@@ -54,7 +54,51 @@ class collectionManager(bulletinManager.bulletinManager):
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
-		pass
+		# Extraction du champ BBB
+		bbb = self.getBBB(rawBulletin)
+
+		if bbb == None:
+		# Si aucun champ BBB
+
+			pass
+
+			# Si le bulletin est destiné a être collecté
+		
+				# Si dans la période de collection
+
+				# Sinon, retard
+
+			# Sinon, aucune modification, le bulletin sera déplacé
+
+		else:
+		# Le bulletin a un champ BBB
+			pass
+
+			# Vérification que ca ne fait pas plus de temps que la limite permise
+
+			# Si dans les temps, fetch du prochain token, et modification 
+			# de l'entête
+
+			# Sinon, flag du bulletin en erreur
+
+	def getBBB(self,rawBulletin):
+		"""getBBB(rawBulletin) -> champ
+
+		   rawBulletin		String
+
+		   champ		String/None
+					- Champ BBB associé au bulletin
+					- None si le bulletin n'a pas
+					  de champ BBB
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Novembre 2004
+		"""
+		if rawBulletin.splitlines()[0].split()[-1].isalpha():
+			return rawBulletin.splitlines()[0].split()[-1]
+		else:
+			return None
+
 
 	def writeBulletinToDisk(self, bulletin=None):
 		"""Redirection pour masquer celui de la superclasse"""
@@ -68,6 +112,9 @@ class collectionManager(bulletinManager.bulletinManager):
 		   Auteur:      Louis-Philippe Thériault
                    Date:        Novembre 2004
 		"""
+		# Parcours des collections, et si la période de collection 
+		# est dépassée ou si le data de toutes les stations est rentré,
+		# on écrit la collection
 		pass
 
 	def loadStatusFile(self,pathFicStatus):
@@ -120,3 +167,20 @@ class collectionManager(bulletinManager.bulletinManager):
 		   Date:	Novembre 2004
 		"""
 		pass
+
+	def incrementToken(self,token):
+		"""incrementToken(token) -> incremented_token
+
+		   token/incremented_token	String
+						-Retourne le token suivant à utiliser
+
+						Ex:
+							incrementToken('AAB') -> 'AAC'
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Novembre 2004
+		"""
+		return token[:-1] + chr(ord(token[-1]) + 1)
+		
+
+		
