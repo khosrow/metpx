@@ -582,6 +582,9 @@ class bulletinManager:
 	           associes. Le nom du map sera self.mapCircuits et s'il est à None,
 		   C'est que l'option est à OFF.
 
+		   FIXME: Peter a fixé le chemin a /apps/px/etc/header2circuit.conf
+                        donc le parametre choisi simplement si on s´en sert ou pas.
+
 		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
@@ -595,6 +598,9 @@ class bulletinManager:
 
 		# Test d'existence du fichier
 	        try:
+			if not self.config.use_pds:
+                           pathHeader2circuit = fet.FET_ETC + 'header2client.conf'
+
 	                fic = os.open( pathHeader2circuit, os.O_RDONLY )
 	        except Exception:
 	                raise bulletinManagerException('Impossible d\'ouvrir le fichier d\'entetes (fichier inaccessible)')

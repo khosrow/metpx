@@ -23,7 +23,7 @@ for example:
       into the database and client queues in parallel.  Since there are
       no queues which need to be explicitly added to by the programs,
       there is no IPC needed to moderate access to the queues (five
-      sources can simulataneously be adding items to a single client queue)
+      sources can simultaneously be adding items to a single client queue)
    -- serialization of access to file system directories is taken care of by 
       operating system mechanisms, no code is required to support them.
       As these mechanisms are already heavily used, their reliability is assumed.   
@@ -34,7 +34,7 @@ Even if file system performance has been deemed adequate, it has still been as t
 examples:
    -- If we can pack all the routing information in the name, 
       we are better off. (avoid a stat call per file to route.)
-      exmple here: better to have an ascii encoded date in the file name
+      example here: better to have an ascii encoded date in the file name
       than perform a stat call.  (FIXME: TEST THIS!)
 
    -- Want to minimize the number of times we touch a file
@@ -54,12 +54,13 @@ examples:
       entries. (FIXME: figure out the test data to back this up.)
 
 
-Fourth Principle:  No coding based on assumptions without experimental proof.
+Fourth Principle:  No performance coding based on assumptions without experimental proof.
 
 To examine performance, make some guesses.  Then make some small test programs
 to verify the guesses.   Keep the testing hypothesis, and the test
 done to verify it.  If the results make sense, then start looking at
 how to modify things to be in accordance with the hypothesis.
+
 
 have a sample test below:
 test #1: efficiency of date calls. PS

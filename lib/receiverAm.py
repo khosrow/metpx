@@ -19,8 +19,8 @@ class receiverAm(gateway.gateway):
 	Date:	Octobre 2004
 	"""
 
-	def __init__(self,path,logger):
-		gateway.gateway.__init__(self,path,logger)
+	def __init__(self,path,options,logger):
+		gateway.gateway.__init__(self,path,options,logger)
 
 		self.establishConnection()
 

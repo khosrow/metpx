@@ -38,7 +38,7 @@ class senderWmo(gateway.gateway):
 	Novembre 2004
         """
 
-        def __init__(self,path,logger):
+        def __init__(self,path,options,logger):
 		"""
 		Nom:
 		__init__ 
@@ -59,7 +59,7 @@ class senderWmo(gateway.gateway):
 		Date:
 		Novembre 2004
 		"""
-		gateway.gateway.__init__(self,path,logger)
+		gateway.gateway.__init__(self,path,options,logger)
 		self.establishConnection()
 
                 # Instanciation du bulletinManagerWmo selon les arguments issues du fichier

@@ -19,21 +19,32 @@ class receiverWmo(gateway.gateway):
 	Date:	Octobre 2004
 	"""
 
-	def __init__(self,path,logger):
-		gateway.gateway.__init__(self,path,logger)
+	def __init__(self,path,options,logger):
+		gateway.gateway.__init__(self,path,options,logger)
 
+		self.options = options
 		self.establishConnection()
 
                 self.logger.writeLog(logger.DEBUG,"Instanciation du bulletinManagerWmo")
 
 		# Instanciation du bulletinManagerWmo avec la panoplie d'arguments.
-		self.unBulletinManagerWmo = \
-			bulletinManagerWmo.bulletinManagerWmo(	self.config.pathTemp,logger, \
-								pathDest = self.config.pathDestination, \
-								pathFichierCircuit = self.config.ficCircuits, \
-								extension = self.config.extension, \
-								mapEnteteDelai = self.config.mapEnteteDelai \
+                if not options.source:
+		  self.unBulletinManagerWmo = \
+			bulletinManagerWmo.bulletinManagerWmo(	
+                            self.config.pathTemp,logger, \
+			    pathDest = self.config.pathDestination, \
+			    pathFichierCircuit = self.config.ficCircuits, \
+		 	    extension = self.config.extension, \
+		  	    mapEnteteDelai = self.config.mapEnteteDelai \
 								) 
+		else:
+		  self.unBulletinManagerWmo = \
+			bulletinManagerWmo.bulletinManagerWmo(	
+			   FET_DATA + FET_RX + option.client, logger, \
+			   pathDest = '/dev/null', \
+		  	   pathFichierCircuit = '/dev/null', \
+		           extension = options.extension, \
+			   mapEnteteDelai = options.mapEnteteDelai ) 
 
         def shutdown(self):
 		__doc__ = gateway.gateway.shutdown.__doc__ + \

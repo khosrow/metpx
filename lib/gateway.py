@@ -45,7 +45,7 @@ class gateway:
 	   Auteur:	Louis-Philippe Thériault
 	   Date:	Octobre 2004
 	"""
-	def __init__(self,path,logger):
+	def __init__(self,path,options,logger):
 		self.pathToConfigFile = path
 		self.config = gateway.loadConfig(path)
 		self.logger = logger

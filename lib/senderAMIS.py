@@ -35,7 +35,7 @@ class senderAMIS(gateway.gateway):
 	2004-10-15
         """
 
-        def __init__(self,path,logger):
+        def __init__(self,path,options,logger):
 		"""
 		Nom:
 		__init__ 
@@ -56,7 +56,7 @@ class senderAMIS(gateway.gateway):
 		Date:
 		Octobre 2004
 		"""
-		gateway.gateway.__init__(self,path,logger)
+		gateway.gateway.__init__(self,path,options,logger)
 		self.establishConnection()
 
                 # Instanciation du bulletinManagerAMIS selon les arguments issues du fichier

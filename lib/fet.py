@@ -28,6 +28,8 @@ import string
 import sys
 import signal
 import log
+from optparse import OptionParser
+
 
 #FET_DATA='/apps/px/'
 #FET_DATA='/tmp/fet/'
@@ -38,7 +40,10 @@ FET_TX= 'tx/'
 FET_RX= 'rx/'
 
 FET_ETC='/apps/px/etc/'
+
 #FET_ETC='../etc/'
+
+options={} 
 
 #
 # These URL routines are extremely stupid.
@@ -122,6 +127,31 @@ def urlJoin( protocol, destdir, user, pw, host, port ):
 #  print "urlJoin it=", it
   return it
 
+
+def addStandardOptions(parser):
+  """ Add standard options to a optparse list of options.
+   
+  just so this code does not have to be repeated.
+  """
+  parser.add_option( "--dataDir", dest="dataDir", default=FET_DATA,
+      help="root of directory tree where data is stored", metavar="PXDATA")
+  parser.add_option( "-d", "--direct", dest="direct", default=False,
+      help="when set, apply header2client AHL mapping to route bulletins" )
+  parser.add_option( "-x", "--extension", dest="extension", default=None,
+      help="the colon (:) separated fields to append to the original input name" )
+  parser.add_option( "-a", "--arrival", dest="mapEnteteDelai", default=None,
+      help="map AHL type and arrival time to reject messages received at wrong time." )
+  parser.add_option( "-e", "--etcdir", dest="etcDir",
+      default=FET_ETC, help="Directory for configuration files",
+      metavar="PXETC")
+  parser.add_option( "-s", "--source", default=None, dest="source", 
+      help="name of source (when receiving) identifying config and queue directories" )
+  parser.add_option( "-c", "--client", default=None, dest="client", 
+      help="name of client (when tranmitting) identifying config and queue directories" )
+  parser.add_option( "-v", "--verbose", default=None,
+      dest="verbose", help="make it more voluble" )
+ 
+  
 
 def lockStopOrDie(lfn, cmd):
 
@@ -286,7 +316,11 @@ sources = {}
 """
 
   each source is a list of the form:
-  [ priority, system, site, type, format, ingester ]
+  
+  [ priority, system, ori_site, type, format, ingester ]
+
+mapping to ingestname:
+      what : ori_system : ori_site : data_type : data_format :
 
 """
 sourcedefaults = [ '', '', '', '', '', '' ]
@@ -324,7 +358,7 @@ def readSources(logger):
 	  source[3]  = srcline[1]
         elif srcline[0] == 'format':
 	  source[4]  = srcline[1]
-        elif srcline[0] == 'ingester':
+        elif srcline[0] == 'connection':
 	  source[5]  = srcline[1:]
       src=srcconf.readline()
 
@@ -369,7 +403,7 @@ def dbName(ingestname):
   """ given an ingest name, return an relative database name
 
   given a file name of the form:
-      what : ori_system : ori_site : type : format :
+      what : ori_system : ori_site : data_type : format :
   link it to 
       db/<today>/type/ori_system/ori_site/ingestname
   (same pattern as PDS)
@@ -605,15 +639,17 @@ def initDB(logger):
    logger.writeLog( logger.INFO, "dbinit done")
 
 
-def startup(dataDir, configDir, logger):
+def startup(opts, logger):
    global FET_DATA
    global FET_ETC
+   global options
 
-   FET_DATA=dataDir
+   options = opts
+   FET_DATA=opts.dataDir
    if FET_DATA[-1] != '/':
      FET_DATA = FET_DATA + '/'
 
-   FET_ETC=configDir
+   FET_ETC=opts.etcDir
    if FET_ETC[-1] != '/':
      FET_ETC = FET_ETC + '/'
 

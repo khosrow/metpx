@@ -4,6 +4,7 @@
 import bulletinManager, bulletinManagerAm, bulletinPlain, bulletinCollection
 import os, time, string
 import gdbm, pickle
+import fet
 
 __version__ = '2.0'
 
@@ -686,6 +687,9 @@ class collectionManager(bulletinManager.bulletinManager):
                 uneLigneParsee = ""
                 self.mapEntetes = {}
                 self.mapEntetes2mapStations = {}
+
+	        if not self.config.use_pds:
+		  	pathFichierStations= fet.FET_ETC + 'collection_stations.conf'
 
                 # Construction des 2 map en même temps
                 for ligne in self.lireFicTexte(pathFichierStations):
