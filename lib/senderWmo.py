@@ -216,11 +216,17 @@ class senderWmo(gateway.gateway):
 			        succes = self.unSocketManagerWmo.sendBulletin(unBulletinWmo)
 			        #si le bulletin a ete envoye correctement, le fichier est efface
 			        if succes:
+                			self.logger.writeLog(self.logger.INFO,"bulletin %s envoye ", self.reader.sortedFiles[index])
 			                self.unBulletinManagerWmo.effacerFichier(self.reader.sortedFiles[index])
                 	                self.logger.writeLog(self.logger.DEBUG,"senderWmo.write(..): Effacage de " + self.reader.sortedFiles[index])
-		        except:
-                	        self.logger.writeLog(self.logger.ERROR,"senderWmo.write(..): Erreur ecriture")
-		                raise
+                                else 
+                			self.logger.writeLog(self.logger.INFO,"bulletin %s: probleme d'envoi ", self.reader.sortedFiles[index)
+			except Exception, e:
+				if e==104 or e==110 or e==32 or e==107:
+                			self.logger.writeLog(self.logger.ERROR,"senderWmo.write(): la connexion est rompue: %s",str(e.args))
+				else:
+                			self.logger.writeLog(self.logger.ERROR,"senderWmo.write(): erreur: %s",str(e.args))
+				raise
 
                 """
                 self.logger.writeLog(self.logger.DEBUG,"%d nouveaux bulletins sont envoyes",len(data))
