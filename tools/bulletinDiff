@@ -12,6 +12,7 @@ import sys
 import time
 import string
 import signal
+import copy
 
 sys.path.append(sys.path[0] + '/../lib')
 sys.path.append(sys.path[0] + '/../etc')
@@ -130,6 +131,35 @@ def catSortWriteFichiers(dir,listeFics, dest):
 
 	commands.getoutput('cat ' + f + ' | sort > ' + dest)
 
+def multipleCompare(dir1,_list1,dir2,_list2):
+	"""Compare les fichiers ensembles et tente de les "matcher" ensembles
+
+	   Retourne une string vide s'ils sont identiques. Efface les fichiers
+	   identiques"""
+	list1 = copy.deepcopy(_list1)
+	list2 = copy.deepcopy(_list2)
+
+	dir1Diff,dir2Diff, dir1Identiques, dir2Identiques = [],[],[],[]
+
+	for f1 in list1:
+		for f2 in list2:
+			compRes = compareFics(dir1+f1,dir2+f2)
+
+			if compRes == '':
+				dir1Identiques.append(f1)
+				dir2Identiques.append(list2.pop(list2.index(f2)))
+				break
+
+		if not f1 in dir1Identiques:
+		# f1 est matché
+			dir1Diff.append(f1)
+
+	dir2Diff = list2
+
+	return dir1Diff,dir2Diff, dir1Identiques, dir2Identiques
+
+
+
 def printAverage(signum, frame):
 	global moyDelaiArrivee
 
@@ -144,26 +174,47 @@ while True:
 
 	derniersFichiers = getLesDerniersFichiers(workDir1,workDir2)
 
-	for t in derniersFichiers:
+	while True:
+		if len(derniersFichiers) == 0:
+			break
+
+		t = derniersFichiers.pop(0)
+
 		if len(t[0]) == 1:
 		# Un seul fichier a comparer
 			compRes = compareFics(workDir1 + t[0][0],workDir2 + t[1][0])
 			fichiers = t[0][0] + ' et ' + t[1][0]
 		else:
 		# Plusieurs fichiers a comparer
-			f1 = catSortWriteFichiers(workDir1, t[0], ficTmpDir1)
-			f2 = catSortWriteFichiers(workDir2, t[1], ficTmpDir2)
-			compRes = compareFics(ficTmpDir1,ficTmpDir2)
-			fichiers = '(' + ','.join(t[0]) + ') et (' + ','.join(t[1]) + ')'
-			
-			os.remove(ficTmpDir1)
-			os.remove(ficTmpDir2)
+			dir1Diff,dir2Diff, dir1Identiques, dir2Identiques = multipleCompare(workDir1,t[0],workDir2,t[1])
+
+			if len(dir1Diff) == len(dir2Diff) == 0:
+				compRes = ''
+				fichiers = '(' + ','.join(t[0]) + ') et (' + ','.join(t[1]) + ')'
+			else:
+				if len(dir1Identiques) != 0 or len(dir2Identiques) != 0:
+					fichiers = '(' + ','.join(dir1Identiques) + ') et (' + ','.join(dir2Identiques) + ')'
+					utils.writeLog(log,"Effacement des fichiers " + fichiers + ', ils sont identiques ')
+					# Effacement des fichiers identiques
+					for f in dir1Identiques:
+						os.remove(workDir1+f)
+					for f in dir2Identiques:
+						os.remove(workDir2+f)
+
+	                        f1 = catSortWriteFichiers(workDir1, dir1Diff, ficTmpDir1)
+	                        f2 = catSortWriteFichiers(workDir2, dir2Diff, ficTmpDir2)
+	                        compRes = compareFics(ficTmpDir1,ficTmpDir2)
+	                        fichiers = '(' + ','.join(dir1Diff) + ') et (' + ','.join(dir2Diff) + ')'
+
+				t = dir1Diff,dir2Diff
+
+	                        os.remove(ficTmpDir1)
+	                        os.remove(ficTmpDir2)
 
 		for i in range(len(t[0])):
 			delaiArr = (float(os.stat(workDir1 + t[0][i]).st_mtime) - float(os.stat(workDir2 + t[1][i]).st_mtime)) 
                 	moyDelaiArrivee = ( (moyDelaiArrivee*nbComp) + (float(os.stat(workDir1 + t[0][i]).st_mtime) - float(os.stat(workDir2 + t[1][i]).st_mtime)) ) / (nbComp+1.0)
                         nbComp += 1
-
 
 		if compRes != '':
 			# Analyse etant donne la difference
