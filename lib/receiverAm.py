@@ -6,6 +6,7 @@ import socketManagerAm
 import bulletinManagerAm
 import socketManager
 from socketManager import socketManagerException
+import fet
 
 class receiverAm(gateway.gateway):
 	__doc__ = gateway.gateway.__doc__ + \
@@ -40,9 +41,9 @@ class receiverAm(gateway.gateway):
                                 use_pds = self.config.use_pds
 								) 
                 else:
-                  self.unBulletinManagerWmo = \
-                        bulletinManagerWmo.bulletinManagerWmo(
-                           FET_DATA + FET_RX + options.source, logger, \
+                  self.unBulletinManagerAm = \
+                        bulletinManagerAm.bulletinManagerAm(
+                           fet.FET_DATA + fet.FET_RX + options.source, logger, \
                            pathDest = '/dev/null', \
                            pathFichierCircuit = '/dev/null', \
                            extension = options.extension, \

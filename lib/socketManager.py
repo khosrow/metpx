@@ -95,11 +95,12 @@ class socketManager:
 		if self.type == 'slave':
 			self.logger.writeLog(self.logger.INFO,"Binding du socket avec le port %d",self.port)
 	        	while True:
-	                	try:
-	                        	self.socket.bind(('',self.port))
+				try:
+	                       		self.socket.bind(('',self.port))
 	                        	break
 	                	except socket.error:
-	                        	time.sleep(1)
+				        self.logger.writeLog(self.logger.INFO," Bind failed")
+	                        	time.sleep(10)
 
 		# KEEP_ALIVE à True, pour que si la connexion tombe, la notification
 		# soit immédiate
