@@ -57,6 +57,10 @@ class bulletinAm(bulletin.bulletin):
 		except Exception:
 			self.station = None
 
+		# Vérification de l'entête pour les bulletins dont on ne traîteras pas
+		if self.station == "PASDESTATION":
+			bulletin.bulletin.verifyHeader(self)
+
 		# Print de la station pour le debug
 		self.logger.writeLog(logger.DEBUG,"Station: %s",str(self.station))
 
