@@ -380,7 +380,14 @@ class bulletin:
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
-		header = self.getHeader()
+                header = self.getHeader()
+
+                # Changement qui doit être fait avant de vérifier l'entête,
+                # le tandem enlève le 'z' ou 'Z' à la fin de l'entête
+                # s'il y a lieu.
+		if header[-1] in ['z','Z']:
+			header = header[:-1]
+			self.setHeader(header)
 
 		tokens = header.split()
 
