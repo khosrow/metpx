@@ -184,7 +184,7 @@ class bulletinManager:
 		       pri=5
 
 		    
-                    fet.directingest( nomFichier, clist, pri, tempNom, self.logger )
+                    fet.directIngest( nomFichier, clist, pri, tempNom, self.logger )
 	            os.unlink(tempNom)
 
 
