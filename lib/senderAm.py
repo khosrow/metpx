@@ -57,13 +57,18 @@ class senderAm(gateway.gateway):
 		Date:
 		Janvier 2005
 		"""
-		gateway.gateway.__init__(self,path,logger)
+		gateway.gateway.__init__(self,path,options,logger)
 		self.establishConnection()
 
                 # Instanciation du bulletinManagerAm selon les arguments issues du fichier
 		# de configuration
 		self.logger.writeLog(logger.DEBUG,"Instanciation du bulletinManagerAm")
-                self.unBulletinManagerAm = \
+		if options.client:
+                   self.unBulletinManagerAm = \
+                        bulletinManagerAm.bulletinManagerAm(
+			fet.FET_DATA + FET_TX + options.client, logger)
+		else:
+                   self.unBulletinManagerAm = \
                         bulletinManagerAm.bulletinManagerAm(self.config.pathTemp,logger)
 		self.listeFichiersDejaChoisis = []
 		

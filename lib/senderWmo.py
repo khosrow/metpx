@@ -65,7 +65,11 @@ class senderWmo(gateway.gateway):
                 # Instanciation du bulletinManagerWmo selon les arguments issues du fichier
 		# de configuration
 		self.logger.writeLog(logger.DEBUG,"Instanciation du bulletinManagerWmo")
-                self.unBulletinManagerWmo = \
+		if options.client:
+                   self.unBulletinManagerWmo = \
+                        bulletinManagerWmo.bulletinManagerWmo( fet.FET_DATA + fet.FET_TX + options.client ,logger)
+                else:
+                   self.unBulletinManagerWmo = \
                         bulletinManagerWmo.bulletinManagerWmo(self.config.pathTemp,logger)
 		self.listeFichiersDejaChoisis = []
                 self.reader = None
