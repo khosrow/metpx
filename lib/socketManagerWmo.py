@@ -139,7 +139,7 @@ class socketManagerWmo(socketManager.socketManager):
                         return 'INCOMPLETE'
 
         def sendBulletin(self,bulletin):
-                __doc__ = socketManager.socketManager.sendBulletin.__doc__ + \
+                #__doc__ = socketManager.socketManager.sendBulletin.__doc__ + \
                 """
                 ###Methode concrete pour socketManagerWmo###
 

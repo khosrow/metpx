@@ -315,6 +315,7 @@ class bulletinManager:
 				if i>=len(listeFichiersChoisis):
 					break
 				if listeFichiersChoisis[i] in listeFichiersDejaChoisis:
+					print "listeFichiersChoisis[i] = ",i
 					listeFichiersChoisis.pop(i)
 					continue
 				i+=1
