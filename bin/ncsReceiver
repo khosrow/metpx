@@ -80,5 +80,5 @@ if __name__ == '__main__':
 	try:
 		main()
 	except Exception, e:
-		self.logger.writeLog(self.logger.EXCEPTION,"Exception:", ''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
+		logger.writeLog(logger.EXCEPTION,"Exception:", ''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
 		raise
