@@ -538,6 +538,8 @@ def initdb(logger):
         -- added explicit creation based on current time to dbname,
 	   so that it doesn't depend on system wide db rollover process.
 
+   so nothing below matters, because nobody uses 'today'.  it is only sugar for humans.
+
    N.B. There are potential race conditions if multiple ingestors run.
    really, ingest process should be quiescent when the symlink changes.
    	-- both look at the directories and try to roll over at once.

@@ -171,7 +171,7 @@ class bulletinManager:
 	                raise bulletinManagerException('Entete non trouvée dans fichier de circuits')
 
                     fet.directingest( nomFichier, self.mapCircuits[entete]['routing_groups'], self.mapCircuits[entete]['priority'], tmppath, self.logger )
-                    os.unlink(tmppath)
+	            effacerFichier(self,tmppath):
 
 
 
