@@ -126,7 +126,7 @@ class bulletin:
                    Date:        Octobre 2004"""
                 self.bulletin[0] = header
 
-		self.logger(self.logger.DEBUG,"Nouvelle entête du bulletin: %s",header)
+		self.logger.writeLog(self.logger.DEBUG,"Nouvelle entête du bulletin: %s",header)
 
 	def getType(self):
                 """getType() -> type

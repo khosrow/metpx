@@ -43,7 +43,7 @@ class bulletinManager:
 		unBulletin = self.__generateBulletin(unRawBulletin)
 		unBulletin.doSpecificProcessing()
 
-		nomFichier = self.__getFileName(unBulletin)
+		nomFichier = self.getFileName(unBulletin)
 
 		try:
 			unFichier = os.open( self.pathTemp + nomFichier , os.O_CREAT | os.O_WRONLY )
@@ -54,7 +54,7 @@ class bulletinManager:
 	                self.logger.writeLog(self.logger.WARNING,"Manipulation du fichier impossible! (Ecriture avec un nom non standard)")
 			self.logger.writeLog(self.logger.EXCEPTION,"Exception:")
 
-                        nomFichier = self.__getFileName(unBulletin,error=True)
+                        nomFichier = self.getFileName(unBulletin,error=True)
 			unFichier = os.open( self.pathTemp + nomFichier , os.O_CREAT | os.O_WRONLY )
 
                 os.write( unFichier , unBulletin.getBulletin() )
@@ -86,8 +86,8 @@ class bulletinManager:
 
 	        return path
 
-	def __getFileName(self,bulletin,error=False):
-		"""__getFileName(bulletin[,error]) -> fileName
+	def getFileName(self,bulletin,error=False):
+		"""getFileName(bulletin[,error]) -> fileName
 
 		   Retourne le nom du fichier pour le bulletin. Si error
 		   est à True, c'est que le bulletin a tenté d'être écrit
@@ -141,8 +141,8 @@ class bulletinManager:
                 Auteur: Louis-Philippe Thériault
                 Date:   Octobre 2004
                 """
-                if os.access(path,os.R_OK):
-                        f = open(path,'r')
+                if os.access(pathFic,os.R_OK):
+                        f = open(pathFic,'r')
                         lignes = f.readlines()
                         f.close
                         return lignes
