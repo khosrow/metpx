@@ -88,6 +88,8 @@ class DiskReader:
       files = []
       for file in dirIterator:
          if not os.path.isdir(file):
+	    if os.path.basename(file)[0] == '.':
+		continue
             if self.validation:
                if self._validateName(file):
                   files.append(file)

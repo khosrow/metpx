@@ -6,6 +6,7 @@ import bulletinAm
 from socketManager import socketManagerException
 from DiskReader import DiskReader
 from MultiKeysStringSorter import MultiKeysStringSorter
+import fet
 
 class senderAm(gateway.gateway):
         __doc__ = gateway.gateway.__doc__ + \

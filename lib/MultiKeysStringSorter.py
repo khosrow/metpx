@@ -13,6 +13,7 @@
 """
 import os, commands
 from SortableString import SortableString
+import time
 
 class MultiKeysStringSorter:
 

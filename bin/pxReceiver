@@ -87,8 +87,8 @@ def main():
 		unGateway = receiverWmo.receiverWmo('/dev/null',options,logger)
 	
 	elif options.type == 'single-file':
-		import fetfile
-		fetfile.checkSource( options.source, fet.sources, logger )
+		import fetFile
+		fetFile.checkSource( options.source, fet.sources, logger )
 
 	elif options.type == 'bulletin-file':
 		import bulletinFileReceiver

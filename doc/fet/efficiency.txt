@@ -103,11 +103,11 @@ review results for messages per second, and data.
 -------------------------------------------------------------------
 2005-02-09 (DL)
 
-A filename verification function has been added. The pattern to verify is written as a
-regex.
+A filename verification function has been added to the directory sorting
+ingestor. The pattern to verify is written as a regex.
 
-The verification is not included directly in the class that extract the "keys"
-from a filename. It implied that a first pass has to be done to eliminate the
+The verification is not included directly in the class that extracts the "keys"
+from a filename. It implies that a first pass has to be done to eliminate the
 "bad" files. It's better for the design and the overhead is negligible.
 
 Testing has been done on ingestion of 12000 filenames. Here are the results:
@@ -119,5 +119,5 @@ Time to sort the good filenames (12000): ~ 1 second
 Conclusion: The time spent for name verification is negligible in comparison
 to the time passed to ingest.
 
-=> We will favored the design over performance on this item.
+=> We choose design over performance on this item.
 -------------------------------------------------------------------
