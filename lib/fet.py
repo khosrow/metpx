@@ -499,7 +499,7 @@ def dbName(ingestname):
 def clientQDirName( client, pri ):
   """ return the directory into which a file of a given priority should be placed.
   A couple of different layouts being contemplated.
-  /apps/px/tx/<client>/1_YYmmddhh ??
+  /apps/px/txq/<client>/1_YYmmddhh ??
   """
   global clients
   return FET_DATA + FET_TX + client + '/' + pri + '_' \
@@ -633,7 +633,7 @@ def directIngest(ingestname,clist,pri,lfn,logger):
       return 0
 
    linkFile(lfn, dbn)
-   logger.writeLog( logger.INFO, "linking " + dbn + " to: " + lfn )
+   logger.writeLog( logger.INFO, "ingest " + dbn )
 
    if len (clist) < 1:
      return 1
@@ -642,7 +642,7 @@ def directIngest(ingestname,clist,pri,lfn,logger):
      cname=clientQDirName( c, pri )
      linkFile(dbn , cname + ingestname )   
 
-   logger.writeLog( logger.INFO, "linked for " + string.join(clist) )
+   logger.writeLog( logger.INFO, "queued for " + string.join(clist) )
    return 1
 
 

@@ -196,7 +196,6 @@ class bulletinManager:
 		       clist = []
 		       pri=5
 
-		    
                     fet.directIngest( nomFichier, clist, pri, tempNom, self.logger )
 	            os.unlink(tempNom)
 
@@ -602,14 +601,13 @@ class bulletinManager:
 	        self.mapCircuits = {}
 
 		# Test d'existence du fichier
-#	        try:
-		if True:
+	        try:
 		   if not self.use_pds:
                      pathHeader2circuit = fet.FET_ETC + 'header2client.conf'
 
 	           fic = os.open( pathHeader2circuit, os.O_RDONLY )
-#	        except Exception:
-#	           raise bulletinManagerException('Impossible d\'ouvrir le fichier d\'entetes ' + pathHeader2circuit + ' (fichier inaccessible)' )
+	        except Exception:
+	           raise bulletinManagerException('Impossible d\'ouvrir le fichier d\'entetes ' + pathHeader2circuit + ' (fichier inaccessible)' )
 	
 	        champs = self.champsHeader2Circuit.split(':')
 	
@@ -617,19 +615,29 @@ class bulletinManager:
 	
 		# Pour chaque ligne du fichier, on associe l'entête avec un map, qui est le nom des autres champs
 		# associés avec leur valeurs.
+		#   self.champsHeader2Circuit = 'entete:routing_groups:priority:'
+		bogus=[]
+	        self.logger.writeLog( self.logger.INFO, "validating header2client.conf, clients:" + string.join(fet.clients.keys()) )
 	        for ligne in lignes.splitlines():
-	                uneLigneSplitee = ligne.split(':')
-	
-	                self.mapCircuits[uneLigneSplitee[0]] = {}
-	
-	                try:
-	                        for token in range( max( len(champs)-2,len(uneLigneSplitee)-2 ) ):
-	                                self.mapCircuits[uneLigneSplitee[0]][champs[token+1]] = uneLigneSplitee[token+1]
-	
-	                                if len(self.mapCircuits[uneLigneSplitee[0]][champs[token+1]].split(' ')) > 1:
-	                                        self.mapCircuits[uneLigneSplitee[0]][champs[token+1]] = self.mapCircuits[uneLigneSplitee[0]][champs[token+1]].split(' ')
-	                except IndexError:
-	                        raise bulletinManagerException('Les champs ne concordent pas dans le fichier header2circuit',ligne)
+	            uneLigneSplitee = ligne.split(':')
+                    ahl = uneLigneSplitee[0]
+	            self.mapCircuits[uneLigneSplitee[0]] = {}
+	            try:
+	                self.mapCircuits[ahl] = {}
+	                self.mapCircuits[ahl]['entete'] = ahl
+	                self.mapCircuits[ahl]['routing_groups'] = ahl
+	                self.mapCircuits[ahl]['priority'] = uneLigneSplitee[2]
+			gs=[]
+			for g in uneLigneSplitee[1].split() :
+				if g in fet.clients.keys():
+	                            gs = gs + [ g ]
+			        else:
+				    if g not in bogus:
+				       bogus = bogus + [ g ]
+				       self.logger.writeLog( self.logger.WARNING, "client (%s) invalide, ignorée ", g )
+	                self.mapCircuits[ahl]['routing_groups'] =  gs
+	            except IndexError:
+	                raise bulletinManagerException('Les champs ne concordent pas dans le fichier header2circuit',ligne)
 
 	def getMapCircuits(self):
 		"""getMapCircuits() -> mapCircuits
