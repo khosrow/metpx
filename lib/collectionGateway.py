@@ -63,7 +63,7 @@ class collectionGateway(gateway.gateway):
 		for fic in self.bulletinsAEffacer:
 			self.logger.writeLog(self.logger.VERYVERYVERBOSE,"Effacement du fichier %s",fic)
 
-			os.remove(self.unBulletinManager.getPathSource()+fic)
+			os.remove(fic)
 
 		# Fetch de la liste des nouveaux bulletins dans le répertoire
 		self.bulletinsAEffacer = self.unBulletinManager.getListeFichiers(self.unBulletinManager.getPathSource(),[])
