@@ -37,7 +37,7 @@ class gateway:
 	def __init__(self,path):
 		self.config = gateway.loadConfig(path)
 
-	def loadConfig(self,path):
+	def loadConfig(path):
 		"""loadConfig(path)
 
 		   Charge la configuration, située au path en particulier.
@@ -45,7 +45,7 @@ class gateway:
 		   que python puisse l'interpréter.
 		"""
         	try:
-                        fic_cfg = open(pathCfg,'r')
+                        fic_cfg = open(path,'r')
                         config = imp.load_source('config','/dev/null',fic_cfg)
                         fic_cfg.close()
 

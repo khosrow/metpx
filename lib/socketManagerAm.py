@@ -27,13 +27,13 @@ class socketManagerAm(socketManager.socketManager):
 	"""
 
 	def __init__(self,type='slave',localPort=9999,remoteHost=None,timeout=None,log=None):
-		socketManager.__init__(self,type='slave',localPort=9999,remoteHost=None,timeout=None,log=None)
+		socketManager.socketManager.__init__(self,type,localPort,remoteHost,timeout,log)
 
 		# La taille du amRec est prise d'a partir du fichier ytram.h, à l'origine dans
 		# amtcp2file. Pour la gestion des champs l'on se refere au module struct
 		# de Python.
 		self.patternAmRec = '80sLL4sii4s4s20s'
-		self.sizeAmRec = struct.calcsize(patternAmRec)
+		self.sizeAmRec = struct.calcsize(self.patternAmRec)
 
         def __unwrapBulletin(self):
                 """unwrapBulletin() -> (bulletin,longBuffer)

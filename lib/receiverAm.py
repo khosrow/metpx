@@ -10,10 +10,12 @@ class receiverAm(gateway.gateway):
 	def __init__(self,path):
 		gateway.gateway.__init__(self,path)
 
-#		self.unSocketManagerAm = socketManagerAm.socketManagerAm() FIXME
+		self.unSocketManagerAm = \
+				socketManagerAm.socketManagerAm(type='slave', \
+								localPort=self.config.localPort)
 
 		# Instanciation du bulletinManagerAm avec la panoplie d'arguments.
-		self.unBulletinManagerAm = \ 
+		self.unBulletinManagerAm = \
 			bulletinManagerAm.bulletinManagerAm(	self.config.pathTemp, \
 								pathDest = self.config.pathDestination, \
 								pathFichierCircuit = self.config.ficCircuits, \
@@ -22,17 +24,17 @@ class receiverAm(gateway.gateway):
 								) 
 
         def read(self):
-        """read() -> data
+	        """read() -> data
 
-           data : Liste d'objets
+	           data : Liste d'objets
 
-           Cette méthode retourne une liste d'objets, qui peut être
-           ingérée par l'écrivain. Elle lève une exception si
-           une erreur est détectée.
-           """
+	           Cette méthode retourne une liste d'objets, qui peut être
+	           ingérée par l'écrivain. Elle lève une exception si
+	           une erreur est détectée.
+	           """
 		data = []
 
-		while True
+		while True:
 			# FIXME test ici si une erreur
 	                rawBulletin = self.unSocketManagerAm.getNextBulletin()
 
@@ -44,13 +46,13 @@ class receiverAm(gateway.gateway):
 		return data
 
         def write(self,data):
-        """write(data)
+        	"""write(data)
 
-           data : Liste d'objets
-
-           Cette méthode prends le data lu par read, et fait le traîtement
-           approprié.
-           """
+	           data : Liste d'objets
+	
+	           Cette méthode prends le data lu par read, et fait le traîtement
+	           approprié.
+	           """
 		while True:
 			if len(data) <= 0:
 				break

@@ -17,14 +17,14 @@ class bulletinManager:
 	   Un bulletin manager est en charge de la lecture et écriture des
 	   bulletins sur le disque."""
 
-	def __init__(self,pathTemp,pathSource=None,pathDest=None,maxCompteur=99999,lineSeparator='\n'):
+	def __init__(self,pathTemp,pathSource=None,pathDest=None,maxCompteur=99999,lineSeparator='\n',extension=':'):
 
 		self.pathSource = self.__normalizePath(pathSource)
 		self.pathDest = self.__normalizePath(pathDest)
 		self.pathTemp = self.__normalizePath(pathTemp)
 		self.maxCompteur = maxCompteur
 		self.compteur = 0
-		self.extension = None
+		self.extension = extension
 		self.lineSeparator = lineSeparator
 
 	def writeBulletinToDisk(self,unRawBulletin):
@@ -35,7 +35,7 @@ class bulletinManager:
 			raise bulletinManagerException("opération impossible, pathDest n'est pas fourni")
 
 		if self.compteur > self.maxCompteur:
-				self.compteur = 1
+				self.compteur = 0
 
 		self.compteur += 1
 
@@ -68,16 +68,16 @@ class bulletinManager:
 #                        utils.writeLog(log,'Ecriture du fichier <' + destDir + nomFic + '>')
 
 	def __generateBulletin(self,rawBulletin):
-	"""__generateBulletin(rawBulletin) -> objetBulletin
+		"""__generateBulletin(rawBulletin) -> objetBulletin
 
-	   Retourne un objetBulletin d'à partir d'un bulletin
-	   "brut" """
+		   Retourne un objetBulletin d'à partir d'un bulletin
+		   "brut" """
 		return bulletin.bulletin(rawBulletin,self.lineSeparator)
 
 	def readBulletinFromDisk(self):
 		pass
 
-	def __normalizePath(path):
+	def __normalizePath(self,path):
 		"""normalizePath(path) -> path
 
 		   Retourne un path avec un '/' à la fin"""
@@ -96,8 +96,15 @@ class bulletinManager:
 		   un nom de fichier "safe" est retourné."""
 		strCompteur = string.zfill(self.compteur, len(str(self.maxCompteur)))
 
-		if bulletin.getError() == None:
-			return (bulletin.getHeader() + ' ' + strCompteur + self.__getExtension(bulletin)).replace(' ','_')
+		if bulletin.getError() == None and not error:
+		# Bulletin normal
+			return (bulletin.getHeader() + ' ' + strCompteur + self.__getExtension(bulletin,error)).replace(' ','_')
+		elif bulletin.getError() != None and not error:
+		# Le bulletin est erronné mais l'entête est "imprimable"
+			return ('ERROR_BULLETIN ' + bulletin.getHeader() + ' ' + strCompteur + self.__getExtension(bulletin,error)).replace(' ','_')
+		else:
+		# L'entête n'est pas imprimable
+			return ('ERROR_BULLETIN ' + 'UNPRINTABLE HEADER' + ' ' + strCompteur + self.__getExtension(bulletin,error)).replace(' ','_')
 
 	def __getExtension(self,bulletin,error=False):
 		"""__getExtension(bulletin) -> extension
@@ -105,4 +112,17 @@ class bulletinManager:
 		   Retourne l'extension à donner au bulletin. Si error est à True,
 		   les champs 'dynamiques' sont mis à 'ERROR'.
 		"""
-		pass
+		newExtension = self.extension
+
+		if not error and bulletin.getError() == None:
+			newExtension = newExtension.replace('-TT',bulletin.getType())\
+					     	   .replace('-CCCC',bulletin.getOrigin())
+
+			return newExtension
+		else:
+			# Une erreur est détectée dans le bulletin
+			newExtension = newExtension.replace('-TT','ERROR')\
+                                                   .replace('-CCCC','ERROR')
+
+			return newExtension
+			

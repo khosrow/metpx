@@ -68,12 +68,14 @@ suivants:
 		self.outBuffer = []
 		self.connected = False
 
+		# Établissement de la connection
+		self.__establishConnection()
+
 	def __establishConnection(self):
 		"""Établit la connection selon la valeur des attributs de l'objet.
 
 		   self.socket sera, après l'exécution, la connection."""
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.socket.setsockopt(socket.SOL_SOCKET,socket.SO_KEEPALIVE,1)
 
 		# Binding avec le port local
 	        while True:
@@ -82,6 +84,10 @@ suivants:
 	                        break
 	                except socket.error:
 	                        time.sleep(1)
+
+		# KEEP_ALIVE à True, pour que si la connection tombe, la notification
+		# soit immédiate
+                self.socket.setsockopt(socket.SOL_SOCKET,socket.SO_KEEPALIVE,1)
 
 		# Snapshot du temps
 		then = time.time()

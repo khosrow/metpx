@@ -105,12 +105,12 @@ class bulletin:
                    Retourne le type (2 premieres lettres de l'entête) du bulletin (SA,FT,etc...)"""
                 return self.bulletin[0][:2]
 
-	def getSource(self):
-                """getSource() -> source
+	def getOrigin(self):
+                """getOrigin() -> origine
 
-                   source	: String
+                   origine	: String
 
-                   Retourne la source (2e champ de l'entête) du bulletin (CWAO,etc...)"""
+                   Retourne l'origine (2e champ de l'entête) du bulletin (CWAO,etc...)"""
                 return self.bulletin[0].split(' ')[1]
 
 	def doSpecificProcessing(self):

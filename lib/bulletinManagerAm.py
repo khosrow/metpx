@@ -8,11 +8,11 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 	"""pas déf"""
 
 	def __init__(self,pathTemp,pathSource=None, \
-			pathDest=None,maxCompteur=99999,lineSeparator='\n', \
+			pathDest=None,maxCompteur=99999,lineSeparator='\n',extension=':', \
 			pathFichierCircuit=None, SMHeaderFormat=False, pathFichierStations=None):
 
 		bulletinManager.bulletinManager.__init__(self,pathTemp, \
-						pathSource,pathDest,maxCompteur,lineSeparator)
+						pathSource,pathDest,maxCompteur,lineSeparator,extension)
 
 		self.lineSeparator = lineSeparator
 #		self.pathFichierCircuit = pathFichierCircuit		# calcul du map de fichiers circuits
@@ -31,8 +31,6 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 				return True
 
 		return False
-
-                        listeBulletins = listeBulletins + bulletinLib.separerBulletin(contenuDeBulletin,'TAF')
 
 	def __splitBulletin(self,rawBulletin):
                 """__isSplittable(rawBulletin) -> bool
@@ -63,5 +61,20 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 
 		Overriding ici pour passer les bons arguments au bulletinAm
 		"""
-                return bulletinAm.bulletinAm(rawBulletin,self.lineSeparator,mapEntetes,SMHeaderFormat)
+                return bulletinAm.bulletinAm(rawBulletin,self.lineSeparator,self.mapEntetes,self.SMHeaderFormat)
 
+
+        def writeBulletinToDisk(self,unRawBulletin):
+		bulletinManager.bulletinManager.writeBulletinToDisk.__doc__ + \
+		"""
+		### Ajout de bulletin manager AM ###
+
+		Les bulletins en AM peuvent êtres divisibles, donc
+		une division est effectuée et est passée à la méthode
+		de la superclasse.
+		"""
+		if self.__isSplittable(unRawBulletin):
+			for rawBull in self.__splitBulletin(rawBulletin):
+				bulletinManager.bulletinManager.writeBulletinToDisk(rawBull)
+		else:
+			bulletinManager.bulletinManager.writeBulletinToDisk(unRawBulletin)

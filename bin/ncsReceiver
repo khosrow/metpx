@@ -4,15 +4,15 @@ import sys
 
 sys.path.append(sys.path[0] + '/../lib')
 sys.path.append(sys.path[0] + '/../etc')
-sys.path.append(sys.path[0] + '/../etc/importedLibs')
+sys.path.append(sys.path[0] + '/../lib/importedLibs')
 
 from optparse import OptionParser
 import gateway
 
-usage =  "\"%prog pathConfigFile\"\n" \
+usage =  "%prog pathConfigFile\n" \
          "       Un receiver reçoit les bulletins par une connection réseau et les\n" \
          "       écrits sur le disque. Le fichier de configuration doit être dûement\n" \
-	 "       remplit pour que le programme fonctionne correctement"
+	 "       remplit pour que le programme fonctionne correctement."
 
 parser = OptionParser(usage)
 options,args = parser.parse_args()
@@ -24,7 +24,7 @@ elif len(args) == 0:
 
 # Chargement de la config pour savoir le type de protocole
 # FIXME: Vérifier que typeProtocole est défini
-config = gateway.loadConfig(args[0])
+config = gateway.gateway.loadConfig(args[0])
 
 if config.typeProcotole == 'AM':
 
@@ -34,6 +34,7 @@ if config.typeProcotole == 'AM':
 elif config.typeProcotole == 'WMO':
 
 	# FIXME à implanter
+	pass
 
 else:
 	raise Exception('Type de protocole non reconnu')	# FIXME
