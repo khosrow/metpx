@@ -74,7 +74,7 @@ suivants:
 	def establishConnection(self):
 		"""Établit la connection selon la valeur des attributs de l'objet.
 
-		   self.socket sera après l'exécution la connection."""
+		   self.socket sera, après l'exécution, la connection."""
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.socket.setsockopt(socket.SOL_SOCKET,socket.SO_KEEPALIVE,1)
 
@@ -126,28 +126,65 @@ suivants:
 		# Pour que l'interrogation du buffer ne fasse attendre le système
 		self.socket.setblocking(False)
 
-	def closeProperly():
+	def closeProperly(self):
 		"""closeProperply() -> ([bulletinsReçus],nbBulletinsEnvoyés) 
 
 		   Ferme le socket et finit de traîter le socket d'arrivée et de
 		   sortie."""
+		# FIXME: À tester que l'on peut faire un shutdown si la connection
+		# est perdue
 	        self.socket.shutdown(2)
 
+		# FIXME: À implanter de traîter le reste du buffer
 	        try:
 	                self.recvBuffer = self.recvBuffer + self.socket.recv(1000000)
 	        except socket.error, inst:
 	                pass
 
+		# FIXME: À tester la faisabilité si la connection est perdue
         	self.socket.close()
 
-	def getNextBulletin():
+	def getNextBulletin(self):
+		"""getNextBulletin() -> bulletin
+
+		   bulletin	: String
+
+		   Retourne le prochain bulletin reçu, une chaîne vide sinon."""
+		pass		
+
+	def sendBulletin(self):
 		pass
 
-	def sendBulletin():
+	def syncInBuffer(self):
+		"""Copie l'information du buffer du socket s'il y a lieu
+
+		   Lève une exception si la connection est perdue."""
+	        while True:
+	                try:
+	                        temp = self.socket.recv(32768)
+
+        	                self.inBuffer = self.inBuffer + temp
+	                        break
+
+	                except socket.error, inst:
+	                        if inst.args[0] == 11:
+				# Le buffer du socket est vide
+	                                break
+	                        elif inst.args[0] == 104:
+				# La connection est brisée
+	                                self.socket.close()
+	                                raise socketManagerException('la connection est brisee')
+	                        else:
+	                                raise
+
+	def transmitOutBuffer(self):
 		pass
 
 	def wrapBulletin(self,bulletin):
 		"""wrapbulletin(bulletin) -> wrappedBulletin
+
+		   bulletin	: String
+		   wrappedBulletin	: String
 		   
 		   Retourne le bulletin avec les entetes/informations relatives
 		   au protocole sous forme de string. Le bulletin doit etre un
@@ -155,10 +192,18 @@ suivants:
 		raise socketManagerException("Méthode non implantée (méthode abstraite wrapBulletin)")
 
 	def unwrapBulletin(self):
-		"""unWrapBulletin(wrappedBulletin) -> bulletin
+		"""unwrapBulletin() -> (bulletin,longBuffer)
+
+		   bulletin	: String
+		   longBuffer	: int
 
 		   Retourne le prochain bulletin contenu dans le buffer,
-		   après avoir vérifié son intégrité, sans modifier le buffer."""
+		   après avoir vérifié son intégrité, sans modifier le buffer.
+		   longBuffer sera égal à la longueur de ce que l'on doit enlever
+		   au buffer pour que le prochain bulletin soit en premier.
+
+		   Retourne une chaîne vide s'il n'y a pas assez de données
+		   pour compléter le prochain bulletin."""
 		raise socketManagerException("Méthode non implantée (méthode abstraite unwrapBulletin)")
 
 	
