@@ -175,24 +175,36 @@ removing/changing configuration options:
 
 
 file hierarchy:
-        FET_ROOT= /apps/fet
-	FET_ROOT/db/<date>/
-	FET_ROOT/rx/<source>/
-	FET_ROOT/tx/<client>/[1..5]
-        FET_ROOT/log/		-- logs for statistics, monitoring etc...
+
+the nice thing about standards is there are so many to choose from...
+There is a linux file hierarchy standard (FHS - http://www.pathname.com/fhs/)
+normally applications which are installed into the system follow that.
+but there is also a standard of installing things under /opt, where
+an entire tree is encapsulated.   Then there is thre /apps tradition.
+to preserve the ability to accomodate all three file hierarchies, the
+application is split into three:
+
+	FET_DATA/ -- is where all the data is.  db, tx, etc...
+		subdirectories: db, tx, rx
+	FET_ETC/ -- is where all the configuration information is
+
+	FET_BIN/ -- is the binary run tree.  bin/ lib/ should be under there.
+
+for maximum compatibility with history...
+FHS builtin style:   FET_DATA=/var/sppol/px,   FET_ETC=/etc/px, FET_BIN=/usr
+FHS opt style:   FET_DATA=/opt/px,   FET_ETC=/opt/px/etc, FET_BIN=/opt/px
+PDS style:   FET_DATA=/apps/px,   FET_ETC=/apps/px/etc, FET_BIN=/apps/px
+
+        FET_DATA= /apps/px
+	FET_DATA/db/<date>/
+
+	FET_DATA/rx/<source>/
+
+	FET_DATA/tx/<client>/[1..5] '_' YYYYMMDDHH
+        FET_DATA/log/		-- logs for statistics, monitoring etc...
 	             rx/<client> -- is same logs for resending?
 		     tx/<source>
 
-	FET_ROOT/<date>/db
-			rx/	
-			tx/
-        
-	FET_ROOT/db/<date>
-	         tx/<date>HH/<client>/<pri>
-		 rx/<date>HH/<source>/
-
-        FET_ROOT/tx/<client>/<date><HH>_[1-5]/
-        FET_ROOT/tx/<client>/<date><HH>_/
 	eventually:
         FET_ETC/
 		fet.conf

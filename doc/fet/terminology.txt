@@ -2,11 +2,11 @@
 FET - File Exchange Tracker.
 
 initial file hierarchy:
-        FET_ROOT= /apps/fet
-	FET_ROOT/db/<date>/
-	FET_ROOT/rxq/<source>/[1..5]
-	FET_ROOT/txq/<client>/[1..5]
-        FET_ROOT/log/<client>,<qsrc>,<process>
+        FET_DATA= /apps/fet
+	FET_DATA/db/<date>/
+	FET_DATA/rxq/<source>/[1..5]
+	FET_DATA/txq/<client>/[1..5]
+        FET_DATA/log/<client>,<qsrc>,<process>
         
         FET_ETC/
 		fet.conf
@@ -14,7 +14,7 @@ initial file hierarchy:
 	        tx/<client>.conf
 		rx/<reception>.conf
 
-     uses links extensively, chdir to FET_ROOT, and link relative.
+     uses links extensively, chdir to FET_DATA, and link relative.
 
 receive files from 'sources' and deliver to clients
 

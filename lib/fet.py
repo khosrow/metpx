@@ -29,9 +29,9 @@ import sys
 import signal
 import log
 
-#FET_ROOT='/apps/px/'
-#FET_ROOT='/tmp/fet/'
-FET_ROOT='/apps/px/'
+#FET_DATA='/apps/px/'
+#FET_DATA='/tmp/fet/'
+FET_DATA='/apps/px/'
 FET_DB= 'db/today/' 
 
 FET_TX= 'tx/'
@@ -158,11 +158,20 @@ def lockStopOrDie(lfn, cmd):
 
   clients is a keyed data structure... 
       filled with list values of the form:
-  [ [ patterns, log_rollover, ftp_timer, q_timer, time_window, sleep_timer, debug_level, chmod ], ... ]
+  [ [ patterns, default_dest, ftp_timer, q_timer, time_window, sleep_timer, debug_level, chmod ], ... ]
 
 """
 clients = {}
-clientdefaults = [ [], 'monthly','10','3600','3600','10','3','000'  ]
+
+# 
+# FIXME: This isn't done right, there should be a parent class
+#        with inheritance to override it.  but this is just a skeleton.
+#
+# -- for a file sender
+clientdefaults = [ [], '','10','3600','3600','10','3','000'  ]
+#
+# for AM sender
+clientdefaults = [ [], '','','','','','',''  ]
 
 
 # FIXME: currently get one global list of clients.
@@ -227,6 +236,8 @@ def readClients(logger):
 	     host = hspec
           if pspec != '':
 	     port = pspec
+	  if client[1] == '':
+	     client[1]=urlJoin(protocol,destdir,user,password,host,port)
 
 #          print "after urlSplit proto="+ protocol +" destdir="+ destdir +' u='+ user +' pw='+ password +' h='+ host  +' port='+ port 
         elif maskline[0] == 'host':
@@ -239,8 +250,6 @@ def readClients(logger):
 	  password = maskline[1]
         elif maskline[0] == 'protocol':
 	  protocol = maskline[1]
-        elif maskline[0] == 'log_roll_over':
-	  client[1] = maskline[1]
         elif maskline[0] == 'ftp_timer':
 	  client[2] = maskline[1]
         elif maskline[0] == 'queue_timer':
@@ -260,6 +269,7 @@ def readClients(logger):
     if isactive == 1:
       clients[clientid] = copy.deepcopy(client)
       logger.writeLog( logger.INFO, "read config of client " + clientid )
+      isactive=0
     else:
       logger.writeLog( logger.INFO, "ignored config of client " + clientid )
     
@@ -329,7 +339,7 @@ def readSources(logger):
     #print "sources are: ", sources
 
 def sourceQDirName(s):
-  return FET_ROOT + FET_RX + s
+  return FET_DATA + FET_RX + s
 
 def ingestName(r,s):
   """ map reception to ingest name, based on the source configuration.
@@ -363,14 +373,14 @@ def dbName(ingestname):
   link it to 
       db/<today>/type/ori_system/ori_site/ingestname
   (same pattern as PDS)
-  path is relative to FET_ROOT (includes db)
+  path is relative to FET_DATA (includes db)
 
   NB: see notes/tests.txt for why the date/time is recalculated everytime.
   """
   if ingestname.count(':') >= 4 :
     dirs = ingestname.split(':')
     today = time.strftime( "%Y%m%d/", time.gmtime(time.time()) )
-    return FET_ROOT + 'db/' + today + dirs[3] + '/' + dirs[1] + '/' + dirs[2] + '/' + ingestname 
+    return FET_DATA + 'db/' + today + dirs[3] + '/' + dirs[1] + '/' + dirs[2] + '/' + ingestname 
   else:
     return ''
 
@@ -381,7 +391,7 @@ def clientQDirName( client, pri ):
   /apps/px/tx/<client>/1_YYmmddhh ??
   """
   global clients
-  return FET_ROOT + FET_TX + client + '/' + pri + '_' \
+  return FET_DATA + FET_TX + client + '/' + pri + '_' \
              + time.strftime( "%Y%m%d%H", time.gmtime(time.time()) ) + '/'
 
 
@@ -569,15 +579,15 @@ def initDB(logger):
 
    logger.writeLog( logger.INFO, "dbinit start")
    dirs_created = []
-   createDir( FET_ROOT + '/.' )
-   createDir( FET_ROOT + FET_RX )
-   createDir( FET_ROOT + FET_TX )
-   createDir( FET_ROOT + "db" )
+   createDir( FET_DATA + '/.' )
+   createDir( FET_DATA + FET_RX )
+   createDir( FET_DATA + FET_TX )
+   createDir( FET_DATA + "db" )
    todaylink = time.strftime( "%Y%m%d", time.gmtime(time.time()))
    FET_DB = "db/" + todaylink + "/"
-   createDir( FET_ROOT + FET_DB )
-   tl = FET_ROOT + "db/today"
-   yl = FET_ROOT + "db/yesterday"
+   createDir( FET_DATA + FET_DB )
+   tl = FET_DATA + "db/today"
+   yl = FET_DATA + "db/yesterday"
    if os.path.exists( tl ):
      lnk = os.readlink( tl )
      if ( todaylink != lnk ):
@@ -595,7 +605,18 @@ def initDB(logger):
    logger.writeLog( logger.INFO, "dbinit done")
 
 
-def startup(logger):
+def startup(dataDir, configDir, logger):
+   global FET_DATA
+   global FET_ETC
+
+   FET_DATA=dataDir
+   if FET_DATA[-1] != '/':
+     FET_DATA = FET_DATA + '/'
+
+   FET_ETC=configDir
+   if FET_ETC[-1] != '/':
+     FET_ETC = FET_ETC + '/'
+
    initDB(logger)
    readClients(logger)
    readSources(logger)

@@ -1,46 +1,6 @@
-#!/usr/bin/python
-#
-#  File Exchange Tracker
-#	(aka, PDS ++ )
-#
-#  flow:
-#	-- open directory, read name, create DB entry, link DB entry to client dirs.
-#          do the above in a manner compatible with PDS.
-#
-#       -- if we do the delivery thing, then base it on curl (pycurl?) robust
-#          functionality for Command line URL's does get & put with retries.
-#
-#
-#
-# -*- coding: iso-8859-1 -*-
 
+Samples of PDS ish things for study.
 
-import fet
-
-
-files = [ 'fred', 
-	'sacn37_CWAO:ncp1:SA:CN:hoho', 
-	'sacn35:ncp2:SA:CN:hoho' ,
-	'nood88:ncp2:SA:CN:hoho:1.A.B.C.D.E.F.G.H.I.J.K.L.M.N.O.P.Q.R.S.T.U',
-	'loov44:ncp2:SA:CN:hoho:2.A.B.C.D.E.F.G.H.I.J.K.L.M.N.O.P.Q.R.S.T.U'
-	]
-
-for i in files:
-  d = fet.dbname(i)
-  print "\n\n\tActions for file named: " + i + "\n\n"
-  if not d:
-     print "invalid name, not databased, cannot be linked"
-     continue
-
-  cm = fet.clientmatches(i)
-  print "Client matches: ", cm
-  print "DB entry: ",  d
-
-
-
-
-
-  """
   need to make a logging module.
   look at PDS logs, and make them look identical.
 

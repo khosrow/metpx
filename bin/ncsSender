@@ -16,13 +16,14 @@ sys.path.append(sys.path[0] + '/../lib/importedLibs')
 
 from optparse import OptionParser
 import gateway, log
+import fet
 
 def main():
 	global logger
 	global unGateway
 
 	# Message d'usage pour l' option parser
-	usage =  "%prog pathConfigFile\n" \
+	usage =  "%prog <pathConfigFile> <client>\n" \
 		 "	 Un sender lit les bulletins dans un repertoire du disque et les\n" \
 		 "	 envoie a un destinataire via une connexion socket.  Le fichier de\n" \
 		 "	 configuration doit etre exempt d'erreur pour que le programme\n" \
@@ -30,6 +31,18 @@ def main():
 
 	# Instanciation de l'option parser
 	parser = OptionParser(usage)
+        parser.add_option( "-d", "--data", dest="dataDir",
+                default=fet.FET_DATA,
+                help="root Directory of application",
+                metavar="PXROOT")
+        parser.add_option( "-c", "--client", dest="client",
+                help="Directory containing configuration files",
+                metavar="PXCFG")
+        parser.add_option( "-e", "--etcdir", dest="etcDir",
+                default=fet.FET_ETC,
+                help="Directory containing configuration files",
+                metavar="PXCFG")
+
 	options,args = parser.parse_args()
 	
 	# Un seul argument doit être fourni
@@ -43,8 +56,14 @@ def main():
 
         # FIXME: Vérifier que typeProtocole est défini et le fichier de log
 
-	# Init du log
-	logger = log.log(config.log)
+
+	if options.client:
+	   # Init du log
+	  logger = log.log(options.dataDir + '/log/ncsSender_' + options.client )
+          fet.startup(options.dataDir,options.etcDir,logger)
+	else:
+	  logger = log.log(config.log)
+
 	logger.writeLog(logger.INFO, "Début du programme, fichier de config chargé correctement")
 
         logger.writeLog(logger.DEBUG,"Protocole %s sélectionné",config.typeProcotole)

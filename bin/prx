@@ -23,9 +23,12 @@ import os.path
 import time
 import sys
 
+
+
 sys.path.insert(1,sys.path[0] + '/../lib')
 sys.path.insert(1,sys.path[0] + '/../lib/importedLibs')
 
+from optparse import OptionParser
 import log
 import fet
 
@@ -79,11 +82,9 @@ def checkSource(s, sources):
   global logger
 
 
-  if not os.path.exists( fet.FET_ROOT + fet.FET_RX):
+  if not os.path.exists( fet.FET_DATA + fet.FET_RX):
      logger.writeLog(logger.FATAL, "ingest queue directory does not exist" )
      return
-
-  fet.startup(logger)
 
   # initialize history array.
   dmodified = {}
@@ -111,6 +112,16 @@ def checkSource(s, sources):
 
     time.sleep(1)      
 
+usage="%prog [--data dir][-e etc] <source> (start|stop)\n"
+parser = OptionParser(usage)
+
+parser.add_option( "-d", "--data", dest="dataDir", default=fet.FET_DATA, 
+   help="root Directory of application", metavar="PXROOT")
+parser.add_option( "-e", "--etcdir", dest="etcDir", default=fet.FET_ETC,
+   help="Directory containing configuration files", metavar="PXCFG")
+
+options,args = parser.parse_args()
+
 
 if len(sys.argv) < 2:
   print "FATAL: fetrx expects the name of a source as a single argument"
@@ -123,16 +134,16 @@ if ( len(sys.argv) < 3 ) or not (( sys.argv[2] == 'stop' ) or ( sys.argv[2] == '
 s = sys.argv[1]
 cmd = sys.argv[2]
 
-logger = log.log( fet.FET_ROOT + "log/fetrx_" + s )
+logger = log.log( fet.FET_DATA + "log/" + os.path.basename(sys.argv[0]) "_" + s )
 
-fet.startup(logger)
+fet.startup(options.dataDir,options.etcDir,logger)
 
 if s not in fet.sources.keys():
   print "FATAL: " + s + " source not configured or is set inactive"
   sys.exit(1)
 
-fet.lockStopOrDie( fet.FET_ROOT + fet.FET_RX + s + '/.lock' , cmd )
+fet.lockStopOrDie( fet.FET_DATA + fet.FET_RX + s + '/.lock' , cmd )
 
-checkSource( sys.argv[1], fet.sources )
+checkSource( s, fet.sources )
 
 
