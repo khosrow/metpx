@@ -1,0 +1,35 @@
+
+directives
+
+'active' <yes|no>
+   whether this channel is 'on' or not.
+   if it is not active, anything delivered into it's input queues will stay there.
+   For sockets, that means the peer will not be able to connect.
+
+'type' <am|wmo|plain|wmofile>
+   am        	   - AM protocol socket
+   wmo        	   - WMO protocol socket
+   single-file     - Receive plain files (like a PDS.)
+   nwsfile         - receive bulletins in an archive
+   ukmetfile       - receive bulletins in an archive
+   wmofile         - receive bulletins in an archive
+
+'port' 5012
+   port to bind for reception, only used on socket protocols
+
+'extension' 1:AMTCP2FILE:DADS:BULLETIN:ASCII
+ 
+  the reception file or bulletin name will have appended to it
+  the following fields:
+
+    priority, ori_system : ori_site : data_type : data_format :
+
+  
+arrival { 'CA':(5,20),'WO':(20,40) }
+  mapping of what the valid times to receive a given type of bulletin are.
+  in this example for CA's, -5 or +20 minutes versus the issue time is 
+  the valid interval.
+
+AddSMHeader true
+  
+routing direct

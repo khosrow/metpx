@@ -1,0 +1,41 @@
+
+directives
+
+'active' <yes|no>
+   whether this channel is 'on' or not.
+   if it is not active, anything delivered into it's input queues will stay there.
+   For sockets, that means no attempt to connect to remote will be made.
+
+'type' <am|wmo|plain|wmofile>
+   am        	   - AM protocol socket
+   wmo        	   - WMO protocol socket
+   single-file     - Receive plain files (like a PDS.)
+   nwsfile         - receive bulletins in an archive
+   ukmetfile       - receive bulletins in an archive
+   wmofile         - receive bulletins in an archive
+
+'destination' <URL> <DESTFN>
+    Uniform Resource Locator to designate where a sender should connect to.
+    ie.  wmo://localhost:5012
+   
+    One can issue multiple destination directives in a single client.
+    but it there will be a severe performance penalty if delivering large
+    numbers of files to two different machines using the same client.
+    best to use separate clients, each with their own destination.
+
+    There are also synonyms for subsets of 'destination'
+    'protocol', 'host', 'user', 'password', 'directory', 'filename'
+   
+    
+
+
+  
+active yes
+type wmo
+destination wmo://localhost:5012
+
+FIXME:  below is not described!
+emask *:*:*:*:RADAR:*
+
+imask *:*:*:*:DIRECT:*
+
