@@ -39,10 +39,6 @@ class bulletinManager:
 
 				Ex: mapEnteteDelai = { 'CA':(5,20),'WO':(20,40)}
 
-	   SMHeaderFormat	Bool
-
-				- Ajout du champ "AAXX jjhh4\\n" aux bulletins SM/SI.
-
 	   ficCollection	path
 
 				- Path vers le fichier de collection correctement formatte
@@ -707,7 +703,7 @@ class bulletinManager:
 			Pouvoir vérifier qu'un bulletin soit dans les délais 
 			acceptables.
 
-		   Visibilité:	Publique
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""

@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 """Système efficace pour le logging"""
 
-# Gestion de paths relatifs
+# Gestion de paths relatifs, si l'on veut importer le module seul
 pathDeLaLibrairie = '/'.join(__file__.split('/')[:-1])
 
 if not '/' in pathDeLaLibrairie:
