@@ -355,7 +355,15 @@ class bulletin:
 	def verifyHeader(self):
 		"""verifyHeader()
 
-		   Vérifie l'entête du bulletin et le flag en erreur s'il y a erreur
+		   Vérifie l'entête du bulletin et le flag en erreur s'il y a erreur.
+
+		   Utilisation:
+
+			Est appelé à l'instance, masquer pour ne pas faire l'appel.
+
+		   Visibilité:	Privée
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Novembre 2004
 		"""
 		header = self.getHeader()
 

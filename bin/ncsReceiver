@@ -67,7 +67,7 @@ def main():
 		global logger
 		global isShutdowning
 
-		logger.writeLog(logger.INFO,"Reception d'un signal (signal=%d)",sig)
+		logger.writeLog(logger.DEBUG,"Reception d'un signal (signal=%d)",sig)
 
 		if not isShutdowning:
 		# Pour que le shutdown ne se fasse q'une fois
@@ -80,6 +80,18 @@ def main():
 	# Assignement des signaux avec le shutdown
 	signal.signal(signal.SIGTERM,shutdown)
 	signal.signal(signal.SIGINT,shutdown)
+
+	# Définition de la méthode de reload de config via SIGHUP
+	def reloadConfig(sig,stack):
+		global unGateway
+		global logger
+
+		logger.writeLog(logger.DEBUG,"Reception d'un signal (signal=%d)",sig)
+
+		unGateway.reloadConfig()
+
+	# Assignement des signaux avec le reloadConfig
+	signal.signal(signal.SIGHUP,reloadConfig)
 
 	unGateway.run()
 

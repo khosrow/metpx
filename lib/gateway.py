@@ -46,6 +46,7 @@ class gateway:
 	   Date:	Octobre 2004
 	"""
 	def __init__(self,path,logger):
+		self.pathToConfigFile = path
 		self.config = gateway.loadConfig(path)
 		self.logger = logger
 
@@ -172,3 +173,18 @@ class gateway:
 		"""
 		raise gatewayException("Méthode non implantée: gateway.gateway.checkLooping()")
 
+	def reloadConfig(self):
+		"""reloadConfig()
+
+		   Recharge les éléments du fichier de config, les éléments
+		   peuvent varier selon l'implantation.
+
+		   Utilisation:
+
+			Recharger la config lors d'un SIGHUP.
+
+		   Visibilité:	Publique
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Décembre 2004
+		"""
+		self.logger.writeLog(self.logger.INFO,'Demande de rechargement de configuration... non implanté!')

@@ -127,6 +127,39 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 		else:
 			bulletinManager.bulletinManager.writeBulletinToDisk(self,unRawBulletin,includeError=includeError)
 
+        def reloadMapEntetes(self, pathFichierStations):
+                """reloadMapEntetes(pathFichierStations)
+
+
+                   pathFichierStations: String
+                                        - Chemin d'accès vers le fichier de "collection"
+
+                   Recharge le fichier d'entêtes en mémoire.
+
+                   Utilisation:
+
+                        Pour le rechargement lors d'un SIGHUP.
+
+                   Visibilité:  Publique
+                   Auteur:      Louis-Philippe Thériault
+                   Date:        Décembre 2004
+                """
+                oldMapEntetes = self.mapEntetes
+
+                try:
+
+                        self.initMapEntetes(pathFichierStations)
+
+                        self.logger.writeLog(self.logger.INFO,"Succès du rechargement du fichier d'entêtes")
+
+                except Exception,e :
+
+                        self.mapEntetes = oldMapEntetes
+
+                        self.logger.writeLog(self.logger.WARNING,"Échec du rechargement du fichier d'entêtes")
+
+                        raise
+
 	def initMapEntetes(self, pathFichierStations):
 		"""initMapEntetes(pathFichierStations)
 

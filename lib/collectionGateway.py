@@ -120,3 +120,43 @@ class collectionGateway(gateway.gateway):
 
 		self.unCollectionManager.close()
 
+        def reloadConfig(self):
+		__doc__ = gateway.gateway.reloadConfig.__doc__
+                self.logger.writeLog(self.logger.INFO,'Demande de rechargement de configuration')
+
+		try:
+
+			newConfig = gateway.gateway.loadConfig(self.pathToConfigFile)
+
+			ficCircuits = newConfig.ficCircuits
+			ficCollection = newConfig.ficCollection
+			collectionParams = newConfig.collectionParams
+
+			# Reload du fichier de circuits
+			# -----------------------------
+			self.unCollectionManager.reloadMapCircuit(ficCircuits)
+
+	                # Partage du même map pour les 2 managers
+	                self.unBulletinManager.setMapCircuits(self.unCollectionManager.getMapCircuits())
+
+			self.config.ficCircuits = ficCircuits
+			
+			# Reload du fichier de stations
+			# -----------------------------
+			self.unCollectionManager.reloadMapEntetes(ficCollection)
+
+			self.config.ficCollection = ficCollection
+
+			# Reload des paramètres de la collection
+			# --------------------------------------
+			self.logger.writeLog(self.logger.INFO,'Rechargement des paramètres de la collection')
+
+			self.unCollectionManager.setCollectionParams(collectionParams)
+
+			self.logger.writeLog(self.logger.INFO,'Succès du rechargement de la config')
+
+		except Exception, e:
+
+			self.logger.writeLog(self.logger.ERROR,'Échec du rechargement de la config!')
+
+			self.logger.writeLog(self.logger.DEBUG,"Erreur: %s", str(e.args))

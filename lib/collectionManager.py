@@ -77,6 +77,7 @@ class collectionManager(bulletinManager.bulletinManager):
 
                 self.maxCompteur = 99999
                 self.compteur = 0
+		self.statusNeedToBeUpdated = False
 
 		self.collectionParams = collectionParams
 		self.delaiMaxSeq = delaiMaxSeq
@@ -220,7 +221,7 @@ class collectionManager(bulletinManager.bulletinManager):
 			self.mainDataMap['sequenceWriteQueue'].append({'writeTime':writeTime,'bull':bull})
 
 		# MAJ du fichier de statut
-		self.saveStatusFile()
+		self.statusNeedToBeUpdated = True
 
 	def getBBB(self,rawBulletin):
 		"""getBBB(rawBulletin) -> champ
@@ -445,7 +446,6 @@ class collectionManager(bulletinManager.bulletinManager):
                    Date:        Novembre 2004
 		"""
 		now = time.time()
-		dataIsModified = False
 
 		# Parcours des collections, et si la période de collection 
 		# est dépassée ou si le data de toutes les stations est rentré,
@@ -466,7 +466,7 @@ class collectionManager(bulletinManager.bulletinManager):
 
 				del self.mainDataMap['collectionMap'][k]
 
-				dataIsModified = True
+				self.statusNeedToBeUpdated = True
 
 		# Parcours des fichiers non collectés (séquencage) puis écriture
 		# sur le disque
@@ -483,7 +483,7 @@ class collectionManager(bulletinManager.bulletinManager):
 				self.writeToDisk(fileName,m['bull'])
 				self.mainDataMap['sequenceWriteQueue'].pop(i)
 
-				dataIsModified = True
+				self.statusNeedToBeUpdated = True
 
 				continue
 
@@ -496,11 +496,14 @@ class collectionManager(bulletinManager.bulletinManager):
 				del self.mainDataMap['sequenceMap'][k]
 				self.logger.writeLog(self.logger.VERYVERBOSE,"Effacement de la séquence %s", k)
 
-				dataIsModified = True
+				self.statusNeedToBeUpdated = True
 
 
 		# MAJ du fichier de statut 
-		self.saveStatusFile()
+		if self.statusNeedToBeUpdated:
+			self.saveStatusFile()
+
+			self.statusNeedToBeUpdated = False
 
 	def loadStatusFile(self):
 		"""loadStatusFile()
@@ -613,6 +616,40 @@ class collectionManager(bulletinManager.bulletinManager):
 		except:
 			# Si quelconque erreur, on retourne Faux
 			return False
+
+	def reloadMapEntetes(self, pathFichierStations):
+		"""reloadMapEntetes(pathFichierStations)
+
+
+                   pathFichierStations: String
+                                        - Chemin d'accès vers le fichier de "collection"
+
+		   Recharge le fichier d'entêtes en mémoire.
+
+		   Utilisation:
+
+			Pour le rechargement lors d'un SIGHUP.
+
+		   Visibilité:	Publique
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Décembre 2004
+		"""
+                oldMapEntetes = self.mapEntetes
+
+                try:
+
+                        self.initMapEntetes(pathFichierStations)
+
+                        self.logger.writeLog(self.logger.INFO,"Succès du rechargement du fichier d'entêtes")
+
+                except Exception,e :
+
+                        self.mapEntetes = oldMapEntetes
+
+                        self.logger.writeLog(self.logger.WARNING,"Échec du rechargement du fichier d'entêtes")
+
+                        raise
+
 
         def initMapEntetes(self, pathFichierStations):
                 """initMapEntetes(pathFichierStations)
@@ -805,3 +842,18 @@ class collectionManager(bulletinManager.bulletinManager):
 
                 # Si la différence est plus grande que le maximum permis
                 return abs(nbHourNow - nbHourBullTime) > self.delaiMaxSeq
+
+	def setCollectionParams(self,collectionParams):
+		"""setCollectionParams(collectionParams)
+
+		   Doit avoir la même signification que dans le fichier de config.
+
+		   Utilisation:
+
+			Recharger cet élément lors d'un éventuel SIGHUP.
+
+		   Visibilité:	Publique
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Décembre 2004
+		"""
+		self.collectionParams = collectionParams

@@ -140,4 +140,28 @@ class receiverWmo(gateway.gateway):
 
 			self.unBulletinManagerWmo.writeBulletinToDisk(rawBulletin)
 
+        def reloadConfig(self):
+                __doc__ = gateway.gateway.reloadConfig.__doc__
+                self.logger.writeLog(self.logger.INFO,'Demande de rechargement de configuration')
+
+                try:
+
+                        newConfig = gateway.gateway.loadConfig(self.pathToConfigFile)
+
+                        ficCircuits = newConfig.ficCircuits
+
+                        # Reload du fichier de circuits
+                        # -----------------------------
+                        self.unBulletinManagerWmo.reloadMapCircuit(ficCircuits)
+
+                        self.config.ficCircuits = ficCircuits
+
+                        self.logger.writeLog(self.logger.INFO,'Succès du rechargement de la config')
+
+                except Exception, e:
+
+                        self.logger.writeLog(self.logger.ERROR,'Échec du rechargement de la config!')
+
+                        self.logger.writeLog(self.logger.DEBUG,"Erreur: %s", str(e.args))
+
 

@@ -142,4 +142,35 @@ class receiverAm(gateway.gateway):
 
 			self.unBulletinManagerAm.writeBulletinToDisk(rawBulletin,includeError=True)
 
+        def reloadConfig(self):
+                __doc__ = gateway.gateway.reloadConfig.__doc__
+                self.logger.writeLog(self.logger.INFO,'Demande de rechargement de configuration')
+
+                try:
+
+                        newConfig = gateway.gateway.loadConfig(self.pathToConfigFile)
+
+                        ficCircuits = newConfig.ficCircuits
+                        ficCollection = newConfig.ficCollection
+
+                        # Reload du fichier de circuits
+                        # -----------------------------
+                        self.unBulletinManagerAm.reloadMapCircuit(ficCircuits)
+
+                        self.config.ficCircuits = ficCircuits
+
+                        # Reload du fichier de stations
+                        # -----------------------------
+                        self.unBulletinManagerAm.reloadMapEntetes(ficCollection)
+
+                        self.config.ficCollection = ficCollection
+
+                        self.logger.writeLog(self.logger.INFO,'Succès du rechargement de la config')
+
+                except Exception, e:
+
+                        self.logger.writeLog(self.logger.ERROR,'Échec du rechargement de la config!')
+
+                        self.logger.writeLog(self.logger.DEBUG,"Erreur: %s", str(e.args))
+
 

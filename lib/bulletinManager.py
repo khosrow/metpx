@@ -496,6 +496,40 @@ class bulletinManager:
                 else:
                         raise IOError
 
+	def reloadMapCircuit(self,pathHeader2circuit):
+		"""reloadMapCircuit(pathHeader2circuit)
+
+                   pathHeader2circuit:  String
+                                        - Chemin d'accès vers le fichier de circuits
+
+
+		   Recharge le fichier de mapCircuits.
+
+		   Utilisation:
+
+			Rechargement lors d'un SIGHUP.
+
+		   Visibilité:	Publique
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Décembre 2004
+		"""
+		oldMapCircuits = self.mapCircuits
+
+		try:
+
+			self.initMapCircuit(pathHeader2circuit)
+
+			self.logger.writeLog(self.logger.INFO,"Succès du rechargement du fichier de Circuits")
+
+		except Exception,e :
+
+			self.mapCircuits = oldMapCircuits
+
+			self.logger.writeLog(self.logger.WARNING,"Échec du rechargement du fichier de Circuits")
+
+			raise
+
+
 	def initMapCircuit(self,pathHeader2circuit):
 	        """initMapCircuit(pathHeader2circuit)
 
