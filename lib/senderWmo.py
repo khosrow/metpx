@@ -192,7 +192,7 @@ class senderWmo(gateway.gateway):
 			return data
 
 		except Exception, e:
-               		self.logger.writeLog(self.logger.ERROR,"senderWmo.read(..): Erreur lecture: %s",str(e.args))
+               		self.logger.writeLog(self.logger.ERROR,"senderWmo.read(): Erreur lecture: %s",str(e.args))
 			raise
                  """
 
