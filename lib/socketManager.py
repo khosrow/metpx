@@ -211,7 +211,7 @@ suivants:
 
 		status = self.checkNextMsgStatus()
 
-		self.logger.writeLog(self.logger.DEBUG,"Status du prochain bulletin dans le buffer: %s", status )
+		self.logger.writeLog(self.logger.DEBUG,"Statut du prochain bulletin dans le buffer: %s", status )
 
 		if status ==  'OK':
 			(bulletin,longBuffer) = self.unwrapBulletin()
