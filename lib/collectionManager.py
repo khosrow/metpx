@@ -66,12 +66,15 @@ class collectionManager(bulletinManager.bulletinManager):
 			self.loadStatusFile(self.pathTemp+self.statusFile)
 		else:
 		# Création des structures
-			self.collectionMap = {}
+			self.mainDataMap = {'collectionMap':{},'sequenceMap':{}}
 
-	def addBulletin(self,rawBulletin):
+	def addBulletin(self,rawBulletin,path):
 		"""addBulletin(rawBulletin)
 
 		   rawBulletin:	String
+
+		   path:	String
+				- Path vers le bulletin
 
 		   Ajoute le bulletin au fichier de collection correspondant. Le bulletin
 		   doit absolument être destiné pour les collections.
@@ -85,28 +88,32 @@ class collectionManager(bulletinManager.bulletinManager):
 		if bbb == None:
 		# Si aucun champ BBB
 
-			# Si le bulletin est destiné a être collecté
-			if rawBulletin[:2] in self.collectionParams:
-		
+			# Si le bulletin est destiné a être collecté (entete + heure de collection)
+			if rawBulletin[:2] in self.collectionParams and \
+				int(self.getBullTimestamp(rawBulletin)[2:4]) in self.collectionParams[rawBulletin[:2]]['h_collection']:
+				
+				if isInCollectionPeriod(rawBulletin):
 				# Si dans la période de collection
-
+					self.handleCollection(rawBulletin)
+				else:
 				# Sinon, retard
+					self.handleLateCollection(rawBulletin)
 
 			# Sinon, aucune modification, le bulletin sera déplacé
 			else:
-				# À déterminer (on garde les compteurs dans le nom du fichier???)
-				pass
-
+				os.rename(path,self.pathDest + path.split('/')[-1])
 		else:
 		# Le bulletin a un champ BBB
-			pass
 
 			# Vérification que ca ne fait pas plus de temps que la limite permise
+			if not self.isLate(rawBulletin):
+				# Si dans les temps, fetch du prochain token, et modification 
+				# de l'entête
+				#fetch du prochain token dans le map de tokens, création si aucun token
 
-			# Si dans les temps, fetch du prochain token, et modification 
-			# de l'entête
-
+			else:
 			# Sinon, flag du bulletin en erreur
+				#Générer l'objet bulletin, flag en erreur, écriture
 
 	def getBBB(self,rawBulletin):
 		"""getBBB(rawBulletin) -> champ
@@ -125,6 +132,136 @@ class collectionManager(bulletinManager.bulletinManager):
 			return rawBulletin.splitlines()[0].split()[-1]
 		else:
 			return None
+
+	def handleLateCollection(self,rawBulletin):
+		"""handleLateCollection(rawBulletin)
+
+		   Le bulletin est en retard, et une collection doit être
+		   créée/continuée pour le bulletin.
+
+		   Le rawBulletin doit être dans la liste des bulletins à
+		   collecter.
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Novembre 2004
+		"""
+		# S'il n'y a pas de collections de retard en cours
+		if not rawBulletin.splitlines()[0] in self.mainDataMap['collectionMap']:
+			entete = ' '.join(rawBulletin.splitlines()[0].split()[:2])
+			writeTime = time.time() + ( 60.0 * float(self.collectionParams[rawBulletin[:2]]['m_suppl']))
+
+                        if not entete in self.mapEntetes2mapStations:
+                                raise bulletinManagerException("Entete non définie dans le fichier de stations")
+
+			self.mainDataMap['collectionMap'][rawBulletin.splitlines()[0]] = \
+                                bulletinCollection.bulletinCollection(self.logger,self.mapEntetes2mapStations[entete],
+                                                                      writeTime,rawBulletin.splitlines()[0])
+
+		# Ajout du bulletin dans la collection
+                station = bulletinCollection.bulletinCollection.getStation(rawBulletin)
+                data = bulletinCollection.bulletinCollection.getData(rawBulletin)
+
+                self.mainDataMap['collectionMap'][rawBulletin.splitlines()[0]].addData(station,data)
+
+	def isInCollectionPeriod(self,rawBulletin):
+		"""isInCollectionPeriod(rawBulletin) -> bool
+
+		   Retourne vrai si le bulletin est dans la période de collection
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Novembre 2004
+		"""
+		bullTime = self.getBullTimestamp(rawBulletin)[:-2] + string.zfill(self.collectionParams[rawBulletin[:2]]['m_primaire'0],2)
+
+                now = time.strftime("%d%H%M",time.localtime())
+	
+                # Détection si wrap up et correction pour le calcul
+                if abs(int(now[:2]) - int(bullTime[:2])) > 10:
+                        if now > bullTime:
+                        # Si le temps présent est plus grand que le temps du bulletin
+                        # (donc si le bulletin est généré le mois suivant que présentement),
+                        # On ajoute une journée au temps présent pour faire le temps du bulletin
+                                bullTime = str(int(now[:2]) + 1) + bullTime[2:]
+                        else:
+                        # Contraire (...)
+                                now = str(int(bullTime[:2]) + 1) + now[2:]
+
+                # Conversion en nombre de minutes
+                nbMinNow = 60 * 24 * int(now[0:2]) + 60 * int(now[2:4]) + int(now[4:])
+                nbMinBullTime = 60 * 24 * int(bullTime[0:2]) + 60 * int(bullTime[2:4]) + int(bullTime[4:])
+
+		return nbMinNow <= nbMinBullTime
+
+        def handleCollection(self,rawBulletin):
+                """handleCollection(rawBulletin)
+
+                   Le bulletin doit être collecté, et une collection doit être
+                   créée/continuée pour le bulletin.
+
+                   Le rawBulletin doit être dans la liste des bulletins à
+                   collecter.
+
+                   Auteur:      Louis-Philippe Thériault
+                   Date:        Novembre 2004
+                """
+                if not rawBulletin.splitlines()[0] in self.mainDataMap['collectionMap']:
+		# Création d'une nouvelle collection
+			entete = ' '.join(rawBulletin.splitlines()[0].split()[:2])
+			writeTime = self.getWriteTime(self.getBullTimestamp(rawBulletin),self.collectionParams[rawBulletin[:2]]['m_primaire'])
+
+			if not entete in self.mapEntetes2mapStations:
+				raise bulletinManagerException("Entete non définie dans le fichier de stations")
+
+			self.mainDataMap['collectionMap'][rawBulletin.splitlines()[0]] = \
+				bulletinCollection.bulletinCollection(self.logger,self.mapEntetes2mapStations[entete],
+								      writeTime,rawBulletin.splitlines()[0])
+
+		# Ajout du bulletin dans la collection
+		station = bulletinCollection.bulletinCollection.getStation(rawBulletin)
+		data = bulletinCollection.bulletinCollection.getData(rawBulletin)
+
+		self.mainDataMap['collectionMap'][rawBulletin.splitlines()[0]].addData(station,data)
+
+	def getWriteTime(self,timeStamp,nb_min)
+		"""getWriteTime(timeStamp,nb_min) -> writeTime
+
+		   timeStamp:		String
+					- jjhhmm de l'entête de la collection
+
+		   nb_min:		Int
+					- Nombre de minutes après l'heure jusqu'à ce que l'on doit 
+					  effectuer la collection
+
+		   writeTime:		Float
+					- Valeur de time.time() lorsque la collection devra être fermée
+
+		   Gestion des wrap ups. Si un bulletin est reçu à 23h55 le 31 décembre 2005, le write
+		   time devra être généré en conséquence.
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Novembre 2004
+		"""
+		mday = int(timeStamp[:2])
+		hour = int(timeStamp[2:4])
+		min = nb_min
+
+		gmtime = time.gmtime()
+
+		gmyear, gmmonth, gmday = gmtime.tm_mon, gmtime.tm_mon, gmtime.tm_mday
+
+		if mday < gmday:
+		# Si le jour du bulletin est plus petit que le jour courant,
+		# donc si le bulletin est reçu aujourd'hui et qu'il doit être
+		# collecté demain, et que demain est le premier jour du mois,
+		# on doit faire un wrap du mois/année.
+			gmmonth += 1
+
+			if gmmonth == 13:
+				gmmonth = 1
+				gmyear += 1
+
+		# Génération du temps d'à partir des informations
+		return time.mktime((gmyear,gmmonth,mday,hour,min,0,0,0,0))
 
 	def getBullTimestamp(self,rawBulletin):
 		"""getBullTimestamp(rawBulletin) -> jjhhmm
@@ -180,10 +317,13 @@ class collectionManager(bulletinManager.bulletinManager):
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
-		pass
+		if self.getBullTimestamp(rawBulletin)[-2:] == '00':
 		# Doit finir (l'heure) par 00
 
-		# Si SA/SI/SM OU si champ BBB :True
+			return  rawBulletin[:2] in self.collectionParams or self.getBBB(rawBulletin) != None
+			# Si dans le type de bulletin a collecter OU si champ BBB :True
+		else:
+			return False
 
         def initMapEntetes(self, pathFichierStations):
 		"""Même méthode que pour le bulletinManagerAm
@@ -225,5 +365,33 @@ class collectionManager(bulletinManager.bulletinManager):
 		"""
 		return token[:-1] + chr(ord(token[-1]) + 1)
 		
+	def isLate(self,rawBulletin):
+		"""isLate(rawBulletin) -> is_late
 
-		
+		   is_late		bool
+					- Si l'heure d'arrivée du bulletin
+					  dépasse la limite permise, =True
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Novembre 2004
+		"""
+		now = time.strftime("%d%H%M",time.localtime())
+		bullTime = rawBulletin.splitlines()[0].split()[2]
+
+                # Détection si wrap up et correction pour le calcul
+                if abs(int(now[:2]) - int(bullTime[:2])) > 10:
+                        if now > bullTime:
+                        # Si le temps présent est plus grand que le temps du bulletin
+                        # (donc si le bulletin est généré le mois suivant que présentement),
+                        # On ajoute une journée au temps présent pour faire le temps du bulletin
+                                bullTime = str(int(now[:2]) + 1) + bullTime[2:]
+                        else:
+                        # Contraire (...)
+                                now = str(int(bullTime[:2]) + 1) + now[2:]
+
+                # Conversion en nombre d'heures
+                nbHourNow = 24 * int(now[0:2]) + int(now[2:4])
+                nbHourBullTime = 24 * int(bullTime[0:2]) + int(bullTime[2:4]) 
+
+                # Si la différence est plus grande que le maximum permis
+                return abs(nbHourNow - nbHourBullTime) > self.delaiMaxSeq

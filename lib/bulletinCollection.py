@@ -148,8 +148,8 @@ class bulletinCollection(bulletin.bulletin):
 		"""
 		return self.getCollection()
 
-	def getCollection(self,tokenIfNoData=' NIL='):
-		"""getCollection() -> collection
+	def getCollection(self,tokenIfNoData=' NIL=',bbb=None):
+		"""getCollection(tokenIfNoData,bbb) -> collection
 
 		   tokenIfNoData	String/None
 					- Si un élément est à None pour une des stations,
@@ -162,6 +162,9 @@ class bulletinCollection(bulletin.bulletin):
 					    "CYUL NIL=" sera la ligne associée pour 
 					    cette station
 
+		   bbb			String/None
+					- Champ BBB qui sera retourné pour la collection
+
 		   collection		String
 					- Fichier de collection, fusionné en un bulletin
 
@@ -170,7 +173,13 @@ class bulletinCollection(bulletin.bulletin):
 		"""
 		coll = []
 
-		coll.append(self.mapCollection['header'])
+		header = self.mapCollection['header']
+
+		# On insère/remplace le champ BBB à la fin de l'entête
+		if bbb != None:
+			header = ' '.join(header.split()[:3] + [bbb])
+
+		coll.append(header)
 		# Ajout du header à la collection
 
 		for station in self.mapCollection['mapStations'].keys():
@@ -184,8 +193,6 @@ class bulletinCollection(bulletin.bulletin):
 				coll.append(self.mapCollection['mapStations'][station])
 
 		return self.lineSeparator.join(coll)
-
-
 
 	def addData(self,station,data):
 		"""addData(station,data)
@@ -257,6 +264,33 @@ class bulletinCollection(bulletin.bulletin):
 			raise Exception('Station non trouvée')
 
 	getStation = staticmethod(getStation)
+
+	def getData(rawBulletin):
+                """bulletinCollection.getData(rawBulletin) -> data
+
+                   rawBulletin          String
+
+                   data                 String
+
+		   Extrait la portion de données du bulletin.
+
+                   Méthode statique.
+
+                   Auteur:      Louis-Philippe Thériault
+                   Date:        Novembre 2004
+                """
+		splittedBulletin = rawBulletin.splitlines()
+
+		# On enlève la première ligne (entête)
+		splittedBulletin.pop(0)
+
+		while splittedBulletin[0] == '' or splittedBulletin[0].find('AAXX') != -1:
+			splittedBulletin.pop(0)
+
+		return '\n'.join(splittedBulletin)
+
+        getData = staticmethod(getData)
+
 
 
 
