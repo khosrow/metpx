@@ -67,6 +67,8 @@ def main():
 		global logger
 		global isShutdowning
 
+		logger.writeLog(logger.INFO,"Reception d'un signal (signal=%d)",sig)
+
 		if not isShutdowning:
 		# Pour que le shutdown ne se fasse q'une fois
 			isShutdowning = True

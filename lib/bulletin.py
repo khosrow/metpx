@@ -2,7 +2,7 @@
 """Définition de la classe principale pour les bulletins."""
 
 import time
-import string
+import string, traceback, sys
 
 __version__ = '2.0'
 
@@ -61,11 +61,11 @@ class bulletin:
   	"""
 
 	def __init__(self,stringBulletin,logger,lineSeparator='\n'):
+                self.logger = logger
 		self.lineSeparator = lineSeparator
 		self.bulletin = self.splitlinesBulletin(stringBulletin.lstrip(lineSeparator))
 		self.dataType = None
 		self.errorBulletin = None
-		self.logger = logger
 
                 self.logger.writeLog(self.logger.VERYVERBOSE,"newBulletin: %s",stringBulletin)
 
@@ -84,32 +84,36 @@ class bulletin:
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
-		if stringBulletin.find('GRIB') != -1:
-		# Type de bulletin GRIB, découpage spécifique
-			b = stringBulletin[:stringBulletin.find('GRIB')].split(self.lineSeparator) + \
-				[stringBulletin[stringBulletin.find('GRIB'):stringBulletin.find('7777')+len('7777')]] 
-
-			b_fin = stringBulletin[stringBulletin.find('7777')+len('7777'):].split(self.lineSeparator)
-
-			if len(b_fin) > 0 and b_fin[0] == '':
-			# Si le premier élément est un '', c'est qu'il y avait un séparateur de ligne après le 7777
-				return b + b_fin[1:]
+		try:
+			if stringBulletin.find('GRIB') != -1:
+			# Type de bulletin GRIB, découpage spécifique
+				b = stringBulletin[:stringBulletin.find('GRIB')].split(self.lineSeparator) + \
+					[stringBulletin[stringBulletin.find('GRIB'):stringBulletin.find('7777')+len('7777')]] 
+	
+				b_fin = stringBulletin[stringBulletin.find('7777')+len('7777'):].split(self.lineSeparator)
+	
+				if len(b_fin) > 0 and b_fin[0] == '':
+				# Si le premier élément est un '', c'est qu'il y avait un séparateur de ligne après le 7777
+					return b + b_fin[1:]
+				else:
+					return b + b_fin
+	
+			elif stringBulletin.find('BUFR') != -1:
+	                # Type de bulletin BUFR, découpage spécifique
+	                        b = stringBulletin[:stringBulletin.find('BUFR')].split(self.lineSeparator) + \
+					[stringBulletin[stringBulletin.find('BUFR'):stringBulletin.find('7777')+len('7777')]]
+	
+	                        b_fin = stringBulletin[stringBulletin.find('7777')+len('7777'):].split(self.lineSeparator)
+	
+	                        if len(b_fin) > 0 and b_fin[0] == '':
+	                        # Si le premier élément est un '', c'est qu'il y avait un séparateur de ligne après le 7777
+	                                return b + b_fin[1:]
+	                        else:
+	                                return b + b_fin
 			else:
-				return b + b_fin
-
-		elif stringBulletin.find('BUFR') != -1:
-                # Type de bulletin BUFR, découpage spécifique
-                        b = stringBulletin[:stringBulletin.find('BUFR')].split(self.lineSeparator) + \
-				[stringBulletin[stringBulletin.find('BUFR'):stringBulletin.find('7777')+len('7777')]]
-
-                        b_fin = stringBulletin[stringBulletin.find('7777')+len('7777'):].split(self.lineSeparator)
-
-                        if len(b_fin) > 0 and b_fin[0] == '':
-                        # Si le premier élément est un '', c'est qu'il y avait un séparateur de ligne après le 7777
-                                return b + b_fin[1:]
-                        else:
-                                return b + b_fin
-		else:
+				return stringBulletin.split(self.lineSeparator)
+		except Exception:
+			self.logger.writeLog(self.logger.EXCEPTION,'Erreur lors du decoupage du bulletin:\n'+''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
 			return stringBulletin.split(self.lineSeparator)
 
 	def replaceChar(self,oldchars,newchars):
