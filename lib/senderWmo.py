@@ -4,6 +4,8 @@ import socketManagerWmo
 import bulletinManagerWmo
 import bulletinWmo
 from socketManager import socketManagerException
+from DiskReader import DiskReader
+from MultiKeysStringSorter import MultiKeysStringSorter
 
 class senderWmo(gateway.gateway):
         __doc__ = gateway.gateway.__doc__ + \
@@ -66,6 +68,7 @@ class senderWmo(gateway.gateway):
                 self.unBulletinManagerWmo = \
                         bulletinManagerWmo.bulletinManagerWmo(self.config.pathTemp,logger)
 		self.listeFichiersDejaChoisis = []
+                self.reader = None
 		
 	def shutdown(self):
 		__doc__ = gateway.gateway.shutdown.__doc__ + \
@@ -155,6 +158,10 @@ class senderWmo(gateway.gateway):
                 Novembre 2004
 		Modifications: Janvier 2005
                 """
+                self.reader = DiskReader(self.config.rootPath, MultiKeysStringSorter)
+                self.reader.sort()
+                return(self.reader.getFilesContent(self.config.fileNumber))
+                """
                 data = []
 		#lecture de la selection precedente
 		liste = self.unBulletinManagerWmo.getListeNomsFichiersAbsolus()
@@ -172,7 +179,9 @@ class senderWmo(gateway.gateway):
 		except Exception, e:
                		self.logger.writeLog(self.logger.ERROR,"senderWmo.read(..): Erreur lecture: %s",str(e.args))
 			raise
+                 """
 
+                 
 	def write(self,data):
                 __doc__ =  gateway.gateway.write.__doc__ + \
 		"""
@@ -197,9 +206,24 @@ class senderWmo(gateway.gateway):
                 Decembre 2004
 		Modifications: Janvier 2005
                 """
-
+                
                 self.logger.writeLog(self.logger.DEBUG,"%d nouveaux bulletins sont envoyes",len(data))
 
+                for index in range(len(data)):
+                        try:
+                                rawBulletin = data[index]
+                                unBulletinWmo = bulletinWmo.bulletinWmo(rawBulletin,self.logger,finalLineSeparator='\r\r\n')
+			        succes = self.unSocketManagerWmo.sendBulletin(unBulletinWmo)
+			        #si le bulletin a ete envoye correctement, le fichier est efface
+			        if succes:
+			                self.unBulletinManagerWmo.effacerFichier(self.reader.sortedFiles[index])
+                	                self.logger.writeLog(self.logger.DEBUG,"senderWmo.write(..): Effacage de " + self.reader.sortedFiles[index])
+		        except:
+                	        self.logger.writeLog(self.logger.ERROR,"senderWmo.write(..): Erreur ecriture")
+		                raise
+
+                """
+                self.logger.writeLog(self.logger.DEBUG,"%d nouveaux bulletins sont envoyes",len(data))
 		for key in data:
 			try:
 				#creation du bulletin wmo
@@ -226,3 +250,4 @@ class senderWmo(gateway.gateway):
 				else:
                 			self.logger.writeLog(self.logger.ERROR,"senderWmo.write(): erreur: %s",str(e.args))
 				raise
+                """
