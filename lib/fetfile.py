@@ -169,8 +169,6 @@ FIXME:
        continue
      else: 
        (proto, dspec, uspec, pwspec, hspec, pspec) = fet.urlSplit(m[2])
-       logger.writeLog( logger.INFO, "fichier " + f + " livré à "  + \
-          proto + ":" + hspec + " " + dspec + " " + dfn )
        if proto == 'file':
 	  there = dspec + '/' + dfn 
 	  os.copy( p , there )
