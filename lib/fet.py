@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: iso-8859-1 -*-
 #
 #  File Exchange Tracker
 #	(aka, PDS ++ )
@@ -17,7 +18,6 @@
 #
 # 2005/01/10 - begun by Peter Silva
 #
-# -*- coding: iso-8859-1 -*-
 
 import re
 import fnmatch

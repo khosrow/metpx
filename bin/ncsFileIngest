@@ -14,8 +14,6 @@
 import sys, os, signal, time
 sys.path.insert(1,sys.path[0] + '/../lib')
 sys.path.insert(1,sys.path[0] + '/../lib/importedLibs')
-#sys.path.insert(1,sys.path[0] + '../lib')
-#sys.path.insert(1,sys.path[0] + '../lib/importedLibs')
 
 from optparse import OptionParser
 import gateway, log, bulletinManager
@@ -59,7 +57,7 @@ def reload(sig, stack):
    global config, bullManager
    config = gateway.gateway.loadConfig(args[0])
    bullManager = bulletinManager.bulletinManager(config.pathTemp, logger, config.pathSource, config.pathDestination, config.maxCompteur,
-                                                 config.lineSeparator, config.extension, config.ficCircuits)
+                                                 config.lineSeparator, config.extension, config.ficCircuits, config.use_pds)
    logger.writeLog(logger.INFO,"Reception d'un signal de reload (signal=%d)", sig)
 
 # SIGHUP pour "reloader" 

@@ -33,10 +33,10 @@ class bulletinManagerAMIS(bulletinManager.bulletinManager):
         """
 
 	def __init__(self,pathTemp,logger,pathSource=None,\
-			pathDest=None,maxCompteur=99999,lineSeparator='\n',extension=':'):
+			pathDest=None,maxCompteur=99999,lineSeparator='\n',extension=':',use_pds=0):
 
 		bulletinManager.bulletinManager.__init__(self,pathTemp,logger, \
-						pathSource,pathDest,maxCompteur,lineSeparator,extension)
+						pathSource,pathDest,maxCompteur,lineSeparator,extension,use_pds)
 
 	def __isSplittable(self,rawBulletin):
 		pass

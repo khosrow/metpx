@@ -18,10 +18,10 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 	def __init__(self,pathTemp,logger,pathSource=None, \
 			pathDest=None,maxCompteur=99999,lineSeparator='\n',extension=':', \
 			pathFichierCircuit=None, SMHeaderFormat=False, pathFichierStations=None, \
-			mapEnteteDelai=None):
+			mapEnteteDelai=None, use_pds=0):
 
 		bulletinManager.bulletinManager.__init__(self,pathTemp,logger, \
-						pathSource,pathDest,maxCompteur,lineSeparator,extension,pathFichierCircuit,mapEnteteDelai)
+						pathSource,pathDest,maxCompteur,lineSeparator,extension,pathFichierCircuit,mapEnteteDelai,use_pds)
 
 		self.initMapEntetes(pathFichierStations)
 		self.SMHeaderFormat = SMHeaderFormat

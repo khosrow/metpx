@@ -70,7 +70,7 @@ class bulletinManager:
 	"""
 
 	def __init__(self,pathTemp,logger,pathSource=None,pathDest=None,maxCompteur=99999, \
-					lineSeparator='\n',extension=':',pathFichierCircuit=None,mapEnteteDelai=None):
+					lineSeparator='\n',extension=':',pathFichierCircuit=None,mapEnteteDelai=None,use_pds=0):
 
 		self.logger = logger
 		self.pathSource = self.__normalizePath(pathSource)
@@ -78,7 +78,7 @@ class bulletinManager:
 		self.pathTemp = self.__normalizePath(pathTemp)
 		self.maxCompteur = maxCompteur
 		# FIXME: this should be read from a config file, haven't understood enough yet.
-		self.use_pds = 1
+		self.use_pds = use_pds
 		self.compteur = 0
 		self.extension = extension
 		self.lineSeparator = lineSeparator
