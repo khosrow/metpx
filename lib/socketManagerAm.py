@@ -3,7 +3,7 @@
 
 __version__ = '2.0'
 
-import struct, socket
+import struct, socket, curses, curses.ascii
 import socketManager
 
 class socketManagerAm(socketManager.socketManager):
@@ -62,6 +62,39 @@ class socketManagerAm(socketManager.socketManager):
 	        else:
 	                return '',0
 
+        def wrapBulletin(self,bulletin):
+                __doc__ = socketManager.socketManager.wrapBulletin.__doc__ + \
+                """### Ajout de socketManagerAm ###
+                   Nom:
+                   wrapBulletin
+
+                   Parametres d'entree:
+                   -bulletin:   un objet bulletinAm
+
+                   Parametres de sortie:
+                   -Retourne le bulletin pret a envoyer en format string
+
+                   Description:
+                   Ajoute l'entete AM appropriee au bulletin passe en parametre.
+
+                   Auteur:      Pierre Michaud
+                   Date:        Janvier 2005
+                """
+		#affectation des valeurs des parametres d'entetes
+		length = socket.htonl(len(bulletin.getBulletin()))
+		header='null'
+		src_inet='null'
+		dst_inet='null'
+		threads='null'
+		start='null'
+		length='null'
+		firsttime='null'
+		timestamp='null'
+		future='null'
+		#assemblage de l'entete avec le contenu du bulletin
+		bulletinStr = header+src_inet+dst_inet+threads+start+length+firsttime+timestamp+future+bulletin.getBulletin()
+                return 'bulletinStr'
+
         def checkNextMsgStatus(self):
                 __doc__ = socketManager.socketManager.checkNextMsgStatus.__doc__ + \
                 """### Ajout de socketManagerAm ###
@@ -88,3 +121,45 @@ class socketManagerAm(socketManager.socketManager):
                 else:
                         return 'INCOMPLETE'
 
+        def sendBulletin(self,bulletin):
+                #__doc__ = socketManager.socketManager.sendBulletin.__doc__ + \
+                """
+                ###Methode concrete pour socketManagerAm###
+
+                Nom:
+                sendBulletin
+
+                Parametres d'entree:
+                -bulletin:
+                        -un objet bulletin
+
+                Parametres de sortie:
+                -si succes: 0
+                -sinon: 1
+
+                Description:
+                Envoi au socket correspondant un bulletin AM et indique
+                si le bulletin a ete transfere totalement ou non.
+
+                Auteur:
+                Pierre Michaud
+
+                Date:
+                Decembre 2005
+                """
+                try:
+                        #preparation du bulletin pour l'envoi
+                        data = self.wrapBulletin(bulletin)
+
+                        #envoi du bulletin
+                        bytesSent = self.socket.send(data)
+
+                        #verifier si l'envoi est un succes
+                        if bytesSent != len(data):
+                                return 0
+                        else:
+                                return 1
+
+                except:
+                        self.logger.writeLog(self.logger.DEBUG,"socketManagerAm.sendBulletin(): erreur d'envoi")
+                        raise
