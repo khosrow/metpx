@@ -39,6 +39,9 @@ class gateway:
 				- Doit pouvoir être appelé pour écrire les
 				  messages. C'est le log principal du 
 				  programme
+
+	   Auteur:	Louis-Philippe Thériault
+	   Date:	Octobre 2004
 	"""
 	def __init__(self,path,logger):
 		self.config = gateway.loadConfig(path)
@@ -50,6 +53,11 @@ class gateway:
 		   Charge la configuration, située au path en particulier.
 		   La configuration doit être syntaxiquement correcte pour
 		   que python puisse l'interpréter.
+
+		   (Méthode statique)
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
 		"""
         	try:
                         fic_cfg = open(path,'r')
@@ -58,9 +66,8 @@ class gateway:
 
 			return config
                 except IOError:
-                        #print "*** Erreur: Fichier de configuration inexistant, erreur fatale!" #FIXME
-                        #sys.exit(-1)
-			raise
+                        print "*** Erreur: Fichier de configuration inexistant, erreur fatale!"
+                        sys.exit(-1)
 
 	loadConfig = staticmethod(loadConfig)
 
@@ -68,7 +75,11 @@ class gateway:
 		"""establishConnection()
 
 		   Établit une connection avec le lecteur et l'écrivain (vérifie
-		   que les ressources sont disponibles aussi)"""
+		   que les ressources sont disponibles aussi)
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
+		"""
                 raise gatewayException('Méthode non implantée (méthode abstraite establishConnection)')
 
 	def read(self):
@@ -79,7 +90,10 @@ class gateway:
 		   Cette méthode retourne une liste d'objets, qui peut être
 		   ingérée par l'écrivain. Elle lève une exception si
 		   une erreur est détectée.
-		   """
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre
+		"""
 		raise gatewayException('Méthode non implantée (méthode abstraite read)')
 	
 	def write(self,data):
@@ -89,7 +103,10 @@ class gateway:
 
 		   Cette méthode prends le data lu par read, et fait le traîtement
 		   approprié.
-	           """
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
+	        """
                 raise gatewayException('Méthode non implantée (méthode abstraite write)')
 
 	def run(self):
@@ -97,7 +114,11 @@ class gateway:
 
 		   Boucle infinie pour le transfert de data. Une exception
 		   non contenue peut être levée si le lecteur et l'écrivain
-		   ne sont pas disponibles."""
+		   ne sont pas disponibles.
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
+		"""
 		while True:
 			# Vérifier que le lecteur et l'écrivain sont disponibles
 			pass

@@ -24,6 +24,8 @@ class socketManagerAm(socketManager.socketManager):
 				- Longueur de l'entête (en octets) 
 				  calculée par struct
 	
+	Auteur:	Louis-Philippe Thériault
+	Date:	Octobre 2004
 	"""
 
 	def __init__(self,logger,type='slave',localPort=9999,remoteHost=None,timeout=None):
@@ -36,18 +38,14 @@ class socketManagerAm(socketManager.socketManager):
 		self.sizeAmRec = struct.calcsize(self.patternAmRec)
 
         def unwrapBulletin(self):
-                """unwrapBulletin() -> (bulletin,longBuffer)
+		__doc__ = socketManager.socketManager.unwrapBulletin.__doc__ + \
+		"""### Ajout de socketManagerAm ###
 
-                   bulletin     : String
-                   longBuffer   : int
+		   Définition de la méthode
 
-                   Retourne le prochain bulletin contenu dans le buffer,
-                   après avoir vérifié son intégrité, sans modifier le buffer.
-                   longBuffer sera égal à la longueur de ce que l'on doit enlever
-                   au buffer pour que le prochain bulletin soit en premier.
-
-                   Retourne une chaîne vide s'il n'y a pas assez de données
-                   pour compléter le prochain bulletin."""
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
+		"""
                 status = self.checkNextMsgStatus()
 
 		if status == 'OK':
@@ -63,11 +61,16 @@ class socketManagerAm(socketManager.socketManager):
 	                return '',0
 
         def checkNextMsgStatus(self):
-                """checkNextMsgStatus() -> status
+                __doc__ = socketManager.socketManager.checkNextMsgStatus.__doc__ + \
+                """### Ajout de socketManagerAm ###
 
-                   status       : String élément de ('OK','INCOMPLETE','CORRUPT')
+                   Définition de la méthode
 
-                   Statut du prochain bulletin dans le buffer.
+		   Ne détecte pas si les données sont corrompues, limitations du 
+		   protocole AM ?
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
                 """
                 if len(self.inBuffer) >= self.sizeAmRec:
                         (header,src_inet,dst_inet,threads,start,length,firsttime,timestamp,future) = \

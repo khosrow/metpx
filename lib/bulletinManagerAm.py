@@ -1,11 +1,18 @@
 """Gestion des bulletins "AM" """
 
-import bulletinManager, bulletinAm, os
+import bulletinManager, bulletinAm, os, string
 
 __version__ = '2.0'
 
 class bulletinManagerAm(bulletinManager.bulletinManager):
-	"""pas déf"""
+	__doc__ = bulletinManager.bulletinManager.__doc__ + \
+	"""### Ajout de bulletinManagerAm ###
+
+	   Spécialisation et implantation du bulletinManager
+
+	   Auteur:	Louis-Philippe Thériault
+	   Date:	Octobre 2004
+	"""
 
 	def __init__(self,pathTemp,logger,pathSource=None, \
 			pathDest=None,maxCompteur=99999,lineSeparator='\n',extension=':', \
@@ -15,23 +22,23 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 						pathSource,pathDest,maxCompteur,lineSeparator,extension,pathFichierCircuit)
 
 		self.__initMapEntetes(pathFichierStations)
-
-		self.mapCircuits = None
-		self.lineSeparator = lineSeparator
-#		self.pathFichierCircuit = pathFichierCircuit		# calcul du map de fichiers circuits
 		self.SMHeaderFormat = SMHeaderFormat
 
 	def __isSplittable(self,rawBulletin):
 		"""__isSplittable(rawBulletin) -> bool
 
-		   Retourne vrai si le bulletin courant contien plus d'un bulletin"""
+		   Retourne vrai si le bulletin courant contien plus d'un bulletin
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
+		"""
         	# Si c'est un bulletin FC/FT, possibilite de plusieurs bulletins,
                 # donc découpage en fichiers et reste du traitement saute (il
                 # sera effectue lors de la prochaine passe
 		premierMot = rawBulletin.splitlines()[0].split()[0]
 
                 if len(premierMot) == 2 and premierMot in ["FC","FT"]:
-                	if string.count(string.join(contenuDeBulletin,'\n'),'TAF') > 1:
+                	if string.count(string.join(rawBulletin,'\n'),'TAF') > 1:
 				return True
 
 		return False
@@ -39,7 +46,11 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 	def __splitBulletin(self,rawBulletin):
                 """__splitBulletin(rawBulletin) -> liste bulletins
 
-		Retourne une liste de rawBulletins, séparés """
+		   Retourne une liste de rawBulletins, séparés 
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
+		"""
 		entete = rawBulletin.splitlines()[0]
 
 	        listeBulletins = []
@@ -60,22 +71,26 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 
         def _bulletinManager__generateBulletin(self,rawBulletin):
 		__doc__ = bulletinManager.bulletinManager._bulletinManager__generateBulletin.__doc__ + \
-		"""
-		### Ajout de bulletinManagerAm ###
+		"""### Ajout de bulletinManagerAm ###
 
-		Overriding ici pour passer les bons arguments au bulletinAm
+		   Overriding ici pour passer les bons arguments au bulletinAm
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
 		"""
                 return bulletinAm.bulletinAm(rawBulletin,self.logger,self.lineSeparator,self.mapEntetes,self.SMHeaderFormat)
 
 
         def writeBulletinToDisk(self,unRawBulletin):
 		bulletinManager.bulletinManager.writeBulletinToDisk.__doc__ + \
-		"""
-		### Ajout de bulletin manager AM ###
+		"""### Ajout de bulletin manager AM ###
 
-		Les bulletins en AM peuvent êtres divisibles, donc
-		une division est effectuée et est passée à la méthode
-		de la superclasse.
+		   Les bulletins en AM peuvent êtres divisibles, donc
+		   une division est effectuée et est passée à la méthode
+		   de la superclasse.
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
 		"""
 		if self.__isSplittable(unRawBulletin):
 			for rawBull in self.__splitBulletin(rawBulletin):
@@ -84,18 +99,20 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 			bulletinManager.bulletinManager.writeBulletinToDisk(self,unRawBulletin)
 
 	def __initMapEntetes(self, pathFichierStations):
-		"""
-		__initMapEntetes(pathFichierStations)
+		"""__initMapEntetes(pathFichierStations)
 
-		pathFichierStations:	String
-					- Chemin d'accès vers le fichier de "collection"
+		   pathFichierStations:	String
+		   			- Chemin d'accès vers le fichier de "collection"
 
-            	mapEntetes sera un map contenant les entete a utiliser avec
-            	quelles stations. La cle se trouve a etre une concatenation des
-            	2 premieres lettres du bulletin et de la station, la definition
-	        est une string qui contient l'entete a ajouter au bulletin.
+            	   mapEntetes sera un map contenant les entete a utiliser avec
+            	   quelles stations. La cle se trouve a etre une concatenation des
+            	   2 premieres lettres du bulletin et de la station, la definition
+	           est une string qui contient l'entete a ajouter au bulletin.
             
-            		Ex.: mapEntetes["SPCZPC"] = "CN52 CWAO "
+            	   	Ex.: mapEntetes["SPCZPC"] = "CN52 CWAO "
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
 		"""
 		if pathFichierStations == None:
 			self.mapEntetes = None
@@ -121,10 +138,12 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 	        
         def getFileName(self,bulletin,error=False):
 		__doc__ = bulletinManager.bulletinManager.getFileName.__doc__ + \
-		"""
-		### Ajout de bulletinManagerAm ###
+		"""### Ajout de bulletinManagerAm ###
 
-		Ajout de la station dans le nom si elle est disponible
+		   Ajout de la station dans le nom si elle est disponible
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
 		"""
 		station = bulletin.getStation()
 

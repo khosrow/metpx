@@ -201,16 +201,16 @@ class bulletinManager:
 			return
 
 	        self.mapCircuits = {}
-	
+
 		# Test d'existence du fichier
 	        try:
-	                fic = os.open( header2circuit_file, os.O_RDONLY )
+	                fic = os.open( pathHeader2circuit, os.O_RDONLY )
 	        except Exception:
 	                raise bulletinManagerException('Impossible d\'ouvrir le fichier d\'entetes (fichier inaccessible)')
 	
 	        champs = self.champsHeader2Circuit.split(':')
 	
-	        lignes = os.read(fic,os.stat(header2circuit_file)[6])
+	        lignes = os.read(fic,os.stat(pathHeader2circuit)[6])
 	
 		# Pour chaque ligne du fichier, on associe l'entête avec un map, qui est le nom des autres champs
 		# associés avec leur valeurs.
@@ -250,6 +250,7 @@ class bulletinManager:
 		entete = ' '.join(bulletin.getHeader().split()[:2])
 
 	        if not self.mapCircuits.has_key(entete):
+			bulletin.setError('Entete non trouvée dans fichier de circuits')
 	                raise bulletinManagerException('Entete non trouvée dans fichier de circuits')
 	
 	        return '.'.join(self.mapCircuits[entete]['routing_groups'])

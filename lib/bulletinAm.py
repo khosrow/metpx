@@ -65,7 +65,8 @@ class bulletinAm(bulletin.bulletin):
 		   précède le bulletin.
 
 		   Auteur: 	Louis-Philippe Thériault
-		   Date:	Octobre 2004"""
+		   Date:	Octobre 2004
+		"""
 		if self.errorBulletin == None:
 	                return string.join(self.bulletin,self.lineSeparator)
 		else:
@@ -80,7 +81,8 @@ class bulletinAm(bulletin.bulletin):
                    retourne None si elle est introuvable.
 
                    Auteur:      Louis-Philippe Thériault
-                   Date:        Octobre 2004"""
+                   Date:        Octobre 2004
+		"""
 		if self.station == "PASCALCULE" and len(self.getHeader().split()[0]) == 2:
 
         		station  = ""
@@ -127,28 +129,24 @@ class bulletinAm(bulletin.bulletin):
 		        self.station = station
 		
 		elif self.station == "PASCALCULE" and len(self.getHeader().split()[0]) != 2:
-			station = "PASDESTATION"
+			self.station = "PASDESTATION"
 
 		return self.station
 
 
         def doSpecificProcessing(self):
-                """doSpecificProcessing()
+		__doc__ = bulletin.bulletin.doSpecificProcessing.__doc__ + \
+                """### Ajout de bulletinAm ###
+
+		   (Définition de la méthode abstraite)
 
                    Modifie les bulletins provenant de stations, transmis 
 		   par protocole Am, nommés "Bulletins Am"
 
-		   Le bulletin, après l'exécution, sera conforme pour les
-		   programmes les utilisants.
-
                    Auteur:      Louis-Philippe Thériault
-                   Date:        Octobre 2004"""
+                   Date:        Octobre 2004
+		"""
 		unBulletin = self.bulletin
-
-		# Si le bulletin est à modifier et que l'on doit traîter les SM/SI
-		# (l'ajout de "AAXX jjhhmm4\n")
-                if len(self.getHeader().split()[0]) == 2 and self.SMHeaderFormat and self.getType() in ["SM","SI"]:
-			self.bulletin.insert(1, "AAXX " + self.getHeader().split()[2][0:4] + "4")
 
                 # Si le bulletin est à modifier et que l'entête doit être renomée
                 if self.mapEntetes != None and len(self.getHeader().split()[0]) == 2:
@@ -190,6 +188,11 @@ class bulletinAm(bulletin.bulletin):
 	                	# Assignement de l'entete modifiee
 		                self.setHeader(uneEnteteDeBulletin)
 
+		                # Si le bulletin est à modifier et que l'on doit traîter les SM/SI
+		                # (l'ajout de "AAXX jjhhmm4\n")
+		                if self.SMHeaderFormat and self.getType() in ["SM","SI"]:
+		                        self.bulletin.insert(1, "AAXX " + self.getHeader().split()[2][0:4] + "4")
+
 			if station == None or uneEnteteDeBulletin == None:
 				if station == None:
 					self.errorBulletin = ("station non trouvée","### Pattern de station non trouve ou non specifie" + self.lineSeparator + "ERROR BULLETIN" + self.lineSeparator)
@@ -201,11 +204,29 @@ class bulletinAm(bulletin.bulletin):
                                 elif uneEnteteDeBulletin == None:
                                         self.errorBulletin = ("entête non trouvée","### Entete non trouvee dans le fichier de collection" + self.lineSeparator  + "ERROR BULLETIN" + self.lineSeparator)
 
-                                	self.logger.writeLog(self.logger.WARNING,"Station <" + uneStation + "> non trouvee avec prefixe <" + premierMot + ">")
+                                	self.logger.writeLog(self.logger.WARNING,"Station <" + station + "> non trouvee avec prefixe <" + premierMot + ">")
                                         self.logger.writeLog(self.logger.WARNING,"Bulletin:\n"+self.getBulletin())
 
 	def getFormattedSystemTime(self):
-	        """Retourne une string de l'heure locale du systeme, selon
-	           jjhhmm : jour/heures(24h)/minutes"""
+	        """getFormattedSystemTime() -> heure
+
+		   heure:	String
+
+		   Retourne une string de l'heure locale du systeme, selon
+	           jjhhmm : jour/heures(24h)/minutes
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre
+		"""
 	        return time.strftime("%d%H%M",time.localtime())
 
+        def setError(self,msg):
+		"""### Ajout de bulletinAm ###
+
+		   Le message est ajouté au début du bulletin
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
+		"""
+		if self.errorBulletin == None:
+			self.errorBulletin = (msg,"### " + msg + self.lineSeparator + "ERROR BULLETIN" + self.lineSeparator)

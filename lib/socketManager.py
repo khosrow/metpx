@@ -72,9 +72,15 @@ suivants:
 		self.__establishConnection()
 
 	def __establishConnection(self):
-		"""Établit la connection selon la valeur des attributs de l'objet.
+		"""__establishConnection()
 
-		   self.socket sera, après l'exécution, la connection."""
+		   Établit la connection selon la valeur des attributs de l'objet.
+
+		   self.socket sera, après l'exécution, la connection.
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
+		"""
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 		self.logger.writeLog(self.logger.INFO,"Binding du socket avec le port %d",self.localPort)
@@ -142,7 +148,13 @@ suivants:
 		"""closeProperply() -> ([bulletinsReçus],nbBulletinsEnvoyés) 
 
 		   Ferme le socket et finit de traîter le socket d'arrivée et de
-		   sortie."""
+		   sortie.
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
+		"""
+		# FIXME: Pas encore développée!
+
 		# FIXME: À tester que l'on peut faire un shutdown si la connection
 		# est perdue
 	        self.socket.shutdown(2)
@@ -163,8 +175,13 @@ suivants:
 
 		   bulletin	: String
 
-		   Retourne le prochain bulletin reçu, une chaîne vide sinon."""
-		self.__syncInBuffer()
+		   Retourne le prochain bulletin reçu, une chaîne vide sinon.
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
+		"""
+		if self.connected:
+			self.__syncInBuffer()
 
 		status = self.checkNextMsgStatus()
 
@@ -187,9 +204,15 @@ suivants:
 		raise socketManagerException('notDefinedYet')
 
 	def __syncInBuffer(self):
-		"""Copie l'information du buffer du socket s'il y a lieu
+		"""__syncInBuffer()
 
-		   Lève une exception si la connection est perdue."""
+		   Copie l'information du buffer du socket s'il y a lieu
+
+		   Lève une exception si la connection est perdue.
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
+		"""
 	        while True:
 	                try:
 	                        temp = self.socket.recv(32768)
@@ -216,12 +239,17 @@ suivants:
 	def wrapBulletin(self,bulletin):
 		"""wrapbulletin(bulletin) -> wrappedBulletin
 
-		   bulletin	: String
+		   bulletin		: String
 		   wrappedBulletin	: String
 		   
 		   Retourne le bulletin avec les entetes/informations relatives
 		   au protocole sous forme de string. Le bulletin doit etre un
-		   objet Bulletin."""
+		   objet Bulletin.
+
+		   Statut:	Abstraite
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
+		"""
 		raise socketManagerException("Méthode non implantée (méthode abstraite wrapBulletin)")
 
 	def unwrapBulletin(self):
@@ -236,13 +264,22 @@ suivants:
 		   au buffer pour que le prochain bulletin soit en premier.
 
 		   Retourne une chaîne vide s'il n'y a pas assez de données
-		   pour compléter le prochain bulletin."""
+		   pour compléter le prochain bulletin.
+
+		   Statut:	Abstraite	
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
+		"""
 		raise socketManagerException("Méthode non implantée (méthode abstraite unwrapBulletin)")
 
 	def isConnected(self):
 		"""isConnected() -> bool
 
-		   Retourne True si la connection est établie."""
+		   Retourne True si la connection est établie.
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
+		"""
 		return self.connected
 
 	def checkNextMsgStatus(self):
@@ -251,6 +288,10 @@ suivants:
 		   status	: String élément de ('OK','INCOMPLETE','CORRUPT')
 
 		   Statut du prochain bulletin dans le buffer.
+
+		   Statut:	Abstraite
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
 		"""
                 raise socketManagerException("Méthode non implantée (méthode abstraite checkNextMsgStatus)")
 

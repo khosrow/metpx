@@ -17,7 +17,7 @@ class log:
 		self.log = logging.Logger(name)
 		self.log.addHandler(self.TimedRotatingFileHandler)
 
-		self.log.setLevel(logging.DEBUG)
+		self.log.setLevel(logging.INFO)
 
 		self.CRITICAL = logging.CRITICAL
 		self.ERROR = logging.ERROR

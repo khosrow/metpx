@@ -68,7 +68,6 @@ class bulletin:
 
                 self.logger.writeLog(self.logger.VERYVERBOSE,"newBulletin: %s",stringBulletin)
 
-
 	def getBulletin(self):
 		"""getBulletin() -> bulletin
 
@@ -77,7 +76,8 @@ class bulletin:
 		   Retourne le bulletin en texte
 
 		   Auteur:	Louis-Philippe Thériault
-		   Date:	Octobre 2004"""
+		   Date:	Octobre 2004
+		"""
 		return string.join(self.bulletin,self.lineSeparator)
 
 	def setBulletin(self,bulletin):
@@ -88,7 +88,8 @@ class bulletin:
                    Assigne le bulletin en texte
 
                    Auteur:      Louis-Philippe Thériault
-                   Date:        Octobre 2004"""
+                   Date:        Octobre 2004
+		"""
 		self.bulletin = bulletin.splitlines()
 
 		self.log.writeLog(self.log.VERYVERBOSE,"setBulletin: bulletin = %s",bulletin)
@@ -101,7 +102,8 @@ class bulletin:
                    Retourne la longueur du bulletin avec le lineSeparator
 
                    Auteur:      Louis-Philippe Thériault
-                   Date:        Octobre 2004"""
+                   Date:        Octobre 2004
+		"""
 		return len(self.getBulletin())
 
 	def getHeader(self):
@@ -112,7 +114,8 @@ class bulletin:
 		   Retourne la première ligne du bulletin
 
                    Auteur:      Louis-Philippe Thériault
-                   Date:        Octobre 2004"""
+                   Date:        Octobre 2004
+		"""
 		return self.bulletin[0]
 
         def setHeader(self,header):
@@ -123,7 +126,8 @@ class bulletin:
                    Assigne la première ligne du bulletin
 
                    Auteur:      Louis-Philippe Thériault
-                   Date:        Octobre 2004"""
+                   Date:        Octobre 2004
+		"""
                 self.bulletin[0] = header
 
 		self.logger.writeLog(self.logger.DEBUG,"Nouvelle entête du bulletin: %s",header)
@@ -136,7 +140,8 @@ class bulletin:
                    Retourne le type (2 premieres lettres de l'entête) du bulletin (SA,FT,etc...)
 
                    Auteur:      Louis-Philippe Thériault
-                   Date:        Octobre 2004"""
+                   Date:        Octobre 2004
+		"""
                 return self.bulletin[0][:2]
 
 	def getOrigin(self):
@@ -147,7 +152,8 @@ class bulletin:
                    Retourne l'origine (2e champ de l'entête) du bulletin (CWAO,etc...)
 
                    Auteur:      Louis-Philippe Thériault
-                   Date:        Octobre 2004"""
+                   Date:        Octobre 2004
+		"""
                 return self.bulletin[0].split(' ')[1]
 
 	def doSpecificProcessing(self):
@@ -157,17 +163,55 @@ class bulletin:
 
 		   Statut:	Abstraite
                    Auteur:      Louis-Philippe Thériault
-                   Date:        Octobre 2004"""
+                   Date:        Octobre 2004
+		"""
 		raise bulletinException('Méthode non implantée (méthode abstraite doSpecificProcessing)')
 
 	def getError(self):
-		"""getError()
+		"""getError() -> (TypeErreur)
 
 		   Retourne None si aucune erreur détectée dans le bulletin,
 		   sinon un tuple avec comme premier élément la description 
 		   de l'erreur. Les autres champs sont laissés libres
 
                    Auteur:      Louis-Philippe Thériault
-                   Date:        Octobre 2004"""
+                   Date:        Octobre 2004
+		"""
 		return self.errorBulletin
 
+        def setError(self,msg):
+                """setError(msg)
+
+		   msg:	String
+			- Message relatif à l'erreur
+
+		   Flag le bulletin comme erroné. L'utilisation du message est propre
+		   au type de bulletin.
+
+                   Auteur:      Louis-Philippe Thériault
+                   Date:        Octobre 2004
+                """
+		if self.errorBulletin == None:
+	                self.errorBulletin = (msg)
+
+
+	def getDataType(self):
+		"""getDataType() -> dataType
+
+		   dataType:	String élément de ('BI','AN')
+				- Type de pa portion de données du bulletin
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
+		"""
+		if self.dataType != None:
+			return self.dataType
+
+		bull = self.lineSeparator.join(self.bulletin)
+
+		if bull.find('BUFR') != -1 and bull.find('GRIB') != -1:
+			self.dataType = 'AN'
+		else:
+			self.dataType = 'BI'
+
+		return self.dataType
