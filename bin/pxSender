@@ -23,6 +23,10 @@ def main():
 	global logger
 	global unGateway
 
+        if os.geteuid() == 0:
+           print "FATAL: Do not start as root. It will be a mess."
+	   sys.exit(2)
+
 	# Message d'usage pour l' option parser
 	usage =  "%prog <client> (start|stop)\n" \
 		 "	 Un sender lit les bulletins dans un repertoire du disque et les\n" \

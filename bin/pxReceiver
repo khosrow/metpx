@@ -26,6 +26,10 @@ def main():
 	usage =  "%prog <source> (start|stop)\n" \
 	         "       Un receiver reçoit les bulletins par une connection réseau.\n"
 
+	if os.getuid() == 0:
+	   print "FATAL: Do not start as root. It will be a mess."
+	   sys.exit(2)
+
 	# Instanciation du option parser
 	parser = OptionParser(usage)
         fet.addStandardOptions(parser)

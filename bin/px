@@ -45,6 +45,11 @@ def start(cmd):
   startThem( fet.FET_ETC + fet.FET_TX, 'pxSender', cmd)
 
 
+
+if os.getuid() == 0:
+  print "FATAL: Do not start as root. It will be a mess."
+  sys.exit(2)
+
 if len(sys.argv) < 2:
   print "USAGE: px (start|stop) "
   sys.exit(1)
