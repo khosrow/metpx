@@ -99,8 +99,9 @@ def main():
 					mapPrincipale[entete] = {}
 					mapPrincipale[entete]['routing_groups'] = []
 
-				if mapPrincipale[entete]['routing_groups'].count(nomFic) == 0:
-					mapPrincipale[entete]['routing_groups'].append(nomFic)
+				if mapPrincipale[entete]['routing_groups'].count(nomFic[0]) == 0:
+					mapPrincipale[entete]['routing_groups'].append(nomFic[0])
+
 				elif config.outputErrs:
 					sys.stderr.write('Plusieurs definitions dans le meme circuit (' + entete + ',fichier ' + nomFic + ')\n')
 
