@@ -242,11 +242,11 @@ class senderWmo(gateway.gateway):
 				#est efface, sinon le bulletin est retire de la liste
 				#de fichier deja envoyes
 				if succes:
-                			self.logger.writeLog(self.logger.INFO,"bulletin %s envoye ",unBulletinWmo.bulletin[0])
+                			self.logger.writeLog(self.logger.INFO,"bulletin %s envoye ",key)
 					self.unBulletinManagerWmo.effacerFichier(key)
                 			self.logger.writeLog(self.logger.DEBUG,"%s est efface",key)
 				else:
-                			self.logger.writeLog(self.logger.INFO,"bulletin %s: probleme d'envoi ",unBulletinWmo.bulletin[0])
+                			self.logger.writeLog(self.logger.INFO,"bulletin %s: probleme d'envoi ",key)
 					if self.listeFichiersDejaChoisis.count(key)>0:
 						self.listeFichiersDejaChoisis.remove(key)
 
