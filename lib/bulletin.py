@@ -103,7 +103,13 @@ class bulletin:
 			if estBinaire:
 				if stringBulletin.find('GRIB') != -1:
 				# Type de bulletin GRIB, découpage spécifique
-					b = stringBulletin[:stringBulletin.find('GRIB')].split(self.lineSeparator) 
+					b = stringBulletin[:stringBulletin.find('GRIB')].split(self.lineSeparator)
+
+					# Si le dernier token est un '', c'est qu'il y avait
+					# un \n à la fin, et on enlève puisque entre 2 éléments de la liste,
+					# on insère un \n
+					if b[-1] == '':
+						b.pop(-1)
 	
 					b = b + [stringBulletin[stringBulletin.find('GRIB'):stringBulletin.find('7777')+len('7777')]] 
 		
@@ -115,6 +121,12 @@ class bulletin:
 		                # Type de bulletin BUFR, découpage spécifique
 	                                b = stringBulletin[:stringBulletin.find('BUFR')].split(self.lineSeparator)
 	
+                                        # Si le dernier token est un '', c'est qu'il y avait
+                                        # un \n à la fin, et on enlève puisque entre 2 éléments de la liste,
+                                        # on insère un \n
+                                        if b[-1] == '':
+                                                b.pop(-1)
+
 	                                b = b + [stringBulletin[stringBulletin.find('BUFR'):stringBulletin.find('7777')+len('7777')]]
 		
 					b = b + stringBulletin[stringBulletin.find('7777')+len('7777'):].split(self.lineSeparator)
