@@ -78,7 +78,7 @@ class bulletinManager:
 		self.pathTemp = self.__normalizePath(pathTemp)
 		self.maxCompteur = maxCompteur
 		# FIXME: this should be read from a config file, haven't understood enough yet.
-		self.use_pds = 'no'
+		self.use_pds = 'yes'
 		self.compteur = 0
 		self.extension = extension
 		self.lineSeparator = lineSeparator
