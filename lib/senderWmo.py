@@ -179,14 +179,16 @@ class senderWmo(gateway.gateway):
 			self.config.nameValidation, 
 			self.logger, 
 			eval(self.config.sorter))
+                   self.reader.sort()
+                   return(self.reader.getFilesContent(self.config.fileNumber))
 		else:
                    self.reader = DiskReader(
 			fet.FET_DATA + fet.FET_TX + self.options.client, 
 			True, 
 			self.logger, 
 			eval(fet.clients[self.options.client][4]) )
-                self.reader.sort()
-                return(self.reader.getFilesContent(fet.clients[self.options.client][5]))
+                   self.reader.sort()
+                   return(self.reader.getFilesContent(fet.clients[self.options.client][5]))
                 """
                 data = []
 		#lecture de la selection precedente
