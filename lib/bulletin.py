@@ -89,41 +89,21 @@ class bulletin:
 			# Type de bulletin GRIB, découpage spécifique
 				b = stringBulletin[:stringBulletin.find('GRIB')].split(self.lineSeparator) 
 
-				if stringBulletin[:stringBulletin.find('GRIB')][-1] == self.lineSeparator:
-					b = b + ['']
-
 				b = b + [stringBulletin[stringBulletin.find('GRIB'):stringBulletin.find('7777')+len('7777')]] 
 	
-				b_fin = stringBulletin[stringBulletin.find('7777')+len('7777'):].split(self.lineSeparator)
+				b = b + stringBulletin[stringBulletin.find('7777')+len('7777'):].split(self.lineSeparator)
 	
-                                if stringBulletin[stringBulletin.find('7777')+len('7777'):] == self.lineSeparator:
-                                        b_fin = b_fin + ['']
-
-				if len(b_fin) > 0 and b_fin[0] == '':
-				# Si le premier élément est un '', c'est qu'il y avait un séparateur de ligne après le 7777
-					return b + b_fin[1:]
-				else:
-					return b + b_fin
+				return b
 	
 			elif stringBulletin.find('BUFR') != -1:
 	                # Type de bulletin BUFR, découpage spécifique
                                 b = stringBulletin[:stringBulletin.find('BUFR')].split(self.lineSeparator)
 
-                                if stringBulletin[:stringBulletin.find('BUFR')][-1] == self.lineSeparator:
-                                        b = b + ['']
-
                                 b = b + [stringBulletin[stringBulletin.find('BUFR'):stringBulletin.find('7777')+len('7777')]]
 	
-	                        b_fin = stringBulletin[stringBulletin.find('7777')+len('7777'):].split(self.lineSeparator)
+				b = b + stringBulletin[stringBulletin.find('7777')+len('7777'):].split(self.lineSeparator)
 
-				if stringBulletin[stringBulletin.find('7777')+len('7777'):] == self.lineSeparator:
-					b_fin = b_fin + ['']
-	
-	                        if len(b_fin) > 0 and b_fin[0] == '':
-	                        # Si le premier élément est un '', c'est qu'il y avait un séparateur de ligne après le 7777
-	                                return b + b_fin[1:]
-	                        else:
-	                                return b + b_fin
+	                        return b
 			else:
 				return stringBulletin.split(self.lineSeparator)
 		except Exception:
