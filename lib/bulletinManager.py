@@ -18,7 +18,8 @@ class bulletinManager:
 	   Un bulletin manager est en charge de la lecture et écriture des
 	   bulletins sur le disque."""
 
-	def __init__(self,pathTemp,logger,pathSource=None,pathDest=None,maxCompteur=99999,lineSeparator='\n',extension=':',pathFichierCircuit=None):
+	def __init__(self,pathTemp,logger,pathSource=None,pathDest=None,maxCompteur=99999, \
+					lineSeparator='\n',extension=':',pathFichierCircuit=None,mapEnteteDelai=None):
 
 		self.logger = logger
 		self.pathSource = self.__normalizePath(pathSource)
@@ -29,6 +30,7 @@ class bulletinManager:
 		self.extension = extension
 		self.lineSeparator = lineSeparator
 		self.champsHeader2Circuit = 'entete:routing_groups:priority:'
+		self.mapEnteteDelai = mapEnteteDelai
 
 		# Init du map des circuits
 		self.initMapCircuit(pathFichierCircuit)
@@ -47,6 +49,9 @@ class bulletinManager:
 
 		unBulletin = self.__generateBulletin(unRawBulletin)
 		unBulletin.doSpecificProcessing()
+
+		# Vérification du temps d'arrivée
+		self.verifyDelay(unBulletin)
 
 		# Génération du nom du fichier
 		nomFichier = self.getFileName(unBulletin)
@@ -84,7 +89,11 @@ class bulletinManager:
 		"""__generateBulletin(rawBulletin) -> objetBulletin
 
 		   Retourne un objetBulletin d'à partir d'un bulletin
-		   "brut" """
+		   "brut".
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
+		"""
 		return bulletin.bulletin(rawBulletin,self.logger,self.lineSeparator)
 
 	def readBulletinFromDisk(self):
@@ -297,3 +306,58 @@ class bulletinManager:
 			return self.pathDest.replace('-PRIORITY',self.mapCircuits[entete]['priority'])
 		else:
 			return self.pathDest.replace('-PRIORITY','NONIMPLANTE')
+
+	def verifyDelay(self,unBulletin):
+		"""verifyDelay(unBulletin)
+
+		   Vérifie que le bulletin est bien dans les délais (si l'option
+		   de délais est activée). Flag le bulletin en erreur si le delai
+		   n'est pas respecté.
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
+		"""
+		if self.mapEnteteDelai == None:
+			return
+
+		now = time.strftime("%d%H%M",time.localtime())
+
+		try:
+			bullTime = unBulletin.getHeader().split()[2]
+			header = unBulletin.getHeader()
+
+			minimum,maximum = None,None
+
+			for k in self.mapEnteteDelai.keys():
+			# Fetch de l'intervalle valide dans le map
+				if k == header[:len(k)]:
+					(minimum,maximum) = self.mapEnteteDelai[k]
+					break
+
+			if minimum == None:
+			# Si le cas n'est pas défini, considéré comme correct
+				return
+
+		except Exception:
+			unBulletin.setError('Découpage d\'entête impossible')
+			return
+
+		# Détection si wrap up et correction pour le calcul
+		if abs(int(now[:2]) - int(bullTime[:2])) > 10:
+			if now > bullTime:
+			# Si le temps présent est plus grand que le temps du bulletin
+			# (donc si le bulletin est généré le mois suivant que présentement),
+			# On ajoute une journée au temps présent pour faire le temps du bulletin
+				bullTime = str(int(now[:2]) + 1) + bullTime[2:]
+			else:
+			# Contraire (...)
+				now = str(int(bullTime[:2]) + 1) + now[2:]
+
+		# Conversion en nombre de minutes 
+		nbMinNow = 60 * 24 * int(now[0:2]) + 60 * int(now[2:4]) + int(now[4:])
+		nbMinBullTime = 60 * 24 * int(bullTime[0:2]) + 60 * int(bullTime[2:4]) + int(bullTime[4:])
+
+		# Calcul de l'interval de validité
+		if not( -1 * abs(minimum) < nbMinNow - nbMinBullTime < maximum ):
+			# La différence se situe en dehors de l'intervale de validité
+				unBulletin.setError('Bulletin en dehors du delai permis')

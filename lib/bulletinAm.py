@@ -74,6 +74,9 @@ class bulletinAm(bulletin.bulletin):
 		if self.errorBulletin == None:
 	                return string.join(self.bulletin,self.lineSeparator)
 		else:
+			if len(self.errorBulletin) == 1:
+				self.errorBulletin = self.errorBulletin + ("### " + self.errorBulletin[0] + self.lineSeparator + "ERROR BULLETIN" + self.lineSeparator)
+
 			return self.errorBulletin[1] + string.join(self.bulletin,self.lineSeparator)
 
         def getStation(self):
@@ -237,4 +240,4 @@ class bulletinAm(bulletin.bulletin):
 		   Date:	Octobre 2004
 		"""
 		if self.errorBulletin == None:
-			self.errorBulletin = (msg,"### " + msg + self.lineSeparator + "ERROR BULLETIN" + self.lineSeparator)
+			self.errorBulletin = (msg,"### " + str(msg) + self.lineSeparator + "ERROR BULLETIN" + self.lineSeparator)

@@ -90,22 +90,10 @@ def main():
 		data = os.read(fileDesc,os.stat(config.inputDir + nomFic)[6])
 
 		for ligne in data.splitlines():
-			if len(ligne) > 20 and ligne[0:10].isalnum() and ligne[11:21].isalnum():
-				try:
-					if len(ligne.split('*')) > 1:
-						entete = ligne.split('*')[0][:6] + ' ' + ligne.split('*')[0][6:]
-						entete2 = ligne.split('*')[1][:len(entete)-1][:6] + ' ' + ligne.split('*')[1][:len(entete)-1][6:]
-					elif len(ligne.split('+')) > 1:
-						entete = ligne.split('+')[0][:6] + ' ' + ligne.split('+')[0][6:]
-						entete2 = ligne.split('+')[1][:len(entete)-1][:6] + ' ' + ligne.split('+')[1][:len(entete)-1][6:]
-					else:
-						if config.showIgnoredLines:
-							os.write(ignoredLinesFic,nomFic + ': ' + ligne + '\n')
-						continue
-				except Exception:
-					if config.showIgnoredLines:
-						os.write(ignoredLinesFic,nomFic + ': ' + ligne + '\n')
-					continue
+				entete = ligne[:6].replace(' ','') + ' ' + ligne[6:10].replace(' ','')
+
+				if len(entete.split()) == 1:
+					entete = entete.replace(' ','')
 
 				if not mapPrincipale.has_key(entete):
 					mapPrincipale[entete] = {}
@@ -126,15 +114,18 @@ def main():
 #							sys.stderr.write('L\'entete de destination differe! (' + entete + ',fichier ' + nomFic  + ')\n')
 #							if mapPrincipale[entete] == entete2:
 #								mapPrincipale[entete]['rename'] = entete2
-			else:
-				if config.showIgnoredLines:
-					os.write(ignoredLinesFic,nomFic + ': ' + ligne + '\n')
+#			else:
+#				if config.showIgnoredLines:
+#					os.write(ignoredLinesFic,nomFic + ': ' + ligne + '\n')
 
 		os.close(fileDesc)
 
 	# Fetch de la priorité pour chaque entêtes
 	for key in mapPrincipale.keys():
-		mapPrincipale[key]['priority'] = getPriority(priorityList,key.split()[0],key.split()[1])
+		if len(key.split()) != 1:
+			mapPrincipale[key]['priority'] = getPriority(priorityList,key.split()[0],key.split()[1])
+		else:
+			mapPrincipale[key]['priority'] = getPriority(priorityList,key.split()[0],' ')
 	
 	# Effacement de l'ancien fichier de db (s'il y a lieu)
 	if os.access(config.destFile,os.F_OK):
