@@ -1,4 +1,4 @@
-"""Définition des diverses classes découlant de socketManager.
+"""Définition de la superclasse socketManager.
 
 Ces classes servent à l'établissement de la connection, la 
 réception et envoi des bulletins et la vérification du respect 
@@ -7,10 +7,7 @@ des contraintes relatives aux protocoles.
 
 import socket
 import time
-import struct
 import string
-import curses
-import curses.ascii
 
 __version__ = '2.0'
 
