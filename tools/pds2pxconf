@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#! /usr/bin/env python2
 #
 # convert PDS configs into FET configs
 #
@@ -10,9 +10,16 @@ import copy
 import string
 import os
 import os.path
+import sys
 
-pdsetc = '/apps/pds/etc/'
-fetetc = '/apps/px/etc/'
+if len(sys.argv) != 3:
+	print "call it with two directories as arguments, pds conf & px"
+	sys.exit(1)
+
+pdsetc = sys.argv[1] + '/'
+fetetc = sys.argv[2] + '/'
+
+
 
 #
 # config reader
@@ -59,7 +66,7 @@ def convertclient(one):
 	clientid=maskline[1]
 	fetcli=open( fetetc + 'tx/' + clientid + '.conf', 'w')
 	fetcli.write( 'active yes' + "\n" )
-	fetcli.write( 'protocol ftp' + "\n" )
+	fetcli.write( 'type single-file' + "\n" )
 	fetcli.write( 'host ' + clients[clientid][0] + "\n" )
 	fetcli.write( 'user ' + clients[clientid][1] + "\n" )
 	fetcli.write( 'password ' + clients[clientid][2] + "\n" )
@@ -69,16 +76,16 @@ def convertclient(one):
 	   fetcli.write( 'directory '+ destdir + "\n" )
 	   fetcli.write( 'filename '+ maskline[3] + "\n" )
         fetcli.write( string.join( maskline[0:2], ' ' ) + "\n" )
-      elif maskline[0] == 'log_to':
-	pass
-      elif maskline[0] == 'log_roll_over' or \
+      elif maskline[0] == 'log_to' or \
+	   maskline[0] == 'log_roll_over' or \
            maskline[0] == 'ftp_window' or \
            maskline[0] == 'queue_window' or \
            maskline[0] == 'time_window' or \
            maskline[0] == 'sleep_timer' or \
            maskline[0] == 'debug_level' or \
-           maskline[0] == 'emask' or \
            maskline[0] == 'chmod' :
+	pass
+      elif maskline[0] == 'emask' :
 	   fetcli.write(mask)
     mask=cliconf.readline()
 
