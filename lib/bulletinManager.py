@@ -359,7 +359,11 @@ class bulletinManager:
                 return self.mapBulletinsBruts.keys()
 
 	def effacerFichier(self,nomFichier):
-		pass
+		try:
+			os.remove(nomFichier)
+		except:
+			self.logger.writeLog(self.logger.ERROR,"(BulletinManager.effacerFichier(): Erreur d'effacement d'un bulletin)")
+			raise
 
 	def __normalizePath(self,path):
 		"""normalizePath(path) -> path
