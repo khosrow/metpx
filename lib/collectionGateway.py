@@ -68,6 +68,8 @@ class collectionGateway(gateway.gateway):
 		# Fetch de la liste des nouveaux bulletins dans le répertoire
 		self.bulletinsAEffacer = self.unBulletinManager.getListeFichiers(self.unBulletinManager.getPathSource(),[])
 
+		self.logger.writeLog(self.logger.VERYVERYVERBOSE,"Liste des fichiers lus : %s",str(self.bulletinsAEffacer))
+
 		# Lecture de ces bulletins et stockage dans une liste
 		mapData = self.unBulletinManager.getMapBulletinsBruts(self.bulletinsAEffacer)
 

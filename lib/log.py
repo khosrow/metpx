@@ -55,7 +55,7 @@ class log:
 
 			self.logDebug = logging.Logger("Debug")
 			self.logDebug.addHandler(unTimedRotatingFileHandlerDebug)
-			self.logDebug.setLevel(5)
+			self.logDebug.setLevel(3)
 
 		self.CRITICAL = logging.CRITICAL
 		self.ERROR = logging.ERROR

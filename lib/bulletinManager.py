@@ -266,14 +266,11 @@ class bulletinManager:
 			self.mapBulletinsBruts = {}
 			#lecture et mapping du contenu brut des fichiers
                         for fichier in listeFichiers:
-                                #if os.access(repertoireChoisi+'/'+fichier,os.F_OK|os.R_OK) !=1:
                                 if os.access(fichier,os.F_OK|os.R_OK) !=1:
-                                        raise bulletinManagerException("Fichier inexistant")
-                                #fic = open(repertoireChoisi+'/'+fichier,'r')
+                                        raise bulletinManagerException("Fichier inexistant: %s",fichier)
                                 fic = open(fichier,'r')
                                 rawBulletin = fic.read()
                                 fic.close()
-                                #self.mapBulletinsBruts[repertoireChoisi+'/'+fichier]=rawBulletin
                                 self.mapBulletinsBruts[fichier]=rawBulletin
 
                         return self.mapBulletinsBruts
