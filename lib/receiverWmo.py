@@ -83,7 +83,7 @@ class receiverWmo(gateway.gateway):
 				try:
 			                rawBulletin = self.unSocketManagerWmo.getNextBulletin()
 				except socketManagerException, e:
-					if e == "La connection est brisée":
+					if e == "la connection est brisee":
 						self.logger.writeLog(self.logger.ERROR,"Perte de connection, traîtement du reste du buffer")
 						resteDuBuffer, nbBullEnv = self.unSocketManagerWmo.closeProperly()
 						data = data + resteDuBuffer
