@@ -4,6 +4,7 @@
 import gateway
 import socketManagerWmo
 import bulletinManagerWmo
+import socketManager
 from socketManager import socketManagerException
 
 class receiverWmo(gateway.gateway):
@@ -91,29 +92,24 @@ class receiverWmo(gateway.gateway):
                    Visibilité:  Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
+
+
+                   Modification le 25 janvier 2005: getNextBulletins()
+                   retourne une liste de bulletins.
+
+                   Auteur:      Louis-Philippe Thériault
 		"""
-		data = []
-
-		while True:
-			if self.unSocketManagerWmo.isConnected():
-				try:
-			                rawBulletin = self.unSocketManagerWmo.getNextBulletin()
-				except socketManagerException, e:
-					if e.args[0] == 'la connection est brisee':
-						self.logger.writeLog(self.logger.ERROR,"Perte de connection, traîtement du reste du buffer")
-						resteDuBuffer, nbBullEnv = self.unSocketManagerWmo.closeProperly()
-						data = data + resteDuBuffer
-						break
-					else:
-						raise
-					
-			else:
-				raise gateway.gatewayException("Le lecteur ne peut être accédé")
-
-			if rawBulletin != '':
-				data.append(rawBulletin)
-			else:
-				break
+		if self.unSocketManagerWmo.isConnected():
+			try:
+		                data = self.unSocketManagerWmo.getNextBulletins()
+			except socketManager.socketManagerException, e:
+				if e.args[0] == 'la connexion est brisee':
+					self.logger.writeLog(self.logger.ERROR,"Perte de connection, traîtement du reste du buffer")
+					data, nbBullEnv = self.unSocketManagerWmo.closeProperly()
+				else:
+					raise
+		else:
+			raise gateway.gatewayException("Le lecteur ne peut être accédé")
 
 		self.logger.writeLog(self.logger.VERYVERYVERBOSE,"%d nouveaux bulletins lus",len(data))
 

@@ -103,6 +103,7 @@ class socketManager:
 
 		# KEEP_ALIVE à True, pour que si la connexion tombe, la notification
 		# soit immédiate
+		# nb: Ne semble pas fonctionner
                 self.socket.setsockopt(socket.SOL_SOCKET,socket.SO_KEEPALIVE,1)
 
 		# Snapshot du temps
@@ -186,8 +187,12 @@ class socketManager:
 			self.logger.writeLog(self.logger.DEBUG,"Shutdown du socket: [ERREUR]\n %s",str(e))
 
 		# Copie du reste du buffer entrant après la connexion
+		# Le bulletin doit être mis à non blocking si on
+		# veut fermer la connection proprement.
 		try:
+			self.socket.setblocking(False)
 			self.__syncInBuffer(onlySynch = True)
+			self.socket.setblocking(True)
 		except Exception:
 			pass
 
@@ -200,51 +205,58 @@ class socketManager:
 		self.connected = False
 
 		# Traîtement du reste du buffer pour découper les bulletins
-		bulletinsRecus = []
-		
-		while True:
-			bull = self.getNextBulletin()
+		bulletinsRecus = self.getNextBulletins()
 
-			if bull != '':
-				bulletinsRecus.append(bull)
-			else:
-				break
 
 		self.logger.writeLog(self.logger.INFO,"Succès de la fermeture de la connexion socket")
 		self.logger.writeLog(self.logger.DEBUG,"Nombre de bulletins dans le buffer : %d",len(bulletinsRecus))
 
 		return (bulletinsRecus, 0)
 
-	def getNextBulletin(self):
-		"""getNextBulletin() -> bulletin
+	def getNextBulletins(self):
+		"""getNextBulletins() -> [bulletin]
 
-		   bulletin	: String
+		   bulletin	: [String]
 
-		   Retourne le prochain bulletin reçu, une chaîne vide sinon.
+		   Retourne les prochains bulletin reçus, une liste vide sinon.
 
 		   Visibilité:	Publique
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
+
+		   Modifiée le 25 janvier 2005, retourne maintenant une liste, et 
+		   le socket est bloquant.
+
+		   Auteur:      Louis-Philippe Thériault
 		"""
 		if self.connected:
+		# Si n'est pas connecté, ne fais pas le check, car l'on peut vouloir avoir les 
+		# bulletins dans le buffer sans être connecté.
 			self.__syncInBuffer()
 
-		status = self.checkNextMsgStatus()
+		nouveauxBulletins = []
 
-		self.logger.writeLog(self.logger.DEBUG,"Statut du prochain bulletin dans le buffer: %s", status )
+		while True:
 
-		if status ==  'OK':
-			(bulletin,longBuffer) = self.unwrapBulletin()
+			status = self.checkNextMsgStatus()
 
-			self.inBuffer = self.inBuffer[longBuffer:]
+			self.logger.writeLog(self.logger.DEBUG,"Statut du prochain bulletin dans le buffer: %s", status )
 
-			return bulletin
-		elif status == 'INCOMPLETE':
-			return ''
-		elif status == 'CORRUPT':
-			raise socketManagerException('corruption dans les données','CORRUPT',self.inBuffer)
-		else:
-			raise socketManagerException('status de buffer inconnu',status,self.inBuffer)
+			if status == 'INCOMPLETE':
+				break
+
+			if status ==  'OK':
+				(bulletin,longBuffer) = self.unwrapBulletin()
+
+				self.inBuffer = self.inBuffer[longBuffer:]
+
+				nouveauxBulletins.append(bulletin)
+			elif status == 'CORRUPT':
+				raise socketManagerException('corruption dans les données','CORRUPT',self.inBuffer)
+			else:
+				raise socketManagerException('status de buffer inconnu',status,self.inBuffer)
+
+		return nouveauxBulletins
 
 	def sendBulletin(self):
 		raise socketManagerException('socketManager.sendBulletin() est une methode virtuelle pure')
@@ -268,6 +280,9 @@ class socketManager:
 		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
+
+
+		   Modification: 	Modification du code pour que le socket soit non-bloquant.
 		"""
 	        while True:
 	                try:
@@ -285,15 +300,9 @@ class socketManager:
 
 	                except socket.error, inst:
 				if not onlySynch:
-		                        if inst.args[0] == 11:
-					# Le buffer du socket est vide
-		                                break
-		                        elif inst.args[0] == 104 or inst.args[0] == 110:
-					# La connexion est brisée
-						self.logger.writeLog(self.logger.ERROR,"La connexion est brisée")
-		                                raise socketManagerException('la connexion est brisee')
-		                        else:
-		                                raise
+				# La connexion est brisée
+					self.logger.writeLog(self.logger.ERROR,"La connexion est brisée")
+	                                raise socketManagerException('la connexion est brisee')
 
 	def __transmitOutBuffer(self):
 		pass
