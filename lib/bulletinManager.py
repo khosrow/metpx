@@ -92,6 +92,14 @@ class bulletinManager:
 		# Init du map des circuits
 		self.initMapCircuit(pathFichierCircuit)
 
+
+	def effacerFichier(self,nomFichier):
+		try:
+			os.remove(nomFichier)
+		except:
+                        self.logger.writeLog(self.logger.ERROR,"(BulletinManager.effacerFichier(): Erreur d'effacement d'un bulletin)")
+			raise
+
 	def writeBulletinToDisk(self,unRawBulletin,compteur=True,includeError=True):
 		"""writeBulletinToDisk(bulletin [,compteur,includeError])
 
@@ -167,11 +175,11 @@ class bulletinManager:
 		    entete = ' '.join(unBulletin.getHeader().split()[:2])
 
 	            if not self.mapCircuits.has_key(entete):
-			unBulletin.setError('Entete non trouvée dans fichier de circuits')
-	                raise bulletinManagerException('Entete non trouvée dans fichier de circuits')
+			unBulletin.setError('Entete ' + entete + 'non trouvée dans fichier de circuits')
+	                raise bulletinManagerException('Entete' + entete + ' non trouvée dans fichier de circuits')
 
-                    fet.directingest( nomFichier, self.mapCircuits[entete]['routing_groups'], self.mapCircuits[entete]['priority'], tmppath, self.logger )
-	            effacerFichier(self,tmppath):
+                    fet.directingest( nomFichier, self.mapCircuits[entete]['routing_groups'], self.mapCircuits[entete]['priority'], tempNom, self.logger )
+	            os.unlink(tempNom)
 
 
 
@@ -387,13 +395,6 @@ class bulletinManager:
 
         def getListeNomsFichiersAbsolus(self):
                 return self.mapBulletinsBruts.keys()
-
-	def effacerFichier(self,nomFichier):
-		try:
-			os.remove(nomFichier)
-		except:
-                        self.logger.writeLog(self.logger.ERROR,"(BulletinManager.effacerFichier(): Erreur d'effacement d'un bulletin)")
-			raise
 
 	def __normalizePath(self,path):
 		"""normalizePath(path) -> path

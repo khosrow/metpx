@@ -31,14 +31,14 @@ import log
 
 #FET_ROOT='/apps/px/'
 #FET_ROOT='/tmp/fet/'
-FET_ROOT='/tmp/px/'
+FET_ROOT='/apps/px/'
 FET_DB= 'db/today/' 
 
 FET_TX= 'tx/'
 FET_RX= 'rx/'
 
-#FET_ETC='/apps/px/etc/'
-FET_ETC='../etc/'
+FET_ETC='/apps/px/etc/'
+#FET_ETC='../etc/'
 
 #
 # These URL routines are extremely stupid.
@@ -510,9 +510,9 @@ def directingest(ingestname,clist,pri,lfn,logger):
    logger.writeLog( logger.INFO, "linking " + dbn + " to: " + lfn )
 
    for c in clist:
-     cname=clientQdirname( c[0], pri )
+     cname=clientQdirname( c, pri )
      linkit(dbn , cname + ingestname )   
-     logger.writeLog( logger.INFO, "linking for " + c[0] )
+     logger.writeLog( logger.INFO, "linking for " + c )
 
    return 1
 
