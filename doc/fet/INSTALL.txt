@@ -1,28 +1,3 @@
  
-   Look in lib/fet.py and change fet.FET_ROOT to a good value like '/apps/fet'
-
-
-   clients="Tandem Adonis FTPSVR2 PDSALPH METMGR1 MEMGR2 PDSALPH PDSOP QUACTRL"
-   for c in $clients:
-       mkdir /apps/fet/etc/tx/$c
-
-   if you want to have files sent by FTP to a circuit, say castor, then configure
-
-   /apps/fet/etc/tx/castor.conf
-   --
-   active yes
-   log_roll_over  daily
-   sleep_timer    10
-   debug_level    3
-   chmod          000
-   destination ftp://am:Pr2namPW@castor/data/hoho/out WHATFN
-   imask *:*:*:*:*
-   --
-
-   to use ncsSender, Daniel's priority sorting directory tree should be 
-   pointed at /apps/fet/tx/<client>
-
-   and that ought to work... you can look in /apps/fet/db/ for the database
-   files, and just run the ncsReceiver without starting a sender to watch
-   the client queues fill up.
+  ?  part of pds-nccs now.
 

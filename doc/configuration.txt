@@ -1,9 +1,9 @@
 
 NOTE BENE:  THIS IS NOT DONE YET!
+
 current status:
-   if you specify -c <client> on the command line to ncsSender, 
-   or -s to ncsReceiver, then this style of config will override
-   the old style.
+	ncsReceiver & ncsSender uses old style configs.
+        pxReceiver & pxSender uses the new.
 
  etc/
      header2client.conf
@@ -14,8 +14,8 @@ current status:
      tx/
 	<client>.conf
 
-header2client.conf -- the direct route mapping table.
-each header is on it's own line, three fields per line, colon separated.
+header2client.conf -- the direct route mapping table. 
+Each header is on it's own line, three fields per line, colon separated.
 AHL on the left, list of destinations in the middle, priority is third field.
 sample line:
 SICA01 MSLP:A E C H S F O Q:5:
@@ -31,11 +31,13 @@ FCCN41CWAO   CYBL CYCD CYCG CYDL CYKA CYLW CYXC CYXJ CYYF CYZY
 collections.conf -- configuration file for collection process.
   -- same as existing one.
 
-
 -------------------------------------
-     sample rx/<source>.conf
+For each receptions circuit (a "source" in px parlance), there
+is a configuration file in the rx directory.  by creating
 
-type single-file
+samples of rx/<source>.conf
+
+type single-file		
 active yes
 extension default AMTCP2FILE:DADS:BULLETIN:ASCII
 
@@ -52,23 +54,25 @@ active yes
 extension set :PPP1:-CCCC:-TT:-CIRCUIT:ncsWmoReceiver
 
 
+For each outgoing circuit, there 
 -----------------------------
     sample etc/tx/ppp1_wmo.conf
 
 active yes
-log_roll_over  daily
-sleep_timer    10
-debug_level    3
-chmod          000
-
+type  single-file
 protocol https
-user am
-password Pr2namPW
+user iamwhatiam
+password sdgasdg
 host ppp1.cmc.ec.gc.ca
 directory /tmp/data_wmo
 filename  WHATFN
 imask *:nwsA:*:*:* 
-destination https://fred:fredpass@fredwether.com/disk1/WHATFN
+
+destination https://fred:fredpass@fredwether.com/disk1 WHATFN
 imask *:nwsG:*:*:* 
 
-destination NULL -- special meaning, just leave it there.. (in: /apps/fet/tx/<client>/<whatever> )
+
+For each circuit, there is a spooling/queueing directory.
+/apps/px/rx/<source>  for sources, and /apps/px/tx/<client> for outgoing ones.
+
+

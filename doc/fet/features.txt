@@ -29,7 +29,7 @@ FET - File Exchange Tracker, specification
 
         - add integrated whattopds functionality (file renaming)
 
-	  sample code: fet.py/sourceRx2Ingestname(
+	  sample code: fet.ingestName(
 
 
 	- make the grammar in configuration files similar, so that
@@ -41,7 +41,7 @@ FET - File Exchange Tracker, specification
 	- have it parse imasks etc... to know how to link to clients.
   	  & ingest into a database: 
 
-	  sample code: fet.py/ingest( do all the above...
+	  sample code: fet.ingest( do all the above...
 	     uses:
 	     	dbname -- maps an ingest name to a db path
 		clientmatches -- checks all the imask entries to find hits.
@@ -63,7 +63,7 @@ FET - File Exchange Tracker, specification
 	  no sample available.
 
 
-        - have a parseable log for .old, per circuit logic for .old
+        - have a parseable log for :old, per circuit logic for :old
 	  and scheduling.
 
 	  examples of conflicting algorithms:
@@ -87,7 +87,7 @@ FET - File Exchange Tracker, specification
 
   - Do it in a non-commital way, ie. keep pds-nccs PDS compatible,
     so that we can mix and match.
-    put in a global setting 'use_pds' 'yes'
+    put in a global setting 'use_pds' 1
     will be 'obsoleted' later.  use_pds setting will turn off fet
     integration.
 
@@ -100,7 +100,7 @@ FET - File Exchange Tracker, specification
     first pass, is to pick the client, and deposit in the client q.
     the second pass, is within the sender to figure out the destination
     characteristics.  PDS-NCCS adds 'direct routing' which applies the
-    matching based on specific names (ie. header2circuit.db)
+    matching based on specific names (ie.  header2client.conf)
 
     so still need logic in the am protocol ingestor to figure out
     the ingestname is (the name of the file to be placed in the db
@@ -111,19 +111,6 @@ FET - File Exchange Tracker, specification
       ... figure out the ingestname. (why? client imasks... you'll see)
       ... do we still need patterns that match per client?
       ... what about per client rejection of files (no match on second pass?)
-
-
-add after:
-  - for 1st code drop, just have simple Round-Robin for directory 
-    reading, simple priorities on 
-    reception/ingest, and output. no worse than today.
-  - unlimited number of input directories.
-  - daily rollover database
-
-
-next step:
-  - conversion function in ingestor
-  - add get functionality to ingestor, for gudfx & friends.
 
 
 removing/changing configuration options:
@@ -144,9 +131,9 @@ removing/changing configuration options:
     log file is in /apps/fet/log/rx/fetrx_<source>.<timestamp>
     input q file is in /apps/fet/rx/<source>/<pri>_jjjHH/
   
-    log_file will be separate per client.
-    not a per client option, but a global one. (no need for setting
-    in config file.
+    log_file will be separate per client.  same as rollover 
+    (daily,weekly,monthly) not a per client option, but a 
+    global one. (no need for setting in config file.
 
   - host/usr/pw moved into main configuration file.
     (host removed from imask settings.) 

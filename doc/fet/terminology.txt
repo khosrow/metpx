@@ -4,20 +4,27 @@ FET - File Exchange Tracker.
 initial file hierarchy:
         FET_DATA= /apps/fet
 	FET_DATA/db/<date>/
-	FET_DATA/rxq/<source>/[1..5]
-	FET_DATA/txq/<client>/[1..5]
-        FET_DATA/log/<client>,<qsrc>,<process>
+	FET_DATA/rx/<source>/[1..5]_<YYYYMMDDHH>
+	FET_DATA/tx/<client>/[1..5]_<YYYYMMDDHH>
+        FET_DATA/log/pxReceiver_<source>
+        FET_DATA/log/pxSender_<source>
         
         FET_ETC/
-		fet.conf
-		pdsswitch.conf  (optional)
+		header2client.conf
+		collection_stations.conf
+		collection.conf
 	        tx/<client>.conf
 		rx/<reception>.conf
 
-     uses links extensively, chdir to FET_DATA, and link relative.
 
-receive files from 'sources' and deliver to clients
+Circuits are established relationships with other machines.
+Circuits are unidirectional and can be divided into two types:
+We receive products from 'source' circuits and deliver products
+to 'client' circuits.
 
+The term circuit is used loosely, as in this case it applies
+to file reception and delivery as well as traditional permanent
+connections.
 
 Directions:
 all directions are relative to the entire machine, not any sub-component.
@@ -28,35 +35,34 @@ sample confusion to be avoided:
 ie. PDS has 'incoming' as the name of the files which are outgoing from the server,
 because they are 'incoming' to the client.  Such a directory name is very confusing.
 
-clients:
-     locations to which files are delivered.
+Clients:
+     locations to which products are delivered.
      same terminology as the PDS.
 
 sources 
      one (or more, depends on priority setting in config.)
      places where files can be received.
 
-Reception name:
+Reception Name:
      Files are received with a "reception name" in the rxq.
      once the reception name is adjusted via a ('whattopds') type
      mapping, then the ingestname is generated from that.
 
-Ingest name:
+Ingest Name:
      Ingest name is used to store the file in the DB, as is.
-     (names which will arrive with correct ingest names 
-      files can be delivered directly to the inq)
 
+     for patterned routing (see below):
      ingest name is mapped against patterns to find clients who 
      will be sent the file.
 
-Destination name:
+Destination File Name:
      destination file name, destfn, is calculated:
      default is first field of ingest name.
      add suffixes according to DESTFN parameter setting in pattern.
 
-Direct routing:
+Direct Routing:
      routing using a lookup table, tandem style, with direct correspondence
-     between source and client.
+     between source and client. 
 
-Patterned or masked routing:
-     traditional PDS routing, via client specific emasks & imasks
+Pattern Routing:
+     traditional PDS routing, via emasks & imasks

@@ -44,7 +44,7 @@ examples:
       expensive than renaming (FIXME: TEST THIS!)
 	   FIXME: wanted test confirming/denying the cost of these calls.
 
-   -- file and directory manipulation time, is directly proportional to the
+   -- file and directory manipulation time is directly proportional to the
       lengths of the file names. (FIXME: reference long file name results.)
       so do not lengthen them beyond what you need.
 

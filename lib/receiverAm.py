@@ -46,6 +46,8 @@ class receiverAm(gateway.gateway):
                            fet.FET_DATA + fet.FET_RX + options.source, logger, \
                            pathDest = '/dev/null', \
                            pathFichierCircuit = '/dev/null', \
+			   SMHeaderFormat = options.AddSMHeader, \
+			   pathFichierStations = fet.FET_ETC + 'collection_stations.conf', \
                            extension = options.extension, \
                            mapEnteteDelai = options.mapEnteteDelai )
 
@@ -98,11 +100,11 @@ class receiverAm(gateway.gateway):
                 if self.options.source:
                     self.unSocketManagerAm = \
                         socketManagerAm.socketManagerAm(self.logger,type='slave', \
-                                localPort=self.options.port)
+                                port=self.options.port)
                 else:
                     self.unSocketManagerAm = \
                         socketManagerAm.socketManagerAm(self.logger,type='slave', \
-                                localPort=self.config.localPort)
+                                port=self.config.localPort)
 
         def read(self):
 		__doc__ =  gateway.gateway.read.__doc__ + \
