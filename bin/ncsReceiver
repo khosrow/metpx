@@ -6,7 +6,7 @@
 # Auteur:	Louis-Philippe Thériault
 # Date:		Octobre 2004
 
-import sys, signal
+import sys, signal, traceback
 
 sys.path.append(sys.path[0] + '/../lib')
 sys.path.append(sys.path[0] + '/../etc')
@@ -77,4 +77,8 @@ def main():
 	unGateway.run()
 
 if __name__ == '__main__':
-	main()
+	try:
+		main()
+	except Exception, e:
+		self.logger.writeLog(self.logger.EXCEPTION,"Exception:", ''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
+		raise
