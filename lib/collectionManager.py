@@ -1,8 +1,8 @@
 # -*- coding: UTF-8 -*-
 """Gestionnaire de 'collections'"""
 
-import bulletinManager, bulletinManagerAm
-import os, time
+import bulletinManager, bulletinManagerAm, bulletinPlain, bulletinCollection
+import os, time, string
 
 __version__ = '2.0'
 
@@ -59,7 +59,7 @@ class collectionManager(bulletinManager.bulletinManager):
            Date:        Novembre 2004
         """
 
-        def __init__(self,pathTemp,logger,pathFichierStations,collectionParams,delaiMaxSeq, \
+        def __init__(self,pathTemp,logger,pathFichierCollection,collectionParams,delaiMaxSeq, \
 			includeAllStn,ficCircuits,pathSource=None,pathDest=None,lineSeparator='\n', \
 			extension=':',statusFile='ncsCollection.status'):
 
@@ -75,12 +75,12 @@ class collectionManager(bulletinManager.bulletinManager):
 		self.extension = extension
 		self.logger = logger
 
-		self.initMapEntetes(pathFichierStations)
+		self.initMapEntetes(pathFichierCollection)
 		self.statusFile = statusFile
 
 		# Init du map des entetes/priorités		
                 self.champsHeader2Circuit = 'entete:routing_groups:priority:'
-		self.initMapCircuit(pathFichierCircuit)
+		self.initMapCircuit(ficCircuits)
 
 		# Si le fichier de statut existe déja, on le charge en mémoire
 		if os.access(self.pathTemp+self.statusFile,os.F_OK):
@@ -89,13 +89,10 @@ class collectionManager(bulletinManager.bulletinManager):
 		# Création des structures
 			self.mainDataMap = {'collectionMap':{},'sequenceMap':{},'sequenceWriteQueue':[]}
 
-	def addBulletin(self,rawBulletin,path):
+	def addBulletin(self,rawBulletin):
 		"""addBulletin(rawBulletin)
 
 		   rawBulletin:	String
-
-		   path:	String
-				- Path vers le bulletin
 
 		   Ajoute le bulletin au fichier de collection correspondant. Le bulletin
 		   doit absolument être destiné pour les collections (utiliser 
@@ -116,20 +113,34 @@ class collectionManager(bulletinManager.bulletinManager):
 			# Si le bulletin est destiné a être collecté (entete + heure de collection)
 			if rawBulletin[:2] in self.collectionParams and \
 				int(self.getBullTimestamp(rawBulletin)[2:4]) in self.collectionParams[rawBulletin[:2]]['h_collection']:
-				
-				if isInCollectionPeriod(rawBulletin):
-				# Si dans la période de collection
-					self.logger.writeLog(self.logger.DEBUG,"Statut: [COLLECTE]")
-					self.handleCollection(rawBulletin)
-				else:
-				# Sinon, retard
-					self.logger.writeLog(self.logger.DEBUG,"Statut: [COLLECTE et RETARD]")
-					self.handleLateCollection(rawBulletin)
+			
+				try:
+	
+					if self.isInCollectionPeriod(rawBulletin):
+					# Si dans la période de collection
+						self.logger.writeLog(self.logger.DEBUG,"Statut: [COLLECTE]")
+						self.handleCollection(rawBulletin)
+					else:
+					# Sinon, retard
+						self.logger.writeLog(self.logger.DEBUG,"Statut: [COLLECTE et RETARD]")
+						self.handleLateCollection(rawBulletin)
+
+				except bulletinManager.bulletinManagerException, e:
+					self.logger.writeLog(self.logger.WARNING,"Erreur lors de la création de la collection: %s", e.args[0])
+
+		                        # Flag du bulletin en erreur
+	                                bull = bulletinPlain.bulletinPlain(rawBulletin,self.logger)
+	                                bull.setError(e.args[0])
+
+	                                writeTime = time.time()
+
+		                        # -> Ajout à la queue
+		                        self.mainDataMap['sequenceWriteQueue'].append({'writeTime':writeTime,'bull':bull})
 
 			# Sinon, aucune modification, le bulletin sera déplacé
 			else:
 				self.logger.writeLog(self.logger.DEBUG,"Statut: [AUCUNE MODIF]")
-				bull = bulletin.bulletin(rawBulletin,self.logger)
+				bull = bulletinPlain.bulletinPlain(rawBulletin,self.logger)
 				writeTime = time.time()
 
 				self.mainDataMap['sequenceWriteQueue'].append({'writeTime':writeTime,'bull':bull})
@@ -160,10 +171,10 @@ class collectionManager(bulletinManager.bulletinManager):
 				self.logger.writeLog(self.logger.DEBUG,"Nouveau champ BBB: %s", newBBB)
 
 				# Changement du champ BBB, génération du writeTime, et ajout à la queue
-				bull = bulletin.bulletin(rawBulletin,self.logger)
+				bull = bulletinPlain.bulletinPlain(rawBulletin,self.logger)
 
 				# -> Changement de l'entête
-				newHeader = bull.getHeader().split()[:-1] + ' ' + newBBB
+				newHeader = ' '.join(bull.getHeader().split()[:-1]) + ' ' + newBBB
 				bull.setHeader(newHeader)
 				rawBulletin = bull.getBulletin()
 
@@ -175,7 +186,7 @@ class collectionManager(bulletinManager.bulletinManager):
 
 			else:
 			# Sinon, flag du bulletin en erreur
-				bull = bulletin.bulletin(rawBulletin,self.logger)
+				bull = bulletinPlain.bulletinPlain(rawBulletin,self.logger)
 				bull.setError("Bulletin en retard, delai maximum depasse")
 		
 				writeTime = time.time()
@@ -222,11 +233,13 @@ class collectionManager(bulletinManager.bulletinManager):
 			writeTime = time.time() + ( 60.0 * float(self.collectionParams[rawBulletin[:2]]['m_suppl']))
 
                         if not entete in self.mapEntetes2mapStations:
-                                raise bulletinManagerException("Entete non définie dans le fichier de stations")
+                                raise bulletinManager.bulletinManagerException("Entete non définie dans le fichier de stations")
 
 			self.mainDataMap['collectionMap'][rawBulletin.splitlines()[0]] = \
                                 bulletinCollection.bulletinCollection(self.logger,self.mapEntetes2mapStations[entete],
                                                                       writeTime,rawBulletin.splitlines()[0])
+
+			self.mainDataMap['collectionMap'][rawBulletin.splitlines()[0]].setTokenIfNoData(None)
 
 		# Ajout du bulletin dans la collection
                 station = bulletinCollection.bulletinCollection.getStation(rawBulletin)
@@ -242,7 +255,7 @@ class collectionManager(bulletinManager.bulletinManager):
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
-		bullTime = self.getBullTimestamp(rawBulletin)[:-2] + string.zfill(self.collectionParams[rawBulletin[:2]]['m_primaire'0],2)
+		bullTime = self.getBullTimestamp(rawBulletin)[:-2] + string.zfill(self.collectionParams[rawBulletin[:2]]['m_primaire'],2)
 
                 now = time.strftime("%d%H%M",time.localtime())
 	
@@ -293,7 +306,7 @@ class collectionManager(bulletinManager.bulletinManager):
 
 		self.mainDataMap['collectionMap'][rawBulletin.splitlines()[0]].addData(station,data)
 
-	def getWriteTime(self,timeStamp,nb_min)
+	def getWriteTime(self,timeStamp,nb_min):
 		"""getWriteTime(timeStamp,nb_min) -> writeTime
 
 		   timeStamp:		String
@@ -367,7 +380,14 @@ class collectionManager(bulletinManager.bulletinManager):
 		# on écrit la collection
 		keys = self.mainDataMap['collectionMap'].keys()
 		for k in keys:
-			if now > self.mainDataMap['collectionMap'][k].getWriteTime():
+			if now > self.mainDataMap['collectionMap'][k].getWriteTime() or self.mainDataMap['collectionMap'][k].dataIsComplete():
+				if self.mainDataMap['collectionMap'][k].dataIsComplete():
+					reason = "le data de toutes les stations est rentré"
+				else:
+					reason = "la periode de collection est terminée"
+
+				self.logger.writeLog(self.logger.DEBUG,"Écriture de la collection: %s", reason)
+
 				fileName = self.getFileName(self.mainDataMap['collectionMap'][k],compteur=False)
 
 				self.writeToDisk(fileName, self.mainDataMap['collectionMap'][k])
@@ -419,18 +439,66 @@ class collectionManager(bulletinManager.bulletinManager):
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
-		if self.getBullTimestamp(rawBulletin)[-2:] == '00':
-		# Doit finir (l'heure) par 00
+		try:
+			if self.getBullTimestamp(rawBulletin)[-2:] == '00':
+			# Doit finir (l'heure) par 00
+				bbb = self.getBBB(rawBulletin)
 
-			return  rawBulletin[:2] in self.collectionParams or self.getBBB(rawBulletin) != None
-			# Si dans le type de bulletin a collecter OU si champ BBB :True
-		else:
+				return  rawBulletin[:2] in self.collectionParams or ( bbb != None and bbb[0] in ['C','R'] )
+				# Si dans le type de bulletin a collecter OU si champ BBB :True
+			else:
+				return False
+		except:
+			# Si quelconque erreur, on retourne Faux
 			return False
 
         def initMapEntetes(self, pathFichierStations):
-		"""Même méthode que pour le bulletinManagerAm
-		"""
-		bulletinManagerAm.bulletinManagerAm.initMapEntetes(self, pathFichierStations)		
+                """initMapEntetes(pathFichierStations)
+
+                   pathFichierStations: String
+                                        - Chemin d'accès vers le fichier de "collection"
+
+                   mapEntetes sera un map contenant les entete a utiliser avec
+                   quelles stations. La cle se trouve a etre une concatenation des
+                   2 premieres lettres du bulletin et de la station, la definition
+                   est une string qui contient l'entete a ajouter au bulletin.
+
+                   self.mapEntetes2mapStations sera un map, avec pour chaque entete
+                   un map associé des stations, dont la valeur sera None.
+
+                        Ex.: mapEntetes["SPCZPC"] = "CN52 CWAO "
+
+                   Auteur:      Louis-Philippe Thériault
+                   Date:        Octobre 2004
+                """
+                if pathFichierStations == None:
+                        self.mapEntetes = None
+                        return
+
+                uneEntete = ""
+                uneCle = ""
+                unPrefixe = ""
+                uneLigneParsee = ""
+                self.mapEntetes = {}
+                self.mapEntetes2mapStations = {}
+
+                # Construction des 2 map en même temps
+                for ligne in self.lireFicTexte(pathFichierStations):
+                        uneLigneParsee = ligne.split()
+
+                        unPrefixe = uneLigneParsee[0][0:2]
+                        uneEntete = uneLigneParsee[0][2:6] + ' ' + uneLigneParsee[0][6:] + ' '
+
+                        # Ajout d'un map vide pour l'entête courante
+                        if unPrefixe + uneEntete[:-1] not in self.mapEntetes2mapStations:
+                                self.mapEntetes2mapStations[unPrefixe + uneEntete[:-1]] = {}
+
+                        for station in uneLigneParsee[1:]:
+                                uneCle = unPrefixe + station
+
+                                self.mapEntetes[uneCle] = uneEntete
+
+                                self.mapEntetes2mapStations[unPrefixe + uneEntete[:-1]][station] = None
 
 	def writeToDisk(self,nomFichier,unBulletin):
 		"""writeToDisk(nomFichier,unBulletin)

@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 """Gestionnaire de bulletins"""
 
-import math, string, os, bulletin, traceback, sys, time
+import math, string, os, bulletinPlain, traceback, sys, time
 
 __version__ = '2.0'
 
@@ -100,7 +100,7 @@ class bulletinManager:
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
-		return bulletin.bulletin(rawBulletin,self.logger,self.lineSeparator)
+		return bulletinPlain.bulletinPlain(rawBulletin,self.logger,self.lineSeparator)
 
 	def readBulletinFromDisk(self,listeRepertoires,listeFichiersDejaChoisis=[],priorite=False):
 		"""
@@ -469,7 +469,7 @@ class bulletinManager:
 		if not type(self.mapCircuits[entete]['routing_groups']) == list:
 			self.mapCircuits[entete]['routing_groups'] = [ self.mapCircuits[entete]['routing_groups'] ]
 	
-	        return self.mapCircuits[entete]['priority'] + '.' + '.'.join(self.mapCircuits[entete]['routing_groups'])
+	        return self.mapCircuits[entete]['priority'] + '.' + '.'.join(self.mapCircuits[entete]['routing_groups']) + '.'
 
 	def getFinalPath(self,bulletin):
 		"""getFinalPath(bulletin) -> path
@@ -503,6 +503,17 @@ class bulletinManager:
 			return self.pathDest.replace('-PRIORITY',self.mapCircuits[entete]['priority'])
 		else:
 			return self.pathDest.replace('-PRIORITY','NONIMPLANTE')
+
+	def getPathSource(self):
+		"""getPathSource() -> Path_source 
+
+		   Path_source:		String
+					-Path source que contient le manager
+
+		   Auteur:	Louis-Philippe Thériault
+                   Date:	Novembre 2004
+		"""
+		return self.pathSource
 
 	def verifyDelay(self,unBulletin):
 		"""verifyDelay(unBulletin)

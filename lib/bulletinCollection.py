@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 """Définition des collections de bulletins"""
 
-import traceback, sys, bulletin
+import traceback, sys, bulletin, time
 
 __version__ = '2.0'
 
@@ -50,24 +50,29 @@ class bulletinCollection(bulletin.bulletin):
 		self.lineSeparator = lineSeparator
 		self.writeTime = writeTime
 
+		self.tokenIfNoData = ' NIL='
+		self.bbb = None
+
 		if header != None:
 		# Création d'une nouvelle collection
 			self.errorBulletin = None
 
 			self.mapCollection = {}
 			self.mapCollection['header'] = header
-			self.mapCollection['stations'] = mapStations.copy()
+			self.mapCollection['mapStations'] = mapStations.copy()
 
                 	self.logger.writeLog(self.logger.INFO,"Création d'une nouvelle collection: %s",header)
+			self.logger.writeLog(self.logger.VERYVERBOSE,"writeTime de la collection: %s",time.asctime(time.gmtime(writeTime)))
 
 		elif mapData != None:
 		# Continuité d'une collection
 			self.errorBulletin = mapData['errorBulletin']
 			self.mapCollection = mapData['mapCollection']
 			self.writeTime = mapData['writeTime']
+			self.tokenIfNoData = mapData['tokenIfNoData']
 
 			self.logger.writeLog(self.logger.INFO,"Chargement d'une collection: %s",self.mapCollection['header'])
-			self.logger.writeLog(self.logger.DEBUG,"mapData:\n" + str(mapData))
+			self.logger.writeLog(self.logger.VERYVERBOSE,"mapData:\n" + str(mapData))
 
 		else:
 			raise bulletin.bulletinException('Aucune information d\'entrée est fournie (header/mapData)')
@@ -78,8 +83,23 @@ class bulletinCollection(bulletin.bulletin):
 		   nb_sec	float
 				- Temps (en sec depuis epoch) quand la collection devra être
 				  écrite
+
+                   Auteur:      Louis-Philippe Thériault
+                   Date:        Novembre 2004
 		"""
 		return self.writeTime
+
+	def dataIsComplete(self):
+		"""dataIsComplete() -> True/False
+
+		   Informe si tout le data pour les stations est rentré. Si tel est le 
+		   cas la collection devrait être écrite.
+
+		   Auteur:	Louis-Philippe Thériault
+                   Date:        Novembre 2004
+		"""
+		# Tout le data est rentré si aucun station est à None 
+		return not( None in [self.mapCollection['mapStations'][x] for x in self.mapCollection['mapStations']] )
 
 	def getPersistentData(self):
 		"""getPersistentData() -> Map
@@ -90,7 +110,8 @@ class bulletinCollection(bulletin.bulletin):
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
-		return {'mapCollection':self.mapCollection,'errorBulletin':self.errorBulletin, 'writeTime':self.writeTime}
+		return {'mapCollection':self.mapCollection,'errorBulletin':self.errorBulletin, \
+			'writeTime':self.writeTime, 'tokenIfNoData':self.tokenIfNoData}
 
 
 	def getHeader(self):
@@ -148,7 +169,29 @@ class bulletinCollection(bulletin.bulletin):
 		"""
 		return self.getCollection()
 
-	def getCollection(self,tokenIfNoData=' NIL=',bbb=None):
+	def setBBB(self,newBBB):
+		"""setBBB(newBBB)
+
+		   Assigne le champ newBBB au bulletin. À être utilisé avant
+		   getBulletin, pour fin de compatibilité.
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Novembre 2004
+		"""
+		self.bbb = newBBB
+
+        def setTokenIfNoData(self,tokenIfNoData):
+                """setTokenIfNoData(tokenIfNoData)
+
+                   Assigne le champ tokenIfNoData au bulletin. À être utilisé avant
+                   getBulletin, pour fin de compatibilité.
+
+                   Auteur:      Louis-Philippe Thériault
+                   Date:        Novembre 2004
+                """
+                self.tokenIfNoData = tokenIfNoData
+
+	def getCollection(self,tokenIfNoData="self.tokenIfNoData",bbb="self.bbb"):
 		"""getCollection(tokenIfNoData,bbb) -> collection
 
 		   tokenIfNoData	String/None
@@ -171,6 +214,13 @@ class bulletinCollection(bulletin.bulletin):
 		   Auteur:	Louis-Philipe Thériault
 		   Date:	Novembre 2004
 		"""
+		# Assignement des valeurs par défaut dynamiques, on ne peut les placer dans l'entête
+		if tokenIfNoData == "self.tokenIfNoData":
+			tokenIfNoData = self.tokenIfNoData
+
+		if bbb == "self.bbb":
+			bbb = self.bbb
+
 		coll = []
 
 		header = self.mapCollection['header']
@@ -182,7 +232,10 @@ class bulletinCollection(bulletin.bulletin):
 		coll.append(header)
 		# Ajout du header à la collection
 
-		for station in self.mapCollection['mapStations'].keys():
+		keys = self.mapCollection['mapStations'].keys()
+		keys.sort()
+
+		for station in keys:
 			if self.mapCollection['mapStations'][station] == None:
 				# Il n'y a pas de data pour la station courante
 				if tokenIfNoData != None:
@@ -209,22 +262,22 @@ class bulletinCollection(bulletin.bulletin):
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
-		if not self.mapCollection['stations'].has_key(station):
+		if not self.mapCollection['mapStations'].has_key(station):
 		# La station n'est pas définie dans le fichier de stations
 			self.logger.writeLog(self.logger.WARNING,\
 				"Station inconnue (collection:%s, station:%s)" % (self.mapCollection['header'].splitlines()[0],station) )
 
 			raise Exception("Station non définie")
 
-		if self.mapCollection['stations'][station] == None:
-			self.mapCollection['stations'][station] = data
+		if self.mapCollection['mapStations'][station] == None:
+			self.mapCollection['mapStations'][station] = data
 		else:
 			self.logger.writeLog(self.logger.WARNING,\
 				"Du data est déja présent pour la station (collection:%s, station:%s)" % (self.mapCollection['header'].splitlines()[0],station))
 			# S'il y a déja du data de présent, et que le nouveau data est
 			# différent
-			if self.mapCollection['stations'][station] != data:
-				self.mapCollection['stations'][station] += self.lineSeparator + data
+			if self.mapCollection['mapStations'][station] != data:
+				self.mapCollection['mapStations'][station] += self.lineSeparator + data
 
 	def getStation(rawBulletin):
 		"""bulletinCollection.getStation(rawBulletin) -> station

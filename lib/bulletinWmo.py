@@ -37,56 +37,60 @@ class bulletinWmo(bulletin.bulletin):
 	                self.replaceChar('\r','')
 	                return 
 
-	        if self.bulletin[0][:4] in ['SDUS','WSUS','SRCN','SRMN','SRND','SRWA','SRMT','SXAA','SXCN','SXVX','SXWA','SXXX','FOCN','WAUS']:
-        	        self.replaceChar('\x1e','')
+#        if self.bulletin[0][:4] in ['SDUS','WSUS','SRCN','SRMN','SRND','SRWA','SRMT','SXAA','SXCN','SXVX','SXWA','SXXX','FOCN','WAUS']:
+#        	        self.replaceChar('\x1e','')
 
-	        if self.bulletin[0][:4] in ['SRCN','SRMN','SRND','SRWA','SRMT','SXCN','SRUS','SXVX','SXWA']:
-        	        self.replaceChar('~',self.lineSeparator)
+		if self.bulletin[0][:2] in ['SD','SO','WS','SR','SX','FO','WA','AC','FA']:
+	                self.replaceChar('\x1e','')
+
+#        if self.bulletin[0][:4] in ['SRCN','SRMN','SRND','SRWA','SRMT','SXCN','SRUS','SXVX','SXWA','SXXX']:
+#        	        self.replaceChar('~',self.lineSeparator)
+		
+		if self.bulletin[0][:2] in ['SR','SX']:
+		        self.replaceChar('~',self.lineSeparator)
 
 		if self.bulletin[0][:2] in ['UK']:
 			self.replaceChar('\x01','')
 
-		if self.bulletin[0][:2] in ['SO']:
-			self.replaceChar('\x1e','')
-                        self.replaceChar('\x00','')
+		if self.bulletin[0][:2] in ['SO','SR']:
                         self.replaceChar('\x02','')
-                        self.replaceChar('\x03','')
 
-                if self.bulletin[0][:2] in ['FT']:
-                        self.replaceChar('\x03','')
 
-                if self.bulletin[0][:2] in ['SX','SR']:
+                if self.bulletin[0][:2] in ['SX','SR','SO']:
                         self.replaceChar('\x00','')
 
                 if self.bulletin[0][:2] in ['SX']:
                         self.replaceChar('\x11','')
+			self.replaceChar('\x14','')
 			self.replaceChar('\x19','')
+			self.replaceChar('\x1f','')
 
-	        if self.bulletin[0][:4] in ['SRUS']:
+	        if self.bulletin[0][:2] in ['SR']:
+			self.replaceChar('\b','')
         	        self.replaceChar('\t','')
+			self.replaceChar('\x1a','')
+			self.replaceChar('\x1b','')
+			self.replaceChar('\x12','')
 
-	        if self.bulletin[0][:4] in ['WWST']:
+		if self.bulletin[0][:2] in ['FX']:
+		        self.replaceChar('\x10','')
+			self.replaceChar('\xf1','')
+
+	        if self.bulletin[0][:2] in ['WW']:
         	        self.replaceChar('\xba','')
 
-	        if self.bulletin[0][:4] in ['USXX']:
+	        if self.bulletin[0][:2] in ['US']:
         	        self.replaceChar('\x18','')
-
-	        if self.bulletin[0][:4] in ['SRUS']:
-        	        self.replaceChar('\x1a','')
-
-	        if self.bulletin[0][:4] in ['SRMT']:
-        	        self.replaceChar('\x12','')
 
 	        if self.bulletin[0][:4] in ['SXUS','SXCN']:
         	        self.replaceChar('\x7f','?')
 
-	        if self.bulletin[0][:4] in ['SXVX','SRUS']:
+	        if self.bulletin[0][:4] in ['SXVX','SRUS','SRMT']:
 	                self.replaceChar('\x7f','')
 
 	        self.replaceChar('\r','')
 
-	        if self.bulletin[0][:2] in ['SA','SM']:
-#	                self.replaceChar('\x03\n','')
+	        if self.bulletin[0][:2] in ['SA','SM','SI','SO','UJ','US','FT']:
                         self.replaceChar('\x03','')
 
 		# Re-calcul du bulletin

@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 """ReceiverWmo: socketWmo -> disk, incluant traitement pour les bulletins"""
 
-import gateway, bulletinManager, collectionManager
+import gateway, bulletinManager, collectionManager, os
 
 class collectionGateway(gateway.gateway):
 	__doc__ = gateway.gateway.__doc__ + \
@@ -26,7 +26,7 @@ class collectionGateway(gateway.gateway):
 
 		self.unCollectionManager = \
 			collectionManager.collectionManager(	self.config.pathTemp,logger, \
-							    	self.config.ficStations, \
+							    	self.config.ficCollection, \
 								self.config.collectionParams, \
 								self.config.delaiMaxSeq, \
 								self.config.includeAllStn, \
@@ -61,15 +61,21 @@ class collectionGateway(gateway.gateway):
 		for fic in self.bulletinsAEffacer:
 			self.logger.writeLog(self.logger.VERYVERBOSE,"Effacement du fichier %s",fic)
 
-			os.remove(fic)
+			os.remove(self.unBulletinManager.getPathSource()+fic)
 
 		# Fetch de la liste des nouveaux bulletins dans le répertoire
-		self.bulletinsAEffacer = self.unBulletinManager.getFileList()
+		self.bulletinsAEffacer = self.unBulletinManager.getListeFichiers(self.unBulletinManager.getPathSource(),[])
 
 		# Lecture de ces bulletins et stockage dans une liste
-		mapData = self.unBulletinManager.readBulletinFromDisk(self.bulletinsAEffacer)
+		mapData = self.unBulletinManager.getMapBulletinsBruts(self.bulletinsAEffacer,self.unBulletinManager.getPathSource())
+
+		# Ici on s'intéresse seulement au bulletins bruts, extraction du bulletin d'à partir du map
+		data = [ mapData[x] for x in mapData ]
 
 		self.logger.writeLog(self.logger.DEBUG,"%d nouveaux bulletins lus",len(data))
+
+                # Dans tous les cas, écrire les collection s'il y a lieu
+                self.unCollectionManager.writeCollection()
 
 		return data
 
@@ -95,7 +101,7 @@ class collectionGateway(gateway.gateway):
 			if self.unCollectionManager.needsToBeCollected(rawBulletin):
 
 				# Envoi dans collManager 
-				self.unCollectionManager.addBulletin(rawBulletin)
+				self.unCollectionManager.addBulletin(rawBulletin,)
 
 			else:
 				# Parcours normal (non collecté) 
