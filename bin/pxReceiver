@@ -143,11 +143,11 @@ def main():
 
 global logger
 global isShutdowning 
+global unGateway
 
 isShutdowning = False
 logger = None
 
-unGateway = None
 
 if __name__ == '__main__':
 	try:

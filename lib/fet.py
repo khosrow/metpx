@@ -1,23 +1,25 @@
 #!/usr/bin/python
 # -*- coding: iso-8859-1 -*-
-#
-#  File Exchange Tracker
-#	(aka, PDS ++ )
-#
-#  flow:
-#	-- open directory, read name, create DB entry, link DB entry to client dirs.
-#          do the above in a manner compatible with PDS.
-#
-#       -- if we do the delivery thing, then base it on curl (pycurl?) robust
-#          functionality for Command line URL's does get & put with retries.
-#
-#
-#  Inputs:
-#		-- ingest directory       ingestdir
-#		-- client configurations  clientconfigs
-#
-# 2005/01/10 - begun by Peter Silva
-#
+"""
+
+  File Exchange Tracker 
+
+  flow:
+	-- open directory, read name, create DB entry, link DB 
+          entry to client dirs.  Do the above in a manner similar to PDS.
+
+       -- if we do the delivery thing, then base it on curl (pycurl?) robust
+          functionality for Command line URL's does get & put with retries.
+
+
+  Inputs:
+		-- ingest directory       ingestdir
+		-- source configurations  
+		-- client configurations  clientconfigs
+
+ 2005/01/10 - begun by Peter Silva
+
+"""
 
 import re
 import fnmatch
@@ -398,6 +400,8 @@ def readSources(logger):
 	  except:
             logger.writeLog( logger.ERROR, 
 		"error in " + sourceid + " config: " + src )
+        elif srcline[0] == 'AddSMHeader' and (srcline[1] == 'True' ):
+          source[srcline[0]] = True
 	else:
           source[srcline[0]] = string.join(srcline[1:]) 
 
@@ -743,6 +747,7 @@ def startup(opts, logger):
        opts.port = int(s['port'])
        opts.extension = s['extension']
        opts.mapEnteteDelai = s['mapEnteteDelai']
+       opts.AddSMHeader = s['AddSMHeader']
      else:
        logger.writeLog( logger.ERROR, "unknown source: " + options.source )
    elif options.type == 'collector':
