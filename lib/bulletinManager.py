@@ -27,7 +27,7 @@ class bulletinManager:
 		self.compteur = 0
 		self.extension = extension
 		self.lineSeparator = lineSeparator
-		self.champsHeader2Circuit = 'entete:routing_groups:rename:'
+		self.champsHeader2Circuit = 'entete:routing_groups:priority:'
 
 		# Init du map des circuits
 		self.initMapCircuit(pathFichierCircuit)
@@ -66,10 +66,18 @@ class bulletinManager:
                 os.close( unFichier )
                 os.chmod(self.pathTemp + nomFichier,0644)
 
-                os.rename( self.pathTemp + nomFichier , self.pathDest + nomFichier )
+		# Fetch du path de destination
+		pathDest = self.getFinalPath(unBulletin)
+
+		# Si le répertoire n'existe pas, le créer
+		if not os.access(pathDest,os.F_OK):
+			os.mkdir(pathDest, 0755)
+
+		# Déplacement du fichier vers le répertoire final
+                os.rename( self.pathTemp + nomFichier , pathDest + nomFichier )
 
                 # Le transfert du fichier est un succes 
-		self.logger.writeLog(self.logger.INFO, "Ecriture du fichier <%s>",self.pathDest + nomFichier)
+		self.logger.writeLog(self.logger.INFO, "Ecriture du fichier <%s>",pathDest + nomFichier)
 
 	def __generateBulletin(self,rawBulletin):
 		"""__generateBulletin(rawBulletin) -> objetBulletin
@@ -255,3 +263,35 @@ class bulletinManager:
 	
 	        return '.'.join(self.mapCircuits[entete]['routing_groups'])
 
+	def getFinalPath(self,bulletin):
+		"""getFinalPath(bulletin) -> path
+
+		   path		String
+				- Répertoire où le fichier sera écrit
+
+		   bulletin	objet bulletin
+				- Pour aller chercher l'entête du bulletin
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
+		"""
+		# Si le bulletin est erronné
+		if bulletin.getError() != None:
+			return self.pathDest.replace('-PRIORITY','ERROR')
+
+		try:
+			entete = ' '.join(bulletin.getHeader().split()[:2])
+		except Exception:
+			self.logger.writeLog(self.logger.ERROR,"Entête non standard, priorité impossible à déterminer(%s)",bulletin.getHeader())
+			return self.pathDest.replace('-PRIORITY','ERROR')
+
+		if self.mapCircuits != None:
+			# Si le circuitage est activé
+			if not self.mapCircuits.has_key(entete):
+				# Entête est introuvable
+				self.logger.writeLog(self.logger.ERROR,"Entête introuvable, priorité impossible à déterminer")
+				return self.pathDest.replace('-PRIORITY','ERROR')
+
+			return self.pathDest.replace('-PRIORITY',self.mapCircuits[entete]['priority'])
+		else:
+			return self.pathDest.replace('-PRIORITY','NONIMPLANTE')

@@ -28,7 +28,7 @@ class log:
 		self.debug = debug
 
 		# Init du handler et du formatter pour le log normal
-		unTimedRotatingFileHandler = logging.handlers.TimedRotatingFileHandler(filename, when='h', interval=1, backupCount=24)
+		unTimedRotatingFileHandler = logging.handlers.TimedRotatingFileHandler(filename, when='d', interval=1, backupCount=5)
 		unFormatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s","%x %X")
 		unTimedRotatingFileHandler.setFormatter(unFormatter)
 
