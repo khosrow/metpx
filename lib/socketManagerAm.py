@@ -26,8 +26,8 @@ class socketManagerAm(socketManager.socketManager):
 	
 	"""
 
-	def __init__(self,type='slave',localPort=9999,remoteHost=None,timeout=None,log=None):
-		socketManager.socketManager.__init__(self,type,localPort,remoteHost,timeout,log)
+	def __init__(self,type='slave',localPort=9999,remoteHost=None,timeout=None,logger=None):
+		socketManager.socketManager.__init__(self,type,localPort,remoteHost,timeout,logger)
 
 		# La taille du amRec est prise d'a partir du fichier ytram.h, à l'origine dans
 		# amtcp2file. Pour la gestion des champs l'on se refere au module struct
@@ -35,7 +35,7 @@ class socketManagerAm(socketManager.socketManager):
 		self.patternAmRec = '80sLL4sii4s4s20s'
 		self.sizeAmRec = struct.calcsize(self.patternAmRec)
 
-        def __unwrapBulletin(self):
+        def unwrapBulletin(self):
                 """unwrapBulletin() -> (bulletin,longBuffer)
 
                    bulletin     : String
@@ -48,7 +48,7 @@ class socketManagerAm(socketManager.socketManager):
 
                    Retourne une chaîne vide s'il n'y a pas assez de données
                    pour compléter le prochain bulletin."""
-                status = self.__checkNextMsgStatus() 
+                status = self.checkNextMsgStatus()
 
 		if status == 'OK':
 	                (header,src_inet,dst_inet,threads,start,length,firsttime,timestamp,future) = \
@@ -62,8 +62,8 @@ class socketManagerAm(socketManager.socketManager):
 	        else:
 	                return '',0
 
-        def __checkNextMsgStatus(self):
-                """__checkNextMsgStatus() -> status
+        def checkNextMsgStatus(self):
+                """checkNextMsgStatus() -> status
 
                    status       : String élément de ('OK','INCOMPLETE','CORRUPT')
 

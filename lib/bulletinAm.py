@@ -40,8 +40,8 @@ class bulletinAm(bulletin.bulletin):
 	"""
 
 
-	def __init__(self,stringBulletin,lineSeparator='\n',mapEntetes=None,SMHeaderFormat=False):
-		bulletin.bulletin.__init__(self,stringBulletin,lineSeparator='\n')
+	def __init__(self,stringBulletin,logger,lineSeparator='\n',mapEntetes=None,SMHeaderFormat=False):
+		bulletin.bulletin.__init__(self,stringBulletin,logger,lineSeparator='\n')
 		self.mapEntetes = mapEntetes
 		self.SMHeaderFormat = SMHeaderFormat
 
@@ -49,6 +49,9 @@ class bulletinAm(bulletin.bulletin):
 							# C'est pour ca qu'elle est initialisée comme
 							# ca.
 		self.station = self.getStation()
+
+		# Print de la station pour le debug
+		self.logger.writeLog(logger.DEBUG,"Station: %s",str(self.station))
 
         def getBulletin(self):
                 """getBulletin() -> bulletin

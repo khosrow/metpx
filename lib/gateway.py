@@ -1,5 +1,5 @@
 """Superclasse pour un gateway de transfert de bulletins"""
-import imp
+import imp, time
 
 __version__ = '2.0'
 
@@ -33,9 +33,16 @@ class gateway:
 	        path		String
 
 				- Chemin d'accès vers le fichier de config
+
+		logger		Objet logger
+
+				- Doit pouvoir être appelé pour écrire les
+				  messages. C'est le log principal du 
+				  programme
 	"""
-	def __init__(self,path):
+	def __init__(self,path,logger):
 		self.config = gateway.loadConfig(path)
+		self.logger = logger
 
 	def loadConfig(path):
 		"""loadConfig(path)
@@ -99,7 +106,7 @@ class gateway:
 
 			if len(data) == 0:
 			# S'il n'y a pas de nouveau data
-				pass
+				time.sleep(1)
 			else:
 				self.write(data)
 

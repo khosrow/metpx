@@ -1,4 +1,10 @@
 #! /usr/bin/env python2
+# -----------------------------------------------------
+# Définition globale pour le traîtement effectué par un 
+# Receiver (socket2file).
+#
+# Auteur:	Louis-Philippe Thériault
+# Date:		Octobre 2004
 
 import sys
 
@@ -7,36 +13,52 @@ sys.path.append(sys.path[0] + '/../etc')
 sys.path.append(sys.path[0] + '/../lib/importedLibs')
 
 from optparse import OptionParser
-import gateway
+import gateway, log
 
-usage =  "%prog pathConfigFile\n" \
-         "       Un receiver reçoit les bulletins par une connection réseau et les\n" \
-         "       écrits sur le disque. Le fichier de configuration doit être dûement\n" \
-	 "       remplit pour que le programme fonctionne correctement."
+def main():
 
-parser = OptionParser(usage)
-options,args = parser.parse_args()
+	# Message d'usage pour le option parser
+	usage =  "%prog pathConfigFile\n" \
+	         "       Un receiver reçoit les bulletins par une connection réseau et les\n" \
+	         "       écrits sur le disque. Le fichier de configuration doit être dûement\n" \
+		 "       remplit pour que le programme fonctionne correctement."
 
-if len(args) > 1:
-	parser.error("trop d'arguments fournis")
-elif len(args) == 0:
-	parser.error("aucun fichier de config fourni")
+	# Instanciation du option parser
+	parser = OptionParser(usage)
+	options,args = parser.parse_args()
+	
+	# Un seul argument doit être fourni
+	if len(args) > 1:
+		parser.error("trop d'arguments fournis")
+	elif len(args) == 0:
+		parser.error("aucun fichier de config fourni")
+	
+	# Chargement de la config pour savoir le type de protocole et le path du log
+	config = gateway.gateway.loadConfig(args[0])
 
-# Chargement de la config pour savoir le type de protocole
-# FIXME: Vérifier que typeProtocole est défini
-config = gateway.gateway.loadConfig(args[0])
+        # FIXME: Vérifier que typeProtocole est défini et le fichier de log
 
-if config.typeProcotole == 'AM':
+	# Init du log
+	logger = log.log(config.log)
+	logger.writeLog(logger.INFO, "Début du programme, fichier de config chargé correctement")
 
-	import receiverAm
-	unGateway = receiverAm.receiverAm(args[0])
+        logger.writeLog(logger.DEBUG,"Protocole %s sélectionné",config.typeProcotole)
 
-elif config.typeProcotole == 'WMO':
+	# Branchement selon le type de protocole	
+	if config.typeProcotole == 'AM':
 
-	# FIXME à implanter
-	pass
+		import receiverAm
+		unGateway = receiverAm.receiverAm(args[0],logger)
+	
+	elif config.typeProcotole == 'WMO':
+	
+		# FIXME à implanter
+		pass
+	
+	else:
+		raise Exception('Type de protocole non reconnu')	# FIXME
 
-else:
-	raise Exception('Type de protocole non reconnu')	# FIXME
+	unGateway.run()
 
-
+if __name__ == '__main__':
+	main()

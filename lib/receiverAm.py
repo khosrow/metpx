@@ -5,14 +5,28 @@ import socketManagerAm
 import bulletinManagerAm
 
 class receiverAm(gateway.gateway):
-	""""""
+	__doc__ = gateway.gateway.__doc__ + \
+	"""
+	### Ajout de receiver AM ###
 
-	def __init__(self,path):
-		gateway.gateway.__init__(self,path)
+	Implantation du receiver pour un feed AM. Il est constitué
+	d'un socket manager AM et d'un bulletin manager AM.
 
+	Auteur:	Louis-Philippe Thériault
+	Date:	Octobre 2004
+	"""
+
+	def __init__(self,path,logger):
+		gateway.gateway.__init__(self,path,logger)
+
+		self.logger.writeLog(logger.DEBUG,"Instanciation du socketManagerAm")
+
+		# Instanciation du socketManagerAm
 		self.unSocketManagerAm = \
 				socketManagerAm.socketManagerAm(type='slave', \
 								localPort=self.config.localPort)
+
+                self.logger.writeLog(logger.DEBUG,"Instanciation du bulletinManagerAm")
 
 		# Instanciation du bulletinManagerAm avec la panoplie d'arguments.
 		self.unBulletinManagerAm = \
@@ -43,6 +57,8 @@ class receiverAm(gateway.gateway):
 			else:
 				break
 
+		self.logger(logger.DEBUG,"%d nouveaux bulletins lus",len(data))
+
 		return data
 
         def write(self,data):
@@ -53,6 +69,9 @@ class receiverAm(gateway.gateway):
 	           Cette méthode prends le data lu par read, et fait le traîtement
 	           approprié.
 	           """
+
+                self.logger(logger.DEBUG,"%d nouveaux bulletins seront écrits",len(data))
+
 		while True:
 			if len(data) <= 0:
 				break

@@ -54,7 +54,7 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 
 	        return listeBulletins[1:]
 
-        def __generateBulletin(self,rawBulletin):
+        def _bulletinManager__generateBulletin(self,rawBulletin):
 		__doc__ = bulletinManager.__generateBulletin.__doc__ + \
 		"""
 		### Ajout de bulletinManagerAm ###

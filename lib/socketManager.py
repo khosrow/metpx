@@ -57,12 +57,12 @@ suivants:
 			- Objet de la classe Log
 
 """
-	def __init__(self,type='slave',localPort=9999,remoteHost=None,timeout=None,log=None):
+	def __init__(self,type='slave',localPort=9999,remoteHost=None,timeout=None,logger=None):
 		self.type = type
 		self.localPort = localPort
 		self.remoteHost = remoteHost
 		self.timeout = timeout
-		self.log = log
+		self.logger = logger
 
 		self.inBuffer = ""
 		self.outBuffer = []
@@ -155,10 +155,14 @@ suivants:
 		   bulletin	: String
 
 		   Retourne le prochain bulletin reçu, une chaîne vide sinon."""
-		status = self.__checkNextMsgStatus()
+		self.__syncInBuffer()
+
+		status = self.checkNextMsgStatus()
+
+		print status
 
 		if status ==  'OK':
-			(bulletin,longBuffer) = self.__unwrapBulletin()
+			(bulletin,longBuffer) = self.unwrapBulletin()
 
 			self.inBuffer = self.inBuffer[longBuffer:]
 
@@ -199,7 +203,7 @@ suivants:
 	def __transmitOutBuffer(self):
 		pass
 
-	def __wrapBulletin(self,bulletin):
+	def wrapBulletin(self,bulletin):
 		"""wrapbulletin(bulletin) -> wrappedBulletin
 
 		   bulletin	: String
@@ -210,7 +214,7 @@ suivants:
 		   objet Bulletin."""
 		raise socketManagerException("Méthode non implantée (méthode abstraite wrapBulletin)")
 
-	def __unwrapBulletin(self):
+	def unwrapBulletin(self):
 		"""unwrapBulletin() -> (bulletin,longBuffer)
 
 		   bulletin	: String
@@ -231,13 +235,13 @@ suivants:
 		   Retourne True si la connection est établie."""
 		return self.connected
 
-	def __checkNextMsgStatus(self):
-		"""__checkNextMsgStatus() -> status
+	def checkNextMsgStatus(self):
+		"""checkNextMsgStatus() -> status
 
 		   status	: String élément de ('OK','INCOMPLETE','CORRUPT')
 
 		   Statut du prochain bulletin dans le buffer.
 		"""
-                raise socketManagerException("Méthode non implantée (méthode abstraite __checkNextMsgIntegrity)")
+                raise socketManagerException("Méthode non implantée (méthode abstraite checkNextMsgStatus)")
 
 

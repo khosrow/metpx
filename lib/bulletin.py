@@ -24,6 +24,10 @@ class bulletin:
 
 					- Le bulletin lui-même en String
 
+		logger			Objet log
+
+					- Log principal pour les bulletins
+
 		lineSeparator		String
 
 					- Séparateur utilisé comme fin de ligne
@@ -49,20 +53,31 @@ class bulletin:
 					  bulletin est fusionné avec
 					  lineSeparator comme caractère
 					  d'union
+
+	Statut:	Abstraite
+	Auteur:	Louis-Philippe Thériault
+	Date:	Octobre 2004
   	"""
 
-	def __init__(self,stringBulletin,lineSeparator='\n'):
+	def __init__(self,stringBulletin,logger,lineSeparator='\n'):
 		self.bulletin = stringBulletin.splitlines()
 		self.dataType = None
 		self.lineSeparator = lineSeparator
 		self.errorBulletin = None
+		self.logger = logger
+
+                self.log.writeLog(self.log.VERYVERBOSE,"newBulletin: %s",bulletin)
+
 
 	def getBulletin(self):
 		"""getBulletin() -> bulletin
 
 		   bulletin	: String
 
-		   Retourne le bulletin en texte"""
+		   Retourne le bulletin en texte
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004"""
 		return string.join(self.bulletin,self.lineSeparator)
 
 	def setBulletin(self,bulletin):
@@ -70,15 +85,23 @@ class bulletin:
 
                    bulletin     : String
 
-                   Assigne le bulletin en texte"""
+                   Assigne le bulletin en texte
+
+                   Auteur:      Louis-Philippe Thériault
+                   Date:        Octobre 2004"""
 		self.bulletin = bulletin.splitlines()
+
+		self.log.writeLog(self.log.VERYVERBOSE,"setBulletin: bulletin = %s",bulletin)
 
 	def getLength(self):
                 """getLength() -> longueur
 
                    longueur	: int
 
-                   Retourne la longueur du bulletin avec le lineSeparator"""
+                   Retourne la longueur du bulletin avec le lineSeparator
+
+                   Auteur:      Louis-Philippe Thériault
+                   Date:        Octobre 2004"""
 		return len(self.getBulletin())
 
 	def getHeader(self):
@@ -86,7 +109,10 @@ class bulletin:
 
 		   header	: String
 
-		   Retourne la première ligne du bulletin"""
+		   Retourne la première ligne du bulletin
+
+                   Auteur:      Louis-Philippe Thériault
+                   Date:        Octobre 2004"""
 		return self.bulletin[0]
 
         def setHeader(self,header):
@@ -94,15 +120,23 @@ class bulletin:
 
                    header       : String
 
-                   Assigne la première ligne du bulletin"""
+                   Assigne la première ligne du bulletin
+
+                   Auteur:      Louis-Philippe Thériault
+                   Date:        Octobre 2004"""
                 self.bulletin[0] = header
+
+		self.logger(self.logger.DEBUG,"Nouvelle entête du bulletin: %s",header)
 
 	def getType(self):
                 """getType() -> type
 
                    type         : String
 
-                   Retourne le type (2 premieres lettres de l'entête) du bulletin (SA,FT,etc...)"""
+                   Retourne le type (2 premieres lettres de l'entête) du bulletin (SA,FT,etc...)
+
+                   Auteur:      Louis-Philippe Thériault
+                   Date:        Octobre 2004"""
                 return self.bulletin[0][:2]
 
 	def getOrigin(self):
@@ -110,13 +144,20 @@ class bulletin:
 
                    origine	: String
 
-                   Retourne l'origine (2e champ de l'entête) du bulletin (CWAO,etc...)"""
+                   Retourne l'origine (2e champ de l'entête) du bulletin (CWAO,etc...)
+
+                   Auteur:      Louis-Philippe Thériault
+                   Date:        Octobre 2004"""
                 return self.bulletin[0].split(' ')[1]
 
 	def doSpecificProcessing(self):
 		"""doSpecificProcessing()
 
-		   Modifie le bulletin s'il y a lieu, selon le traîtement désiré."""
+		   Modifie le bulletin s'il y a lieu, selon le traîtement désiré.
+
+		   Statut:	Abstraite
+                   Auteur:      Louis-Philippe Thériault
+                   Date:        Octobre 2004"""
 		raise bulletinException('Méthode non implantée (méthode abstraite doSpecificProcessing)')
 
 	def getError(self):
@@ -124,6 +165,9 @@ class bulletin:
 
 		   Retourne None si aucune erreur détectée dans le bulletin,
 		   sinon un tuple avec comme premier élément la description 
-		   de l'erreur. Les autres champs sont laissés libres"""
+		   de l'erreur. Les autres champs sont laissés libres
+
+                   Auteur:      Louis-Philippe Thériault
+                   Date:        Octobre 2004"""
 		return self.errorBulletin
 
