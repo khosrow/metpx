@@ -1,8 +1,14 @@
 
-
-  -- AFTN support
+  -- AFTN support -- DL
 	-- need a contingency if we move the Tandem.
 
+  -- end to end performance testing.
+
+  -- Move Collection stuff into new config methods.
+       -- figure out where to put them... /apps/px/cx/collections
+	  cx == conversions ?
+
+  -- more options on receiver (tune directory sleep timer or...)
 
   -- student project... directory watching technique study.
 	-- opendir poll, versus, poll mtime, FAM, fcntl(D_NOTIFY, fcntl(I_NOTIFY)
@@ -14,6 +20,7 @@
 
   -- student project:
 	-- add sftp support into curl.
+	-- just work with the open source project and modify it.
 
 
   -- student project:
@@ -21,7 +28,7 @@
 	   see if we can add it.
 
 	
-  -- full ftp sender.
+  -- full ftp sender.   DL!
 	-- record byte count on send in log.
 	-- supports multiple protocols (http,https, sftp  etc...)
 	-- based on curl.
@@ -33,4 +40,16 @@
 	-- good market for this with implementation, if
            we do it right.
 
-   
+  -- Complete English Documentation
+     
+
+  -- i18n (logs and error messages controlled by locales, default English, 'C' locale)
+ 
+  -- add ingester routing directive, so that one can use
+     masked routing on socket connections. Currently, routing is fixed by type.
+     All sockets are directly mapped, and single-file is masked PDS-style. 
+
+  -- (only later, for PDS) add ingester conversion routines. to do the 
+     *2gif, or whatever conversions, and have all versions ingested.
+
+

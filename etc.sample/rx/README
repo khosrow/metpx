@@ -32,4 +32,8 @@ arrival { 'CA':(5,20),'WO':(20,40) }
 
 AddSMHeader true
   
-routing direct
+FIXME: NOT YET IMPLEMENTED:
+routing direct|pattern  
+	be able to choose how the bulletin/file received is mapped to clients
+	two methods exist: AHL lookup in header2clients.conf, or by 
+        patterns (imask&emask)
