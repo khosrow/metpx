@@ -174,10 +174,10 @@ class senderAm(gateway.gateway):
                 Date:
                 Janvier 2005
                 """
-#                self.reader = DiskReader(self.config.rootPath, MultiKeysStringSorter)
-#                self.reader.sort()
-#                return(self.reader.getFilesContent(self.config.fileNumber))
-
+                self.reader = DiskReader(self.config.rootPath, MultiKeysStringSorter)
+                self.reader.sort()
+                return(self.reader.getFilesContent(self.config.fileNumber))
+		"""
                 data = []
 
 		#lecture de la selection precedente
@@ -197,6 +197,7 @@ class senderAm(gateway.gateway):
 		except Exception, e:
                		self.logger.writeLog(self.logger.ERROR,"senderAm.read(): Erreur lecture: %s",str(e.args))
 			raise
+		"""
 
 	def write(self,data):
                 __doc__ =  gateway.gateway.write.__doc__ + \
@@ -222,36 +223,29 @@ class senderAm(gateway.gateway):
                 Janvier 2005 
                 """
 
-		"""
+		#"""
                 self.logger.writeLog(self.logger.DEBUG,"%d nouveaux bulletins sont envoyes",len(data))
 
                 for index in range(len(data)):
                         try:
                                 rawBulletin = data[index]
-                                unBulletinAm = bulletinAm.bulletinAm(rawBulletin,self.logger,finalLineSepar
-ator='\r\r\n')
+                                unBulletinAm = bulletinAm.bulletinAm(rawBulletin,self.logger,finalLineSeparator='\r\r\n')
                                 succes = self.unSocketManagerAm.sendBulletin(unBulletinAm)
                                 #si le bulletin a ete envoye correctement, le fichier est efface
                                 if succes:
-                                        self.logger.writeLog(self.logger.INFO,"bulletin %s envoye ", self.read
-er.sortedFiles[index])
-                                        self.unBulletinManagerAm.effacerFichier(self.reader.sortedFiles[index
-])
-                                        self.logger.writeLog(self.logger.DEBUG,"senderAm.write(..): Effacage
-de " + self.reader.sortedFiles[index])
+                                        self.logger.writeLog(self.logger.INFO,"bulletin %s envoye ", self.reader.sortedFiles[index])
+                                        self.unBulletinManagerAm.effacerFichier(self.reader.sortedFiles[index])
+                                        self.logger.writeLog(self.logger.DEBUG,"senderAm.write(..): Effacage de " + self.reader.sortedFiles[index])
                                 else:
-                                        self.logger.writeLog(self.logger.INFO,"bulletin %s: probleme d'envoi "
-, self.reader.sortedFiles[index])
+                                        self.logger.writeLog(self.logger.INFO,"bulletin %s: probleme d'envoi ", self.reader.sortedFiles[index])
                         except Exception, e:
                                 if e==104 or e==110 or e==32 or e==107:
-                                        self.logger.writeLog(self.logger.ERROR,"senderAm.write(): la connexio
-n est rompue: %s",str(e.args))
+                                        self.logger.writeLog(self.logger.ERROR,"senderAm.write(): la connexion est rompue: %s",str(e.args))
                                 else:
-                                        self.logger.writeLog(self.logger.ERROR,"senderAm.write(): erreur: %s"
-,str(e.args))
+                                        self.logger.writeLog(self.logger.ERROR,"senderAm.write(): erreur: %s",str(e.args))
                                 raise
+		#"""
 		"""
-
                 self.logger.writeLog(self.logger.DEBUG,"%d nouveaux bulletins sont envoyes",len(data))
                 for key in data:
                         try:
@@ -279,3 +273,4 @@ n est rompue: %s",str(e.args))
                                 else:
                                         self.logger.writeLog(self.logger.ERROR,"senderAm.write(): erreur: %s",str(e.args))
                                 raise
+		"""
