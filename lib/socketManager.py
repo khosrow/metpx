@@ -211,3 +211,13 @@ suivants:
 
 		   Retourne True si la connection est établie."""
 		return self.connected
+
+	def __checkNextMsgStatus(self):
+		"""__checkNextMsgStatus() -> status
+
+		   status	: String élément de ('OK','INCOMPLETE','ERROR')
+
+		   Statut du prochain bulletin dans le buffer.
+		"""
+                raise socketManagerException("Méthode non implantée (méthode abstraite __checkNextMsgIntegrity)")
+
