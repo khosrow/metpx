@@ -30,6 +30,7 @@ def run(logger):
         '\n', 
         fet.options.extension, 
         fet.FET_ETC + 'header2client.conf',
+        fet.options.mapEnteteDelai,
         fet.options.use_pds )
 
    while True:

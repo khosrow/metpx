@@ -708,7 +708,7 @@ class bulletinManager:
 			Pouvoir vérifier qu'un bulletin soit dans les délais 
 			acceptables.
 		"""
-		if (self.mapEnteteDelai == None) or (self.mapEnteteDelai == 0):
+		if (self.mapEnteteDelai == None): 
 			return
 
 		now = time.strftime("%d%H%M",time.localtime())
@@ -720,7 +720,6 @@ class bulletinManager:
 
 			minimum,maximum = None,None
 
-                        print self.mapEnteteDelai
 			for k in self.mapEnteteDelai.keys():
 			# Fetch de l'intervalle valide dans le map
 				if k == header[:len(k)]:

@@ -392,7 +392,7 @@ def readSources(logger):
 
     sourceid = cfname[:-5]
     srcconf = open( FET_ETC + 'rx/' + cfname, 'r' )
-    source = source.deepcopy(sourcedefaults)
+    source = sourcedefaults
     src=srcconf.readline()
     while src :
       srcline=src.split()
