@@ -1,4 +1,5 @@
 #! /usr/bin/env python2
+# -*- coding: UTF-8 -*-
 # -----------------------------------------------------
 # Définition globale pour le traîtement effectué par un 
 # sender (file2socket).

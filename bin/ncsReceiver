@@ -1,4 +1,5 @@
 #! /usr/bin/env python2
+# -*- coding: UTF-8 -*-
 # -----------------------------------------------------
 # Définition globale pour le traîtement effectué par un 
 # Receiver (socket2file).
@@ -10,7 +11,7 @@ import sys, signal, traceback
 
 sys.path.append(sys.path[0] + '/../lib')
 sys.path.append(sys.path[0] + '/../etc')
-sys.path.append(sys.path[0] + '/../lib/importedLibs')
+sys.path.insert(0,sys.path[0] + '/../lib/importedLibs')
 
 from optparse import OptionParser
 import gateway, log
@@ -76,9 +77,11 @@ def main():
 
 	unGateway.run()
 
+global logger
+
 if __name__ == '__main__':
 	try:
 		main()
 	except Exception, e:
-		logger.writeLog(logger.EXCEPTION,"Exception:", ''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
+		logger.writeLog(logger.EXCEPTION,"Exception: " + ''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
 		raise
