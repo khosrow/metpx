@@ -29,13 +29,15 @@ import sys
 import signal
 import log
 
-FET_ROOT='/apps/fet/'
+#FET_ROOT='/apps/fet/'
+FET_ROOT='/tmp/fet/'
 FET_DB= 'db/today/' 
 
 FET_TX= 'tx/'
 FET_RX= 'rx/'
 
-FET_ETC='/apps/fet/etc/'
+#FET_ETC='/apps/fet/etc/'
+FET_ETC='../etc/'
 
 #
 # These URL routines are extremely stupid.

@@ -1,31 +1,6 @@
+ 
+   Look in lib/fet.py and change fet.FET_ROOT to a good value like '/apps/fet'
 
-
-   extract the tar file, just above the pds-nccs source tree.
-   so you have a directory that looks like so:
-
-   ls  -CF
-   fet/ pds-nccs/
-
-   cd pds-nccs
-   patch -p1 <../fet/doc/pds-nccs-fet-ingest.patch
-
-   -- the above patch modifies bulletinManager.py to directly insert
-      bulletins into the db, and link them to client directories.
-
-   rather than have two trees lying around, copy the stuff into pds-nccs...
-
-   cp ../fet/bin/* bin
-   cp ../fet/lib/fet.py lib
-
-   vi bin/fet bin/fetrx bin/fettx
-
-   remove '../pds-nccs' in the sys.path.insert lines near the beginning of each
-   because now fet is inside pds-nccs.
-
-   mkdir /apps/fet
-   mkdir /apps/fet/etc
-   mkdir /apps/fet/etc/tx
-   mkdir /apps/fet/etc/rx
 
    clients="Tandem Adonis FTPSVR2 PDSALPH METMGR1 MEMGR2 PDSALPH PDSOP QUACTRL"
    for c in $clients:
@@ -47,9 +22,7 @@
    to use ncsSender, Daniel's priority sorting directory tree should be 
    pointed at /apps/fet/tx/<client>
 
-
    and that ought to work... you can look in /apps/fet/db/ for the database
    files, and just run the ncsReceiver without starting a sender to watch
    the client queues fill up.
-
 

@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 """Gestionnaire de bulletins"""
 
-import math, string, os, bulletinPlain, traceback, sys, time
+import math, string, os, bulletinPlain, traceback, sys, time, fet
 
 __version__ = '2.0'
 
@@ -77,6 +77,8 @@ class bulletinManager:
 		self.pathDest = self.__normalizePath(pathDest)
 		self.pathTemp = self.__normalizePath(pathTemp)
 		self.maxCompteur = maxCompteur
+		# FIXME: this should be read from a config file, haven't understood enough yet.
+		self.use_pds = 'no'
 		self.compteur = 0
 		self.extension = extension
 		self.lineSeparator = lineSeparator
@@ -135,9 +137,9 @@ class bulletinManager:
 
 		# Génération du nom du fichier
 		nomFichier = self.getFileName(unBulletin,compteur=compteur)
-
+                tempNom = self.pathTemp + nomFichier
 		try:
-			unFichier = os.open( self.pathTemp + nomFichier , os.O_CREAT | os.O_WRONLY )
+			unFichier = os.open( tempNom , os.O_CREAT | os.O_WRONLY )
 
 		except (OSError,TypeError), e:
 			# Le nom du fichier est invalide, génération d'un nouveau nom
@@ -146,24 +148,27 @@ class bulletinManager:
 			self.logger.writeLog(self.logger.EXCEPTION,"Exception: " + ''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
 
                         nomFichier = self.getFileName(unBulletin,error=True,compteur=compteur)
-			unFichier = os.open( self.pathTemp + nomFichier , os.O_CREAT | os.O_WRONLY )
+                        tempNom = self.pathTemp + nomFichier
+			unFichier = os.open( tempNom, os.O_CREAT | os.O_WRONLY )
 
                 os.write( unFichier , unBulletin.getBulletin(includeError=includeError) )
                 os.close( unFichier )
-                os.chmod(self.pathTemp + nomFichier,0644)
+                os.chmod(tempNom,0644)
 
-		# Fetch du path de destination
-		pathDest = self.getFinalPath(unBulletin)
+		if self.use_pds == 'yes':
+		    pathDest = self.getFinalPath(unBulletin)
 
-		# Si le répertoire n'existe pas, le créer
-		if not os.access(pathDest,os.F_OK):
+		    if not os.access(pathDest,os.F_OK):
 			os.mkdir(pathDest, 0755)
 
-		# Déplacement du fichier vers le répertoire final
-                os.rename( self.pathTemp + nomFichier , pathDest + nomFichier )
+                    os.rename( tempNom , pathDest + nomFichier )
+		    self.logger.writeLog(self.logger.INFO, "Ecriture du fichier <%s>",pathDest + nomFichier)
+                else: 
+                    fet.directingest( nomFichier, self.mapCircuits[entete]['routing_groups'], self.mapCircuits[entete]['priority'], tmppath, self.logger )
+                    os.unlink(tmppath)
 
-                # Le transfert du fichier est un succes 
-		self.logger.writeLog(self.logger.INFO, "Ecriture du fichier <%s>",pathDest + nomFichier)
+
+
 
 	def __generateBulletin(self,rawBulletin):
 		"""__generateBulletin(rawBulletin) -> objetBulletin
