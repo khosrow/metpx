@@ -139,7 +139,8 @@ class socketManagerAm(socketManager.socketManager):
 
                 Description:
                 Envoi au socket correspondant un bulletin AM et indique
-                si le bulletin a ete transfere totalement ou non.
+                si le bulletin a ete transfere totalement ou non.  Chaque
+		envoi s'assure de l'etat de la connexion.
 
                 Auteur:
                 Pierre Michaud
@@ -151,15 +152,31 @@ class socketManagerAm(socketManager.socketManager):
                         #preparation du bulletin pour l'envoi
                         data = self.wrapBulletin(bulletin)
 
-                        #envoi du bulletin
-                        bytesSent = self.socket.send(data)
+                        #tentative d'envoi et controle de la connexion
+                        #mettre le try/except dans un while(1)????
+                        try:
+                                #envoi du bulletin
+                                bytesSent = self.socket.send(data)
 
-                        #verifier si l'envoi est un succes
-                        if bytesSent != len(data):
-                                return 0
-                        else:
-                                return 1
+                                #verifier si l'envoi est un succes
+                                if bytesSent != len(data):
+                                        self.connected=False
+                                        return 0
+                                else:
+                                        return 1
 
-                except:
-                        self.logger.writeLog(self.logger.DEBUG,"socketManagerAm.sendBulletin(): erreur d'envoi")
+                        except socket.error, e:
+                                #erreurs potentielles: 104, 107, 110 ou 32
+                                self.logger.writeLog(self.logger.ERROR,"senderAm.write(): la connexion est ro
+mpue: %s",str(e.args))
+                                #modification du statut de la connexion
+                                #tentative de reconnexion
+                                self.connected = False
+                                self.logger.writeLog(self.logger.INFO,"senderAm.write(): tentative de reconne
+xion")
+                                self.socket.close()
+                                self._socketManager__establishConnection()
+
+                except Exception, e:
+                        self.logger.writeLog(self.logger.ERROR,"socketManagerAm.sendBulletin(): erreur d'envoi: %s",str(e.args))
                         raise
