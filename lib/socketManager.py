@@ -376,4 +376,10 @@ class socketManager:
 		"""
                 raise socketManagerException("Méthode non implantée (méthode abstraite checkNextMsgStatus)")
 
-
+	def setConnected(self,valeur):
+		"""
+		Description: modifie le statut de l'attribut connected
+		Auteur: PM
+		Date: janvier 2005
+		"""
+		self.connected = valeur

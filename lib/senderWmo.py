@@ -144,16 +144,18 @@ class senderWmo(gateway.gateway):
 
                 Description:
                 Lit les bulletins contenus dans un repertoire.  Le repertoire
-		contient les bulletins de la priorite courante.
+		contient les bulletins de la priorite courante.  Comme la methode
+		gateway.run() n'est pas redefini ici, read() verifie la validite 
+		de la connexion
 
                 Nom:
                 Pierre Michaud
 
                 Date:
                 Novembre 2004
+		Modifications: Janvier 2005
                 """
                 data = []
-
 		#lecture de la selection precedente
 		liste = self.unBulletinManagerWmo.getListeNomsFichiersAbsolus()
 		#si rien n'a ete envoye lors de la derniere lecture,
@@ -193,6 +195,7 @@ class senderWmo(gateway.gateway):
 
                 Date:
                 Decembre 2004
+		Modifications: Janvier 2005
                 """
 
                 self.logger.writeLog(self.logger.DEBUG,"%d nouveaux bulletins sont envoyes",len(data))
@@ -203,17 +206,22 @@ class senderWmo(gateway.gateway):
 				rawBulletin = data[key]
 				unBulletinWmo = bulletinWmo.bulletinWmo(rawBulletin,self.logger,finalLineSeparator='\r\r\n')
 
-				#FIXME s'assurer que la gestion des dejaChoisis est mise a jour
-				#en fonction du succes ou de l'echec de sendBulletin
-
 				#envoi du bulletin wmo
 				succes = self.unSocketManagerWmo.sendBulletin(unBulletinWmo)
 
 				#si le bulletin a ete envoye correctement, le fichier
-				#est efface
+				#est efface, sinon le bulletin est retire de la liste
+				#de fichier deja envoyes
 				if succes:
 					self.unBulletinManagerWmo.effacerFichier(key)
+                			self.logger.writeLog(self.logger.DEBUG,"%s est efface",key)
+				else:
+					if self.listeFichiersDejaChoisis.count(key)>0:
+						self.listeFichiersDejaChoisis.remove(key)
 
-			except:
-                		self.logger.writeLog(self.logger.ERROR,"senderWmo.write(..): Erreur ecriture")
+			except Exception, e:
+				if e==104 or e==110 or e==32 or e==107:
+                			self.logger.writeLog(self.logger.ERROR,"senderWmo.write(): la connexion est rompue: %s",str(e.args))
+				else:
+                			self.logger.writeLog(self.logger.ERROR,"senderWmo.write(): erreur: %s",str(e.args))
 				raise
