@@ -45,9 +45,11 @@ class receiverWmo(gateway.gateway):
                    Date:        Octobre 2004
 		"""
 		gateway.gateway.shutdown(self)
-		resteDuBuffer, nbBullEnv = self.unSocketManagerWmo.closeProperly()
 
-		self.write(resteDuBuffer)
+		if self.unSocketManagerWmo.isConnected():
+			resteDuBuffer, nbBullEnv = self.unSocketManagerWmo.closeProperly()
+
+			self.write(resteDuBuffer)
 
 		self.logger.writeLog(self.logger.INFO,"Succès du traîtement du reste de l'info")
 

@@ -48,9 +48,10 @@ class receiverAm(gateway.gateway):
 		"""
                 gateway.gateway.shutdown(self)
 
-		resteDuBuffer, nbBullEnv = self.unSocketManagerAm.closeProperly()
+		if self.unSocketManagerAm.isConnected():
+			resteDuBuffer, nbBullEnv = self.unSocketManagerAm.closeProperly()
 
-		self.write(resteDuBuffer)
+			self.write(resteDuBuffer)
 
 		self.logger.writeLog(self.logger.INFO,"Succès du traîtement du reste de l'info")
 

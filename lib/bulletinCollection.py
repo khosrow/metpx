@@ -12,16 +12,25 @@ class bulletinCollection(bulletin.bulletin):
 
 	   Gestion de 'collections' de bulletins.
 
+	   header	String
+			-Entete de la collection: TTAAii CCCC JJHHMM <BBB>
+			-Le champ BBB est facultatif
+
+	   mapStations	Map
+			- Une entree par station doit être présente dans le map,
+			  et la valeur doit être égale à None
+
 	   Auteur:	Louis-Philippe Thériault
   	   Date:	Novembre 2004
   	"""
 
-	def __init__(self,header,logger,lineSeparator='\n'):
+	def __init__(self,header,logger,mapStations,lineSeparator='\n'):
                 self.logger = logger
 		self.lineSeparator = lineSeparator
 
 		self.errorBulletin = None
                 self.logger.writeLog(self.logger.VERYVERBOSE,"Création d'une nouvelle collection: %s",header)
+
 
 	def getLength(self):
                 """getLength() -> longueur

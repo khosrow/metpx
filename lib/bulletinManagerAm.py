@@ -115,6 +115,9 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
             	   2 premieres lettres du bulletin et de la station, la definition
 	           est une string qui contient l'entete a ajouter au bulletin.
             
+		   self.mapEntetes2mapStations sera un map, avec pour chaque entete
+		   un map associé des stations, dont la valeur sera None.
+
             	   	Ex.: mapEntetes["SPCZPC"] = "CN52 CWAO "
 
 		   Auteur:	Louis-Philippe Thériault
@@ -129,17 +132,25 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 	        unPrefixe = ""
 	        uneLigneParsee = ""
 	        self.mapEntetes = {}
+		self.mapEntetes2mapStations = {}
 
+		# Construction des 2 map en même temps
         	for ligne in self.lireFicTexte(pathFichierStations):
 	                uneLigneParsee = ligne.split()
 	
 	                unPrefixe = uneLigneParsee[0][0:2]
 	                uneEntete = uneLigneParsee[0][2:6] + ' ' + uneLigneParsee[0][6:] + ' '
+
+			# Ajout d'un map vide pour l'entête courante
+			if unPrefixe + uneEntete not in self.mapEntetes2mapStations:
+				self.mapEntetes2mapStations[unPrefixe + uneEntete] = {}
 	
 	                for station in uneLigneParsee[1:]:
 	                        uneCle = unPrefixe + station
 	
 	                        self.mapEntetes[uneCle] = uneEntete
+
+				self.mapEntetes2mapStations[unPrefixe + uneEntete][station] = None
 
 	        
         def getFileName(self,bulletin,error=False):

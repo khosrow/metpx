@@ -129,6 +129,10 @@ class gateway:
 				if e.args[0] == "Le lecteur ne peut être accédé":
 				# Lecture impossible, il ne devrait plus y avoir
 				# de données en attente
+					if len(data) > 0:
+						self.write(data)
+						data = []
+
 					self.establishConnection()
 				else:
 					raise
