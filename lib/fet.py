@@ -177,6 +177,13 @@ def lockStopOrDie(lfn, cmd):
         pass
       os.unlink( lfn )
       sys.exit(0)
+    elif cmd == 'reload' :
+      try:
+        os.kill(lockpid,signal.SIGHUP)
+        sys.exit(0)
+      except:
+        pass
+      sys.exit(1)
     else:
       print "FATAL: queue locked by process: " + repr(lockpid)
       sys.exit(1)
