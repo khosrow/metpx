@@ -39,6 +39,10 @@ class bulletinManager:
 
 				Ex: mapEnteteDelai = { 'CA':(5,20),'WO':(20,40)}
 
+	   SMHeaderFormat	Bool
+
+				- Ajout du champ "AAXX jjhh4\\n" aux bulletins SM/SI.
+
 	   ficCollection	path
 
 				- Path vers le fichier de collection correctement formatte
@@ -184,7 +188,7 @@ class bulletinManager:
                         en format absolu
                 -listeFichiersDejaChoisis (optionnel):
                         les fichiers choisis lors du
-                        precedent appel
+                        precedent appel, en format absolu
 		-priorite (optionnel):
 			si priorite = 1 ou True, la methode ordonnancer()
 			est executee
@@ -221,13 +225,16 @@ class bulletinManager:
 		
 			#lecture du contenu des fichiers et
 			#chargement de leur contenu
-			return self.getMapBulletinsBruts(listeFichiers,repertoireChoisi)
+			map = self.getMapBulletinsBruts(listeFichiers)
+		
+			#return self.getMapBulletinsBruts(listeFichiers)
+			return map
 
 		except:
 			self.logger.writeLog(self.logger.ERROR,"(Erreur de chargement des bulletins)")
 			raise
 
-	def getMapBulletinsBruts(self,listeFichiers,repertoireChoisi):
+	def getMapBulletinsBruts(self,listeFichiers):
                 """
                 Nom:
 		getMapBulletinsBruts
@@ -235,8 +242,7 @@ class bulletinManager:
                 Parametres d'entree:
                 -listeFichiers:
                         les fichiers a lire
-		-repertoireChoisi:
-			chemin absolu du repertoire a consulter
+			en format absolu
 
                 Parametres de sortie:
                 -mapBulletinsBruts:
@@ -260,12 +266,15 @@ class bulletinManager:
 			self.mapBulletinsBruts = {}
 			#lecture et mapping du contenu brut des fichiers
                         for fichier in listeFichiers:
-                                if os.access(repertoireChoisi+'/'+fichier,os.F_OK|os.R_OK) !=1:
+                                #if os.access(repertoireChoisi+'/'+fichier,os.F_OK|os.R_OK) !=1:
+                                if os.access(fichier,os.F_OK|os.R_OK) !=1:
                                         raise bulletinManagerException("Fichier inexistant")
-                                fic = open(repertoireChoisi+'/'+fichier,'r')
+                                #fic = open(repertoireChoisi+'/'+fichier,'r')
+                                fic = open(fichier,'r')
                                 rawBulletin = fic.read()
                                 fic.close()
-                                self.mapBulletinsBruts[repertoireChoisi+'/'+fichier]=rawBulletin
+                                #self.mapBulletinsBruts[repertoireChoisi+'/'+fichier]=rawBulletin
+                                self.mapBulletinsBruts[fichier]=rawBulletin
 
                         return self.mapBulletinsBruts
 
@@ -284,7 +293,7 @@ class bulletinManager:
 			en format absolu
                 -listeFichiersDejaChoisis:
 			les fichiers choisis lors du
-                	precedent appel	
+                	precedent appel	en format absolu
 
                 Parametres de sortie:
                 -listeFichiersChoisis: 
@@ -305,13 +314,19 @@ class bulletinManager:
 			#lecture du contenu du repertoire
 			listeFichiersChoisis = os.listdir(repertoire)
 
+			#transformation en format absolu
+			liste = []
+			for fichier in listeFichiersChoisis:
+				data = repertoire+'/'+fichier
+				liste.append(data)
+			listeFichiersChoisis = liste
+
 			#validation avec les fichiers deja lus
 			i=0
 			while True:
 				if i>=len(listeFichiersChoisis):
 					break
 				if listeFichiersChoisis[i] in listeFichiersDejaChoisis:
-					print "listeFichiersChoisis[i] = ",i
 					listeFichiersChoisis.pop(i)
 					continue
 				i+=1
@@ -362,7 +377,7 @@ class bulletinManager:
 		try:
 			os.remove(nomFichier)
 		except:
-			self.logger.writeLog(self.logger.ERROR,"(BulletinManager.effacerFichier(): Erreur d'effacement d'un bulletin)")
+                        self.logger.writeLog(self.logger.ERROR,"(BulletinManager.effacerFichier(): Erreur d'effacement d'un bulletin)")
 			raise
 
 	def __normalizePath(self,path):
@@ -707,7 +722,7 @@ class bulletinManager:
 			Pouvoir vérifier qu'un bulletin soit dans les délais 
 			acceptables.
 
-		   Visibilité:	Privée
+		   Visibilité:	Publique
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
