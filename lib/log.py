@@ -6,18 +6,49 @@ sys.path.append(sys.path[0] + '/../lib/importedLibs/logging')
 import logging, logging.handlers
 
 class log:
-	""""""
+	"""Classe pour le log.
 
-	def __init__(self,filename,name='MainLog'):
-		# Init du handler et du formatter pour le log
-		self.TimedRotatingFileHandler = logging.handlers.TimedRotatingFileHandler(filename, when='h', interval=1, backupCount=24)
-		self.Formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s","%x %X")
-		self.TimedRotatingFileHandler.setFormatter(self.Formatter)
+	   Pour inscrire un message au log, il suffit d'appeler
+	   writeLog.
 
-		self.log = logging.Logger(name)
-		self.log.addHandler(self.TimedRotatingFileHandler)
+	   Pour l'instanciation:
 
-#		self.log.setLevel(logging.INFO)
+		filename:	path
+				-Chemin de destination pour le log
+
+		debug:		booléen
+				-Si à True, 2 logs sont créés, dont 1
+				 qui est "very verbose"
+
+	   Auteur:	Louis-Philippe Thériault
+	   Date:	Octobre 2004
+	"""
+
+	def __init__(self,filename,debug=True):
+		self.debug = debug
+
+		# Init du handler et du formatter pour le log normal
+		unTimedRotatingFileHandler = logging.handlers.TimedRotatingFileHandler(filename, when='h', interval=1, backupCount=24)
+		unFormatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s","%x %X")
+		unTimedRotatingFileHandler.setFormatter(unFormatter)
+
+                # Création des loggers
+                self.log = logging.Logger('root')
+
+                # Ajout des handlers
+                self.log.addHandler(unTimedRotatingFileHandler)
+
+                # Ajout des niveaux de loggers
+                self.log.setLevel(logging.INFO)
+
+		if self.debug:
+	                # Init du handler et du formatter pour le log debug
+	                unTimedRotatingFileHandlerDebug = logging.handlers.TimedRotatingFileHandler(filename+'_debug', when='h', interval=1, backupCount=24)
+	                unTimedRotatingFileHandlerDebug.setFormatter(unFormatter)
+
+			self.logDebug = logging.Logger("Debug")
+			self.logDebug.addHandler(unTimedRotatingFileHandlerDebug)
+			self.logDebug.setLevel(0)
 
 		self.CRITICAL = logging.CRITICAL
 		self.ERROR = logging.ERROR
@@ -25,30 +56,39 @@ class log:
 		self.FATAL = logging.FATAL
 		self.WARNING = logging.WARNING
 		self.INFO = logging.INFO
-		self.EXCEPTION = 'EXCEPTION'
-		self.VERYVERBOSE = "VERYVERBOSE"	# Niveau de logging 5
+		self.EXCEPTION = logging.ERROR
+		self.VERYVERBOSE = 5		# Niveau de logging 5
 
 	def writeLog(self, level, msg, *args, **kwargs):
-		""""""
-		if level == self.CRITICAL:
-			self.log.critical(msg, *args, **kwargs)
-		elif level == self.ERROR:
-                        self.log.error(msg, *args, **kwargs)
-                elif level == self.DEBUG:
-                        self.log.debug(msg, *args, **kwargs)
-                elif level == self.FATAL:
-                        self.log.fatal(msg, *args, **kwargs)
-                elif level == self.WARNING:
-                        self.log.warning(msg, *args, **kwargs)
-                elif level == self.INFO:
-                        self.log.info(msg, *args, **kwargs)
-		elif level == self.EXCEPTION:
-                        self.log.error(msg, *args, **kwargs)
-		elif level == self.VERYVERBOSE:
-                        self.log.log(5, msg, *args, **kwargs)
-		else:
-                        self.log.log(level, msg, *args, **kwargs)
+		"""writeLog(level,msg[,args])
 
-	def closeLog(self):
-		""""""
-		pass
+		   level:	Attributs de la classe log
+				-Valeurs possibles:
+					(CRITICAL,ERROR,DEBUG,
+					 FATAL,WARNING,INFO,
+					 EXCEPTION,VERYVERBOSE)
+				-ERROR et EXCEPTION sont la 
+				 même chose
+
+		   msg:		String
+				-Message à inscrire dans le log
+
+		   args:	Arguments séparés par une virgule
+				-Même système de "remplacement" de
+				 variables que les string en C.
+				 ex: %s remplacé par une string,
+				     %d remplacé par un décimal
+
+		   L'on peut soir bâtir le message par concaténation (méthode
+		   standard dans python) ou le remplacement de tokens en C.
+
+		  Auteur:	Louis-Philippe Thériault
+		  Date:		Octobre 2004
+		"""
+                self.log.log(level, msg, *args, **kwargs)
+
+		if self.debug:
+			self.logDebug.log(level, msg, *args, **kwargs)
+
+
+

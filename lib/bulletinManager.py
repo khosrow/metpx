@@ -53,7 +53,7 @@ class bulletinManager:
 		try:
 			unFichier = os.open( self.pathTemp + nomFichier , os.O_CREAT | os.O_WRONLY )
 
-		except OSError, e:
+		except (OSError,TypeError), e:
 			# Le nom du fichier est invalide, génération d'un nouveau nom
 
 	                self.logger.writeLog(self.logger.WARNING,"Manipulation du fichier impossible! (Ecriture avec un nom non standard)")
