@@ -207,4 +207,7 @@ suivants:
 		raise socketManagerException("Méthode non implantée (méthode abstraite unwrapBulletin)")
 
 	def isConnected(self):
-		"""isConnected() -> bool"""	
+		"""isConnected() -> bool
+
+		   Retourne True si la connection est établie."""
+		return self.connected

@@ -17,41 +17,37 @@ class bulletinManager:
 	   Un bulletin manager est en charge de la lecture et écriture des
 	   bulletins sur le disque."""
 
-	def __init__(self,connectionManager,pathTemp,pathSource=None,pathDest=None,maxCompteur=99999):
+	def __init__(self,pathTemp,pathSource=None,pathDest=None,maxCompteur=99999,lineSeparator='\n'):
 
-		self.connectionManager = connectionManager
-		self.pathSource = bulletinManager.normalizePath(pathSource)
-		self.pathDest = bulletinManager.normalizePath(pathDest)
-		self.pathTemp = bulletinManager.normalizePath(pathTemp)
+		self.pathSource = self.__normalizePath(pathSource)
+		self.pathDest = self.__normalizePath(pathDest)
+		self.pathTemp = self.__normalizePath(pathTemp)
 		self.maxCompteur = maxCompteur
 		self.compteur = 0
-		self.bulletinList = []
+		self.extension = None
+		self.lineSeparator = lineSeparator
 
-	def writeBulletinToDisk(self):
-		"""writeBulletinToDisk() -> nbBulletinsEcrits
+	def writeBulletinToDisk(self,unRawBulletin):
+		"""writeBulletinToDisk(bulletin)
 
-		   nbBulletinsEcrits	: int
-
-		   Écrit tous les bulletins dans la liste des bulletins sur le disque"""
+		   Écrit le bulletin sur le disque. Le bulletin est une simple string."""
 		if self.pathDest == None:
 			raise bulletinManagerException("opération impossible, pathDest n'est pas fourni")
 
-		nbBulletinsEcrits = 0
-
-		while len(self.bulletinList) > 0:
-			if self.compteur > self.maxCompteur:
+		if self.compteur > self.maxCompteur:
 				self.compteur = 1
 
-			self.compteur += 1
+		self.compteur += 1
 
-			unBulletin = self.bulletinList.pop(0)
+		unBulletin = self.__generateBulletin(unRawBulletin)
+		unBulletin.doSpecificProcessing()
 
-			nomFichier = self.__getFileName(unBulletin)
+		nomFichier = self.__getFileName(unBulletin)
 
-			try:
-				unFichier = os.open( self.pathTemp + nomFichier , os.O_CREAT | os.O_WRONLY )
+		try:
+			unFichier = os.open( self.pathTemp + nomFichier , os.O_CREAT | os.O_WRONLY )
 
-			except OSError:
+		except OSError:
 			# Le nom du fichier est invalide, génération d'un nouveau nom
 
 #				FIXME
@@ -59,35 +55,38 @@ class bulletinManager:
 #               	        utils.writeLog(log,"*** Exception: " + str(inst.args[0]))
 #                       	utils.writeLog(log,"Bulletin :\n" + unBulletin, sync=True)
 
-	                        nomFichier = self.__getFileName(unBulletin,error=True)
-				unFichier = os.open( self.pathTemp + nomFichier , os.O_CREAT | os.O_WRONLY )
+                        nomFichier = self.__getFileName(unBulletin,error=True)
+			unFichier = os.open( self.pathTemp + nomFichier , os.O_CREAT | os.O_WRONLY )
 
-                        os.write( unFichier , unBulletin.getBulletin() )
-                        os.close( unFichier )
-                        os.chmod(self.pathTemp + nomFichier,0644)
+                os.write( unFichier , unBulletin.getBulletin() )
+                os.close( unFichier )
+                os.chmod(self.pathTemp + nomFichier,0644)
 
-                        os.rename( self.pathTemp + nomFichier , self.pathDest + nomFichier )
+                os.rename( self.pathTemp + nomFichier , self.pathDest + nomFichier )
 
-			nbBulletinsEcrits += 1
-
-                        # Le transfert du fichier est un succes FIXME
+                       # Le transfert du fichier est un succes FIXME
 #                        utils.writeLog(log,'Ecriture du fichier <' + destDir + nomFic + '>')
 
-		return nbBulletinsEcrits
+	def __generateBulletin(self,rawBulletin):
+	"""__generateBulletin(rawBulletin) -> objetBulletin
+
+	   Retourne un objetBulletin d'à partir d'un bulletin
+	   "brut" """
+		raise bulletinManagerException('Méthode non implantée (méthode abstraite __generateBulletin)')
+
 
 	def readBulletinFromDisk(self):
 		pass
 
-	def normalizePath(path):
+	def __normalizePath(path):
 		"""normalizePath(path) -> path
 
 		   Retourne un path avec un '/' à la fin"""
-	        if path != '' and path[-1] != '/':
-	                path = path + '/'
+		if path != None:
+		        if path != '' and path[-1] != '/':
+		                path = path + '/'
 
 	        return path
-
-	normalizePath = staticmethod(normalizePath)
 
 	def __getFileName(self,bulletin,error=False):
 		"""__getFileName(bulletin[,error]) -> fileName

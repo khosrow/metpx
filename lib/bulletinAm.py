@@ -45,6 +45,11 @@ class bulletinAm(bulletin.bulletin):
 		self.mapEntetes = mapEntetes
 		self.SMHeaderFormat = SMHeaderFormat
 
+		self.station = "PASCALCULE"		# None veut dire qu'elle n'est pas trouvée.
+							# C'est pour ca qu'elle est initialisée comme
+							# ca.
+		self.station = self.getStation()
+
         def getBulletin(self):
                 """getBulletin() -> bulletin
 
@@ -63,10 +68,56 @@ class bulletinAm(bulletin.bulletin):
                    station      : String
 
                    Retourne la station associée au bulletin,
-                   lève une exception si elle est introuvable."""
-		if self.uneStation == None:
-	                self.uneStation = bulletinLib.getStationMeteo(contenuDeBulletin) #FIXME
-		return self.uneStation
+                   retourne None si elle est introuvable."""
+		if self.station == "PASCALCULE" and len(self.getHeader().split()[0]) == 2:
+
+        		station  = ""
+		        premiereLignePleine = ""
+			bulletin = self.bulletin
+
+		        # Cas special, il faut aller chercher la prochaine ligne pleine
+		        for ligne in bulletin[1:]:
+		                premiereLignePleine = ligne
+
+                		if len(premiereLignePleine) > 1:
+		                        break
+
+		        # Embranchement selon les differents types de bulletins
+		        if bulletin[0][0:2] == "SA":
+		                if bulletin[1].split()[0] in ["METAR","LWIS"]:
+		                        station = premiereLignePleine.split()[1]
+                		else:
+		                        station = premiereLignePleine.split()[0]
+
+		        elif bulletin[0][0:2] == "SP":
+		                station = premiereLignePleine.split()[1]
+
+		        elif bulletin[0][0:2] in ["SI","SM"]:
+		                station = premiereLignePleine.split()[0]
+
+		        elif bulletin[0][0:2] in ["FC","FT"]:
+		                if premiereLignePleine.split()[1] == "AMD":
+		                        station = premiereLignePleine.split()[2]
+		                else:
+		                        station = premiereLignePleine.split()[1]
+
+		        elif bulletin[0][0:2] in ["UE","UG","UK","UL","UQ","US"]:
+                		station = premiereLignePleine.split()[2]
+
+		        elif bulletin[0][0:2] in ["RA","MA","CA"]:
+		                station = premiereLignePleine.split()[0].split('/')[0]
+
+		                if station[0] == '?':
+		                        station = station[1:]
+		        else:
+		                station = None
+
+		        self.station = station
+		
+		elif len(self.getHeader().split()[0]) != 2:
+			station = "PASDESTATION"
+
+		return self.station
 
 
         def doSpecificProcessing(self):
@@ -95,7 +146,7 @@ class bulletinAm(bulletin.bulletin):
 			station = self.getStation()			
 
 			# Fetch de l'entête
-			if self.uneStation != None:
+			if station != None:
 	                	# Construction de la cle
 	                	if premierMot != "SP":
 	                        	uneCle = premierMot + station

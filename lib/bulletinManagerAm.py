@@ -1,3 +1,28 @@
+"""Gestion des bulletins "AM" """
+
+import bulletinManager
+
+__version__ = '2.0'
+
+class bulletinManagerAm(bulletinManager.bulletinManager):
+	"""pas déf"""
+
+	def __init__(self,pathTemp,pathSource=None, \
+			pathDest=None,maxCompteur=99999,lineSeparator='\n', \
+			pathFichierCircuit=None, SMHeaderFormat=False, pathFichierStations=None):
+
+		bulletinManager.bulletinManager.__init__(self,pathTemp, \
+						pathSource=None,pathDest=None,maxCompteur=99999,lineSeparator='\n')
+
+		self.pathFichierCircuit = pathFichierCircuit
+		self.SMHeaderFormat = SMHeaderFormat
+		self.pathFichierStations = pathFichierStations
+
+
+
+
+
+
                                 # ----------------------------------------------------------------------
                                 # FIXME: À déplacer dans bulletinManagerAm
                                 # Si c'est un bulletin FC/FT, possibilite de plusieurs bulletins,
