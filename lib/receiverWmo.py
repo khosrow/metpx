@@ -30,7 +30,8 @@ class receiverWmo(gateway.gateway):
 			bulletinManagerWmo.bulletinManagerWmo(	self.config.pathTemp,logger, \
 								pathDest = self.config.pathDestination, \
 								pathFichierCircuit = self.config.ficCircuits, \
-								extension = self.config.extension \
+								extension = self.config.extension, \
+								mapEnteteDelai = self.config.mapEnteteDelai \
 								) 
 
         def shutdown(self):
