@@ -94,7 +94,7 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
                 return bulletinAm.bulletinAm(rawBulletin,self.logger,self.lineSeparator,self.mapEntetes,self.SMHeaderFormat)
 
 
-        def writeBulletinToDisk(self,unRawBulletin):
+        def writeBulletinToDisk(self,unRawBulletin,includeError=False):
 		bulletinManager.bulletinManager.writeBulletinToDisk.__doc__ + \
 		"""### Ajout de bulletin manager AM ###
 
@@ -107,9 +107,9 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 		"""
 		if self.__isSplittable(unRawBulletin):
 			for rawBull in self.__splitBulletin(unRawBulletin):
-				bulletinManager.bulletinManager.writeBulletinToDisk(self,rawBull)
+				bulletinManager.bulletinManager.writeBulletinToDisk(self,rawBull,includeError=includeError)
 		else:
-			bulletinManager.bulletinManager.writeBulletinToDisk(self,unRawBulletin)
+			bulletinManager.bulletinManager.writeBulletinToDisk(self,unRawBulletin,includeError=includeError)
 
 	def initMapEntetes(self, pathFichierStations):
 		"""initMapEntetes(pathFichierStations)

@@ -161,6 +161,8 @@ class collectionManager(bulletinManager.bulletinManager):
 
 					self.mainDataMap['sequenceMap'][header+bbbType] = bbbType + 'B'
 					newBBB = bbbType + 'A'
+				elif bbb == 'COR':
+					newBBB = 'COR'
 				else:
 					newBBB = self.mainDataMap['sequenceMap'][header+bbbType]
 					self.mainDataMap['sequenceMap'][header+bbbType] = self.incrementToken(newBBB)
@@ -176,7 +178,8 @@ class collectionManager(bulletinManager.bulletinManager):
 				rawBulletin = bull.getBulletin()
 
 				# -> Génération du writeTime
-				if rawBulletin[:2] in self.collectionParams:
+				if newBBB[0] == 'C' and rawBulletin[:2] in self.collectionParams and \
+						int(self.getBullTimestamp(rawBulletin)[2:4]) in self.collectionParams[rawBulletin[:2]]['h_collection']:
 					writeTime = self.getWriteTime(self.getBullTimestamp(rawBulletin),self.collectionParams[rawBulletin[:2]]['m_primaire'])
 				else:
 					writeTime = time.time()
@@ -284,7 +287,7 @@ class collectionManager(bulletinManager.bulletinManager):
                 nbMinNow = 60 * 24 * int(now[0:2]) + 60 * int(now[2:4]) + int(now[4:])
                 nbMinBullTime = 60 * 24 * int(bullTime[0:2]) + 60 * int(bullTime[2:4]) + int(bullTime[4:])
 
-		return nbMinNow <= nbMinBullTime
+		return nbMinNow < nbMinBullTime
 
         def handleCollection(self,rawBulletin):
                 """handleCollection(rawBulletin)
@@ -304,7 +307,7 @@ class collectionManager(bulletinManager.bulletinManager):
 			writeTime = self.getWriteTime(self.getBullTimestamp(rawBulletin),self.collectionParams[rawBulletin[:2]]['m_primaire'])
 
 			if not entete in self.mapEntetes2mapStations:
-				raise bulletinManagerException("Entete non définie dans le fichier de stations")
+				raise bulletinManager.bulletinManagerException("Entete non définie dans le fichier de stations")
 
 			self.mainDataMap['collectionMap'][rawBulletin.splitlines()[0]] = \
 				bulletinCollection.bulletinCollection(self.logger,self.mapEntetes2mapStations[entete],
@@ -341,7 +344,7 @@ class collectionManager(bulletinManager.bulletinManager):
 
 		gmtime = time.gmtime()
 
-		gmyear, gmmonth, gmday = gmtime.tm_mon, gmtime.tm_mon, gmtime.tm_mday
+		gmyear, gmmonth, gmday = gmtime.tm_year, gmtime.tm_mon, gmtime.tm_mday
 
 		if mday < gmday:
 		# Si le jour du bulletin est plus petit que le jour courant,
@@ -454,7 +457,7 @@ class collectionManager(bulletinManager.bulletinManager):
 			# Doit finir (l'heure) par 00
 				bbb = self.getBBB(rawBulletin)
 
-				return  rawBulletin[:2] in self.collectionParams or ( bbb != None and bbb[:2] in ['CC','RR','AA'] )
+				return  rawBulletin[:2] in self.collectionParams or ( bbb != None and bbb[0] in ['C','R','A'] )
 				# Si dans le type de bulletin a collecter OU si champ BBB :True
 			else:
 				return False
@@ -530,7 +533,7 @@ class collectionManager(bulletinManager.bulletinManager):
                         nomFichier = self.getFileName(unBulletin,error=True)
                         unFichier = os.open( self.pathTemp + nomFichier , os.O_CREAT | os.O_WRONLY )
 
-                os.write( unFichier , unBulletin.getBulletin() )
+                os.write( unFichier , unBulletin.getBulletin(includeError=True) )
                 os.close( unFichier )
                 os.chmod(self.pathTemp + nomFichier,0644)
 

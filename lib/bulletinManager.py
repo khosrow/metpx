@@ -41,7 +41,7 @@ class bulletinManager:
 		# Init du map des circuits
 		self.initMapCircuit(pathFichierCircuit)
 
-	def writeBulletinToDisk(self,unRawBulletin,compteur=True):
+	def writeBulletinToDisk(self,unRawBulletin,compteur=True,includeError=False):
 		"""writeBulletinToDisk(bulletin)
 
 		   Écrit le bulletin sur le disque. Le bulletin est une simple string."""
@@ -74,7 +74,7 @@ class bulletinManager:
                         nomFichier = self.getFileName(unBulletin,error=True,compteur=compteur)
 			unFichier = os.open( self.pathTemp + nomFichier , os.O_CREAT | os.O_WRONLY )
 
-                os.write( unFichier , unBulletin.getBulletin() )
+                os.write( unFichier , unBulletin.getBulletin(includeError=includeError) )
                 os.close( unFichier )
                 os.chmod(self.pathTemp + nomFichier,0644)
 

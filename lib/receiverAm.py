@@ -127,6 +127,6 @@ class receiverAm(gateway.gateway):
 			rawBulletin = data.pop(0)
 
 			# FIXME test ici si une erreur
-			self.unBulletinManagerAm.writeBulletinToDisk(rawBulletin)
+			self.unBulletinManagerAm.writeBulletinToDisk(rawBulletin,includeError=True)
 
 

@@ -137,17 +137,27 @@ class bulletin:
 
 				self.bulletin[i] = self.bulletin[i].replace(oldchars,newchars)
 
-	def getBulletin(self):
-		"""getBulletin() -> bulletin
+	def getBulletin(self,includeError=False):
+		"""getBulletin([includeError]) -> bulletin
 
 		   bulletin	: String
+
+		   includeError:	Bool
+					- Si est à True, inclut l'erreur dans le corps du bulletin
 
 		   Retourne le bulletin en texte
 
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
-		return string.join(self.bulletin,self.lineSeparator)
+		if self.errorBulletin == None:
+			return string.join(self.bulletin,self.lineSeparator)
+		else:
+			if includeError:
+		       	        return ("### " + self.errorBulletin[0] + self.lineSeparator + "ERROR BULLETIN" + self.lineSeparator) + string.join(self.bulletin,self.lineSeparator)
+			else:
+				return string.join(self.bulletin,self.lineSeparator)
+
 
 	def getLength(self):
                 """getLength() -> longueur
@@ -247,7 +257,7 @@ class bulletin:
                    Date:        Octobre 2004
                 """
 		if self.errorBulletin == None:
-	                self.errorBulletin = (msg)
+	                self.errorBulletin = [msg]
 
 
 	def getDataType(self):

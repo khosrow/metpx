@@ -164,8 +164,10 @@ class bulletinCollection(bulletin.bulletin):
 		"""
                 return self.mapCollection['header'].split(' ')[1]
 
-	def getBulletin(self):
+	def getBulletin(self,includeError=None):
 		"""Utiliser self.getCollection()
+
+		   N'inclut pas l'erreur
 		"""
 		return self.getCollection()
 
@@ -250,7 +252,7 @@ class bulletinCollection(bulletin.bulletin):
 				# Ajout du data pour la station
 				coll.append(self.mapCollection['mapStations'][station])
 
-		return self.lineSeparator.join(coll)
+		return self.lineSeparator.join(coll) + self.lineSeparator
 
 	def addData(self,station,data):
 		"""addData(station,data)

@@ -60,25 +60,6 @@ class bulletinAm(bulletin.bulletin):
 		# Print de la station pour le debug
 		self.logger.writeLog(logger.DEBUG,"Station: %s",str(self.station))
 
-        def getBulletin(self):
-                __doc__ = bulletin.bulletin.getBulletin.__doc__ + \
-		"""
-		   ### Ajout de bulletinAm ###
-
-                   Si une erreur est détectée, self.errorBulletin[1] 
-		   précède le bulletin.
-
-		   Auteur: 	Louis-Philippe Thériault
-		   Date:	Octobre 2004
-		"""
-		if self.errorBulletin == None:
-	                return string.join(self.bulletin,self.lineSeparator)
-		else:
-			if len(self.errorBulletin) == 1:
-				self.errorBulletin = self.errorBulletin + ("### " + self.errorBulletin[0] + self.lineSeparator + "ERROR BULLETIN" + self.lineSeparator)
-
-			return self.errorBulletin[1] + string.join(self.bulletin,self.lineSeparator)
-
         def getStation(self):
                 """getStation() -> station
 
@@ -212,14 +193,14 @@ class bulletinAm(bulletin.bulletin):
 
 			if station == None or uneEnteteDeBulletin == None:
 				if station == None:
-					self.errorBulletin = ("station non trouvée","### Pattern de station non trouve ou non specifie" + self.lineSeparator + "ERROR BULLETIN" + self.lineSeparator)
+					self.setError("Pattern de station non trouve ou non specifie")
 
 					self.logger.writeLog(self.logger.WARNING,"Pattern de station non trouve")
                                         self.logger.writeLog(self.logger.WARNING,"Bulletin:\n"+self.getBulletin())
 
                                 # L'entête n'a pu être trouvée dans le fichier de collection, erreur
                                 elif uneEnteteDeBulletin == None:
-                                        self.errorBulletin = ("entête non trouvée","### Entete non trouvee dans le fichier de collection" + self.lineSeparator  + "ERROR BULLETIN" + self.lineSeparator)
+                                        self.setError("Entete non trouvee dans le fichier de collection")
 
                                 	self.logger.writeLog(self.logger.WARNING,"Station <" + station + "> non trouvee avec prefixe <" + premierMot + ">")
                                         self.logger.writeLog(self.logger.WARNING,"Bulletin:\n"+self.getBulletin())
@@ -240,13 +221,3 @@ class bulletinAm(bulletin.bulletin):
 		"""
 	        return time.strftime("%d%H%M",time.localtime())
 
-        def setError(self,msg):
-		"""### Ajout de bulletinAm ###
-
-		   Le message est ajouté au début du bulletin
-
-		   Auteur:	Louis-Philippe Thériault
-		   Date:	Octobre 2004
-		"""
-		if self.errorBulletin == None:
-			self.errorBulletin = (msg,"### " + str(msg) + self.lineSeparator + "ERROR BULLETIN" + self.lineSeparator)
