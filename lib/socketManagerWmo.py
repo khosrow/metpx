@@ -182,7 +182,6 @@ class socketManagerWmo(socketManager.socketManager):
 			data = self.wrapBulletin(bulletin)
 
 			#tentative d'envoi et controle de la connexion
-			#mettre le try/except dans un while(1)????
 			try:
 				#envoi du bulletin
                 		bytesSent = self.socket.send(data)
