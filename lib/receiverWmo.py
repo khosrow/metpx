@@ -41,6 +41,11 @@ class receiverWmo(gateway.gateway):
 		   Fermeture du socket et finalisation du traîtement du
 		   buffer.
 
+                   Utilisation:
+
+                        Fermeture propre du programme via sigkill/sigterm
+
+                   Visibilité:  Publique
                    Auteur:      Louis-Philippe Thériault
                    Date:        Octobre 2004
 		"""
@@ -60,6 +65,12 @@ class receiverWmo(gateway.gateway):
 		   establishConnection ne fait que initialiser la connection
 		   socket. 
 
+                   Utilisation:
+
+                        En encapsulant la connection réseau par cette méthode, il est plus
+                        facile de gérer la perte d'une connection et sa reconnection.
+
+                   Visibilité:  Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
@@ -77,6 +88,7 @@ class receiverWmo(gateway.gateway):
 
 		   Le lecteur est le socket tcp, géré par socketManagerWmo.
 
+                   Visibilité:  Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
@@ -108,12 +120,14 @@ class receiverWmo(gateway.gateway):
 		return data
 
         def write(self,data):
-        	"""write(data)
+                __doc__ =  gateway.gateway.write.__doc__ + \
+        	"""### Ajout de receiverWmo ###
 
-	           data : Liste d'objets
-	
-	           Cette méthode prends le data lu par read, et fait le traîtement
-	           approprié.
+		   L'écrivain est un bulletinManagerWmo.
+
+                   Visibilité:  Privée
+                   Auteur:      Louis-Philippe Thériault
+                   Date:        Octobre 2004
 	        """
 
                 self.logger.writeLog(self.logger.VERYVERBOSE,"%d nouveaux bulletins seront écrits",len(data))
@@ -124,7 +138,6 @@ class receiverWmo(gateway.gateway):
 
 			rawBulletin = data.pop(0)
 
-			# FIXME test ici si une erreur
 			self.unBulletinManagerWmo.writeBulletinToDisk(rawBulletin)
 
 

@@ -1,8 +1,14 @@
 # -*- coding: UTF-8 -*-
 """Système efficace pour le logging"""
 
+# Gestion de paths relatifs
+pathDeLaLibrairie = '/'.join(__file__.split('/')[:-1])
+
+if not '/' in pathDeLaLibrairie:
+	pathDeLaLibrairie = '.'
+
 import sys
-sys.path.insert(1,sys.path[0] + '/../lib/importedLibs/'
+sys.path.insert(1,pathDeLaLibrairie + '/../lib/importedLibs/')
 
 import logging, logging.handlers
 
@@ -86,6 +92,7 @@ class log:
 		   L'on peut soir bâtir le message par concaténation (méthode
 		   standard dans python) ou le remplacement de tokens en C.
 
+		  Visibilité:	Publique
 		  Auteur:	Louis-Philippe Thériault
 		  Date:		Octobre 2004
 		"""

@@ -9,24 +9,22 @@ import socketManager
 class socketManagerWmo(socketManager.socketManager):
         __doc__ = socketManager.socketManager.__doc__ + \
         """
-        --- Spécialisation concrète pour la gestion de sockets WMO ---
+           ### Ajout de socketManagerWmo ###
 
-        ### Ajout de socketManagerWmo ###
+           * Attributs
 
-        * Attributs
+        	patternWmoRec           str
 
-        patternWmoRec           str
+	                                - Pattern pour le découpage d'entête
+	                                  par struct
 
-                                - Pattern pour le découpage d'entête
-                                  par struct
+	        sizeWmoRec              int
+	
+	                                - Longueur de l'entête (en octets)
+	                                  calculée par struct
 
-        sizeWmoRec              int
-
-                                - Longueur de l'entête (en octets)
-                                  calculée par struct
-
-        Auteur: Louis-Philippe Thériault
-        Date:   Octobre 2004
+           Auteur: Louis-Philippe Thériault
+           Date:   Octobre 2004
         """
 
         def __init__(self,logger,type='slave',localPort=9999,remoteHost=None,timeout=None):
@@ -47,6 +45,7 @@ class socketManagerWmo(socketManager.socketManager):
 
                    Définition de la méthode
 
+		   Visibilité:	Privée
                    Auteur:      Louis-Philippe Thériault
                    Date:        Octobre 2004
                 """
@@ -73,6 +72,7 @@ class socketManagerWmo(socketManager.socketManager):
 
                    Définition de la méthode
 
+		   Visibilité:	Privée
                    Auteur:      Louis-Philippe Thériault
                    Date:        Octobre 2004
                 """
@@ -86,6 +86,12 @@ class socketManagerWmo(socketManager.socketManager):
 		   compteur:	String
 				- Portion "compteur" du bulletin
 
+		   Utilisation:
+
+			Générer le compteur pour un bulletinWmo. L'on doit être sur que le bulletin
+			sera dans le queue de bulletins à envoyer.
+
+		   Visibilité:	Publique
                    Auteur:      Louis-Philippe Thériault
                    Date:        Octobre 2004
 		"""
@@ -102,6 +108,7 @@ class socketManagerWmo(socketManager.socketManager):
 
                    Définition de la méthode
 
+		   Visibilité:	Privée
                    Auteur:      Louis-Philippe Thériault
                    Date:        Octobre 2004
                 """

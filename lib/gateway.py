@@ -41,6 +41,7 @@ class gateway:
 				  messages. C'est le log principal du 
 				  programme
 
+	   Statut:	Abstraite
 	   Auteur:	Louis-Philippe Thériault
 	   Date:	Octobre 2004
 	"""
@@ -79,6 +80,7 @@ class gateway:
 		   que les ressources sont disponibles aussi). Est appelé si la
 		   connection, d'un côté ou l'autre, tombe.
 
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
@@ -93,6 +95,7 @@ class gateway:
 		   ingérée par l'écrivain. Elle lève une exception si
 		   une erreur est détectée.
 
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre
 		"""
@@ -106,6 +109,7 @@ class gateway:
 		   Cette méthode prends le data lu par read, et fait le traîtement
 		   approprié.
 
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 	        """
@@ -118,6 +122,7 @@ class gateway:
 		   non contenue peut être levée si le lecteur et l'écrivain
 		   ne sont pas disponibles.
 
+		   Visibilité:	Publique
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
@@ -149,11 +154,21 @@ class gateway:
 		   Ferme le lecteur et l'écrivain "proprement". À être
 		   redéfini.
 
+		   Visibilité:	Publique
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
 		self.logger.writeLog(self.logger.INFO,"Fermeture propre du gateway")
 
-	def checkLooping(self):
-		pass
+	def checkLooping(self, unElementDeData):
+		"""checkLooping() -> bool
+
+		   Permet de détecté que l'on reçoit du data que l'on a 
+		   déja reçu.
+
+		   Retourne True si pour l'objet passé on a du looping.
+
+		   Statut: Abstraite
+		"""
+		raise gatewayException("Méthode non implantée: gateway.gateway.checkLooping()")
 

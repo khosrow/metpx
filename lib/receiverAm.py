@@ -43,6 +43,11 @@ class receiverAm(gateway.gateway):
 		   Fermeture du socket et finalisation du traîtement du
 		   buffer.
 
+		   Utilisation:
+
+			Fermeture propre du programme via sigkill/sigterm
+
+		   Visibilité:	Publique
                    Auteur:      Louis-Philippe Thériault
                    Date:        Octobre 2004
 		"""
@@ -62,6 +67,12 @@ class receiverAm(gateway.gateway):
 		   establishConnection ne fait que initialiser la connection
 		   socket. 
 
+		   Utilisation:
+
+			En encapsulant la connection réseau par cette méthode, il est plus
+			facile de gérer la perte d'une connection et sa reconnection.
+
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
@@ -80,6 +91,7 @@ class receiverAm(gateway.gateway):
 
 		   Le lecteur est le socket tcp, géré par socketManagerAm.
 
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
@@ -110,13 +122,15 @@ class receiverAm(gateway.gateway):
 		return data
 
         def write(self,data):
-        	"""write(data)
+                __doc__ =  gateway.gateway.write.__doc__ + \
+                """### Ajout de receiverAm ###
 
-	           data : Liste d'objets
-	
-	           Cette méthode prends le data lu par read, et fait le traîtement
-	           approprié.
-	        """
+                   L'écrivain est un bulletinManagerAm.
+
+                   Visibilité:  Privée
+                   Auteur:      Louis-Philippe Thériault
+                   Date:        Octobre 2004
+                """
 
                 self.logger.writeLog(self.logger.VERYVERBOSE,"%d nouveaux bulletins seront écrits",len(data))
 
@@ -126,7 +140,6 @@ class receiverAm(gateway.gateway):
 
 			rawBulletin = data.pop(0)
 
-			# FIXME test ici si une erreur
 			self.unBulletinManagerAm.writeBulletinToDisk(rawBulletin,includeError=True)
 
 

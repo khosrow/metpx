@@ -113,6 +113,11 @@ class collectionManager(bulletinManager.bulletinManager):
 		   needsToBeCollected). Le bulletin peut ne pas être collecté mais aussi
 		   simplement 'séquencé', il sera alors directement écrit sur le disque.
 
+		   Utilisation:
+
+			Envoyer le bulletin pour la collection
+
+		   Visibilité:	Publique
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
@@ -152,6 +157,7 @@ class collectionManager(bulletinManager.bulletinManager):
 		                        self.mainDataMap['sequenceWriteQueue'].append({'writeTime':writeTime,'bull':bull})
 
 			# Sinon, aucune modification, le bulletin sera déplacé
+			# *** Normalement aucun bulletin se rendra ici ***
 			else:
 				self.logger.writeLog(self.logger.DEBUG,"Statut: [AUCUNE MODIF]")
 				bull = bulletinPlain.bulletinPlain(rawBulletin,self.logger)
@@ -210,6 +216,7 @@ class collectionManager(bulletinManager.bulletinManager):
 			self.mainDataMap['sequenceWriteQueue'].append({'writeTime':writeTime,'bull':bull})
 
 		# MAJ du fichier de statut
+		# FIXME
 				
 
 	def getBBB(self,rawBulletin):
@@ -222,6 +229,11 @@ class collectionManager(bulletinManager.bulletinManager):
 					- None si le bulletin n'a pas
 					  de champ BBB
 
+		   Utilisation:
+
+			Extraire le champ BBB du bulletin
+
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
@@ -239,6 +251,7 @@ class collectionManager(bulletinManager.bulletinManager):
 		   Le rawBulletin doit être dans la liste des bulletins à
 		   collecter.
 
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
@@ -247,6 +260,7 @@ class collectionManager(bulletinManager.bulletinManager):
 			entete = ' '.join(rawBulletin.splitlines()[0].split()[:2])
 			writeTime = time.time() + ( 60.0 * float(self.collectionParams[rawBulletin[:2]]['m_suppl']))
 
+			# L'entête doit être définie dans le fichier d'entêtes
                         if not entete in self.mapEntetes2mapStations:
                                 raise bulletinManager.bulletinManagerException("Entete non définie dans le fichier de stations")
 
@@ -263,6 +277,7 @@ class collectionManager(bulletinManager.bulletinManager):
                                 self.mainDataMap['sequenceMap'][entete + ' ' + 'RR'] = \
 					{'token':'RRA','deleteTime':time.time() + 60.0 * 60.0 * float(self.delaiMaxSeq)}
 			
+			# Génération du RRx pour la collection en retard
 			newBBB = self.mainDataMap['sequenceMap'][entete + ' ' + 'RR']['token']
 			self.mainDataMap['sequenceMap'][entete + ' ' + 'RR']['token'] = self.incrementToken(newBBB)
 
@@ -281,6 +296,12 @@ class collectionManager(bulletinManager.bulletinManager):
 
 		   Retourne vrai si le bulletin est dans la période de collection
 
+		   Utilisation:
+
+			Pour déterminer si le bulletin est dans la période de
+			collection primaire, ou en retard.
+
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
@@ -314,6 +335,7 @@ class collectionManager(bulletinManager.bulletinManager):
                    Le rawBulletin doit être dans la liste des bulletins à
                    collecter.
 
+		   Visibilité:	Privée
                    Auteur:      Louis-Philippe Thériault
                    Date:        Novembre 2004
                 """
@@ -353,6 +375,12 @@ class collectionManager(bulletinManager.bulletinManager):
 		   Gestion des wrap ups. Si un bulletin est reçu à 23h55 le 31 décembre 2005, le write
 		   time devra être généré en conséquence.
 
+		   Utilisation:
+
+			Retourne le temps d'écriture, pour les collections, dans leur
+			période de collection primaire.
+
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
@@ -384,6 +412,7 @@ class collectionManager(bulletinManager.bulletinManager):
 		   jjhhmm		String
 					- Date de création du bulletin
 
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
@@ -403,6 +432,12 @@ class collectionManager(bulletinManager.bulletinManager):
 
 		   Gère ici l'aspect de mise à jour par rapport au temps.
 
+		   Utilisation:
+
+			À être appelé à tout les passes, idéalement en un laps
+			de temps assez court.
+
+		   Visibilité:	Publique
 		   Auteur:      Louis-Philippe Thériault
                    Date:        Novembre 2004
 		"""
@@ -454,7 +489,8 @@ class collectionManager(bulletinManager.bulletinManager):
 				self.logger.writeLog(self.logger.VERYVERBOSE,"Effacement de la séquence %s", k)
 
 
-		# MAJ du fichier de statut FIXME
+		# MAJ du fichier de statut 
+		# FIXME
 
 	def loadStatusFile(self,pathFicStatus):
 		"""loadStatusFile(pathFicStatus)
@@ -465,9 +501,16 @@ class collectionManager(bulletinManager.bulletinManager):
 		   'pickle dump' d'un objet, et la clé de la DB est le nom
 		   de l'objet.
 
+		   Utilisation:
+
+			Si le programme a été arrêté, l'état est conservé dans ce fichier 
+			et les données seront chargées.
+
+		   Visibilité:	Privée
                    Auteur:      Louis-Philippe Thériault
                    Date:        Novembre 2004
 		"""
+		# FIXME
 		pass
 
 	def needsToBeCollected(self,rawBulletin):
@@ -476,6 +519,13 @@ class collectionManager(bulletinManager.bulletinManager):
 		   Retourne TRUE si le bulletin doit être collecté,
 		   false sinon.
 
+		   Utilisation:
+
+			Pour déterminer si le bulletin non instancié doit passe
+			par l'étape de collection. (Appelé par un gateway 
+			probablement)
+
+		   Visibilité:	Publique
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
@@ -508,6 +558,11 @@ class collectionManager(bulletinManager.bulletinManager):
 
                         Ex.: mapEntetes["SPCZPC"] = "CN52 CWAO "
 
+		   Note:
+
+			C'est le même code que pour le managerAm.
+
+		   Visibilité:	Privée
                    Auteur:      Louis-Philippe Thériault
                    Date:        Octobre 2004
                 """
@@ -545,6 +600,13 @@ class collectionManager(bulletinManager.bulletinManager):
 
 		   Écrit l'objet data dans le fichier nomFichier.
 
+		   Utilisation:
+
+			Pour avoir un mécanisme d'écriture de fichiers/gestion
+			d'erreur, mais qui ne fait pas le même traîtement que
+			bulletinManager.bulletinManager.writeBulletinToDisk().
+
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
@@ -585,7 +647,12 @@ class collectionManager(bulletinManager.bulletinManager):
         def __normalizePath(self,path):
                 """normalizePath(path) -> path
 
-                   Retourne un path avec un '/' à la fin"""
+                   Retourne un path avec un '/' à la fin
+
+		   Visibilité:	Publique
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
+		"""
                 if path != None:
                         if path != '' and path[-1] != '/':
                                 path = path + '/'
@@ -598,6 +665,11 @@ class collectionManager(bulletinManager.bulletinManager):
 		   Traîte le reste se l'information s'il y a lieu, puis mets
 		   à jour le fichier de statut.
 
+		   Utilisation:
+
+			Pour permettre la fermeture 'propre' du manager.
+
+		   Visibilité:	Publique
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
@@ -612,6 +684,11 @@ class collectionManager(bulletinManager.bulletinManager):
 						Ex:
 							incrementToken('AAB') -> 'AAC'
 
+		   Utilisation:
+
+			Pour générer le prochain token dans le séquencage
+
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
@@ -624,6 +701,12 @@ class collectionManager(bulletinManager.bulletinManager):
 					- Si l'heure d'arrivée du bulletin
 					  dépasse la limite permise, =True
 
+		   Utilisation:
+
+			Pour déterminer si un bulletin est trop en retard
+			pour le séquencage.
+
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""

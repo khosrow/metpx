@@ -1,10 +1,5 @@
 # -*- coding: UTF-8 -*-
-"""Définition de la superclasse socketManager.
-
-Ces classes servent à l'établissement de la connection, la 
-réception et envoi des bulletins et la vérification du respect 
-des contraintes relatives aux protocoles.
-"""
+"""Gestionnaire de sockets générique"""
 
 import socket
 import time
@@ -13,51 +8,52 @@ import string
 __version__ = '2.0'
 
 class socketManagerException(Exception):
-	"""Classe d'exception spécialisés relatives au socket
-managers"""
+	"""Classe d'exception spécialisés relatives au socket managers"""
 	pass
 
 class socketManager:
 	"""Classe abstraite regroupant toutes les fonctionnalitées 
-requises pour un gestionnaire de sockets. Les méthodes 
-qui ne retournent qu'une exception doivent êtres redéfinies 
-dans les sous-classes (il s'agit de méthodes abstraites).
-
-Les arguments à passer pour initialiser un socketManager sont les
-suivants:
-
-	type		'master','slave' (default='slave')
-
-			- Si master est fourni, le programme se 
-			  connecte à un hôte distant, si slave,
-			  le programme écoute pour une 
-			  connection.
-
-	localPort	int (default=9999)
-
-			- Port local ou se 'bind' le socket.
-
-	remoteHost	(str hostname,int port)
-
-			- Couple de (hostname,port) pour la 
-			  connection. Lorsque timeout secondes
-			  est atteint, un socketManagerException
-			  est levé.
-
-			- Doit être absolument fourni si type='master',
-			  et non fourni si type='slave'.
-
-	timeout		int (default=None)
-			
-			- Lors de l'établissement d'une connection 
-			  à un hôte distant, délai avant de dire 
-			  que l'hôte de réponds pas.
-
-	log		Objet Log (default=None)
-
-			- Objet de la classe Log
-
-"""
+	   requises pour un gestionnaire de sockets. Les méthodes 
+	   qui ne retournent qu'une exception doivent êtres redéfinies 
+	   dans les sous-classes (il s'agit de méthodes abstraites).
+	
+	   Les arguments à passer pour initialiser un socketManager sont les
+	   suivants:
+	
+		type		'master','slave' (default='slave')
+	
+				- Si master est fourni, le programme se 
+				  connecte à un hôte distant, si slave,
+				  le programme écoute pour une 
+				  connection.
+	
+		localPort	int (default=9999)
+	
+				- Port local ou se 'bind' le socket.
+	
+		remoteHost	(str hostname,int port)
+	
+				- Couple de (hostname,port) pour la 
+				  connection. Lorsque timeout secondes
+				  est atteint, un socketManagerException
+				  est levé.
+	
+				- Doit être absolument fourni si type='master',
+				  et non fourni si type='slave'.
+	
+		timeout		int (default=None)
+				
+				- Lors de l'établissement d'une connection 
+				  à un hôte distant, délai avant de dire 
+				  que l'hôte de réponds pas.
+	
+		log		Objet Log (default=None)
+	
+				- Objet de la classe Log
+	
+	   Auteur:	Louis-Philippe Thériault
+	   Date:	Septembre 2004
+	"""
 	def __init__(self,logger,type='slave',localPort=9999,remoteHost=None,timeout=None):
 		self.type = type
 		self.localPort = localPort
@@ -79,6 +75,7 @@ suivants:
 
 		   self.socket sera, après l'exécution, la connection.
 
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
@@ -155,6 +152,12 @@ suivants:
 		   Ferme le socket et finit de traîter le socket d'arrivée et de
 		   sortie.
 
+		   Utilisation:
+
+			Traîter l'information restante, puis éliminer le socket
+			proprement.
+
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
@@ -204,6 +207,7 @@ suivants:
 
 		   Retourne le prochain bulletin reçu, une chaîne vide sinon.
 
+		   Visibilité:	Publique
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
@@ -241,6 +245,12 @@ suivants:
 
 		   Lève une exception si la connection est perdue.
 
+		   Utilisation:
+
+			Copier le nouveau data reçu du socket dans l'attribut
+			du socketManager.
+
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
@@ -286,6 +296,7 @@ suivants:
 		   d'un compteur qui doit se suivre.
 
 		   Statut:	Abstraite
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
@@ -305,7 +316,8 @@ suivants:
 		   Retourne une chaîne vide s'il n'y a pas assez de données
 		   pour compléter le prochain bulletin.
 
-		   Statut:	Abstraite	
+		   Statut:	Abstraite
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
@@ -316,6 +328,7 @@ suivants:
 
 		   Retourne True si la connection est établie.
 
+		   Visibilité:	Publique
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
@@ -329,6 +342,7 @@ suivants:
 		   Statut du prochain bulletin dans le buffer.
 
 		   Statut:	Abstraite
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""

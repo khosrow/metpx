@@ -44,6 +44,7 @@ class socketManagerAm(socketManager.socketManager):
 
 		   Définition de la méthode
 
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
@@ -70,6 +71,7 @@ class socketManagerAm(socketManager.socketManager):
 		   Ne détecte pas si les données sont corrompues, limitations du 
 		   protocole AM ?
 
+		   Visibilité:	Publique
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
                 """
