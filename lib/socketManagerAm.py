@@ -2,10 +2,25 @@
 
 __version__ = '2.0'
 
-import struct
+import struct, socket
 import socketManager
 
 class socketManagerAm(socketManager.socketManager):
+	socketManager.socketManager.__doc__ + \
+	"""
+	### Ajout de socketManagerAm ###
+
+		patternAmRec		str
+
+					- Pattern pour le découpage d'entête
+					  par struct
+
+		sizeAmRec		int
+
+					- Longueur de l'entête (en octets) 
+					  calculée par struct
+	
+	"""
 
 	def __init__(self,type='slave',localPort=9999,remoteHost=None,timeout=None,log=None):
 		socketManager.__init__(self,type='slave',localPort=9999,remoteHost=None,timeout=None,log=None)
@@ -43,5 +58,25 @@ class socketManagerAm(socketManager.socketManager):
 	        else:
 	                return ''
 
+        def __checkNextMsgStatus(self):
+                """__checkNextMsgStatus() -> status
 
-	def
+                   status       : String élément de ('OK','INCOMPLETE','CORRUPT')
+
+                   Statut du prochain bulletin dans le buffer.
+                """
+                if len(self.inBuffer) >= self.sizeAmRec:
+                        (header,src_inet,dst_inet,threads,start,length,firsttime,timestamp,future) = \
+                                struct.unpack(self.patternAmRec,self.inBuffer[0:self.sizeAmRec])
+                else:
+                        return 'INCOMPLETE'
+
+                length = socket.ntohl(length)
+
+                if len(self.inBuffer) >= self.sizeAmRec + length:
+                        bulletin = self.inBuffer[self.sizeAmRec:self.sizeAmRec + length]
+
+                        return 'OK'
+                else:
+                        return 'INCOMPLETE'
+

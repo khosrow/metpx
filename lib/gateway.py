@@ -58,31 +58,31 @@ class gateway:
 	loadConfig = staticmethod(loadConfig)
 
 	def establishConnection(self):
-	"""establishConnectino()
+		"""establishConnection()
 
-	   Établit une connection avec le lecteur et l'écrivain (vérifie
-	   que les ressources sont disponibles aussi)"""
+		   Établit une connection avec le lecteur et l'écrivain (vérifie
+		   que les ressources sont disponibles aussi)"""
                 raise gatewayException('Méthode non implantée (méthode abstraite establishConnection)')
 
 	def read(self):
-	"""read() -> data
-
-	   data	: Liste d'objets
-
-	   Cette méthode retourne une liste d'objets, qui peut être
-	   ingérée par l'écrivain. Elle lève une exception si
-	   une erreur est détectée.
-	   """
+		"""read() -> data
+	
+		   data	: Liste d'objets
+	
+		   Cette méthode retourne une liste d'objets, qui peut être
+		   ingérée par l'écrivain. Elle lève une exception si
+		   une erreur est détectée.
+		   """
 		raise gatewayException('Méthode non implantée (méthode abstraite read)')
 	
 	def write(self,data):
-        """write(data) 
+	        """write(data) 
+	
+	           data : Liste d'objets
 
-           data : Liste d'objets
-
-	   Cette méthode prends le data lu par read, et fait le traîtement
-	   approprié.
-           """
+		   Cette méthode prends le data lu par read, et fait le traîtement
+		   approprié.
+	           """
                 raise gatewayException('Méthode non implantée (méthode abstraite write)')
 
 	def run(self):

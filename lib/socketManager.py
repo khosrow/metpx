@@ -149,10 +149,22 @@ suivants:
 		   bulletin	: String
 
 		   Retourne le prochain bulletin reçu, une chaîne vide sinon."""
-		pass		
+		status = self.__checkNextMsgStatus()
+		if status ==  'OK':
+			(bulletin,longBuffer) = self.__unwrapBulletin()
+
+			self.inBuffer = self.inBuffer[longBuffer:]
+
+			return bulletin
+		elif status == 'INCOMPLETE':
+			return ''
+		elif status == 'CORRUPT':
+			raise socketManagerException('corruption dans les données','CORRUPT',self.inBuffer)
+		else:
+			raise socketManagerException('status de buffer inconnu',status,self.inBuffer)
 
 	def sendBulletin(self):
-		pass
+		raise socketManagerException('notDefinedYet')
 
 	def __syncInBuffer(self):
 		"""Copie l'information du buffer du socket s'il y a lieu
@@ -215,9 +227,10 @@ suivants:
 	def __checkNextMsgStatus(self):
 		"""__checkNextMsgStatus() -> status
 
-		   status	: String élément de ('OK','INCOMPLETE','ERROR')
+		   status	: String élément de ('OK','INCOMPLETE','CORRUPT')
 
 		   Statut du prochain bulletin dans le buffer.
 		"""
                 raise socketManagerException("Méthode non implantée (méthode abstraite __checkNextMsgIntegrity)")
+
 

@@ -1,6 +1,6 @@
 """Gestionnaire de bulletins"""
 
-import math, string, os
+import math, string, os, bulletin
 
 __version__ = '2.0'
 
@@ -72,8 +72,7 @@ class bulletinManager:
 
 	   Retourne un objetBulletin d'à partir d'un bulletin
 	   "brut" """
-		raise bulletinManagerException('Méthode non implantée (méthode abstraite __generateBulletin)')
-
+		return bulletin.bulletin(rawBulletin,self.lineSeparator)
 
 	def readBulletinFromDisk(self):
 		pass
@@ -92,13 +91,18 @@ class bulletinManager:
 		"""__getFileName(bulletin[,error]) -> fileName
 
 		   Retourne le nom du fichier pour le bulletin. Si error
-		   est à True, c'est que le bulletin a tanté d'être écrit
+		   est à True, c'est que le bulletin a tenté d'être écrit
 		   et qu'il y a des caractère "illégaux" dans le nom,
 		   un nom de fichier "safe" est retourné."""
-		pass
+		strCompteur = string.zfill(self.compteur, len(str(self.maxCompteur)))
 
-	def __getExtension(self,bulletin):
+		if bulletin.getError() == None:
+			return (bulletin.getHeader() + ' ' + strCompteur + self.__getExtension(bulletin)).replace(' ','_')
+
+	def __getExtension(self,bulletin,error=False):
 		"""__getExtension(bulletin) -> extension
 
-		   Retourne l'extension à donner au bulletin."""
+		   Retourne l'extension à donner au bulletin. Si error est à True,
+		   les champs 'dynamiques' sont mis à 'ERROR'.
+		"""
 		pass

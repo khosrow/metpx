@@ -114,7 +114,7 @@ class bulletinAm(bulletin.bulletin):
 
 		        self.station = station
 		
-		elif len(self.getHeader().split()[0]) != 2:
+		elif self.station == "PASCALCULE" and len(self.getHeader().split()[0]) != 2:
 			station = "PASDESTATION"
 
 		return self.station
