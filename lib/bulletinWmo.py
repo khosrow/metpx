@@ -38,11 +38,11 @@ class bulletinWmo(bulletin.bulletin):
 	        if self.getDataType() == 'BI':
 	        # Si le bulletin est un BUFR, l'on remplace le premier set,
 	        # puis le dernier (apres le 7777) s'il y a lieu
-	                self.replaceChar('\r\r\n',self.lineSeparator)
+	                self.replaceChar('\r','')
 	                return 
 
 	        if self.bulletin[0][:4] in ['SDUS','WSUS','SRCN','SRMN','SRND','SRWA','SRMT','SXAA','SXCN','SXVX','SXWA','SXXX','FOCN','WAUS']:
-        	        self.replaceChar('\n\x1e',self.lineSeparator)
+        	        self.replaceChar('\x1e','')
 
 	        if self.bulletin[0][:4] in ['SRCN','SRMN','SRND','SRWA','SRMT','SXCN','SRUS','SXVX','SXWA']:
         	        self.replaceChar('~',self.lineSeparator)
@@ -83,7 +83,8 @@ class bulletinWmo(bulletin.bulletin):
 	        self.replaceChar('\r','')
 
 	        if self.bulletin[0][:2] in ['SA','SM']:
-	                self.replaceChar('\x03\n','')
+#	                self.replaceChar('\x03\n','')
+                        self.replaceChar('\x03','')
 
 		# Re-calcul du bulletin
 		self.bulletin = self.splitlinesBulletin(self.lineSeparator.join(self.bulletin))

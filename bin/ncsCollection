@@ -1,0 +1,15 @@
+
+
+# Load de la config
+
+# Load du fichier d'état (s'il ya lieu)
+
+# Loop
+
+	# S'il y a du traîtement en attente, l'effectuer
+
+	# Charger nouveaux fichiers
+
+		# Si aucun nouveau fichier, sleep
+
+		# Si nouveaux fichiers, Classement

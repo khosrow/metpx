@@ -61,9 +61,9 @@ class bulletin:
   	"""
 
 	def __init__(self,stringBulletin,logger,lineSeparator='\n'):
+		self.lineSeparator = lineSeparator
 		self.bulletin = self.splitlinesBulletin(stringBulletin.lstrip(lineSeparator))
 		self.dataType = None
-		self.lineSeparator = lineSeparator
 		self.errorBulletin = None
 		self.logger = logger
 
@@ -86,10 +86,10 @@ class bulletin:
 		"""
 		if stringBulletin.find('GRIB') != -1:
 		# Type de bulletin GRIB, découpage spécifique
-			b = stringBulletin[:stringBulletin.find('GRIB')].splitlines() + \
+			b = stringBulletin[:stringBulletin.find('GRIB')].split(self.lineSeparator) + \
 				[stringBulletin[stringBulletin.find('GRIB'):stringBulletin.find('7777')+len('7777')]] 
 
-			b_fin = stringBulletin[stringBulletin.find('7777')+len('7777'):].splitlines()
+			b_fin = stringBulletin[stringBulletin.find('7777')+len('7777'):].split(self.lineSeparator)
 
 			if len(b_fin) > 0 and b_fin[0] == '':
 			# Si le premier élément est un '', c'est qu'il y avait un séparateur de ligne après le 7777
@@ -99,10 +99,10 @@ class bulletin:
 
 		elif stringBulletin.find('BUFR') != -1:
                 # Type de bulletin BUFR, découpage spécifique
-                        b = stringBulletin[:stringBulletin.find('BUFR')].splitlines() + \
+                        b = stringBulletin[:stringBulletin.find('BUFR')].split(self.lineSeparator) + \
 				[stringBulletin[stringBulletin.find('BUFR'):stringBulletin.find('7777')+len('7777')]]
 
-                        b_fin = stringBulletin[stringBulletin.find('7777')+len('7777'):].splitlines()
+                        b_fin = stringBulletin[stringBulletin.find('7777')+len('7777'):].split(self.lineSeparator)
 
                         if len(b_fin) > 0 and b_fin[0] == '':
                         # Si le premier élément est un '', c'est qu'il y avait un séparateur de ligne après le 7777
@@ -110,7 +110,7 @@ class bulletin:
                         else:
                                 return b + b_fin
 		else:
-			return stringBulletin.splitlines()
+			return stringBulletin.split(self.lineSeparator)
 
 	def replaceChar(self,oldchars,newchars):
 		"""replaceChar(oldchars,newchars) 
