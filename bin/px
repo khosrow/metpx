@@ -42,7 +42,7 @@ def startThem(dir,name,cmd):
 
 def start(cmd):
   startThem( fet.FET_ETC + 'rx/', 'pxReceiver', cmd)
-  startThem( fet.FET_ETC + 'rx/', 'pxSender', cmd)
+  startThem( fet.FET_ETC + 'tx/', 'pxSender', cmd)
 
 
 
