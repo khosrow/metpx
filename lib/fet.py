@@ -131,7 +131,10 @@ def lockstopordie(lfn, cmd):
     lockpid = int(lockfile.read())
     lockfile.close()
     if cmd == 'stop':
-      os.kill(lockpid,signal.SIGTERM)
+      try:
+        os.kill(lockpid,signal.SIGTERM)
+      except:
+        pass
       os.unlink( lfn )
       sys.exit(0)
     else:
@@ -529,7 +532,7 @@ def ingest(ingestname,lfn,logger):
 
    """
    pri=ingestname.split(':')[5]
-   clist=clientmatches(ingestname)
+   clist=map( lambda x: x[0], clientmatches(ingestname))
    directingest(ingestname,clist,pri,lfn,logger)
 
 

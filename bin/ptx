@@ -90,7 +90,7 @@ FIXME:
             except:
 	      excinfo= sys.exc_info()
 	      logger.writeLog( logger.ERROR, "chui pas capable de me brancher à " + uspec + '@' + hspec + ": " + repr(sys.exc_info()[0]) )
-              sleep(10)  # relax, buy a cherry blossom, don't be shy.
+              time.sleep(10)  # relax, buy a cherry blossom, don't be shy.
 	      return #FIXME: no point to continue looping...
 
             ftphost=hspec
