@@ -35,7 +35,8 @@ class receiverWmo(gateway.gateway):
 			    pathDest = self.config.pathDestination, \
 			    pathFichierCircuit = self.config.ficCircuits, \
 		 	    extension = self.config.extension, \
-		  	    mapEnteteDelai = self.config.mapEnteteDelai \
+		  	    mapEnteteDelai = self.config.mapEnteteDelai, \
+			    use_pds = self.config.use_pds
 								) 
 		else:
 		  self.unBulletinManagerWmo = \

@@ -147,6 +147,7 @@ class bulletinManager:
 		nomFichier = self.getFileName(unBulletin,compteur=compteur)
 		if not self.use_pds:
 		   nomFichier = nomFichier + ':' + time.strftime( "%Y%m%d%H%M%S", time.gmtime(time.time()) )
+
                 tempNom = self.pathTemp + nomFichier
 		try:
 			unFichier = os.open( tempNom , os.O_CREAT | os.O_WRONLY )
@@ -598,12 +599,12 @@ class bulletinManager:
 
 		# Test d'existence du fichier
 	        try:
-			if not self.config.use_pds:
+			if not self.use_pds:
                            pathHeader2circuit = fet.FET_ETC + 'header2client.conf'
 
 	                fic = os.open( pathHeader2circuit, os.O_RDONLY )
 	        except Exception:
-	                raise bulletinManagerException('Impossible d\'ouvrir le fichier d\'entetes (fichier inaccessible)')
+	                raise bulletinManagerException('Impossible d\'ouvrir le fichier d\'entetes ' + pathHeader2circuit + ' (fichier inaccessible)' )
 	
 	        champs = self.champsHeader2Circuit.split(':')
 	

@@ -154,7 +154,18 @@ def addStandardOptions(parser):
   
 
 def lockStopOrDie(lfn, cmd):
+  """ cmd=start: lock & continue or die,  cmd=stop: kill running pid.
 
+     If the command is 'stop' then stop the process in question.
+     the lockfile path gives the location of the process (pid in file.)
+     which may be running.  Attempt to kill the process.  Whether or not
+     it succeeds, unlink the lock file (so that 'stop' followed by 'start'
+     tends to bring one to a reasonable state.)
+
+     if the command is start, and there is no lock file indicating that
+     another process is currently using the directory, then create a lock
+     file containing the pid of the calling process.
+  """
   createDir( os.path.dirname(lfn) )
   if os.path.exists( lfn ):
     lockfile = open( lfn , 'r' )
@@ -350,16 +361,15 @@ def readSources(logger):
         elif srcline[0] == 'active':
 	    if srcline[1] == 'yes':
 	       isactive=1 
-        elif srcline[0] == 'system':
-	  source[1]  = srcline[1]
-        elif srcline[0] == 'site':
-	  source[2]  = srcline[1]
-        elif srcline[0] == 'type':
-	  source[3]  = srcline[1]
-        elif srcline[0] == 'format':
-	  source[4]  = srcline[1]
+        elif srcline[0] == 'extension':
+          ss = srcline[1].split(':')
+          source[1] = ss[0]
+          source[2] = ss[1]
+          source[3] = ss[2]
+          source[4] = ss[3]
+          source[5] = ss[4]
         elif srcline[0] == 'connection':
-	  source[5]  = srcline[1:]
+	  source[6]  = srcline[1:]
       src=srcconf.readline()
 
     srcconf.close()
@@ -367,6 +377,7 @@ def readSources(logger):
     if isactive == 1:
       sources[sourceid] = copy.deepcopy(source)
       logger.writeLog( logger.INFO, "read config of source " + sourceid )
+      isactive=0
     else:
       logger.writeLog( logger.INFO, "ignored config of source " + sourceid )
 

@@ -34,7 +34,8 @@ class receiverAm(gateway.gateway):
 								SMHeaderFormat = self.config.SMHeaderFormat, \
 								pathFichierStations = self.config.ficCollection, \
 								extension = self.config.extension, \
-								mapEnteteDelai = self.config.mapEnteteDelai \
+								mapEnteteDelai = self.config.mapEnteteDelai, \
+                                                                use_pds = self.config.use_pds
 								) 
 
         def shutdown(self):
