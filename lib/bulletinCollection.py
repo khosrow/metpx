@@ -178,7 +178,12 @@ class bulletinCollection(bulletin.bulletin):
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
-		self.bbb = newBBB
+                header = self.mapCollection['header']
+
+                header = ' '.join(header.split()[:3] + [newBBB])
+
+		self.mapCollection['header'] = header
+
 
         def setTokenIfNoData(self,tokenIfNoData):
                 """setTokenIfNoData(tokenIfNoData)

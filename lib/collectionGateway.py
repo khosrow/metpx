@@ -72,7 +72,7 @@ class collectionGateway(gateway.gateway):
 		# Ici on s'intéresse seulement au bulletins bruts, extraction du bulletin d'à partir du map
 		data = [ mapData[x] for x in mapData ]
 
-		self.logger.writeLog(self.logger.DEBUG,"%d nouveaux bulletins lus",len(data))
+		self.logger.writeLog(self.logger.VERYVERBOSE,"%d nouveaux bulletins lus",len(data))
 
                 # Dans tous les cas, écrire les collection s'il y a lieu
                 self.unCollectionManager.writeCollection()
@@ -89,7 +89,7 @@ class collectionGateway(gateway.gateway):
 		   Date:	Novembre 2004
 	        """
 
-                self.logger.writeLog(self.logger.DEBUG,"%d nouveaux bulletins seront écrits",len(data))
+                self.logger.writeLog(self.logger.VERYVERBOSE,"%d nouveaux bulletins seront écrits",len(data))
 
 		while True:
 			if len(data) <= 0:

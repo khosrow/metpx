@@ -103,7 +103,7 @@ class receiverWmo(gateway.gateway):
 			else:
 				break
 
-		self.logger.writeLog(self.logger.DEBUG,"%d nouveaux bulletins lus",len(data))
+		self.logger.writeLog(self.logger.VERYVERBOSE,"%d nouveaux bulletins lus",len(data))
 
 		return data
 
@@ -116,7 +116,7 @@ class receiverWmo(gateway.gateway):
 	           approprié.
 	        """
 
-                self.logger.writeLog(self.logger.DEBUG,"%d nouveaux bulletins seront écrits",len(data))
+                self.logger.writeLog(self.logger.VERYVERBOSE,"%d nouveaux bulletins seront écrits",len(data))
 
 		while True:
 			if len(data) <= 0:

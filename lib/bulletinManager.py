@@ -321,7 +321,7 @@ class bulletinManager:
 		# Bulletin normal
 			try:
 				return (bulletin.getHeader() + strCompteur + self.getExtension(bulletin,error)).replace(' ','_')
-			except bulletinManagerException, e:
+			except Exception, e:
 			# Une erreur est détectée (probablement dans l'extension) et le nom est généré avec des erreurs
 				self.logger.writeLog(self.logger.WARNING,e)
 				return ('ERROR_BULLETIN ' + bulletin.getHeader() + strCompteur + self.getExtension(bulletin,error=True)).replace(' ','_')

@@ -241,6 +241,17 @@ class collectionManager(bulletinManager.bulletinManager):
 
 			self.mainDataMap['collectionMap'][rawBulletin.splitlines()[0]].setTokenIfNoData(None)
 
+                        if not self.mainDataMap['sequenceMap'].has_key(entete + ' ' + 'RR'):
+	                        # Pas de séquence de démarée
+                                self.mainDataMap['sequenceMap'][entete + ' ' + 'RR'] = 'RRA'
+			
+			newBBB = self.mainDataMap['sequenceMap'][entete + ' ' + 'RR']
+			self.mainDataMap['sequenceMap'][entete + ' ' + 'RR'] = self.incrementToken(newBBB)
+
+			self.mainDataMap['collectionMap'][rawBulletin.splitlines()[0]].setBBB(newBBB)
+
+			self.logger.writeLog(self.logger.VERYVERBOSE,"Séquencage de la collection de retard: %s", newBBB)
+
 		# Ajout du bulletin dans la collection
                 station = bulletinCollection.bulletinCollection.getStation(rawBulletin)
                 data = bulletinCollection.bulletinCollection.getData(rawBulletin)
