@@ -43,7 +43,7 @@ class log:
 
 		if self.debug:
 	                # Init du handler et du formatter pour le log debug
-	                unTimedRotatingFileHandlerDebug = logging.handlers.TimedRotatingFileHandler(filename+'_debug', when='h', interval=1, backupCount=24)
+	                unTimedRotatingFileHandlerDebug = logging.handlers.TimedRotatingFileHandler(filename+'_debug', when='d', interval=1, backupCount=5)
 	                unTimedRotatingFileHandlerDebug.setFormatter(unFormatter)
 
 			self.logDebug = logging.Logger("Debug")
