@@ -3,7 +3,7 @@
 
 __version__ = '2.0'
 
-import struct, socket, curses, curses.ascii
+import struct, socket, curses, curses.ascii, string
 import socketManager
 
 class socketManagerAm(socketManager.socketManager):
@@ -29,8 +29,10 @@ class socketManagerAm(socketManager.socketManager):
 	Date:	Octobre 2004
 	"""
 
-	def __init__(self,logger,type='slave',localPort=9999,remoteHost=None,timeout=None):
-		socketManager.socketManager.__init__(self,logger,type,localPort,remoteHost,timeout)
+	#def __init__(self,logger,type='slave',localPort=9999,remoteHost=None,timeout=None):
+		#socketManager.socketManager.__init__(self,logger,type,localPort,remoteHost,timeout)
+	def __init__(self,logger,type='slave',port=9999,remoteHost=None,timeout=None):
+		socketManager.socketManager.__init__(self,logger,type,port,remoteHost,timeout)
 
 		# La taille du amRec est prise d'a partir du fichier ytram.h, à l'origine dans
 		# amtcp2file. Pour la gestion des champs l'on se refere au module struct
@@ -80,45 +82,44 @@ class socketManagerAm(socketManager.socketManager):
                    Auteur:      Pierre Michaud
                    Date:        Janvier 2005
                 """
-		#construction de l'entete	
-
+		#initialisation des parametres de l'entete
 		#char header[80]
-		pattern = '80s'
-		size = struct.calcsize(pattern)
 		tmp = bulletin.getBulletin()
-		header = struct.unpack(pattern,tmp[0:size])
-	
+		size = struct.calcsize('80s')
+
+		header = tmp[0:size]
+		listeHeader=[]
+		for i in header:
+			listeHeader.append(i)	
+		for i in range(size):
+			if listeHeader[i]==chr(curses.ascii.LF):
+				listeHeader[i]=chr(curses.ascii.NUL)
+		header = string.join(listeHeader,'')
+
 		#unsigned long src_inet, dst_inet
-		src_inet = long(0)
-		dst_inet = long(0)
+		src_inet = 0
+		dst_inet = 0
 
 		#unsigned char threads[4]
-		threads1 = '0'
-		threads2 = '255'
-		threads3 = '0'
-		threads4 = '0'
+		threads='0'+chr(255)+'0'+'0'
 
 		#unsigned int start, length
-		start = long( socket.htonl(len(bulletin.getBulletin())) )
-		length = long(0)
+		start = 0
+		length = socket.htonl( len(bulletin.getBulletin()) )
 
 		#time_t firsttime, timestamp
-		firsttime = '0'
-		timestamp = '0'
+		firsttime = chr(curses.ascii.NUL)
+		timestamp = chr(curses.ascii.NUL)
 
 		#char future[20]
-		future = '00000000000000000000'
+		future = chr(curses.ascii.NUL)
+
+		#construction de l'entete	
+		bulletinHeader = struct.pack(self.patternAmRec,header,src_inet,dst_inet,threads,start \
+					,length,firsttime,timestamp,future)
 
 		#assemblage de l'entete avec le contenu du bulletin
-		bulletinHeader = str(header)+str(src_inet)+str(dst_inet)+threads1+threads2+threads3+ \
-				threads4+str(start)+str(length)+firsttime+timestamp+future
 		wrappedBulletin = bulletinHeader + bulletin.getBulletin()
-
-		print "len(bulletinHeader) = ",len(bulletinHeader)
-		print bulletinHeader
-		print "len(header) = ",len(header)
-		print header
-		print "**************************************************************"
 
                 return wrappedBulletin
 
