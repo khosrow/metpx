@@ -12,7 +12,7 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 			pathFichierCircuit=None, SMHeaderFormat=False, pathFichierStations=None):
 
 		bulletinManager.bulletinManager.__init__(self,pathTemp,logger, \
-						pathSource,pathDest,maxCompteur,lineSeparator,extension)
+						pathSource,pathDest,maxCompteur,lineSeparator,extension,pathFichierCircuit)
 
 		self.__initMapEntetes(pathFichierStations)
 
@@ -30,14 +30,14 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
                 # sera effectue lors de la prochaine passe
 		premierMot = rawBulletin.splitlines()[0].split()[0]
 
-                if len(premierMot) == 2 and premierMot == "FC" or premierMot == "FT":
+                if len(premierMot) == 2 and premierMot in ["FC","FT"]:
                 	if string.count(string.join(contenuDeBulletin,'\n'),'TAF') > 1:
 				return True
 
 		return False
 
 	def __splitBulletin(self,rawBulletin):
-                """__isSplittable(rawBulletin) -> bool
+                """__splitBulletin(rawBulletin) -> liste bulletins
 
 		Retourne une liste de rawBulletins, séparés """
 		entete = rawBulletin.splitlines()[0]

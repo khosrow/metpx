@@ -181,7 +181,7 @@ class bulletinAm(bulletin.bulletin):
 			# Construction de l'entête
 			if station != None and uneEnteteDeBulletin != None:
 	                        if len(unBulletin[0].split()) == 1:
-	                                uneEnteteDeBulletin = premierMot + uneEnteteDeBulletin + bulletinLib.getFormattedSystemTime() # FIXME
+	                                uneEnteteDeBulletin = premierMot + uneEnteteDeBulletin + self.getFormattedSystemTime()
 	                        elif len(unBulletin[0].split()) == 2:
 	                                uneEnteteDeBulletin = premierMot + uneEnteteDeBulletin + unBulletin[0].split()[1]
 	                        else:
@@ -194,15 +194,18 @@ class bulletinAm(bulletin.bulletin):
 				if station == None:
 					self.errorBulletin = ("station non trouvée","### Pattern de station non trouve ou non specifie" + self.lineSeparator + "ERROR BULLETIN" + self.lineSeparator)
 
-					# FIXME
-#                                        utils.writeLog(log,"*** Erreur : Pattern de station non trouve !")
-#                                        utils.writeLog(log,"Bulletin:\n" + unBulletin)
+					self.logger.writeLog(self.logger.WARNING,"Pattern de station non trouve")
+                                        self.logger.writeLog(self.logger.WARNING,"Bulletin:\n"+self.getBulletin())
 
                                 # L'entête n'a pu être trouvée dans le fichier de collection, erreur
                                 elif uneEnteteDeBulletin == None:
                                         self.errorBulletin = ("entête non trouvée","### Entete non trouvee dans le fichier de collection" + self.lineSeparator  + "ERROR BULLETIN" + self.lineSeparator)
 
-                                        # FIXME
-#                                utils.writeLog(log,"*** Erreur : Station <" + uneStation + "> non trouvee avec prefixe <" + premierMot + ">")
-#                                utils.writeLog(log,"Bulletin:\n" + unBulletin)
+                                	self.logger.writeLog(self.logger.WARNING,"Station <" + uneStation + "> non trouvee avec prefixe <" + premierMot + ">")
+                                        self.logger.writeLog(self.logger.WARNING,"Bulletin:\n"+self.getBulletin())
+
+	def getFormattedSystemTime(self):
+	        """Retourne une string de l'heure locale du systeme, selon
+	           jjhhmm : jour/heures(24h)/minutes"""
+	        return time.strftime("%d%H%M",time.localtime())
 

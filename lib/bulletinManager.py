@@ -17,7 +17,7 @@ class bulletinManager:
 	   Un bulletin manager est en charge de la lecture et écriture des
 	   bulletins sur le disque."""
 
-	def __init__(self,pathTemp,logger,pathSource=None,pathDest=None,maxCompteur=99999,lineSeparator='\n',extension=':'):
+	def __init__(self,pathTemp,logger,pathSource=None,pathDest=None,maxCompteur=99999,lineSeparator='\n',extension=':',pathFichierCircuit=None):
 
 		self.logger = logger
 		self.pathSource = self.__normalizePath(pathSource)
@@ -27,6 +27,10 @@ class bulletinManager:
 		self.compteur = 0
 		self.extension = extension
 		self.lineSeparator = lineSeparator
+		self.champsHeader2Circuit = 'entete:routing_groups:rename:'
+
+		# Init du map des circuits
+		self.initMapCircuit(pathFichierCircuit)
 
 	def writeBulletinToDisk(self,unRawBulletin):
 		"""writeBulletinToDisk(bulletin)
@@ -43,6 +47,7 @@ class bulletinManager:
 		unBulletin = self.__generateBulletin(unRawBulletin)
 		unBulletin.doSpecificProcessing()
 
+		# Génération du nom du fichier
 		nomFichier = self.getFileName(unBulletin)
 
 		try:
@@ -92,12 +97,23 @@ class bulletinManager:
 		   Retourne le nom du fichier pour le bulletin. Si error
 		   est à True, c'est que le bulletin a tenté d'être écrit
 		   et qu'il y a des caractère "illégaux" dans le nom,
-		   un nom de fichier "safe" est retourné."""
+		   un nom de fichier "safe" est retourné. Si le bulletin semble être
+		   correct mais que le nom du fichier ne peut être généré,
+		   les champs sont mis à ERROR dans l'extension.
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
+		"""
 		strCompteur = string.zfill(self.compteur, len(str(self.maxCompteur)))
 
 		if bulletin.getError() == None and not error:
 		# Bulletin normal
-			return (bulletin.getHeader() + ' ' + strCompteur + self.getExtension(bulletin,error)).replace(' ','_')
+			try:
+				return (bulletin.getHeader() + ' ' + strCompteur + self.getExtension(bulletin,error)).replace(' ','_')
+			except bulletinManagerException, e:
+			# Une erreur est détectée (probablement dans l'extension) et le nom est généré avec des erreurs
+				self.logger.writeLog(self.logger.WARNING,e)
+				return ('ERROR_BULLETIN ' + bulletin.getHeader() + ' ' + strCompteur + self.getExtension(bulletin,error=True)).replace(' ','_')
 		elif bulletin.getError() != None and not error:
 		# Le bulletin est erronné mais l'entête est "imprimable"
 			return ('ERROR_BULLETIN ' + bulletin.getHeader() + ' ' + strCompteur + self.getExtension(bulletin,error)).replace(' ','_')
@@ -113,6 +129,15 @@ class bulletinManager:
 
 		   -TT:		Type du bulletin (2 premieres lettres)
 		   -CCCC:	Origine du bulletin (2e champ dans l'entête
+		   -CIRCUIT:	Liste des circuits, séparés par des points
+
+		   Exceptions possibles:
+			bulletinManagerException:	Si l'extension ne peut être générée 
+							correctement et qu'il n'y avait pas
+							d'erreur à l'origine.
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
 		"""
 		newExtension = self.extension
 
@@ -120,11 +145,17 @@ class bulletinManager:
 			newExtension = newExtension.replace('-TT',bulletin.getType())\
 					     	   .replace('-CCCC',bulletin.getOrigin())
 
+			if self.mapCircuits != None:
+			# Si les circuits sont activés 
+			# NB: Lève une exception si l'entête est introuvable
+				newExtension = newExtension.replace('-CIRCUIT',self.getCircuitList(bulletin))
+
 			return newExtension
 		else:
 			# Une erreur est détectée dans le bulletin
 			newExtension = newExtension.replace('-TT','ERROR')\
-                                                   .replace('-CCCC','ERROR')
+                                                   .replace('-CCCC','ERROR')\
+						   .replace('-CIRCUIT','ERROR')
 
 			return newExtension
 			
@@ -148,4 +179,78 @@ class bulletinManager:
                         return lignes
                 else:
                         raise IOError
+
+	def initMapCircuit(self,pathHeader2circuit):
+	        """initMapCircuit(pathHeader2circuit)
+
+		   pathHeader2circuit:	String
+					- Chemin d'accès vers le fichier de circuits
+
+		   Charge le fichier de header2circuit et assigne un map avec comme cle
+	           le premier champ de champsHeader2Circuit (premier token est la cle,
+	           le reste des tokens sont les cles d'un map contenant les valeurs
+	           associes. Le nom du map sera self.mapCircuits et s'il est à None,
+		   C'est que l'option est à OFF.
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
+		"""
+		if pathHeader2circuit == None:
+		# Si l'option est à OFF
+			self.mapCircuits = None
+			return
+
+	        self.mapCircuits = {}
+	
+		# Test d'existence du fichier
+	        try:
+	                fic = os.open( header2circuit_file, os.O_RDONLY )
+	        except Exception:
+	                raise bulletinManagerException('Impossible d\'ouvrir le fichier d\'entetes (fichier inaccessible)')
+	
+	        champs = self.champsHeader2Circuit.split(':')
+	
+	        lignes = os.read(fic,os.stat(header2circuit_file)[6])
+	
+		# Pour chaque ligne du fichier, on associe l'entête avec un map, qui est le nom des autres champs
+		# associés avec leur valeurs.
+	        for ligne in lignes.splitlines():
+	                uneLigneSplitee = ligne.split(':')
+	
+	                self.mapCircuits[uneLigneSplitee[0]] = {}
+	
+	                try:
+	                        for token in range( max( len(champs)-2,len(uneLigneSplitee)-2 ) ):
+	                                self.mapCircuits[uneLigneSplitee[0]][champs[token+1]] = uneLigneSplitee[token+1]
+	
+	                                if len(self.mapCircuits[uneLigneSplitee[0]][champs[token+1]].split(' ')) > 1:
+	                                        self.mapCircuits[uneLigneSplitee[0]][champs[token+1]] = self.mapCircuits[uneLigneSplitee[0]][champs[token+1]].split(' ')
+	                except IndexError:
+	                        raise bulletinManagerException('Les champs ne concordent pas dans le fichier header2circuit',ligne)
+	
+	def getCircuitList(self,bulletin):
+	        """
+		circuitRename(bulletin) -> Circuits
+
+		bulletin:	Objet bulletin
+
+		Circuits:	String
+				-Circuits formattés correctement pour êtres insérés dans l'extension
+
+		Retourne la liste des circuits pour le bulletin, pour être inséré
+		dans l'extension
+
+                   Exceptions possibles:
+                        bulletinManagerException:       Si l'entête ne peut être trouvée dans le
+							fichier de circuits
+
+		Auteur:	Louis-Philippe Thériault
+		Date:	Octobre 2004
+		"""
+		entete = ' '.join(bulletin.getHeader().split()[:2])
+
+	        if not self.mapCircuits.has_key(entete):
+	                raise bulletinManagerException('Entete non trouvée dans fichier de circuits')
+	
+	        return '.'.join(self.mapCircuits[entete]['routing_groups'])
 
