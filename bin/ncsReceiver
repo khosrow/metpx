@@ -29,7 +29,7 @@ def main():
 	# Instanciation du option parser
 	parser = OptionParser(usage)
 	options,args = parser.parse_args()
-	
+
 	# Un seul argument doit être fourni
 	if len(args) > 1:
 		parser.error("trop d'arguments fournis")
@@ -79,9 +79,13 @@ def main():
 
 global logger
 
+logger = None
+
 if __name__ == '__main__':
 	try:
 		main()
 	except Exception, e:
-		logger.writeLog(logger.EXCEPTION,"Exception: " + ''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
+		if logger != None:
+			logger.writeLog(logger.EXCEPTION,"Exception: " + ''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
 		raise
+

@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 """Spécialisation pour gestion de sockets "AM" """
 
 __version__ = '2.0'
