@@ -1,0 +1,96 @@
+#! /usr/bin/env python2
+# -*- coding: UTF-8 -*-
+# -----------------------------------------------------
+# Définition d'un gestionnaire de collection. (file2file)
+#
+# Auteur:	Louis-Philippe Thériault
+# Date:		Novembre 2004
+
+import sys, signal, traceback
+
+sys.path.append(sys.path[0] + '/../lib')
+sys.path.append(sys.path[0] + '/../etc')
+sys.path.insert(0,sys.path[0] + '/../lib/importedLibs')
+
+from optparse import OptionParser
+import gateway, log
+
+def main():
+	global logger
+	global unGateway
+
+	# Message d'usage pour le option parser
+	usage =  "%prog pathConfigFile\n" \
+	         "       Un ncsCollection lit les fichiers dans un répertoire d'entrée,\n" \
+	         "       crée des collections, et fait le séquencage des bulletins\n" \
+		 "       spécifiés."
+
+	# Instanciation du option parser
+	parser = OptionParser(usage)
+	options,args = parser.parse_args()
+
+	# Un seul argument doit être fourni
+	if len(args) > 1:
+		parser.error("trop d'arguments fournis")
+	elif len(args) == 0:
+		parser.error("aucun fichier de config fourni")
+	
+	# Chargement de la config pour savoir le type de protocole et le path du log
+	config = gateway.gateway.loadConfig(args[0])
+
+	# Init du log
+	logger = log.log(config.log)
+	logger.writeLog(logger.INFO, "Début du programme, fichier de config chargé correctement")
+
+	# Instanciation du gateway pour la collection, un seul mode pour l'instant
+	import collectionGateway
+	unGateway = collectionGateway.collectionGateway(args[0],logger)
+	
+	# Définition de la méthode de shutdown "propre"
+	def shutdown(sig,stack):
+		global unGateway
+		global logger
+		global isShutdowning
+
+		logger.writeLog(logger.DEBUG,"Reception d'un signal (signal=%d)",sig)
+
+		if not isShutdowning:
+		# Pour que le shutdown ne se fasse q'une fois
+			isShutdowning = True
+			logger.writeLog(logger.INFO,"Fermeture du programme (signal=%d)",sig)
+		
+			unGateway.shutdown()
+			sys.exit()
+	
+	# Assignement des signaux avec le shutdown
+	signal.signal(signal.SIGTERM,shutdown)
+	signal.signal(signal.SIGINT,shutdown)
+
+        # Définition de la méthode de reload de config via SIGHUP
+        def reloadConfig(sig,stack):
+                global unGateway
+                global logger
+
+                logger.writeLog(logger.DEBUG,"Reception d'un signal (signal=%d)",sig)
+
+                unGateway.reloadConfig()
+
+        # Assignement des signaux avec le reloadConfig
+        signal.signal(signal.SIGHUP,reloadConfig)
+
+	unGateway.run()
+
+global logger
+global isShutdowning 
+
+isShutdowning = False
+logger = None
+
+if __name__ == '__main__':
+	try:
+		main()
+	except Exception, e:
+		if logger != None and e.args != ():
+			logger.writeLog(logger.EXCEPTION,"Exception: " + ''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
+		raise
+

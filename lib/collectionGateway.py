@@ -25,25 +25,27 @@ class collectionGateway(gateway.gateway):
                 self.logger.writeLog(logger.DEBUG,"Instanciation du collectionManager")
 
 		self.unCollectionManager = \
-			collectionManager.collectionManager(	self.config.pathTemp,logger, \
-							    	self.config.ficCollection, \
-								self.config.collectionParams, \
-								self.config.delaiMaxSeq, \
-								self.config.ficCircuits, \
-								pathDest = self.config.pathDestination, \
-								extension = self.config.extension \
+			collectionManager.collectionManager(	
+				self.config.pathTemp,logger, \
+				self.config.ficCollection, \
+				self.config.collectionParams, \
+				self.config.delaiMaxSeq, \
+				self.config.ficCircuits, \
+				pathDest = self.config.pathDestination, \
+				extension = self.config.extension \
 							  	)
 
 		# Instanciation du bulletinManager(reader/writer)
                 self.logger.writeLog(logger.DEBUG,"Instanciation du bulletinManager")
 
                 self.unBulletinManager = \
-                        bulletinManager.bulletinManager(    self.config.pathTemp,logger, \
-							    pathSource = self.config.pathSource, \
-                                                            pathDest = self.config.pathDestination, \
-                                                            pathFichierCircuit = None, \
-                                                            extension = self.config.extension \
-                                                            )
+                        bulletinManager.bulletinManager(    
+				self.config.pathTemp,logger, \
+				pathSource = self.config.pathSource, \
+                                pathDest = self.config.pathDestination, \
+                                pathFichierCircuit = None, \
+                                extension = self.config.extension \
+                                )
 
 		# Partage du même map pour les 2 managers
 		self.unBulletinManager.setMapCircuits(self.unCollectionManager.getMapCircuits())

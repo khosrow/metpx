@@ -44,21 +44,32 @@ def main():
 		parser.error("aucun source fourni")
 	
 	# Chargement de la config pour savoir le type de protocole et le path du log
-	options.source = args[0]
+
+	if args[0] == 'collector':
+	   	options.type='collector'
+		options.source=None
+		options.client=None
+	else:
+		options.source = args[0]
+
         options.cmd = args[1]
 
         # FIXME: Vérifier que typeProtocole est défini et le fichier de log
 
 	# Init du log
-        logger = log.log(options.dataDir + '/log/' + os.path.basename(sys.argv[0]) 
-			+ "_" + args[0] )
+        logger = log.log(options.dataDir + '/log/' + 
+			os.path.basename(sys.argv[0]) + "_" + args[0] )
+
         fet.startup(options,logger)
+
           
-        fet.lockStopOrDie( fet.FET_DATA + fet.FET_RX + options.source + '/.lock' , options.cmd )
+        fet.lockStopOrDie( fet.FET_DATA + fet.FET_RX + args[0] + '/.lock' , options.cmd )
 
 	logger.writeLog(logger.INFO, "Début du programme, fichier de config chargé correctement")
 
-        options.type= fet.sources[options.source]['type']
+	if options.type != 'collector':
+            options.type= fet.sources[options.source]['type']
+
         logger.writeLog(logger.DEBUG,"Protocole %s sélectionné", options.type )
 
 	# Branchement selon le type de protocole	
@@ -79,9 +90,15 @@ def main():
 	elif options.type == 'bulletin-file':
 		import bulletinFileReceiver
 		bulletinFileReceiver.run(logger)
-		
+
+	elif options.type == 'collector':
+        	import collectionGateway
+        	unGateway = collectionGateway.collectionGateway(
+			'/dev/null', options, logger)
+
 	else:
 		raise Exception('Type de protocole non reconnu')	# FIXME
+
 
 	# Définition de la méthode de shutdown "propre"
 	def shutdown(sig,stack):

@@ -53,6 +53,7 @@ def main():
 	# Init du log
 	logger = log.log(options.dataDir + '/log/' + 
 			os.path.basename(sys.argv[0]) + "_" + options.client )
+
         fet.startup(options,logger)
 
         fet.lockStopOrDie( fet.FET_DATA + fet.FET_TX + options.client + '/.lock' , options.cmd )

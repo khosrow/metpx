@@ -255,7 +255,7 @@ def doClient(c,howtoprioritize,logger):
   """
   global dmodified
   
-  cname = fet.FET_DATA + 'tx/' + c
+  cname = fet.FET_DATA + fet.FET_TX + c
   for dname in map( lambda x: os.path.join(cname,x), os.listdir( cname )):
     cfiles = []
 

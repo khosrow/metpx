@@ -36,8 +36,9 @@ from optparse import OptionParser
 FET_DATA='/apps/px/'
 FET_DB= 'db/today/' 
 
-FET_TX= 'tx/'
-FET_RX= 'rx/'
+FET_TX= 'txq/'
+FET_RX= 'rxq/'
+FET_CL= 'clq/'
 
 FET_ETC='/apps/px/etc/'
 
@@ -61,14 +62,15 @@ def urlSplit(url):
   password=''
   dirspec=''
 
+  if len(url)== 0:
+     return [ protocol, dirspec, user, password, host, port ]
+
   delim = url.find(':')
   protocol = url[0:delim]
   if protocol == 'file':
     rest = url[delim+1:]
   else:
     rest = url[delim+3:]
-
-#  print 'urlSplit begin, url: ', url, ' rest: ', rest
 
   if rest[0] == '/':
     destdir = rest
@@ -234,10 +236,10 @@ def readClients(logger):
 
   clients = {}
 
-  for cfname in os.listdir( FET_ETC + FET_TX ):
+  for cfname in os.listdir( FET_ETC + 'tx/' ):
     if cfname[-5:] != '.conf':
        continue
-    cliconf = open( FET_ETC + FET_TX + cfname, 'r' )
+    cliconf = open( FET_ETC + 'tx/' + cfname, 'r' )
     clientid = cfname[:-5]
     isactive=0
     mask=cliconf.readline()
@@ -319,8 +321,8 @@ def readClients(logger):
       logger.writeLog( logger.INFO, "ignored config of client " + clientid )
     
   # dump clients db
-  #for k in clients.keys():
-  #   print "client ", k, " is: ",  clients[k], "\n"
+  for k in clients.keys():
+     print "client ", k, " is: ",  clients[k], "\n"
 
   #print "\n\n\nPatterns\n\n\n"
   #print patterns
@@ -362,11 +364,11 @@ def readSources(logger):
   sources = {}
 
   #print "readSources"
-  for cfname in os.listdir( FET_ETC + FET_RX ):
+  for cfname in os.listdir( FET_ETC + 'rx/' ):
     if cfname[-5:] != '.conf':
        continue
     sourceid = cfname[:-5]
-    srcconf = open( FET_ETC + FET_RX + cfname, 'r' )
+    srcconf = open( FET_ETC + 'rx/' + cfname, 'r' )
     isactive=0
     source = sourcedefaults
     src=srcconf.readline()
@@ -680,16 +682,25 @@ def startup(opts, logger):
    readClients(logger)
    readSources(logger)
    if options.client:
-     opts.type = clients[options.client][3]
-     dd = urlSplit(clients[options.client][1])
-     opts.host = dd[4]
-     opts.port = dd[5]
-     opts.connect_timeout = int(clients[options.client][2])
+     if options.client in clients.keys():
+       opts.type = clients[options.client][3]
+       dd = urlSplit(clients[options.client][1])
+       opts.host = dd[4]
+       opts.port = dd[5]
+       opts.connect_timeout = int(clients[options.client][2])
+     else:
+       logger.writeLog( logger.ERROR, "unknown client: " + options.client )
+
    elif options.source:
-     s=sources[options.source]
-     opts.port = int(s['port'])
-     opts.extension = s['extension']
-     opts.mapEnteteDelai = s['mapEnteteDelai']
+     if options.source in sources.keys():
+       s=sources[options.source]
+       opts.port = int(s['port'])
+       opts.extension = s['extension']
+       opts.mapEnteteDelai = s['mapEnteteDelai']
+     else:
+       logger.writeLog( logger.ERROR, "unknown source: " + options.source )
+   elif options.type == 'collector':
+       pass
 
 # module initialization code
 #startup()

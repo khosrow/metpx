@@ -6,6 +6,10 @@ import os, time, string
 import gdbm, pickle
 import fet
 
+collectionParams = None
+delaiMaxSeq = 23
+extension = None
+
 __version__ = '2.0'
 
 class collectionManager(bulletinManager.bulletinManager):
@@ -26,7 +30,7 @@ class collectionManager(bulletinManager.bulletinManager):
 		   collectionParams[entete][m_suppl]             = Si la période de collection primaire est terminée,
 		                                                   une nouvelle période commence, et elle sera de cette
 		                                                   durée (une collection pour les retards...)
-		   collectionParams[entete][inslude_all_stn]     = Si oui ou non inclure les stations avec aucun data
+		   collectionParams[entete][include_all_stn]     = Si oui ou non inclure les stations avec aucun data
 		                                                   (et mettre "<station> NIL=")
 
 	   delaiMaxSeq			Int
@@ -71,10 +75,29 @@ class collectionManager(bulletinManager.bulletinManager):
            Date:        Novembre 2004
         """
 
-        def __init__(self,pathTemp,logger,pathFichierCollection,collectionParams,delaiMaxSeq, \
-			ficCircuits=None,pathSource=None,pathDest=None,lineSeparator='\n', \
-			extension=':',statusFile='ncsCollection.status'):
+        def __init__(self, \
+		logger, \
+		pathTemp=fet.FET_DATA + fet.FET_CL, \
+		pathFichierCollection = fet.FET_ETC + 'collection_stations.conf', \
+		collectParms = None, \
+		ficCircuits= fet.FET_ETC + 'header2client.conf' , \
+		delai= None, \
+		pathSource=fet.FET_DATA + fet.FET_CL, \
+		pathDest=None, \
+		lineSeparator='\n', \
+		ext =':', \
+		statusFile='status'):
 
+		global delaiMaxSeq
+		global collectionParams
+
+		if pathDest == None: # trigger FET
+		   readParams()
+		else
+		   collectionParams = collectParms
+		   delaiMaxSeq = delai
+		   extension = ext 
+				    
 		self.pathTemp = self.__normalizePath(pathTemp)
 		self.pathSource = self.__normalizePath(pathSource)
 		self.pathDest = self.__normalizePath(pathDest)
@@ -83,11 +106,7 @@ class collectionManager(bulletinManager.bulletinManager):
                 self.compteur = 0
 		self.statusNeedToBeUpdated = False
 
-		self.collectionParams = collectionParams
-		self.delaiMaxSeq = delaiMaxSeq
-
 		self.lineSeparator = lineSeparator
-		self.extension = extension
 		self.logger = logger
 
 		self.initMapEntetes(pathFichierCollection)
@@ -100,10 +119,33 @@ class collectionManager(bulletinManager.bulletinManager):
 
 		# Si le fichier de statut existe déja, on le charge en mémoire
 		if os.access(self.statusFile,os.F_OK):
-			self.loadStatusFile()
+		  self.loadStatusFile()
 		else:
-		# Création des structures
-			self.mainDataMap = {'collectionMap':{},'sequenceMap':{},'sequenceWriteQueue':[]}
+		  # Création des structures
+	 	  self.mainDataMap = {'collectionMap':{},'sequenceMap':{},'sequenceWriteQueue':[]}
+
+	def readParams(self)
+	  global collectionParams
+	  global delaiMaxSeq
+
+	  collcfg = open( fet.FET_ETC + 'collection.conf', 'r' )
+	  cfline = collcfg.readline()
+	  self.collectionParams={}
+	  while cfline:
+            cf = cfline.split()	
+	    if not re.compile('^[ \t]*#').search(cf) :
+               if cf[0] == 'collect':
+		 exec( "self.collectionParams['"+ cf[1] +"']=" + string.join(srcline[2:]) )
+	       elif cf[0] == 'tooLate':
+		 self.DelaiMaxSeq = int(cf[1])
+	       elif cf[0] == 'extension':
+		 self.extension = cf[1]
+	    cfline = collcfg.readline()
+	  collcfg.close()
+
+	def reload(self):
+	   readParams
+	   reloadMapEntetes(self)
 
 	def addBulletin(self,rawBulletin):
 		"""addBulletin(rawBulletin)
@@ -182,7 +224,7 @@ class collectionManager(bulletinManager.bulletinManager):
 					self.logger.writeLog(self.logger.DEBUG,"Création de la séquence: %s", bbbType)
 
 					self.mainDataMap['sequenceMap'][header+bbbType] = \
-						{'token':bbbType + 'B','deleteTime':time.time() + 60.0 * 60.0 * float(self.delaiMaxSeq)}
+						{'token':bbbType + 'B','deleteTime':time.time() + 60.0 * 60.0 * float(delaiMaxSeq)}
 					newBBB = bbbType + 'A'
 				elif bbb == 'COR':
 					newBBB = 'COR'
@@ -276,7 +318,7 @@ class collectionManager(bulletinManager.bulletinManager):
                         if not self.mainDataMap['sequenceMap'].has_key(entete + ' ' + 'RR'):
 	                        # Pas de séquence de démarée
                                 self.mainDataMap['sequenceMap'][entete + ' ' + 'RR'] = \
-					{'token':'RRA','deleteTime':time.time() + 60.0 * 60.0 * float(self.delaiMaxSeq)}
+					{'token':'RRA','deleteTime':time.time() + 60.0 * 60.0 * float(delaiMaxSeq)}
 			
 			# Génération du RRx pour la collection en retard
 			newBBB = self.mainDataMap['sequenceMap'][entete + ' ' + 'RR']['token']
@@ -354,7 +396,7 @@ class collectionManager(bulletinManager.bulletinManager):
 
 			# On détermine si pour le type de bulletin courant l'on veut inclure ou non les stations
 			# manquantes pour la collection.
-			if self.collectionParams[rawBulletin[:2]]['inslude_all_stn']:
+			if self.collectionParams[rawBulletin[:2]]['include_all_stn']:
 				self.mainDataMap['collectionMap'][rawBulletin.splitlines()[0]].setTokenIfNoData(" NIL=")
 			else:
 				self.mainDataMap['collectionMap'][rawBulletin.splitlines()[0]].setTokenIfNoData(None)
@@ -846,10 +888,10 @@ class collectionManager(bulletinManager.bulletinManager):
                 nbHourBullTime = 24 * int(bullTime[0:2]) + int(bullTime[2:4]) 
 
                 # Si la différence est plus grande que le maximum permis
-                return abs(nbHourNow - nbHourBullTime) > self.delaiMaxSeq
+                return abs(nbHourNow - nbHourBullTime) > delaiMaxSeq
 
-	def setCollectionParams(self,collectionParams):
-		"""setCollectionParams(collectionParams)
+	def setCollectionParams(self,colP):
+		"""setCollectionParams(self,colP)
 
 		   Doit avoir la même signification que dans le fichier de config.
 
@@ -861,4 +903,4 @@ class collectionManager(bulletinManager.bulletinManager):
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Décembre 2004
 		"""
-		self.collectionParams = collectionParams
+		self.collectionParams = colP

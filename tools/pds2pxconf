@@ -33,6 +33,7 @@ def readpdsclientlist():
   global pdsetc
 
   # fill in the blanks from above with clientlist config file.
+  print "clientlist read start"
   clientlistconf = open( pdsetc + 'clientlist', 'r')
   cli=clientlistconf.readline()
   while cli:
@@ -48,6 +49,7 @@ def readpdsclientlist():
 
     cli=clientlistconf.readline()
   clientlistconf.close()
+  print "clientlist read done"
 
 
 def convertclient(one):
@@ -55,6 +57,7 @@ def convertclient(one):
   global pdsetc
   global fetetc
 
+  print "client: "+one+" start"
   cliconf = open( pdsetc + one , 'r' )
   mask=cliconf.readline()
   destdir=''
@@ -71,10 +74,10 @@ def convertclient(one):
 	fetcli.write( 'user ' + clients[clientid][1] + "\n" )
 	fetcli.write( 'password ' + clients[clientid][2] + "\n" )
       elif maskline[0] == 'imask':
-	if (destdir != maskline[4]):
+	fetcli.write( 'filename '+ maskline[3] + "\n" )
+	if (len(maskline) > 4 ) and (destdir != maskline[4]):
 	   destdir=maskline[4]
 	   fetcli.write( 'directory '+ destdir + "\n" )
-	   fetcli.write( 'filename '+ maskline[3] + "\n" )
         fetcli.write( string.join( maskline[0:2], ' ' ) + "\n" )
       elif maskline[0] == 'log_to' or \
 	   maskline[0] == 'log_roll_over' or \
@@ -84,13 +87,14 @@ def convertclient(one):
            maskline[0] == 'sleep_timer' or \
            maskline[0] == 'debug_level' or \
            maskline[0] == 'chmod' :
-	pass
+	pass # not implemented
       elif maskline[0] == 'emask' :
 	   fetcli.write(mask)
     mask=cliconf.readline()
 
   cliconf.close()
   fetcli.close()
+  print "client: "+one+" end"
 
 
 def convertpdsswitch():
@@ -108,6 +112,7 @@ def convertpdsswitch():
   # Pass through the pdsswitch.conf hierarchy of config files.
   #
 
+  print "switch: start"
   switchconf = open( pdsetc + 'pdsswitch.conf' , 'r' )
   cli=switchconf.readline() 
   while cli:
@@ -121,6 +126,7 @@ def convertpdsswitch():
     	 pass
     cli=switchconf.readline()
   switchconf.close()
+  print "switch: end"
 
   
 if not os.path.exists(fetetc):

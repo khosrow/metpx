@@ -10,7 +10,11 @@
        -- figure out where to put them... /apps/px/cx/collections
 	  cx == conversions ?
 
-  -- more options on receiver (tune directory sleep timer or...)
+  -- more options on receiver? (tune directory sleep timer or...)
+
+  -- move status out from .conf files, into q directories.
+     ie.   txq/<client>/.status -> active enabled
+     or just put it inside .lock?, no want to persist across restarts.
 
   -- student project... directory watching technique study.
 	-- opendir poll, versus, poll mtime, FAM, fcntl(D_NOTIFY, fcntl(I_NOTIFY)
@@ -41,12 +45,17 @@
 	-- good market for this with implementation, if
            we do it right.
 
+  -- add destination confirmation to the process of reading header2client.conf?
+     reject non-existent clients?
+
   -- Documentation
-	-- Extract all the TIKI stuff into a sub-dir like requirements/Spec/Design.?
+	-- Extract all the TIKI stuff .. dump it into docs/specs...
+           sub-dir like requirements/Spec/Design.?
 	-- keep it for reference.
 	-- 
 
-  -- i18n (logs and error messages controlled by locales, default English, 'C' locale)
+  -- i18n 
+     Logs and error messages controlled by locales, default English, 'C' locale.
  
   -- add ingester routing directive, so that one can use
      masked routing on socket connections. Currently, routing is fixed by type.
