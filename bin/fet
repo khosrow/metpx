@@ -1,0 +1,54 @@
+#!/usr/bin/env python2
+# -*- coding: iso-8859-1 -*-
+
+# manual annihilation:
+#
+# killall fetrx
+# killall fettx
+# rm -f /apps/fet/[rt]x/.lock
+
+import sys
+import os
+
+sys.path.insert(1, sys.path[0] + '/../lib')
+sys.path.insert(1,sys.path[0] + '/../lib/importedLibs')
+
+import fet
+
+
+def startthem(dir,name,cmd):
+  for cfname in os.listdir( dir ):
+    if cfname[-5:] != '.conf':
+      continue
+
+    active=0
+    cfgfile = open( dir + '/' + cfname, 'r' )
+    conf = cfgfile.readline()
+    while conf:
+      cfl = conf.split()
+      if cfl[0] == 'active':
+        if cfl[1] == 'yes':
+	  active=1
+        break
+
+      conf = cfgfile.readline()
+
+    cfgfile.close()
+    if active == 1:
+      id = cfname[:-5]
+      if os.fork() == 0:
+        os.execl( sys.path[0] + '/' + name , name, id, cmd )
+
+
+def start(cmd):
+  startthem( fet.FET_ETC + fet.FET_RX, 'fetrx', cmd)
+  startthem( fet.FET_ETC + fet.FET_TX, 'fettx', cmd)
+
+
+if len(sys.argv) < 2:
+  print "USAGE: fet (start|stop) "
+  sys.exit(1)
+
+start(sys.argv[1])
+sys.exit(0)
+

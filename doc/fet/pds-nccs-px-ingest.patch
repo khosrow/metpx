@@ -1,0 +1,156 @@
+diff -cr pds-nccs-orig/bin/ncsSender pds-nccs-patched/bin/ncsSender
+*** pds-nccs-orig/bin/ncsSender	Tue Nov 23 10:31:07 2004
+--- pds-nccs-patched/bin/ncsSender	Fri Jan 14 20:57:33 2005
+***************
+*** 1,4 ****
+! #! /usr/bin/env python2
+  # -*- coding: UTF-8 -*-
+  # -----------------------------------------------------
+  # Définition globale pour le traîtement effectué par un 
+--- 1,4 ----
+! #! /usr/bin/env python
+  # -*- coding: UTF-8 -*-
+  # -----------------------------------------------------
+  # Définition globale pour le traîtement effectué par un 
+diff -cr pds-nccs-orig/etc.sample/amReceiver.config pds-nccs-patched/etc.sample/amReceiver.config
+*** pds-nccs-orig/etc.sample/amReceiver.config	Tue Nov 30 10:11:14 2004
+--- pds-nccs-patched/etc.sample/amReceiver.config	Tue Feb  1 20:59:22 2005
+***************
+*** 4,9 ****
+--- 4,13 ----
+  # Valeurs possibles: ['AM','WMO']
+  typeProcotole			=	'AM'
+  
++ # type d'ingestion, defaults to px, use_pds to override
++ #
++ use_pds				=       'yes'
++ 
+  # Port d'arrivée des données
+  localPort                       =       9999
+  
+diff -cr pds-nccs-orig/etc.sample/wmoReceiver.config pds-nccs-patched/etc.sample/wmoReceiver.config
+*** pds-nccs-orig/etc.sample/wmoReceiver.config	Tue Nov 30 10:11:14 2004
+--- pds-nccs-patched/etc.sample/wmoReceiver.config	Tue Feb  1 20:59:57 2005
+***************
+*** 4,9 ****
+--- 4,12 ----
+  # Valeurs possibles: ['AM','WMO']
+  typeProcotole                   =       'WMO'
+  
++ # ingest into what sort of file switcher, defaults to px, override to use pds with 'yes'
++ use_pds				=	'yes'
++ 
+  # Port d'arrivée des données
+  localPort                       =       30012
+  
+diff -cr pds-nccs-orig/lib/bulletinManager.py pds-nccs-patched/lib/bulletinManager.py
+*** pds-nccs-orig/lib/bulletinManager.py	Tue Nov 30 10:11:14 2004
+--- pds-nccs-patched/lib/bulletinManager.py	Tue Feb  1 21:20:28 2005
+***************
+*** 1,7 ****
+  # -*- coding: UTF-8 -*-
+  """Gestionnaire de bulletins"""
+  
+! import math, string, os, bulletinPlain, traceback, sys, time
+  
+  __version__ = '2.0'
+  
+--- 1,7 ----
+  # -*- coding: UTF-8 -*-
+  """Gestionnaire de bulletins"""
+  
+! import math, string, os, bulletinPlain, traceback, sys, time, fet
+  
+  __version__ = '2.0'
+  
+***************
+*** 77,82 ****
+--- 77,83 ----
+  		self.pathDest = self.__normalizePath(pathDest)
+  		self.pathTemp = self.__normalizePath(pathTemp)
+  		self.maxCompteur = maxCompteur
++ 		self.use_pds = 'no'
+  		self.compteur = 0
+  		self.extension = extension
+  		self.lineSeparator = lineSeparator
+***************
+*** 135,143 ****
+  
+  		# Génération du nom du fichier
+  		nomFichier = self.getFileName(unBulletin,compteur=compteur)
+! 
+  		try:
+! 			unFichier = os.open( self.pathTemp + nomFichier , os.O_CREAT | os.O_WRONLY )
+  
+  		except (OSError,TypeError), e:
+  			# Le nom du fichier est invalide, génération d'un nouveau nom
+--- 136,144 ----
+  
+  		# Génération du nom du fichier
+  		nomFichier = self.getFileName(unBulletin,compteur=compteur)
+!                 tempNom = self.pathTemp + nomFichier
+  		try:
+! 			unFichier = os.open( tempNom , os.O_CREAT | os.O_WRONLY )
+  
+  		except (OSError,TypeError), e:
+  			# Le nom du fichier est invalide, génération d'un nouveau nom
+***************
+*** 146,169 ****
+  			self.logger.writeLog(self.logger.EXCEPTION,"Exception: " + ''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
+  
+                          nomFichier = self.getFileName(unBulletin,error=True,compteur=compteur)
+! 			unFichier = os.open( self.pathTemp + nomFichier , os.O_CREAT | os.O_WRONLY )
+  
+                  os.write( unFichier , unBulletin.getBulletin(includeError=includeError) )
+                  os.close( unFichier )
+!                 os.chmod(self.pathTemp + nomFichier,0644)
+  
+! 		# Fetch du path de destination
+! 		pathDest = self.getFinalPath(unBulletin)
+  
+! 		# Si le répertoire n'existe pas, le créer
+! 		if not os.access(pathDest,os.F_OK):
+  			os.mkdir(pathDest, 0755)
+  
+! 		# Déplacement du fichier vers le répertoire final
+!                 os.rename( self.pathTemp + nomFichier , pathDest + nomFichier )
+  
+-                 # Le transfert du fichier est un succes 
+- 		self.logger.writeLog(self.logger.INFO, "Ecriture du fichier <%s>",pathDest + nomFichier)
+  
+  	def __generateBulletin(self,rawBulletin):
+  		"""__generateBulletin(rawBulletin) -> objetBulletin
+--- 147,173 ----
+  			self.logger.writeLog(self.logger.EXCEPTION,"Exception: " + ''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
+  
+                          nomFichier = self.getFileName(unBulletin,error=True,compteur=compteur)
+!                         tempNom = self.pathTemp + nomFichier
+! 			unFichier = os.open( tempNom, os.O_CREAT | os.O_WRONLY )
+  
+                  os.write( unFichier , unBulletin.getBulletin(includeError=includeError) )
+                  os.close( unFichier )
+!                 os.chmod(tempNom,0644)
+  
+! 		if self.use_pds == 'yes':
+! 		    pathDest = self.getFinalPath(unBulletin)
+  
+! 		    if not os.access(pathDest,os.F_OK):
+  			os.mkdir(pathDest, 0755)
+  
+!                     os.rename( tempNom , pathDest + nomFichier )
+! 		    self.logger.writeLog(self.logger.INFO, "Ecriture du fichier <%s>",pathDest + nomFichier)
+!                 else: 
+!                     fet.directingest( nomFichier, self.mapCircuits[entete]['routing_groups'], self.mapCircuits[entete]['priority'], tmppath, self.logger )
+!                     os.unlink(tmppath)
+! 
+! 
+  
+  
+  	def __generateBulletin(self,rawBulletin):
+  		"""__generateBulletin(rawBulletin) -> objetBulletin
+Only in pds-nccs-patched/lib: gateway.pyc
+Only in pds-nccs-patched/lib/importedLibs/logging: __init__.pyc
+Only in pds-nccs-patched/lib/importedLibs/logging: handlers.pyc
+Only in pds-nccs-patched/lib/importedLibs: optparse.pyc
+Only in pds-nccs-patched/lib/importedLibs: textwrap.pyc
+Only in pds-nccs-patched/lib: log.pyc

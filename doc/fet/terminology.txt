@@ -1,0 +1,62 @@
+
+FET - File Exchange Tracker.
+
+initial file hierarchy:
+        FET_ROOT= /apps/fet
+	FET_ROOT/db/<date>/
+	FET_ROOT/rxq/<source>/[1..5]
+	FET_ROOT/txq/<client>/[1..5]
+        FET_ROOT/log/<client>,<qsrc>,<process>
+        
+        FET_ETC/
+		fet.conf
+		pdsswitch.conf  (optional)
+	        tx/<client>.conf
+		rx/<reception>.conf
+
+     uses links extensively, chdir to FET_ROOT, and link relative.
+
+receive files from 'sources' and deliver to clients
+
+
+Directions:
+all directions are relative to the entire machine, not any sub-component.
+if files are on their way into the machine, they are rx (reception) files.
+if they are on their way out from the machine, they are tx (transmission) files.
+
+sample confusion to be avoided:
+ie. PDS has 'incoming' as the name of the files which are outgoing from the server,
+because they are 'incoming' to the client.  Such a directory name is very confusing.
+
+clients:
+     locations to which files are delivered.
+     same terminology as the PDS.
+
+sources 
+     one (or more, depends on priority setting in config.)
+     places where files can be received.
+
+Reception name:
+     Files are received with a "reception name" in the rxq.
+     once the reception name is adjusted via a ('whattopds') type
+     mapping, then the ingestname is generated from that.
+
+Ingest name:
+     Ingest name is used to store the file in the DB, as is.
+     (names which will arrive with correct ingest names 
+      files can be delivered directly to the inq)
+
+     ingest name is mapped against patterns to find clients who 
+     will be sent the file.
+
+Destination name:
+     destination file name, destfn, is calculated:
+     default is first field of ingest name.
+     add suffixes according to DESTFN parameter setting in pattern.
+
+Direct routing:
+     routing using a lookup table, tandem style, with direct correspondence
+     between source and client.
+
+Patterned or masked routing:
+     traditional PDS routing, via client specific emasks & imasks

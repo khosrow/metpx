@@ -1,0 +1,53 @@
+
+Notes from figuring out how to add px support into pds-nccs.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+notes about changes to pds-nccs to ingest into fet:
+
+add config option 'use_pds'  defaults to no...
+
+samples from header2circuit.db:
+HTBF85 KWBC:TEST ADONIS CAST0526 FTPSVR2 PDSALPH:PRIORITE4:
+HVAK99 KWBC:TEST ADONIS CAST0526 FTPSVR2 PDSALPH:PRIORITE4:
+HVDO85 ECMF:TEST ADONIS CAST0526 FTPSVR2 PDSALPH:PRIORITE5:
+AACN60 CWLT:TEST CAST0526 SATNET FTPSVR2 METMGR1 METMGR2 PDSALPH:PRIORITE3:
+
+is the list...
+
+def directingest(ingestname,clist,pri,lfn,logger):
+
+
+
+pathDest = bulletinManager.getFinalPath(self,bulletin)
+
+in writeBulletinToDisk...
+
+   if self.use_px == 'yes':
+      tmppath =  self.pathTemp + nomFichier
+      fnameDest=os.path.basename(pathDest)
+
+      fet.directingest( fnameDest, self.mapCircuits[entete]['routing_groups'], self.mapCircuits[entete]['priority'], tmppath, self.logger )
+
+      os.unlink(tmppath)
+    
+   if self.use_pds == 'yes':
