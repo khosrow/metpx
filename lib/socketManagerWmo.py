@@ -138,4 +138,28 @@ class socketManagerWmo(socketManager.socketManager):
                 else:
                         return 'INCOMPLETE'
 
+        def sendBulletin(self,bulletin):
+                __doc__ = socketManager.socketManager.sendBulletin.__doc__ + \
+                """
+                ###Methode concrete pour socketManagerWmo###
+
+                Nom:
+                sendBulletin
+
+                Parametres d'entree:
+                -bulletin:
+                        -un objet bulletin
+
+                Parametres de sortie:
+                -aucun
+
+                Description:
+
+                Auteur:
+                Pierre Michaud
+
+                Date:
+                Novembre 2004
+                """
+                pass
 

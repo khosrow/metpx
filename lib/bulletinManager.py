@@ -358,6 +358,9 @@ class bulletinManager:
 		except:
 			self.logger.writeLog(self.logger.ERROR,"(Liste de repertoires invalide)")
 
+        def getListeNomsFichiersAbsolus(self):
+                return self.mapBulletinsBruts.keys()
+
 	def effacerFichier(self,nomFichier):
 		pass
 
