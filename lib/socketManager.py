@@ -118,8 +118,6 @@ class socketManager:
 			self.logger.writeLog(self.logger.INFO,"Tentative de connexion à l'hôte distant %s", str(self.remoteHost) )
 
 	                while True:
-				print "timeout = ",self.timeout
-				print "current time = ",time.time() - then
 	                        if self.timeout != None and (time.time() - then) > self.timeout:
 	                                self.socket.close()
 	                                raise socketManagerException('timeout dépassé')
