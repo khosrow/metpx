@@ -1,11 +1,6 @@
 
 directives
 
-'active' <yes|no>
-   whether this channel is 'on' or not.
-   if it is not active, anything delivered into it's input queues will stay there.
-   For sockets, that means the peer will not be able to connect.
-
 'type' <am|wmo|single-file|bulletin-file>
    am        	   - AM protocol socket
    wmo        	   - WMO protocol socket

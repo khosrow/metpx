@@ -253,7 +253,6 @@ def readClients(logger):
        continue
     cliconf = open( FET_ETC + 'tx/' + cfname, 'r' )
     clientid = cfname[:-5]
-    isactive=0
     mask=cliconf.readline()
     destdir=''
     client=clientdefaults
@@ -272,9 +271,6 @@ def readClients(logger):
 	  destination=urlJoin(protocol,destdir,user,password,host,port)
           #print "destination: ", destination
 	  patterns = patterns + [ maskline + [ destination, destfn ] ]
-        elif maskline[0] == 'active':
-	    if maskline[1] == 'yes':
-	       isactive=1 
         elif maskline[0] == 'emask':
 	    patterns = patterns + [ maskline ]
         elif maskline[0] == 'directory':
@@ -320,19 +316,15 @@ def readClients(logger):
 
     cliconf.close()
     client[0] = patterns
-    if isactive == 1:
-      clients[clientid] = copy.deepcopy(client)
-      logger.writeLog( logger.INFO, "read config of client " + clientid )
-      isactive=0
-      client[1]=''
-      host=''
-      port=''
-      user=''
-      password=''
-      destdir=''
-      destfn=''
-    else:
-      logger.writeLog( logger.INFO, "ignored config of client " + clientid )
+    clients[clientid] = copy.deepcopy(client)
+    logger.writeLog( logger.INFO, "read config of client " + clientid )
+    client[1]=''
+    host=''
+    port=''
+    user=''
+    password=''
+    destdir=''
+    destfn=''
     
   # dump clients db
   #for k in clients.keys():
@@ -390,15 +382,11 @@ def readSources(logger):
 
     sourceid = cfname[:-5]
     srcconf = open( FET_ETC + 'rx/' + cfname, 'r' )
-    isactive=0
     source = sourcedefaults
     src=srcconf.readline()
     while src :
       srcline=src.split()
       if ( len(srcline) >= 2 and not re.compile('^[ \t]*#').search(src) ) :
-        if srcline[0] == 'active':
-	  if srcline[1] == 'yes':
-	     isactive=1 
         elif srcline[0] == 'arrival':
 	  try:
             exec("source['mapEnteteDelai'] = " + string.join(srcline[1:]) )
@@ -414,12 +402,8 @@ def readSources(logger):
 
     srcconf.close()
 
-    if isactive == 1:
-      sources[sourceid] = copy.deepcopy(source)
-      logger.writeLog( logger.INFO, "read config of source " + sourceid )
-      isactive=0
-    else:
-      logger.writeLog( logger.INFO, "ignored config of source " + sourceid )
+    sources[sourceid] = copy.deepcopy(source)
+    logger.writeLog( logger.INFO, "read config of source " + sourceid )
 
 
 def readCollections(options,logger):

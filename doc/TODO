@@ -2,6 +2,8 @@
   -- AFTN support -- DL
 	-- need a contingency if we move the Tandem.
 
+  -- reindent.py ...
+
   -- replace 'active' verb with just file naming?
        (ie. mv yup.conf to yup.inactive )
 
@@ -54,7 +56,6 @@
 	-- Extract all the TIKI stuff .. dump it into docs/specs...
            sub-dir like requirements/Spec/Design.?
 	-- keep it for reference.
-	-- 
 
   -- i18n 
      Logs and error messages controlled by locales, default English, 'C' locale.
@@ -67,3 +68,14 @@
      *2gif, or whatever conversions, and have all versions ingested.
 
   -- once we get to PDS... all those unwrappers from Rejean... 
+
+  -- performance improvement, worklists...
+     drop off worklists in the q directories, rather than linking files...
+     reduces overhead... ie... receiver builds a list of files to q for each
+     client places the list in /apps/px/txq/q<source>_<unique>
+ 
+     Senders then read the names in all the q files, and perform the normal
+     priority sort.
+
+     faster than linking each file under heavy load, much less file system interaction.
+     test!?

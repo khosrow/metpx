@@ -1,11 +1,6 @@
 
 directives
 
-'active' <yes|no>
-   whether this channel is 'on' or not.
-   if it is not active, anything delivered into it's input queues will stay there.
-   For sockets, that means no attempt to connect to remote will be made.
-
 'type' <am|wmo|plain|wmofile>
    am        	   - AM protocol socket
    wmo        	   - WMO protocol socket
@@ -46,7 +41,6 @@ directives
 
 ----------------------------------------------------------------------------
   
-active yes
 type single-file
 destination ftp://dude:dpw@machine.example.org/data/dude WHATFN
 connect_timeout 300
