@@ -232,7 +232,7 @@ class socketManager:
 			raise socketManagerException('status de buffer inconnu',status,self.inBuffer)
 
 	def sendBulletin(self):
-		raise socketManagerException('notDefinedYet')
+		raise socketManagerException('socketManager.sendBulletin() est une methode virtuelle pure')
 
 	def __syncInBuffer(self,onlySynch=False):
 		"""__syncInBuffer()

@@ -203,14 +203,19 @@ class senderWmo(gateway.gateway):
 			try:
 				#creation du bulletin wmo
 				rawBulletin = data[key]
-				unBulletinWmo = bulletinWmo.bulletinWmo(rawBulletin,self.logger)
+				unBulletinWmo = bulletinWmo.bulletinWmo(rawBulletin,self.logger,finalLineSeparator='\r\r\n')
+
+				#FIXME s'assurer que la gestion des dejaChoisis est mise a jour
+				#en fonction du succes ou de l'echec de sendBulletin
 
 				#envoi du bulletin wmo
-				self.unSocketManagerWmo.sendBulletin(unBulletinWmo)
-				print "J'ENVOIE!!!!"
+				succes = self.unSocketManagerWmo.sendBulletin(unBulletinWmo)
 
-				#FIXME if pas d'erreur a sendBulletin, effacer le fichier
-				self.unBulletinManagerWmo.effacerFichier(key)
+				#si le bulletin a ete envoye correctement, le fichier
+				#est efface
+				if succes:
+					self.unBulletinManagerWmo.effacerFichier(key)
+					print "JEFFACE!!"
 
 			except:
                 		self.logger.writeLog(self.logger.ERROR,"senderWmo.write(..): Erreur ecriture")

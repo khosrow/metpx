@@ -19,8 +19,8 @@ class bulletinWmo(bulletin.bulletin):
         Date:   Octobre 2004
 	"""
 
-	def __init__(self,stringBulletin,logger,lineSeparator='\n'):
-		bulletin.bulletin.__init__(self,stringBulletin,logger,lineSeparator)
+	def __init__(self,stringBulletin,logger,lineSeparator='\n',finalLineSeparator='\n'):
+		bulletin.bulletin.__init__(self,stringBulletin,logger,lineSeparator,finalLineSeparator)
 
         def doSpecificProcessing(self):
                 """doSpecificProcessing()
@@ -88,7 +88,7 @@ class bulletinWmo(bulletin.bulletin):
                         self.replaceChar('\x03','')
 
 		# Re-calcul du bulletin
-		self.bulletin = self.splitlinesBulletin(self.lineSeparator.join(self.bulletin))
+		self.bulletin = self.splitlinesBulletin(self.getBulletin(useFinalLineSeparator=False))
 
 		# Enlève les espaces à la fin des lignes
 		for i in range(len(self.bulletin)):

@@ -25,6 +25,7 @@ class socketManagerWmo(socketManager.socketManager):
 
            Auteur: Louis-Philippe Thériault
            Date:   Octobre 2004
+	   Modifications: Decembre2004, Pierre Michaud
         """
 
         def __init__(self,logger,type='slave',localPort=9999,remoteHost=None,timeout=None):
@@ -75,8 +76,13 @@ class socketManagerWmo(socketManager.socketManager):
 		   Visibilité:	Privée
                    Auteur:      Louis-Philippe Thériault
                    Date:        Octobre 2004
+		   Modifications: Decembre 2004, Pierre Michaud
                 """
-	        bulletinStr = chr(curses.ascii.SOH) + '\r\r\n' + self.getNextCounter(5) + '\r\r\n' + bulletin.getBulletin() + '\r\r\n' + chr(curses.ascii.ETX)
+	        bulletinStr = chr(curses.ascii.SOH) + '\r\r\n' + self.getNextCounter(5) + '\r\r\n' + bulletin.getBulletin(useFinalLineSeparator=True) + '\r\r\n' + chr(curses.ascii.ETX)
+
+		print "****************"
+		print "return wrapBulletin(...): \n",string.zfill(len(bulletinStr),8) + bulletin.getDataType() + bulletinStr
+		print "****************"
 
 	        return string.zfill(len(bulletinStr),8) + bulletin.getDataType() + bulletinStr
 
@@ -151,7 +157,8 @@ class socketManagerWmo(socketManager.socketManager):
                         -un objet bulletin
 
                 Parametres de sortie:
-                -aucun
+                -si succes: 0
+		-sinon: 1
 
                 Description:
 
@@ -159,7 +166,21 @@ class socketManagerWmo(socketManager.socketManager):
                 Pierre Michaud
 
                 Date:
-                Novembre 2004
+                Decembre 2004
                 """
-                pass
+		try:
+			#preparation du bulletin pour l'envoi
+			data = self.wrapBulletin(bulletin)
 
+			#envoi du bulletin
+                	bytesSent = self.socket.send(data)
+
+			#verifier si l'envoi est un succes
+			if bytesSent != len(data):
+				return 0
+			else:
+				return 1
+
+		except:
+			self.logger.writeLog(self.logger.DEBUG,"socketManagerWmo.sendBulletin(): erreur d'envoi")
+			raise

@@ -33,10 +33,15 @@ class bulletin:
 
 					- Log principal pour les bulletins
 
-		lineSeparator		String
+		finalLineSeparator	String
 
 					- Séparateur utilisé comme fin de ligne
 					  lors de l'appel du get
+
+		lineSeparator		String
+
+					- Marqueur utilise pour separer les lignes
+					  du bulletin source
 
 		* Attributs (usage interne seulement)
 
@@ -62,12 +67,14 @@ class bulletin:
 	Statut:	Abstraite
 	Auteur:	Louis-Philippe Thériault
 	Date:	Octobre 2004
+	Modifications: Decembre 2004, Louis-Philippe et Pierre
   	"""
 
-	def __init__(self,stringBulletin,logger,lineSeparator='\n'):
+	def __init__(self,stringBulletin,logger,lineSeparator='\n',finalLineSeparator='\n'):
                 self.logger = logger
 		self.errorBulletin = None
 		self.lineSeparator = lineSeparator
+		self.finalLineSeparator = finalLineSeparator
 		self.bulletin = self.splitlinesBulletin(stringBulletin.lstrip(lineSeparator))
 		self.dataType = None
 
@@ -169,7 +176,7 @@ class bulletin:
 
 				self.bulletin[i] = self.bulletin[i].replace(oldchars,newchars)
 
-	def getBulletin(self,includeError=False):
+	def getBulletin(self,includeError=False,useFinalLineSeparator=True):
 		"""getBulletin([includeError]) -> bulletin
 
 		   bulletin	: String
@@ -177,19 +184,28 @@ class bulletin:
 		   includeError:	Bool
 					- Si est à True, inclut l'erreur dans le corps du bulletin
 
+		   useFinalLineSeparator:	Bool
+					- Si est a True, utilise le finalLineSeparator
+
 		   Retourne le bulletin en texte
 
 		   Visibilité:	Publique
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
+		   Modifications: Decembre 2004, Louis-Philippe et Pierre
 		"""
+		if useFinalLineSeparator:
+			marqueur = self.finalLineSeparator	
+		else:
+			marqueur = self.lineSeparator
+
 		if self.errorBulletin == None:
-			return string.join(self.bulletin,self.lineSeparator)
+			return string.join(self.bulletin,marqueur)
 		else:
 			if includeError:
-		       	        return ("### " + self.errorBulletin[0] + self.lineSeparator + "PROBLEM BULLETIN" + self.lineSeparator) + string.join(self.bulletin,self.lineSeparator)
+		       	        return ("### " + self.errorBulletin[0] + marqueur + "PROBLEM BULLETIN" + marqueur) + string.join(self.bulletin,marqueur)
 			else:
-				return string.join(self.bulletin,self.lineSeparator)
+				return string.join(self.bulletin,marqueur)
 
 	def getLength(self):
                 """getLength() -> longueur
