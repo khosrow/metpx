@@ -159,6 +159,10 @@ class bulletinAm(bulletin.bulletin):
 		"""
 		unBulletin = self.bulletin
 
+		if len(self.getHeader().split()) < 1:
+		# Si la première ligne est vide, bulletin erroné, aucun traîtement
+			return
+
                 # Si le bulletin est à modifier et que l'entête doit être renomée
                 if self.mapEntetes != None and len(self.getHeader().split()[0]) == 2:
 			# Si le premier token est 2 lettres de long
