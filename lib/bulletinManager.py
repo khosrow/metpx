@@ -145,6 +145,8 @@ class bulletinManager:
 
 		# Génération du nom du fichier
 		nomFichier = self.getFileName(unBulletin,compteur=compteur)
+		if not use_pds:
+		   nomFichier = nomFichier + ´:´ + time.strftime( "%Y%m%d%H%M%S", time.gmtime(time.time()) )
                 tempNom = self.pathTemp + nomFichier
 		try:
 			unFichier = os.open( tempNom , os.O_CREAT | os.O_WRONLY )
@@ -174,13 +176,14 @@ class bulletinManager:
                 else: 
 		    entete = ' '.join(unBulletin.getHeader().split()[:2])
 
-	            if not self.mapCircuits.has_key(entete):
-			unBulletin.setError('Entete ' + entete + 'non trouvée dans fichier de circuits')
-	                raise bulletinManagerException('Entete' + entete + ' non trouvée dans fichier de circuits')
+	            if self.mapCircuits.has_key(entete):
+                       clist = self.mapCircuits[entete]['routing_groups']
+		    else:
+		       clist = []
 
+		    
                     fet.directingest( nomFichier, self.mapCircuits[entete]['routing_groups'], self.mapCircuits[entete]['priority'], tempNom, self.logger )
 	            os.unlink(tempNom)
-
 
 
 
