@@ -404,8 +404,9 @@ class bulletin:
 
 		if not tokens[0].isalnum() or len(tokens[0]) not in [4,5,6] or \
 		   not tokens[1].isalnum() or len(tokens[1]) not in [4,5,6] or \
-		   not tokens[2].isdigit() or not (0 <= int(tokens[2][:2]) <= 31) or \
-		   not(00 <= int(tokens[2][2:4]) <= 23) or not(00 <= int(tokens[2][4:]) <= 59):
+		   not tokens[2].isdigit() or len(tokens[2]) != 6 or \
+		   not (0 <= int(tokens[2][:2]) <= 31) or not(00 <= int(tokens[2][2:4]) <= 23) or \
+		   not(00 <= int(tokens[2][4:]) <= 59):
 
 			self.setError('Entete non conforme (format des 3 premiers champs incorrects)')
 			return
