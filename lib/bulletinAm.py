@@ -144,6 +144,7 @@ class bulletinAm(bulletin.bulletin):
 
 		if len(self.getHeader().split()) < 1:
 		# Si la première ligne est vide, bulletin erroné, aucun traîtement
+			bulletin.bulletin.verifyHeader(self)
 			return
 
                 # Si le bulletin est à modifier et que l'entête doit être renomée
@@ -208,6 +209,8 @@ class bulletinAm(bulletin.bulletin):
 		if self.getType() in ['UG','UK','US'] and self.bulletin[1] == '':
 			self.bulletin.remove('')
 
+		bulletin.bulletin.verifyHeader(self)
+
 	def getFormattedSystemTime(self):
 	        """getFormattedSystemTime() -> heure
 
@@ -227,3 +230,11 @@ class bulletinAm(bulletin.bulletin):
 		"""
 	        return time.strftime("%d%H%M",time.localtime())
 
+        def verifyHeader(self):
+		__doc__ = bulletin.bulletin.verifyHeader.__doc__ + \
+		"""### Ajout de bulletinAm ###
+
+		   Overriding ici pour que lors de l'instanciation, le bulletin
+		   ne soit pas vérifié.
+		"""
+		return

@@ -19,6 +19,10 @@ class bulletin:
 	Le bulletin est représenté à l'interne comme une liste de strings,
 	découpés par l'attribut lineSeparator.
 
+	Vérifie l'entête du bulletin lors de l'instanciation. Pour sauter
+	cette vérification dans une des classes spécialisées, overrider
+	la méthode par une méthode vide.
+
 		* Paramètres à passer au constructeur
 
 		stringBulletin		String
@@ -66,6 +70,11 @@ class bulletin:
 		self.lineSeparator = lineSeparator
 		self.bulletin = self.splitlinesBulletin(stringBulletin.lstrip(lineSeparator))
 		self.dataType = None
+
+		# Vérification du header du bulletin
+		# pour ne pas l'effectuer, simplement overrider la méthode 
+		# dans la classe spécialisée, par une méthode qui ne fait rien
+		self.verifyHeader()
 
                 self.logger.writeLog(self.logger.VERYVERBOSE,"newBulletin: %s",stringBulletin)
 
@@ -343,3 +352,41 @@ class bulletin:
                 """
                 self.logger = logger
 
+	def verifyHeader(self):
+		"""verifyHeader()
+
+		   Vérifie l'entête du bulletin et le flag en erreur s'il y a erreur
+		"""
+		header = self.getHeader()
+
+		tokens = header.split()
+
+		if len(tokens) < 3:
+			self.setError('Entete non conforme (moins de 3 champs)')
+			return
+
+		if not tokens[0].isalnum() or len(tokens[0]) not in [4,5,6] or \
+		   not tokens[1].isalnum() or len(tokens[1]) != 4 or \
+		   not tokens[2].isdigit() or not (0 <= int(tokens[2][:2]) <= 31) or \
+		   not(00 <= int(tokens[2][2:4]) <= 23) or not(00 <= int(tokens[2][4:]) <= 59):
+
+			self.setError('Entete non conforme (format des 3 premiers champs incorrects)')
+			return
+
+		if len(tokens) <= 3:
+			return
+
+		if not tokens[3].isalpha() or len(tokens[3]) != 3 or tokens[3][0] not in ['C','A','R','P']:
+			self.setError('Entete non conforme (champ BBB incorrect')
+			return
+
+		if len(tokens) == 5 and \
+			(not tokens[4].isalpha() or len(tokens[4]) != 3 or tokens[4][0] not in ['C','A','R','P']):
+
+			self.setError('Entete non conforme4 (champ BBB no2 incorrect')
+			return
+
+		if len(tokens) > 5:
+
+			self.setError('Entete non conforme (plus de 5 champs')
+			return
