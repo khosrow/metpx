@@ -95,7 +95,7 @@ class receiverAm(gateway.gateway):
 					else:
 						raise
 			else:
-				raise gatewayException("Le lecteur ne peut être accédé")
+				raise gateway.gatewayException("Le lecteur ne peut être accédé")
 
 			if rawBulletin != '':
 				data.append(rawBulletin)
