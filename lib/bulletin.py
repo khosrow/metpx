@@ -86,7 +86,9 @@ class bulletin:
 		"""
 		if stringBulletin.find('GRIB') != -1:
 		# Type de bulletin GRIB, découpage spécifique
-			b = stringBulletin[:stringBulletin.find('GRIB')].splitlines() + [stringBulletin[stringBulletin.find('GRIB'):stringBulletin.find('7777')+len('7777')]] 
+			b = stringBulletin[:stringBulletin.find('GRIB')].splitlines() + \
+				[stringBulletin[stringBulletin.find('GRIB'):stringBulletin.find('7777')+len('7777')]] 
+
 			b_fin = stringBulletin[stringBulletin.find('7777')+len('7777'):].splitlines()
 
 			if len(b_fin) > 0 and b_fin[0] == '':
@@ -97,7 +99,9 @@ class bulletin:
 
 		elif stringBulletin.find('BUFR') != -1:
                 # Type de bulletin BUFR, découpage spécifique
-                        b = stringBulletin[:stringBulletin.find('BUFR')].splitlines() + [stringBulletin[stringBulletin.find('BUFR'):stringBulletin.find('7777')+len('7777')]]
+                        b = stringBulletin[:stringBulletin.find('BUFR')].splitlines() + \
+				[stringBulletin[stringBulletin.find('BUFR'):stringBulletin.find('7777')+len('7777')]]
+
                         b_fin = stringBulletin[stringBulletin.find('7777')+len('7777'):].splitlines()
 
                         if len(b_fin) > 0 and b_fin[0] == '':

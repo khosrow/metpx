@@ -82,8 +82,9 @@ def main():
 	unGateway.run()
 
 global logger
-global isShutdowning = False
+global isShutdowning 
 
+isShutdowning = False
 logger = None
 
 if __name__ == '__main__':
