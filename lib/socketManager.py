@@ -5,13 +5,25 @@ réception et envoi des bulletins et la vérification du respect
 des contraintes relatives aux protocoles.
 """
 
+import socket
+import time
+import struct
+import string
+import curses
+import curses.ascii
+
 __version__ = '2.0'
+
+class socketManagerException(Exception):
+	"""Classe d'exception spécialisés relatives au socket
+managers"""
+	pass
 
 class socketManager:
 	"""Classe abstraite regroupant toutes les fonctionnalitées 
 requises pour un gestionnaire de sockets. Les méthodes 
 qui ne retournent qu'une exception doivent êtres redéfinies 
-dans les sous-classes.
+dans les sous-classes (il s'agit de méthodes abstraites).
 
 Les arguments à passer pour initialiser un socketManager sont les
 suivants:
@@ -27,12 +39,12 @@ suivants:
 
 			- Port local ou se 'bind' le socket.
 
-	remoteHosts	[ (str hostname,int port) ]
+	remoteHost	(str hostname,int port)
 
-			- Liste de (hostname,port) pour la 
+			- Couple de (hostname,port) pour la 
 			  connection. Lorsque timeout secondes
-			  est atteint, le prochain couple dans
-			  la liste est essayé.
+			  est atteint, un socketManagerException
+			  est levé.
 
 			- Doit être absolument fourni si type='master',
 			  et non fourni si type='slave'.
@@ -43,9 +55,110 @@ suivants:
 			  à un hôte distant, délai avant de dire 
 			  que l'hôte de réponds pas.
 
+	log		Objet Log (default=None)
+
+			- Objet de la classe Log
+
 """
-	def __init__(type='slave',localPort=9999,remoteHosts=None,timeout=None):
+	def __init__(self,type='slave',localPort=9999,remoteHost=None,timeout=None,log=None):
 		self.type = type
 		self.localPort = localPort
-		self.remoteHosts = remoteHosts
+		self.remoteHost = remoteHost
 		self.timeout = timeout
+		self.log = log
+
+		self.inBuffer = ""
+		self.outBuffer = []
+		self.connected = False
+
+	def establishConnection(self):
+		"""Établit la connection selon la valeur des attributs de l'objet.
+
+		   self.socket sera après l'exécution la connection."""
+		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		self.socket.setsockopt(socket.SOL_SOCKET,socket.SO_KEEPALIVE,1)
+
+		# Binding avec le port local
+	        while True:
+	                try:
+	                        self.socket.bind(('',self.localPort))
+	                        break
+	                except socket.error:
+	                        time.sleep(1)
+
+		# Snapshot du temps
+		then = time.time()
+
+		# Tentative de connection
+		if self.type == 'master':
+			# La connection doit se faire a un hôte distant
+	                if self.remoteHost == None:
+	                        raise socketManagerException('remoteHost (host,port) n\'est pas spécifié')
+
+	                while True:
+	                        if self.timeout != None and (time.time() - then) > self.timeout:
+	                                self.socket.close()
+	                                raise socketManagerException('timeout dépassé')
+
+	                        try:
+	                                self.socket.connect(self.remoteHost)
+	                                break
+	                        except socket.error:
+	                                time.sleep(5)
+		else:
+			# En attente de connection
+	                self.socket.listen(1)
+
+        	        while True:
+	                        if self.timeout != None and (time.time() - then) > self.timeout:
+	                                self.socket.close()
+	                                raise socketManagerException('timeout dépassé')
+
+        	                try:
+	                                conn, self.remoteHost = self.socket.accept()
+	                                break
+	                        except TypeError:
+	                                time.sleep(1)
+
+        	        self.socket.close()
+	                self.socket = conn
+
+		# Pour que l'interrogation du buffer ne fasse attendre le système
+		self.socket.setblocking(False)
+
+	def closeProperly():
+		"""closeProperply() -> ([bulletinsReçus],nbBulletinsEnvoyés) 
+
+		   Ferme le socket et finit de traîter le socket d'arrivée et de
+		   sortie."""
+	        self.socket.shutdown(2)
+
+	        try:
+	                self.recvBuffer = self.recvBuffer + self.socket.recv(1000000)
+	        except socket.error, inst:
+	                pass
+
+        	self.socket.close()
+
+	def getNextBulletin():
+		pass
+
+	def sendBulletin():
+		pass
+
+	def wrapBulletin(self,bulletin):
+		"""wrapbulletin(bulletin) -> wrappedBulletin
+		   
+		   Retourne le bulletin avec les entetes/informations relatives
+		   au protocole sous forme de string. Le bulletin doit etre un
+		   objet Bulletin."""
+		raise socketManagerException("Méthode non implantée (méthode abstraite wrapBulletin)")
+
+	def unwrapBulletin(self):
+		"""unWrapBulletin(wrappedBulletin) -> bulletin
+
+		   Retourne le prochain bulletin contenu dans le buffer,
+		   après avoir vérifié son intégrité, sans modifier le buffer."""
+		raise socketManagerException("Méthode non implantée (méthode abstraite unwrapBulletin)")
+
+	
