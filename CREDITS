@@ -5,9 +5,10 @@ to get the file started, but doesn´t really know who did what.
 
 Louis-Phillippe.Theriault  ampersand ec.gc.ca
   First pass at design, all the early proofs of concept.  First receiver, 
-First sender, and all the complex data transformations necesary on 
-receipt of messages.  Bulletin Collection.  After the first pass, and some 
-review, implemented a second pass design with more OO methodologies.
+He who chose Python, over C.  First sender, and all the complex data 
+transformations necesary on receipt of messages.  Bulletin Collection.  
+After the first pass, and some review, implemented a second pass design 
+with more OO methodologies.
 
 Pierre.Michaud ampersand ec.gc.ca
   Worked with Louis-Phillippe of the second pass design.  Developer of the second pass senders for AM, WMO, & AMIS.
@@ -32,6 +33,6 @@ Alfred.Gagne ampersand ec.gc.ca
   He who knows the data.  participated in specification effort, also testing.
 
   
-Lambros.Stamadianous, Dave.Spiegl  ampersand ec.gc.ca
+Lambros.Stamadianos, Dave.Spiegl  ampersand ec.gc.ca
   participated in specs for the precursor of this project.
 

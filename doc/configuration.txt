@@ -39,19 +39,19 @@ samples of rx/<source>.conf
 
 type single-file		
 active yes
-extension default AMTCP2FILE:DADS:BULLETIN:ASCII
+extension 3:AMTCP2FILE:DADS:BULLETIN:ASCII
 
 type single-file
 active yes
-extension default AMTCP2FILE:DADS:BULLETIN:ASCII
+extension 3:AMTCP2FILE:DADS:BULLETIN:ASCII
 
 type am
 active yes
-extension set :PPP1:-CCCC:-TT:-CIRCUIT:ncsAmReceiver
+extension 3:PPP1:-CCCC:-TT:-CIRCUIT:ncsAmReceiver
 
 type wmo
 active yes
-extension set :PPP1:-CCCC:-TT:-CIRCUIT:ncsWmoReceiver
+extension 3:PPP1:-CCCC:-TT:-CIRCUIT:ncsWmoReceiver
 
 
 For each outgoing circuit, there 

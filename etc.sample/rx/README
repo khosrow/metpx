@@ -10,9 +10,7 @@ directives
    am        	   - AM protocol socket
    wmo        	   - WMO protocol socket
    single-file     - Receive plain files (like a PDS.)
-   nwsfile         - receive bulletins in an archive
-   ukmetfile       - receive bulletins in an archive
-   wmofile         - receive bulletins in an archive
+   single-bulletin - receive bulletins in a file (ingested like from a socket.)
 
 'port' 5012
    port to bind for reception, only used on socket protocols

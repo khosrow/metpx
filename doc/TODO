@@ -6,10 +6,6 @@
 
   -- ability to interpret SIGHUP without hanging up the socket.
 
-  -- Move Daniel's file ingestor ncsFileIngerinto 
-
-  -- check to refuse to start up as root.
-
   -- Move Collection stuff into new config methods.
        -- figure out where to put them... /apps/px/cx/collections
 	  cx == conversions ?
@@ -49,7 +45,6 @@
 	-- Extract all the TIKI stuff into a sub-dir like requirements/Spec/Design.?
 	-- keep it for reference.
 	-- 
-  -- Complete French Documentation     
 
   -- i18n (logs and error messages controlled by locales, default English, 'C' locale)
  

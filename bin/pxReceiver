@@ -18,6 +18,7 @@ import os.path
 import gateway, log
 import fet
 
+
 def main():
 	global logger
 	global unGateway
@@ -75,7 +76,10 @@ def main():
 		import fetfile
 		fetfile.checkSource( options.source, fet.sources, logger )
 
-
+	elif options.type == 'bulletin-file':
+		import bulletinFileReceiver
+		bulletinFileReceiver.run(logger)
+		
 	else:
 		raise Exception('Type de protocole non reconnu')	# FIXME
 
