@@ -36,7 +36,7 @@ class SortableString:
 if __name__ == '__main__':
 
    #ss = SortableString("toto99_2")
-   ss = SortableString("SACN43_CWAO_012000_CYOJ_41613:ncp1:CWAO:SA:3.A.I.E.C.M.N.H.K.X.S.D.O.Q.::20050201200339")
+   ss = SortableString("/apps/pds/SACN43_CWAO_012000_CYOJ_41613:ncp1:CWAO:SA:3.A.I.E::20050201200339")
    print ss.data
    print ss.basename
    print ss.priority  

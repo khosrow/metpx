@@ -173,7 +173,7 @@ class senderWmo(gateway.gateway):
                 Novembre 2004
 		Modifications: Janvier 2005
                 """
-                self.reader = DiskReader(self.config.rootPath, MultiKeysStringSorter)
+                self.reader = DiskReader(self.config.rootPath, self.config.nameValidation, self.logger, eval(self.config.sorter))
                 self.reader.sort()
                 return(self.reader.getFilesContent(self.config.fileNumber))
                 """
