@@ -184,9 +184,10 @@ class senderWmo(gateway.gateway):
 		else:
                    self.reader = DiskReader(
 			fet.FET_DATA + fet.FET_TX + self.options.client, 
-			True, 
+			False,   # FIXME: should be True, but bug for now.
 			self.logger, 
 			eval(fet.clients[self.options.client][4]) )
+		   print self.reader
                    self.reader.sort()
                    return(self.reader.getFilesContent(fet.clients[self.options.client][5]))
                 """

@@ -177,8 +177,12 @@ def lockStopOrDie(lfn, cmd):
       try:
         os.kill(lockpid,signal.SIGTERM)
       except:
-        pass
-      os.unlink( lfn )
+	pass
+      try:
+        os.unlink( lfn )
+      except:
+	pass
+
       sys.exit(0)
     elif cmd == 'reload' :
       try:
@@ -190,6 +194,11 @@ def lockStopOrDie(lfn, cmd):
     else:
       print "FATAL: queue locked by process: " + repr(lockpid)
       sys.exit(1)
+
+  else:
+    if cmd == 'stop':
+      print "ERROR: no lock file found doing nothing. " 
+      sys.exit(0)
 
   lockfile = open( lfn , 'w' )
   lockfile.write( repr(os.getpid()) )
@@ -324,8 +333,8 @@ def readClients(logger):
       logger.writeLog( logger.INFO, "ignored config of client " + clientid )
     
   # dump clients db
-  for k in clients.keys():
-     print "client ", k, " is: ",  clients[k], "\n"
+  #for k in clients.keys():
+  #   print "client ", k, " is: ",  clients[k], "\n"
 
   #print "\n\n\nPatterns\n\n\n"
   #print patterns
@@ -370,6 +379,7 @@ def readSources(logger):
   for cfname in os.listdir( FET_ETC + 'rx/' ):
     if cfname[-5:] != '.conf':
        continue
+
     sourceid = cfname[:-5]
     srcconf = open( FET_ETC + 'rx/' + cfname, 'r' )
     isactive=0
