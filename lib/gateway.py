@@ -125,10 +125,12 @@ class gateway:
 			try:
 				data = self.read()
 			except gatewayException, e:
-				if e == "Le lecteur ne peut être accédé":
+				if e.args[0] == "Le lecteur ne peut être accédé":
 				# Lecture impossible, il ne devrait plus y avoir
 				# de données en attente
 					self.establishConnection()
+				else:
+					raise
 
 			if len(data) == 0:
 			# S'il n'y a pas de nouveau data
