@@ -224,6 +224,9 @@ class bulletinAm(bulletin.bulletin):
                                 	self.logger.writeLog(self.logger.WARNING,"Station <" + station + "> non trouvee avec prefixe <" + premierMot + ">")
                                         self.logger.writeLog(self.logger.WARNING,"Bulletin:\n"+self.getBulletin())
 
+		if self.getType() in ['UG','UK','US'] and self.bulletin[1] == '':
+			self.bulletin.remove('')
+
 	def getFormattedSystemTime(self):
 	        """getFormattedSystemTime() -> heure
 

@@ -2,7 +2,7 @@
 """Définition des collections de bulletins"""
 
 import time
-import string, traceback, sys
+import string, traceback, sys, bulletin
 
 __version__ = '2.0'
 
@@ -15,58 +15,92 @@ class bulletinCollection(bulletin.bulletin):
 	   header	String
 			-Entete de la collection: TTAAii CCCC JJHHMM <BBB>
 			-Le champ BBB est facultatif
+			-Facultatif (l'on doit fournir mapCollection si non fourni)
+
+	   mapData	Map
+			-Utilisé pour instancier une collection qui est en cours,
+			 lors du démarage du programme, avec des collection à faire
+			 suivre
+			-Facultatif (l'on doit fournir header si non fourni)
+			-'mapCollection':mapCollection
+			-'errorBulletin':<type d'erreur>
+
+	   mapCollection	Map
+				-'header'=str(header)
+				-'stations'=map{'station':str(data)}
 
 	   mapStations	Map
 			- Une entree par station doit être présente dans le map,
 			  et la valeur doit être égale à None
 
+	   Les informations suivantes sont sauvées dans le fichier de statut:
+
+		self.mapCollection, self.errorBulletin
+
 	   Auteur:	Louis-Philippe Thériault
   	   Date:	Novembre 2004
   	"""
 
-	def __init__(self,header,logger,mapStations,lineSeparator='\n'):
+	def __init__(self,logger,mapStations,header=None,lineSeparator='\n',mapData=None):
                 self.logger = logger
 		self.lineSeparator = lineSeparator
 
-		self.errorBulletin = None
-                self.logger.writeLog(self.logger.VERYVERBOSE,"Création d'une nouvelle collection: %s",header)
+		if header != None:
+		# Création d'une nouvelle collection
+			self.errorBulletin = None
 
+			self.mapCollection = {}
+			self.mapCollection['header'] = header
+			self.mapCollection['stations'] = {}
 
-	def getLength(self):
-                """getLength() -> longueur
+                	self.logger.writeLog(self.logger.INFO,"Création d'une nouvelle collection: %s",header)
 
-                   longueur	: int
+		elif mapData != None:
+		# Continuité d'une collection
+			self.errorBulletin = mapData['errorBulletin']
+			self.mapCollection = mapData['mapCollection']
 
-                   Retourne la longueur du bulletin avec le lineSeparator
+			self.logger.writeLog(self.logger.INFO,"Chargement d'une collection: %s",self.mapCollection['header'])
+			self.logger.writeLog(self.logger.DEBUG,"mapData:\n" + str(mapData))
 
-                   Auteur:      Louis-Philippe Thériault
-                   Date:        Octobre 2004
+		else:
+			raise bulletin.bulletinException('Aucune information d\'entrée est fournie (header/mapData)')
+
+	def getPersistentData(self):
+		"""getPersistentData() -> Map
+
+		   Retourne un map qui contiendra les informations à passer pour l'instanciation
+		   d'une collection, l'éventualité de la fermeture du programme.
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Novembre 2004
 		"""
-		return len(self.getBulletin())
+		return {'mapCollection':self.mapCollection,'errorBulletin':self.errorBulletin}
+
 
 	def getHeader(self):
 		"""getHeader() -> header
 
 		   header	: String
 
-		   Retourne la première ligne du bulletin
+		   Retourne l'entête du fichier de collection
 
                    Auteur:      Louis-Philippe Thériault
-                   Date:        Octobre 2004
+                   Date:        Novembre 2004
 		"""
-		return self.bulletin[0]
+		return self.mapCollection['header']
 
         def setHeader(self,header):
                 """setHeader(header)
 
                    header       : String
 
-                   Assigne la première ligne du bulletin
+                   Assigne l'entête du fichier de collection
 
                    Auteur:      Louis-Philippe Thériault
-                   Date:        Octobre 2004
+                   Date:        Novembre 2004
 		"""
-                self.bulletin[0] = header
+                self.mapCollection['header'] = header
 
 		self.logger.writeLog(self.logger.DEBUG,"Nouvelle entête du bulletin: %s",header)
 
@@ -78,9 +112,9 @@ class bulletinCollection(bulletin.bulletin):
                    Retourne le type (2 premieres lettres de l'entête) du bulletin (SA,FT,etc...)
 
                    Auteur:      Louis-Philippe Thériault
-                   Date:        Octobre 2004
+                   Date:        Novembre 2004
 		"""
-                return self.bulletin[0][:2]
+                return self.mapCollection['header'][:2]
 
 	def getOrigin(self):
                 """getOrigin() -> origine
@@ -90,36 +124,8 @@ class bulletinCollection(bulletin.bulletin):
                    Retourne l'origine (2e champ de l'entête) du bulletin (CWAO,etc...)
 
                    Auteur:      Louis-Philippe Thériault
-                   Date:        Octobre 2004
+                   Date:        Novembre 2004
 		"""
-                return self.bulletin[0].split(' ')[1]
-
-	def getError(self):
-		"""getError() -> (TypeErreur)
-
-		   Retourne None si aucune erreur détectée dans le bulletin,
-		   sinon un tuple avec comme premier élément la description 
-		   de l'erreur. Les autres champs sont laissés libres
-
-                   Auteur:      Louis-Philippe Thériault
-                   Date:        Octobre 2004
-		"""
-		return self.errorBulletin
-
-        def setError(self,msg):
-                """setError(msg)
-
-		   msg:	String
-			- Message relatif à l'erreur
-
-		   Flag le bulletin comme erroné. L'utilisation du message est propre
-		   au type de bulletin.
-
-
-                   Auteur:      Louis-Philippe Thériault
-                   Date:        Octobre 2004
-		"""
-		if self.errorBulletin == None:
-	                self.errorBulletin = (msg)
+                return self.mapCollection['header'].split(' ')[1]
 
 

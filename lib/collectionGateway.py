@@ -53,17 +53,17 @@ class collectionGateway(gateway.gateway):
 			rawBulletin = data.pop(0)
 
 			# Si le bulletin doit etre collecté 
-			#-if self.collManager.needsToBeCollected(warBulletin):
+			if self.collManager.needsToBeCollected(rawBulletin):
 
 				# Envoi dans collManager 
-				#-self.collManager.addBulletin(rawBulletin)
+				self.collManager.addBulletin(rawBulletin)
 
-			#-else:
+			else:
 
 				# Parcours normal (non collecté) 
-				#-self.bulletinManager.writeBulletinToDisk(rawBulletin)
+				self.bulletinManager.writeBulletinToDisk(rawBulletin)
 
 		# Dans tous les cas, écrire les collection s'il y a lieu
-		#-self.collManager.writeCollection()
+		self.collManager.writeCollection()
 
 

@@ -45,8 +45,14 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 			return False
 
                 if len(premierMot) == 2 and premierMot in ["FC","FT"]:
-                	if string.count(string.join(rawBulletin,'\n'),'TAF') > 1:
-				return True
+			motCle = 'TAF'
+                	i = 0
+
+			for ligne in rawBulletin.split(self.lineSeparator)[1:]:
+				if len(ligne.split()) > 0 and ligne.split()[0] == motCle:
+					i += 1
+
+			return i > 1
 
 		return False
 
@@ -58,13 +64,14 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
-		entete = rawBulletin.splitlines()[0]
+		entete = rawBulletin.split(self.lineSeparator)[0]
 
 	        listeBulletins = []
 	        unBulletin = []
+		motCle = 'TAF'
 
-	        for ligne in bulletinOriginal[1:]:
-	                if ligne.split()[0] == motCle:
+	        for ligne in rawBulletin.split(self.lineSeparator)[1:]:
+	                if len(ligne.split()) > 0 and ligne.split()[0] == motCle:
 	                        listeBulletins.append(string.join(unBulletin,self.lineSeparator))
 
        		                unBulletin = list()
@@ -99,7 +106,7 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 		   Date:	Octobre 2004
 		"""
 		if self.__isSplittable(unRawBulletin):
-			for rawBull in self.__splitBulletin(rawBulletin):
+			for rawBull in self.__splitBulletin(unRawBulletin):
 				bulletinManager.bulletinManager.writeBulletinToDisk(self,rawBull)
 		else:
 			bulletinManager.bulletinManager.writeBulletinToDisk(self,unRawBulletin)
