@@ -312,7 +312,8 @@ class bulletinManager:
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
-		if compteur:
+		if compteur or bulletin.getError() != None or error:
+			compteur = True
 			strCompteur = ' ' + string.zfill(self.compteur, len(str(self.maxCompteur)))
 		else:
 			strCompteur = ''
@@ -323,6 +324,12 @@ class bulletinManager:
 				return (bulletin.getHeader() + strCompteur + self.getExtension(bulletin,error)).replace(' ','_')
 			except Exception, e:
 			# Une erreur est détectée (probablement dans l'extension) et le nom est généré avec des erreurs
+
+				# Si le compteur n'a pas été calculé, c'est que le bulletin était correct,
+				# mais si on est ici dans le code, c'est qu'il y a eu une erreur.
+				if strCompteur == '':
+					strCompteur = ' ' + string.zfill(self.compteur, len(str(self.maxCompteur)))
+
 				self.logger.writeLog(self.logger.WARNING,e)
 				return ('ERROR_BULLETIN ' + bulletin.getHeader() + strCompteur + self.getExtension(bulletin,error=True)).replace(' ','_')
 		elif bulletin.getError() != None and not error:

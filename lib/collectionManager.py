@@ -72,6 +72,9 @@ class collectionManager(bulletinManager.bulletinManager):
 		self.pathSource = self.__normalizePath(pathSource)
 		self.pathDest = self.__normalizePath(pathDest)
 
+                self.maxCompteur = 99999
+                self.compteur = 0
+
 		self.collectionParams = collectionParams
 		self.delaiMaxSeq = delaiMaxSeq
 
@@ -545,6 +548,11 @@ class collectionManager(bulletinManager.bulletinManager):
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
+		if self.compteur >= self.maxCompteur:
+			self.compteur = 0
+
+		self.compteur += 1
+
                 try:
                         unFichier = os.open( self.pathTemp + nomFichier , os.O_CREAT | os.O_WRONLY )
 

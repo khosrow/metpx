@@ -27,6 +27,7 @@ class bulletinPlain(bulletin.bulletin):
 
 		   Fait rien
 
+                   Visibilité:  Publique
                    Auteur:      Louis-Philippe Thériault
                    Date:        Octobre 2004
 		"""

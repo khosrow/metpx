@@ -71,6 +71,7 @@ class bulletinCollection(bulletin.bulletin):
 			Pour comparer avec le temps courant (time.time()), pour l'écriture
 			de la collection.
 
+		   Visibilité:  Publique
                    Auteur:      Louis-Philippe Thériault
                    Date:        Novembre 2004
 		"""
@@ -83,6 +84,7 @@ class bulletinCollection(bulletin.bulletin):
 			Informe si tout le data pour les stations est rentré. Si tel est le 
 			cas la collection devrait être écrite.
 
+                   Visibilité:  Publique
 		   Auteur:	Louis-Philippe Thériault
                    Date:        Novembre 2004
 		"""
@@ -96,6 +98,7 @@ class bulletinCollection(bulletin.bulletin):
 
 		   Retourne l'entête du fichier de collection
 
+                   Visibilité:  Publique
                    Auteur:      Louis-Philippe Thériault
                    Date:        Novembre 2004
 		"""
@@ -108,6 +111,7 @@ class bulletinCollection(bulletin.bulletin):
 
                    Assigne l'entête du fichier de collection
 
+                   Visibilité:  Publique
                    Auteur:      Louis-Philippe Thériault
                    Date:        Novembre 2004
 		"""
@@ -122,6 +126,7 @@ class bulletinCollection(bulletin.bulletin):
 
                    Retourne le type (2 premieres lettres de l'entête) du bulletin (SA,FT,etc...)
 
+                   Visibilité:	Publique
                    Auteur:      Louis-Philippe Thériault
                    Date:        Novembre 2004
 		"""
@@ -134,6 +139,7 @@ class bulletinCollection(bulletin.bulletin):
 
                    Retourne l'origine (2e champ de l'entête) du bulletin (CWAO,etc...)
 
+                   Visibilité:  Publique
                    Auteur:      Louis-Philippe Thériault
                    Date:        Novembre 2004
 		"""
@@ -141,8 +147,6 @@ class bulletinCollection(bulletin.bulletin):
 
 	def getBulletin(self,includeError=None):
 		"""Utiliser self.getCollection()
-
-		   N'inclut pas l'erreur
 		"""
 		return self.getCollection()
 
@@ -158,6 +162,7 @@ class bulletinCollection(bulletin.bulletin):
 
 			L'interface par getBulletin() est donc respectée.
 
+                   Visibilité:  Publique
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
@@ -180,6 +185,7 @@ class bulletinCollection(bulletin.bulletin):
 
                         L'interface par getBulletin() est donc respectée.
 
+                   Visibilité:  Publique
                    Auteur:      Louis-Philippe Thériault
                    Date:        Novembre 2004
                 """
@@ -210,6 +216,7 @@ class bulletinCollection(bulletin.bulletin):
 			Appel qui devrait être utilisé, permet un paramétrage direct, sinon
 			on peut setter les paramètres par setBBB/setTokenIfNoData.
 
+                   Visibilité:  Publique
 		   Auteur:	Louis-Philipe Thériault
 		   Date:	Novembre 2004
 		"""
@@ -266,6 +273,7 @@ class bulletinCollection(bulletin.bulletin):
 			les méthodes statiques getStation/getData, sur un bulletin
 			brut, puis passer l'info à addData.
 
+                   Visibilité:  Publique
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""

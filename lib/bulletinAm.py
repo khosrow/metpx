@@ -68,6 +68,7 @@ class bulletinAm(bulletin.bulletin):
                    Retourne la station associée au bulletin,
                    retourne None si elle est introuvable.
 
+                   Visibilité:  Publique
                    Auteur:      Louis-Philippe Thériault
                    Date:        Octobre 2004
 		"""
@@ -130,11 +131,10 @@ class bulletinAm(bulletin.bulletin):
 		__doc__ = bulletin.bulletin.doSpecificProcessing.__doc__ + \
                 """### Ajout de bulletinAm ###
 
-		   (Définition de la méthode abstraite)
-
                    Modifie les bulletins provenant de stations, transmis 
 		   par protocole Am, nommés "Bulletins Am"
 
+                   Visibilité:  Publique
                    Auteur:      Louis-Philippe Thériault
                    Date:        Octobre 2004
 		"""
@@ -216,6 +216,12 @@ class bulletinAm(bulletin.bulletin):
 		   Retourne une string de l'heure locale du systeme, selon
 	           jjhhmm : jour/heures(24h)/minutes
 
+		   Utilisation:
+
+			Générer le champ jjhhmm pour l'entête du bulletin avec
+			l'heure courante.
+
+                   Visibilité:  Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre
 		"""
