@@ -137,7 +137,8 @@ class bulletinManager:
 
 		   -TT:		Type du bulletin (2 premieres lettres)
 		   -CCCC:	Origine du bulletin (2e champ dans l'entête
-		   -CIRCUIT:	Liste des circuits, séparés par des points
+		   -CIRCUIT:	Liste des circuits, séparés par des points, 
+				précédés de la priorité.
 
 		   Exceptions possibles:
 			bulletinManagerException:	Si l'extension ne peut être générée 
@@ -245,8 +246,8 @@ class bulletinManager:
 		Circuits:	String
 				-Circuits formattés correctement pour êtres insérés dans l'extension
 
-		Retourne la liste des circuits pour le bulletin, pour être inséré
-		dans l'extension
+		Retourne la liste des circuits pour le bulletin précédés de la priorité, pour être inséré
+		dans l'extension.
 
                    Exceptions possibles:
                         bulletinManagerException:       Si l'entête ne peut être trouvée dans le
@@ -261,7 +262,7 @@ class bulletinManager:
 			bulletin.setError('Entete non trouvée dans fichier de circuits')
 	                raise bulletinManagerException('Entete non trouvée dans fichier de circuits')
 	
-	        return '.'.join(self.mapCircuits[entete]['routing_groups'])
+	        return self.mapCircuits[entete]['priority'] + '.' + '.'.join(self.mapCircuits[entete]['routing_groups'])
 
 	def getFinalPath(self,bulletin):
 		"""getFinalPath(bulletin) -> path
