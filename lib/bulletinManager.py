@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 """Gestionnaire de bulletins"""
 
 import math, string, os, bulletin, traceback, sys

@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 """Superclasse pour un gateway de transfert de bulletins"""
 import imp, time
 

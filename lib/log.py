@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 """Système efficace pour le logging"""
 
 import sys

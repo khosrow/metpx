@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 """Gestion des bulletins "WMO" """
 
 import bulletinManager, bulletinWmo, os, string

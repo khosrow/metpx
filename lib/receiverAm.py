@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 """ReceiverAm: socketAm -> disk, incluant traitement pour les bulletins"""
 
 import gateway

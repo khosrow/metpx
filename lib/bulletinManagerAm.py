@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 """Gestion des bulletins "AM" """
 
 import bulletinManager, bulletinAm, os, string

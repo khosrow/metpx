@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 """Définition d'une sous-classe pour les bulletins "WMO" """
 
 import time

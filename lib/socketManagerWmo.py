@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 """Spécialisation pour gestion de sockets "WMO" """
 
 __version__ = '2.0'

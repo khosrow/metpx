@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 """Définition de la superclasse socketManager.
 
 Ces classes servent à l'établissement de la connection, la 
