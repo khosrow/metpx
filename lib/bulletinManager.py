@@ -165,6 +165,11 @@ class bulletinManager:
 		    self.logger.writeLog(self.logger.INFO, "Ecriture du fichier <%s>",pathDest + nomFichier)
                 else: 
 		    entete = ' '.join(unBulletin.getHeader().split()[:2])
+
+	            if not self.mapCircuits.has_key(entete):
+			unBulletin.setError('Entete non trouvée dans fichier de circuits')
+	                raise bulletinManagerException('Entete non trouvée dans fichier de circuits')
+
                     fet.directingest( nomFichier, self.mapCircuits[entete]['routing_groups'], self.mapCircuits[entete]['priority'], tmppath, self.logger )
                     os.unlink(tmppath)
 
