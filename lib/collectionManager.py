@@ -3,6 +3,7 @@
 
 import bulletinManager, bulletinManagerAm, bulletinPlain, bulletinCollection
 import os, time, string
+import gdbm, pickle
 
 __version__ = '2.0'
 
@@ -58,7 +59,9 @@ class collectionManager(bulletinManager.bulletinManager):
 
 	   L'état du programme est conservé dans un fichier qui est 
 	   dans <répertoire_temporaire>/<statusFile>, donc si le programme crash,
-	   ce fichier est rechargé et il continue.
+	   ce fichier est rechargé et il continue. Chaque modification à 
+	   self.mainDataMap et ses objets pointés doivent êtres suivies
+	   par la sauvegarde dans le fichier de statut (self.saveStatusFile())
 
            Auteur:      Louis-Philippe Thériault
            Date:        Novembre 2004
@@ -83,7 +86,8 @@ class collectionManager(bulletinManager.bulletinManager):
 		self.logger = logger
 
 		self.initMapEntetes(pathFichierCollection)
-		self.statusFile = statusFile
+		self.statusFile = self.pathTemp + statusFile
+		self.statusDb = None
 
 		# Variable pour définir si l'on veut inclure toutes les
 		# stations dans les fichiers de collection
@@ -97,8 +101,8 @@ class collectionManager(bulletinManager.bulletinManager):
 		self.initMapCircuit(ficCircuits)
 
 		# Si le fichier de statut existe déja, on le charge en mémoire
-		if os.access(self.pathTemp+self.statusFile,os.F_OK):
-			self.loadStatusFile(self.pathTemp+self.statusFile)
+		if os.access(self.statusFile,os.F_OK):
+			self.loadStatusFile()
 		else:
 		# Création des structures
 			self.mainDataMap = {'collectionMap':{},'sequenceMap':{},'sequenceWriteQueue':[]}
@@ -216,8 +220,7 @@ class collectionManager(bulletinManager.bulletinManager):
 			self.mainDataMap['sequenceWriteQueue'].append({'writeTime':writeTime,'bull':bull})
 
 		# MAJ du fichier de statut
-		# FIXME
-				
+		self.saveStatusFile()
 
 	def getBBB(self,rawBulletin):
 		"""getBBB(rawBulletin) -> champ
@@ -442,6 +445,7 @@ class collectionManager(bulletinManager.bulletinManager):
                    Date:        Novembre 2004
 		"""
 		now = time.time()
+		dataIsModified = False
 
 		# Parcours des collections, et si la période de collection 
 		# est dépassée ou si le data de toutes les stations est rentré,
@@ -462,6 +466,8 @@ class collectionManager(bulletinManager.bulletinManager):
 
 				del self.mainDataMap['collectionMap'][k]
 
+				dataIsModified = True
+
 		# Parcours des fichiers non collectés (séquencage) puis écriture
 		# sur le disque
 		i = 0
@@ -477,6 +483,8 @@ class collectionManager(bulletinManager.bulletinManager):
 				self.writeToDisk(fileName,m['bull'])
 				self.mainDataMap['sequenceWriteQueue'].pop(i)
 
+				dataIsModified = True
+
 				continue
 
 			i += 1
@@ -488,14 +496,16 @@ class collectionManager(bulletinManager.bulletinManager):
 				del self.mainDataMap['sequenceMap'][k]
 				self.logger.writeLog(self.logger.VERYVERBOSE,"Effacement de la séquence %s", k)
 
+				dataIsModified = True
+
 
 		# MAJ du fichier de statut 
-		# FIXME
+		self.saveStatusFile()
 
-	def loadStatusFile(self,pathFicStatus):
-		"""loadStatusFile(pathFicStatus)
+	def loadStatusFile(self):
+		"""loadStatusFile()
 
-		   Charge les structures contenues dans le fichiers pathFicStatus.
+		   Charge les structures contenues dans le fichier self.statusFile.
 
 		   Le fichier est une database gdbm, avec comme éléments le 
 		   'pickle dump' d'un objet, et la clé de la DB est le nom
@@ -510,8 +520,70 @@ class collectionManager(bulletinManager.bulletinManager):
                    Auteur:      Louis-Philippe Thériault
                    Date:        Novembre 2004
 		"""
-		# FIXME
-		pass
+		try:
+			self.logger.writeLog(self.logger.INFO,"Chargement du fichier de statut...")
+
+			self.statusDb = gdbm.open(self.statusFile,'cs')
+
+			self.mainDataMap = {}
+
+			self.mainDataMap['sequenceMap'] = pickle.loads(self.statusDb['sequenceMap'])
+
+			self.mainDataMap['sequenceWriteQueue'] = pickle.loads(self.statusDb['sequenceWriteQueue'])
+
+			# Initialisation du logger pour les bulletins
+	                for m in self.mainDataMap['sequenceWriteQueue']:
+	                        m['bull'].setLogger(self.logger)
+
+			self.mainDataMap['collectionMap'] = pickle.loads(self.statusDb['collectionMap'])
+
+	                # Initialisation du logger pour les bulletins
+	                for m in self.mainDataMap['collectionMap']:
+	                        self.mainDataMap['collectionMap'][m].setLogger(self.logger)
+			
+			self.logger.writeLog(self.logger.INFO,"Fichier de status correctement chargé")
+		except Exception, e:
+			self.logger.writeLog(self.logger.WARNING,"Erreur lors du chargement du fichier de statut: %s", str(e.args))
+
+			self.statusDb = None
+			self.mainDataMap = {'collectionMap':{},'sequenceMap':{},'sequenceWriteQueue':[]}
+
+	def saveStatusFile(self):
+		"""saveStatusFile()
+
+		   Sauvegarde les informations que l'on doit recharger dans l'éventualité
+		   d'un arrêt du programme.
+
+		   Visibilité:	Privée
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Novembre 2004
+		"""
+		if self.statusDb == None:
+			self.statusDb = gdbm.open(self.statusFile,'cs')
+
+		self.statusDb['sequenceMap'] = pickle.dumps(self.mainDataMap['sequenceMap'])
+
+		# Pour chaque bulletin 'pickle' le bulletin, sans l'objet log
+		for m in self.mainDataMap['sequenceWriteQueue']:
+			m['bull'].setLogger(None)
+
+		self.statusDb['sequenceWriteQueue'] = pickle.dumps(self.mainDataMap['sequenceWriteQueue'])
+
+		# On réassigne le logger original
+                for m in self.mainDataMap['sequenceWriteQueue']:
+                        m['bull'].setLogger(self.logger)
+
+                # Pour chaque bulletin 'pickle' le bulletin, sans l'objet log
+                for m in self.mainDataMap['collectionMap']:
+                        self.mainDataMap['collectionMap'][m].setLogger(None)
+
+		self.statusDb['collectionMap'] = pickle.dumps(self.mainDataMap['collectionMap'])
+
+                # On réassigne le logger original
+		for m in self.mainDataMap['collectionMap']:
+                        self.mainDataMap['collectionMap'][m].setLogger(self.logger)
+
+		self.statusDb.reorganize()
 
 	def needsToBeCollected(self,rawBulletin):
 		"""needsToBeCollected(rawBulletin) -> bool
@@ -521,7 +593,7 @@ class collectionManager(bulletinManager.bulletinManager):
 
 		   Utilisation:
 
-			Pour déterminer si le bulletin non instancié doit passe
+			Pour déterminer si le bulletin non instancié doit passer
 			par l'étape de collection. (Appelé par un gateway 
 			probablement)
 
@@ -673,7 +745,10 @@ class collectionManager(bulletinManager.bulletinManager):
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
-		pass
+		self.writeCollection()
+		self.saveStatusFile()
+
+		self.logger.writeLog(self.logger.INFO,"Sauvegarde de l'état du manager de collections: [OK]")
 
 	def incrementToken(self,token):
 		"""incrementToken(token) -> incremented_token

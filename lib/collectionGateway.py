@@ -114,3 +114,9 @@ class collectionGateway(gateway.gateway):
 		self.unCollectionManager.writeCollection()
 
 
+        def shutdown(self):
+		__doc__ = gateway.gateway.shutdown.__doc__ 
+                gateway.gateway.shutdown(self)
+
+		self.unCollectionManager.close()
+

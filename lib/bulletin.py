@@ -320,3 +320,26 @@ class bulletin:
 		if self.dataType == None: self.dataType = 'AN'
 
 		return self.dataType
+
+	def getLogger(self):
+		"""getLogger() -> objet_logger
+
+		   Retourne l'attribut logger du bulletin
+
+		   Visibilité:	Publique
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Novembre 2004
+		"""
+		return self.logger
+
+        def setLogger(self,logger):
+                """setLogger(logger)
+
+                   Assigne l'attribut logger du bulletin
+
+                   Visibilité:  Publique
+                   Auteur:      Louis-Philippe Thériault
+                   Date:        Novembre 2004
+                """
+                self.logger = logger
+
