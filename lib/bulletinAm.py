@@ -51,7 +51,10 @@ class bulletinAm(bulletin.bulletin):
 		self.station = "PASCALCULE"		# None veut dire qu'elle n'est pas trouvée.
 							# C'est pour ca qu'elle est initialisée comme
 							# ca.
-		self.station = self.getStation()
+		try:
+			self.station = self.getStation()
+		except Exception:
+			self.station = None
 
 		# Print de la station pour le debug
 		self.logger.writeLog(logger.DEBUG,"Station: %s",str(self.station))

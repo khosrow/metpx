@@ -87,7 +87,7 @@ class receiverAm(gateway.gateway):
 				try:
 			                rawBulletin = self.unSocketManagerAm.getNextBulletin()
 				except socketManagerException, e:
-					if e == "la connection est brisee":
+					if e.args[0] == "la connection est brisee":
 						self.logger.writeLog(self.logger.ERROR,"Perte de connection, traîtement du reste du buffer")
 						resteDuBuffer, nbBullEnv = self.unSocketManagerAm.closeProperly()
 						data = data + resteDuBuffer

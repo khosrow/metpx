@@ -60,7 +60,7 @@ class bulletin:
   	"""
 
 	def __init__(self,stringBulletin,logger,lineSeparator='\n'):
-		self.bulletin = stringBulletin.splitlines()
+		self.bulletin = stringBulletin.lstrip(lineSeparator).splitlines()
 		self.dataType = None
 		self.lineSeparator = lineSeparator
 		self.errorBulletin = None
