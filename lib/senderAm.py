@@ -4,6 +4,8 @@ import socketManagerAm
 import bulletinManagerAm
 import bulletinAm
 from socketManager import socketManagerException
+from DiskReader import DiskReader
+from MultiKeysStringSorter import MultiKeysStringSorter
 
 class senderAm(gateway.gateway):
         __doc__ = gateway.gateway.__doc__ + \
@@ -36,7 +38,7 @@ class senderAm(gateway.gateway):
 	Janvier 2005
         """
 
-        def __init__(self,path,logger):
+        def __init__(self,path,options,logger):
 		"""
 		Nom:
 		__init__ 
@@ -59,6 +61,7 @@ class senderAm(gateway.gateway):
 		"""
 		gateway.gateway.__init__(self,path,options,logger)
 		self.establishConnection()
+                self.options = options
 
                 # Instanciation du bulletinManagerAm selon les arguments issues du fichier
 		# de configuration
@@ -67,10 +70,15 @@ class senderAm(gateway.gateway):
                    self.unBulletinManagerAm = \
                         bulletinManagerAm.bulletinManagerAm(
 			fet.FET_DATA + FET_TX + options.client, logger)
+                   self.config.remoteHost = options.host
+                   self.config.localPort = options.port
+                   self.config.timeout    = options.timeout
+
 		else:
                    self.unBulletinManagerAm = \
                         bulletinManagerAm.bulletinManagerAm(self.config.pathTemp,logger)
 		self.listeFichiersDejaChoisis = []
+                self.reader = None
 		
 	def shutdown(self):
 		__doc__ = gateway.gateway.shutdown.__doc__ + \
@@ -128,11 +136,20 @@ class senderAm(gateway.gateway):
 
                 # Instanciation du socketManagerAm
                 self.logger.writeLog(self.logger.DEBUG,"Instanciation du socketManagerAm")
-                self.unSocketManagerAm = \
-                                socketManagerAm.socketManagerAm(self.logger,type='master', \
-                                                                localPort=None,\
-								remoteHost=self.config.remoteHost,
-								timeout=self.config.timeout)
+
+                if self.options.client:
+                   self.unSocketManagerAm = \
+                        socketManagerAm.socketManagerAm(
+                                self.logger,type='master', \
+                                port=self.options.port,\
+                                remoteHost=self.options.host,
+                                timeout=self.options.connect_timeout)
+                else:
+                   self.unSocketManagerAm = \
+                        socketManagerAm.socketManagerAm(self.logger,type='master', \
+                             port=self.config.remoteHost[1],\
+                             remoteHost=self.config.remoteHost[0],
+                             timeout=self.config.timeout)
 
         def read(self):
                 __doc__ =  gateway.gateway.read.__doc__ + \
@@ -157,6 +174,10 @@ class senderAm(gateway.gateway):
                 Date:
                 Janvier 2005
                 """
+#                self.reader = DiskReader(self.config.rootPath, MultiKeysStringSorter)
+#                self.reader.sort()
+#                return(self.reader.getFilesContent(self.config.fileNumber))
+
                 data = []
 
 		#lecture de la selection precedente
@@ -200,6 +221,36 @@ class senderAm(gateway.gateway):
                 Date:
                 Janvier 2005 
                 """
+
+		"""
+                self.logger.writeLog(self.logger.DEBUG,"%d nouveaux bulletins sont envoyes",len(data))
+
+                for index in range(len(data)):
+                        try:
+                                rawBulletin = data[index]
+                                unBulletinAm = bulletinAm.bulletinAm(rawBulletin,self.logger,finalLineSepar
+ator='\r\r\n')
+                                succes = self.unSocketManagerAm.sendBulletin(unBulletinAm)
+                                #si le bulletin a ete envoye correctement, le fichier est efface
+                                if succes:
+                                        self.logger.writeLog(self.logger.INFO,"bulletin %s envoye ", self.read
+er.sortedFiles[index])
+                                        self.unBulletinManagerAm.effacerFichier(self.reader.sortedFiles[index
+])
+                                        self.logger.writeLog(self.logger.DEBUG,"senderAm.write(..): Effacage
+de " + self.reader.sortedFiles[index])
+                                else:
+                                        self.logger.writeLog(self.logger.INFO,"bulletin %s: probleme d'envoi "
+, self.reader.sortedFiles[index])
+                        except Exception, e:
+                                if e==104 or e==110 or e==32 or e==107:
+                                        self.logger.writeLog(self.logger.ERROR,"senderAm.write(): la connexio
+n est rompue: %s",str(e.args))
+                                else:
+                                        self.logger.writeLog(self.logger.ERROR,"senderAm.write(): erreur: %s"
+,str(e.args))
+                                raise
+		"""
 
                 self.logger.writeLog(self.logger.DEBUG,"%d nouveaux bulletins sont envoyes",len(data))
                 for key in data:
