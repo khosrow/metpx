@@ -267,7 +267,7 @@ class bulletinManager:
 			#lecture et mapping du contenu brut des fichiers
                         for fichier in listeFichiers:
                                 if os.access(fichier,os.F_OK|os.R_OK) !=1:
-                                        raise bulletinManagerException("Fichier inexistant: %s",fichier)
+                                        raise bulletinManagerException("Fichier inexistant: " + fichier)
                                 fic = open(fichier,'r')
                                 rawBulletin = fic.read()
                                 fic.close()
