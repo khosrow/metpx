@@ -6,6 +6,12 @@ import gateway, bulletinManager, collectionManager
 class collectionGateway(gateway.gateway):
 	__doc__ = gateway.gateway.__doc__ + \
 	"""
+	### Ajout de collectionGateway ###
+
+	Un collectionGateway lit les bulletins sur le disque, et
+	l'envoie à la collection s'il y a lieu, à un bulletinManager
+	de base sinon.
+
 	Auteur:	Louis-Philippe Thériault
 	Date:	Octobre 2004
 	"""
@@ -13,9 +19,32 @@ class collectionGateway(gateway.gateway):
 	def __init__(self,path,logger):
 		gateway.gateway.__init__(self,path,logger)
 
-		# Instanciation des collectionManager
+		self.bulletinsAEffacer = []
 
-		# Instanciation du bulletinManager
+		# Instanciation des collectionManager(writer)
+                self.logger.writeLog(logger.DEBUG,"Instanciation du collectionManager")
+
+		self.unCollectionManager = \
+			collectionManager.collectionManager(	self.config.pathTemp,logger, \
+							    	self.config.ficStations, \
+								self.config.collectionParams, \
+								self.config.delaiMaxSeq, \
+								self.config.includeAllStn, \
+								self.config.ficCircuits, \
+								pathDest = self.config.pathDestination, \
+								extension = self.config.extension \
+							  	)
+
+		# Instanciation du bulletinManager(reader/writer)
+                self.logger.writeLog(logger.DEBUG,"Instanciation du bulletinManager")
+
+                self.unBulletinManager = \
+                        bulletinManager.bulletinManager(    self.config.pathTemp,logger, \
+							    pathSource = self.config.pathSource, \
+                                                            pathDest = self.config.pathDestination, \
+                                                            pathFichierCircuit = self.config.ficCircuits, \
+                                                            extension = self.config.extension \
+                                                            )
 
         def read(self):
 		__doc__ =  gateway.gateway.read.__doc__ + \
@@ -26,22 +55,32 @@ class collectionGateway(gateway.gateway):
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
-		data = []
+		# Effacement des fichiers que l'on a traîté
+		# Si on est rendu ici, on prends pour acquis 
+		# que les fichiers ont étés traîtés
+		for fic in self.bulletinsAEffacer:
+			self.logger.writeLog(self.logger.VERYVERBOSE,"Effacement du fichier %s",fic)
 
-		while True:
-			# Lecture du prochain rawBulletin
+			os.remove(fic)
 
-			if rawBulletin != '':
-				data.append(rawBulletin)
-			else:
-				break
+		# Fetch de la liste des nouveaux bulletins dans le répertoire
+		self.bulletinsAEffacer = self.unBulletinManager.getFileList()
+
+		# Lecture de ces bulletins et stockage dans une liste
+		mapData = self.unBulletinManager.readBulletinFromDisk(self.bulletinsAEffacer)
 
 		self.logger.writeLog(self.logger.DEBUG,"%d nouveaux bulletins lus",len(data))
 
 		return data
 
         def write(self,data):
-        	"""
+		__doc__ =  gateway.gateway.write.__doc__ + \
+        	"""### Ajout de collectionGateway ###
+
+		   Collection s'il y a lieu, puis écriture du bulletin sur le disque.
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Novembre 2004
 	        """
 
                 self.logger.writeLog(self.logger.DEBUG,"%d nouveaux bulletins seront écrits",len(data))
@@ -53,17 +92,16 @@ class collectionGateway(gateway.gateway):
 			rawBulletin = data.pop(0)
 
 			# Si le bulletin doit etre collecté 
-			if self.collManager.needsToBeCollected(rawBulletin):
+			if self.unCollectionManager.needsToBeCollected(rawBulletin):
 
 				# Envoi dans collManager 
-				self.collManager.addBulletin(rawBulletin)
+				self.unCollectionManager.addBulletin(rawBulletin)
 
 			else:
-
 				# Parcours normal (non collecté) 
-				self.bulletinManager.writeBulletinToDisk(rawBulletin)
+				self.unBulletinManager.writeBulletinToDisk(rawBulletin,compteur=False)
 
 		# Dans tous les cas, écrire les collection s'il y a lieu
-		self.collManager.writeCollection()
+		self.unCollectionManager.writeCollection()
 
 

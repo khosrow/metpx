@@ -34,6 +34,23 @@ class collectionManager(bulletinManager.bulletinManager):
 					  toutes les stations, complètent le data des stations
 					  manquantes par une valeur nulle
 
+	   mainDataMap			Map
+					- Les informations persistentes sont stockées dans ce
+					  map.
+
+	   mainDataMap[collectionMap]	Map
+					- La clé est l'entête de la collection, et l'objet pointé
+					  en est un objet bulletinCollection
+
+	   mainDataMap[sequenceMap]	Map
+					- La clé est l'entete du bulletin, l'objet pointé est le 
+					  prochain champ bbb pour l'entête en question
+
+	   mainDataMap[sequenceWriteQueue]	Liste
+						- Liste de Map, où 'bull' est l'objet bulletin,
+						  et 'writeTime' est l'heure quand il faudra
+						  écrire le bulletin
+
 	   L'état du programme est conservé dans un fichier qui est 
 	   dans <répertoire_temporaire>/<statusFile>, donc si le programme crash,
 	   ce fichier est rechargé et il continue.
@@ -43,7 +60,7 @@ class collectionManager(bulletinManager.bulletinManager):
         """
 
         def __init__(self,pathTemp,logger,pathFichierStations,collectionParams,delaiMaxSeq, \
-			includeAllStn,pathSource=None,pathDest=None,lineSeparator='\n', \
+			includeAllStn,ficCircuits,pathSource=None,pathDest=None,lineSeparator='\n', \
 			extension=':',statusFile='ncsCollection.status'):
 
 		self.pathTemp = self.__normalizePath(pathTemp)
@@ -61,12 +78,16 @@ class collectionManager(bulletinManager.bulletinManager):
 		self.initMapEntetes(pathFichierStations)
 		self.statusFile = statusFile
 
+		# Init du map des entetes/priorités		
+                self.champsHeader2Circuit = 'entete:routing_groups:priority:'
+		self.initMapCircuit(pathFichierCircuit)
+
 		# Si le fichier de statut existe déja, on le charge en mémoire
 		if os.access(self.pathTemp+self.statusFile,os.F_OK):
 			self.loadStatusFile(self.pathTemp+self.statusFile)
 		else:
 		# Création des structures
-			self.mainDataMap = {'collectionMap':{},'sequenceMap':{}}
+			self.mainDataMap = {'collectionMap':{},'sequenceMap':{},'sequenceWriteQueue':[]}
 
 	def addBulletin(self,rawBulletin,path):
 		"""addBulletin(rawBulletin)
@@ -77,11 +98,15 @@ class collectionManager(bulletinManager.bulletinManager):
 				- Path vers le bulletin
 
 		   Ajoute le bulletin au fichier de collection correspondant. Le bulletin
-		   doit absolument être destiné pour les collections.
+		   doit absolument être destiné pour les collections (utiliser 
+		   needsToBeCollected). Le bulletin peut ne pas être collecté mais aussi
+		   simplement 'séquencé', il sera alors directement écrit sur le disque.
 
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
+		self.logger.writeLog(self.logger.DEBUG,"Entête: %s", rawBulletin.splitlines()[0])
+
 		# Extraction du champ BBB
 		bbb = self.getBBB(rawBulletin)
 
@@ -94,26 +119,72 @@ class collectionManager(bulletinManager.bulletinManager):
 				
 				if isInCollectionPeriod(rawBulletin):
 				# Si dans la période de collection
+					self.logger.writeLog(self.logger.DEBUG,"Statut: [COLLECTE]")
 					self.handleCollection(rawBulletin)
 				else:
 				# Sinon, retard
+					self.logger.writeLog(self.logger.DEBUG,"Statut: [COLLECTE et RETARD]")
 					self.handleLateCollection(rawBulletin)
 
 			# Sinon, aucune modification, le bulletin sera déplacé
 			else:
-				os.rename(path,self.pathDest + path.split('/')[-1])
+				self.logger.writeLog(self.logger.DEBUG,"Statut: [AUCUNE MODIF]")
+				bull = bulletin.bulletin(rawBulletin,self.logger)
+				writeTime = time.time()
+
+				self.mainDataMap['sequenceWriteQueue'].append({'writeTime':writeTime,'bull':bull})
 		else:
 		# Le bulletin a un champ BBB
+			header = ' '.join(rawBulletin.splitlines()[0].strip().split()[:-1]) + ' '
+			bbbType = bbb[:-1]
 
 			# Vérification que ca ne fait pas plus de temps que la limite permise
 			if not self.isLate(rawBulletin):
 				# Si dans les temps, fetch du prochain token, et modification 
 				# de l'entête
-				#fetch du prochain token dans le map de tokens, création si aucun token
+				self.logger.writeLog(self.logger.DEBUG,"Statut: [SEQUENCAGE]")
+
+				if bbb != "COR" and not self.mainDataMap['sequenceMap'].has_key(header+bbbType):
+					# Pas de séquence de démarée
+					self.logger.writeLog(self.logger.DEBUG,"Création de la séquence: %s", bbbType)
+
+					self.mainDataMap['sequenceMap'][header+bbbType] = bbbType + 'B'
+					newBBB = bbbType + 'A'
+				elif bbb == "COR":
+					# Pas de séquencage pour les COR
+					newBBB = 'COR'
+				else:
+					newBBB = self.mainDataMap['sequenceMap'][header+bbbType]
+					self.mainDataMap['sequenceMap'][header+bbbType] = self.incrementToken(newBBB)
+
+				self.logger.writeLog(self.logger.DEBUG,"Nouveau champ BBB: %s", newBBB)
+
+				# Changement du champ BBB, génération du writeTime, et ajout à la queue
+				bull = bulletin.bulletin(rawBulletin,self.logger)
+
+				# -> Changement de l'entête
+				newHeader = bull.getHeader().split()[:-1] + ' ' + newBBB
+				bull.setHeader(newHeader)
+				rawBulletin = bull.getBulletin()
+
+				# -> Génération du writeTime
+				if rawBulletin[:2] in self.collectionParams:
+					writeTime = self.getWriteTime(self.getBullTimestamp(rawBulletin),self.collectionParams[rawBulletin[:2]]['m_primaire'])
+				else:
+					writeTime = time.time()
 
 			else:
 			# Sinon, flag du bulletin en erreur
-				#Générer l'objet bulletin, flag en erreur, écriture
+				bull = bulletin.bulletin(rawBulletin,self.logger)
+				bull.setError("Bulletin en retard, delai maximum depasse")
+		
+				writeTime = time.time()
+
+			# -> Ajout à la queue
+			self.mainDataMap['sequenceWriteQueue'].append({'writeTime':writeTime,'bull':bull})
+
+		# MAJ du fichier de statut
+				
 
 	def getBBB(self,rawBulletin):
 		"""getBBB(rawBulletin) -> champ
@@ -289,10 +360,41 @@ class collectionManager(bulletinManager.bulletinManager):
 		   Auteur:      Louis-Philippe Thériault
                    Date:        Novembre 2004
 		"""
+		now = time.time()
+
 		# Parcours des collections, et si la période de collection 
 		# est dépassée ou si le data de toutes les stations est rentré,
 		# on écrit la collection
-		pass
+		keys = self.mainDataMap['collectionMap'].keys()
+		for k in keys:
+			if now > self.mainDataMap['collectionMap'][k].getWriteTime():
+				fileName = self.getFileName(self.mainDataMap['collectionMap'][k],compteur=False)
+
+				self.writeToDisk(fileName, self.mainDataMap['collectionMap'][k])
+
+				del self.mainDataMap['collectionMap'][k]
+
+		# Parcours des fichiers non collectés (séquencage) puis écriture
+		# sur le disque
+		i = 0
+		while True:
+			if i >= len(self.mainDataMap['sequenceWriteQueue']):
+				break
+
+			m = self.mainDataMap['sequenceWriteQueue'][i]
+
+			if now > m['writeTime']:
+				fileName = self.getFileName(m['bull'],compteur=False)
+
+				self.writeToDisk(fileName,m['bull'])
+				self.mainDataMap['sequenceWriteQueue'].pop(i)
+
+				continue
+
+			i += 1
+
+
+		# MAJ du fichier de statut FIXME
 
 	def loadStatusFile(self,pathFicStatus):
 		"""loadStatusFile(pathFicStatus)
@@ -329,6 +431,43 @@ class collectionManager(bulletinManager.bulletinManager):
 		"""Même méthode que pour le bulletinManagerAm
 		"""
 		bulletinManagerAm.bulletinManagerAm.initMapEntetes(self, pathFichierStations)		
+
+	def writeToDisk(self,nomFichier,unBulletin):
+		"""writeToDisk(nomFichier,unBulletin)
+
+		   Écrit l'objet data dans le fichier nomFichier.
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Novembre 2004
+		"""
+                try:
+                        unFichier = os.open( self.pathTemp + nomFichier , os.O_CREAT | os.O_WRONLY )
+
+                except (OSError,TypeError), e:
+                        # Le nom du fichier est invalide, génération d'un nouveau nom
+
+                        self.logger.writeLog(self.logger.WARNING,"Manipulation du fichier impossible! (Ecriture avec un nom non standard)")
+                        self.logger.writeLog(self.logger.EXCEPTION,"Exception: " + ''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
+
+                        nomFichier = self.getFileName(unBulletin,error=True)
+                        unFichier = os.open( self.pathTemp + nomFichier , os.O_CREAT | os.O_WRONLY )
+
+                os.write( unFichier , unBulletin.getBulletin() )
+                os.close( unFichier )
+                os.chmod(self.pathTemp + nomFichier,0644)
+
+                # Fetch du path de destination
+                pathDest = self.getFinalPath(unBulletin)
+
+                # Si le répertoire n'existe pas, le créer
+                if not os.access(pathDest,os.F_OK):
+                        os.mkdir(pathDest, 0755)
+
+                # Déplacement du fichier vers le répertoire final
+                os.rename( self.pathTemp + nomFichier , pathDest + nomFichier )
+
+                # Le transfert du fichier est un succes
+                self.logger.writeLog(self.logger.INFO, "Ecriture du fichier <%s>",pathDest + nomFichier)
 
         def __normalizePath(self,path):
                 """normalizePath(path) -> path

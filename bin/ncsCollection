@@ -21,9 +21,9 @@ def main():
 
 	# Message d'usage pour le option parser
 	usage =  "%prog pathConfigFile\n" \
-	         "       Un receiver reçoit les bulletins par une connection réseau et les\n" \
-	         "       écrits sur le disque. Le fichier de configuration doit être dûement\n" \
-		 "       remplit pour que le programme fonctionne correctement."
+	         "       Un ncsCollection lit les fichiers dans un répertoire d'entrée,\n" \
+	         "       crée des collections, et fait le séquencage des bulletins\n" \
+		 "       spécifiés."
 
 	# Instanciation du option parser
 	parser = OptionParser(usage)
@@ -38,28 +38,14 @@ def main():
 	# Chargement de la config pour savoir le type de protocole et le path du log
 	config = gateway.gateway.loadConfig(args[0])
 
-        # FIXME: Vérifier que typeProtocole est défini et le fichier de log
-
 	# Init du log
 	logger = log.log(config.log)
 	logger.writeLog(logger.INFO, "Début du programme, fichier de config chargé correctement")
 
-        logger.writeLog(logger.DEBUG,"Protocole %s sélectionné",config.typeProcotole)
-
-	# Branchement selon le type de protocole	
-	if config.typeProcotole == 'AM':
-
-		import receiverAm
-		unGateway = receiverAm.receiverAm(args[0],logger)
+	# Instanciation du gateway pour la collection
+	import collectionGateway
+	unGateway = collectionGateway.collectionGateway(args[0],logger)
 	
-	elif config.typeProcotole == 'WMO':
-	
-		import receiverWmo
-		unGateway = receiverWmo.receiverWmo(args[0],logger)
-	
-	else:
-		raise Exception('Type de protocole non reconnu')	# FIXME
-
 	# Définition de la méthode de shutdown "propre"
 	def shutdown(sig,stack):
 		global unGateway

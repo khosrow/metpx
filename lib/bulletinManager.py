@@ -35,7 +35,7 @@ class bulletinManager:
 		# Init du map des circuits
 		self.initMapCircuit(pathFichierCircuit)
 
-	def writeBulletinToDisk(self,unRawBulletin):
+	def writeBulletinToDisk(self,unRawBulletin,compteur=True):
 		"""writeBulletinToDisk(bulletin)
 
 		   Écrit le bulletin sur le disque. Le bulletin est une simple string."""
@@ -54,7 +54,7 @@ class bulletinManager:
 		self.verifyDelay(unBulletin)
 
 		# Génération du nom du fichier
-		nomFichier = self.getFileName(unBulletin)
+		nomFichier = self.getFileName(unBulletin,compteur=compteur)
 
 		try:
 			unFichier = os.open( self.pathTemp + nomFichier , os.O_CREAT | os.O_WRONLY )
@@ -65,7 +65,7 @@ class bulletinManager:
 	                self.logger.writeLog(self.logger.WARNING,"Manipulation du fichier impossible! (Ecriture avec un nom non standard)")
 			self.logger.writeLog(self.logger.EXCEPTION,"Exception: " + ''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
 
-                        nomFichier = self.getFileName(unBulletin,error=True)
+                        nomFichier = self.getFileName(unBulletin,error=True,compteur=compteur)
 			unFichier = os.open( self.pathTemp + nomFichier , os.O_CREAT | os.O_WRONLY )
 
                 os.write( unFichier , unBulletin.getBulletin() )
@@ -109,8 +109,8 @@ class bulletinManager:
 
 	        return path
 
-	def getFileName(self,bulletin,error=False):
-		"""getFileName(bulletin[,error]) -> fileName
+	def getFileName(self,bulletin,error=False, compteur=True):
+		"""getFileName(bulletin[,error, compteur]) -> fileName
 
 		   Retourne le nom du fichier pour le bulletin. Si error
 		   est à True, c'est que le bulletin a tenté d'être écrit
@@ -119,25 +119,31 @@ class bulletinManager:
 		   correct mais que le nom du fichier ne peut être généré,
 		   les champs sont mis à ERROR dans l'extension.
 
+		   Si compteur est à False, le compteur n'est pas inséré 
+		   dans le nom de fichier.
+
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
-		strCompteur = string.zfill(self.compteur, len(str(self.maxCompteur)))
+		if compteur:
+			strCompteur = ' ' + string.zfill(self.compteur, len(str(self.maxCompteur)))
+		else:
+			strCompteur = ''
 
 		if bulletin.getError() == None and not error:
 		# Bulletin normal
 			try:
-				return (bulletin.getHeader() + ' ' + strCompteur + self.getExtension(bulletin,error)).replace(' ','_')
+				return (bulletin.getHeader() + strCompteur + self.getExtension(bulletin,error)).replace(' ','_')
 			except bulletinManagerException, e:
 			# Une erreur est détectée (probablement dans l'extension) et le nom est généré avec des erreurs
 				self.logger.writeLog(self.logger.WARNING,e)
-				return ('ERROR_BULLETIN ' + bulletin.getHeader() + ' ' + strCompteur + self.getExtension(bulletin,error=True)).replace(' ','_')
+				return ('ERROR_BULLETIN ' + bulletin.getHeader() + strCompteur + self.getExtension(bulletin,error=True)).replace(' ','_')
 		elif bulletin.getError() != None and not error:
 		# Le bulletin est erronné mais l'entête est "imprimable"
-			return ('ERROR_BULLETIN ' + bulletin.getHeader() + ' ' + strCompteur + self.getExtension(bulletin,error)).replace(' ','_')
+			return ('ERROR_BULLETIN ' + bulletin.getHeader() + strCompteur + self.getExtension(bulletin,error)).replace(' ','_')
 		else:
 		# L'entête n'est pas imprimable
-			return ('ERROR_BULLETIN ' + 'UNPRINTABLE HEADER' + ' ' + strCompteur + self.getExtension(bulletin,error)).replace(' ','_')
+			return ('ERROR_BULLETIN ' + 'UNPRINTABLE HEADER' + strCompteur + self.getExtension(bulletin,error)).replace(' ','_')
 
 	def getExtension(self,bulletin,error=False):
 		"""getExtension(bulletin) -> extension
