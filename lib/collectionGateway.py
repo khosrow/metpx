@@ -29,7 +29,6 @@ class collectionGateway(gateway.gateway):
 							    	self.config.ficCollection, \
 								self.config.collectionParams, \
 								self.config.delaiMaxSeq, \
-								self.config.includeAllStn, \
 								self.config.ficCircuits, \
 								pathDest = self.config.pathDestination, \
 								extension = self.config.extension \
@@ -62,7 +61,7 @@ class collectionGateway(gateway.gateway):
 		# Si on est rendu ici, on prends pour acquis 
 		# que les fichiers ont étés traîtés
 		for fic in self.bulletinsAEffacer:
-			self.logger.writeLog(self.logger.VERYVERBOSE,"Effacement du fichier %s",fic)
+			self.logger.writeLog(self.logger.VERYVERYVERBOSE,"Effacement du fichier %s",fic)
 
 			os.remove(self.unBulletinManager.getPathSource()+fic)
 
@@ -75,7 +74,7 @@ class collectionGateway(gateway.gateway):
 		# Ici on s'intéresse seulement au bulletins bruts, extraction du bulletin d'à partir du map
 		data = [ mapData[x] for x in mapData ]
 
-		self.logger.writeLog(self.logger.VERYVERBOSE,"%d nouveaux bulletins lus",len(data))
+		self.logger.writeLog(self.logger.VERYVERYVERBOSE,"%d nouveaux bulletins lus",len(data))
 
                 # Dans tous les cas, écrire les collection s'il y a lieu
                 self.unCollectionManager.writeCollection()
@@ -92,7 +91,7 @@ class collectionGateway(gateway.gateway):
 		   Date:	Novembre 2004
 	        """
 
-                self.logger.writeLog(self.logger.VERYVERBOSE,"%d nouveaux bulletins seront écrits",len(data))
+                self.logger.writeLog(self.logger.VERYVERYVERBOSE,"%d nouveaux bulletins seront écrits",len(data))
 
 		while True:
 			if len(data) <= 0:

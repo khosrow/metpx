@@ -25,6 +25,9 @@ class collectionManager(bulletinManager.bulletinManager):
 		   collectionParams[entete][m_suppl]             = Si la période de collection primaire est terminée,
 		                                                   une nouvelle période commence, et elle sera de cette
 		                                                   durée (une collection pour les retards...)
+		   collectionParams[entete][inslude_all_stn]     = Si oui ou non inclure les stations avec aucun data
+		                                                   (et mettre "<station> NIL=")
+
 	   delaiMaxSeq			Int
 					- Délai maximum avant de ne plus "compter" les séquences.
 					- Le programme 'oublie' la séquence après ce temps,
@@ -68,7 +71,7 @@ class collectionManager(bulletinManager.bulletinManager):
         """
 
         def __init__(self,pathTemp,logger,pathFichierCollection,collectionParams,delaiMaxSeq, \
-			includeAllStn,ficCircuits=None,pathSource=None,pathDest=None,lineSeparator='\n', \
+			ficCircuits=None,pathSource=None,pathDest=None,lineSeparator='\n', \
 			extension=':',statusFile='ncsCollection.status'):
 
 		self.pathTemp = self.__normalizePath(pathTemp)
@@ -89,13 +92,6 @@ class collectionManager(bulletinManager.bulletinManager):
 		self.initMapEntetes(pathFichierCollection)
 		self.statusFile = self.pathTemp + statusFile
 		self.statusDb = None
-
-		# Variable pour définir si l'on veut inclure toutes les
-		# stations dans les fichiers de collection
-		if includeAllStn:
-			self.defaultNoDataStation = " NIL="
-		else:
-			self.defaultNoDataStation = None
 
 		# Init du map des entetes/priorités		
                 self.champsHeader2Circuit = 'entete:routing_groups:priority:'
@@ -355,7 +351,12 @@ class collectionManager(bulletinManager.bulletinManager):
 				bulletinCollection.bulletinCollection(self.logger,self.mapEntetes2mapStations[entete],
 								      writeTime,rawBulletin.splitlines()[0])
 
-                        self.mainDataMap['collectionMap'][rawBulletin.splitlines()[0]].setTokenIfNoData(self.defaultNoDataStation)
+			# On détermine si pour le type de bulletin courant l'on veut inclure ou non les stations
+			# manquantes pour la collection.
+			if self.collectionParams[rawBulletin[:2]]['inslude_all_stn']:
+				self.mainDataMap['collectionMap'][rawBulletin.splitlines()[0]].setTokenIfNoData(" NIL=")
+			else:
+				self.mainDataMap['collectionMap'][rawBulletin.splitlines()[0]].setTokenIfNoData(None)
 
 		# Ajout du bulletin dans la collection
 		station = bulletinCollection.bulletinCollection.getStation(rawBulletin)

@@ -55,7 +55,7 @@ class log:
 
 			self.logDebug = logging.Logger("Debug")
 			self.logDebug.addHandler(unTimedRotatingFileHandlerDebug)
-			self.logDebug.setLevel(0)
+			self.logDebug.setLevel(5)
 
 		self.CRITICAL = logging.CRITICAL
 		self.ERROR = logging.ERROR
@@ -65,9 +65,11 @@ class log:
 		self.INFO = logging.INFO
 		self.EXCEPTION = logging.ERROR
 		self.VERYVERBOSE = 5		# Niveau de logging 5
+		self.VERYVERYVERBOSE = 3
 
 		# Setting du nom pour les niveaux "custom"
 		logging.addLevelName(self.VERYVERBOSE,'VERYVERBOSE')
+		logging.addLevelName(self.VERYVERYVERBOSE,'VERYVERYVERBOSE')
 
 	def writeLog(self, level, msg, *args, **kwargs):
 		"""writeLog(level,msg[,args])

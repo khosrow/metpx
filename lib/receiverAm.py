@@ -117,7 +117,7 @@ class receiverAm(gateway.gateway):
 			else:
 				break
 
-		self.logger.writeLog(self.logger.VERYVERBOSE,"%d nouveaux bulletins lus",len(data))
+		self.logger.writeLog(self.logger.VERYVERYVERBOSE,"%d nouveaux bulletins lus",len(data))
 
 		return data
 
@@ -132,7 +132,7 @@ class receiverAm(gateway.gateway):
                    Date:        Octobre 2004
                 """
 
-                self.logger.writeLog(self.logger.VERYVERBOSE,"%d nouveaux bulletins seront écrits",len(data))
+                self.logger.writeLog(self.logger.VERYVERYVERBOSE,"%d nouveaux bulletins seront écrits",len(data))
 
 		while True:
 			if len(data) <= 0:
