@@ -673,7 +673,7 @@ def startup(opts, logger):
    readClients(logger)
    readSources(logger)
    if options.client:
-     opts.type = client[options.client][3]
+     opts.type = clients[options.client][3]
      dd = urlSplit(clients[options.client][1])
      opts.host = dd[4]
      opts.port = dd[5]
