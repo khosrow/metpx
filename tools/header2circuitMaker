@@ -90,7 +90,7 @@ def main():
 		data = os.read(fileDesc,os.stat(config.inputDir + nomFic)[6])
 
 		for ligne in data.splitlines():
-				entete = ligne[:6].replace(' ','') + ' ' + ligne[6:10].replace(' ','')
+				entete = ligne[:6].replace(' ','') + ' ' + ligne[6:12].strip()
 
 				if len(entete.split()) == 1:
 					entete = entete.replace(' ','')
