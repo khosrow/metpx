@@ -29,16 +29,7 @@ def main():
 
 	# Instanciation du option parser
 	parser = OptionParser(usage)
-        parser.add_option( "-d", "--data", dest="dataDir",
-                default=fet.FET_DATA,
-                help="root of directory tree where data is stored",
-                metavar="PXROOT")
-        parser.add_option( "-s", "--source", dest="source",
-                help="Directory containing configuration files")
-        parser.add_option( "-e", "--etcdir", dest="etcDir",
-                default=fet.FET_ETC,
-                help="Directory containing configuration files",
-                metavar="PXCFG")
+        fet.addStandardOptions(parser)
 
 	options,args = parser.parse_args()
 
@@ -58,7 +49,8 @@ def main():
         if options.source:
            # Init du log
           logger = log.log(options.dataDir + '/log/ncsSender_' + options.source )
-          fet.startup(options.dataDir,options.etcDir,logger)
+          fet.startup(options,logger)
+          
         else:
           logger = log.log(config.log)
 
@@ -70,12 +62,12 @@ def main():
 	if config.typeProcotole == 'AM':
 
 		import receiverAm
-		unGateway = receiverAm.receiverAm(args[0],logger)
+		unGateway = receiverAm.receiverAm(args[0],options,logger)
 	
 	elif config.typeProcotole == 'WMO':
 	
 		import receiverWmo
-		unGateway = receiverWmo.receiverWmo(args[0],logger)
+		unGateway = receiverWmo.receiverWmo(args[0],options,logger)
 	
 	else:
 		raise Exception('Type de protocole non reconnu')	# FIXME

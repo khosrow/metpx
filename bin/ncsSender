@@ -31,17 +31,7 @@ def main():
 
 	# Instanciation de l'option parser
 	parser = OptionParser(usage)
-        parser.add_option( "-d", "--data", dest="dataDir",
-                default=fet.FET_DATA,
-                help="root Directory of application",
-                metavar="PXROOT")
-        parser.add_option( "-c", "--client", dest="client",
-                help="Directory containing configuration files",
-                metavar="PXCFG")
-        parser.add_option( "-e", "--etcdir", dest="etcDir",
-                default=fet.FET_ETC,
-                help="Directory containing configuration files",
-                metavar="PXCFG")
+        fet.addStandardOptions(parser)
 
 	options,args = parser.parse_args()
 	
@@ -49,7 +39,7 @@ def main():
 	if len(args) > 1:
 		parser.error("trop d'arguments fournis")
 	elif len(args) == 0:
-		parser.error("aucun fichier de config fourni")
+  	        parser.error("aucun fichier de config fourni")
 	
 	# Chargement de la config pour savoir le type de protocole et le path du log
 	config = gateway.gateway.loadConfig(args[0])
@@ -60,7 +50,7 @@ def main():
 	if options.client:
 	   # Init du log
 	  logger = log.log(options.dataDir + '/log/ncsSender_' + options.client )
-          fet.startup(options.dataDir,options.etcDir,logger)
+          fet.startup(options,logger)
 	else:
 	  logger = log.log(config.log)
 
@@ -72,17 +62,17 @@ def main():
 	if config.typeProcotole == 'AM':
 
 		import senderAm
-		unGateway = senderAm.senderAm(args[0],logger)
+		unGateway = senderAm.senderAm(args[0],options,logger)
 	
 	elif config.typeProcotole == 'WMO':
 	
 		import senderWmo
-		unGateway = senderWmo.senderWmo(args[0],logger)
+		unGateway = senderWmo.senderWmo(args[0],options,logger)
 
 	elif config.typeProcotole == 'AMIS':
 
 		import senderAMIS
-		unGateway = senderAMIS.senderAMIS(args[0],logger)
+		unGateway = senderAMIS.senderAMIS(args[0],options,logger)
 
 	else:
 		raise Exception('Type de protocole non reconnu')	# FIXME
