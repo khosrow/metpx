@@ -74,6 +74,7 @@ while True:
 
    # Write (and name correctly) the bulletins to disk, erase them after
    for key in bulletinsBrutsDict.keys():
+      logger.writeLog(logger.DEBUG, "Lecture de %s: %d bytes" % (key, len(bulletinsBrutsDict[key]))
       bullManager.writeBulletinToDisk(bulletinsBrutsDict[key], includeError=True)
       os.unlink(key) # erase the file
    
