@@ -3,9 +3,9 @@
 
 # manual annihilation:
 #
-# killall fetrx
-# killall fettx
-# rm -f /apps/fet/[rt]x/.lock
+# killall ptx
+# killall prx
+# rm -f /apps/px/[rt]x/.lock
 
 import sys
 import os
@@ -41,12 +41,12 @@ def startthem(dir,name,cmd):
 
 
 def start(cmd):
-  startthem( fet.FET_ETC + fet.FET_RX, 'fetrx', cmd)
-  startthem( fet.FET_ETC + fet.FET_TX, 'fettx', cmd)
+  startthem( fet.FET_ETC + fet.FET_RX, 'prx', cmd)
+  startthem( fet.FET_ETC + fet.FET_TX, 'ptx', cmd)
 
 
 if len(sys.argv) < 2:
-  print "USAGE: fet (start|stop) "
+  print "USAGE: px (start|stop) "
   sys.exit(1)
 
 start(sys.argv[1])

@@ -12,7 +12,7 @@ import os
 import os.path
 
 pdsetc = '/apps/pds/etc/'
-fetetc = '/apps/fet/etc/'
+fetetc = '/apps/px/etc/'
 
 #
 # config reader

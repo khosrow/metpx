@@ -29,14 +29,15 @@ import sys
 import signal
 import log
 
-#FET_ROOT='/apps/fet/'
-FET_ROOT='/tmp/fet/'
+#FET_ROOT='/apps/px/'
+#FET_ROOT='/tmp/fet/'
+FET_ROOT='/tmp/px/'
 FET_DB= 'db/today/' 
 
 FET_TX= 'tx/'
 FET_RX= 'rx/'
 
-#FET_ETC='/apps/fet/etc/'
+#FET_ETC='/apps/px/etc/'
 FET_ETC='../etc/'
 
 #
@@ -374,7 +375,7 @@ def dbname(ingestname):
 def clientQdirname( client, pri ):
   """ return the directory into which a file of a given priority should be placed.
   A couple of different layouts being contemplated.
-  /apps/fet/tx/<client>/1_YYmmddhh ??
+  /apps/px/tx/<client>/1_YYmmddhh ??
   """
   global clients
   return FET_ROOT + FET_TX + client + '/' + pri + '_' \
