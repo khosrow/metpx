@@ -28,7 +28,7 @@ sys.path.insert(1,sys.path[0] + '/../lib/importedLibs')
 import log
 import fet
 
-def sendfiles(c, files,logger):
+def sendFiles(c, files,logger):
   """ send the given list of files, in order.
 
       attempt to send the given list of files, logging the result
@@ -61,14 +61,14 @@ FIXME:
   ftpdir=''
   for p in files:
      f = p[p.rfind('/')+1:] 
-     m = fet.clientmatch(c,f)
-     dfn = fet.destfn(f,m)
+     m = fet.clientMatch(c,f)
+     dfn = fet.destFileName(f,m)
 #     print "match is: ", m
      if dfn == '' or m[2] == 'NULL':
        logger.writeLog(logger.ERROR, "fichier " + f + " pas routable par " + c )
        continue
      else: 
-       (proto, dspec, uspec, pwspec, hspec, pspec) = fet.urlsplit(m[2])
+       (proto, dspec, uspec, pwspec, hspec, pspec) = fet.urlSplit(m[2])
        logger.writeLog( logger.INFO, "fichier " + f + " livré à "  + \
           proto + ":" + hspec + " " + dspec + " " + dfn )
        if proto == 'file':
@@ -148,7 +148,7 @@ def checkdir(d,logger):
 logger = {}
 dmodified = {}
 
-def doclient(c,howtoprioritize,logger):
+def doClient(c,howtoprioritize,logger):
   """ process the files queued for a single client.
 
       look at all the subdirectories in the client queue
@@ -182,11 +182,11 @@ def doclient(c,howtoprioritize,logger):
 
     cfiles.sort(howtoprioritize) 
 
-    sendfiles( c, cfiles, logger )  
+    sendFiles( c, cfiles, logger )  
 
 
 
-def checkclient( c, clients, howtoprioritize, logger ):
+def checkClient( c, clients, howtoprioritize, logger ):
   """look for client directories with data to transmit. Trigger ingestion.
 
      Priority scheduling scheme.
@@ -205,11 +205,11 @@ FIXME holdover from rx
 
 
   while(1):
-    doclient(c,howtoprioritize,logger)
+    doClient(c,howtoprioritize,logger)
     time.sleep(1)
 
 
-def fileprio( x, y ):
+def filePrio( x, y ):
   """ comparator function for sort. 
 
       based on criteria (fields 5 and 6 are the priority and timestamp, 
@@ -238,6 +238,6 @@ if c not in fet.clients.keys():
   logger.writeLog(logger.FATAL, "client " + c + " n'est pas active" )
   sys.exit(1)
 
-fet.lockstopordie( fet.FET_ROOT + fet.FET_TX + c + '/.lock' ,  cmd )
+fet.lockStopOrDie( fet.FET_ROOT + fet.FET_TX + c + '/.lock' ,  cmd )
 
-checkclient( sys.argv[1], fet.clients, fileprio, logger )
+checkClient( sys.argv[1], fet.clients, filePrio, logger )

@@ -31,7 +31,7 @@ import fet
 
 logger = {}
 
-def ingestdir(d,s,logger):
+def ingestDir(d,s,logger):
   """
   given a single directory, read all the non-hidden entries and
   attempt to ingest them.  
@@ -52,7 +52,7 @@ def ingestdir(d,s,logger):
   for r in os.listdir(d):
     if r[0] == '.' or not os.access(r, os.R_OK):
       continue
-    i=fet.ingestname(r,s) # map reception name to ingest name
+    i=fet.ingestName(r,s) # map reception name to ingest name
     rr=d + "/" + r
     if fet.ingest(i,rr, logger) == 1:
       logger.writeLog(logger.INFO, "fichier " + rr + " ingérée comme " + i)
@@ -65,7 +65,7 @@ def ingestdir(d,s,logger):
 
 
 
-def checksource(s, sources):
+def checkSource(s, sources):
   """look for source directories with data to ingest. Trigger ingestion.
 
      Priority scheduling scheme.
@@ -91,12 +91,12 @@ def checksource(s, sources):
 
   while(1):
 
-    dname = fet.sourceQdirname(s)
+    dname = fet.sourceQDirName(s)
       
     if dname == '':
       continue
   
-    fet.createdir(dname)
+    fet.createDir(dname)
     dstat=os.stat( dname );
 
     # if the dir has changed, then ingest.
@@ -107,7 +107,7 @@ def checksource(s, sources):
       #print "New files!"
       os.chdir(dname)
       dmodified[ dname ] = dstat.st_mtime
-      ingestdir( dname, s, logger )
+      ingestDir( dname, s, logger )
 
     time.sleep(1)      
 
@@ -131,8 +131,8 @@ if s not in fet.sources.keys():
   print "FATAL: " + s + " source not configured or is set inactive"
   sys.exit(1)
 
-fet.lockstopordie( fet.FET_ROOT + fet.FET_RX + s + '/.lock' , cmd )
+fet.lockStopOrDie( fet.FET_ROOT + fet.FET_RX + s + '/.lock' , cmd )
 
-checksource( sys.argv[1], fet.sources )
+checkSource( sys.argv[1], fet.sources )
 
 

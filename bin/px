@@ -16,7 +16,7 @@ sys.path.insert(1,sys.path[0] + '/../lib/importedLibs')
 import fet
 
 
-def startthem(dir,name,cmd):
+def startThem(dir,name,cmd):
   for cfname in os.listdir( dir ):
     if cfname[-5:] != '.conf':
       continue
@@ -41,8 +41,8 @@ def startthem(dir,name,cmd):
 
 
 def start(cmd):
-  startthem( fet.FET_ETC + fet.FET_RX, 'prx', cmd)
-  startthem( fet.FET_ETC + fet.FET_TX, 'ptx', cmd)
+  startThem( fet.FET_ETC + fet.FET_RX, 'prx', cmd)
+  startThem( fet.FET_ETC + fet.FET_TX, 'ptx', cmd)
 
 
 if len(sys.argv) < 2:

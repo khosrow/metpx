@@ -47,7 +47,7 @@ FET_ETC='/apps/px/etc/'
 #              #2 use python urlparse and just do the rest.
 #              could reduce size of routines considerably
 
-def urlsplit(url):
+def urlSplit(url):
 
   protocol=''
   host=''
@@ -63,7 +63,7 @@ def urlsplit(url):
   else:
     rest = url[delim+3:]
 
-#  print 'urlsplit begin, url: ', url, ' rest: ', rest
+#  print 'urlSplit begin, url: ', url, ' rest: ', rest
 
   if rest[0] == '/':
     destdir = rest
@@ -93,13 +93,13 @@ def urlsplit(url):
     else:
       host=rest
 
-#  print "urlsplit proto="+ protocol +" dir="+ dirspec +' u='+ user +' pw='+ password +' h='+ host  +' port='+ port 
+#  print "urlSplit proto="+ protocol +" dir="+ dirspec +' u='+ user +' pw='+ password +' h='+ host  +' port='+ port 
   return [ protocol, dirspec, user, password, host, port ]
 
 
-def urljoin( protocol, destdir, user, pw, host, port ):
+def urlJoin( protocol, destdir, user, pw, host, port ):
 
-#  print "urljoin proto="+ protocol +" dir="+ destdir +' u='+ user +' pw='+ pw +' h='+ host  +' p='+ port 
+#  print "urlJoin proto="+ protocol +" dir="+ destdir +' u='+ user +' pw='+ pw +' h='+ host  +' p='+ port 
   if protocol == 'file':
      it = protocol + ':'
   else:
@@ -119,13 +119,13 @@ def urljoin( protocol, destdir, user, pw, host, port ):
        it = it + '/'
     it = it + destdir
    
-#  print "urljoin it=", it
+#  print "urlJoin it=", it
   return it
 
 
-def lockstopordie(lfn, cmd):
+def lockStopOrDie(lfn, cmd):
 
-  createdir( os.path.dirname(lfn) )
+  createDir( os.path.dirname(lfn) )
   if os.path.exists( lfn ):
     lockfile = open( lfn , 'r' )
     lockpid = int(lockfile.read())
@@ -170,7 +170,7 @@ clientdefaults = [ [], 'monthly','10','3600','3600','10','3','000'  ]
 #        indices, then it could break out faster on first match.
 #
 
-def readclients(logger):
+def readClients(logger):
   """ read the client configuration directory 
 
   this provides all the information necessary for routing files to 
@@ -202,7 +202,7 @@ def readclients(logger):
       maskline = mask.split()
       if ( len(maskline) >= 2 and not re.compile('^[ \t]*#').search(mask) ) :
         if maskline[0] == 'imask' :
-	  destination=urljoin(protocol,destdir,user,password,host,port)
+	  destination=urlJoin(protocol,destdir,user,password,host,port)
           #print "destination: ", destination
 	  patterns = patterns + [ maskline + [ destination, destfn ] ]
         elif maskline[0] == 'active':
@@ -214,7 +214,7 @@ def readclients(logger):
 	  destdir = maskline[1]
         elif maskline[0] == 'destination':
 	  ( protocol, dirspec, uspec, pwspec, hspec, pspec ) = \
-	  	urlsplit( maskline[1] )
+	  	urlSplit( maskline[1] )
 	  if len(maskline) > 2 :
 	     destfn = maskline[2]
           if dirspec != '':
@@ -228,7 +228,7 @@ def readclients(logger):
           if pspec != '':
 	     port = pspec
 
-#          print "after urlsplit proto="+ protocol +" destdir="+ destdir +' u='+ user +' pw='+ password +' h='+ host  +' port='+ port 
+#          print "after urlSplit proto="+ protocol +" destdir="+ destdir +' u='+ user +' pw='+ password +' h='+ host  +' port='+ port 
         elif maskline[0] == 'host':
 	  host = maskline[1]
         elif maskline[0] == 'user':
@@ -281,7 +281,7 @@ sources = {}
 """
 sourcedefaults = [ '', '', '', '', '', '' ]
 
-def readsources(logger):
+def readSources(logger):
   """ read the source configuration directory for settings
   """
   global sources
@@ -289,7 +289,7 @@ def readsources(logger):
 
   sources = {}
 
-  #print "readsources"
+  #print "readSources"
   for cfname in os.listdir( FET_ETC + FET_RX ):
     if cfname[-5:] != '.conf':
        continue
@@ -328,10 +328,10 @@ def readsources(logger):
 
     #print "sources are: ", sources
 
-def sourceQdirname(s):
+def sourceQDirName(s):
   return FET_ROOT + FET_RX + s
 
-def ingestname(r,s):
+def ingestName(r,s):
   """ map reception to ingest name, based on the source configuration.
 
       used to be called: sourceRx2Ingestname(r,s):
@@ -355,7 +355,7 @@ def ingestname(r,s):
   return string.join(rs,':')
 
 
-def dbname(ingestname):
+def dbName(ingestname):
   """ given an ingest name, return an relative database name
 
   given a file name of the form:
@@ -375,7 +375,7 @@ def dbname(ingestname):
     return ''
 
 
-def clientQdirname( client, pri ):
+def clientQDirName( client, pri ):
   """ return the directory into which a file of a given priority should be placed.
   A couple of different layouts being contemplated.
   /apps/px/tx/<client>/1_YYmmddhh ??
@@ -385,7 +385,7 @@ def clientQdirname( client, pri ):
              + time.strftime( "%Y%m%d%H", time.gmtime(time.time()) ) + '/'
 
 
-def clientmatch(c,ingestname):
+def clientMatch(c,ingestname):
 
   for p in clients[c][0]:
     if fnmatch.fnmatch(ingestname,p[1]) :
@@ -394,7 +394,7 @@ def clientmatch(c,ingestname):
   return []
 
 
-def clientmatches(ingestname):
+def clientMatches(ingestname):
   """ returns a list of clients to whome the file with ingestname should be sent.
 
    match ingestname against global list of client patterns.
@@ -409,7 +409,7 @@ def clientmatches(ingestname):
 
 #  print "client matches for " + ingestname 
   for c in clients.keys():
-    p = clientmatch(c,ingestname)
+    p = clientMatch(c,ingestname)
     if p != []:
       hits = hits + [ [ c ] + p ]
 
@@ -418,7 +418,7 @@ def clientmatches(ingestname):
 
 
 
-def destfn(ingestname, climatch):
+def destFileName(ingestname, climatch):
   """ return the appropriate destination give the climatch client specification.
 
   return the appropriate destination file name for a given client match from patterns.
@@ -473,51 +473,51 @@ def destfn(ingestname, climatch):
    first check.
 
    FIXME: cleaning out dirs_created? might get big after a while.
-      cleaned out in initdb.
+      cleaned out in initDB.
 """
 dirs_created = []
 
-def createdir(dir):
+def createDir(dir):
    """ create a directory if it does not exist
 
    should I check for rollover?
    """
    global dirs_created
 
-   #print "createdir(", dir, ")"
+   #print "createDir(", dir, ")"
    if not (dir in dirs_created) and not os.path.exists( dir ):
       os.makedirs( dir, 01775 )
-      #print "createdir(", dir, ")"
+      #print "createDir(", dir, ")"
    dirs_created = dirs_created + [ dir ]
 
 
-def linkit(f,l):
+def linkFile(f,l):
   """ make a link l to the existing file f, 
   """
-  createdir( os.path.dirname(l) )
+  createDir( os.path.dirname(l) )
 #  print "link(", f, l, ")"
   os.link( f, l )
 
 
-def directingest(ingestname,clist,pri,lfn,logger):
+def directIngest(ingestname,clist,pri,lfn,logger):
    """ link lfn into the db & client spools based on ingestname & clients 
 
        accepts a list of matching clients.
    """
 
-   dbn=dbname(ingestname)
+   dbn=dbName(ingestname)
    if ( dbn == '' ):
       return 0
 
-   linkit(lfn, dbn)
+   linkFile(lfn, dbn)
    logger.writeLog( logger.INFO, "linking " + dbn + " to: " + lfn )
 
    if len (clist) < 1:
      return 1
 
    for c in clist:
-     cname=clientQdirname( c, pri )
-     linkit(dbn , cname + ingestname )   
+     cname=clientQDirName( c, pri )
+     linkFile(dbn , cname + ingestname )   
      logger.writeLog( logger.INFO, "linking for " + c )
 
    return 1
@@ -532,17 +532,17 @@ def ingest(ingestname,lfn,logger):
 
    """
    pri=ingestname.split(':')[5]
-   clist=map( lambda x: x[0], clientmatches(ingestname))
-   directingest(ingestname,clist,pri,lfn,logger)
+   clist=map( lambda x: x[0], clientMatches(ingestname))
+   directIngest(ingestname,clist,pri,lfn,logger)
 
 
-def initdb(logger):
+def initDB(logger):
    """
    initialize the base of the FET spooling tree, rotating the today link
    if needed.  
    
    FIXME: Are there race conditions because of db rollover. ?
-        -- added explicit creation based on current time to dbname,
+        -- added explicit creation based on current time to dbName,
 	   so that it doesn't depend on system wide db rollover process.
 
    so nothing below matters, because nobody uses 'today'.  it is only sugar for humans.
@@ -559,7 +559,7 @@ def initdb(logger):
    a day event. so they only place this should be called is from somewhere
    that knows the db is quiescent.
 
-   a lock for only the initdb routing would solve most (except 'today' reference)
+   a lock for only the initDB routing would solve most (except 'today' reference)
 
    FIXME: -- creation of yesterday link doesn't happen if today is missing.
 	  -- no logging of this important event, hmm...
@@ -569,13 +569,13 @@ def initdb(logger):
 
    logger.writeLog( logger.INFO, "dbinit start")
    dirs_created = []
-   createdir( FET_ROOT )
-   createdir( FET_ROOT + FET_RX )
-   createdir( FET_ROOT + FET_TX )
-   createdir( FET_ROOT + "db" )
+   createDir( FET_ROOT + '/.' )
+   createDir( FET_ROOT + FET_RX )
+   createDir( FET_ROOT + FET_TX )
+   createDir( FET_ROOT + "db" )
    todaylink = time.strftime( "%Y%m%d", time.gmtime(time.time()))
    FET_DB = "db/" + todaylink + "/"
-   createdir( FET_ROOT + FET_DB )
+   createDir( FET_ROOT + FET_DB )
    tl = FET_ROOT + "db/today"
    yl = FET_ROOT + "db/yesterday"
    if os.path.exists( tl ):
@@ -596,9 +596,9 @@ def initdb(logger):
 
 
 def startup(logger):
-   initdb(logger)
-   readclients(logger)
-   readsources(logger)
+   initDB(logger)
+   readClients(logger)
+   readSources(logger)
 
 
 # module initialization code
