@@ -160,13 +160,11 @@ class senderWmo(gateway.gateway):
 		#on considere le dernier envoi non vide effectue
 		if len(liste)>=1:
 			self.listeFichiersDejaChoisis = self.unBulletinManagerWmo.getListeNomsFichiersAbsolus()
-		print "self.listeFichiersDejaChoisis = ",self.listeFichiersDejaChoisis
 
 		try:
 			#determination des bulletins a lire et lecture de leur contenu brut
 			data = self.unBulletinManagerWmo.readBulletinFromDisk(self.config.listeRepertoires,self.listeFichiersDejaChoisis,priorite=1)
 
-			print "return senderWmo.read(): ",data
 			return data
 
 		except:
@@ -188,7 +186,7 @@ class senderWmo(gateway.gateway):
 
                 Description:
 		Genere les bulletins en format WMO issus du dictionnaire data
-		et les ecrit au socket approprie 
+		et les ecrit au socket approprie.
 
                 Nom:
                 Pierre Michaud
@@ -215,7 +213,6 @@ class senderWmo(gateway.gateway):
 				#est efface
 				if succes:
 					self.unBulletinManagerWmo.effacerFichier(key)
-					print "JEFFACE!!"
 
 			except:
                 		self.logger.writeLog(self.logger.ERROR,"senderWmo.write(..): Erreur ecriture")

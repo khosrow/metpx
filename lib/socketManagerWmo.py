@@ -5,6 +5,7 @@ __version__ = '2.0'
 
 import struct, socket, curses, curses.ascii, string
 import socketManager
+import time
 
 class socketManagerWmo(socketManager.socketManager):
         __doc__ = socketManager.socketManager.__doc__ + \
@@ -70,8 +71,17 @@ class socketManagerWmo(socketManager.socketManager):
         def wrapBulletin(self,bulletin):
                 __doc__ = socketManager.socketManager.wrapBulletin.__doc__ + \
                 """### Ajout de socketManagerWmo ###
+		   Nom:
+		   wrapBulletin
 
-                   Définition de la méthode
+                   Parametres d'entree:
+                   -bulletin:	un objet bulletinWmo
+
+                   Parametres de sortie:
+		   -Retourne le bulletin pret a envoyer en format string
+
+                   Description:
+		   Ajoute l'entete WMO approprie au bulletin passe en parametre.
 
 		   Visibilité:	Privée
                    Auteur:      Louis-Philippe Thériault
@@ -79,10 +89,6 @@ class socketManagerWmo(socketManager.socketManager):
 		   Modifications: Decembre 2004, Pierre Michaud
                 """
 	        bulletinStr = chr(curses.ascii.SOH) + '\r\r\n' + self.getNextCounter(5) + '\r\r\n' + bulletin.getBulletin(useFinalLineSeparator=True) + '\r\r\n' + chr(curses.ascii.ETX)
-
-		print "****************"
-		print "return wrapBulletin(...): \n",string.zfill(len(bulletinStr),8) + bulletin.getDataType() + bulletinStr
-		print "****************"
 
 	        return string.zfill(len(bulletinStr),8) + bulletin.getDataType() + bulletinStr
 
@@ -161,6 +167,8 @@ class socketManagerWmo(socketManager.socketManager):
 		-sinon: 1
 
                 Description:
+		Envoi au socket correspondant un bulletin WMO et indique
+		si le bulletin a ete transfere totalement ou non.
 
                 Auteur:
                 Pierre Michaud
@@ -173,7 +181,9 @@ class socketManagerWmo(socketManager.socketManager):
 			data = self.wrapBulletin(bulletin)
 
 			#envoi du bulletin
+			#FIXME socket.error: (11, 'Resource temporarily unavailable')
                 	bytesSent = self.socket.send(data)
+			time.sleep(0.5)
 
 			#verifier si l'envoi est un succes
 			if bytesSent != len(data):
