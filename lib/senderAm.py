@@ -70,10 +70,10 @@ class senderAm(gateway.gateway):
 		if options.client:
                    self.unBulletinManagerAm = \
                         bulletinManagerAm.bulletinManagerAm(
-			fet.FET_DATA + FET_TX + options.client, logger)
+			fet.FET_DATA + fet.FET_TX + options.client, logger)
                    self.config.remoteHost = options.host
                    self.config.localPort = options.port
-                   self.config.timeout    = options.timeout
+                   self.config.timeout    = options.connect_timeout
 
 		else:
                    self.unBulletinManagerAm = \

@@ -41,16 +41,18 @@ directives
     MultiKeysStringSorter ensures delivery by priority and time.
     default: MultiKeysStringSorter
     
-
+'imask' 
 
 
 ----------------------------------------------------------------------------
   
 active yes
-type wmo
-destination wmo://localhost:5012
+type single-file
+destination ftp://dude:dpw@machine.example.org/data/dude WHATFN
+connect_timeout 300
+order MultiKeysStringSorter
+batch 200
 
-FIXME:  below is not described!
 emask *:*:*:*:RADAR:*
 
 imask *:*:*:*:DIRECT:*

@@ -152,8 +152,8 @@ def addStandardOptions(parser):
       help="name of source (when receiving) identifying config and queue directories" )
   parser.add_option( "-c", "--client", default=None, dest="client", 
       help="name of client (when tranmitting) identifying config and queue directories" )
-  parser.add_option( "-v", "--verbose", "--verbosity", default=0, type="int",
-      dest="verbose", help="higher number makes it more voluble" )
+  parser.add_option( "-v", "--debug", default=False, type="int",
+      dest="debug", help="makes it ridiculously more voluble"  )
  
   
 
@@ -358,6 +358,11 @@ priority...
 extension... mapping to ingestname:
       priority : what : ori_system : ori_site : data_type : data_format :
 
+sample
+      sacn444_bidule : input_source : origin_site : BULLETIN/PHOTO/CHART/RADAR
+      datafmt ASCII/JPEG/........ :  
+
+      
 type -- URL indicating connection type
 	am://localhost:4012
 

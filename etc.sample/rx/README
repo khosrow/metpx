@@ -6,7 +6,7 @@ directives
    if it is not active, anything delivered into it's input queues will stay there.
    For sockets, that means the peer will not be able to connect.
 
-'type' <am|wmo|plain|wmofile>
+'type' <am|wmo|single-file|bulletin-file>
    am        	   - AM protocol socket
    wmo        	   - WMO protocol socket
    single-file     - Receive plain files (like a PDS.)
@@ -28,7 +28,7 @@ arrival { 'CA':(5,20),'WO':(20,40) }
   in this example for CA's, -5 or +20 minutes versus the issue time is 
   the valid interval.
 
-AddSMHeader true
+AddSMHeader True
   true if a header is to be inserted at the beginning of a SM or SI bulletins.
   the header is of the form: "AAXX jjhh4\\n".
 
@@ -38,3 +38,5 @@ routing direct|pattern
 	be able to choose how the bulletin/file received is mapped to clients
 	two methods exist: AHL lookup in header2clients.conf, or by 
         patterns (imask&emask)
+
+	headerMap, pattern, whatfnMap ?

@@ -51,10 +51,19 @@ def main():
 
 
 	# Init du log
+
+	#FIXME: want to log fet.startup messages, will leave chicken dropping
+	#       files when invalid clients are entered.
 	logger = log.log(options.dataDir + '/log/' + 
-			os.path.basename(sys.argv[0]) + "_" + options.client )
+		  os.path.basename(sys.argv[0]) + "_" + options.client,
+		  options.debug )
 
         fet.startup(options,logger)
+	if options.client not in fet.clients.keys():
+	      logger.writeLog(logger.FATAL, "fin anormale, client invalide.")
+	      print "fin anormale: client invalide."
+	      sys.exit(1)
+	 
 
         fet.lockStopOrDie( fet.FET_DATA + fet.FET_TX + options.client + '/.lock' , options.cmd )
 
