@@ -95,6 +95,9 @@ class bulletin:
 			Pour découpage initial du bulletin, ou si l'on insère un self.linseparator
 			dans le bulletin, pour le redécouper (faire un getBulletin() puis le redécouper).
 
+		   Nb.:	Les bulletins GRIB/BUFR sont normalisés en enlevant tout data après le '7777'
+			(délimiteur de fin de portion de data) en en ajoutant un lineSeparator.
+
 		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
@@ -120,9 +123,7 @@ class bulletin:
 					if b[-1] == '':
 						b.pop(-1)
 	
-					b = b + [stringBulletin[stringBulletin.find('GRIB'):stringBulletin.find('7777')+len('7777')]] 
-		
-					b = b + stringBulletin[stringBulletin.find('7777')+len('7777'):].split(self.lineSeparator)
+					b = b + [stringBulletin[stringBulletin.find('GRIB'):stringBulletin.find('7777')+len('7777')]] + [''] 
 		
 					return b
 		
@@ -136,10 +137,8 @@ class bulletin:
                                         if b[-1] == '':
                                                 b.pop(-1)
 
-	                                b = b + [stringBulletin[stringBulletin.find('BUFR'):stringBulletin.find('7777')+len('7777')]]
+	                                b = b + [stringBulletin[stringBulletin.find('BUFR'):stringBulletin.find('7777')+len('7777')]] + ['']
 		
-					b = b + stringBulletin[stringBulletin.find('7777')+len('7777'):].split(self.lineSeparator)
-	
 		                        return b
 			else:
 				# Le bulletin n'est pas binaire
