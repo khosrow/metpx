@@ -1,15 +1,9 @@
 """Définition de la classe principale pour les bulletins.
 
-Ces classes servent à l'établissement de la connection, la
-réception et envoi des bulletins et la vérification du respect
-des contraintes relatives aux protocoles.
 """
 
 import time
-import struct
 import string
-import curses
-import curses.ascii
 
 __version__ = '2.0'
 
@@ -110,7 +104,7 @@ class bulletin:
 		"""doSpecificProcessing()
 
 		   Modifie le bulletin s'il y a lieu, selon le traîtement désiré."""
-		bulletinException('Méthode non implantée (méthode abstraite doSpecificProcessing)')
+		raise bulletinException('Méthode non implantée (méthode abstraite doSpecificProcessing)')
 
 
 
