@@ -92,7 +92,7 @@ class receiverWmo(gateway.gateway):
 						raise
 					
 			else:
-				raise gatewayException("Le lecteur ne peut être accédé")
+				raise gateway.gatewayException("Le lecteur ne peut être accédé")
 
 			if rawBulletin != '':
 				data.append(rawBulletin)
