@@ -60,7 +60,7 @@ class collectionManager(bulletinManager.bulletinManager):
         """
 
         def __init__(self,pathTemp,logger,pathFichierCollection,collectionParams,delaiMaxSeq, \
-			includeAllStn,ficCircuits,pathSource=None,pathDest=None,lineSeparator='\n', \
+			includeAllStn,ficCircuits=None,pathSource=None,pathDest=None,lineSeparator='\n', \
 			extension=':',statusFile='ncsCollection.status'):
 
 		self.pathTemp = self.__normalizePath(pathTemp)
@@ -161,9 +161,6 @@ class collectionManager(bulletinManager.bulletinManager):
 
 					self.mainDataMap['sequenceMap'][header+bbbType] = bbbType + 'B'
 					newBBB = bbbType + 'A'
-				elif bbb == "COR":
-					# Pas de séquencage pour les COR
-					newBBB = 'COR'
 				else:
 					newBBB = self.mainDataMap['sequenceMap'][header+bbbType]
 					self.mainDataMap['sequenceMap'][header+bbbType] = self.incrementToken(newBBB)
@@ -241,6 +238,8 @@ class collectionManager(bulletinManager.bulletinManager):
 
 			self.mainDataMap['collectionMap'][rawBulletin.splitlines()[0]].setTokenIfNoData(None)
 
+			# Entête doit inclure l'heure ici
+			entete = ' '.join(rawBulletin.splitlines()[0].split()[:3])
                         if not self.mainDataMap['sequenceMap'].has_key(entete + ' ' + 'RR'):
 	                        # Pas de séquence de démarée
                                 self.mainDataMap['sequenceMap'][entete + ' ' + 'RR'] = 'RRA'
@@ -455,7 +454,7 @@ class collectionManager(bulletinManager.bulletinManager):
 			# Doit finir (l'heure) par 00
 				bbb = self.getBBB(rawBulletin)
 
-				return  rawBulletin[:2] in self.collectionParams or ( bbb != None and bbb[0] in ['C','R'] )
+				return  rawBulletin[:2] in self.collectionParams or ( bbb != None and bbb[:2] in ['CC','RR','AA'] )
 				# Si dans le type de bulletin a collecter OU si champ BBB :True
 			else:
 				return False

@@ -42,9 +42,12 @@ class collectionGateway(gateway.gateway):
                         bulletinManager.bulletinManager(    self.config.pathTemp,logger, \
 							    pathSource = self.config.pathSource, \
                                                             pathDest = self.config.pathDestination, \
-                                                            pathFichierCircuit = self.config.ficCircuits, \
+                                                            pathFichierCircuit = None, \
                                                             extension = self.config.extension \
                                                             )
+
+		# Partage du même map pour les 2 managers
+		self.unBulletinManager.setMapCircuits(self.unCollectionManager.getMapCircuits())
 
         def read(self):
 		__doc__ =  gateway.gateway.read.__doc__ + \

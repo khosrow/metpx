@@ -439,6 +439,28 @@ class bulletinManager:
 	                                        self.mapCircuits[uneLigneSplitee[0]][champs[token+1]] = self.mapCircuits[uneLigneSplitee[0]][champs[token+1]].split(' ')
 	                except IndexError:
 	                        raise bulletinManagerException('Les champs ne concordent pas dans le fichier header2circuit',ligne)
+
+	def getMapCircuits(self):
+		"""getMapCircuits() -> mapCircuits
+
+		   À utiliser pour que plusieurs instances utilisant la même
+		   map.
+
+		   Auteur: Louis-Philippe Thériault
+	           Date:   Octobre 2004
+		"""
+		return self.mapCircuits
+
+        def setMapCircuits(self,mapCircuits):
+                """setMapCircuits(mapCircuits)
+
+                   À utiliser pour que plusieurs instances utilisant la même
+                   map.
+
+                   Auteur: Louis-Philippe Thériault
+                   Date:   Octobre 2004
+                """
+                self.mapCircuits = mapCircuits
 	
 	def getCircuitList(self,bulletin):
 	        """
