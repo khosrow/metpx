@@ -68,7 +68,7 @@ suivants:
 		self.outBuffer = []
 		self.connected = False
 
-	def establishConnection(self):
+	def __establishConnection(self):
 		"""Établit la connection selon la valeur des attributs de l'objet.
 
 		   self.socket sera, après l'exécution, la connection."""
@@ -123,6 +123,8 @@ suivants:
 		# Pour que l'interrogation du buffer ne fasse attendre le système
 		self.socket.setblocking(False)
 
+		self.connected = True
+
 	def closeProperly(self):
 		"""closeProperply() -> ([bulletinsReçus],nbBulletinsEnvoyés) 
 
@@ -152,7 +154,7 @@ suivants:
 	def sendBulletin(self):
 		pass
 
-	def syncInBuffer(self):
+	def __syncInBuffer(self):
 		"""Copie l'information du buffer du socket s'il y a lieu
 
 		   Lève une exception si la connection est perdue."""
@@ -170,14 +172,15 @@ suivants:
 	                        elif inst.args[0] == 104:
 				# La connection est brisée
 	                                self.socket.close()
+					self.connected = False
 	                                raise socketManagerException('la connection est brisee')
 	                        else:
 	                                raise
 
-	def transmitOutBuffer(self):
+	def __transmitOutBuffer(self):
 		pass
 
-	def wrapBulletin(self,bulletin):
+	def __wrapBulletin(self,bulletin):
 		"""wrapbulletin(bulletin) -> wrappedBulletin
 
 		   bulletin	: String
@@ -188,7 +191,7 @@ suivants:
 		   objet Bulletin."""
 		raise socketManagerException("Méthode non implantée (méthode abstraite wrapBulletin)")
 
-	def unwrapBulletin(self):
+	def __unwrapBulletin(self):
 		"""unwrapBulletin() -> (bulletin,longBuffer)
 
 		   bulletin	: String
@@ -203,4 +206,5 @@ suivants:
 		   pour compléter le prochain bulletin."""
 		raise socketManagerException("Méthode non implantée (méthode abstraite unwrapBulletin)")
 
-	
+	def isConnected(self):
+		"""isConnected() -> bool"""	

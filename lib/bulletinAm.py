@@ -41,7 +41,7 @@ class bulletinAm(bulletin.bulletin):
 
 
 	def __init__(self,stringBulletin,lineSeparator='\n',mapEntetes=None,SMHeaderFormat=False):
-		bulletin.bulletin.__init__(stringBulletin,lineSeparator='\n')
+		bulletin.bulletin.__init__(self,stringBulletin,lineSeparator='\n')
 		self.mapEntetes = mapEntetes
 		self.SMHeaderFormat = SMHeaderFormat
 
