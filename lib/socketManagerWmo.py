@@ -29,8 +29,8 @@ class socketManagerWmo(socketManager.socketManager):
 	   Modifications: Decembre2004, Pierre Michaud
         """
 
-        def __init__(self,logger,type='slave',localPort=9999,remoteHost=None,timeout=None):
-                socketManager.socketManager.__init__(self,logger,type,localPort,remoteHost,timeout)
+        def __init__(self,logger,type='slave',port=9999,remoteHost=None,timeout=None):
+                socketManager.socketManager.__init__(self,logger,type,port,remoteHost,timeout)
 
 		# La taille du wmoHeader est prise d'a partir du document :
 		# "Use of TCP/IP on the GTS", pages 28-29, et l'exemple en C

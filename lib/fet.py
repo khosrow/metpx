@@ -96,7 +96,12 @@ def urlSplit(url):
       else:
         user=rest
     else:
-      host=rest
+      delim = string.find(rest, ':')
+      if delim > 0:
+        host = rest[:delim]
+        port = rest[delim+1:]
+      else:
+        host=rest
 
 #  print "urlSplit proto="+ protocol +" dir="+ dirspec +' u='+ user +' pw='+ password +' h='+ host  +' port='+ port 
   return [ protocol, dirspec, user, password, host, port ]
@@ -135,12 +140,6 @@ def addStandardOptions(parser):
   """
   parser.add_option( "--dataDir", dest="dataDir", default=FET_DATA,
       help="root of directory tree where data is stored", metavar="PXDATA")
-  parser.add_option( "-d", "--direct", dest="direct", default=False,
-      help="when set, apply header2client AHL mapping to route bulletins" )
-  parser.add_option( "-x", "--extension", dest="extension", default=None,
-      help="the colon (:) separated fields to apply to the reception file name" )
-  parser.add_option( "-a", "--arrival", dest="mapEnteteDelai", default=None,
-      help="map AHL type and arrival time to reject messages received at wrong time." )
   parser.add_option( "-e", "--etcdir", dest="etcDir",
       default=FET_ETC, help="Directory for configuration files",
       metavar="PXETC")
@@ -148,8 +147,8 @@ def addStandardOptions(parser):
       help="name of source (when receiving) identifying config and queue directories" )
   parser.add_option( "-c", "--client", default=None, dest="client", 
       help="name of client (when tranmitting) identifying config and queue directories" )
-  parser.add_option( "-v", "--verbose", default=None,
-      dest="verbose", help="make it more voluble" )
+  parser.add_option( "-v", "--verbose", "--verbosity", default=0, type="int",
+      dest="verbose", help="higher number makes it more voluble" )
  
   
 
@@ -209,11 +208,8 @@ clients = {}
 #        with inheritance to override it.  but this is just a skeleton.
 #
 # -- for a file sender
-clientdefaults = [ [], '','10','3600','3600','10','3','000'  ]
+clientdefaults = [ [], '',10,'3600','3600','10','3','000'  ]
 #
-# for AM sender
-clientdefaults = [ [], '','','','','','',''  ]
-
 
 # FIXME: currently get one global list of clients.
 #        if it were structured such that all the patterns were per client
@@ -289,18 +285,10 @@ def readClients(logger):
 	  destfn = maskline[1]
         elif maskline[0] == 'password':
 	  password = maskline[1]
-        elif maskline[0] == 'protocol':
+        elif maskline[0] == 'type':
 	  protocol = maskline[1]
-        elif maskline[0] == 'ftp_timer':
+        elif maskline[0] == 'connect_timeout':
 	  client[2] = maskline[1]
-        elif maskline[0] == 'queue_timer':
-	  client[3] = maskline[1]
-        elif maskline[0] == 'time_window':
-	  client[4] = maskline[1]
-        elif maskline[0] == 'sleep_timer':
-	  client[5] = maskline[1]
-        elif maskline[0] == 'debug_level':
-	  client[6] = maskline[1]
         elif maskline[0] == 'chmod':
 	  client[7] = maskline[1]
 	mask=cliconf.readline()
@@ -311,12 +299,19 @@ def readClients(logger):
       clients[clientid] = copy.deepcopy(client)
       logger.writeLog( logger.INFO, "read config of client " + clientid )
       isactive=0
+      client[1]=''
+      host=''
+      port=''
+      user=''
+      password=''
+      destdir=''
+      destfn=''
     else:
       logger.writeLog( logger.INFO, "ignored config of client " + clientid )
     
   # dump clients db
-#  for k in clients.keys():
-#     print "client ", k, " is: ",  clients[k], "\n"
+  #for k in clients.keys():
+  #   print "client ", k, " is: ",  clients[k], "\n"
 
   #print "\n\n\nPatterns\n\n\n"
   #print patterns
@@ -342,7 +337,12 @@ type -- URL indicating connection type
 	am://localhost:4012
 
 """
-sourcedefaults = { 'extension':'5:MISSING:MISSING:MISSING:MISSING', 'type':None }
+sourcedefaults = { 
+    'extension':'5:MISSING:MISSING:MISSING:MISSING', 
+    'type':None,
+    'mapEnteteDelai':None,
+    'port':0,
+ }
 
 def readSources(logger):
   """ read the source configuration directory for settings
@@ -367,10 +367,10 @@ def readSources(logger):
         if srcline[0] == 'active':
 	    if srcline[1] == 'yes':
 	       isactive=1 
-        elif srcline[0] == 'extension':
-          source['extension'] = srcline[1]
-        elif srcline[0] == 'type':
-	  source['type'] = srcline[1]
+        elif srcline[0] == 'arrival':
+	  exec("source['mapEnteteDelai'] = " + string.join(srcline[1:]) )
+	else:
+          source[srcline[0]] = string.join(srcline[1:])
       src=srcconf.readline()
 
     srcconf.close()
@@ -382,6 +382,7 @@ def readSources(logger):
     else:
       logger.writeLog( logger.INFO, "ignored config of source " + sourceid )
 
+  print sources
 
 def sourceQDirName(s):
   return FET_DATA + FET_RX + s
@@ -641,7 +642,7 @@ def initDB(logger):
      if ( todaylink != lnk ):
        os.unlink( tl )
        os.symlink( todaylink, tl )
-       if os.path.exists( yl ):
+       if os.path.exists( lnk ):
          os.unlink( yl )
          os.symlink( lnk, yl )
        
@@ -670,7 +671,14 @@ def startup(opts, logger):
    initDB(logger)
    readClients(logger)
    readSources(logger)
-
+   if options.client:
+     dd = urlSplit(clients[options.client][1])
+     print 'options.client', options.client
+     print 'urlsplit ', dd
+     opts.type = dd[0]
+     opts.host = dd[4]
+     opts.port = dd[5]
+     opts.connect_timeout = int(clients[options.client][2])
 
 # module initialization code
 #startup()

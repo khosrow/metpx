@@ -61,6 +61,7 @@ class senderWmo(gateway.gateway):
 		"""
 		gateway.gateway.__init__(self,path,options,logger)
 		self.establishConnection()
+		self.options = options
 
                 # Instanciation du bulletinManagerWmo selon les arguments issues du fichier
 		# de configuration
@@ -68,6 +69,9 @@ class senderWmo(gateway.gateway):
 		if options.client:
                    self.unBulletinManagerWmo = \
                         bulletinManagerWmo.bulletinManagerWmo( fet.FET_DATA + fet.FET_TX + options.client ,logger)
+                   self.config.remoteHost = options.host
+                   self.config.localPort = options.port
+                   self.config.timeout    = options.timeout
                 else:
                    self.unBulletinManagerWmo = \
                         bulletinManagerWmo.bulletinManagerWmo(self.config.pathTemp,logger)
@@ -130,11 +134,20 @@ class senderWmo(gateway.gateway):
 
                 # Instanciation du socketManagerWmo
                 self.logger.writeLog(self.logger.DEBUG,"Instanciation du socketManagerWmo")
-                self.unSocketManagerWmo = \
-                                socketManagerWmo.socketManagerWmo(self.logger,type='master', \
-                                                                localPort=None,\
-								remoteHost=self.config.remoteHost,
-								timeout=self.config.timeout)
+
+                if self.options.client:
+                   self.unSocketManagerWmo = \
+                        socketManagerWmo.socketManagerWmo(
+				self.logger,type='master', \
+                                port=self.options.port,\
+				remoteHost=self.options.host,
+				timeout=self.options.connect_timeout)
+		else:
+                   self.unSocketManagerWmo = \
+                        socketManagerWmo.socketManagerWmo(self.logger,type='master', \
+                             port=self.config.remoteHost[1],\
+			     remoteHost=self.config.remoteHost[0],
+			     timeout=self.config.timeout)
 
         def read(self):
                 __doc__ =  gateway.gateway.read.__doc__ + \

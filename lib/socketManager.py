@@ -27,7 +27,7 @@ class socketManager:
 				  le programme écoute pour une 
 				  connexion.
 	
-		localPort	int (default=9999)
+		port	int (default=9999)
 	
 				- Port local ou se 'bind' le socket.
 	
@@ -54,9 +54,9 @@ class socketManager:
 	   Auteur:	Louis-Philippe Thériault
 	   Date:	Septembre 2004
 	"""
-	def __init__(self,logger,type='slave',localPort=9999,remoteHost=None,timeout=None):
+	def __init__(self,logger,type='slave',port=9999,remoteHost=None,timeout=None):
 		self.type = type
-		self.localPort = localPort
+		self.port = port
 		self.remoteHost = remoteHost
 		self.timeout = timeout
 		self.logger = logger
@@ -93,10 +93,10 @@ class socketManager:
 		# Binding avec le port local
 		# Si ce n'est pas un master - Pierre Michaud 2004-12-15
 		if self.type == 'slave':
-			self.logger.writeLog(self.logger.INFO,"Binding du socket avec le port %d",self.localPort)
+			self.logger.writeLog(self.logger.INFO,"Binding du socket avec le port %d",self.port)
 	        	while True:
 	                	try:
-	                        	self.socket.bind(('',self.localPort))
+	                        	self.socket.bind(('',self.port))
 	                        	break
 	                	except socket.error:
 	                        	time.sleep(1)
@@ -124,7 +124,9 @@ class socketManager:
 	                                raise socketManagerException('timeout dépassé')
 
 	                        try:
-	                                self.socket.connect(self.remoteHost)
+	                                self.socket.connect((
+						socket.gethostbyname(self.remoteHost),
+						int(self.port) ))
 	                                break
 	                        except socket.error:
 	                                time.sleep(5)

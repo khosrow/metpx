@@ -27,16 +27,28 @@ class receiverAm(gateway.gateway):
                 self.logger.writeLog(logger.DEBUG,"Instanciation du bulletinManagerAm")
 
 		# Instanciation du bulletinManagerAm avec la panoplie d'arguments.
-		self.unBulletinManagerAm = \
-			bulletinManagerAm.bulletinManagerAm(	self.config.pathTemp,logger, \
-								pathDest = self.config.pathDestination, \
-								pathFichierCircuit = self.config.ficCircuits, \
-								SMHeaderFormat = self.config.SMHeaderFormat, \
-								pathFichierStations = self.config.ficCollection, \
-								extension = self.config.extension, \
-								mapEnteteDelai = self.config.mapEnteteDelai, \
-                                                                use_pds = self.config.use_pds
+		if options.source:
+		   self.unBulletinManagerAm = \
+			bulletinManagerAm.bulletinManagerAm(	
+				self.config.pathTemp,logger, \
+				pathDest = self.config.pathDestination, \
+				pathFichierCircuit = self.config.ficCircuits, \
+				SMHeaderFormat = self.config.SMHeaderFormat, \
+				pathFichierStations = self.config.ficCollection, \
+				extension = self.config.extension, \
+				mapEnteteDelai = self.config.mapEnteteDelai, \
+                                use_pds = self.config.use_pds
 								) 
+               else:
+                  self.unBulletinManagerWmo = \
+                        bulletinManagerWmo.bulletinManagerWmo(
+                           FET_DATA + FET_RX + options.source, logger, \
+                           pathDest = '/dev/null', \
+                           pathFichierCircuit = '/dev/null', \
+                           extension = options.extension, \
+                           mapEnteteDelai = options.mapEnteteDelai )
+
+
 
         def shutdown(self):
 		__doc__ = gateway.gateway.shutdown.__doc__ + \

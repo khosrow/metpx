@@ -14,6 +14,7 @@ sys.path.insert(1,sys.path[0] + '/../etc')
 sys.path.insert(1,sys.path[0] + '/../lib/importedLibs')
 
 from optparse import OptionParser
+import os.path
 import gateway, log
 import fet
 
@@ -34,39 +35,39 @@ def main():
 	options,args = parser.parse_args()
 
 	# Un seul argument doit être fourni
-	if len(args) > 1:
+	if len(args) > 2:
 		parser.error("trop d'arguments fournis")
 	elif len(args) == 0:
-		parser.error("aucun fichier de config fourni")
+		parser.error("aucun source fourni")
 	
 	# Chargement de la config pour savoir le type de protocole et le path du log
-	config = gateway.gateway.loadConfig(args[0])
+	options.source = args[0]
+        options.cmd = args[1]
 
         # FIXME: Vérifier que typeProtocole est défini et le fichier de log
 
 	# Init du log
-        if options.source:
-           # Init du log
-          logger = log.log(options.dataDir + '/log/ncsSender_' + options.source )
-          fet.startup(options,logger)
+        logger = log.log(options.dataDir + '/log/' + os.path.basename(sys.argv[0]) 
+			+ "_" + args[0] )
+        fet.startup(options,logger)
           
-        else:
-          logger = log.log(config.log)
+        fet.lockStopOrDie( fet.FET_DATA + fet.FET_RX + options.source + '/.lock' , options.cmd )
 
 	logger.writeLog(logger.INFO, "Début du programme, fichier de config chargé correctement")
 
-        logger.writeLog(logger.DEBUG,"Protocole %s sélectionné",config.typeProcotole)
+        options.type= fet.sources[options.source]['type']
+        logger.writeLog(logger.DEBUG,"Protocole %s sélectionné", options.type )
 
 	# Branchement selon le type de protocole	
-	if config.typeProcotole == 'AM':
+	if options.type == 'am':
 
 		import receiverAm
-		unGateway = receiverAm.receiverAm(args[0],options,logger)
+		unGateway = receiverAm.receiverAm('/dev/null',options,logger)
 	
-	elif config.typeProcotole == 'WMO':
+	elif options.type == 'wmo':
 	
 		import receiverWmo
-		unGateway = receiverWmo.receiverWmo(args[0],options,logger)
+		unGateway = receiverWmo.receiverWmo('/dev/null',options,logger)
 	
 	else:
 		raise Exception('Type de protocole non reconnu')	# FIXME

@@ -1,10 +1,9 @@
 
-Feel free to add what they did in here.  Peter made
-a first pass to get the file started, but doesn´t really know who
-did what.
+Feel free to add what they did in here.  Peter made a first pass 
+to get the file started, but doesn´t really know who did what.
 
 
-Louis-Phillippe.Therieault  ampersand ec.gc.ca
+Louis-Phillippe.Theriault  ampersand ec.gc.ca
   First pass at design, all the early proofs of concept.  First receiver, 
 First sender, and all the complex data transformations necesary on 
 receipt of messages.  Bulletin Collection.  After the first pass, and some 
@@ -25,7 +24,8 @@ lead on precursor project to develop ¨Requirements for an NMMHS¨
   
 Peter.Silva ampersand ec.gc.ca
   Project Manager.  Some requirements, first pass at the file exchange 
-tracking module to allow for priorities & direct routing.
+tracking module to allow for priorities & direct routing, and provide
+an overall view of the whole network, as opposed to individual circuits
 
 
 Alfred.Gagne ampersand ec.gc.ca
@@ -33,6 +33,5 @@ Alfred.Gagne ampersand ec.gc.ca
 
   
 Lambros.Stamadianous, Dave.Spiegl  ampersand ec.gc.ca
-  - participated in specs for the precursor of this project,
+  participated in specs for the precursor of this project.
 
-   

@@ -35,6 +35,9 @@ class gateway:
 
 				- Chemin d'accès vers le fichier de config
 
+		options		- liste d'options fet.
+                                  pour remplace tous les 'config'.
+
 		logger		Objet logger
 
 				- Doit pouvoir être appelé pour écrire les
@@ -49,6 +52,7 @@ class gateway:
 		self.pathToConfigFile = path
 		self.config = gateway.loadConfig(path)
 		self.logger = logger
+		self.options = options
 
 	def loadConfig(path):
 		"""loadConfig(path)
