@@ -3,6 +3,7 @@
 import gateway
 import socketManagerAm
 import bulletinManagerAm
+from socketManager import socketManagerException
 
 class receiverAm(gateway.gateway):
 	__doc__ = gateway.gateway.__doc__ + \
@@ -43,6 +44,8 @@ class receiverAm(gateway.gateway):
                    Auteur:      Louis-Philippe Thériault
                    Date:        Octobre 2004
 		"""
+                gateway.gateway.shutdown(self)
+
 		resteDuBuffer, nbBullEnv = self.unSocketManagerAm.closeProperly()
 
 		self.write(resteDuBuffer)

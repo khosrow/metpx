@@ -124,7 +124,7 @@ class gateway:
 
 			try:
 				data = self.read()
-			except gatewatException, e:
+			except gatewayException, e:
 				if e == "Le lecteur ne peut être accédé":
 				# Lecture impossible, il ne devrait plus y avoir
 				# de données en attente

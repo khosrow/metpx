@@ -1,4 +1,4 @@
-"""Définition d'une sous-classe pour les bulletins "wmo" """
+"""Définition d'une sous-classe pour les bulletins "WMO" """
 
 import time
 import struct
@@ -83,6 +83,6 @@ class bulletinWmo(bulletin.bulletin):
 	        if bulletin[-2:] == '\n\n':
 	                bulletin = bulletin[:-1]
 
-	        self.bulletin = bulletin
+	        self.bulletin = bulletin.splitlines()
 
 

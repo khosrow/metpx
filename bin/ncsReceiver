@@ -54,8 +54,8 @@ def main():
 	
 	elif config.typeProcotole == 'WMO':
 	
-		# FIXME à implanter
-		pass
+		import receiverWmo
+		unGateway = receiverWmo.receiverWmo(args[0],logger)
 	
 	else:
 		raise Exception('Type de protocole non reconnu')	# FIXME

@@ -35,7 +35,7 @@ class socketManagerWmo(socketManager.socketManager):
 		# "Use of TCP/IP on the GTS", pages 28-29, et l'exemple en C
 		# page 49-54
 		self.patternWmoRec = '8s2s'
-		self.sizeWmoRec = struct.calcsize(patternWmoRec)
+		self.sizeWmoRec = struct.calcsize(self.patternWmoRec)
 
 		self.maxCompteur = 99999
 		self.compteur = 0
@@ -59,7 +59,7 @@ class socketManagerWmo(socketManager.socketManager):
 
                         bulletin = self.inBuffer[self.sizeWmoRec:self.sizeWmoRec + msg_length]
 
-                        return (bulletin,self.sizeWmoRec + msg_length)
+                        return (bulletin[12:-4],self.sizeWmoRec + msg_length)
                 elif status == 'INCOMPLETE':
                         return '',0
 		else:
@@ -112,14 +112,18 @@ class socketManagerWmo(socketManager.socketManager):
 
                 try:
 	                msg_length = int(msg_length)
+			self.logger.writeLog(self.logger.DEBUG,"Longueur du message: %d",msg_length)
                 except ValueError:
+			self.logger.writeLog(self.logger.DEBUG,"Corruption: longueur n'est pas lisible")
                         return 'CORRUPT'
 
 		if not msg_type in ['BI','AN','FX']:
+			self.logger.writeLog(self.logger.DEBUG,"Corruption: Type de message est incorrec")
 			return 'CORRUPT'
 
-                if len(self.inBuffer) >= self.sizeAmRec + msg_length:
-                        if ord(self.inBuffer[self.sizeWmoRec]) != curses.ascii.SOH or ord(self.inBuffer[self.sizeWmoRec+msg_length]) != curses.ascii.ETX:
+                if len(self.inBuffer) >= self.sizeWmoRec + msg_length:
+                        if ord(self.inBuffer[self.sizeWmoRec]) != curses.ascii.SOH or ord(self.inBuffer[self.sizeWmoRec+msg_length-1]) != curses.ascii.ETX:
+				self.logger.writeLog(self.logger.DEBUG,"Corruption: Caractères de contrôle incorrects")
                                 return 'CORRUPT'
 
                         return 'OK'
