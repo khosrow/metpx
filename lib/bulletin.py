@@ -85,28 +85,39 @@ class bulletin:
 		   Date:	Novembre 2004
 		"""
 		try:
-			if stringBulletin.find('GRIB') != -1:
-			# Type de bulletin GRIB, découpage spécifique
-				b = stringBulletin[:stringBulletin.find('GRIB')].split(self.lineSeparator) 
+			estBinaire = False
 
-				b = b + [stringBulletin[stringBulletin.find('GRIB'):stringBulletin.find('7777')+len('7777')]] 
-	
-				b = b + stringBulletin[stringBulletin.find('7777')+len('7777'):].split(self.lineSeparator)
-	
-				return b
-	
-			elif stringBulletin.find('BUFR') != -1:
-	                # Type de bulletin BUFR, découpage spécifique
-                                b = stringBulletin[:stringBulletin.find('BUFR')].split(self.lineSeparator)
+			# On détermine si le bulletin est binaire
+	                for ligne in stringBulletin.splitlines():
+	                        if ligne.lstrip()[:4] == 'BUFR' or ligne.lstrip()[:4] == 'GRIB':
+	                                # Il faut que le BUFR/GRIB soit au début d'une ligne
+	                                estBinaire = True
+	                                break
 
-                                b = b + [stringBulletin[stringBulletin.find('BUFR'):stringBulletin.find('7777')+len('7777')]]
+			if estBinaire:
+				if stringBulletin.find('GRIB') != -1:
+				# Type de bulletin GRIB, découpage spécifique
+					b = stringBulletin[:stringBulletin.find('GRIB')].split(self.lineSeparator) 
 	
-				b = b + stringBulletin[stringBulletin.find('7777')+len('7777'):].split(self.lineSeparator)
-
-	                        return b
+					b = b + [stringBulletin[stringBulletin.find('GRIB'):stringBulletin.find('7777')+len('7777')]] 
+		
+					b = b + stringBulletin[stringBulletin.find('7777')+len('7777'):].split(self.lineSeparator)
+		
+					return b
+		
+				elif stringBulletin.find('BUFR') != -1:
+		                # Type de bulletin BUFR, découpage spécifique
+	                                b = stringBulletin[:stringBulletin.find('BUFR')].split(self.lineSeparator)
+	
+	                                b = b + [stringBulletin[stringBulletin.find('BUFR'):stringBulletin.find('7777')+len('7777')]]
+		
+					b = b + stringBulletin[stringBulletin.find('7777')+len('7777'):].split(self.lineSeparator)
+	
+		                        return b
 			else:
+				# Le bulletin n'est pas binaire
 				return stringBulletin.split(self.lineSeparator)
-		except Exception:
+		except Exception, e:
 			self.logger.writeLog(self.logger.EXCEPTION,'Erreur lors du decoupage du bulletin:\n'+''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
 			return stringBulletin.split(self.lineSeparator)
 
@@ -122,7 +133,7 @@ class bulletin:
 		   Date:	Novembre 2004
 		"""
 		for i in range(len(self.bulletin)):
-			if self.bulletin[i].find('GRIB') == -1 and self.bulletin[i].find('BUFR') == -1:
+			if self.bulletin[i].lstrip()[:4] != 'GRIB' and self.bulletin[i].lstrip()[:4] != 'BUFR':
 
 				self.bulletin[i] = self.bulletin[i].replace(oldchars,newchars)
 
@@ -251,11 +262,13 @@ class bulletin:
 		if self.dataType != None:
 			return self.dataType
 
-		bull = self.lineSeparator.join(self.bulletin)
+		for ligne in self.bulletin:
+	                if ligne.lstrip()[:4] == 'BUFR' or ligne.lstrip()[:4] == 'GRIB':
+				# Il faut que le BUFR/GRIB soit au début d'une ligne
+				self.dataType = 'BI'
+				break
 
-		if bull.find('BUFR') != -1 and bull.find('GRIB') != -1:
-			self.dataType = 'BI'
-		else:
-			self.dataType = 'AN'
+		# Si le bulletin n'est pas binaire, il est alphanumérique
+		if self.dataType == None: self.dataType = 'AN'
 
 		return self.dataType

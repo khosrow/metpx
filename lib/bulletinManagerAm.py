@@ -149,15 +149,15 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 	                uneEntete = uneLigneParsee[0][2:6] + ' ' + uneLigneParsee[0][6:] + ' '
 
 			# Ajout d'un map vide pour l'entête courante
-			if unPrefixe + uneEntete not in self.mapEntetes2mapStations:
-				self.mapEntetes2mapStations[unPrefixe + uneEntete] = {}
+			if unPrefixe + uneEntete[:-1] not in self.mapEntetes2mapStations:
+				self.mapEntetes2mapStations[unPrefixe + uneEntete[:-1]] = {}
 	
 	                for station in uneLigneParsee[1:]:
 	                        uneCle = unPrefixe + station
 	
 	                        self.mapEntetes[uneCle] = uneEntete
 
-				self.mapEntetes2mapStations[unPrefixe + uneEntete][station] = None
+				self.mapEntetes2mapStations[unPrefixe + uneEntete[:-1]][station] = None
 
 	        
         def getFileName(self,bulletin,error=False):
