@@ -78,6 +78,9 @@ class bulletin:
 		self.bulletin = self.splitlinesBulletin(stringBulletin.lstrip(lineSeparator))
 		self.dataType = None
 
+		# Normalization du header ici (enlever les espaces au début et a la fin)
+		self.setHeader(self.getHeader().strip())
+
 		# Vérification du header du bulletin
 		# pour ne pas l'effectuer, simplement overrider la méthode 
 		# dans la classe spécialisée, par une méthode qui ne fait rien
