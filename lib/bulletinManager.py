@@ -6,8 +6,7 @@ import math, string, os, bulletinPlain, traceback, sys, time
 __version__ = '2.0'
 
 class bulletinManagerException(Exception):
-        """Classe d'exception spécialisés relatives au bulletin
-managers"""
+        """Classe d'exception spécialisés relatives au bulletin managers"""
         pass
 
 class bulletinManager:
@@ -15,10 +14,60 @@ class bulletinManager:
 	   des bulletins en tant qu'entités, mais ne fait pas de traîtements
 	   à l'intérieur des bulletins.
 
-	   Un bulletin manager est en charge de la lecture et écriture des
-	   bulletins sur le disque. 
+	   pathTemp		path
 
-	   #FIXME: DOCUMENTATION A COMPLETER SVP"""
+				- Obligatoire, doit être sur le même file system que
+				  pathSource/pathDest
+
+	   pathSource/pathDest	path
+
+				- Répertoire source et destination des fichiers
+				- Au moins un des 2 doit être fournis
+
+				Si le manager ne fait qu'écrire les fichier sur le disque,
+				seul pathDest est nécessaire.
+
+	   mapEnteteDelai	map
+
+				- Gestion pour la validité des fichiers concernant les délais.
+
+				- Map d'entêtes pointant sur des tuples, avec comme champ [0] le nombre de minutes
+				  avant, et champ [1] le nombre de minutes après, pour que le bulletin soit valide.
+
+				Nb: Mettre à None pour désactiver la fonction de validité des fichiers
+				    concernant les délais.
+
+				Ex: mapEnteteDelai = { 'CA':(5,20),'WO':(20,40)}
+
+	   SMHeaderFormat	Bool
+
+				- Ajout du champ "AAXX jjhh4\\n" aux bulletins SM/SI.
+
+	   ficCollection	path
+
+				- Path vers le fichier de collection correctement formatte
+				  Doit etre mis a None si on veut garder les bulletins
+				  intouchés.
+
+				Nb: Mettre a None pour desactiver cette fonction
+
+	   pathFichierCircuit	path
+
+				- Remplace le -CIRCUIT dans l'extension par la liste de circuits
+				  séparés par un point.
+
+				Nb: Mettre a None pour desactiver cette fonction
+
+	   maxCompteur		Int
+
+				- Compteur à ajouter à la fin des fichiers (dans le nom du fichier)
+
+	   Un bulletin manager est en charge de la lecture et écriture des
+	   bulletins sur le disque.
+
+	   Auteur:	Louis-Philippe Thériault
+	   Date:	Octobre 2004
+	"""
 
 	def __init__(self,pathTemp,logger,pathSource=None,pathDest=None,maxCompteur=99999, \
 					lineSeparator='\n',extension=':',pathFichierCircuit=None,mapEnteteDelai=None):
@@ -42,9 +91,34 @@ class bulletinManager:
 		self.initMapCircuit(pathFichierCircuit)
 
 	def writeBulletinToDisk(self,unRawBulletin,compteur=True,includeError=False):
-		"""writeBulletinToDisk(bulletin)
+		"""writeBulletinToDisk(bulletin [,compteur,includeError])
 
-		   Écrit le bulletin sur le disque. Le bulletin est une simple string."""
+		   unRawBulletin	String
+
+					- Le unRawBulletin est un string, et il est instancié
+					  en bulletin avane l'écriture sur le disque
+					- Les modifications sont effectuées via 
+					  unObjetBulletin.doSpecificProcessing() avant
+					  l'écriture
+
+		   compteur		Bool
+
+					- Si à True, le compteur est inclut dans le nom du fichier
+
+		   includeError		Bool
+
+					- Si à True et que le bulletin est erronné, le message
+					  d'erreur est inséré au début du bulletin
+
+		   Utilisation:
+
+			   Écrit le bulletin sur le disque. Le bulletin est une simple string.
+
+		   Visibilité:	Publique
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
+		"""
+
 		if self.pathDest == None:
 			raise bulletinManagerException("opération impossible, pathDest n'est pas fourni")
 
@@ -97,6 +171,7 @@ class bulletinManager:
 		   Retourne un objetBulletin d'à partir d'un bulletin
 		   "brut".
 
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
@@ -289,7 +364,13 @@ class bulletinManager:
 	def __normalizePath(self,path):
 		"""normalizePath(path) -> path
 
-		   Retourne un path avec un '/' à la fin"""
+		   Retourne un path avec un '/' à la fin
+
+		   Visibilité:	Privée
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
+		"""
+
 		if path != None:
 		        if path != '' and path[-1] != '/':
 		                path = path + '/'
@@ -309,6 +390,11 @@ class bulletinManager:
 		   Si compteur est à False, le compteur n'est pas inséré 
 		   dans le nom de fichier.
 
+		   Utilisation:
+
+			Générer le nom du fichier pour le bulletin concerné.
+
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
@@ -355,6 +441,11 @@ class bulletinManager:
 							correctement et qu'il n'y avait pas
 							d'erreur à l'origine.
 
+		   Utilisation:
+
+			Générer la portion extension du nom du fichier.
+
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
@@ -380,16 +471,22 @@ class bulletinManager:
 			
         def lireFicTexte(self,pathFic):
                 """
-                lireFicTexte(pathFic) -> liste des lignes
+                   lireFicTexte(pathFic) -> liste des lignes
 
-                pathFic:        String
-                                - Chemin d'accès vers le fichier texte
+                   pathFic:        String
+                                   - Chemin d'accès vers le fichier texte
 
-                liste des lignes:       [str]
-                                        - Liste des lignes du fichier texte
+                   liste des lignes:       [str]
+                                           - Liste des lignes du fichier texte
 
-                Auteur: Louis-Philippe Thériault
-                Date:   Octobre 2004
+		Utilisation:
+
+			Retourner les lignes d'un fichier, utile pour lire les petites
+			databases dans un fichier ou les fichiers de config.
+
+		   Visibilité:	Privée
+                   Auteur: 	Louis-Philippe Thériault
+                   Date:   	Octobre 2004
                 """
                 if os.access(pathFic,os.R_OK):
                         f = open(pathFic,'r')
@@ -411,6 +508,7 @@ class bulletinManager:
 	           associes. Le nom du map sera self.mapCircuits et s'il est à None,
 		   C'est que l'option est à OFF.
 
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
@@ -453,8 +551,9 @@ class bulletinManager:
 		   À utiliser pour que plusieurs instances utilisant la même
 		   map.
 
-		   Auteur: Louis-Philippe Thériault
-	           Date:   Octobre 2004
+		   Visibilité:	Publique
+		   Auteur: 	Louis-Philippe Thériault
+	           Date:   	Octobre 2004
 		"""
 		return self.mapCircuits
 
@@ -464,30 +563,34 @@ class bulletinManager:
                    À utiliser pour que plusieurs instances utilisant la même
                    map.
 
-                   Auteur: Louis-Philippe Thériault
-                   Date:   Octobre 2004
+		   Visibilité:	Publique
+                   Auteur: 	Louis-Philippe Thériault
+                   Date:   	Octobre 2004
                 """
                 self.mapCircuits = mapCircuits
 	
 	def getCircuitList(self,bulletin):
-	        """
-		circuitRename(bulletin) -> Circuits
+	        """circuitRename(bulletin) -> Circuits
 
-		bulletin:	Objet bulletin
+		   bulletin:	Objet bulletin
 
-		Circuits:	String
-				-Circuits formattés correctement pour êtres insérés dans l'extension
+		   Circuits:	String
+		   		-Circuits formattés correctement pour êtres insérés dans l'extension
 
-		Retourne la liste des circuits pour le bulletin précédés de la priorité, pour être inséré
-		dans l'extension.
+		   Retourne la liste des circuits pour le bulletin précédés de la priorité, pour être inséré
+		   dans l'extension.
 
-                   Exceptions possibles:
-                        bulletinManagerException:       Si l'entête ne peut être trouvée dans le
-							fichier de circuits
+                      Exceptions possibles:
+                           bulletinManagerException:       Si l'entête ne peut être trouvée dans le
+							   fichier de circuits
 
-		Auteur:	Louis-Philippe Thériault
-		Date:	Octobre 2004
+		   Visibilité:	Publique
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
 		"""
+		if self.mapCircuits == None:
+			raise bulletinManagerException("Le mapCircuit n'est pas chargé")
+
 		entete = ' '.join(bulletin.getHeader().split()[:2])
 
 	        if not self.mapCircuits.has_key(entete):
@@ -509,6 +612,12 @@ class bulletinManager:
 		   bulletin	objet bulletin
 				- Pour aller chercher l'entête du bulletin
 
+		   Utilisation:
+
+			Pour générer le path final où le bulletin sera écrit. Génère
+			le répertoire incluant la priorité.
+
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
@@ -539,6 +648,7 @@ class bulletinManager:
 		   Path_source:		String
 					-Path source que contient le manager
 
+		   Visibilité:	Publique
 		   Auteur:	Louis-Philippe Thériault
                    Date:	Novembre 2004
 		"""
@@ -551,6 +661,15 @@ class bulletinManager:
 		   de délais est activée). Flag le bulletin en erreur si le delai
 		   n'est pas respecté.
 
+		   Ne peut vérifier le délai que si self.mapEnteteDelai n'est 
+		   pas à None.
+
+		   Utilisation:
+
+			Pouvoir vérifier qu'un bulletin soit dans les délais 
+			acceptables.
+
+		   Visibilité:	Publique
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""

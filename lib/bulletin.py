@@ -257,7 +257,8 @@ class bulletin:
 
 		   Utilisation:
 
-			Inclure les modifications à effectuer sur le 
+			Inclure les modifications à effectuer sur le bulletin, qui
+			sont propres au type de bulletin en question. 
 
 		   Statut:	Abstraite
 		   Visibilité:	Publique
@@ -273,6 +274,7 @@ class bulletin:
 		   sinon un tuple avec comme premier élément la description 
 		   de l'erreur. Les autres champs sont laissés libres
 
+		   Visitilité:	Publique
                    Auteur:      Louis-Philippe Thériault
                    Date:        Octobre 2004
 		"""
@@ -287,6 +289,7 @@ class bulletin:
 		   Flag le bulletin comme erroné. L'utilisation du message est propre
 		   au type de bulletin.
 
+                   Visitilité:  Publique
                    Auteur:      Louis-Philippe Thériault
                    Date:        Octobre 2004
                 """
@@ -298,8 +301,9 @@ class bulletin:
 		"""getDataType() -> dataType
 
 		   dataType:	String élément de ('BI','AN')
-				- Type de pa portion de données du bulletin
+				- Type de la portion de données du bulletin
 
+                   Visitilité:  Publique
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""

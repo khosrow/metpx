@@ -28,8 +28,9 @@ class bulletinWmo(bulletin.bulletin):
                    Modifie les bulletins provenant de Washington, transmis 
 		   par protocole Wmo, nommés "WMO"
 
-		   Auteur: Louis-Philippe Thériault
-		   Date:   Octobre 2004
+		   Visibilité:	Publique
+		   Auteur: 	Louis-Philippe Thériault
+		   Date:   	Octobre 2004
 		"""
 	        if self.getDataType() == 'BI':
 	        # Si le bulletin est un BUFR, l'on remplace le premier set,
@@ -37,15 +38,9 @@ class bulletinWmo(bulletin.bulletin):
 	                self.replaceChar('\r','')
 	                return 
 
-#        if self.bulletin[0][:4] in ['SDUS','WSUS','SRCN','SRMN','SRND','SRWA','SRMT','SXAA','SXCN','SXVX','SXWA','SXXX','FOCN','WAUS']:
-#        	        self.replaceChar('\x1e','')
-
 		if self.bulletin[0][:2] in ['SD','SO','WS','SR','SX','FO','WA','AC','FA']:
 	                self.replaceChar('\x1e','')
 
-#        if self.bulletin[0][:4] in ['SRCN','SRMN','SRND','SRWA','SRMT','SXCN','SRUS','SXVX','SXWA','SXXX']:
-#        	        self.replaceChar('~',self.lineSeparator)
-		
 		if self.bulletin[0][:2] in ['SR','SX']:
 		        self.replaceChar('~',self.lineSeparator)
 
@@ -54,7 +49,6 @@ class bulletinWmo(bulletin.bulletin):
 
 		if self.bulletin[0][:2] in ['SO','SR']:
                         self.replaceChar('\x02','')
-
 
                 if self.bulletin[0][:2] in ['SX','SR','SO']:
                         self.replaceChar('\x00','')

@@ -86,7 +86,7 @@ class collectionGateway(gateway.gateway):
 		__doc__ =  gateway.gateway.write.__doc__ + \
         	"""### Ajout de collectionGateway ###
 
-		   Collection s'il y a lieu, puis écriture du bulletin sur le disque.
+		   Collection s'il y a lieu, sinon écriture par un bulletinManager ordinaire.
 
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004

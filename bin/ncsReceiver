@@ -9,9 +9,9 @@
 
 import sys, signal, traceback
 
-sys.path.append(sys.path[0] + '/../lib')
-sys.path.append(sys.path[0] + '/../etc')
-sys.path.insert(0,sys.path[0] + '/../lib/importedLibs')
+sys.path.insert(1,sys.path[0] + '/../lib')
+sys.path.insert(1,sys.path[0] + '/../etc')
+sys.path.insert(1,sys.path[0] + '/../lib/importedLibs')
 
 from optparse import OptionParser
 import gateway, log

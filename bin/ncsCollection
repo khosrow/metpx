@@ -42,7 +42,7 @@ def main():
 	logger = log.log(config.log)
 	logger.writeLog(logger.INFO, "Début du programme, fichier de config chargé correctement")
 
-	# Instanciation du gateway pour la collection
+	# Instanciation du gateway pour la collection, un seul mode pour l'instant
 	import collectionGateway
 	unGateway = collectionGateway.collectionGateway(args[0],logger)
 	

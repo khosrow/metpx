@@ -29,14 +29,20 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 	def __isSplittable(self,rawBulletin):
 		"""__isSplittable(rawBulletin) -> bool
 
-		   Retourne vrai si le bulletin courant contien plus d'un bulletin
+		   Retourne vrai si le bulletin courant contient plus d'un bulletin
 
+		   Utilisation:
+
+			Déterminer si un bulletin est séparable, avant de l'instancier.
+
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
         	# Si c'est un bulletin FC/FT, possibilite de plusieurs bulletins,
                 # donc découpage en fichiers et reste du traitement saute (il
                 # sera effectue lors de la prochaine passe.
+
 		# Si une erreur est détectée
 		try:
 			premierMot = rawBulletin.splitlines()[0].split()[0]
@@ -61,6 +67,12 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 
 		   Retourne une liste de rawBulletins, séparés 
 
+		   Utilisation:
+
+			Séparer les bulletins FC/FT qui contiennent plus d'un bulletin
+			par bulletin.
+
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
@@ -70,6 +82,8 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 	        unBulletin = []
 		motCle = 'TAF'
 
+		# Les bulletins FC/FT ont une entête commune, et le data de chaque
+		# station commence par 'TAF'
 	        for ligne in rawBulletin.split(self.lineSeparator)[1:]:
 	                if len(ligne.split()) > 0 and ligne.split()[0] == motCle:
 	                        listeBulletins.append(string.join(unBulletin,self.lineSeparator))
@@ -88,6 +102,7 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 
 		   Overriding ici pour passer les bons arguments au bulletinAm
 
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
@@ -102,6 +117,7 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 		   une division est effectuée et est passée à la méthode
 		   de la superclasse.
 
+		   Visibilité:	Publique
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
@@ -117,16 +133,17 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 		   pathFichierStations:	String
 		   			- Chemin d'accès vers le fichier de "collection"
 
-            	   mapEntetes sera un map contenant les entete a utiliser avec
-            	   quelles stations. La cle se trouve a etre une concatenation des
-            	   2 premieres lettres du bulletin et de la station, la definition
-	           est une string qui contient l'entete a ajouter au bulletin.
+            	   mapEntetes sera un map contenant les entête à utiliser avec
+            	   quelles stations. La clé se trouve a être une concaténation des
+            	   2 premières lettres du bulletin et de la station, la définition
+	           est une string qui contient l'entête à ajouter au bulletin.
             
-		   self.mapEntetes2mapStations sera un map, avec pour chaque entete
+		   self.mapEntetes2mapStations sera un map, avec pour chaque entête
 		   un map associé des stations, dont la valeur sera None.
 
             	   	Ex.: mapEntetes["SPCZPC"] = "CN52 CWAO "
 
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
@@ -166,6 +183,7 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 
 		   Ajout de la station dans le nom si elle est disponible
 
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""

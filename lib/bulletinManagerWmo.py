@@ -31,6 +31,7 @@ class bulletinManagerWmo(bulletinManager.bulletinManager):
 
                    Overriding ici pour passer les bons arguments au bulletinWmo
 
+		   Visibilité:	Privée
                    Auteur:      Louis-Philippe Thériault
                    Date:        Octobre 2004
                 """

@@ -2,7 +2,7 @@
 """Système efficace pour le logging"""
 
 import sys
-sys.path.append(sys.path[0] + '/../lib/importedLibs/logging')
+sys.path.insert(1,sys.path[0] + '/../lib/importedLibs/'
 
 import logging, logging.handlers
 
