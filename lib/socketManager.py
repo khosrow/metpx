@@ -25,7 +25,7 @@ class socketManager:
 				- Si master est fourni, le programme se 
 				  connecte à un hôte distant, si slave,
 				  le programme écoute pour une 
-				  connection.
+				  connexion.
 	
 		localPort	int (default=9999)
 	
@@ -34,7 +34,7 @@ class socketManager:
 		remoteHost	(str hostname,int port)
 	
 				- Couple de (hostname,port) pour la 
-				  connection. Lorsque timeout secondes
+				  connexion. Lorsque timeout secondes
 				  est atteint, un socketManagerException
 				  est levé.
 	
@@ -43,7 +43,7 @@ class socketManager:
 	
 		timeout		int (default=None)
 				
-				- Lors de l'établissement d'une connection 
+				- Lors de l'établissement d'une connexion 
 				  à un hôte distant, délai avant de dire 
 				  que l'hôte de réponds pas.
 	
@@ -65,48 +65,61 @@ class socketManager:
 		self.outBuffer = []
 		self.connected = False
 
-		# Établissement de la connection
+		# Établissement de la connexion
 		self.__establishConnection()
 
 	def __establishConnection(self):
-		"""__establishConnection()
+		"""
+		   Nom:
+		   __establishConnection()
 
-		   Établit la connection selon la valeur des attributs de l'objet.
+                   Parametres d'entree:
+		   -Aucun
 
-		   self.socket sera, après l'exécution, la connection.
+                   Parametres de sortie:
+		   -Aucun
+
+                   Description:
+		   Établit la connexion selon la valeur des attributs de l'objet.
+		   self.socket sera, après l'exécution, la connexion.
 
 		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
+		   Modifications: Pierre Michaud, 2004-12-15
 		"""
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-		self.logger.writeLog(self.logger.INFO,"Binding du socket avec le port %d",self.localPort)
-
 		# Binding avec le port local
-	        while True:
-	                try:
-	                        self.socket.bind(('',self.localPort))
-	                        break
-	                except socket.error:
-	                        time.sleep(1)
+		# Si ce n'est pas un master - Pierre Michaud 2004-12-15
+		if self.type == 'slave':
+			self.logger.writeLog(self.logger.INFO,"Binding du socket avec le port %d",self.localPort)
+	        	while True:
+	                	try:
+	                        	self.socket.bind(('',self.localPort))
+	                        	break
+	                	except socket.error:
+	                        	time.sleep(1)
 
-		# KEEP_ALIVE à True, pour que si la connection tombe, la notification
+		# KEEP_ALIVE à True, pour que si la connexion tombe, la notification
 		# soit immédiate
                 self.socket.setsockopt(socket.SOL_SOCKET,socket.SO_KEEPALIVE,1)
 
 		# Snapshot du temps
 		then = time.time()
 
-		# Tentative de connection
+		# Tentative de connexion
+		#connexion type client (exemple PDS-NCCS: un sender)
 		if self.type == 'master':
-			# La connection doit se faire a un hôte distant
+			# La connexion doit se faire a un hôte distant
 	                if self.remoteHost == None:
 	                        raise socketManagerException('remoteHost (host,port) n\'est pas spécifié')
 
-			self.logger.writeLog(self.logger.INFO,"Tentative de connection à l'hôte distant %s", str(self.remoteHost) )
+			self.logger.writeLog(self.logger.INFO,"Tentative de connexion à l'hôte distant %s", str(self.remoteHost) )
 
 	                while True:
+				print "timeout = ",self.timeout
+				print "current time = ",time.time() - then
 	                        if self.timeout != None and (time.time() - then) > self.timeout:
 	                                self.socket.close()
 	                                raise socketManagerException('timeout dépassé')
@@ -116,11 +129,13 @@ class socketManager:
 	                                break
 	                        except socket.error:
 	                                time.sleep(5)
+
+		#connexion type serveur (exemple PDS-NCCS: un receiver) ou bidirectionnelle
 		else:
-			# En attente de connection
+			# En attente de connexion
 	                self.socket.listen(1)
 
-			self.logger.writeLog(self.logger.INFO,"En attente de connection (mode listen)")
+			self.logger.writeLog(self.logger.INFO,"En attente de connexion (mode listen)")
 
         	        while True:
 	                        if self.timeout != None and (time.time() - then) > self.timeout:
@@ -139,7 +154,7 @@ class socketManager:
 		# Pour que l'interrogation du buffer ne fasse attendre le système
 		self.socket.setblocking(False)
 
-		self.logger.writeLog(self.logger.INFO,"Connection établie avec %s",str(self.remoteHost))
+		self.logger.writeLog(self.logger.INFO,"Connexion établie avec %s",str(self.remoteHost))
 		self.connected = True
 
 	def closeProperly(self):
@@ -163,14 +178,14 @@ class socketManager:
 		"""
 		self.logger.writeLog(self.logger.INFO,"Fermeture du socket et copie du reste du buffer")
 
-		# Coupure de la connection
+		# Coupure de la connexion
 		try:
 		        self.socket.shutdown(2)
 			self.logger.writeLog(self.logger.DEBUG,"Shutdown du socket: [OK]")
 		except Exception, e:
 			self.logger.writeLog(self.logger.DEBUG,"Shutdown du socket: [ERREUR]\n %s",str(e))
 
-		# Copie du reste du buffer entrant après la connection
+		# Copie du reste du buffer entrant après la connexion
 		try:
 			self.__syncInBuffer(onlySynch = True)
 		except Exception:
@@ -195,7 +210,7 @@ class socketManager:
 			else:
 				break
 
-		self.logger.writeLog(self.logger.INFO,"Succès de la fermeture de la connection socket")
+		self.logger.writeLog(self.logger.INFO,"Succès de la fermeture de la connexion socket")
 		self.logger.writeLog(self.logger.DEBUG,"Nombre de bulletins dans le buffer : %d",len(bulletinsRecus))
 
 		return (bulletinsRecus, 0)
@@ -238,12 +253,12 @@ class socketManager:
 		"""__syncInBuffer()
 
 		   onlySynch:	Booleen
-				- Si est à True, ne vérifie pas que la connection fonctionne,
+				- Si est à True, ne vérifie pas que la connexion fonctionne,
 				  Ne fait que syncher le buffer
 
 		   Copie l'information du buffer du socket s'il y a lieu
 
-		   Lève une exception si la connection est perdue.
+		   Lève une exception si la connexion est perdue.
 
 		   Utilisation:
 
@@ -260,8 +275,8 @@ class socketManager:
 
 				if temp == '':
 					if not onlySynch:
-						self.logger.writeLog(self.logger.ERROR,"La connection est brisée")
-						raise socketManagerException('la connection est brisee')
+						self.logger.writeLog(self.logger.ERROR,"La connexion est brisée")
+						raise socketManagerException('la connexion est brisee')
 
 				self.logger.writeLog(self.logger.VERYVERBOSE,"Data reçu: %s",temp)
 
@@ -274,9 +289,9 @@ class socketManager:
 					# Le buffer du socket est vide
 		                                break
 		                        elif inst.args[0] == 104 or inst.args[0] == 110:
-					# La connection est brisée
-						self.logger.writeLog(self.logger.ERROR,"La connection est brisée")
-		                                raise socketManagerException('la connection est brisee')
+					# La connexion est brisée
+						self.logger.writeLog(self.logger.ERROR,"La connexion est brisée")
+		                                raise socketManagerException('la connexion est brisee')
 		                        else:
 		                                raise
 
@@ -326,7 +341,7 @@ class socketManager:
 	def isConnected(self):
 		"""isConnected() -> bool
 
-		   Retourne True si la connection est établie.
+		   Retourne True si la connexion est établie.
 
 		   Visibilité:	Publique
 		   Auteur:	Louis-Philippe Thériault
