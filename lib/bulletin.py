@@ -61,13 +61,68 @@ class bulletin:
   	"""
 
 	def __init__(self,stringBulletin,logger,lineSeparator='\n'):
-		self.bulletin = stringBulletin.lstrip(lineSeparator).splitlines()
+		self.bulletin = self.splitlinesBulletin(stringBulletin.lstrip(lineSeparator))
 		self.dataType = None
 		self.lineSeparator = lineSeparator
 		self.errorBulletin = None
 		self.logger = logger
 
                 self.logger.writeLog(self.logger.VERYVERBOSE,"newBulletin: %s",stringBulletin)
+
+	def splitlinesBulletin(self,stringBulletin):
+		"""splitlinesBulletin(stringBulletin) -> listeLignes
+
+		   stringBulletin	: String
+		   listeLignes		: Liste
+
+		   Retourne la liste de lignes des bulletins. Ne pas utiliser .splitlines()
+		   (de string) car il y a possibilité d'un bulletin en binaire.
+
+		   Les bulletins binaires (jusqu'à présent) commencent par GRIB/BUFR et
+		   se terminent par 7777 (la portion binaire).
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Novembre 2004
+		"""
+		if stringBulletin.find('GRIB') != -1:
+		# Type de bulletin GRIB, découpage spécifique
+			b = stringBulletin[:stringBulletin.find('GRIB')].splitlines() + [stringBulletin[stringBulletin.find('GRIB'):stringBulletin.find('7777')+len('7777')]] 
+			b_fin = stringBulletin[stringBulletin.find('7777')+len('7777'):].splitlines()
+
+			if len(b_fin) > 0 and b_fin[0] == '':
+			# Si le premier élément est un '', c'est qu'il y avait un séparateur de ligne après le 7777
+				return b + b_fin[1:]
+			else:
+				return b + b_fin
+
+		elif stringBulletin.find('BUFR') != -1:
+                # Type de bulletin BUFR, découpage spécifique
+                        b = stringBulletin[:stringBulletin.find('BUFR')].splitlines() + [stringBulletin[stringBulletin.find('BUFR'):stringBulletin.find('7777')+len('7777')]]
+                        b_fin = stringBulletin[stringBulletin.find('7777')+len('7777'):].splitlines()
+
+                        if len(b_fin) > 0 and b_fin[0] == '':
+                        # Si le premier élément est un '', c'est qu'il y avait un séparateur de ligne après le 7777
+                                return b + b_fin[1:]
+                        else:
+                                return b + b_fin
+		else:
+			return stringBulletin.splitlines()
+
+	def replaceChar(self,oldchars,newchars):
+		"""replaceChar(oldchars,newchars) 
+
+		   oldchars,newchars	: String
+
+		   Remplace oldchars par newchars dans le bulletin. Ne touche pas à la portion Data
+		   des GRIB/BUFR
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Novembre 2004
+		"""
+		for i in range(len(self.bulletin)):
+			if self.bulletin[i].find('GRIB') == -1 and self.bulletin[i].find('BUFR') == -1:
+
+				self.bulletin[i] = self.bulletin[i].replace(oldchars,newchars)
 
 	def getBulletin(self):
 		"""getBulletin() -> bulletin
@@ -80,20 +135,6 @@ class bulletin:
 		   Date:	Octobre 2004
 		"""
 		return string.join(self.bulletin,self.lineSeparator)
-
-	def setBulletin(self,bulletin):
-                """setBulletin(bulletin) 
-
-                   bulletin     : String
-
-                   Assigne le bulletin en texte
-
-                   Auteur:      Louis-Philippe Thériault
-                   Date:        Octobre 2004
-		"""
-		self.bulletin = bulletin.splitlines()
-
-		self.log.writeLog(self.log.VERYVERBOSE,"setBulletin: bulletin = %s",bulletin)
 
 	def getLength(self):
                 """getLength() -> longueur

@@ -65,11 +65,15 @@ def main():
 	def shutdown(sig,stack):
 		global unGateway
 		global logger
+		global isShutdowning
 
-		logger.writeLog(logger.INFO,"Fermeture du programme (signal=%d)",sig)
+		if not isShutdowning:
+		# Pour que le shutdown ne se fasse q'une fois
+			isShutdowning = True
+			logger.writeLog(logger.INFO,"Fermeture du programme (signal=%d)",sig)
 		
-		unGateway.shutdown()
-		sys.exit()
+			unGateway.shutdown()
+			sys.exit()
 	
 	# Assignement des signaux avec le shutdown
 	signal.signal(signal.SIGTERM,shutdown)
@@ -78,6 +82,7 @@ def main():
 	unGateway.run()
 
 global logger
+global isShutdowning = False
 
 logger = None
 

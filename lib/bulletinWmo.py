@@ -35,68 +35,58 @@ class bulletinWmo(bulletin.bulletin):
 		   Auteur: Louis-Philippe Thériault
 		   Date:   Octobre 2004
 		"""
-                bulletin = self.lineSeparator.join(self.bulletin)
-
 	        if self.getDataType() == 'BI':
 	        # Si le bulletin est un BUFR, l'on remplace le premier set,
 	        # puis le dernier (apres le 7777) s'il y a lieu
-	                bulletin = bulletin.replace('\r\r\n','\n',1)
-	                bulletin = bulletin[:bulletin.rfind('7777')] + bulletin[bulletin.rfind('7777'):].replace('\r\r\n','\n')
-
-			self.bulletin = bulletin.splitlines()
+	                self.replaceChar('\r\r\n',self.lineSeparator)
 	                return 
 
-	        if bulletin[:4] in ['SDUS','WSUS','SRCN','SRMN','SRND','SRWA','SRMT','SXAA','SXCN','SXVX','SXWA','SXXX','FOCN','WAUS']:
-        	        bulletin = bulletin.replace('\n\x1e','\n')
+	        if self.bulletin[0][:4] in ['SDUS','WSUS','SRCN','SRMN','SRND','SRWA','SRMT','SXAA','SXCN','SXVX','SXWA','SXXX','FOCN','WAUS']:
+        	        self.replaceChar('\n\x1e',self.lineSeparator)
 
-	        if bulletin[:4] in ['SRCN','SRMN','SRND','SRWA','SRMT','SXCN','SRUS','SXVX','SXWA']:
-        	        bulletin = bulletin.replace('~','\n')
+	        if self.bulletin[0][:4] in ['SRCN','SRMN','SRND','SRWA','SRMT','SXCN','SRUS','SXVX','SXWA']:
+        	        self.replaceChar('~',self.lineSeparator)
 
-		if bulletin[:2] in ['UK']:
-			bulletin = bulletin.replace('\x01','')
+		if self.bulletin[0][:2] in ['UK']:
+			self.replaceChar('\x01','')
 
-                if bulletin[:2] in ['FT']:
-                        bulletin = bulletin.replace('\x03','')
+                if self.bulletin[0][:2] in ['FT']:
+                        self.replaceChar('\x03','')
 
-                if bulletin[:2] in ['SX','SR']:
-                        bulletin = bulletin.replace('\x00','')
+                if self.bulletin[0][:2] in ['SX','SR']:
+                        self.replaceChar('\x00','')
 
-                if bulletin[:2] in ['SX']:
-                        bulletin = bulletin.replace('\x11','')
+                if self.bulletin[0][:2] in ['SX']:
+                        self.replaceChar('\x11','')
 
-	        if bulletin[-1] != '\n':
-        	        bulletin = bulletin + '\n'
+	        if self.bulletin[0][:4] in ['SRUS']:
+        	        self.replaceChar('\t','')
 
-	        if bulletin[:4] in ['SRUS']:
-        	        bulletin = bulletin.replace('\t','')
+	        if self.bulletin[0][:4] in ['WWST']:
+        	        self.replaceChar('\xba','')
 
-	        if bulletin[:4] in ['WWST']:
-        	        bulletin = bulletin.replace('\xba','')
+	        if self.bulletin[0][:4] in ['USXX']:
+        	        self.replaceChar('\x18','')
 
-	        if bulletin[:4] in ['USXX']:
-        	        bulletin = bulletin.replace('\x18','')
+	        if self.bulletin[0][:4] in ['SRUS']:
+        	        self.replaceChar('\x1a','')
 
-	        if bulletin[:4] in ['SRUS']:
-        	        bulletin = bulletin.replace('\x1a','')
+	        if self.bulletin[0][:4] in ['SRMT']:
+        	        self.replaceChar('\x12','')
 
-	        if bulletin[:4] in ['SRMT']:
-        	        bulletin = bulletin.replace('\x12','')
+	        if self.bulletin[0][:4] in ['SXUS','SXCN']:
+        	        self.replaceChar('\x7f','?')
 
-	        if bulletin[:4] in ['SXUS','SXCN']:
-        	        bulletin = bulletin.replace('\x7f','?')
+	        if self.bulletin[0][:4] in ['SXVX','SRUS']:
+	                self.replaceChar('\x7f','')
 
-	        if bulletin[:4] in ['SXVX','SRUS']:
-	                bulletin = bulletin.replace('\x7f','')
+	        self.replaceChar('\r','')
 
-	        bulletin = bulletin.replace('\r','')
+	        if self.bulletin[0][:2] in ['SA','SM']:
+	                self.replaceChar('\x03\n','')
 
-	        if bulletin[:2] in ['SA','SM']:
-	                bulletin = bulletin.replace('\x03\n','')
-
-		# Ramène à un \n à la fin du bulletin
-	        bulletin = bulletin.rstrip('\n') + '\n'
-
-	        self.bulletin = bulletin.splitlines()
+		# Re-calcul du bulletin
+		self.bulletin = self.splitlinesBulletin(self.lineSeparator.join(self.bulletin))
 
 		# Enlève les espaces à la fin des lignes
 		for i in range(len(self.bulletin)):
