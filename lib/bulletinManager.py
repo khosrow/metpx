@@ -309,24 +309,31 @@ class bulletinManager:
                 """
 		try:
 			#lecture du contenu du repertoire
-			listeFichiersChoisis = os.listdir(repertoire)
+			listeFichiers = os.listdir(repertoire)
 
 			#transformation en format absolu
 			liste = []
-			for fichier in listeFichiersChoisis:
+			for fichier in listeFichiers:
+				#seuls les fichiers avec les bonnes
+				#permissions sont conserves
 				data = repertoire+'/'+fichier
 				liste.append(data)
-			listeFichiersChoisis = liste
+
+			#listeFichiers = liste
+
+			#Retrait des fichiers deja choisis
+			listeFichiersChoisis = []
+			listeFichiersChoisis = [fichier for fichier in liste if fichier not in listeFichiersDejaChoisis]
 
 			#validation avec les fichiers deja lus
-			i=0
-			while True:
-				if i>=len(listeFichiersChoisis):
-					break
-				if listeFichiersChoisis[i] in listeFichiersDejaChoisis:
-					listeFichiersChoisis.pop(i)
-					continue
-				i+=1
+			#i=0
+			#while True:
+			#	if i>=len(listeFichiersChoisis):
+			#		break
+			#	if listeFichiersChoisis[i] in listeFichiersDejaChoisis:
+			#		listeFichiersChoisis.pop(i)
+			#		continue
+			#	i+=1
 
 			return listeFichiersChoisis
 		
