@@ -168,7 +168,8 @@ class socketManagerWmo(socketManager.socketManager):
 
                 Description:
 		Envoi au socket correspondant un bulletin WMO et indique
-		si le bulletin a ete transfere totalement ou non.
+		si le bulletin a ete transfere totalement ou non.  Chaque
+		envoi s'assure de l'etat de la connexion.
 
                 Auteur:
                 Pierre Michaud
@@ -180,15 +181,37 @@ class socketManagerWmo(socketManager.socketManager):
 			#preparation du bulletin pour l'envoi
 			data = self.wrapBulletin(bulletin)
 
-			#envoi du bulletin
-                	bytesSent = self.socket.send(data)
+			#tentative d'envoi et controle de la connexion
+			#mettre le try/except dans un while(1)????
+			try:
+				reponse = self.socket.getpeername()
+				print "reponse[0]: ",reponse[0]
+				if reponse[0]=='':
+					print "GRRR"
+					raise
 
-			#verifier si l'envoi est un succes
-			if bytesSent != len(data):
-				return 0
-			else:
-				return 1
+				#envoi du bulletin
+                		bytesSent = self.socket.send(data)
+				print "bytesSent: ",bytesSent
 
-		except:
-			self.logger.writeLog(self.logger.DEBUG,"socketManagerWmo.sendBulletin(): erreur d'envoi")
+				#verifier si l'envoi est un succes
+				if bytesSent != len(data):
+					self.connected=False
+					return 0
+				else:
+					print "succes"
+					return 1
+
+			except socket.error, e:
+				#erreurs potentielles: 104, 107, 110 ou 32
+				self.logger.writeLog(self.logger.ERROR,"senderWmo.write(): la connexion est rompue: %s",str(e.args))
+				#modification du statut de la connexion
+				#tentative de reconnexion
+				self.connected = False
+				self.logger.writeLog(self.logger.INFO,"senderWmo.write(): tentative de reconnexion")
+				self.socket.close()
+				self._socketManager__establishConnection()
+
+		except Exception, e:
+			self.logger.writeLog(self.logger.ERROR,"socketManagerWmo.sendBulletin(): erreur d'envoi: %s",str(e.args))
 			raise
