@@ -43,8 +43,13 @@ class collectionManager(bulletinManager.bulletinManager):
 					  en est un objet bulletinCollection
 
 	   mainDataMap[sequenceMap]	Map
-					- La clé est l'entete du bulletin, l'objet pointé est le 
-					  prochain champ bbb pour l'entête en question
+					- La clé est l'entete du bulletin, l'objet pointé est un map
+					  vers le prochain token, et l'heure d'effacage du séquencage
+
+					nb: L'heure est simplement le temps présent + le délai max. Fort
+					    probable que le séquencage sera encore en mémoire même
+					    si le bulletin est flagué en retard, tant qu'il soit effacé
+					    avant de revenir au mois.
 
 	   mainDataMap[sequenceWriteQueue]	Liste
 						- Liste de Map, où 'bull' est l'objet bulletin,
@@ -165,13 +170,14 @@ class collectionManager(bulletinManager.bulletinManager):
 					# Pas de séquence de démarée
 					self.logger.writeLog(self.logger.DEBUG,"Création de la séquence: %s", bbbType)
 
-					self.mainDataMap['sequenceMap'][header+bbbType] = bbbType + 'B'
+					self.mainDataMap['sequenceMap'][header+bbbType] = \
+						{'token':bbbType + 'B','deleteTime':time.time() + 60.0 * 60.0 * float(self.delaiMaxSeq)}
 					newBBB = bbbType + 'A'
 				elif bbb == 'COR':
 					newBBB = 'COR'
 				else:
-					newBBB = self.mainDataMap['sequenceMap'][header+bbbType]
-					self.mainDataMap['sequenceMap'][header+bbbType] = self.incrementToken(newBBB)
+					newBBB = self.mainDataMap['sequenceMap'][header+bbbType]['token']
+					self.mainDataMap['sequenceMap'][header+bbbType]['token'] = self.incrementToken(newBBB)
 
 				self.logger.writeLog(self.logger.DEBUG,"Nouveau champ BBB: %s", newBBB)
 
@@ -251,10 +257,11 @@ class collectionManager(bulletinManager.bulletinManager):
 			entete = ' '.join(rawBulletin.splitlines()[0].split()[:3])
                         if not self.mainDataMap['sequenceMap'].has_key(entete + ' ' + 'RR'):
 	                        # Pas de séquence de démarée
-                                self.mainDataMap['sequenceMap'][entete + ' ' + 'RR'] = 'RRA'
+                                self.mainDataMap['sequenceMap'][entete + ' ' + 'RR'] = \
+					{'token':'RRA','deleteTime':time.time() + 60.0 * 60.0 * float(self.delaiMaxSeq)}
 			
-			newBBB = self.mainDataMap['sequenceMap'][entete + ' ' + 'RR']
-			self.mainDataMap['sequenceMap'][entete + ' ' + 'RR'] = self.incrementToken(newBBB)
+			newBBB = self.mainDataMap['sequenceMap'][entete + ' ' + 'RR']['token']
+			self.mainDataMap['sequenceMap'][entete + ' ' + 'RR']['token'] = self.incrementToken(newBBB)
 
 			self.mainDataMap['collectionMap'][rawBulletin.splitlines()[0]].setBBB(newBBB)
 
@@ -391,6 +398,8 @@ class collectionManager(bulletinManager.bulletinManager):
 
 		   Écrit les fichiers de collections (s'il y a lieu).
 
+		   Gère ici l'aspect de mise à jour par rapport au temps.
+
 		   Auteur:      Louis-Philippe Thériault
                    Date:        Novembre 2004
 		"""
@@ -433,6 +442,13 @@ class collectionManager(bulletinManager.bulletinManager):
 				continue
 
 			i += 1
+
+		# Effacement des séquences
+		keys = self.mainDataMap['sequenceMap'].keys()
+		for k in keys:
+			if now > self.mainDataMap['sequenceMap'][k]['deleteTime']:
+				del self.mainDataMap['sequenceMap'][k]
+				self.logger.writeLog(self.logger.VERYVERBOSE,"Effacement de la séquence %s", k)
 
 
 		# MAJ du fichier de statut FIXME

@@ -16,17 +16,11 @@ class bulletinCollection(bulletin.bulletin):
 			-Le champ BBB est facultatif
 			-Facultatif (l'on doit fournir mapCollection si non fourni)
 
-	   mapData	Map
-			-Utilisé pour instancier une collection qui est en cours,
-			 lors du démarage du programme, avec des collection à faire
-			 suivre
-			-Facultatif (l'on doit fournir header si non fourni)
-			-'mapCollection':mapCollection
-			-'errorBulletin':<type d'erreur>
-
 	   mapCollection	Map
+				-(usage interne!)
 				-'header'=str(header)
 				-'stations'=map{'station':[str(data)]}
+				-Représentation interne de la collection
 
 	   mapStations	Map
 			- Une entree par station doit être présente dans le map,
@@ -37,45 +31,34 @@ class bulletinCollection(bulletin.bulletin):
 			  devra être faite
 			- Utiliser time.time()
 
-	   Les informations suivantes sont sauvées dans le fichier de statut:
-
-		self.mapCollection, self.errorBulletin, self.writeTime
+	   Notes:
+		bulletinCollection masque la pluspart des méthodes d'un bulletinNormal. La 
+		pluspart des appels peuvent êtres réutilisés, mais les appels spécifiques
+		permettent un paramétrage plus précis.
 
 	   Auteur:	Louis-Philippe Thériault
   	   Date:	Novembre 2004
   	"""
 
-	def __init__(self,logger,mapStations,writeTime,header=None,lineSeparator='\n',mapData=None):
+	def __init__(self,logger,mapStations,writeTime,header,lineSeparator='\n'):
                 self.logger = logger
 		self.lineSeparator = lineSeparator
 		self.writeTime = writeTime
 
+		# Valeurs par défaut
 		self.tokenIfNoData = ' NIL='
 		self.bbb = None
 
-		if header != None:
 		# Création d'une nouvelle collection
-			self.errorBulletin = None
+		self.errorBulletin = None
 
-			self.mapCollection = {}
-			self.mapCollection['header'] = header
-			self.mapCollection['mapStations'] = mapStations.copy()
+		# Initialisation des structures pour stocker la collection
+		self.mapCollection = {}
+		self.mapCollection['header'] = header
+		self.mapCollection['mapStations'] = mapStations.copy()
 
-                	self.logger.writeLog(self.logger.INFO,"Création d'une nouvelle collection: %s",header)
-			self.logger.writeLog(self.logger.VERYVERBOSE,"writeTime de la collection: %s",time.asctime(time.gmtime(writeTime)))
-
-		elif mapData != None:
-		# Continuité d'une collection
-			self.errorBulletin = mapData['errorBulletin']
-			self.mapCollection = mapData['mapCollection']
-			self.writeTime = mapData['writeTime']
-			self.tokenIfNoData = mapData['tokenIfNoData']
-
-			self.logger.writeLog(self.logger.INFO,"Chargement d'une collection: %s",self.mapCollection['header'])
-			self.logger.writeLog(self.logger.VERYVERBOSE,"mapData:\n" + str(mapData))
-
-		else:
-			raise bulletin.bulletinException('Aucune information d\'entrée est fournie (header/mapData)')
+                self.logger.writeLog(self.logger.INFO,"Création d'une nouvelle collection: %s",header)
+		self.logger.writeLog(self.logger.VERYVERBOSE,"writeTime de la collection: %s",time.asctime(time.gmtime(writeTime)))
 
 	def getWriteTime(self):
 		"""getWriteTime() -> nb_sec
@@ -83,6 +66,10 @@ class bulletinCollection(bulletin.bulletin):
 		   nb_sec	float
 				- Temps (en sec depuis epoch) quand la collection devra être
 				  écrite
+
+		   Utilisation:
+			Pour comparer avec le temps courant (time.time()), pour l'écriture
+			de la collection.
 
                    Auteur:      Louis-Philippe Thériault
                    Date:        Novembre 2004
@@ -92,27 +79,15 @@ class bulletinCollection(bulletin.bulletin):
 	def dataIsComplete(self):
 		"""dataIsComplete() -> True/False
 
-		   Informe si tout le data pour les stations est rentré. Si tel est le 
-		   cas la collection devrait être écrite.
+		   Utilisation:
+			Informe si tout le data pour les stations est rentré. Si tel est le 
+			cas la collection devrait être écrite.
 
 		   Auteur:	Louis-Philippe Thériault
                    Date:        Novembre 2004
 		"""
 		# Tout le data est rentré si aucun station est à None 
 		return not( None in [self.mapCollection['mapStations'][x] for x in self.mapCollection['mapStations']] )
-
-	def getPersistentData(self):
-		"""getPersistentData() -> Map
-
-		   Retourne un map qui contiendra les informations à passer pour l'instanciation
-		   d'une collection, l'éventualité de la fermeture du programme.
-
-		   Auteur:	Louis-Philippe Thériault
-		   Date:	Novembre 2004
-		"""
-		return {'mapCollection':self.mapCollection,'errorBulletin':self.errorBulletin, \
-			'writeTime':self.writeTime, 'tokenIfNoData':self.tokenIfNoData}
-
 
 	def getHeader(self):
 		"""getHeader() -> header
@@ -177,6 +152,12 @@ class bulletinCollection(bulletin.bulletin):
 		   Assigne le champ newBBB au bulletin. À être utilisé avant
 		   getBulletin, pour fin de compatibilité.
 
+		   Utilisation:
+			Si l'on veut utiliser getBulletin(), sans passer d'arguments,
+			on peut setter le champ BBB avant d'appeler getBulletin().
+
+			L'interface par getBulletin() est donc respectée.
+
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
@@ -192,6 +173,12 @@ class bulletinCollection(bulletin.bulletin):
 
                    Assigne le champ tokenIfNoData au bulletin. À être utilisé avant
                    getBulletin, pour fin de compatibilité.
+
+                   Utilisation:
+                        Si l'on veut utiliser getBulletin(), sans passer d'arguments,
+                        on peut setter le champ setTokenIfNoData avant d'appeler getBulletin().
+
+                        L'interface par getBulletin() est donc respectée.
 
                    Auteur:      Louis-Philippe Thériault
                    Date:        Novembre 2004
@@ -218,6 +205,11 @@ class bulletinCollection(bulletin.bulletin):
 		   collection		String
 					- Fichier de collection, fusionné en un bulletin
 
+		   Utilisation:
+
+			Appel qui devrait être utilisé, permet un paramétrage direct, sinon
+			on peut setter les paramètres par setBBB/setTokenIfNoData.
+
 		   Auteur:	Louis-Philipe Thériault
 		   Date:	Novembre 2004
 		"""
@@ -227,9 +219,11 @@ class bulletinCollection(bulletin.bulletin):
 
 		if bbb == "self.bbb":
 			bbb = self.bbb
+		# -----------------------------------------------------------------------------------
 
 		coll = []
 
+		# Extraction de l'entête
 		header = self.mapCollection['header']
 
 		# On insère/remplace le champ BBB à la fin de l'entête
@@ -262,9 +256,15 @@ class bulletinCollection(bulletin.bulletin):
 		   data		String
 				- Data associé à la station
 
-		   La station doit être définie dans mapStations, et si elle n'est pas
-		   la, une exception sera levée. Si du data était déja associé,
-		   il est écrasé.
+		   Notes:
+			La station doit être définie dans mapStations, et si elle n'est pas
+			la, une exception sera levée. Si du data était déja associé,
+			il est écrasé.
+
+		   Utilisation:
+			Pour l'ajout du data pour une station, l'on doit appeler
+			les méthodes statiques getStation/getData, sur un bulletin
+			brut, puis passer l'info à addData.
 
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
@@ -274,7 +274,7 @@ class bulletinCollection(bulletin.bulletin):
 			self.logger.writeLog(self.logger.WARNING,\
 				"Station inconnue (collection:%s, station:%s)" % (self.mapCollection['header'].splitlines()[0],station) )
 
-			raise Exception("Station non définie")
+			raise bulletin.bulletinException("Station non définie")
 
 		if self.mapCollection['mapStations'][station] == None:
 			self.mapCollection['mapStations'][station] = data
@@ -328,7 +328,7 @@ class bulletinCollection(bulletin.bulletin):
                 	return premiereLignePleine.split()[0]
 
 		else:
-			raise Exception('Station non trouvée')
+			raise bulletin.bulletinException('On ne peut extraire la station')
 
 	getStation = staticmethod(getStation)
 

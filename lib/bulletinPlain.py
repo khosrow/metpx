@@ -14,6 +14,10 @@ class bulletinPlain(bulletin.bulletin):
 
 	Concrètement, doSpecificProcessing ne fait rien.
 
+	Utilisation:
+		Pour créer un bulletin dont on ne toucheras pas
+		au contenu.
+
 	Auteur:	Louis-Philippe Thériault
 	Date:	Novembre 2004
   	"""
