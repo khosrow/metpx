@@ -138,7 +138,7 @@ def addStandardOptions(parser):
   parser.add_option( "-d", "--direct", dest="direct", default=False,
       help="when set, apply header2client AHL mapping to route bulletins" )
   parser.add_option( "-x", "--extension", dest="extension", default=None,
-      help="the colon (:) separated fields to append to the original input name" )
+      help="the colon (:) separated fields to apply to the reception file name" )
   parser.add_option( "-a", "--arrival", dest="mapEnteteDelai", default=None,
       help="map AHL type and arrival time to reject messages received at wrong time." )
   parser.add_option( "-e", "--etcdir", dest="etcDir",
@@ -326,15 +326,23 @@ def readClients(logger):
 sources = {}
 """
 
+  source is an associative array of source attributes.
+
   each source is a list of the form:
   
-  [ priority, system, ori_site, type, format, ingester ]
+  [ priority, extension, type ]
 
-mapping to ingestname:
-      what : ori_system : ori_site : data_type : data_format :
+priority...
+      number, default priority.
+
+extension... mapping to ingestname:
+      priority : what : ori_system : ori_site : data_type : data_format :
+
+type -- URL indicating connection type
+	am://localhost:4012
 
 """
-sourcedefaults = [ '', '', '', '', '', '' ]
+sourcedefaults = { 'extension':'5:MISSING:MISSING:MISSING:MISSING', 'type':None }
 
 def readSources(logger):
   """ read the source configuration directory for settings
@@ -356,20 +364,13 @@ def readSources(logger):
     while src :
       srcline=src.split()
       if ( len(srcline) >= 2 and not re.compile('^[ \t]*#').search(src) ) :
-        if srcline[0] == 'priority':
-	  source[0]  = int(srcline[1])
-        elif srcline[0] == 'active':
+        if srcline[0] == 'active':
 	    if srcline[1] == 'yes':
 	       isactive=1 
         elif srcline[0] == 'extension':
-          ss = srcline[1].split(':')
-          source[1] = ss[0]
-          source[2] = ss[1]
-          source[3] = ss[2]
-          source[4] = ss[3]
-          source[5] = ss[4]
-        elif srcline[0] == 'connection':
-	  source[6]  = srcline[1:]
+          source['extension'] = srcline[1]
+        elif srcline[0] == 'type':
+	  source['type'] = srcline[1]
       src=srcconf.readline()
 
     srcconf.close()
@@ -381,7 +382,6 @@ def readSources(logger):
     else:
       logger.writeLog( logger.INFO, "ignored config of source " + sourceid )
 
-    #print "sources are: ", sources
 
 def sourceQDirName(s):
   return FET_DATA + FET_RX + s
@@ -389,22 +389,25 @@ def sourceQDirName(s):
 def ingestName(r,s):
   """ map reception to ingest name, based on the source configuration.
 
-      used to be called: sourceRx2Ingestname(r,s):
       This just inserts missing fields,  like whattopds.  DUMB!
-      FIXME: have a library of functions, configurable per client, to
+      FIXME: have a library of functions, configurable per source, to
          perform the mapping, perhaps using rmasks ? & other args.
   """
   rs = r.split(':')
-  if ( len(rs) == 1 ) or sources[s][1] == '' :
-     rs = rs + [ sources[s][1] ]
-  if len(rs) == 2 or sources[s][2] == '' :
-     rs = rs + [ sources[s][2] ]
-  if len(rs) == 3 or sources[s][3] == '' :
-     rs = rs + [ sources[s][3] ]
-  if len(rs) == 4 or sources[s][4] == '' :
-     rs = rs + [ sources[s][4] ]
-  if len(rs) == 5 or sources[s][5] == '' :
-     rs = rs + [ repr(sources[s][0]) ]
+  ss = sources[s]['extension'].split(':')
+
+  print sources[s]['extension'], ss
+
+  if ( len(rs) == 1 ) or ss[1] == '' :
+     rs = rs + [ ss[1] ]
+  if len(rs) == 2 or ss[2] == '' :
+     rs = rs + [ ss[2] ]
+  if len(rs) == 3 or ss[3] == '' :
+     rs = rs + [ ss[3] ]
+  if len(rs) == 4 or ss[4] == '' :
+     rs = rs + [ ss[4] ]
+  if len(rs) == 5 or ss[5] == '' :
+     rs = rs + [ repr(ss[0]) ]
   rs = rs + [ time.strftime( "%Y%m%d%H%M%S", time.gmtime(time.time()) ) ]
      
   return string.join(rs,':')
@@ -588,7 +591,7 @@ def ingest(ingestname,lfn,logger):
    """
    pri=ingestname.split(':')[5]
    clist=map( lambda x: x[0], clientMatches(ingestname))
-   directIngest(ingestname,clist,pri,lfn,logger)
+   return directIngest(ingestname,clist,pri,lfn,logger)
 
 
 def initDB(logger):
