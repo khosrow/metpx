@@ -10,14 +10,14 @@ class log:
 
 	def __init__(self,filename,name='MainLog'):
 		# Init du handler et du formatter pour le log
-		self.TimedRotatingFileHandler = logging.handlers.TimedRotatingFileHandler(filename, when='d', interval=1, backupCount=5)
+		self.TimedRotatingFileHandler = logging.handlers.TimedRotatingFileHandler(filename, when='h', interval=1, backupCount=24)
 		self.Formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s","%x %X")
 		self.TimedRotatingFileHandler.setFormatter(self.Formatter)
 
 		self.log = logging.Logger(name)
 		self.log.addHandler(self.TimedRotatingFileHandler)
 
-		self.log.setLevel(logging.INFO)
+#		self.log.setLevel(logging.INFO)
 
 		self.CRITICAL = logging.CRITICAL
 		self.ERROR = logging.ERROR
@@ -43,7 +43,7 @@ class log:
                 elif level == self.INFO:
                         self.log.info(msg, *args, **kwargs)
 		elif level == self.EXCEPTION:
-                        self.log.exception(msg, *args, **kwargs)
+                        self.log.error(msg, *args, **kwargs)
 		elif level == self.VERYVERBOSE:
                         self.log.log(5, msg, *args, **kwargs)
 		else:

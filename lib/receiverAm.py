@@ -19,12 +19,7 @@ class receiverAm(gateway.gateway):
 	def __init__(self,path,logger):
 		gateway.gateway.__init__(self,path,logger)
 
-		self.logger.writeLog(logger.DEBUG,"Instanciation du socketManagerAm")
-
-		# Instanciation du socketManagerAm
-		self.unSocketManagerAm = \
-				socketManagerAm.socketManagerAm(logger,type='slave', \
-								localPort=self.config.localPort)
+		self.establishConnection()
 
                 self.logger.writeLog(logger.DEBUG,"Instanciation du bulletinManagerAm")
 
@@ -38,6 +33,41 @@ class receiverAm(gateway.gateway):
 								extension = self.config.extension \
 								) 
 
+        def shutdown(self):
+		__doc__ = gateway.gateway.shutdown.__doc__ + \
+		"""### Ajout de receiverAm ###
+
+		   Fermeture du socket et finalisation du traîtement du
+		   buffer.
+
+                   Auteur:      Louis-Philippe Thériault
+                   Date:        Octobre 2004
+		"""
+		resteDuBuffer, nbBullEnv = self.unSocketManagerAm.closeProperly()
+
+		self.write(resteDuBuffer)
+
+		self.logger.writeLog(self.logger.INFO,"Succès du traîtement du reste de l'info")
+
+	def establishConnection(self):
+		__doc__ = gateway.gateway.establishConnection.__doc__ + \
+		"""### Ajout de receiverAm ###
+
+		   establishConnection ne fait que initialiser la connection
+		   socket. 
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
+		"""
+
+                self.logger.writeLog(self.logger.DEBUG,"Instanciation du socketManagerAm")
+
+                # Instanciation du socketManagerAm
+                self.unSocketManagerAm = \
+                                socketManagerAm.socketManagerAm(self.logger,type='slave', \
+                                                                localPort=self.config.localPort)
+
+
         def read(self):
 		__doc__ =  gateway.gateway.read.__doc__ + \
 		"""### Ajout de receiverAm ###
@@ -50,15 +80,17 @@ class receiverAm(gateway.gateway):
 		data = []
 
 		while True:
-			if self.socketManager.isConnected():
+			if self.unSocketManagerAm.isConnected():
 				try:
 			                rawBulletin = self.unSocketManagerAm.getNextBulletin()
 				except socketManagerException, e:
 					if e == "La connection est brisée":
-						self.logger.writeLog(self.logger.ERROR,"Perte de connection, traîtement du reste du buffer"
+						self.logger.writeLog(self.logger.ERROR,"Perte de connection, traîtement du reste du buffer")
 						resteDuBuffer, nbBullEnv = self.unSocketManagerAm.closeProperly()
 						data = data + resteDuBuffer
 						break
+					else:
+						raise
 			else:
 				raise gatewayException("Le lecteur ne peut être accédé")
 
@@ -81,8 +113,6 @@ class receiverAm(gateway.gateway):
 	        """
 
                 self.logger.writeLog(self.logger.DEBUG,"%d nouveaux bulletins seront écrits",len(data))
-
-
 
 		while True:
 			if len(data) <= 0:

@@ -6,7 +6,7 @@
 # Auteur:	Louis-Philippe Thériault
 # Date:		Octobre 2004
 
-import sys
+import sys, signal
 
 sys.path.append(sys.path[0] + '/../lib')
 sys.path.append(sys.path[0] + '/../etc')
@@ -16,6 +16,8 @@ from optparse import OptionParser
 import gateway, log
 
 def main():
+	global logger
+	global unGateway
 
 	# Message d'usage pour le option parser
 	usage =  "%prog pathConfigFile\n" \
@@ -57,6 +59,20 @@ def main():
 	
 	else:
 		raise Exception('Type de protocole non reconnu')	# FIXME
+
+	# Définition de la méthode de shutdown "propre"
+	def shutdown(sig,stack):
+		global unGateway
+		global logger
+
+		logger.writeLog(logger.INFO,"Fermeture du programme (signal=%d)",sig)
+		
+		unGateway.shutdown()
+		sys.exit(-1)
+	
+	# Assignement des signaux avec le shutdown
+	signal.signal(signal.SIGTERM,shutdown)
+	signal.signal(signal.SIGINT,shutdown)
 
 	unGateway.run()
 

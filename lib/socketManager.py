@@ -181,20 +181,20 @@ suivants:
 		self.connected = False
 
 		# Traîtement du reste du buffer pour découper les bulletins
-		bulletinsReçus = []
+		bulletinsRecus = []
 		
 		while True:
 			bull = self.getNextBulletin()
 
 			if bull != '':
-				bulletinsReçus.append(bull)
+				bulletinsRecus.append(bull)
 			else:
 				break
 
 		self.logger.writeLog(self.logger.INFO,"Succès de la fermeture de la connection socket")
-		self.logger.writeLog(self.logger.DEBUG,"Nombre de bulletins dans le buffer : %d",len(bulletinsReçus))
+		self.logger.writeLog(self.logger.DEBUG,"Nombre de bulletins dans le buffer : %d",len(bulletinsRecus))
 
-		return (bulletinsReçus, 0)
+		return (bulletinsRecus, 0)
 
 	def getNextBulletin(self):
 		"""getNextBulletin() -> bulletin
@@ -280,7 +280,9 @@ suivants:
 		   
 		   Retourne le bulletin avec les entetes/informations relatives
 		   au protocole sous forme de string. Le bulletin doit etre un
-		   objet Bulletin.
+		   objet Bulletin. Wrap bulletin doit être appelé seulement si
+		   ce bulletin est sûr d'être envoyé, étant donné la possibilité
+		   d'un compteur qui doit se suivre.
 
 		   Statut:	Abstraite
 		   Auteur:	Louis-Philippe Thériault

@@ -75,7 +75,8 @@ class gateway:
 		"""establishConnection()
 
 		   Établit une connection avec le lecteur et l'écrivain (vérifie
-		   que les ressources sont disponibles aussi)
+		   que les ressources sont disponibles aussi). Est appelé si la
+		   connection, d'un côté ou l'autre, tombe.
 
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
@@ -120,16 +121,31 @@ class gateway:
 		   Date:	Octobre 2004
 		"""
 		while True:
-			# Vérifier que le lecteur et l'écrivain sont disponibles
-			pass
 
-			data = self.read()
+			try:
+				data = self.read()
+			except gatewatException, e:
+				if e == "Le lecteur ne peut être accédé":
+				# Lecture impossible, il ne devrait plus y avoir
+				# de données en attente
+					self.establishConnection()
 
 			if len(data) == 0:
 			# S'il n'y a pas de nouveau data
 				time.sleep(1)
 			else:
 				self.write(data)
+
+	def shutdown(self):
+		"""shutdown()
+
+		   Ferme le lecteur et l'écrivain "proprement". À être
+		   redéfini.
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
+		"""
+		self.logger.writeLog(self.logger.INFO,"Fermeture propre du gateway")
 
 	def checkLooping(self):
 		pass

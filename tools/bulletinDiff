@@ -14,8 +14,7 @@ import string
 import signal
 import copy
 
-sys.path.append(sys.path[0] + '/../lib')
-sys.path.append(sys.path[0] + '/../etc')
+sys.path.append(sys.path[0] + '/./toolLib')
 import utils
 import bulletinLib
 import imp

@@ -2,7 +2,7 @@
 
 __version__ = '2.0'
 
-import struct, socket, curses, curses.ascii
+import struct, socket, curses, curses.ascii, string
 import socketManager
 
 class socketManagerWmo(socketManager.socketManager):
@@ -37,6 +37,9 @@ class socketManagerWmo(socketManager.socketManager):
 		self.patternWmoRec = '8s2s'
 		self.sizeWmoRec = struct.calcsize(patternWmoRec)
 
+		self.maxCompteur = 99999
+		self.compteur = 0
+
         def unwrapBulletin(self):
                 __doc__ = socketManager.socketManager.unwrapBulletin.__doc__ + \
                 """### Ajout de socketManagerWmo ###
@@ -62,6 +65,35 @@ class socketManagerWmo(socketManager.socketManager):
 		else:
 		# Donc message corrompu
 			raise socketManagerException("Données corrompues",self.inBuffer)
+
+        def wrapBulletin(self,bulletin):
+                __doc__ = socketManager.socketManager.wrapBulletin.__doc__ + \
+                """### Ajout de socketManagerWmo ###
+
+                   Définition de la méthode
+
+                   Auteur:      Louis-Philippe Thériault
+                   Date:        Octobre 2004
+                """
+	        bulletinStr = chr(curses.ascii.SOH) + '\r\r\n' + self.getNextCounter(5) + '\r\r\n' + bulletin.getBulletin() + '\r\r\n' + chr(curses.ascii.ETX)
+
+	        return string.zfill(len(bulletinStr),8) + bulletin.getDataType() + bulletinStr
+
+	def getNextCounter(self,x):
+		"""getNextCounter() -> compteur
+
+		   compteur:	String
+				- Portion "compteur" du bulletin
+
+                   Auteur:      Louis-Philippe Thériault
+                   Date:        Octobre 2004
+		"""
+		if self.compteur > self.maxCompteur:
+			self.compteur = 0
+
+		self.compteur = self.compteur + 1
+
+		return string.zfill(self.compteur,len(str(self.maxCompteur)))
 
         def checkNextMsgStatus(self):
                 __doc__ = socketManager.socketManager.checkNextMsgStatus.__doc__ + \
