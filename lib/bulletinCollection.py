@@ -326,17 +326,24 @@ class bulletinCollection(bulletin.bulletin):
 	                        break
 
                 # Embranchement selon les differents types de bulletins
+		station = ''
+
                 if rawBulletin.splitlines()[0][0:2] == "SA":
 	        	if rawBulletin.splitlines()[1].split()[0] in ["METAR","LWIS"]:
-	                	return premiereLignePleine.split()[1]
+	                	station = premiereLignePleine.split()[1]
                         else:
-                                return premiereLignePleine.split()[0]
+                                station = premiereLignePleine.split()[0]
 
                 elif rawBulletin.splitlines()[0][0:2] in ["SI","SM"]:
-                	return premiereLignePleine.split()[0]
+                	station =  premiereLignePleine.split()[0]
 
 		else:
 			raise bulletin.bulletinException('On ne peut extraire la station')
+
+		if station[-1] == '=':
+			station = station[:-1]
+
+		return station
 
 	getStation = staticmethod(getStation)
 
