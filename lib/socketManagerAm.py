@@ -6,19 +6,23 @@ import struct, socket
 import socketManager
 
 class socketManagerAm(socketManager.socketManager):
-	socketManager.socketManager.__doc__ + \
+	__doc__ = socketManager.socketManager.__doc__ + \
 	"""
+	--- Spécialisation concrète pour la gestion de sockets AM ---
+
 	### Ajout de socketManagerAm ###
 
-		patternAmRec		str
+	* Attributs
 
-					- Pattern pour le découpage d'entête
-					  par struct
+	patternAmRec		str
 
-		sizeAmRec		int
+				- Pattern pour le découpage d'entête
+				  par struct
 
-					- Longueur de l'entête (en octets) 
-					  calculée par struct
+	sizeAmRec		int
+
+				- Longueur de l'entête (en octets) 
+				  calculée par struct
 	
 	"""
 
@@ -44,9 +48,9 @@ class socketManagerAm(socketManager.socketManager):
 
                    Retourne une chaîne vide s'il n'y a pas assez de données
                    pour compléter le prochain bulletin."""
-                statut = self.__checkNextMsgStatus() 
+                status = self.__checkNextMsgStatus() 
 
-		if statut == 'OK':
+		if status == 'OK':
 	                (header,src_inet,dst_inet,threads,start,length,firsttime,timestamp,future) = \
 	                         struct.unpack(self.patternAmRec,self.inBuffer[0:self.sizeAmRec])
 
@@ -56,7 +60,7 @@ class socketManagerAm(socketManager.socketManager):
 
 	                return (bulletin,self.sizeAmRec + length)
 	        else:
-	                return ''
+	                return '',0
 
         def __checkNextMsgStatus(self):
                 """__checkNextMsgStatus() -> status

@@ -1,6 +1,6 @@
 """Gestion des bulletins "AM" """
 
-import bulletinManager
+import bulletinManager, bulletinAm
 
 __version__ = '2.0'
 
@@ -15,9 +15,9 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 						pathSource,pathDest,maxCompteur,lineSeparator)
 
 		self.lineSeparator = lineSeparator
-		self.pathFichierCircuit = pathFichierCircuit
+#		self.pathFichierCircuit = pathFichierCircuit		# calcul du map de fichiers circuits
 		self.SMHeaderFormat = SMHeaderFormat
-		self.pathFichierStations = pathFichierStations
+#		self.pathFichierStations = pathFichierStations		# calcul du map entetes FIXME
 
 	def __isSplittable(self,rawBulletin):
 		"""__isSplittable(rawBulletin) -> bool
@@ -55,4 +55,13 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 	        listeBulletins.append(string.join(unBulletin,self.lineSeparator))
 
 	        return listeBulletins[1:]
+
+        def __generateBulletin(self,rawBulletin):
+		__doc__ = bulletinManager.__generateBulletin.__doc__ + \
+		"""
+		### Ajout de bulletinManagerAm ###
+
+		Overriding ici pour passer les bons arguments au bulletinAm
+		"""
+                return bulletinAm.bulletinAm(rawBulletin,self.lineSeparator,mapEntetes,SMHeaderFormat)
 

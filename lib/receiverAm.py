@@ -41,6 +41,8 @@ class receiverAm(gateway.gateway):
 			else:
 				break
 
+		return data
+
         def write(self,data):
         """write(data)
 
@@ -57,3 +59,5 @@ class receiverAm(gateway.gateway):
 
 			# FIXME test ici si une erreur
 			self.unBulletinManagerAm.writeBulletinToDisk(rawBulletin)
+
+

@@ -150,6 +150,7 @@ suivants:
 
 		   Retourne le prochain bulletin reçu, une chaîne vide sinon."""
 		status = self.__checkNextMsgStatus()
+
 		if status ==  'OK':
 			(bulletin,longBuffer) = self.__unwrapBulletin()
 
