@@ -447,10 +447,10 @@ class bulletinManager:
 				self.logger.writeLog(self.logger.WARNING,e)
 				return ('PROBLEM_BULLETIN ' + bulletin.getHeader() + strCompteur + self.getExtension(bulletin,error=True)).replace(' ','_')
 		elif bulletin.getError() != None and not error:
-		# Le bulletin est erronné mais l'entête est "imprimable"
+		        self.logger.writeLog( self.logger.WARNING, "Le bulletin est erronné " + bulletin.getError()[0] )
 			return ('PROBLEM_BULLETIN ' + bulletin.getHeader() + strCompteur + self.getExtension(bulletin,error)).replace(' ','_')
 		else:
-		# L'entête n'est pas imprimable
+		        self.logger.writeLog(self.logger.WARNING, "L'entête n'est pas imprimable" )
 			return ('PROBLEM_BULLETIN ' + 'UNPRINTABLE HEADER' + strCompteur + self.getExtension(bulletin,error)).replace(' ','_')
 
 	def getExtension(self,bulletin,error=False):
@@ -708,17 +708,19 @@ class bulletinManager:
 			Pouvoir vérifier qu'un bulletin soit dans les délais 
 			acceptables.
 		"""
-		if self.mapEnteteDelai == None:
+		if (self.mapEnteteDelai == None) or (self.mapEnteteDelai == 0):
 			return
 
 		now = time.strftime("%d%H%M",time.localtime())
 
-		try:
+#		try:
+                if True:
 			bullTime = unBulletin.getHeader().split()[2]
 			header = unBulletin.getHeader()
 
 			minimum,maximum = None,None
 
+                        print self.mapEnteteDelai
 			for k in self.mapEnteteDelai.keys():
 			# Fetch de l'intervalle valide dans le map
 				if k == header[:len(k)]:
@@ -729,9 +731,9 @@ class bulletinManager:
 			# Si le cas n'est pas défini, considéré comme correct
 				return
 
-		except Exception:
-			unBulletin.setError('Découpage d\'entête impossible')
-			return
+#		except Exception:
+#			unBulletin.setError('Découpage d\'entête impossible')
+#			return
 
 		# Détection si wrap up et correction pour le calcul
 		if abs(int(now[:2]) - int(bullTime[:2])) > 10:
