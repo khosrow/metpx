@@ -23,18 +23,19 @@ class receiverAm(gateway.gateway):
 
 		# Instanciation du socketManagerAm
 		self.unSocketManagerAm = \
-				socketManagerAm.socketManagerAm(type='slave', \
+				socketManagerAm.socketManagerAm(logger,type='slave', \
 								localPort=self.config.localPort)
 
                 self.logger.writeLog(logger.DEBUG,"Instanciation du bulletinManagerAm")
 
 		# Instanciation du bulletinManagerAm avec la panoplie d'arguments.
 		self.unBulletinManagerAm = \
-			bulletinManagerAm.bulletinManagerAm(	self.config.pathTemp, \
+			bulletinManagerAm.bulletinManagerAm(	self.config.pathTemp,logger, \
 								pathDest = self.config.pathDestination, \
 								pathFichierCircuit = self.config.ficCircuits, \
 								SMHeaderFormat = self.config.SMHeaderFormat, \
-								pathFichierStations = self.config.ficCollection \
+								pathFichierStations = self.config.ficCollection, \
+								extension = self.config.extension \
 								) 
 
         def read(self):
@@ -57,7 +58,7 @@ class receiverAm(gateway.gateway):
 			else:
 				break
 
-		self.logger(logger.DEBUG,"%d nouveaux bulletins lus",len(data))
+		self.logger.writeLog(self.logger.DEBUG,"%d nouveaux bulletins lus",len(data))
 
 		return data
 
@@ -70,7 +71,7 @@ class receiverAm(gateway.gateway):
 	           approprié.
 	           """
 
-                self.logger(logger.DEBUG,"%d nouveaux bulletins seront écrits",len(data))
+                self.logger.writeLog(self.logger.DEBUG,"%d nouveaux bulletins seront écrits",len(data))
 
 		while True:
 			if len(data) <= 0:

@@ -66,7 +66,7 @@ class bulletin:
 		self.errorBulletin = None
 		self.logger = logger
 
-                self.log.writeLog(self.log.VERYVERBOSE,"newBulletin: %s",bulletin)
+                self.logger.writeLog(self.logger.VERYVERBOSE,"newBulletin: %s",stringBulletin)
 
 
 	def getBulletin(self):

@@ -17,6 +17,8 @@ class log:
 		self.log = logging.Logger(name)
 		self.log.addHandler(self.TimedRotatingFileHandler)
 
+		self.log.setLevel(logging.DEBUG)
+
 		self.CRITICAL = logging.CRITICAL
 		self.ERROR = logging.ERROR
 		self.DEBUG = logging.DEBUG
@@ -24,7 +26,7 @@ class log:
 		self.WARNING = logging.WARNING
 		self.INFO = logging.INFO
 		self.EXCEPTION = 'EXCEPTION'
-		self.VERYVERBOSE = 'VERYVERBOSE'	# Niveau de logging 666
+		self.VERYVERBOSE = "VERYVERBOSE"	# Niveau de logging 5
 
 	def writeLog(self, level, msg, *args, **kwargs):
 		""""""
@@ -43,9 +45,9 @@ class log:
 		elif level == self.EXCEPTION:
                         self.log.exception(msg, *args, **kwargs)
 		elif level == self.VERYVERBOSE:
-                        self.log.log(msg, 666, *args, **kwargs)
+                        self.log.log(5, msg, *args, **kwargs)
 		else:
-                        self.log.log(msg, level, *args, **kwargs)
+                        self.log.log(level, msg, *args, **kwargs)
 
 	def closeLog(self):
 		""""""

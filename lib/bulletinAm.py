@@ -37,6 +37,9 @@ class bulletinAm(bulletin.bulletin):
 
 					- Si True, ajout de la ligne "AAXX jjhhmm4\\n"
 					  à la 2ième ligne du bulletin
+
+	Auteur:	Louis-Philippe Thériault
+	Date:	Octobre 2004
 	"""
 
 
@@ -54,12 +57,15 @@ class bulletinAm(bulletin.bulletin):
 		self.logger.writeLog(logger.DEBUG,"Station: %s",str(self.station))
 
         def getBulletin(self):
-                """getBulletin() -> bulletin
+                __doc__ = bulletin.bulletin.getBulletin.__doc__ + \
+		"""
+		   ### Ajout de bulletinAm ###
 
-                   bulletin     : String
+                   Si une erreur est détectée, self.errorBulletin[1] 
+		   précède le bulletin.
 
-                   Retourne le bulletin en texte, si une erreur est détectée,
-		   self.errorBulletin[1] précède le bulletin."""
+		   Auteur: 	Louis-Philippe Thériault
+		   Date:	Octobre 2004"""
 		if self.errorBulletin == None:
 	                return string.join(self.bulletin,self.lineSeparator)
 		else:
@@ -71,7 +77,10 @@ class bulletinAm(bulletin.bulletin):
                    station      : String
 
                    Retourne la station associée au bulletin,
-                   retourne None si elle est introuvable."""
+                   retourne None si elle est introuvable.
+
+                   Auteur:      Louis-Philippe Thériault
+                   Date:        Octobre 2004"""
 		if self.station == "PASCALCULE" and len(self.getHeader().split()[0]) == 2:
 
         		station  = ""
@@ -130,7 +139,10 @@ class bulletinAm(bulletin.bulletin):
 		   par protocole Am, nommés "Bulletins Am"
 
 		   Le bulletin, après l'exécution, sera conforme pour les
-		   programmes les utilisants."""
+		   programmes les utilisants.
+
+                   Auteur:      Louis-Philippe Thériault
+                   Date:        Octobre 2004"""
 		unBulletin = self.bulletin
 
 		# Si le bulletin est à modifier et que l'on doit traîter les SM/SI

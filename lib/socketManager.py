@@ -57,7 +57,7 @@ suivants:
 			- Objet de la classe Log
 
 """
-	def __init__(self,type='slave',localPort=9999,remoteHost=None,timeout=None,logger=None):
+	def __init__(self,logger,type='slave',localPort=9999,remoteHost=None,timeout=None):
 		self.type = type
 		self.localPort = localPort
 		self.remoteHost = remoteHost
@@ -76,6 +76,8 @@ suivants:
 
 		   self.socket sera, après l'exécution, la connection."""
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+		self.logger.writeLog(self.logger.INFO,"Binding du socket avec le port %d",self.localPort)
 
 		# Binding avec le port local
 	        while True:
@@ -98,6 +100,8 @@ suivants:
 	                if self.remoteHost == None:
 	                        raise socketManagerException('remoteHost (host,port) n\'est pas spécifié')
 
+			self.logger.writeLog(self.logger.INFO,"Tentative de connection à l'hôte distant %s", str(self.remoteHost) )
+
 	                while True:
 	                        if self.timeout != None and (time.time() - then) > self.timeout:
 	                                self.socket.close()
@@ -111,6 +115,8 @@ suivants:
 		else:
 			# En attente de connection
 	                self.socket.listen(1)
+
+			self.logger.writeLog(self.logger.INFO,"En attente de connection (mode listen)")
 
         	        while True:
 	                        if self.timeout != None and (time.time() - then) > self.timeout:
@@ -129,6 +135,7 @@ suivants:
 		# Pour que l'interrogation du buffer ne fasse attendre le système
 		self.socket.setblocking(False)
 
+		self.logger.writeLog(self.logger.INFO,"Connection établie avec %s",str(self.remoteHost))
 		self.connected = True
 
 	def closeProperly(self):
@@ -149,6 +156,8 @@ suivants:
 		# FIXME: À tester la faisabilité si la connection est perdue
         	self.socket.close()
 
+		self.logger.writeLog(self.logger.INFO,"Succès de la fermeture de la connection socket")
+
 	def getNextBulletin(self):
 		"""getNextBulletin() -> bulletin
 
@@ -159,7 +168,7 @@ suivants:
 
 		status = self.checkNextMsgStatus()
 
-		print status
+		self.logger.writeLog(self.logger.DEBUG,"Status du prochain bulletin dans le buffer: %s", status )
 
 		if status ==  'OK':
 			(bulletin,longBuffer) = self.unwrapBulletin()
@@ -184,6 +193,7 @@ suivants:
 	        while True:
 	                try:
 	                        temp = self.socket.recv(32768)
+				self.logger.writeLog(self.logger.VERYVERBOSE,"Data reçu: %s",temp)
 
         	                self.inBuffer = self.inBuffer + temp
 	                        break

@@ -26,8 +26,8 @@ class socketManagerAm(socketManager.socketManager):
 	
 	"""
 
-	def __init__(self,type='slave',localPort=9999,remoteHost=None,timeout=None,logger=None):
-		socketManager.socketManager.__init__(self,type,localPort,remoteHost,timeout,logger)
+	def __init__(self,logger,type='slave',localPort=9999,remoteHost=None,timeout=None):
+		socketManager.socketManager.__init__(self,logger,type,localPort,remoteHost,timeout)
 
 		# La taille du amRec est prise d'a partir du fichier ytram.h, à l'origine dans
 		# amtcp2file. Pour la gestion des champs l'on se refere au module struct
@@ -78,8 +78,6 @@ class socketManagerAm(socketManager.socketManager):
                 length = socket.ntohl(length)
 
                 if len(self.inBuffer) >= self.sizeAmRec + length:
-                        bulletin = self.inBuffer[self.sizeAmRec:self.sizeAmRec + length]
-
                         return 'OK'
                 else:
                         return 'INCOMPLETE'
