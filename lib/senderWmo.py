@@ -125,7 +125,7 @@ class senderWmo(gateway.gateway):
                 self.logger.writeLog(self.logger.DEBUG,"Instanciation du socketManagerWmo")
                 self.unSocketManagerWmo = \
                                 socketManagerWmo.socketManagerWmo(self.logger,type='master', \
-                                                                localPort=self.config.localPort,\
+                                                                localPort=None,\
 								remoteHost=self.config.remoteHost,
 								timeout=self.config.timeout)
 
