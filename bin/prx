@@ -2,6 +2,9 @@
 # -*- coding: iso-8859-1 -*-
 
 """
+  FIXME: TO BE DELETED.  HERE JUST IN CASE...
+     cli function moved into pxReceiver, and the routines into ../lib/fetfile.py
+
   File Exchange Tracker - File Receiver
 	(aka, PDS ++ )
 

@@ -409,7 +409,7 @@ def ingestName(r,s):
   if len(rs) == 4 or ss[4] == '' :
      rs = rs + [ ss[4] ]
   if len(rs) == 5 or ss[5] == '' :
-     rs = rs + [ repr(ss[0]) ]
+     rs = rs + [ ss[0] ]
   rs = rs + [ time.strftime( "%Y%m%d%H%M%S", time.gmtime(time.time()) ) ]
      
   return string.join(rs,':')
@@ -673,8 +673,8 @@ def startup(opts, logger):
    readClients(logger)
    readSources(logger)
    if options.client:
+     opts.type = client[options.client][3]
      dd = urlSplit(clients[options.client][1])
-     opts.type = dd[0]
      opts.host = dd[4]
      opts.port = dd[5]
      opts.connect_timeout = int(clients[options.client][2])

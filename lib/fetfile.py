@@ -69,7 +69,7 @@ def ingestDir(d,s,logger):
 
 
 
-def checkSource(s, sources):
+def checkSource(s, sources,logger):
   """look for source directories with data to ingest. Trigger ingestion.
 
      Priority scheduling scheme.
@@ -79,9 +79,6 @@ def checkSource(s, sources):
 
      thresh == 100
   """
-
-  global logger
-
 
   if not os.path.exists( fet.FET_DATA + fet.FET_RX):
      logger.writeLog(logger.FATAL, "ingest queue directory does not exist" )

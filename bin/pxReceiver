@@ -23,10 +23,8 @@ def main():
 	global unGateway
 
 	# Message d'usage pour le option parser
-	usage =  "%prog pathConfigFile\n" \
-	         "       Un receiver reçoit les bulletins par une connection réseau et les\n" \
-	         "       écrits sur le disque. Le fichier de configuration doit être dûement\n" \
-		 "       remplit pour que le programme fonctionne correctement."
+	usage =  "%prog <source> (start|stop)\n" \
+	         "       Un receiver reçoit les bulletins par une connection réseau.\n"
 
 	# Instanciation du option parser
 	parser = OptionParser(usage)
@@ -71,7 +69,7 @@ def main():
 	
 	elif options.type == 'single-file':
 		import fetfile
-		fetfile.checkSource( options.source, fet.sources )
+		fetfile.checkSource( options.source, fet.sources, logger )
 
 
 	else:
