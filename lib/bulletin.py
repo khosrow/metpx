@@ -12,7 +12,7 @@ class bulletinException(Exception):
 
 class bulletin:
 	"""Classe abstraite regroupant tout les traits communs des bulletins
-        quels que soient les protocoles utilisés.Les méthodes
+        quels que soient les protocoles utilisés. Les méthodes
         qui ne retournent qu'une exception doivent êtres redéfinies
  	dans les sous-classes (il s'agit de méthodes abstraites).
 
@@ -62,10 +62,10 @@ class bulletin:
 
 	def __init__(self,stringBulletin,logger,lineSeparator='\n'):
                 self.logger = logger
+		self.errorBulletin = None
 		self.lineSeparator = lineSeparator
 		self.bulletin = self.splitlinesBulletin(stringBulletin.lstrip(lineSeparator))
 		self.dataType = None
-		self.errorBulletin = None
 
                 self.logger.writeLog(self.logger.VERYVERBOSE,"newBulletin: %s",stringBulletin)
 
@@ -81,6 +81,12 @@ class bulletin:
 		   Les bulletins binaires (jusqu'à présent) commencent par GRIB/BUFR et
 		   se terminent par 7777 (la portion binaire).
 
+		   Utilisation:
+
+			Pour découpage initial du bulletin, ou si l'on insère un self.linseparator
+			dans le bulletin, pour le redécouper (faire un getBulletin() puis le redécouper).
+
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
@@ -119,6 +125,7 @@ class bulletin:
 				return stringBulletin.split(self.lineSeparator)
 		except Exception, e:
 			self.logger.writeLog(self.logger.EXCEPTION,'Erreur lors du decoupage du bulletin:\n'+''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
+			self.setError('Erreur lors du découpage de lignes')
 			return stringBulletin.split(self.lineSeparator)
 
 	def replaceChar(self,oldchars,newchars):
@@ -129,6 +136,11 @@ class bulletin:
 		   Remplace oldchars par newchars dans le bulletin. Ne touche pas à la portion Data
 		   des GRIB/BUFR
 
+		   Utilisation:
+
+			Pour des remplacements dans doSpecifiProcessing.
+
+		   Visibilité:	Privée
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Novembre 2004
 		"""
@@ -147,6 +159,7 @@ class bulletin:
 
 		   Retourne le bulletin en texte
 
+		   Visibilité:	Publique
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
@@ -158,7 +171,6 @@ class bulletin:
 			else:
 				return string.join(self.bulletin,self.lineSeparator)
 
-
 	def getLength(self):
                 """getLength() -> longueur
 
@@ -166,6 +178,7 @@ class bulletin:
 
                    Retourne la longueur du bulletin avec le lineSeparator
 
+		   Visibilité:	Publique
                    Auteur:      Louis-Philippe Thériault
                    Date:        Octobre 2004
 		"""
@@ -176,8 +189,9 @@ class bulletin:
 
 		   header	: String
 
-		   Retourne la première ligne du bulletin
+		   Retourne l'entête (première ligne) du bulletin
 
+		   Visibilité:	Publique
                    Auteur:      Louis-Philippe Thériault
                    Date:        Octobre 2004
 		"""
@@ -188,8 +202,9 @@ class bulletin:
 
                    header       : String
 
-                   Assigne la première ligne du bulletin
+                   Assigne l'entête du bulletin
 
+		   Visibilité:	Publique
                    Auteur:      Louis-Philippe Thériault
                    Date:        Octobre 2004
 		"""
@@ -204,10 +219,11 @@ class bulletin:
 
                    Retourne le type (2 premieres lettres de l'entête) du bulletin (SA,FT,etc...)
 
+		   Visibilité:	Publique
                    Auteur:      Louis-Philippe Thériault
                    Date:        Octobre 2004
 		"""
-                return self.bulletin[0][:2]
+                return self.getHeader()[:2]
 
 	def getOrigin(self):
                 """getOrigin() -> origine
@@ -216,17 +232,23 @@ class bulletin:
 
                    Retourne l'origine (2e champ de l'entête) du bulletin (CWAO,etc...)
 
+		   Visibilité:	Publique
                    Auteur:      Louis-Philippe Thériault
                    Date:        Octobre 2004
 		"""
-                return self.bulletin[0].split(' ')[1]
+                return self.getHeader().split(' ')[1]
 
 	def doSpecificProcessing(self):
 		"""doSpecificProcessing()
 
 		   Modifie le bulletin s'il y a lieu, selon le traîtement désiré.
 
+		   Utilisation:
+
+			Inclure les modifications à effectuer sur le 
+
 		   Statut:	Abstraite
+		   Visibilité:	Publique
                    Auteur:      Louis-Philippe Thériault
                    Date:        Octobre 2004
 		"""
