@@ -1,0 +1,30 @@
+#!/usr/bin/env python2
+
+
+import sys
+
+sys.path.insert(1, sys.path[0] + '/../lib')
+sys.path.insert(1,sys.path[0] + '/../lib/importedLibs')
+
+import fet
+import os
+
+try: 
+  os.mkdir(fet.FET_ROOT)
+except:
+  pass
+
+os.chdir(fet.FET_ROOT)
+for d in [ 'db', 'etc', 'log', 'rx', 'tx', 'etc/tx', 'etc/rx' ]:
+  try:
+    os.mkdir(d)
+  except:
+    pass
+
+os.chdir(fet.FET_ROOT + '/tx')
+
+for i in range(26):
+#   try:
+     os.mkdir( chr(ord('A')+i) )
+#   except: 
+#     pass
