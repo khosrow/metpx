@@ -397,16 +397,15 @@ def readSources(logger):
     while src :
       srcline=src.split()
       if ( len(srcline) >= 2 and not re.compile('^[ \t]*#').search(src) ) :
-        if srcline[0] == 'arrival':
-	  try:
-            exec("source['mapEnteteDelai'] = " + string.join(srcline[1:]) )
-	  except:
-            logger.writeLog( logger.ERROR, 
-		"error in " + sourceid + " config: " + src )
-        elif srcline[0] == 'AddSMHeader' and (srcline[1] == 'True' ):
-          source[srcline[0]] = True
-	else:
-          source[srcline[0]] = string.join(srcline[1:]) 
+        try:
+          if srcline[0] == 'arrival':
+              source['mapEnteteDelai'] =  { srcline[1] : ( int(srcline[2]), int(srcline[3]) )  }
+          elif srcline[0] == 'AddSMHeader' and (srcline[1] == 'True' ):
+            source[srcline[0]] = True
+	  else:
+            source[srcline[0]] = string.join(srcline[1:]) 
+        except:
+            logger.writeLog( logger.ERROR, "error in " + sourceid + " config: " + src )
 
       src=srcconf.readline()
 
