@@ -229,7 +229,7 @@ class socketManager:
 
 		   Auteur:      Louis-Philippe Thériault
 		"""
-		if self.connected:
+		if self.isConnected():
 		# Si n'est pas connecté, ne fais pas le check, car l'on peut vouloir avoir les 
 		# bulletins dans le buffer sans être connecté.
 			self.__syncInBuffer()
@@ -289,6 +289,8 @@ class socketManager:
 	                        temp = self.socket.recv(32768)
 
 				if temp == '':
+					self.connected = False
+
 					if not onlySynch:
 						self.logger.writeLog(self.logger.ERROR,"La connexion est brisée")
 						raise socketManagerException('la connexion est brisee')
@@ -301,6 +303,8 @@ class socketManager:
 	                except socket.error, inst:
 				if not onlySynch:
 				# La connexion est brisée
+					self.connected = False
+
 					self.logger.writeLog(self.logger.ERROR,"La connexion est brisée")
 	                                raise socketManagerException('la connexion est brisee')
 
