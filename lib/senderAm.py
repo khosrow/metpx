@@ -161,6 +161,7 @@ class senderAm(gateway.gateway):
 
 		#lecture de la selection precedente
 		liste = self.unBulletinManagerAm.getListeNomsFichiersAbsolus()
+
 		#si rien n'a ete envoye lors de la derniere lecture,
 		#on considere le dernier envoi non vide effectue
 		if len(liste)>=1:
@@ -172,7 +173,7 @@ class senderAm(gateway.gateway):
 
 			return data
 
-		except Exception e:
+		except Exception, e:
                		self.logger.writeLog(self.logger.ERROR,"senderAm.read(): Erreur lecture: %s",str(e.args))
 			raise
 
@@ -205,8 +206,7 @@ class senderAm(gateway.gateway):
                         try:
                                 #creation du bulletin am
                                 rawBulletin = data[key]
-				#FIXME
-                                unBulletinAm = bulletinAm.bulletinAm(rawBulletin,self.logger,finalLineSeparator='\r\r\n')
+                                unBulletinAm = bulletinAm.bulletinAm(rawBulletin,self.logger)
                                 #envoi du bulletin am
                                 succes = self.unSocketManagerAm.sendBulletin(unBulletinAm)
 

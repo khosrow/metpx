@@ -80,30 +80,45 @@ class socketManagerAm(socketManager.socketManager):
                    Auteur:      Pierre Michaud
                    Date:        Janvier 2005
                 """
-		#affectation des valeurs des parametres d'entetes
-		length = socket.htonl(len(bulletin.getBulletin()))
-		header='null'
-		src_inet='null'
-		dst_inet='null'
-		threads='null'
-		start='null'
-		length='null'
-		firsttime='null'
-		timestamp='null'
-		future[20]='null'
+		#construction de l'entete	
+
+		#char header[80]
+		pattern = '80s'
+		size = struct.calcsize(pattern)
+		tmp = bulletin.getBulletin()
+		header = struct.unpack(pattern,tmp[0:size])
+	
+		#unsigned long src_inet, dst_inet
+		src_inet = long(0)
+		dst_inet = long(0)
+
+		#unsigned char threads[4]
+		threads1 = '0'
+		threads2 = '255'
+		threads3 = '0'
+		threads4 = '0'
+
+		#unsigned int start, length
+		start = long( socket.htonl(len(bulletin.getBulletin())) )
+		length = long(0)
+
+		#time_t firsttime, timestamp
+		firsttime = '0'
+		timestamp = '0'
+
+		#char future[20]
+		future = '00000000000000000000'
 
 		#assemblage de l'entete avec le contenu du bulletin
-		#bulletinStr = header+src_inet+dst_inet+threads+start+length+firsttime+timestamp+future+bulletin.getBulletin()
-		#header[80]
-#(header,src_inet,dst_inet,threads,start,length,firsttime,timestamp,future) = \
-#                                 struct.unpack(self.patternAmRec,self.inBuffer[0:self.sizeAmRec])
-		
-		pattern = '80s'
-		header = struct.unpack(pattern,bulletin.getBulletin())
+		bulletinHeader = str(header)+str(src_inet)+str(dst_inet)+threads1+threads2+threads3+ \
+				threads4+str(start)+str(length)+firsttime+timestamp+future
+		wrappedBulletin = bulletinHeader + bulletin.getBulletin()
 
-		
-
-		wrappedBulletin = bulletinHeader + bulletin.getBulletin()	
+		print "len(bulletinHeader) = ",len(bulletinHeader)
+		print bulletinHeader
+		print "len(header) = ",len(header)
+		print header
+		print "**************************************************************"
 
                 return wrappedBulletin
 
