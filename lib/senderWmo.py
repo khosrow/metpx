@@ -147,9 +147,7 @@ class senderWmo(gateway.gateway):
 
                 Description:
                 Lit les bulletins contenus dans un repertoire.  Le repertoire
-		contient les bulletins de la priorite courante.  Comme la methode
-		gateway.run() n'est pas redefini ici, read() verifie la validite 
-		de la connexion
+		contient les bulletins de la priorite courante.
 
                 Nom:
                 Pierre Michaud
