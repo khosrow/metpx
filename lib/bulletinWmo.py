@@ -1,11 +1,7 @@
 # -*- coding: UTF-8 -*-
 """Définition d'une sous-classe pour les bulletins "WMO" """
 
-import time
-import struct
 import string
-import curses
-import curses.ascii
 import bulletin
 
 __version__ = '2.0'
@@ -50,6 +46,12 @@ class bulletinWmo(bulletin.bulletin):
 		if self.bulletin[0][:2] in ['UK']:
 			self.replaceChar('\x01','')
 
+		if self.bulletin[0][:2] in ['SO']:
+			self.replaceChar('\x1e','')
+                        self.replaceChar('\x00','')
+                        self.replaceChar('\x02','')
+                        self.replaceChar('\x03','')
+
                 if self.bulletin[0][:2] in ['FT']:
                         self.replaceChar('\x03','')
 
@@ -58,6 +60,7 @@ class bulletinWmo(bulletin.bulletin):
 
                 if self.bulletin[0][:2] in ['SX']:
                         self.replaceChar('\x11','')
+			self.replaceChar('\x19','')
 
 	        if self.bulletin[0][:4] in ['SRUS']:
         	        self.replaceChar('\t','')
@@ -92,3 +95,8 @@ class bulletinWmo(bulletin.bulletin):
 		# Enlève les espaces à la fin des lignes
 		for i in range(len(self.bulletin)):
 			self.bulletin[i] = self.bulletin[i].rstrip()
+
+		# Si pas de newline, on en ajoute un à la fin
+		if self.bulletin[-1] != '':
+			self.bulletin += ['']
+

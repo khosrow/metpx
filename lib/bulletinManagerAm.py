@@ -23,7 +23,7 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 		bulletinManager.bulletinManager.__init__(self,pathTemp,logger, \
 						pathSource,pathDest,maxCompteur,lineSeparator,extension,pathFichierCircuit,mapEnteteDelai)
 
-		self.__initMapEntetes(pathFichierStations)
+		self.initMapEntetes(pathFichierStations)
 		self.SMHeaderFormat = SMHeaderFormat
 
 	def __isSplittable(self,rawBulletin):
@@ -104,8 +104,8 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 		else:
 			bulletinManager.bulletinManager.writeBulletinToDisk(self,unRawBulletin)
 
-	def __initMapEntetes(self, pathFichierStations):
-		"""__initMapEntetes(pathFichierStations)
+	def initMapEntetes(self, pathFichierStations):
+		"""initMapEntetes(pathFichierStations)
 
 		   pathFichierStations:	String
 		   			- Chemin d'accès vers le fichier de "collection"

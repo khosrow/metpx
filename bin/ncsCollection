@@ -1,15 +1,98 @@
+#! /usr/bin/env python2
+# -*- coding: UTF-8 -*-
+# -----------------------------------------------------
+# Définition d'un gestionnaire de collection. (file2file)
+#
+# Auteur:	Louis-Philippe Thériault
+# Date:		Novembre 2004
 
+import sys, signal, traceback
 
-# Load de la config
+sys.path.append(sys.path[0] + '/../lib')
+sys.path.append(sys.path[0] + '/../etc')
+sys.path.insert(0,sys.path[0] + '/../lib/importedLibs')
 
-# Load du fichier d'état (s'il ya lieu)
+from optparse import OptionParser
+import gateway, log
 
-# Loop
+def main():
+	global logger
+	global unGateway
 
-	# S'il y a du traîtement en attente, l'effectuer
+	# Message d'usage pour le option parser
+	usage =  "%prog pathConfigFile\n" \
+	         "       Un receiver reçoit les bulletins par une connection réseau et les\n" \
+	         "       écrits sur le disque. Le fichier de configuration doit être dûement\n" \
+		 "       remplit pour que le programme fonctionne correctement."
 
-	# Charger nouveaux fichiers
+	# Instanciation du option parser
+	parser = OptionParser(usage)
+	options,args = parser.parse_args()
 
-		# Si aucun nouveau fichier, sleep
+	# Un seul argument doit être fourni
+	if len(args) > 1:
+		parser.error("trop d'arguments fournis")
+	elif len(args) == 0:
+		parser.error("aucun fichier de config fourni")
+	
+	# Chargement de la config pour savoir le type de protocole et le path du log
+	config = gateway.gateway.loadConfig(args[0])
 
-		# Si nouveaux fichiers, Classement
+        # FIXME: Vérifier que typeProtocole est défini et le fichier de log
+
+	# Init du log
+	logger = log.log(config.log)
+	logger.writeLog(logger.INFO, "Début du programme, fichier de config chargé correctement")
+
+        logger.writeLog(logger.DEBUG,"Protocole %s sélectionné",config.typeProcotole)
+
+	# Branchement selon le type de protocole	
+	if config.typeProcotole == 'AM':
+
+		import receiverAm
+		unGateway = receiverAm.receiverAm(args[0],logger)
+	
+	elif config.typeProcotole == 'WMO':
+	
+		import receiverWmo
+		unGateway = receiverWmo.receiverWmo(args[0],logger)
+	
+	else:
+		raise Exception('Type de protocole non reconnu')	# FIXME
+
+	# Définition de la méthode de shutdown "propre"
+	def shutdown(sig,stack):
+		global unGateway
+		global logger
+		global isShutdowning
+
+		logger.writeLog(logger.INFO,"Reception d'un signal (signal=%d)",sig)
+
+		if not isShutdowning:
+		# Pour que le shutdown ne se fasse q'une fois
+			isShutdowning = True
+			logger.writeLog(logger.INFO,"Fermeture du programme (signal=%d)",sig)
+		
+			unGateway.shutdown()
+			sys.exit()
+	
+	# Assignement des signaux avec le shutdown
+	signal.signal(signal.SIGTERM,shutdown)
+	signal.signal(signal.SIGINT,shutdown)
+
+	unGateway.run()
+
+global logger
+global isShutdowning 
+
+isShutdowning = False
+logger = None
+
+if __name__ == '__main__':
+	try:
+		main()
+	except Exception, e:
+		if logger != None and e.args != ():
+			logger.writeLog(logger.EXCEPTION,"Exception: " + ''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
+		raise
+
