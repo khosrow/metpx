@@ -56,7 +56,7 @@ def ingestDir(d,s,logger):
 
   logger.writeLog(logger.DEBUG, " examen de répertoire " + d + " débute." )
   for r in os.listdir(d):
-    if r[0] == '.' or not os.access(r, os.R_OK):
+    if ( r[0] == '.' ) or ( r[0:4] == 'tmp_' ) or not os.access(r, os.R_OK):
       continue
     i=fet.ingestName(r,s) # map reception name to ingest name
     rr=d + "/" + r
