@@ -6,6 +6,7 @@ import socketManagerWmo
 import bulletinManagerWmo
 import socketManager
 from socketManager import socketManagerException
+import fet
 
 class receiverWmo(gateway.gateway):
 	__doc__ = gateway.gateway.__doc__ + \
@@ -41,7 +42,7 @@ class receiverWmo(gateway.gateway):
 		else:
 		  self.unBulletinManagerWmo = \
 			bulletinManagerWmo.bulletinManagerWmo(	
-			   FET_DATA + FET_RX + option.client, logger, \
+			   fet.FET_DATA + fet.FET_RX + options.source, logger, \
 			   pathDest = '/dev/null', \
 		  	   pathFichierCircuit = '/dev/null', \
 		           extension = options.extension, \

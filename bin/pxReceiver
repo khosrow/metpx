@@ -69,6 +69,11 @@ def main():
 		import receiverWmo
 		unGateway = receiverWmo.receiverWmo('/dev/null',options,logger)
 	
+	elif options.type == 'single-file':
+		import fetfile
+		fetfile.checkSource( options.source, fet.sources )
+
+
 	else:
 		raise Exception('Type de protocole non reconnu')	# FIXME
 

@@ -27,7 +27,7 @@ class receiverAm(gateway.gateway):
                 self.logger.writeLog(logger.DEBUG,"Instanciation du bulletinManagerAm")
 
 		# Instanciation du bulletinManagerAm avec la panoplie d'arguments.
-		if options.source:
+		if not options.source:
 		   self.unBulletinManagerAm = \
 			bulletinManagerAm.bulletinManagerAm(	
 				self.config.pathTemp,logger, \
@@ -39,7 +39,7 @@ class receiverAm(gateway.gateway):
 				mapEnteteDelai = self.config.mapEnteteDelai, \
                                 use_pds = self.config.use_pds
 								) 
-               else:
+                else:
                   self.unBulletinManagerWmo = \
                         bulletinManagerWmo.bulletinManagerWmo(
                            FET_DATA + FET_RX + options.source, logger, \
@@ -94,10 +94,14 @@ class receiverAm(gateway.gateway):
                 self.logger.writeLog(self.logger.DEBUG,"Instanciation du socketManagerAm")
 
                 # Instanciation du socketManagerAm
-                self.unSocketManagerAm = \
-                                socketManagerAm.socketManagerAm(self.logger,type='slave', \
-                                                                localPort=self.config.localPort)
-
+                if self.options.source:
+                    self.unSocketManagerAm = \
+                        socketManagerAm.socketManagerAm(self.logger,type='slave', \
+                                localPort=self.options.port)
+                else:
+                    self.unSocketManagerAm = \
+                        socketManagerAm.socketManagerAm(self.logger,type='slave', \
+                                localPort=self.config.localPort)
 
         def read(self):
 		__doc__ =  gateway.gateway.read.__doc__ + \

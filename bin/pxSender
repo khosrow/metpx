@@ -74,6 +74,10 @@ def main():
 	   import senderAMIS
 	   unGateway = senderAMIS.senderAMIS('/dev/null',options,logger)
 
+	elif options.type == 'single-file':
+	   import fetfile
+           checkClient( options.client, fet.clients, fetfile.filePrio, logger )
+
 	else:
 	   raise Exception('Type de protocole non reconnu')	
 

@@ -41,8 +41,8 @@ def startThem(dir,name,cmd):
 
 
 def start(cmd):
-  startThem( fet.FET_ETC + fet.FET_RX, 'prx', cmd)
-  startThem( fet.FET_ETC + fet.FET_TX, 'ptx', cmd)
+  startThem( fet.FET_ETC + fet.FET_RX, 'pxReceiver', cmd)
+  startThem( fet.FET_ETC + fet.FET_TX, 'pxSender', cmd)
 
 
 if len(sys.argv) < 2:

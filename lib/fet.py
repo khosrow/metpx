@@ -208,7 +208,7 @@ clients = {}
 #        with inheritance to override it.  but this is just a skeleton.
 #
 # -- for a file sender
-clientdefaults = [ [], '',10,'3600','3600','10','3','000'  ]
+clientdefaults = [ [], '',10,'single-file','3600','10','3','000'  ]
 #
 
 # FIXME: currently get one global list of clients.
@@ -286,6 +286,8 @@ def readClients(logger):
         elif maskline[0] == 'password':
 	  password = maskline[1]
         elif maskline[0] == 'type':
+	  client[3] = maskline[1]
+        elif maskline[0] == 'protocol':
 	  protocol = maskline[1]
         elif maskline[0] == 'connect_timeout':
 	  client[2] = maskline[1]
@@ -365,12 +367,13 @@ def readSources(logger):
       srcline=src.split()
       if ( len(srcline) >= 2 and not re.compile('^[ \t]*#').search(src) ) :
         if srcline[0] == 'active':
-	    if srcline[1] == 'yes':
-	       isactive=1 
+	  if srcline[1] == 'yes':
+	     isactive=1 
         elif srcline[0] == 'arrival':
-	  exec("source['mapEnteteDelai'] = " + string.join(srcline[1:]) )
+          exec("source['mapEnteteDelai'] = " + string.join(srcline[1:]) )
 	else:
-          source[srcline[0]] = string.join(srcline[1:])
+          source[srcline[0]] = string.join(srcline[1:]) 
+
       src=srcconf.readline()
 
     srcconf.close()
@@ -382,7 +385,6 @@ def readSources(logger):
     else:
       logger.writeLog( logger.INFO, "ignored config of source " + sourceid )
 
-  print sources
 
 def sourceQDirName(s):
   return FET_DATA + FET_RX + s
@@ -397,7 +399,6 @@ def ingestName(r,s):
   rs = r.split(':')
   ss = sources[s]['extension'].split(':')
 
-  print sources[s]['extension'], ss
 
   if ( len(rs) == 1 ) or ss[1] == '' :
      rs = rs + [ ss[1] ]
@@ -577,8 +578,8 @@ def directIngest(ingestname,clist,pri,lfn,logger):
    for c in clist:
      cname=clientQDirName( c, pri )
      linkFile(dbn , cname + ingestname )   
-     logger.writeLog( logger.INFO, "linking for " + c )
 
+   logger.writeLog( logger.INFO, "linked for " + string.join(clist) )
    return 1
 
 
@@ -673,12 +674,15 @@ def startup(opts, logger):
    readSources(logger)
    if options.client:
      dd = urlSplit(clients[options.client][1])
-     print 'options.client', options.client
-     print 'urlsplit ', dd
      opts.type = dd[0]
      opts.host = dd[4]
      opts.port = dd[5]
      opts.connect_timeout = int(clients[options.client][2])
+   elif options.source:
+     s=sources[options.source]
+     opts.port = int(s['port'])
+     opts.extension = s['extension']
+     opts.mapEnteteDelai = s['mapEnteteDelai']
 
 # module initialization code
 #startup()
