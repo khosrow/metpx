@@ -184,22 +184,14 @@ class socketManagerWmo(socketManager.socketManager):
 			#tentative d'envoi et controle de la connexion
 			#mettre le try/except dans un while(1)????
 			try:
-				reponse = self.socket.getpeername()
-				print "reponse[0]: ",reponse[0]
-				if reponse[0]=='':
-					print "GRRR"
-					raise
-
 				#envoi du bulletin
                 		bytesSent = self.socket.send(data)
-				print "bytesSent: ",bytesSent
 
 				#verifier si l'envoi est un succes
 				if bytesSent != len(data):
 					self.connected=False
 					return 0
 				else:
-					print "succes"
 					return 1
 
 			except socket.error, e:
