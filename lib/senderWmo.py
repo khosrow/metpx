@@ -72,7 +72,7 @@ class senderWmo(gateway.gateway):
                         bulletinManagerWmo.bulletinManagerWmo( fet.FET_DATA + fet.FET_TX + options.client ,logger)
                    self.config.remoteHost = options.host
                    self.config.localPort = options.port
-                   self.config.timeout    = options.timeout
+                   self.config.timeout    = options.connect_timeout
                 else:
                    self.unBulletinManagerWmo = \
                         bulletinManagerWmo.bulletinManagerWmo(self.config.pathTemp,logger)
@@ -174,9 +174,19 @@ class senderWmo(gateway.gateway):
                 Novembre 2004
 		Modifications: Janvier 2005
                 """
-                self.reader = DiskReader(self.config.rootPath, self.config.nameValidation, self.logger, eval(self.config.sorter))
+		if not self.options.client:
+                   self.reader = DiskReader(self.config.rootPath, 
+			self.config.nameValidation, 
+			self.logger, 
+			eval(self.config.sorter))
+		else:
+                   self.reader = DiskReader(
+			fet.FET_DATA + fet.FET_TX + self.options.client, 
+			True, 
+			self.logger, 
+			eval(fet.clients[self.options.client][4]) )
                 self.reader.sort()
-                return(self.reader.getFilesContent(self.config.fileNumber))
+                return(self.reader.getFilesContent(fet.clients[self.options.client][5]))
                 """
                 data = []
 		#lecture de la selection precedente

@@ -208,7 +208,7 @@ def lockStopOrDie(lfn, cmd):
 
   clients is a keyed data structure... 
       filled with list values of the form:
-  [ [ patterns, default_dest, ftp_timer, q_timer, time_window, sleep_timer, debug_level, chmod ], ... ]
+  [ [ patterns, default_dest, connect_timeout, type, ordering, batch, ... ] ... ]
 
 """
 clients = {}
@@ -218,7 +218,7 @@ clients = {}
 #        with inheritance to override it.  but this is just a skeleton.
 #
 # -- for a file sender
-clientdefaults = [ [], '',10,'single-file','3600','10','3','000'  ]
+clientdefaults = [ [], '',10,'single-file','MultiKeysStringSorter',4,'3','000'  ]
 #
 
 # FIXME: currently get one global list of clients.
@@ -300,9 +300,11 @@ def readClients(logger):
         elif maskline[0] == 'protocol':
 	  protocol = maskline[1]
         elif maskline[0] == 'connect_timeout':
-	  client[2] = maskline[1]
-        elif maskline[0] == 'chmod':
-	  client[7] = maskline[1]
+	  client[2] = int(maskline[1])
+        elif maskline[0] == 'order':
+	  client[3] = maskline[1]
+        elif maskline[0] == 'batch':
+	  client[4] = int(maskline[1])
 	mask=cliconf.readline()
 
     cliconf.close()
@@ -322,8 +324,8 @@ def readClients(logger):
       logger.writeLog( logger.INFO, "ignored config of client " + clientid )
     
   # dump clients db
-  #for k in clients.keys():
-  #   print "client ", k, " is: ",  clients[k], "\n"
+  for k in clients.keys():
+     print "client ", k, " is: ",  clients[k], "\n"
 
   #print "\n\n\nPatterns\n\n\n"
   #print patterns
@@ -439,7 +441,6 @@ def ingestName(r,s):
   """
   rs = r.split(':')
   ss = sources[s]['extension'].split(':')
-
 
   if ( len(rs) == 1 ) or ss[1] == '' :
      rs = rs + [ ss[1] ]
@@ -721,6 +722,8 @@ def startup(opts, logger):
        opts.host = dd[4]
        opts.port = dd[5]
        opts.connect_timeout = int(clients[options.client][2])
+       opts.sorter = 'MultiKeysStringSorter'
+       opts.numFiles = 4
      else:
        logger.writeLog( logger.ERROR, "unknown client: " + options.client )
 

@@ -26,9 +26,25 @@ directives
     There are also synonyms for subsets of 'destination'
     'protocol', 'host', 'user', 'password', 'directory', 'filename'
    
+'connect_timeout'
+    on Socket connections, number of seconds to wait for connection 
+    to occur before printing a warning.
+
+'batch' <count>
+    The integer maximum number of files to send between 
+    checks to the queueing directory. (fileNumber)
+    default: 4
+
+'order' (None|MultiKeysStringSorter)
+    The ordering of files in the queuing directory.
+    None is least cost.
+    MultiKeysStringSorter ensures delivery by priority and time.
+    default: MultiKeysStringSorter
     
 
 
+
+----------------------------------------------------------------------------
   
 active yes
 type wmo
