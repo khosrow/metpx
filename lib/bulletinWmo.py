@@ -1,7 +1,4 @@
-"""Définition d'une sous-classe pour les bulletins "wmo"
-
-
-"""
+"""Définition d'une sous-classe pour les bulletins "wmo" """
 
 import time
 import struct
