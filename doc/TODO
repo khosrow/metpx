@@ -4,6 +4,12 @@
 
   -- end to end performance testing.
 
+  -- ability to interpret SIGHUP without hanging up the socket.
+
+  -- Move Daniel's file ingestor ncsFileIngerinto 
+
+  -- check to refuse to start up as root.
+
   -- Move Collection stuff into new config methods.
        -- figure out where to put them... /apps/px/cx/collections
 	  cx == conversions ?
@@ -33,15 +39,17 @@
 	-- supports multiple protocols (http,https, sftp  etc...)
 	-- based on curl.
 
-
   -- full file fetcher, as another prx method.
   	-- based on Daniel's work for scribe files.
 	-- use also for gudfx stuff.
 	-- good market for this with implementation, if
            we do it right.
 
-  -- Complete English Documentation
-     
+  -- Documentation
+	-- Extract all the TIKI stuff into a sub-dir like requirements/Spec/Design.?
+	-- keep it for reference.
+	-- 
+  -- Complete French Documentation     
 
   -- i18n (logs and error messages controlled by locales, default English, 'C' locale)
  
@@ -52,4 +60,4 @@
   -- (only later, for PDS) add ingester conversion routines. to do the 
      *2gif, or whatever conversions, and have all versions ingested.
 
-
+  -- once we get to PDS... all those unwrappers from Rejean... 
