@@ -90,10 +90,22 @@ class socketManagerAm(socketManager.socketManager):
 		length='null'
 		firsttime='null'
 		timestamp='null'
-		future='null'
+		future[20]='null'
+
 		#assemblage de l'entete avec le contenu du bulletin
-		bulletinStr = header+src_inet+dst_inet+threads+start+length+firsttime+timestamp+future+bulletin.getBulletin()
-                return 'bulletinStr'
+		#bulletinStr = header+src_inet+dst_inet+threads+start+length+firsttime+timestamp+future+bulletin.getBulletin()
+		#header[80]
+#(header,src_inet,dst_inet,threads,start,length,firsttime,timestamp,future) = \
+#                                 struct.unpack(self.patternAmRec,self.inBuffer[0:self.sizeAmRec])
+		
+		pattern = '80s'
+		header = struct.unpack(pattern,bulletin.getBulletin())
+
+		
+
+		wrappedBulletin = bulletinHeader + bulletin.getBulletin()	
+
+                return wrappedBulletin
 
         def checkNextMsgStatus(self):
                 __doc__ = socketManager.socketManager.checkNextMsgStatus.__doc__ + \
@@ -167,13 +179,11 @@ class socketManagerAm(socketManager.socketManager):
 
                         except socket.error, e:
                                 #erreurs potentielles: 104, 107, 110 ou 32
-                                self.logger.writeLog(self.logger.ERROR,"senderAm.write(): la connexion est ro
-mpue: %s",str(e.args))
+                                self.logger.writeLog(self.logger.ERROR,"senderAm.write(): la connexion est rompue: %s",str(e.args))
                                 #modification du statut de la connexion
                                 #tentative de reconnexion
                                 self.connected = False
-                                self.logger.writeLog(self.logger.INFO,"senderAm.write(): tentative de reconne
-xion")
+                                self.logger.writeLog(self.logger.INFO,"senderAm.write(): tentative de reconnexion")
                                 self.socket.close()
                                 self._socketManager__establishConnection()
 
