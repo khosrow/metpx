@@ -81,13 +81,10 @@ class collectionManager(bulletinManager.bulletinManager):
 		pathDest=None, \
 		lineSeparator='\n', \
 		extension =':', \
-		statusFile='status',
+		statusFile='status', \
 		opts=fet.options):
 
-		if pathDest == None: # trigger FET
-		   self.use_pds = False
-		else:
-		   self.use_pds = True
+		if pathDest != None: # trigger FET
 		   collectionParams = collectParms
 		   opts.delaiMaxSeq = delai
 		   opts.extension = extension 

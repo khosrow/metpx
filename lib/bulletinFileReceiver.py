@@ -29,7 +29,8 @@ def run(logger):
 	9999,
         '\n', 
         fet.options.extension, 
-        fet.FET_ETC + 'header2client.conf' )
+        fet.FET_ETC + 'header2client.conf',
+        fet.options.use_pds )
 
    while True:
    # We put the bulletins (read from disk) in a dict (key = absolute filename)

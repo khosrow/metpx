@@ -115,6 +115,12 @@ FET - File Exchange Tracker, specification
 
 removing/changing configuration options:
 
+  - there should be no options to support debugging, or if there
+    are such options, they should be clearly marked as such, and
+    not be required in config files for normal use.
+
+  - there should be reasonable defaults for options, wherever possible.
+
   - client_id from the pds client config file names the config file
     in the transmission directory trees for configuration and spooling
 

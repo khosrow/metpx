@@ -46,12 +46,13 @@ class collectionGateway(gateway.gateway):
 		if options.collector:
                   self.unBulletinManager = \
                         bulletinManager.bulletinManager(    
-				pathTemp=fet.FET_DATA + fet.FET_TMP, 
+				pathTemp=fet.FET_DATA+fet.FET_TMP, 
 				logger=logger,
-				pathSource=fet.FET_DATA + fet.FET_CL,
+				pathSource=fet.FET_DATA+fet.FET_CL,
 				pathDest='/dev/null',
-				pathFichierCircuit=fet.FET_ETC + 'header2client.conf',
-				extension=options.extension
+				pathFichierCircuit=fet.FET_ETC+'header2client.conf',
+				extension=options.extension,
+                                use_pds = fet.options.use_pds
 				)	
 		else:
                   self.unBulletinManager = \
@@ -61,6 +62,7 @@ class collectionGateway(gateway.gateway):
                                 pathDest = self.config.pathDestination, \
                                 pathFichierCircuit = None, \
                                 extension = self.config.extension \
+                                use_pds = fet.options.use_pds
                                 )
 
 		# Partage du même map pour les 2 managers

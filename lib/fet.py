@@ -724,7 +724,23 @@ def startup(opts, logger):
    if FET_ETC[-1] != '/':
      FET_ETC = FET_ETC + '/'
 
-   initDB(logger)
+   options.use_pds=False
+   try:
+     pxconf = open( FET_ETC + 'px.conf', 'r' )
+     cf=pxconf.readline()
+     while cf:
+        cfl=cf.split()
+        if clf[0] == 'usePDS':
+           if clf[1] == 'True':
+             options.use_pds=True
+        cf=pxconf.readline()
+     pxconf.close()
+   except:
+     pass
+   
+   if not options.use_pds:
+        initDB(logger)
+
    readClients(logger)
    readSources(logger)
    readCollections(options,logger)

@@ -2,33 +2,29 @@
 
   -- move code to a new repository.
         -- remove the old bin/'s
+        -- remove self.config support, commit to self.options.
+
+  -- develop basic self-test suite.
 
   -- add use_pds support to options.
 
   -- revamp coding standard.
         -- change indents to 4, ban tabs. (reindent.py ... )
         -- move 'authorship' to start of file, alone. not every routine.
+           If a file has more than one author major, list all at top (once)
         -- scope (public vs. private) of a routine is revealed by it's name
            this information is redundant. Date per routine is redundant.
-           CVS logs can give that information.
 
-
-  -- put all log messages in English.
+  -- clone PDS messages, to minimize impact on pds-stats & columbo.
+        -- put all log messages in English.
+        -- concise (there are a lot more of them.)
 
   -- AFTN support -- DL
 	-- need a contingency if we move the Tandem.
 
-
-  -- replace 'active' verb with just file naming?
-       (ie. mv yup.conf to yup.inactive )
-
   -- end to end performance testing.
 
   -- ability to interpret SIGHUP without hanging up the socket.
-
-  -- Move Collection stuff into new config methods.
-       -- figure out where to put them... /apps/px/cx/collections
-	  cx == conversions ?
 
   -- more options on receiver? (tune directory sleep timer or...)
 

@@ -2,7 +2,7 @@
 FET - File Exchange Tracker.
 
 initial file hierarchy:
-        FET_DATA= /apps/fet
+        FET_DATA= /apps/px
 	FET_DATA/db/<date>/
 	FET_DATA/rx/<source>/[1..5]_<YYYYMMDDHH>
 	FET_DATA/tx/<client>/[1..5]_<YYYYMMDDHH>
