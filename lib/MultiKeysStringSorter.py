@@ -23,11 +23,12 @@ class MultiKeysStringSorter:
    def sort(self):
       ssList = [SortableString(string) for string in self.list]
       #temp = [ (ss.priority, ss.timestamp, i, ss.data) for i, ss in enumerate(ssList) ]
-      temp = [ (ss.priority, ss.timestamp, ss.data) for ss in ssList ]
-      #print temp
+      #temp = [ (ss.priority, ss.timestamp, ss.data) for ss in ssList ]
+      temp = [ (ss.concatenatedKeys, ss.data) for ss in ssList ]
       temp.sort()
       #return [ data for priority, timestamp, i, data in temp ]
-      return [ data for priority, timestamp, data in temp ]
+      #return [ data for priority, timestamp, data in temp ]
+      return [ data for concatenatedKeys, data in temp ]
 
 if __name__ == "__main__":
 
