@@ -157,6 +157,8 @@ class bulletinAm(bulletin.bulletin):
                    Auteur:      Louis-Philippe Thériault
                    Date:        Octobre 2004
 		"""
+		self.replaceChar('\r','')
+
 		unBulletin = self.bulletin
 
 		if len(self.getHeader().split()) < 1:
