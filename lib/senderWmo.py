@@ -187,7 +187,6 @@ class senderWmo(gateway.gateway):
 			False,   # FIXME: should be True, but bug for now.
 			self.logger, 
 			eval(fet.clients[self.options.client][4]) )
-		   print self.reader
                    self.reader.sort()
                    return(self.reader.getFilesContent(fet.clients[self.options.client][5]))
                 """
