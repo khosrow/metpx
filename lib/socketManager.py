@@ -149,8 +149,10 @@ class socketManager:
         	        self.socket.close()
 	                self.socket = conn
 
-		# Pour que l'interrogation du buffer ne fasse attendre le système
-		self.socket.setblocking(False)
+		#L'ensemble des protocoles implantes ici n'ont pas besoin du non-blocking
+		#Si le non-blocking est utilise, les sender sont en probleme et aptes
+		#a mettre un receiver a terre en moins de deux...
+		self.socket.setblocking(True)
 
 		self.logger.writeLog(self.logger.INFO,"Connexion établie avec %s",str(self.remoteHost))
 		self.connected = True
