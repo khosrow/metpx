@@ -280,11 +280,18 @@ class bulletinCollection(bulletin.bulletin):
 			self.mapCollection['mapStations'][station] = data
 		else:
 			self.logger.writeLog(self.logger.WARNING,\
-				"Du data est déja présent pour la station (collection:%s, station:%s)" % (self.mapCollection['header'].splitlines()[0],station))
+				"Du data est déja présent pour la station (collection:%s, station:%s)" % \
+				(self.mapCollection['header'].splitlines()[0],station))
 			# S'il y a déja du data de présent, et que le nouveau data est
 			# différent
 			if self.mapCollection['mapStations'][station] != data:
 				self.mapCollection['mapStations'][station] += self.lineSeparator + data
+
+				self.logger.writeLog(self.logger.DEBUG,"Le data est différent, il sera ajouté")
+			else:
+				self.logger.writeLog(self.logger.DEBUG,"Le data est pareil, aucune modification")
+	 
+
 
 	def getStation(rawBulletin):
 		"""bulletinCollection.getStation(rawBulletin) -> station

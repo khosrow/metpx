@@ -69,7 +69,6 @@ class collectionManager(bulletinManager.bulletinManager):
 
 		self.collectionParams = collectionParams
 		self.delaiMaxSeq = delaiMaxSeq
-		self.includeAllStn = includeAllStn
 
 		self.lineSeparator = lineSeparator
 		self.extension = extension
@@ -77,6 +76,13 @@ class collectionManager(bulletinManager.bulletinManager):
 
 		self.initMapEntetes(pathFichierCollection)
 		self.statusFile = statusFile
+
+		# Variable pour définir si l'on veut inclure toutes les
+		# stations dans les fichiers de collection
+		if includeAllStn:
+			self.defaultNoDataStation = " NIL="
+		else:
+			self.defaultNoDataStation = None
 
 		# Init du map des entetes/priorités		
                 self.champsHeader2Circuit = 'entete:routing_groups:priority:'
@@ -111,8 +117,8 @@ class collectionManager(bulletinManager.bulletinManager):
 		# Si aucun champ BBB
 
 			# Si le bulletin est destiné a être collecté (entete + heure de collection)
-			if rawBulletin[:2] in self.collectionParams and \
-				int(self.getBullTimestamp(rawBulletin)[2:4]) in self.collectionParams[rawBulletin[:2]]['h_collection']:
+			if (rawBulletin[:2] in self.collectionParams) and \
+				(int(self.getBullTimestamp(rawBulletin)[2:4]) in self.collectionParams[rawBulletin[:2]]['h_collection']):
 			
 				try:
 	
@@ -312,6 +318,8 @@ class collectionManager(bulletinManager.bulletinManager):
 			self.mainDataMap['collectionMap'][rawBulletin.splitlines()[0]] = \
 				bulletinCollection.bulletinCollection(self.logger,self.mapEntetes2mapStations[entete],
 								      writeTime,rawBulletin.splitlines()[0])
+
+                        self.mainDataMap['collectionMap'][rawBulletin.splitlines()[0]].setTokenIfNoData(self.defaultNoDataStation)
 
 		# Ajout du bulletin dans la collection
 		station = bulletinCollection.bulletinCollection.getStation(rawBulletin)
