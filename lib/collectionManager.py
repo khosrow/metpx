@@ -14,6 +14,26 @@ class collectionManager(bulletinManager.bulletinManager):
 	   sont pour but d'êtres collectés, si les bulletins n'ont
 	   pas à êtres collectés, utiliser un bulletinManager.
 
+	   collectionParams		Map
+
+		   Map des  paramètres pour la gestion de temps des collections.
+
+		   collectionParams[entete][h_collection]        = Liste d'heures où la collection devra s'effectuer
+		   collectionParams[entete][m_primaire]          = Nombre de minutes après l'heure où la période
+		                                                   de collection primaire se terminera
+		   collectionParams[entete][m_suppl]             = Si la période de collection primaire est terminée,
+		                                                   une nouvelle période commence, et elle sera de cette
+		                                                   durée (une collection pour les retards...)
+	   delaiMaxSeq			Int
+					- Délai maximum avant de ne plus "compter" les séquences.
+					- Le programme 'oublie' la séquence après ce temps,
+					  et les bulletins sont flaggués en erreur
+
+	   includeAllStn		Bool
+					- Si à True, les fichiers de collection qui n'ont pas
+					  toutes les stations, complètent le data des stations
+					  manquantes par une valeur nulle
+
 	   L'état du programme est conservé dans un fichier qui est 
 	   dans <répertoire_temporaire>/<statusFile>, donc si le programme crash,
 	   ce fichier est rechargé et il continue.
@@ -22,12 +42,17 @@ class collectionManager(bulletinManager.bulletinManager):
            Date:        Novembre 2004
         """
 
-        def __init__(self,pathTemp,logger,pathFichierStations,pathSource=None, \
-                        pathDest=None,lineSeparator='\n',extension=':',statusFile='ncsCollection.status'):
+        def __init__(self,pathTemp,logger,pathFichierStations,collectionParams,delaiMaxSeq, \
+			includeAllStn,pathSource=None,pathDest=None,lineSeparator='\n', \
+			extension=':',statusFile='ncsCollection.status'):
 
 		self.pathTemp = self.__normalizePath(pathTemp)
 		self.pathSource = self.__normalizePath(pathSource)
 		self.pathDest = self.__normalizePath(pathDest)
+
+		self.collectionParams = collectionParams
+		self.delaiMaxSeq = delaiMaxSeq
+		self.includeAllStn = includeAllStn
 
 		self.lineSeparator = lineSeparator
 		self.extension = extension
@@ -60,15 +85,17 @@ class collectionManager(bulletinManager.bulletinManager):
 		if bbb == None:
 		# Si aucun champ BBB
 
-			pass
-
 			# Si le bulletin est destiné a être collecté
+			if rawBulletin[:2] in self.collectionParams:
 		
 				# Si dans la période de collection
 
 				# Sinon, retard
 
 			# Sinon, aucune modification, le bulletin sera déplacé
+			else:
+				# À déterminer (on garde les compteurs dans le nom du fichier???)
+				pass
 
 		else:
 		# Le bulletin a un champ BBB
@@ -99,6 +126,19 @@ class collectionManager(bulletinManager.bulletinManager):
 		else:
 			return None
 
+	def getBullTimestamp(self,rawBulletin):
+		"""getBullTimestamp(rawBulletin) -> jjhhmm
+
+		   jjhhmm		String
+					- Date de création du bulletin
+
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Novembre 2004
+		"""
+		if rawBulletin.splitlines()[0].split()[-1].isdigit():
+			return rawBulletin.splitlines()[0].split()[-1]
+		else:
+			return rawBulletin.splitlines()[0].split()[-2]
 
 	def writeBulletinToDisk(self, bulletin=None):
 		"""Redirection pour masquer celui de la superclasse"""
@@ -141,6 +181,9 @@ class collectionManager(bulletinManager.bulletinManager):
 		   Date:	Novembre 2004
 		"""
 		pass
+		# Doit finir (l'heure) par 00
+
+		# Si SA/SI/SM OU si champ BBB :True
 
         def initMapEntetes(self, pathFichierStations):
 		"""Même méthode que pour le bulletinManagerAm
