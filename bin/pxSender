@@ -1,6 +1,6 @@
-#!/usr/bin/python
-# -*- coding: UTF-8 -*-
 #! /usr/bin/env python2
+# -*- coding: UTF-8 -*-
+#!/usr/bin/python
 # -----------------------------------------------------
 # Définition globale pour le traîtement effectué par un 
 # sender (file2socket).
@@ -56,7 +56,7 @@ def main():
 	#FIXME: want to log fet.startup messages, will leave chicken dropping
 	#       files when invalid clients are entered.
 	logger = log.log(options.dataDir + '/log/' + 
-		  os.path.basename(sys.argv[0]) + "_" + options.client,
+		  os.path.basename(sys.argv[0]) + "_" + options.client + '.log',
 		  options.debug )
 
         fet.startup(options,logger)

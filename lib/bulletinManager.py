@@ -1,6 +1,9 @@
 # -*- coding: UTF-8 -*-
-"""Gestionnaire de bulletins"""
+"""Gestionnaire de bulletins
 
+   Auteur:	Louis-Philippe Thériault
+   Date:	Octobre 2004
+"""
 import math, string, os, bulletinPlain, traceback, sys, time, fet
 
 __version__ = '2.0'
@@ -68,8 +71,6 @@ class bulletinManager:
 	   Un bulletin manager est en charge de la lecture et écriture des
 	   bulletins sur le disque.
 
-	   Auteur:	Louis-Philippe Thériault
-	   Date:	Octobre 2004
 	"""
 
 	def __init__(self,
@@ -94,7 +95,6 @@ class bulletinManager:
 		self.compteur = 0
 		self.extension = extension
 		self.lineSeparator = lineSeparator
-		self.champsHeader2Circuit = 'entete:routing_groups:priority:'
 		self.mapEnteteDelai = mapEnteteDelai
 
 		#map du contenu de bulletins en format brut
@@ -136,9 +136,6 @@ class bulletinManager:
 
 			   Écrit le bulletin sur le disque. Le bulletin est une simple string.
 
-		   Visibilité:	Publique
-		   Auteur:	Louis-Philippe Thériault
-		   Date:	Octobre 2004
 		"""
 
 		if self.pathDest == None:
@@ -191,12 +188,10 @@ class bulletinManager:
 
 	            if self.mapCircuits.has_key(entete):
                        clist = self.mapCircuits[entete]['routing_groups']
-		       pri =  self.mapCircuits[entete]['priority']
 		    else:
 		       clist = []
-		       pri=5
 
-                    fet.directIngest( nomFichier, clist, pri, tempNom, self.logger )
+                    fet.directIngest( nomFichier, clist, tempNom, self.logger )
 	            os.unlink(tempNom)
 
 
@@ -207,9 +202,6 @@ class bulletinManager:
 		   Retourne un objetBulletin d'à partir d'un bulletin
 		   "brut".
 
-		   Visibilité:	Privée
-		   Auteur:	Louis-Philippe Thériault
-		   Date:	Octobre 2004
 		"""
 		return bulletinPlain.bulletinPlain(rawBulletin,self.logger,self.lineSeparator)
 
@@ -409,10 +401,6 @@ class bulletinManager:
 		"""normalizePath(path) -> path
 
 		   Retourne un path avec un '/' à la fin
-
-		   Visibilité:	Privée
-		   Auteur:	Louis-Philippe Thériault
-		   Date:	Octobre 2004
 		"""
 
 		if path != None:
@@ -437,10 +425,6 @@ class bulletinManager:
 		   Utilisation:
 
 			Générer le nom du fichier pour le bulletin concerné.
-
-		   Visibilité:	Privée
-		   Auteur:	Louis-Philippe Thériault
-		   Date:	Octobre 2004
 		"""
 		if compteur or bulletin.getError() != None or error:
 			compteur = True
@@ -488,10 +472,6 @@ class bulletinManager:
 		   Utilisation:
 
 			Générer la portion extension du nom du fichier.
-
-		   Visibilité:	Privée
-		   Auteur:	Louis-Philippe Thériault
-		   Date:	Octobre 2004
 		"""
 		newExtension = self.extension
 
@@ -527,10 +507,6 @@ class bulletinManager:
 
 			Retourner les lignes d'un fichier, utile pour lire les petites
 			databases dans un fichier ou les fichiers de config.
-
-		   Visibilité:	Privée
-                   Auteur: 	Louis-Philippe Thériault
-                   Date:   	Octobre 2004
                 """
                 if os.access(pathFic,os.R_OK):
                         f = open(pathFic,'r')
@@ -552,10 +528,6 @@ class bulletinManager:
 		   Utilisation:
 
 			Rechargement lors d'un SIGHUP.
-
-		   Visibilité:	Publique
-		   Auteur:	Louis-Philippe Thériault
-		   Date:	Décembre 2004
 		"""
 		oldMapCircuits = self.mapCircuits
 
@@ -581,17 +553,12 @@ class bulletinManager:
 					- Chemin d'accès vers le fichier de circuits
 
 		   Charge le fichier de header2circuit et assigne un map avec comme cle
-	           le premier champ de champsHeader2Circuit (premier token est la cle,
-	           le reste des tokens sont les cles d'un map contenant les valeurs
-	           associes. Le nom du map sera self.mapCircuits et s'il est à None,
-		   C'est que l'option est à OFF.
+                   champs:
+                        'routing_groups' -- list of clients to which the messages are to be routed.
+       '                priority'       -- priority to assign to the message.
 
 		   FIXME: Peter a fixé le chemin a /apps/px/etc/header2circuit.conf
                         donc le parametre choisi simplement si on s´en sert ou pas.
-
-		   Visibilité:	Privée
-		   Auteur:	Louis-Philippe Thériault
-		   Date:	Octobre 2004
 		"""
 		if pathHeader2circuit == None:
 		# Si l'option est à OFF
@@ -609,13 +576,8 @@ class bulletinManager:
 	        except Exception:
 	           raise bulletinManagerException('Impossible d\'ouvrir le fichier d\'entetes ' + pathHeader2circuit + ' (fichier inaccessible)' )
 	
-	        champs = self.champsHeader2Circuit.split(':')
-	
 	        lignes = os.read(fic,os.stat(pathHeader2circuit)[6])
 	
-		# Pour chaque ligne du fichier, on associe l'entête avec un map, qui est le nom des autres champs
-		# associés avec leur valeurs.
-		#   self.champsHeader2Circuit = 'entete:routing_groups:priority:'
 		bogus=[]
 	        self.logger.writeLog( self.logger.INFO, "validating header2client.conf, clients:" + string.join(fet.clients.keys()) )
 	        for ligne in lignes.splitlines():
@@ -644,10 +606,6 @@ class bulletinManager:
 
 		   À utiliser pour que plusieurs instances utilisant la même
 		   map.
-
-		   Visibilité:	Publique
-		   Auteur: 	Louis-Philippe Thériault
-	           Date:   	Octobre 2004
 		"""
 		return self.mapCircuits
 
@@ -656,10 +614,6 @@ class bulletinManager:
 
                    À utiliser pour que plusieurs instances utilisant la même
                    map.
-
-		   Visibilité:	Publique
-                   Auteur: 	Louis-Philippe Thériault
-                   Date:   	Octobre 2004
                 """
                 self.mapCircuits = mapCircuits
 	
@@ -677,10 +631,6 @@ class bulletinManager:
                       Exceptions possibles:
                            bulletinManagerException:       Si l'entête ne peut être trouvée dans le
 							   fichier de circuits
-
-		   Visibilité:	Publique
-		   Auteur:	Louis-Philippe Thériault
-		   Date:	Octobre 2004
 		"""
 		if self.mapCircuits == None:
 			raise bulletinManagerException("Le mapCircuit n'est pas chargé")
@@ -713,10 +663,6 @@ class bulletinManager:
 
 			Pour générer le path final où le bulletin sera écrit. Génère
 			le répertoire incluant la priorité.
-
-		   Visibilité:	Privée
-		   Auteur:	Louis-Philippe Thériault
-		   Date:	Octobre 2004
 		"""
 		# Si le bulletin est erronné
 		if bulletin.getError() != None:
@@ -744,10 +690,6 @@ class bulletinManager:
 
 		   Path_source:		String
 					-Path source que contient le manager
-
-		   Visibilité:	Publique
-		   Auteur:	Louis-Philippe Thériault
-                   Date:	Novembre 2004
 		"""
 		return self.pathSource
 
@@ -765,10 +707,6 @@ class bulletinManager:
 
 			Pouvoir vérifier qu'un bulletin soit dans les délais 
 			acceptables.
-
-		   Visibilité:	Publique
-		   Auteur:	Louis-Philippe Thériault
-		   Date:	Octobre 2004
 		"""
 		if self.mapEnteteDelai == None:
 			return

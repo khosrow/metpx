@@ -17,6 +17,14 @@
 		-- source configurations  
 		-- client configurations  clientconfigs
 
+        my LISP is showing...
+
+        The data structures are two lists, one of sources, the other of clients.
+        sources are read in from /apps/px/etc/rx/*.conf,
+
+        The client configs are read from /apps/px/etc/tx/*.conf
+
+
  2005/01/10 - begun by Peter Silva
 
 """
@@ -348,8 +356,10 @@ priority...
       number, default priority.
 
 extension... mapping to ingestname:
-      priority : what : ori_system : ori_site : data_type : data_format :
+      [ what ] : ori_system : ori_site : data_type : data_format/priority :
 
+      [what] is the unadorned file name, the thing that is being extended.
+       
 sample
       sacn444_bidule : input_source : origin_site : BULLETIN/PHOTO/CHART/RADAR
       datafmt ASCII/JPEG/........ :  
@@ -360,7 +370,7 @@ type -- URL indicating connection type
 
 """
 sourcedefaults = { 
-    'extension':'5:MISSING:MISSING:MISSING:MISSING', 
+    'extension':'MISSING:MISSING:MISSING:5', 
     'type':None,
     'mapEnteteDelai':None,
     'port':0,
@@ -387,7 +397,7 @@ def readSources(logger):
     while src :
       srcline=src.split()
       if ( len(srcline) >= 2 and not re.compile('^[ \t]*#').search(src) ) :
-        elif srcline[0] == 'arrival':
+        if srcline[0] == 'arrival':
 	  try:
             exec("source['mapEnteteDelai'] = " + string.join(srcline[1:]) )
 	  except:
@@ -445,16 +455,16 @@ def ingestName(r,s):
   rs = r.split(':')
   ss = sources[s]['extension'].split(':')
 
-  if ( len(rs) == 1 ) or ss[1] == '' :
+  if ( len(rs) == 1 ) or rs[1] == '' :
      rs = rs + [ ss[1] ]
-  if len(rs) == 2 or ss[2] == '' :
+  if len(rs) == 2 or rs[2] == '' :
      rs = rs + [ ss[2] ]
-  if len(rs) == 3 or ss[3] == '' :
+  if len(rs) == 3 or rs[3] == '' :
      rs = rs + [ ss[3] ]
-  if len(rs) == 4 or ss[4] == '' :
+  if len(rs) == 4 or rs[4] == '' :
      rs = rs + [ ss[4] ]
-  if len(rs) == 5 or ss[5] == '' :
-     rs = rs + [ ss[0] ]
+  if len(rs) == 5 or rs[5] == '' :
+     rs = rs + [ ss[5] ]
   rs = rs + [ time.strftime( "%Y%m%d%H%M%S", time.gmtime(time.time()) ) ]
      
   return string.join(rs,':')
@@ -480,14 +490,13 @@ def dbName(ingestname):
     return ''
 
 
-def clientQDirName( client, pri ):
-  """ return the directory into which a file of a given priority should be placed.
+def clientQDirName( client ):
+  """Return the directory into which a file of a given priority should be placed.
   A couple of different layouts being contemplated.
-  /apps/px/txq/<client>/1_YYmmddhh ??
+  /apps/px/txq/<client>/YYYYmmddhh ??
   """
   global clients
-  return FET_DATA + FET_TX + client + '/' + pri + '_' \
-             + time.strftime( "%Y%m%d%H", time.gmtime(time.time()) ) + '/'
+  return FET_DATA + FET_TX + client + '/' +  time.strftime( "%Y%m%d%H", time.gmtime(time.time()) ) + '/'
 
 
 def clientMatch(c,ingestname):
@@ -606,7 +615,7 @@ def linkFile(f,l):
   os.link( f, l )
 
 
-def directIngest(ingestname,clist,pri,lfn,logger):
+def directIngest(ingestname,clist,lfn,logger):
    """ link lfn into the db & client spools based on ingestname & clients 
 
        accepts a list of matching clients.
@@ -623,7 +632,7 @@ def directIngest(ingestname,clist,pri,lfn,logger):
      return 1
 
    for c in clist:
-     cname=clientQDirName( c, pri )
+     cname=clientQDirName( c )
      linkFile(dbn , cname + ingestname )   
 
    logger.writeLog( logger.INFO, "queued for " + string.join(clist) )
@@ -638,9 +647,8 @@ def ingest(ingestname,lfn,logger):
       it, and insert it in their queues.
 
    """
-   pri=ingestname.split(':')[5]
    clist=map( lambda x: x[0], clientMatches(ingestname))
-   return directIngest(ingestname,clist,pri,lfn,logger)
+   return directIngest(ingestname,clist,lfn,logger)
 
 
 def initDB(logger):

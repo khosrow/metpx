@@ -1,6 +1,6 @@
-#! /usr/bin/python
-# -*- coding: UTF-8 -*-
 #! /usr/bin/env python2
+# -*- coding: UTF-8 -*-
+#! /usr/bin/python
 # -----------------------------------------------------
 # Définition globale pour le traîtement effectué par un 
 # Receiver (socket2file).
@@ -99,7 +99,7 @@ def main():
 
 	# Init du log
         logger = log.log(options.dataDir + '/log/' + 
-		os.path.basename(sys.argv[0]) + "_" + args[0] ,
+		os.path.basename(sys.argv[0]) + "_" + args[0] + '.log',
 		options.debug )
 
         fet.startup(options,logger)

@@ -1,8 +1,23 @@
 
+
+  -- move code to a new repository.
+        -- remove the old bin/'s
+
+  -- add use_pds support to options.
+
+  -- revamp coding standard.
+        -- change indents to 4, ban tabs. (reindent.py ... )
+        -- move 'authorship' to start of file, alone. not every routine.
+        -- scope (public vs. private) of a routine is revealed by it's name
+           this information is redundant. Date per routine is redundant.
+           CVS logs can give that information.
+
+
+  -- put all log messages in English.
+
   -- AFTN support -- DL
 	-- need a contingency if we move the Tandem.
 
-  -- reindent.py ...
 
   -- replace 'active' verb with just file naming?
        (ie. mv yup.conf to yup.inactive )
