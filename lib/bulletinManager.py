@@ -164,6 +164,7 @@ class bulletinManager:
                     os.rename( tempNom , pathDest + nomFichier )
 		    self.logger.writeLog(self.logger.INFO, "Ecriture du fichier <%s>",pathDest + nomFichier)
                 else: 
+		    entete = ' '.join(unBulletin.getHeader().split()[:2])
                     fet.directingest( nomFichier, self.mapCircuits[entete]['routing_groups'], self.mapCircuits[entete]['priority'], tmppath, self.logger )
                     os.unlink(tmppath)
 
