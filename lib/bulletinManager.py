@@ -16,7 +16,9 @@ class bulletinManager:
 	   à l'intérieur des bulletins.
 
 	   Un bulletin manager est en charge de la lecture et écriture des
-	   bulletins sur le disque."""
+	   bulletins sur le disque. 
+
+	   #FIXME: DOCUMENTATION A COMPLETER SVP"""
 
 	def __init__(self,pathTemp,logger,pathSource=None,pathDest=None,maxCompteur=99999, \
 					lineSeparator='\n',extension=':',pathFichierCircuit=None,mapEnteteDelai=None):
@@ -31,6 +33,10 @@ class bulletinManager:
 		self.lineSeparator = lineSeparator
 		self.champsHeader2Circuit = 'entete:routing_groups:priority:'
 		self.mapEnteteDelai = mapEnteteDelai
+
+		#map du contenu de bulletins en format brut
+		#associe a leur arborescence absolue
+		self.mapBulletinsBruts = {}
 
 		# Init du map des circuits
 		self.initMapCircuit(pathFichierCircuit)
@@ -96,7 +102,188 @@ class bulletinManager:
 		"""
 		return bulletin.bulletin(rawBulletin,self.logger,self.lineSeparator)
 
-	def readBulletinFromDisk(self):
+	def readBulletinFromDisk(self,listeRepertoires,listeFichiersDejaChoisis=[],priorite=False):
+		"""
+                Nom:
+                readBulletinFromDisk
+
+                Parametres d'entree:
+		-listeRepertoires:
+                        les repertoires susceptibles d'etre lus,
+                        en format absolu
+                -listeFichiersDejaChoisis (optionnel):
+                        les fichiers choisis lors du
+                        precedent appel
+		-priorite (optionnel):
+			si priorite = 1 ou True, la methode ordonnancer()
+			est executee
+
+                Parametres de sortie:
+                -mapBulletinsBruts: 
+			dictionnaire du contenu brut des bulletins lus associe
+			a leur arborescence absolue
+
+                Description:
+                Lit le contenu des fichiers contenus dans le repertoire
+		voulu et retourne des bulletins bruts, ainsi que leur
+		origine absolue.  Si besoin est, un ordonnancement est effectue
+		pour choisir un repertoire prioritaire, de meme qu'une validation
+		des fichiers a lire en fonction de ceux deja lus.
+
+                Auteur:
+                Pierre Michaud
+
+                Date:
+                Novembre 2004
+		"""
+
+		try:
+			#par defaut, le premier repertoire est choisi
+			repertoireChoisi = listeRepertoires[0]
+
+			#determination du repertoire a lire
+			if priorite:
+                        	repertoireChoisi = self.ordonnancer(listeRepertoires)
+
+			#determination des fichiers a lire
+			listeFichiers = self.getListeFichiers(repertoireChoisi,listeFichiersDejaChoisis)
+		
+			#lecture du contenu des fichiers et
+			#chargement de leur contenu
+			return self.getMapBulletinsBruts(listeFichiers,repertoireChoisi)
+
+		except:
+			self.logger.writeLog(self.logger.ERROR,"(Erreur de chargement des bulletins)")
+			raise
+
+	def getMapBulletinsBruts(self,listeFichiers,repertoireChoisi):
+                """
+                Nom:
+		getMapBulletinsBruts
+
+                Parametres d'entree:
+                -listeFichiers:
+                        les fichiers a lire
+		-repertoireChoisi:
+			chemin absolu du repertoire a consulter
+
+                Parametres de sortie:
+                -mapBulletinsBruts:
+                        dictionnaire du contenu brut des bulletins lus associe
+                        a leur arborescence absolue
+
+                Description:
+                Lit le contenu des fichiers contenus dans le repertoire
+                voulu et retourne des bulletins bruts, ainsi que leur
+                origine absolue.
+
+                Auteur:
+                Pierre Michaud
+
+                Date:
+                Novembre 2004
+                """
+
+		try:
+			#vidange du map de l'etat precedent
+			self.mapBulletinsBruts = {}
+			#lecture et mapping du contenu brut des fichiers
+                        for fichier in listeFichiers:
+                                if os.access(repertoireChoisi+'/'+fichier,os.F_OK|os.R_OK) !=1:
+                                        raise bulletinManagerException("Fichier inexistant")
+                                fic = open(repertoireChoisi+'/'+fichier,'r')
+                                rawBulletin = fic.read()
+                                fic.close()
+                                self.mapBulletinsBruts[repertoireChoisi+'/'+fichier]=rawBulletin
+
+                        return self.mapBulletinsBruts
+
+		except:
+                        self.logger.writeLog(self.logger.ERROR,"(Erreur de lecture des bulletins)")
+                        raise
+
+	def getListeFichiers(self,repertoire,listeFichiersDejaChoisis):
+                """
+                Nom:
+              	getListeFichiers 
+
+                Parametres d'entree:
+                -repertoire: 	
+			le repertoire a consulter
+			en format absolu
+                -listeFichiersDejaChoisis:
+			les fichiers choisis lors du
+                	precedent appel	
+
+                Parametres de sortie:
+                -listeFichiersChoisis: 
+			liste des fichiers choisis
+
+                Description:
+                Lit les bulletins contenus dans un repertoire choisi selon la priorite
+		courante.  Le repertoire contient les bulletins de la priorite courante.
+		Les fichiers deja lus ne sont pas relus, ils sont mis de cote.
+
+                Auteur:
+                Pierre Michaud
+
+                Date:
+                Novembre 2004
+                """
+		try:
+			#lecture du contenu du repertoire
+			listeFichiersChoisis = os.listdir(repertoire)
+
+			#validation avec les fichiers deja lus
+			i=0
+			while True:
+				if i>=len(listeFichiersChoisis):
+					break
+				if listeFichiersChoisis[i] in listeFichiersDejaChoisis:
+					listeFichiersChoisis.pop(i)
+					continue
+				i+=1
+
+			return listeFichiersChoisis
+		
+		except:
+			self.logger.writeLog(self.logger.ERROR,"(Liste de repertoires invalide)")
+			return 1
+
+	def ordonnancer(self,listeRepertoires):
+                """
+                Nom:
+		ordonnancer
+
+                Parametres d'entree:
+                -listeRepertoires:	les repertoires susceptibles d'etre lus,
+					en format absolu
+
+                Parametres de sortie:
+                -repertoireChoisi: repertoire contenant les bulletins a lire
+				selon la priorite courante, en format absolu
+
+                Description:
+		Determine, parmi une liste de repertoires, lequel
+		doit etre consulte pour obtenir les bulletins prioritaires.
+		Dans la classe de base, la methode ne fait que retourner le
+		premier repertoire de la liste passee en parametre.  Donc,
+		cette methode doit etre redefinie dans les classes derivees.
+
+                Auteur:
+                Pierre Michaud
+
+                Date:
+                Novembre 2004
+                """
+		try:
+			sourceChoisie = listeRepertoires[0]
+			return sourceChoisie
+
+		except:
+			self.logger.writeLog(self.logger.ERROR,"(Liste de repertoires invalide)")
+
+	def effacerFichier(self,nomFichier):
 		pass
 
 	def __normalizePath(self,path):

@@ -7,7 +7,6 @@ __version__ = '2.0'
 
 class bulletinManagerAMIS(bulletinManager.bulletinManager):
 	__doc__ = bulletinManager.bulletinManager.__doc__ + \
-
         """
         #### CLASSE bulletinManagerAMIS ####
 
@@ -33,8 +32,8 @@ class bulletinManagerAMIS(bulletinManager.bulletinManager):
 	Octobre 2004 
         """
 
-	def __init__(self,pathTemp,logger,pathSource=None, \
-			pathDest=None,maxCompteur=99999,lineSeparator='\n',extension=':')
+	def __init__(self,pathTemp,logger,pathSource=None,\
+			pathDest=None,maxCompteur=99999,lineSeparator='\n',extension=':'):
 
 		bulletinManager.bulletinManager.__init__(self,pathTemp,logger, \
 						pathSource,pathDest,maxCompteur,lineSeparator,extension)

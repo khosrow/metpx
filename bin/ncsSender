@@ -23,9 +23,9 @@ def main():
 
 	# Message d'usage pour l' option parser
 	usage =  "%prog pathConfigFile\n" \
-		 "	 Un sender lit les bulletins dans un repertoire du disque et les\n"
-		 "	 envoie a un destinataire via une connexion socket.  Le fichier de\n"
-		 "	 configuration doit etre exempt d'erreur pour que le programme\n"
+		 "	 Un sender lit les bulletins dans un repertoire du disque et les\n" \
+		 "	 envoie a un destinataire via une connexion socket.  Le fichier de\n" \
+		 "	 configuration doit etre exempt d'erreur pour que le programme\n" \
 		 "	 fonctionne correctement."
 
 	# Instanciation de l'option parser

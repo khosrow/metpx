@@ -94,7 +94,7 @@ class senderAMIS(gateway.gateway):
 
                 self.write(resteDuBuffer)
 
-                self.logger.writeLog(self.logger.INFO,"Le senderAMIS est mort.  Traitement en cour reussi.")
+                self.logger.writeLog(self.logger.INFO,"Le senderAMIS est mort.  Traitement en cours reussi.")
 
 	def establishConnection(self):
                 __doc__ = gateway.gateway.establishConnection.__doc__ + \
@@ -162,16 +162,16 @@ class senderAMIS(gateway.gateway):
 #			except bulletinManagerException, e:
 #				JE SUIS ICI!!!!!!!!!!!!!!!	
 #A REFAIRESSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSZE
-	def write(self,data):
+	def write(self,dato):
 
-                self.logger.writeLog(self.logger.DEBUG,"%d nouveaux bulletins seront écrits",len(data))
+                self.logger.writeLog(self.logger.DEBUG,"%d nouveaux bulletins sont envoyes",len(dato))
 
                 while True:
-                        if len(data) <= 0:
+                        if len(dato) <= 0:
                                 break
 
-                        rawBulletin = data.pop(0)
+                        rawBulletin = dato.pop(0)
 
                         # FIXME test ici si une erreur
                         #self.unBulletinManagerAMIS.writeBulletinToDisk(rawBulletin)
-			self.unSocketManagerAMIS.sendBulletin(data)
+			self.unSocketManagerAMIS.sendBulletin(rawBulletin)

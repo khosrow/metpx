@@ -3,6 +3,7 @@ __version__ = '2.0'
 
 import struct, socket
 import socketManager
+import time
 
 class socketManagerAMIS(socketManager.socketManager):
 	__doc__ = socketManager.socketManager.__doc__ + \
@@ -33,20 +34,27 @@ class socketManagerAMIS(socketManager.socketManager):
 	def __init__(self,logger,type='slave',localPort=9999,remoteHost=None,timeout=None):
 		socketManager.socketManager.__init__(self,logger,type,localPort,remoteHost,timeout)
 
-        def wrapBulletin(self):
-		__doc__ = socketManager.socketManager.unwrapBulletin.__doc__ + \
+        def wrapBulletin(self,data):
+		__doc__ = socketManager.socketManager.wrapBulletin.__doc__ + \
 		"""
 		wrapBulletin test
 		"""
 		pass
 
-	def sendBulletin(data):
-		__doc__ = socketManager.socketManager.unwrapBulletin.__doc__ + \
+	def sendBulletin(self,data):
+		#__doc__ = socketManager.socketManager.sendBulletin.__doc__ + \
 		"""
 		sendBulletin test
 		"""
-		self.wrapBulletin()
-		self.socket.send(data)
+		while True:
+			self.wrapBulletin(data)
+			#try:
+			bytesSent = self.socket.send(data)
+			#sleep est imperatif, sinon la connexion se brise
+			time.sleep(0.5)
+			if bytesSent < len(data):
+				print "DANGER, SEULEMENT %d octets d'envoyes sur %d" % (bytesSent,len(data))
+			
 
         def checkNextMsgStatus(self):
                 __doc__ = socketManager.socketManager.checkNextMsgStatus.__doc__ + \
