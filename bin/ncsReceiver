@@ -69,7 +69,7 @@ def main():
 		logger.writeLog(logger.INFO,"Fermeture du programme (signal=%d)",sig)
 		
 		unGateway.shutdown()
-		sys.exit(-1)
+		sys.exit()
 	
 	# Assignement des signaux avec le shutdown
 	signal.signal(signal.SIGTERM,shutdown)
@@ -85,7 +85,7 @@ if __name__ == '__main__':
 	try:
 		main()
 	except Exception, e:
-		if logger != None:
+		if logger != None and e.args != ():
 			logger.writeLog(logger.EXCEPTION,"Exception: " + ''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
 		raise
 

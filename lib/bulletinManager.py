@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 """Gestionnaire de bulletins"""
 
-import math, string, os, bulletin, traceback, sys
+import math, string, os, bulletin, traceback, sys, time
 
 __version__ = '2.0'
 
@@ -68,6 +68,7 @@ class bulletinManager:
                         nomFichier = self.getFileName(unBulletin,error=True)
 			unFichier = os.open( self.pathTemp + nomFichier , os.O_CREAT | os.O_WRONLY )
 
+		print unBulletin.errorBulletin
                 os.write( unFichier , unBulletin.getBulletin() )
                 os.close( unFichier )
                 os.chmod(self.pathTemp + nomFichier,0644)
@@ -271,6 +272,10 @@ class bulletinManager:
 	        if not self.mapCircuits.has_key(entete):
 			bulletin.setError('Entete non trouvée dans fichier de circuits')
 	                raise bulletinManagerException('Entete non trouvée dans fichier de circuits')
+
+		# Check ici, si ce n'est pas une liste, en faire une liste
+		if not type(self.mapCircuits[entete]['routing_groups']) == list:
+			self.mapCircuits[entete]['routing_groups'] = [ self.mapCircuits[entete]['routing_groups'] ]
 	
 	        return self.mapCircuits[entete]['priority'] + '.' + '.'.join(self.mapCircuits[entete]['routing_groups'])
 
@@ -360,4 +365,5 @@ class bulletinManager:
 		# Calcul de l'interval de validité
 		if not( -1 * abs(minimum) < nbMinNow - nbMinBullTime < maximum ):
 			# La différence se situe en dehors de l'intervale de validité
+				self.logger.writeLog(self.logger.WARNING,"Délai en dehors des limites permises bulletin: "+unBulletin.getHeader()+', heure présente '+now)
 				unBulletin.setError('Bulletin en dehors du delai permis')
