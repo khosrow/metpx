@@ -17,6 +17,43 @@ from optparse import OptionParser
 import os.path
 import gateway, log
 import fet
+import bulletinManager
+
+# Définition de la méthode de shutdown "propre"
+def shutdown(sig,stack):
+  global unGateway
+  global logger
+  global isShutdowning
+
+  logger.writeLog(logger.DEBUG,"Reception d'un signal (signal=%d)",sig)
+
+  if not isShutdowning:
+    # Pour que le shutdown ne se fasse q'une fois
+    isShutdowning = True
+    logger.writeLog(logger.INFO,"Fermeture du programme (signal=%d)",sig)
+    unGateway.shutdown()
+    fet.lockStopOrDie( fet.FET_DATA + fet.FET_RX + args[0] + '/.lock' , 'stop' )
+    sys.exit()
+
+# Définition de la méthode de reload de config via SIGHUP
+def reloadConfig(sig,stack):
+   global unGateway
+   global logger
+   global options
+
+   logger.writeLog(logger.DEBUG,"Reception d'un signal (signal=%d)",sig)
+   if fet.options.source:
+      fet.startup(fet.options,logger)
+      if (fet.options.type=='wmo') or (fet.options.type=='am'):
+         unGateway.initMapEntete('/dev/null')
+         unGateway.bulletinManager.initMapCircuit(unGateway,'/dev/null')
+   else:
+      unGateway.reloadConfig()
+
+# Assignement des signaux avec le shutdown
+signal.signal(signal.SIGTERM,shutdown)
+signal.signal(signal.SIGINT,shutdown)
+signal.signal(signal.SIGHUP,reloadConfig)
 
 
 def main():
@@ -102,41 +139,6 @@ def main():
 	else:
 		raise Exception('Type de protocole non reconnu')	# FIXME
 
-
-	# Définition de la méthode de shutdown "propre"
-	def shutdown(sig,stack):
-		global unGateway
-		global logger
-		global isShutdowning
-
-		logger.writeLog(logger.DEBUG,"Reception d'un signal (signal=%d)",sig)
-
-		if not isShutdowning:
-		# Pour que le shutdown ne se fasse q'une fois
-			isShutdowning = True
-			logger.writeLog(logger.INFO,"Fermeture du programme (signal=%d)",sig)
-			unGateway.shutdown()
-        		fet.lockStopOrDie( 
-			   fet.FET_DATA + fet.FET_RX + args[0] + '/.lock' , 
-			   'stop' )
-			sys.exit()
-	
-	# Assignement des signaux avec le shutdown
-	signal.signal(signal.SIGTERM,shutdown)
-	signal.signal(signal.SIGINT,shutdown)
-
-	# Définition de la méthode de reload de config via SIGHUP
-	def reloadConfig(sig,stack):
-		global unGateway
-		global logger
-
-		logger.writeLog(logger.DEBUG,"Reception d'un signal (signal=%d)",sig)
-
-		unGateway.reloadConfig()
-
-	# Assignement des signaux avec le reloadConfig
-	signal.signal(signal.SIGHUP,reloadConfig)
-
 	unGateway.run()
 
 global logger
@@ -144,6 +146,8 @@ global isShutdowning
 
 isShutdowning = False
 logger = None
+
+unGateway = None
 
 if __name__ == '__main__':
 	try:

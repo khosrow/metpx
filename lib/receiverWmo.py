@@ -30,7 +30,7 @@ class receiverWmo(gateway.gateway):
 
 		# Instanciation du bulletinManagerWmo avec la panoplie d'arguments.
                 if not options.source:
-		  self.unBulletinManagerWmo = \
+		  self.unBulletinManager = \
 			bulletinManagerWmo.bulletinManagerWmo(	
                             self.config.pathTemp,logger, \
 			    pathDest = self.config.pathDestination, \
@@ -40,7 +40,7 @@ class receiverWmo(gateway.gateway):
 			    use_pds = self.config.use_pds
 								) 
 		else:
-		  self.unBulletinManagerWmo = \
+		  self.unBulletinManager = \
 			bulletinManagerWmo.bulletinManagerWmo(	
 			   fet.FET_DATA + fet.FET_RX + options.source, logger, \
 			   pathDest = '/dev/null', \
@@ -153,7 +153,7 @@ class receiverWmo(gateway.gateway):
 
 			rawBulletin = data.pop(0)
 
-			self.unBulletinManagerWmo.writeBulletinToDisk(rawBulletin)
+			self.unBulletinManager.writeBulletinToDisk(rawBulletin)
 
         def reloadConfig(self):
                 __doc__ = gateway.gateway.reloadConfig.__doc__
@@ -167,7 +167,7 @@ class receiverWmo(gateway.gateway):
 
                         # Reload du fichier de circuits
                         # -----------------------------
-                        self.unBulletinManagerWmo.reloadMapCircuit(ficCircuits)
+                        self.unBulletinManager.reloadMapCircuit(ficCircuits)
 
                         self.config.ficCircuits = ficCircuits
 

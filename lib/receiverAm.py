@@ -29,7 +29,7 @@ class receiverAm(gateway.gateway):
 
 		# Instanciation du bulletinManagerAm avec la panoplie d'arguments.
 		if not options.source:
-		   self.unBulletinManagerAm = \
+		   self.unBulletinManager = \
 			bulletinManagerAm.bulletinManagerAm(	
 				self.config.pathTemp,logger, \
 				pathDest = self.config.pathDestination, \
@@ -41,7 +41,7 @@ class receiverAm(gateway.gateway):
                                 use_pds = self.config.use_pds
 								) 
                 else:
-                  self.unBulletinManagerAm = \
+                  self.unBulletinManager = \
                         bulletinManagerAm.bulletinManagerAm(
                            fet.FET_DATA + fet.FET_RX + options.source, logger, \
                            pathDest = '/dev/null', \
@@ -157,7 +157,7 @@ class receiverAm(gateway.gateway):
 
 			rawBulletin = data.pop(0)
 
-			self.unBulletinManagerAm.writeBulletinToDisk(rawBulletin,includeError=True)
+			self.unBulletinManager.writeBulletinToDisk(rawBulletin,includeError=True)
 
         def reloadConfig(self):
                 __doc__ = gateway.gateway.reloadConfig.__doc__
@@ -172,13 +172,13 @@ class receiverAm(gateway.gateway):
 
                         # Reload du fichier de circuits
                         # -----------------------------
-                        self.unBulletinManagerAm.reloadMapCircuit(ficCircuits)
+                        self.unBulletinManager.reloadMapCircuit(ficCircuits)
 
                         self.config.ficCircuits = ficCircuits
 
                         # Reload du fichier de stations
                         # -----------------------------
-                        self.unBulletinManagerAm.reloadMapEntetes(ficCollection)
+                        self.unBulletinManager.reloadMapEntetes(ficCollection)
 
                         self.config.ficCollection = ficCollection
 
