@@ -39,6 +39,7 @@ FET_DB= 'db/today/'
 FET_TX= 'txq/'
 FET_RX= 'rxq/'
 FET_CL= 'clq/'
+FET_TMP= 'tmp/'
 
 FET_ETC='/apps/px/etc/'
 
@@ -321,8 +322,8 @@ def readClients(logger):
       logger.writeLog( logger.INFO, "ignored config of client " + clientid )
     
   # dump clients db
-  for k in clients.keys():
-     print "client ", k, " is: ",  clients[k], "\n"
+  #for k in clients.keys():
+  #   print "client ", k, " is: ",  clients[k], "\n"
 
   #print "\n\n\nPatterns\n\n\n"
   #print patterns
@@ -379,7 +380,12 @@ def readSources(logger):
 	  if srcline[1] == 'yes':
 	     isactive=1 
         elif srcline[0] == 'arrival':
-          exec("source['mapEnteteDelai'] = " + string.join(srcline[1:]) )
+	  try:
+            exec("source['mapEnteteDelai'] = " + string.join(srcline[1:]) )
+	  except:
+            logger.writeLog( logger.ERROR, 
+		"error in " + sourceid + " config: " + src )
+	  
 	else:
           source[srcline[0]] = string.join(srcline[1:]) 
 
@@ -394,6 +400,32 @@ def readSources(logger):
     else:
       logger.writeLog( logger.INFO, "ignored config of source " + sourceid )
 
+
+def readCollections(options,logger):
+          """read collection parameters from default configuration file.
+	     reads info from /apps/px/etc/collection.conf
+	     see comments in that file for parameter details.
+	  """
+	  options.delaiMaxSeq = 23
+	  options.extension = None
+	  options.collectionParams={}
+
+	  collcfg = open( FET_ETC + 'collection.conf', 'r' )
+	  cfline = collcfg.readline()
+	  while cfline:
+            cf = cfline.split()	
+	    if (len(cf) > 0 ) and not re.compile('^[ \t]*#').search(cfline) :
+               if cf[0] == 'collect':
+		 try:
+		   exec( "options.collectionParams['"+ cf[1] +"']=" + string.join(cf[2:]) )
+		 except:
+		   logger.writeLog(logger.ERROR, "error in collect spec: " + cfline )
+	       elif cf[0] == 'tooLate':
+		 options.DelaiMaxSeq = int(cf[1])
+	       elif cf[0] == 'extension':
+		 options.extension = cf[1]
+	    cfline = collcfg.readline()
+	  collcfg.close()
 
 def sourceQDirName(s):
   return FET_DATA + FET_RX + s
@@ -681,6 +713,7 @@ def startup(opts, logger):
    initDB(logger)
    readClients(logger)
    readSources(logger)
+   readCollections(options,logger)
    if options.client:
      if options.client in clients.keys():
        opts.type = clients[options.client][3]

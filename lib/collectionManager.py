@@ -1,14 +1,9 @@
 # -*- coding: UTF-8 -*-
 """Gestionnaire de 'collections'"""
 
+import re, os, time, string, gdbm, pickle
 import bulletinManager, bulletinManagerAm, bulletinPlain, bulletinCollection
-import os, time, string
-import gdbm, pickle
 import fet
-
-collectionParams = None
-delaiMaxSeq = 23
-extension = None
 
 __version__ = '2.0'
 
@@ -85,19 +80,19 @@ class collectionManager(bulletinManager.bulletinManager):
 		pathSource=fet.FET_DATA + fet.FET_CL, \
 		pathDest=None, \
 		lineSeparator='\n', \
-		ext =':', \
-		statusFile='status'):
-
-		global delaiMaxSeq
-		global collectionParams
+		extension =':', \
+		statusFile='status',
+		opts=fet.options):
 
 		if pathDest == None: # trigger FET
-		   readParams()
-		else
+		   self.use_pds = False
+		else:
+		   self.use_pds = True
 		   collectionParams = collectParms
-		   delaiMaxSeq = delai
-		   extension = ext 
+		   opts.delaiMaxSeq = delai
+		   opts.extension = extension 
 				    
+		self.options = opts
 		self.pathTemp = self.__normalizePath(pathTemp)
 		self.pathSource = self.__normalizePath(pathSource)
 		self.pathDest = self.__normalizePath(pathDest)
@@ -124,27 +119,11 @@ class collectionManager(bulletinManager.bulletinManager):
 		  # Création des structures
 	 	  self.mainDataMap = {'collectionMap':{},'sequenceMap':{},'sequenceWriteQueue':[]}
 
-	def readParams(self)
-	  global collectionParams
-	  global delaiMaxSeq
-
-	  collcfg = open( fet.FET_ETC + 'collection.conf', 'r' )
-	  cfline = collcfg.readline()
-	  self.collectionParams={}
-	  while cfline:
-            cf = cfline.split()	
-	    if not re.compile('^[ \t]*#').search(cf) :
-               if cf[0] == 'collect':
-		 exec( "self.collectionParams['"+ cf[1] +"']=" + string.join(srcline[2:]) )
-	       elif cf[0] == 'tooLate':
-		 self.DelaiMaxSeq = int(cf[1])
-	       elif cf[0] == 'extension':
-		 self.extension = cf[1]
-	    cfline = collcfg.readline()
-	  collcfg.close()
-
 	def reload(self):
-	   readParams
+	   """ re-initialize collection parameters.
+		intended to be triggerred when a SIGHUP is received.
+
+	   """
 	   reloadMapEntetes(self)
 
 	def addBulletin(self,rawBulletin):
@@ -730,8 +709,8 @@ class collectionManager(bulletinManager.bulletinManager):
                 self.mapEntetes = {}
                 self.mapEntetes2mapStations = {}
 
-	        if not self.config.use_pds:
-		  	pathFichierStations= fet.FET_ETC + 'collection_stations.conf'
+	        if self.options.collector:
+		   pathFichierStations= fet.FET_ETC + 'collection_stations.conf'
 
                 # Construction des 2 map en même temps
                 for ligne in self.lireFicTexte(pathFichierStations):

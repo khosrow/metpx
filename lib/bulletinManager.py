@@ -19,13 +19,16 @@ class bulletinManager:
 				- Obligatoire, doit être sur le même file system que
 				  pathSource/pathDest
 
-	   pathSource/pathDest	path
+	   pathSource		path
 
-				- Répertoire source et destination des fichiers
-				- Au moins un des 2 doit être fournis
+				Répertoire d´ou les fichiers sont lus. 
 
+	   pathDest		path
+				Répertoire ou les fichiers sont écrits.
+				en mode use_pds pathDest est necessaire.
 				Si le manager ne fait qu'écrire les fichier sur le disque,
 				seul pathDest est nécessaire.
+				en mode fet, le fichier va etre directement ingéré
 
 	   mapEnteteDelai	map
 
@@ -69,8 +72,17 @@ class bulletinManager:
 	   Date:	Octobre 2004
 	"""
 
-	def __init__(self,pathTemp,logger,pathSource=None,pathDest=None,maxCompteur=99999, \
-					lineSeparator='\n',extension=':',pathFichierCircuit=None,mapEnteteDelai=None,use_pds=0):
+	def __init__(self,
+		pathTemp,
+		logger,
+		pathSource=None,
+		pathDest=None,
+		maxCompteur=99999, \
+		lineSeparator='\n',
+		extension=':',
+		pathFichierCircuit=None,
+		mapEnteteDelai=None,
+		use_pds=0):
 
 		self.logger = logger
 		self.pathSource = self.__normalizePath(pathSource)
@@ -598,13 +610,14 @@ class bulletinManager:
 	        self.mapCircuits = {}
 
 		# Test d'existence du fichier
-	        try:
-			if not self.use_pds:
-                           pathHeader2circuit = fet.FET_ETC + 'header2client.conf'
+#	        try:
+		if True:
+		   if not self.use_pds:
+                     pathHeader2circuit = fet.FET_ETC + 'header2client.conf'
 
-	                fic = os.open( pathHeader2circuit, os.O_RDONLY )
-	        except Exception:
-	                raise bulletinManagerException('Impossible d\'ouvrir le fichier d\'entetes ' + pathHeader2circuit + ' (fichier inaccessible)' )
+	           fic = os.open( pathHeader2circuit, os.O_RDONLY )
+#	        except Exception:
+#	           raise bulletinManagerException('Impossible d\'ouvrir le fichier d\'entetes ' + pathHeader2circuit + ' (fichier inaccessible)' )
 	
 	        champs = self.champsHeader2Circuit.split(':')
 	

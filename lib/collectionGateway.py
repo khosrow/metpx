@@ -1,7 +1,9 @@
 # -*- coding: UTF-8 -*-
 """ReceiverWmo: socketWmo -> disk, incluant traitement pour les bulletins"""
 
-import gateway, bulletinManager, collectionManager, os
+import os
+import gateway, bulletinManager, collectionManager
+import fet
 
 class collectionGateway(gateway.gateway):
 	__doc__ = gateway.gateway.__doc__ + \
@@ -16,15 +18,19 @@ class collectionGateway(gateway.gateway):
 	Date:	Octobre 2004
 	"""
 
-	def __init__(self,path,logger):
-		gateway.gateway.__init__(self,path,logger)
+	def __init__(self,path,options,logger):
+		gateway.gateway.__init__(self,path,options,logger)
 
 		self.bulletinsAEffacer = []
 
 		# Instanciation des collectionManager(writer)
                 self.logger.writeLog(logger.DEBUG,"Instanciation du collectionManager")
 
-		self.unCollectionManager = \
+		if options.collector:
+		   self.unCollectionManager = \
+			collectionManager.collectionManager( logger )
+		else:
+		   self.unCollectionManager = \
 			collectionManager.collectionManager(	
 				self.config.pathTemp,logger, \
 				self.config.ficCollection, \
@@ -37,8 +43,18 @@ class collectionGateway(gateway.gateway):
 
 		# Instanciation du bulletinManager(reader/writer)
                 self.logger.writeLog(logger.DEBUG,"Instanciation du bulletinManager")
-
-                self.unBulletinManager = \
+		if options.collector:
+                  self.unBulletinManager = \
+                        bulletinManager.bulletinManager(    
+				pathTemp=fet.FET_DATA + fet.FET_TMP, 
+				logger=logger,
+				pathSource=fet.FET_DATA + fet.FET_CL,
+				pathDest='/dev/null',
+				pathFichierCircuit=fet.FET_ETC + 'header2client.conf',
+				extension=options.extension
+				)	
+		else:
+                  self.unBulletinManager = \
                         bulletinManager.bulletinManager(    
 				self.config.pathTemp,logger, \
 				pathSource = self.config.pathSource, \
