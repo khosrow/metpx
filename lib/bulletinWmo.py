@@ -51,6 +51,18 @@ class bulletinWmo(bulletin.bulletin):
 	        if bulletin[:4] in ['SRCN','SRMN','SRND','SRWA','SRMT','SXCN','SRUS','SXVX','SXWA']:
         	        bulletin = bulletin.replace('~','\n')
 
+		if bulletin[:2] in ['UK']:
+			bulletin = bulletin.replace('\x01','')
+
+                if bulletin[:2] in ['FT']:
+                        bulletin = bulletin.replace('\x03','')
+
+                if bulletin[:2] in ['SX','SR']:
+                        bulletin = bulletin.replace('\x00','')
+
+                if bulletin[:2] in ['SX']:
+                        bulletin = bulletin.replace('\x11','')
+
 	        if bulletin[-1] != '\n':
         	        bulletin = bulletin + '\n'
 

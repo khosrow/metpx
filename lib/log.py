@@ -59,6 +59,9 @@ class log:
 		self.EXCEPTION = logging.ERROR
 		self.VERYVERBOSE = 5		# Niveau de logging 5
 
+		# Setting du nom pour les niveaux "custom"
+		logging.addLevelName(self.VERYVERBOSE,'VERYVERBOSE')
+
 	def writeLog(self, level, msg, *args, **kwargs):
 		"""writeLog(level,msg[,args])
 
