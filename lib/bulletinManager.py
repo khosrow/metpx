@@ -1,6 +1,6 @@
 """Gestionnaire de bulletins"""
 
-import math, string, os, bulletin, traceback
+import math, string, os, bulletin, traceback, sys
 
 __version__ = '2.0'
 
@@ -57,7 +57,7 @@ class bulletinManager:
 			# Le nom du fichier est invalide, génération d'un nouveau nom
 
 	                self.logger.writeLog(self.logger.WARNING,"Manipulation du fichier impossible! (Ecriture avec un nom non standard)")
-			self.logger.writeLog(self.logger.EXCEPTION,"Exception:", ''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
+			self.logger.writeLog(self.logger.EXCEPTION,"Exception: %s", ''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
 
                         nomFichier = self.getFileName(unBulletin,error=True)
 			unFichier = os.open( self.pathTemp + nomFichier , os.O_CREAT | os.O_WRONLY )
