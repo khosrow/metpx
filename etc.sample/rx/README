@@ -29,6 +29,9 @@ arrival { 'CA':(5,20),'WO':(20,40) }
   the valid interval.
 
 AddSMHeader true
+  true if a header is to be inserted at the beginning of a SM or SI bulletins.
+  the header is of the form: "AAXX jjhh4\\n".
+
   
 FIXME: NOT YET IMPLEMENTED:
 routing direct|pattern  

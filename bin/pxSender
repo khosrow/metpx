@@ -62,7 +62,6 @@ def main():
 
         logger.writeLog(logger.DEBUG,"Protocole %s sélectionné", options.type )
 
-        print "Protocole " + options.type + " sélectionné"
 	# Branchement selon le type de protocole	
 	if options.type == 'am':
 
@@ -81,7 +80,7 @@ def main():
 
 	elif options.type == 'single-file':
 	   import fetFile
-           fetFile.checkClient( options.client, fet.clients, fetfile.filePrio, logger )
+           fetFile.checkClient( options.client, fet.clients, fetFile.filePrio, logger )
 
 	else:
 	   raise Exception('Type de protocole non reconnu')	

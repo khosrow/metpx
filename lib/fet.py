@@ -197,7 +197,7 @@ def lockStopOrDie(lfn, cmd):
 
   else:
     if cmd == 'stop':
-      print "ERROR: no lock file found doing nothing. " 
+      print "ERROR: no lock file (" + lfn + ") found doing nothing. " 
       sys.exit(0)
 
   lockfile = open( lfn , 'w' )
@@ -365,6 +365,7 @@ sourcedefaults = {
     'type':None,
     'mapEnteteDelai':None,
     'port':0,
+    'AddSMHeader':False,
  }
 
 def readSources(logger):
@@ -397,7 +398,6 @@ def readSources(logger):
 	  except:
             logger.writeLog( logger.ERROR, 
 		"error in " + sourceid + " config: " + src )
-	  
 	else:
           source[srcline[0]] = string.join(srcline[1:]) 
 

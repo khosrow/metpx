@@ -345,34 +345,26 @@ class bulletinManager:
                 Novembre 2004
                 """
 		try:
-			#lecture du contenu du repertoire
-			listeFichiers = os.listdir(repertoire)
+		   #lecture du contenu du repertoire
+		   listeFichiers = os.listdir(repertoire)
 
-			#transformation en format absolu
-			liste = []
-			for fichier in listeFichiers:
-				#seuls les fichiers avec les bonnes
-				#permissions sont conserves
-				data = repertoire+'/'+fichier
-				liste.append(data)
+		   #transformation en format absolu
+		   liste = []
+		   for fichier in listeFichiers:
+			#seuls les fichiers avec les bonnes
+			#permissions sont conserves
+			if fichier[0] == '.':
+			   continue
+			data = repertoire+'/'+fichier
+			liste.append(data)
 
-			#listeFichiers = liste
+		   #listeFichiers = liste
 
-			#Retrait des fichiers deja choisis
-			listeFichiersChoisis = []
-			listeFichiersChoisis = [fichier for fichier in liste if fichier not in listeFichiersDejaChoisis]
+		   #Retrait des fichiers deja choisis
+		   listeFichiersChoisis = []
+		   listeFichiersChoisis = [fichier for fichier in liste if fichier not in listeFichiersDejaChoisis]
 
-			#validation avec les fichiers deja lus
-			#i=0
-			#while True:
-			#	if i>=len(listeFichiersChoisis):
-			#		break
-			#	if listeFichiersChoisis[i] in listeFichiersDejaChoisis:
-			#		listeFichiersChoisis.pop(i)
-			#		continue
-			#	i+=1
-
-			return listeFichiersChoisis
+		   return listeFichiersChoisis
 		
 		except Exception, e:
 			self.logger.writeLog(self.logger.ERROR,"bulletinManager.getListeFichiers(): Liste des repertoires invalide: %s",str(e.args))
