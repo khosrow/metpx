@@ -68,7 +68,6 @@ class bulletinManager:
                         nomFichier = self.getFileName(unBulletin,error=True)
 			unFichier = os.open( self.pathTemp + nomFichier , os.O_CREAT | os.O_WRONLY )
 
-		print unBulletin.errorBulletin
                 os.write( unFichier , unBulletin.getBulletin() )
                 os.close( unFichier )
                 os.chmod(self.pathTemp + nomFichier,0644)
