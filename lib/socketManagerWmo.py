@@ -183,7 +183,6 @@ class socketManagerWmo(socketManager.socketManager):
 			#envoi du bulletin
 			#FIXME socket.error: (11, 'Resource temporarily unavailable')
                 	bytesSent = self.socket.send(data)
-			time.sleep(0.5)
 
 			#verifier si l'envoi est un succes
 			if bytesSent != len(data):
