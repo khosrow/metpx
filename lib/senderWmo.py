@@ -169,8 +169,8 @@ class senderWmo(gateway.gateway):
 
 			return data
 
-		except:
-               		self.logger.writeLog(self.logger.ERROR,"senderWmo.read(..): Erreur lecture")
+		except Exception, e:
+               		self.logger.writeLog(self.logger.ERROR,"senderWmo.read(..): Erreur lecture: %s",str(e.args))
 			raise
 
 	def write(self,data):
@@ -205,7 +205,6 @@ class senderWmo(gateway.gateway):
 				#creation du bulletin wmo
 				rawBulletin = data[key]
 				unBulletinWmo = bulletinWmo.bulletinWmo(rawBulletin,self.logger,finalLineSeparator='\r\r\n')
-
 				#envoi du bulletin wmo
 				succes = self.unSocketManagerWmo.sendBulletin(unBulletinWmo)
 
@@ -213,9 +212,11 @@ class senderWmo(gateway.gateway):
 				#est efface, sinon le bulletin est retire de la liste
 				#de fichier deja envoyes
 				if succes:
+                			self.logger.writeLog(self.logger.INFO,"bulletin %s envoye ",unBulletinWmo.bulletin[0])
 					self.unBulletinManagerWmo.effacerFichier(key)
                 			self.logger.writeLog(self.logger.DEBUG,"%s est efface",key)
 				else:
+                			self.logger.writeLog(self.logger.INFO,"bulletin %s: probleme d'envoi ",unBulletinWmo.bulletin[0])
 					if self.listeFichiersDejaChoisis.count(key)>0:
 						self.listeFichiersDejaChoisis.remove(key)
 

@@ -230,8 +230,8 @@ class bulletinManager:
 			#return self.getMapBulletinsBruts(listeFichiers)
 			return map
 
-		except:
-			self.logger.writeLog(self.logger.ERROR,"(Erreur de chargement des bulletins)")
+		except Exception, e:
+			self.logger.writeLog(self.logger.ERROR,"bulletinManager.readBulletinFromDisk: Erreur de chargement des bulletins: %s",str(e.args))
 			raise
 
 	def getMapBulletinsBruts(self,listeFichiers):
@@ -275,8 +275,8 @@ class bulletinManager:
 
                         return self.mapBulletinsBruts
 
-		except:
-                        self.logger.writeLog(self.logger.ERROR,"(Erreur de lecture des bulletins)")
+		except Exception, e:
+			self.logger.writeLog(self.logger.ERROR,"bulletinManager.getMapBulletinsBruts(): Erreur de lecture des bulletins: %s",str(e.args))
                         raise
 
 	def getListeFichiers(self,repertoire,listeFichiersDejaChoisis):
@@ -337,8 +337,8 @@ class bulletinManager:
 
 			return listeFichiersChoisis
 		
-		except:
-			self.logger.writeLog(self.logger.ERROR,"(Liste de repertoires invalide)")
+		except Exception, e:
+			self.logger.writeLog(self.logger.ERROR,"bulletinManager.getListeFichiers(): Liste des repertoires invalide: %s",str(e.args))
 			return 1
 
 	def ordonnancer(self,listeRepertoires):
@@ -544,11 +544,11 @@ class bulletinManager:
 
 			self.logger.writeLog(self.logger.INFO,"Succès du rechargement du fichier de Circuits")
 
-		except Exception,e :
+		except Exception, e:
 
 			self.mapCircuits = oldMapCircuits
 
-			self.logger.writeLog(self.logger.WARNING,"Échec du rechargement du fichier de Circuits")
+			self.logger.writeLog(self.logger.WARNING,"bulletinManager.reloadMapCircuit(): Échec du rechargement du fichier de Circuits")
 
 			raise
 
