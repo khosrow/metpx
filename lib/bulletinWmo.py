@@ -80,9 +80,11 @@ class bulletinWmo(bulletin.bulletin):
 	        if bulletin[:2] in ['SA','SM']:
 	                bulletin = bulletin.replace('\x03\n','')
 
-	        if bulletin[-2:] == '\n\n':
-	                bulletin = bulletin[:-1]
+		# Ramène à un \n à la fin du bulletin
+	        bulletin = bulletin.rstrip('\n') + '\n'
 
 	        self.bulletin = bulletin.splitlines()
 
-
+		# Enlève les espaces à la fin des lignes
+		for i in range(len(self.bulletin)):
+			self.bulletin[i] = self.bulletin[i].rstrip()
