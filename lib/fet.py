@@ -512,6 +512,8 @@ def clientMatch(c,ingestname):
     if fnmatch.fnmatch(ingestname,p[1]) :
       if p[0] == 'imask':
 	 return p
+      else: 
+      	 return []
   return []
 
 

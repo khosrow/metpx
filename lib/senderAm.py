@@ -175,9 +175,21 @@ class senderAm(gateway.gateway):
                 Date:
                 Janvier 2005
                 """
-                self.reader = DiskReader(self.config.rootPath, MultiKeysStringSorter)
-                self.reader.sort()
-                return(self.reader.getFilesContent(self.config.fileNumber))
+		if not self.options.client:
+                   self.reader = DiskReader(
+		       self.config.rootPath, 
+		       eval(self.config.sorter))
+                   self.reader.sort()
+                   return(self.reader.getFilesContent(self.config.fileNumber))
+                else:
+                   self.reader = DiskReader(
+		   	fet.FET_DATA + fet.FET_TX + self.options.client, 
+			True, # name validation
+			self.logger,
+			eval(self.options.sorter))
+                   self.reader.sort()
+                   return(self.reader.getFilesContent(fet.clients[self.options.client][5]))
+
 		"""
                 data = []
 

@@ -2,6 +2,9 @@
   -- AFTN support -- DL
 	-- need a contingency if we move the Tandem.
 
+  -- replace 'active' verb with just file naming?
+       (ie. mv yup.conf to yup.inactive )
+
   -- end to end performance testing.
 
   -- ability to interpret SIGHUP without hanging up the socket.
