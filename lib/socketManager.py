@@ -262,7 +262,7 @@ suivants:
 		                        if inst.args[0] == 11:
 					# Le buffer du socket est vide
 		                                break
-		                        elif inst.args[0] == 104:
+		                        elif inst.args[0] == 104 or inst.args[0] == 110:
 					# La connection est brisée
 						self.logger.writeLog(self.logger.ERROR,"La connection est brisée")
 		                                raise socketManagerException('la connection est brisee')
