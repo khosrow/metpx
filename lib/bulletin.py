@@ -179,7 +179,7 @@ class bulletin:
 			return string.join(self.bulletin,self.lineSeparator)
 		else:
 			if includeError:
-		       	        return ("### " + self.errorBulletin[0] + self.lineSeparator + "ERROR BULLETIN" + self.lineSeparator) + string.join(self.bulletin,self.lineSeparator)
+		       	        return ("### " + self.errorBulletin[0] + self.lineSeparator + "PROBLEM BULLETIN" + self.lineSeparator) + string.join(self.bulletin,self.lineSeparator)
 			else:
 				return string.join(self.bulletin,self.lineSeparator)
 

@@ -417,19 +417,19 @@ class bulletinManager:
 					strCompteur = ' ' + string.zfill(self.compteur, len(str(self.maxCompteur)))
 
 				self.logger.writeLog(self.logger.WARNING,e)
-				return ('ERROR_BULLETIN ' + bulletin.getHeader() + strCompteur + self.getExtension(bulletin,error=True)).replace(' ','_')
+				return ('PROBLEM_BULLETIN ' + bulletin.getHeader() + strCompteur + self.getExtension(bulletin,error=True)).replace(' ','_')
 		elif bulletin.getError() != None and not error:
 		# Le bulletin est erronné mais l'entête est "imprimable"
-			return ('ERROR_BULLETIN ' + bulletin.getHeader() + strCompteur + self.getExtension(bulletin,error)).replace(' ','_')
+			return ('PROBLEM_BULLETIN ' + bulletin.getHeader() + strCompteur + self.getExtension(bulletin,error)).replace(' ','_')
 		else:
 		# L'entête n'est pas imprimable
-			return ('ERROR_BULLETIN ' + 'UNPRINTABLE HEADER' + strCompteur + self.getExtension(bulletin,error)).replace(' ','_')
+			return ('PROBLEM_BULLETIN ' + 'UNPRINTABLE HEADER' + strCompteur + self.getExtension(bulletin,error)).replace(' ','_')
 
 	def getExtension(self,bulletin,error=False):
 		"""getExtension(bulletin) -> extension
 
 		   Retourne l'extension à donner au bulletin. Si error est à True,
-		   les champs 'dynamiques' sont mis à 'ERROR'.
+		   les champs 'dynamiques' sont mis à 'PROBLEM'.
 
 		   -TT:		Type du bulletin (2 premieres lettres)
 		   -CCCC:	Origine du bulletin (2e champ dans l'entête
@@ -463,9 +463,9 @@ class bulletinManager:
 			return newExtension
 		else:
 			# Une erreur est détectée dans le bulletin
-			newExtension = newExtension.replace('-TT','ERROR')\
-                                                   .replace('-CCCC','ERROR')\
-						   .replace('-CIRCUIT','ERROR')
+			newExtension = newExtension.replace('-TT','PROBLEM')\
+                                                   .replace('-CCCC','PROBLEM')\
+						   .replace('-CIRCUIT','PROBLEM')
 
 			return newExtension
 			
@@ -623,20 +623,20 @@ class bulletinManager:
 		"""
 		# Si le bulletin est erronné
 		if bulletin.getError() != None:
-			return self.pathDest.replace('-PRIORITY','ERROR')
+			return self.pathDest.replace('-PRIORITY','PROBLEM')
 
 		try:
 			entete = ' '.join(bulletin.getHeader().split()[:2])
 		except Exception:
 			self.logger.writeLog(self.logger.ERROR,"Entête non standard, priorité impossible à déterminer(%s)",bulletin.getHeader())
-			return self.pathDest.replace('-PRIORITY','ERROR')
+			return self.pathDest.replace('-PRIORITY','PROBLEM')
 
 		if self.mapCircuits != None:
 			# Si le circuitage est activé
 			if not self.mapCircuits.has_key(entete):
 				# Entête est introuvable
 				self.logger.writeLog(self.logger.ERROR,"Entête introuvable, priorité impossible à déterminer")
-				return self.pathDest.replace('-PRIORITY','ERROR')
+				return self.pathDest.replace('-PRIORITY','PROBLEM')
 
 			return self.pathDest.replace('-PRIORITY',self.mapCircuits[entete]['priority'])
 		else:
