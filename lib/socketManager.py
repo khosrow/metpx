@@ -145,7 +145,11 @@ suivants:
 		self.connected = True
 
 	def closeProperly(self):
-		"""closeProperply() -> ([bulletinsReçus],nbBulletinsEnvoyés) 
+		"""closeProperply() -> ([bulletinsReçus],nbBulletinsEnvoyés)
+
+		   [bulletinsReçus]:	liste de str
+					- Retourne les bulletins dans le buffer lors
+					  de la fermeture
 
 		   Ferme le socket et finit de traîter le socket d'arrivée et de
 		   sortie.
@@ -153,22 +157,44 @@ suivants:
 		   Auteur:	Louis-Philippe Thériault
 		   Date:	Octobre 2004
 		"""
-		# FIXME: Pas encore développée!
+		self.logger.writeLog(self.logger.INFO,"Fermeture du socket et copie du reste du buffer")
 
-		# FIXME: À tester que l'on peut faire un shutdown si la connection
-		# est perdue
-	        self.socket.shutdown(2)
+		# Coupure de la connection
+		try:
+		        self.socket.shutdown(2)
+			self.logger.writeLog(self.logger.DEBUG,"Shutdown du socket: [OK]")
+		except Exception, e:
+			self.logger.writeLog(self.logger.DEBUG,"Shutdown du socket: [ERREUR]\n %s",str(e))
 
-		# FIXME: À implanter de traîter le reste du buffer
-	        try:
-	                self.recvBuffer = self.recvBuffer + self.socket.recv(1000000)
-	        except socket.error, inst:
-	                pass
+		# Copie du reste du buffer entrant après la connection
+		try:
+			self.__syncInBuffer(onlySynch = True)
+		except Exception:
+			pass
 
-		# FIXME: À tester la faisabilité si la connection est perdue
-        	self.socket.close()
+		# Fermeture du socket
+                try:
+                        self.socket.close()
+                except Exception:
+                        pass
+
+		self.connected = False
+
+		# Traîtement du reste du buffer pour découper les bulletins
+		bulletinsReçus = []
+		
+		while True:
+			bull = self.getNextBulletin()
+
+			if bull != '':
+				bulletinsReçus.append(bull)
+			else:
+				break
 
 		self.logger.writeLog(self.logger.INFO,"Succès de la fermeture de la connection socket")
+		self.logger.writeLog(self.logger.DEBUG,"Nombre de bulletins dans le buffer : %d",len(bulletinsReçus))
+
+		return (bulletinsReçus, 0)
 
 	def getNextBulletin(self):
 		"""getNextBulletin() -> bulletin
@@ -203,8 +229,12 @@ suivants:
 	def sendBulletin(self):
 		raise socketManagerException('notDefinedYet')
 
-	def __syncInBuffer(self):
+	def __syncInBuffer(self,onlySynch=False):
 		"""__syncInBuffer()
+
+		   onlySynch:	Booleen
+				- Si est à True, ne vérifie pas que la connection fonctionne,
+				  Ne fait que syncher le buffer
 
 		   Copie l'information du buffer du socket s'il y a lieu
 
@@ -216,22 +246,28 @@ suivants:
 	        while True:
 	                try:
 	                        temp = self.socket.recv(32768)
+
+				if temp == '':
+					if not onlySynch:
+						self.logger.writeLog(self.logger.ERROR,"La connection est brisée")
+						raise socketManagerException('la connection est brisee')
+
 				self.logger.writeLog(self.logger.VERYVERBOSE,"Data reçu: %s",temp)
 
         	                self.inBuffer = self.inBuffer + temp
 	                        break
 
 	                except socket.error, inst:
-	                        if inst.args[0] == 11:
-				# Le buffer du socket est vide
-	                                break
-	                        elif inst.args[0] == 104:
-				# La connection est brisée
-	                                self.socket.close()
-					self.connected = False
-	                                raise socketManagerException('la connection est brisee')
-	                        else:
-	                                raise
+				if not onlySynch:
+		                        if inst.args[0] == 11:
+					# Le buffer du socket est vide
+		                                break
+		                        elif inst.args[0] == 104:
+					# La connection est brisée
+						self.logger.writeLog(self.logger.ERROR,"La connection est brisée")
+		                                raise socketManagerException('la connection est brisee')
+		                        else:
+		                                raise
 
 	def __transmitOutBuffer(self):
 		pass

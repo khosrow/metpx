@@ -210,8 +210,8 @@ class bulletin:
 		bull = self.lineSeparator.join(self.bulletin)
 
 		if bull.find('BUFR') != -1 and bull.find('GRIB') != -1:
-			self.dataType = 'AN'
-		else:
 			self.dataType = 'BI'
+		else:
+			self.dataType = 'AN'
 
 		return self.dataType

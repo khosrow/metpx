@@ -34,8 +34,13 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 		"""
         	# Si c'est un bulletin FC/FT, possibilite de plusieurs bulletins,
                 # donc découpage en fichiers et reste du traitement saute (il
-                # sera effectue lors de la prochaine passe
-		premierMot = rawBulletin.splitlines()[0].split()[0]
+                # sera effectue lors de la prochaine passe.
+		# Si une erreur est détectée
+		try:
+			premierMot = rawBulletin.splitlines()[0].split()[0]
+		except Exception, e:
+			self.logger.writeLog(self.logger.ERROR,"Erreur lors du découpage d'entête\nBulletin:\n%s",rawBulletin)
+			return False
 
                 if len(premierMot) == 2 and premierMot in ["FC","FT"]:
                 	if string.count(string.join(rawBulletin,'\n'),'TAF') > 1:
@@ -60,13 +65,12 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 	                if ligne.split()[0] == motCle:
 	                        listeBulletins.append(string.join(unBulletin,self.lineSeparator))
 
-        	                unBulletin = list()
+       		                unBulletin = list()
 	                        unBulletin.append(entete)
 
         	        unBulletin.append(ligne)
 	
 	        listeBulletins.append(string.join(unBulletin,self.lineSeparator))
-
 	        return listeBulletins[1:]
 
         def _bulletinManager__generateBulletin(self,rawBulletin):

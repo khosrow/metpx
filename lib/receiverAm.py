@@ -39,19 +39,28 @@ class receiverAm(gateway.gateway):
 								) 
 
         def read(self):
-	        """read() -> data
+		__doc__ =  gateway.gateway.read.__doc__ + \
+		"""### Ajout de receiverAm ###
 
-	           data : Liste d'objets
+		   Le lecteur est le socket tcp, géré par socketManagerAm.
 
-	           Cette méthode retourne une liste d'objets, qui peut être
-	           ingérée par l'écrivain. Elle lève une exception si
-	           une erreur est détectée.
-	           """
+		   Auteur:	Louis-Philippe Thériault
+		   Date:	Octobre 2004
+		"""
 		data = []
 
 		while True:
-			# FIXME test ici si une erreur
-	                rawBulletin = self.unSocketManagerAm.getNextBulletin()
+			if self.socketManager.isConnected():
+				try:
+			                rawBulletin = self.unSocketManagerAm.getNextBulletin()
+				except socketManagerException, e:
+					if e == "La connection est brisée":
+						self.logger.writeLog(self.logger.ERROR,"Perte de connection, traîtement du reste du buffer"
+						resteDuBuffer, nbBullEnv = self.unSocketManagerAm.closeProperly()
+						data = data + resteDuBuffer
+						break
+			else:
+				raise gatewayException("Le lecteur ne peut être accédé")
 
 			if rawBulletin != '':
 				data.append(rawBulletin)
@@ -69,9 +78,11 @@ class receiverAm(gateway.gateway):
 	
 	           Cette méthode prends le data lu par read, et fait le traîtement
 	           approprié.
-	           """
+	        """
 
                 self.logger.writeLog(self.logger.DEBUG,"%d nouveaux bulletins seront écrits",len(data))
+
+
 
 		while True:
 			if len(data) <= 0:

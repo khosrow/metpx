@@ -10,13 +10,40 @@ import bulletin
 __version__ = '2.0'
 
 class bulletinWmo(bulletin.bulletin):
+        __doc__ = bulletin.bulletin.__doc__ + \
+	"""### Ajout de bulletinWmo ###
+
+        Implantation pour un usage concret de la classe bulletin.
+
+	Pour l'instant, un bulletinWmo ne se différencie que par son
+	traîtement spécifique.
+
+        Auteur: Louis-Philippe Thériault
+        Date:   Octobre 2004
+	"""
+
+	def __init__(self,stringBulletin,logger,lineSeparator='\n'):
+		bulletin.bulletin.__init__(self,stringBulletin,logger,lineSeparator)
 
         def doSpecificProcessing(self):
                 """doSpecificProcessing()
 
                    Modifie les bulletins provenant de Washington, transmis 
-		   par protocole Wmo, nommés "WMO" """
-		bulletin = self.bulletin
+		   par protocole Wmo, nommés "WMO"
+
+		   Auteur: Louis-Philippe Thériault
+		   Date:   Octobre 2004
+		"""
+                bulletin = self.lineSeparator.join(self.bulletin)
+
+	        if self.getDataType() == 'BI':
+	        # Si le bulletin est un BUFR, l'on remplace le premier set,
+	        # puis le dernier (apres le 7777) s'il y a lieu
+	                bulletin = bulletin.replace('\r\r\n','\n',1)
+	                bulletin = bulletin[:bulletin.rfind('7777')] + bulletin[bulletin.rfind('7777'):].replace('\r\r\n','\n')
+
+			self.bulletin = bulletin.splitlines()
+	                return 
 
 	        if bulletin[:4] in ['SDUS','WSUS','SRCN','SRMN','SRND','SRWA','SRMT','SXAA','SXCN','SXVX','SXWA','SXXX','FOCN','WAUS']:
         	        bulletin = bulletin.replace('\n\x1e','\n')
