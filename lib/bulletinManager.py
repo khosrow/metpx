@@ -78,7 +78,7 @@ class bulletinManager:
 		self.pathTemp = self.__normalizePath(pathTemp)
 		self.maxCompteur = maxCompteur
 		# FIXME: this should be read from a config file, haven't understood enough yet.
-		self.use_pds = 'yes'
+		self.use_pds = 1
 		self.compteur = 0
 		self.extension = extension
 		self.lineSeparator = lineSeparator
@@ -155,7 +155,7 @@ class bulletinManager:
                 os.close( unFichier )
                 os.chmod(tempNom,0644)
 
-		if self.use_pds == 'yes':
+		if self.use_pds:
 		    pathDest = self.getFinalPath(unBulletin)
 
 		    if not os.access(pathDest,os.F_OK):
@@ -664,7 +664,10 @@ class bulletinManager:
 		if not type(self.mapCircuits[entete]['routing_groups']) == list:
 			self.mapCircuits[entete]['routing_groups'] = [ self.mapCircuits[entete]['routing_groups'] ]
 	
-	        return self.mapCircuits[entete]['priority'] + '.' + '.'.join(self.mapCircuits[entete]['routing_groups']) + '.'
+                if self.use_pds:
+	          return self.mapCircuits[entete]['priority'] + '.' + '.'.join(self.mapCircuits[entete]['routing_groups']) + '.'
+ 		else:
+	          return self.mapCircuits[entete]['priority'] 
 
 	def getFinalPath(self,bulletin):
 		"""getFinalPath(bulletin) -> path
