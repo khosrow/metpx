@@ -509,6 +509,9 @@ def directingest(ingestname,clist,pri,lfn,logger):
    linkit(lfn, dbn)
    logger.writeLog( logger.INFO, "linking " + dbn + " to: " + lfn )
 
+   if len (clist) < 1:
+     return 1
+
    for c in clist:
      cname=clientQdirname( c, pri )
      linkit(dbn , cname + ingestname )   
