@@ -90,7 +90,7 @@ class bulletinManager:
 		# Init du map des circuits
 		self.initMapCircuit(pathFichierCircuit)
 
-	def writeBulletinToDisk(self,unRawBulletin,compteur=True,includeError=False):
+	def writeBulletinToDisk(self,unRawBulletin,compteur=True,includeError=True):
 		"""writeBulletinToDisk(bulletin [,compteur,includeError])
 
 		   unRawBulletin	String
