@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 """Superclasse pour un gateway de transfert de bulletins"""
-import imp, time
+import imp, time, sys
 
 __version__ = '2.0'
 
