@@ -23,7 +23,6 @@
 		-- when the directory is almost always empty
 		-- when the directory is getting multiple files per second.
 
-
   -- student project:
 	-- add sftp support into curl.
 	-- just work with the open source project and modify it.

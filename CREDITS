@@ -5,7 +5,7 @@ to get the file started, but doesn´t really know who did what.
 
 Louis-Phillippe.Theriault  ampersand ec.gc.ca
   First pass at design, all the early proofs of concept.  First receiver, 
-He who chose Python, over C.  First sender, and all the complex data 
+He who chose Python over C.  First sender, and all the complex data 
 transformations necesary on receipt of messages.  Bulletin Collection.  
 After the first pass, and some review, implemented a second pass design 
 with more OO methodologies.
@@ -15,7 +15,6 @@ Pierre.Michaud ampersand ec.gc.ca
 
 Daniel.Lemay ampersand ec.gc.ca
   file-based ingest receiver and generalized priorities to senders.
-
 
 Anne-Marie.Beaubien ampersand ec.gc.ca
   Project Lead.  Responsible for testing, lead QA, general bulwark 
