@@ -69,7 +69,7 @@ class collectionGateway(gateway.gateway):
 		self.bulletinsAEffacer = self.unBulletinManager.getListeFichiers(self.unBulletinManager.getPathSource(),[])
 
 		# Lecture de ces bulletins et stockage dans une liste
-		mapData = self.unBulletinManager.getMapBulletinsBruts(self.bulletinsAEffacer,self.unBulletinManager.getPathSource())
+		mapData = self.unBulletinManager.getMapBulletinsBruts(self.bulletinsAEffacer)
 
 		# Ici on s'intéresse seulement au bulletins bruts, extraction du bulletin d'à partir du map
 		data = [ mapData[x] for x in mapData ]
