@@ -127,7 +127,7 @@ def checkSource(s, sources,logger, igniter):
 from ftplib import FTP
 
 
-def sendFiles(c, files,logger):
+def sendFiles(c, files, chmod, logger):
     """ send the given list of files, in order.
 
         attempt to send the given list of files, logging the result
@@ -217,11 +217,19 @@ def sendFiles(c, files,logger):
                 #FIXME: does not take care of tmp renaming or chmod yet.
                 try:
                     #FIXME: does not do the chmod thing, uses a temporary name instead.
-                    pfn = open( p, 'r' )
-                    tmpnam = dfn + ".tmp"
-                    ftp.storbinary("STOR " + tmpnam , pfn )
-                    pfn.close()
-                    ftp.rename( tmpnam, dfn )
+                    if chmod == 0:
+                        pfn = open( p, 'r' )
+                        tmpnam = dfn + ".tmp"
+                        ftp.storbinary("STOR " + tmpnam , pfn )
+                        pfn.close()
+                        ftp.rename( tmpnam, dfn )
+                    else:
+                        pfn = open( p, 'r' )
+                        ftp.voidcmd('SITE UMASK 777')
+                        ftp.storbinary('STOR ' + dfn, pfn)
+                        pfn.close()
+                        ftp.voidcmd('SITE CHMOD ' + str(oct(chmod)) + ' ' + dfn)
+                        
                     os.unlink( p )
                     logger.writeLog( logger.INFO, "fichier " + os.path.basename(f) + " livré à "  + \
                       proto + ":" + hspec + " " + dspec + " " + dfn )

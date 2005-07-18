@@ -249,13 +249,18 @@ clients = {}
 #        with inheritance to override it.  but this is just a skeleton.
 #
 # -- for a file sender
-clientdefaults = [ [], '',10,'single-file','MultiKeysStringSorter',200,'3','000'  ]
+clientdefaults = [ [], '',10,'single-file','MultiKeysStringSorter',200,'3', 0 ]
 #
 
 # FIXME: currently get one global list of clients.
 #        if it were structured such that all the patterns were per client
 #        indices, then it could break out faster on first match.
 #
+def stringToOctal(string):
+    if len(string) != 3:
+        return 0644
+    else:
+        return int(string[0])*64 + int(string[1])*8 + int(string[2])
 
 def readClients(logger):
     """ read the client configuration directory
@@ -332,6 +337,9 @@ def readClients(logger):
                     client[4] = maskline[1]
                 elif maskline[0] == 'batch':
                     client[5] = int(maskline[1])
+                elif maskline[0] == 'chmod':
+                    client[7] = stringToOctal(maskline[1])
+
             mask=cliconf.readline()
 
         cliconf.close()
@@ -809,6 +817,7 @@ def startup(opts, logger):
             opts.sorter = 'MultiKeysStringSorter'
             opts.numFiles = 100
             opts.batch = clients[options.client][5]
+            opts.chmod = clients[options.client][7]
         else:
             logger.writeLog( logger.ERROR, "unknown client: " + options.client )
 
