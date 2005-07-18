@@ -115,7 +115,7 @@ def main():
             if len(reader.sortedFiles) >= 1:
                 sortedFiles = reader.sortedFiles[:fet.options.batch]
                 logger.writeLog(logger.INFO, "%d bulletins will be sent" % len(sortedFiles))
-                fetFile.sendFiles(options.client, reader.sortedFiles[:fet.options.batch], logger)
+                fetFile.sendFiles(options.client, reader.sortedFiles[:fet.options.batch], options.chmod, logger)
             else:
                 time.sleep(1)
 
