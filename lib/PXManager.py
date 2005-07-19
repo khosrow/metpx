@@ -221,6 +221,13 @@ class PXManager(SystemManager):
 
         self.txPaths = txPathsPriDate
 
+    def getDBDirs(self):
+        dates = os.listdir(PXPaths.DB)
+        if 'today' in dates: dates.remove('today')
+        if 'yesterday' in dates: dates.remove('yesterday')
+        return dates
+
+
 if __name__ == '__main__':
   
     manager = PXManager()
