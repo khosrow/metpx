@@ -249,7 +249,7 @@ clients = {}
 #        with inheritance to override it.  but this is just a skeleton.
 #
 # -- for a file sender
-clientdefaults = [ [], '',10,'single-file','MultiKeysStringSorter',200,'3', 0 ]
+clientdefaults = [ [], '',10,'single-file','MultiKeysStringSorter',200,'3', 0, None]
 #
 
 # FIXME: currently get one global list of clients.
@@ -339,6 +339,9 @@ def readClients(logger):
                     client[5] = int(maskline[1])
                 elif maskline[0] == 'chmod':
                     client[7] = stringToOctal(maskline[1])
+                elif maskline[0] == 'ftp_mode':
+                    client[8] = maskline[1]
+
 
             mask=cliconf.readline()
 
@@ -818,6 +821,7 @@ def startup(opts, logger):
             opts.numFiles = 100
             opts.batch = clients[options.client][5]
             opts.chmod = clients[options.client][7]
+            opts.ftp_mode = clients[options.client][8]
         else:
             logger.writeLog( logger.ERROR, "unknown client: " + options.client )
 

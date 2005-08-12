@@ -127,7 +127,7 @@ def checkSource(s, sources,logger, igniter):
 from ftplib import FTP
 
 
-def sendFiles(c, files, chmod, logger):
+def sendFiles(c, files, chmod, ftp_mode, logger):
     """ send the given list of files, in order.
 
         attempt to send the given list of files, logging the result
@@ -199,6 +199,8 @@ def sendFiles(c, files, chmod, logger):
 
                     try:
                         ftp = FTP( hspec, uspec, pwspec )
+                        if ftp_mode == 'active':
+                            ftp.set_pasv(False)
                     except:
                         #excinfo= sys.exc_info()
                         (type, value, tb) = sys.exc_info()
@@ -279,73 +281,6 @@ def checkDir(d,logger):
 logger = {}
 dmodified = {}
 
-def doClient(c,howtoprioritize,logger):
-    """ process the files queued for a single client.
-
-        look at all the subdirectories in the client queue
-        sort all the files using 'howtoprioritize'.
-        send them.
-    """
-    global dmodified
-
-    cname = fet.FET_DATA + fet.FET_TX + c
-    cfiles = []
-
-    for t in os.listdir( cname ):
-
-        dname=os.path.join(cname,t)
-
-        if ( t[0] == '.' ) or ( t[0:4] == 'tmp_' ) or (t[-4:] == '.tmp' ) or not os.access(dname, os.R_OK):
-            continue
-
-        # if the dir has changed, then ingest.
-        try:
-            dstat=os.stat(dname) ;
-        except:
-            logger.writeLog( logger.WARNING, "stat failed for " + dname )
-            continue
-
-        if not stat.S_ISDIR(dstat[stat.ST_MODE]):
-            cfiles = cfiles + [ dname ]
-            continue
-
-        if not dname in dmodified.keys():
-            dmodified[ dname ] = 0
-
-        if (dstat.st_mtime+2) >= dmodified[ dname ] :
-            dmodified[ dname ] = dstat.st_mtime
-            cfiles= cfiles + checkDir( dname, logger )
-
-    if cfiles:
-        cfiles.sort(howtoprioritize)
-        sendFiles( c, cfiles, logger )
-    else:
-        fet.pushWorkList(logger)
-    time.sleep(1) # this sleep is absolutely critical... avoids deadlock conditions with mtime,
-
-
-def checkClient( c, clients, howtoprioritize, logger ):
-    """look for client directories with data to transmit. Trigger ingestion.
-
-       Priority scheduling scheme.
-          -- scan all at pri x
-             if found no files at pri x, then go to x+1
-             if > thresh files fount at pri x, then  go to x+1
-
-       thresh == 100
-  FIXME holdover from rx
-    """
-
-
-    if not os.path.exists( fet.FET_DATA + fet.FET_TX):
-        logger.writeLog(logger.FATAL, "client queues parent directory" + fet.FET_DATA+ fet.FET_TX + " does not exist" )
-        return
-
-
-    while(1):
-        doClient(c,howtoprioritize,logger)
-
-
 def filePrio( x, y ):
     """ comparator function for sort.
 
@@ -356,4 +291,3 @@ def filePrio( x, y ):
     yy = os.path.basename(y).split(':')
     return cmp ( xx[4] + xx[6], yy[4] + yy[6] )
 
-#checkClient( sys.argv[1], fet.clients, filePrio, logger )
