@@ -114,7 +114,10 @@ class senderAMIS:
                                     % (self.reader.sortedFiles[index], type, value))
          #self.logger.writeLog(self.logger.INFO, "Caching stats: %s " % str(self.cacheManager.getStats()))
          (stats, cached, total) = self.cacheManager.getStats()
-         percentage = "%2.2f %% of the last %i requests were cached (implied %i files were deleted)" % (cached/total * 100,  total, cached)
+         if total:
+            percentage = "%2.2f %% of the last %i requests were cached (implied %i files were deleted)" % (cached/total * 100,  total, cached)
+         else:
+            percentage = "No entries in the cache"
          self.logger.writeLog(self.logger.INFO, "Caching stats: %s => %s" % (str(stats), percentage))
 
          #self.logger.writeLog(self.logger.INFO, "Cache: %s " % str(self.cacheManager.cache))
