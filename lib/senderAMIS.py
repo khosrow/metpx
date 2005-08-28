@@ -84,7 +84,7 @@ class senderAMIS:
 
          for index in range(len(data)):
             # If data[index] is already in cache, we don't send it
-            if self.cacheManager.find(data[index]) is not None:
+            if self.cacheManager.find(data[index], 'md5') is not None:
                 try:
                    os.unlink(self.reader.sortedFiles[index])
                    self.logger.writeLog(self.logger.INFO,"%s has been erased (was cached)", os.path.basename(self.reader.sortedFiles[index]))

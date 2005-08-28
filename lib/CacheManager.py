@@ -11,8 +11,7 @@
 #############################################################################################
 
 """
-import md5
-import os, os.path, sys, commands, re, pickle, time, logging, fnmatch
+import md5, time
 
 class CacheManager(object):
 
@@ -43,8 +42,13 @@ class CacheManager(object):
                 # Add the new key
                 self.cache[key] = [time.time(), 1]
 
-    def find(self, object):
-        key = md5.new(object).hexdigest()
+    def find(self, object, keyType='standard'):
+        #Create the key according to key type:
+        if keyType == 'standard': 
+            key = object
+        elif keyType == 'md5':
+            key = md5.new(object).hexdigest()
+
         if key in self.cache:
             self.cache[key][0] = time.time()
             self.cache[key][1] += 1
