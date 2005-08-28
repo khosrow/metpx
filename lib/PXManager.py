@@ -42,6 +42,17 @@ class PXManager(SystemManager):
         self.setTxPaths()
         #self.rxPaths = ['/apps/px/toto/', '/apps/px/titi/', '/apps/px/tata/']
 
+    def initPXPaths(self):
+        # ROOT, BIN, LIB, LOG, ETC, RXQ, TXQ, DB, RX_CONF, TX_CONF
+        self.createDir(PXPaths.BIN)
+        self.createDir(PXPaths.LIB)
+        self.createDir(PXPaths.LOG)
+        self.createDir(PXPaths.RX_CONF)
+        self.createDir(PXPaths.TX_CONF)
+        self.createDir(PXPaths.RXQ)
+        self.createDir(PXPaths.TXQ)
+        self.createDir(PXPaths.DB)
+
     def initNames(self):
         if not os.path.isdir(PXPaths.ROOT):
             self.logger.error("This directory: %s does not exist!" % (PXPaths.ROOT))
