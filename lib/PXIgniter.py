@@ -18,41 +18,42 @@ import fet
 
 class PXIgniter(Igniter):
    
-   def __init__(self, direction, type, client, cmd, lockPath, options=None, logger=None):
+   def __init__(self, direction, flowName, cmd, lockPath, logger=None):
       Igniter.__init__(self, cmd, lockPath) # Parent constructor
-      self.direction = direction            # Receiver or Sender (string)
-      self.type = type                      # wmo, am, etc. (string)
-      self.client = client                  # Client to send or Source from which to receive
-      self.options = options                # All options
+      self.direction = direction            # A string in ['sender', 'receiver']
+      self.flowName = flowName              # Client or Source's name
       self.logger = logger                  # Logger object
+      self.type = None                      # wmo, am, etc. (string)
+      self.flow = None                      # Client or Source object
       self.gateway = None                   # Gateway object
       self.reloadMode = False               # Indicate if we are in reload mode or not
 
-      #  Special case for the collections
-      if self.type == "collector" and self.client == None:
-         self.client = "collector"
-         
       eval("self." + cmd)()                 # Execute the command directly
 
    def setGateway(self, gateway):
       self.gateway = gateway
       #print "Gateway is: " + repr(gateway)
 
+   def setFlow(self, flow):
+      self.flow = flow
+      self.type = self.flow.type
+      #print "Flow is: " + repr(flow)
+        
    def printComment(self, commentID):
       if commentID == 'Already start':
-         print "WARNING: The %s %s is already started with PID %d, use stop or restart!" % (self.direction, self.client, self.lockpid)
+         print "WARNING: The %s %s is already started with PID %d, use stop or restart!" % (self.direction, self.flowName, self.lockpid)
       elif commentID == 'Locked but not running':
-         print "INFO: The %s %s was locked, but not running! The lock has been unlinked!" % (self.direction, self.client)
+         print "INFO: The %s %s was locked, but not running! The lock has been unlinked!" % (self.direction, self.flowName)
       elif commentID == 'No lock':
-         print "No lock on the %s %s. Are you sure it was started?" % (self.direction, self.client)
+         print "No lock on the %s %s. Are you sure it was started?" % (self.direction, self.flowName)
       elif commentID == 'Restarted successfully':
-         print "%s %s has been restarted successfully!" % (self.direction, self.client)
+         print "%s %s has been restarted successfully!" % (self.direction, self.flowName)
       elif commentID == 'Status, started':
-         print "%s %s is running with PID %d" % (self.direction, self.client, self.lockpid)
+         print "%s %s is running with PID %d" % (self.direction, self.flowName, self.lockpid)
       elif commentID == 'Status, not running':
-         print "* %s %s is not running" % (self.direction, self.client)
+         print "* %s %s is not running" % (self.direction, self.flowName)
       elif commentID == 'Status, locked':
-         print "** %s %s is locked (PID %d) but not running" % (self.direction, self.client, self.lockpid)
+         print "** %s %s is locked (PID %d) but not running" % (self.direction, self.flowName, self.lockpid)
 
    def start(self):
       
@@ -62,7 +63,7 @@ class PXIgniter(Igniter):
       signal.signal(signal.SIGTERM, self._shutdown)
       signal.signal(signal.SIGINT, self._shutdown)
       signal.signal(signal.SIGHUP, self._reload)
-      self.logger.writeLog(self.logger.INFO, "%s %s (type: %s) has been started" % (self.direction, self.client, self.type))
+      self.logger.info("%s %s has been started" % (self.direction, self.flowName))
 
    def stop(self):
       # If it is locked ...
@@ -90,7 +91,7 @@ class PXIgniter(Igniter):
       Do the real work here. Depends of type of sender/receiver
       """
       #print "shutdown() has been called"
-      self.logger.writeLog(self.logger.INFO, "%s %s (type: %s) has been stopped" % (self.direction, self.client, self.type))
+      self.logger.info("%s %s (type: %s) has been stopped" % (self.direction, self.flowName, self.type))
       os.kill(self.lockpid, signal.SIGKILL)
 
    def _reload(self, sig, stack):
@@ -98,14 +99,14 @@ class PXIgniter(Igniter):
       Do the real work here. Depends of type of sender/receiver
       """
       if self.gateway is None:
-         #print "_reload() has been called for %s (%s %s)" % (self.client, self.direction, self.type)
+         #print "_reload() has been called for %s (%s %s)" % (self.flowName, self.direction, self.type)
          #print "No gateway object! Nothing can be done"
 
          # Because we don't have a gateway object, it means that we can only reread the configuration
          # file of the source/client, not particular files like Circuit and Stations, because
          # they haven't been read at this time anyway.
-         #fet.startup(self.options, self.logger)
-         #self.logger.writeLog(self.logger.INFO, "%s has been reload" % self.direction)
+         #fet.startup(self.flow, self.logger)
+         #self.logger.info("%s has been reload" % self.direction)
 
          # If we are there, it is because we don't have a gateway object, if means that we are 
          # waiting for a connection, the easiest way to reread the configuration file of 
@@ -113,34 +114,34 @@ class PXIgniter(Igniter):
          # particular source/client is by restarting it!
          if os.fork() == 0:
             self.restart()
-            self.logger.writeLog(self.logger.INFO, "%s has been reloaded by restarting it" % self.direction)
+            self.logger.info("%s has been reloaded by restarting it" % self.direction)
          else:
             pass
       else:
          #print self.gateway
 
          if self.direction == 'sender':
-            fet.startup(self.options, self.logger)
-            self.logger.writeLog(self.logger.INFO, "%s has been reloaded" % self.direction)
+            fet.startup(self.flow, self.logger)
+            self.logger.info("%s has been reloaded" % self.direction)
             if self.type == 'amis':
                 self.gateway.cacheManager.clear()
-                self.logger.writeLog(self.logger.INFO, "Cache has been cleared") 
-            #self.logger.writeLog(self.logger.WARNING, "%s has not been reloaded" % self.direction)
+                self.logger.info("Cache has been cleared") 
+            #self.logger.warning("%s has not been reloaded" % self.direction)
          elif self.direction == 'receiver':
-            fet.startup(self.options, self.logger)
+            fet.startup(self.flow, self.logger)
             if self.type == 'am':
-               self.gateway.unBulletinManager.extension = self.options.extension
-               self.gateway.unBulletinManager.AddSMHeader = self.options.AddSMHeader
-               #print self.options
-               #print "ext: %s" % (self.options.extension)
-               #print "addSM: %s" % (self.options.AddSMHeader)
+               self.gateway.unBulletinManager.extension = self.flow.extension
+               self.gateway.unBulletinManager.AddSMHeader = self.flow.AddSMHeader
+               #print self.flow
+               #print "ext: %s" % (self.flow.extension)
+               #print "addSM: %s" % (self.flow.AddSMHeader)
                self.gateway.unBulletinManager.reloadMapCircuit('/dev/null')
                self.gateway.unBulletinManager.reloadMapEntetes(self.gateway.pathFichierStations)
-               self.logger.writeLog(self.logger.INFO, "%s has been reloaded" % self.direction)
+               self.logger.info("%s has been reloaded" % self.direction)
             if self.type == 'wmo':
-               self.gateway.unBulletinManager.extension = self.options.extension
+               self.gateway.unBulletinManager.extension = self.flow.extension
                self.gateway.unBulletinManager.reloadMapCircuit('/dev/null')
-               self.logger.writeLog(self.logger.INFO, "%s has been reloaded" % self.direction)
+               self.logger.info("%s has been reloaded" % self.direction)
             if self.type == 'single-file':
                self.reloadMode = True
             if self.type == 'bulletin-file':
@@ -169,7 +170,7 @@ class PXIgniter(Igniter):
          # SIGHUP is sent to initiate the reload
          os.kill(self.lockpid, signal.SIGHUP) 
       else:
-         print "No process to reload for %s (%s %s)!" % (self.client, self.direction, self.type)
+         print "No process to reload for %s (%s %s)!" % (self.flowName, self.direction, self.type)
 
       # In any case, we exit!!
       sys.exit(2)
@@ -180,7 +181,7 @@ if __name__ == "__main__":
 
 """
 def shutdown(sig, stack):
-   logger.writeLog(logger.INFO,"Reception d'un signal de shutdown (signal=%d)", sig)
+   logger.info("Reception d'un signal de shutdown (signal=%d)", sig)
    sys.exit()
 
 def reload(sig, stack):
@@ -188,7 +189,7 @@ def reload(sig, stack):
    config = gateway.gateway.loadConfig(args[0])
    bullManager = bulletinManager.bulletinManager(config.pathTemp, logger, config.pathSource, config.pathDestination, config.maxCompteur,
                                                  config.lineSeparator, config.extension, config.ficCircuits, config.use_pds)
-   logger.writeLog(logger.INFO,"Reception d'un signal de reload (signal=%d)", sig)
+   logger.info("Reception d'un signal de reload (signal=%d)", sig)
 
 
    (status, output) = commands.getstatusoutput("date")
