@@ -14,7 +14,6 @@
 """
 import sys, os, commands, signal
 from Igniter import Igniter
-import fet
 
 class PXIgniter(Igniter):
    
@@ -88,7 +87,7 @@ class PXIgniter(Igniter):
 
    def _shutdown(self, sig, stack):
       """
-      Do the real work here. Depends of type of sender/receiver
+      Do the real work here.
       """
       #print "shutdown() has been called"
       self.logger.info("%s %s (type: %s) has been stopped" % (self.direction, self.flowName, self.type))
@@ -99,14 +98,9 @@ class PXIgniter(Igniter):
       Do the real work here. Depends of type of sender/receiver
       """
       if self.gateway is None:
-         #print "_reload() has been called for %s (%s %s)" % (self.flowName, self.direction, self.type)
-         #print "No gateway object! Nothing can be done"
-
          # Because we don't have a gateway object, it means that we can only reread the configuration
          # file of the source/client, not particular files like Circuit and Stations, because
          # they haven't been read at this time anyway.
-         #fet.startup(self.flow, self.logger)
-         #self.logger.info("%s has been reload" % self.direction)
 
          # If we are there, it is because we don't have a gateway object, if means that we are 
          # waiting for a connection, the easiest way to reread the configuration file of 
@@ -121,20 +115,25 @@ class PXIgniter(Igniter):
          #print self.gateway
 
          if self.direction == 'sender':
-            fet.startup(self.flow, self.logger)
+            #fet.startup(self.flow, self.logger)
+            # We assign the defaults and reread the configuration file (in __init__)
+            self.flow.__init__(self.flow.name, self.flow.logger)
             self.logger.info("%s has been reloaded" % self.direction)
             if self.type == 'amis':
                 self.gateway.cacheManager.clear()
                 self.logger.info("Cache has been cleared") 
-            #self.logger.warning("%s has not been reloaded" % self.direction)
+
          elif self.direction == 'receiver':
-            fet.startup(self.flow, self.logger)
+            #fet.startup(self.flow, self.logger)
+            # We assign the defaults, reread configuration file for the source 
+            # and reread all configuration file for the clients (all this in __init__)
+            self.flow.__init__(self.flow.name, self.flow.logger)
             if self.type == 'am':
                self.gateway.unBulletinManager.extension = self.flow.extension
-               self.gateway.unBulletinManager.AddSMHeader = self.flow.AddSMHeader
+               self.gateway.unBulletinManager.addSMHeader = self.flow.addSMHeader
                #print self.flow
                #print "ext: %s" % (self.flow.extension)
-               #print "addSM: %s" % (self.flow.AddSMHeader)
+               #print "addSM: %s" % (self.flow.addSMHeader)
                self.gateway.unBulletinManager.reloadMapCircuit('/dev/null')
                self.gateway.unBulletinManager.reloadMapEntetes(self.gateway.pathFichierStations)
                self.logger.info("%s has been reloaded" % self.direction)
@@ -152,14 +151,9 @@ class PXIgniter(Igniter):
       
    def reload(self):
       """
-      Le reload ne doit pas s'appliquer a un source/client en particulier.
-      Cette operation doit etre effectue pour chaque source/client qui roule
-      au moment de la demande de reload.
-
-      Il me faut la liste des sources/clients qui tournent, j'obtiens ceci en verifiant les .lock + ps -p pid.
-      A tous les programmes qui verifient les 2 conditions precedentes, j'envoie le SIGHUP. Les fonctions appelees
-      a ce moment devrait faire le travail specifique pour chaque sender/receiver de chaque type (wmo, am, amis, aftn).
-      La fonction appelee devrait se trouver dans la classe appropriee....
+      If the process is locked (presence of a .lock file) and running (ps), send a SIGHUP
+      signal to it. The function _reload will be called because SIGHUP signal is assigned 
+      to it.
       """
       # Verify user is not root
       if os.getuid() == 0:
@@ -178,20 +172,3 @@ class PXIgniter(Igniter):
 if __name__ == "__main__":
 
    pass
-
-"""
-def shutdown(sig, stack):
-   logger.info("Reception d'un signal de shutdown (signal=%d)", sig)
-   sys.exit()
-
-def reload(sig, stack):
-   global config, bullManager
-   config = gateway.gateway.loadConfig(args[0])
-   bullManager = bulletinManager.bulletinManager(config.pathTemp, logger, config.pathSource, config.pathDestination, config.maxCompteur,
-                                                 config.lineSeparator, config.extension, config.ficCircuits, config.use_pds)
-   logger.info("Reception d'un signal de reload (signal=%d)", sig)
-
-
-   (status, output) = commands.getstatusoutput("date")
-   print output
-"""

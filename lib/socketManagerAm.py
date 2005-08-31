@@ -203,14 +203,14 @@ class socketManagerAm(socketManager.socketManager):
 
             except socket.error, e:
                 #erreurs potentielles: 104, 107, 110 ou 32
-                self.logger.writeLog(self.logger.ERROR,"senderAm.write(): la connexion est rompue: %s",str(e.args))
+                self.logger.error("senderAm.write(): la connexion est rompue: %s",str(e.args))
                 #modification du statut de la connexion
                 #tentative de reconnexion
                 self.connected = False
-                self.logger.writeLog(self.logger.INFO,"senderAm.write(): tentative de reconnexion")
+                self.logger.info("senderAm.write(): tentative de reconnexion")
                 self.socket.close()
                 self._socketManager__establishConnection()
 
         except Exception, e:
-            self.logger.writeLog(self.logger.ERROR,"socketManagerAm.sendBulletin(): erreur d'envoi: %s",str(e.args))
+            self.logger.error("socketManagerAm.sendBulletin(): erreur d'envoi: %s",str(e.args))
             raise

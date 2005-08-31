@@ -1,167 +1,112 @@
-#! /usr/bin/python
-# -*- coding: UTF-8 -*-
-#! /usr/bin/env python2
-# -----------------------------------------------------
-# Définition globale pour le traîtement effectué par un
-# Receiver (socket2file).
-#
-# Auteur:       Louis-Philippe Thériault
-# Date:         Octobre 2004
+#! /usr/bin/env python
 
-import sys, signal, traceback, pwd
+"""
+#############################################################################################
+# Name: pxReceiver
+#
+# Authors: Louis-Philippe Theriault
+#          Peter Silva 
+#          Daniel Lemay
+#
+# Date: October 2004
+#
+# Description:
+#
+#############################################################################################
+"""
+import sys, os, pwd
 
 sys.path.insert(1,sys.path[0] + '/../lib')
 sys.path.insert(1,sys.path[0] + '/../etc')
 sys.path.insert(1,sys.path[0] + '/../lib/importedLibs')
 
+import PXPaths, log
 from optparse import OptionParser
-import os.path
-import gateway, log
-import fet
-import bulletinManager
+from PXManager import PXManager
+from Logger import Logger
+from Source import Source
 from PXIgniter import PXIgniter
 
-# Définition de la méthode de shutdown "propre"
-def shutdown(sig,stack):
-    global unGateway
-    global logger
-    global isShutdowning
-
-    logger.writeLog(logger.DEBUG,"Reception d'un signal (signal=%d)",sig)
-
-    if not isShutdowning:
-        # Pour que le shutdown ne se fasse q'une fois
-        isShutdowning = True
-        logger.writeLog(logger.INFO,"Fermeture du programme (signal=%d)",sig)
-        unGateway.shutdown()
-        fet.lockStopOrDie( fet.FET_DATA + fet.FET_RX + fet.options.source + '/.lock' , 'stop' )
-        sys.exit()
-
-# Définition de la méthode de reload de config via SIGHUP
-def reloadConfig(sig,stack):
-    global unGateway
-    global logger
-    global options
-
-    logger.writeLog(logger.DEBUG,"Reception d'un signal (signal=%d)",sig)
-    if fet.options.source:
-        fet.startup(fet.options,logger)
-        if (fet.options.type=='wmo') or (fet.options.type=='am'):
-            unGateway.initMapEntete('/dev/null')
-            unGateway.bulletinManager.initMapCircuit(unGateway,'/dev/null')
-    else:
-        unGateway.reloadConfig()
-
-def main():
-    global logger
-    global unGateway
-
-    direction = "receiver"
-
-    # Message d'usage pour le option parser
-    usage =  "%prog <source> (start|stop|restart|reload|status)\n" 
-
-    if os.getuid() == 0:
+if __name__ == '__main__':
+    # We want this program to run under pds user
+    if not os.getuid() ==  pwd.getpwnam('pds')[2]:
         pdsUID = pwd.getpwnam("pds")[2]
         os.setuid(pdsUID)
-        #print "FATAL: Do not start as root. It will be a mess."
-        #sys.exit(2)
+    
+    usage =  """%prog [source] (start|stop|restart|reload|status)\n
+example 1: %prog cmc start   => will start cmc source
+example 2: %prog start       => will start all sources
+             """
+    # Initialize PX Paths
+    PXPaths.normalPaths()
 
-    # Instanciation du option parser
     parser = OptionParser(usage)
-    fet.addStandardOptions(parser)
 
-    options,args = parser.parse_args()
+    # We can set the logLevel to ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
+    parser.add_option("-l", "--logLevel",
+                      action="store", type="string", dest="logLevel", default="INFO",
+                      metavar="LOGLEVEL", help="Set the logging level [default: %default]")
 
-    # Deux arguments doivent etre fournis (source et commande)
+    options, args = parser.parse_args()
+
+    manager = PXManager()
+    manager.initPXPaths()
+    manager.initNames()
+    sourceNames = manager.getRxNames()
+    #print sourceNames
+
+    # The command will be applied to a particular source 
     if len(args) == 2:
-        if args[1] not in ['start', 'stop', 'status', 'restart', 'reload']:
+        if args[1] in ['start', 'stop', 'status', 'restart', 'reload']:
+            command = args[1]
+        else:
             parser.error("Wrong command name")
+
+        if args[0] in sourceNames:
+            sourceName = args[0]
+        else:
+            parser.error("Wrong source name: %s" % args[0])
+
     elif len(args) == 1:
-        parser.error("Source or command missing")
+            parser.error("Source or command missing")
     elif len(args) == 0:
         parser.error("Source and command missing")
     elif len(args) > 2:
         parser.error("Too many arguments")
 
-    # Chargement de la config pour savoir le type de protocole et le path du log
+    logName = PXPaths.LOG + "rx_%s.log" % sourceName
+    lockPath = PXPaths.RXQ + sourceName 
 
-    if args[0] == 'collector':
-        options.type='collector'
-        options.collector=True
-        options.source=None
-        options.client=None
-    else:
-        options.type='unknown'
-        options.source = args[0]
-        options.collector=False
+    # Better way to log
+    logger = Logger(logName, options.logLevel, 'RX' + sourceName)
+    logger = logger.getLogger()
 
-    options.cmd = args[1]
+    # Log with BAD function call, should be changed (and PXIgniter should be changed) 
+    badLogger = log.log(logName, debug=100) 
 
-    # FIXME: Vérifier que typeProtocole est défini et le fichier de log
+    igniter = PXIgniter('receiver', sourceName, command, lockPath, logger)
 
-    # Init du log
-    logger = log.log(options.dataDir + '/log/rx_' + args[0] + '.log',
-            debug=options.debug )
-
-    fet.startup(options,logger)
-
-    if options.type != 'collector':
-        options.type= fet.sources[options.source]['type']
-
-    lockPath = fet.FET_DATA + fet.FET_RX + args[0]
-    igniter = PXIgniter(direction, options.type, options.source, options.cmd, lockPath, options, logger)
-
-    logger.writeLog(logger.INFO, "Début du programme, fichier de config chargé correctement")
-    logger.writeLog(logger.DEBUG,"Protocole %s sélectionné", options.type )
-
-    # Branchement selon le type de protocole
-    if options.type == 'am':
-
+    source = Source(sourceName, logger)
+    igniter.setFlow(source)
+    
+    # Selection by protocol type
+    if source.type == 'am':
         import receiverAm
-        unGateway = receiverAm.receiverAm('/dev/null',options,logger)
+        gateway = receiverAm.receiverAm('/dev/null', source, badLogger)
         igniter.setGateway(unGateway)
-
-    elif options.type == 'wmo':
-
+    elif source.type == 'wmo':
         import receiverWmo
-        unGateway = receiverWmo.receiverWmo('/dev/null',options,logger)
-        igniter.setGateway(unGateway)
-
-    elif options.type == 'single-file':
+        gateway = receiverWmo.receiverWmo('/dev/null', source, badLogger)
+        igniter.setGateway(gateway)
+    elif source.type == 'single-file':
         import fetFile
         igniter.setGateway('DUMMY')
-        fetFile.checkSource( options.source, fet.sources, logger, igniter)
-
-    elif options.type == 'bulletin-file':
+        fetFile.checkSource(sourceName, 'DUMMY', badLogger, igniter)
+    elif source.type == 'bulletin-file':
         import bulletinFileReceiver
         igniter.setGateway('DUMMY')
-        bulletinFileReceiver.run(logger, igniter)
-
-    elif options.type == 'collector':
-        import collectionGateway
-        unGateway = collectionGateway.collectionGateway('/dev/null', options, logger)
-        igniter.setGateway(unGateway)
-
+        bulletinFileReceiver.run(source, igniter, logger, badLogger)
     else:
-        raise Exception('Type de protocole non reconnu')        # FIXME
+        raise Exception('Unknown type') 
 
-    unGateway.run()
-
-global logger
-global isShutdowning
-global unGateway
-
-isShutdowning = False
-logger = None
-
-
-if __name__ == '__main__':
-    try:
-        main()
-    except SystemExit:
-        raise
-    except Exception, e:
-        if logger != None and e.args != ():
-            logger.writeLog(logger.EXCEPTION,"Exception: " + ''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
-        raise
+    gateway.run()

@@ -37,7 +37,7 @@ class Client(object):
         self.type = 'single-file'                 # Must be in ['single-file', 'bulletin-file', 'file', 'am', 'wmo', 'amis']
         self.protocol = None                      # First thing in the url: ftp, file, am, wmo, amis
         self.batch = 100                          # Number of files that will be read in each pass
-        self.timeout = 10                         # Time after which we stop trying to connect
+        self.timeout = 10                         # Time we wait between each tentative to connect
         self.sorter = 'MultiKeysStringSorter'     # Class (or object) used to sort
         self.masks = []                           # All the masks (imask and emask)
         self.url = None
@@ -51,7 +51,7 @@ class Client(object):
         self.chmod = 0                      # If set to a value different than 0, umask 777 followed by a chmod of the value will be done
         self.ftp_mode = 'passive'           # default is 'passive', can be set to 'active'
 
-        #FIXME: Add a logger and replace all the print statements
+        self.readConfig()
 
     def readConfig(self):
 

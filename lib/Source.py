@@ -43,8 +43,9 @@ class Source(object):
         self.extension = ':MISSING:MISSING:MISSING:MISSING:'   # Extension to be added to the ingest name
         self.type = None                                       # Must be in ['single-file', 'bulletin-file', 'am', 'wmo']
         self.port = None                                       # Port number if type is in ['am', 'wmo']
-        self.arrival = None                                    #
+        self.mapEnteteDelai = None                             #
         self.addSMHeader = False                               #
+        self.use_pds = False                                   #
 
         self.readConfig()
         self.ingestor.setClients()
@@ -80,7 +81,7 @@ class Source(object):
                     elif words[0] == 'type': self.type = words[1]
                     elif words[0] == 'port': self.port = int(words[1])
                     elif words[0] == 'batch': self.batch = int(words[1])
-                    elif words[0] == 'arrival': self.arrival = {words[1]:(int(words[2]), int(words[3]))}
+                    elif words[0] == 'arrival': self.mapEnteteDelai = {words[1]:(int(words[2]), int(words[3]))}
 
                 except:
                     self.logger.error("Problem with this line (%s) in configuration file of source %s" % (words, self.name))

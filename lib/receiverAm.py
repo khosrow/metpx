@@ -6,7 +6,9 @@ import socketManagerAm
 import bulletinManagerAm
 import socketManager
 from socketManager import socketManagerException
-import fet
+import PXPaths 
+
+PXPaths.normalPaths()
 
 class receiverAm(gateway.gateway):
     __doc__ = gateway.gateway.__doc__ + \
@@ -20,26 +22,29 @@ class receiverAm(gateway.gateway):
     Date:   Octobre 2004
     """
 
-    def __init__(self,path,options,logger):
-        gateway.gateway.__init__(self,path,options,logger)
+    def __init__(self, path, source, logger):
+        gateway.gateway.__init__(self, path, source, logger)
+
+        self.source = source
 
         self.establishConnection()
 
-        self.logger.writeLog(logger.DEBUG,"Instanciation du bulletinManagerAm")
+        self.logger.debug("Instanciation du bulletinManagerAm")
         
-        self.pathFichierStations = fet.FET_ETC + 'collection_stations.conf'
+        self.pathFichierStations = PXPaths.ETC + 'collection_stations.conf'
 
         # Instanciation du bulletinManagerAm avec la panoplie d'arguments.
         self.unBulletinManager = \
             bulletinManagerAm.bulletinManagerAm(
-                fet.FET_DATA + fet.FET_RX + options.source, logger, \
+                PXPaths.RXQ + source.name, logger, \
                 pathDest = '/apps/pds/RAW/-PRIORITY', \
                 pathFichierCircuit = '/dev/null', \
-                SMHeaderFormat = options.AddSMHeader, \
+                SMHeaderFormat = source.addSMHeader, \
                 pathFichierStations = self.pathFichierStations, \
-                extension = options.extension, \
-                mapEnteteDelai = options.mapEnteteDelai,
-                use_pds = self.options.use_pds )
+                extension = source.extension, \
+                mapEnteteDelai = source.mapEnteteDelai,
+                use_pds = source.use_pds,
+                source= source)
 
 
 
@@ -65,7 +70,7 @@ class receiverAm(gateway.gateway):
 
             self.write(resteDuBuffer)
 
-        self.logger.writeLog(self.logger.INFO,"Succès du traîtement du reste de l'info")
+        self.logger.info("Succès du traîtement du reste de l'info")
 
     def establishConnection(self):
         __doc__ = gateway.gateway.establishConnection.__doc__ + \
@@ -84,12 +89,12 @@ class receiverAm(gateway.gateway):
            Date:        Octobre 2004
         """
 
-        self.logger.writeLog(self.logger.DEBUG,"Instanciation du socketManagerAm")
+        self.logger.debug("Instanciation du socketManagerAm")
 
         # Instanciation du socketManagerAm
         self.unSocketManagerAm = \
                 socketManagerAm.socketManagerAm(self.logger,type='slave', \
-                        port=self.options.port)
+                        port=self.source.port)
 
     def read(self):
         __doc__ =  gateway.gateway.read.__doc__ + \
@@ -112,14 +117,14 @@ class receiverAm(gateway.gateway):
                 data = self.unSocketManagerAm.getNextBulletins()
             except socketManager.socketManagerException, e:
                 if e.args[0] == "la connexion est brisee":
-                    self.logger.writeLog(self.logger.ERROR,"Perte de connection, traîtement du reste du buffer")
+                    self.logger.error("Perte de connection, traîtement du reste du buffer")
                     data, nbBullEnv = self.unSocketManagerAm.closeProperly()
                 else:
                     raise
         else:
             raise gateway.gatewayException("Le lecteur ne peut être accédé")
 
-        self.logger.writeLog(self.logger.VERYVERYVERBOSE,"%d nouveaux bulletins lus",len(data))
+        self.logger.veryveryverbose("%d nouveaux bulletins lus",len(data))
 
         return data
 
@@ -134,7 +139,7 @@ class receiverAm(gateway.gateway):
            Date:        Octobre 2004
         """
 
-        self.logger.writeLog(self.logger.VERYVERYVERBOSE,"%d nouveaux bulletins seront écrits",len(data))
+        self.logger.veryveryverbose("%d nouveaux bulletins seront écrits",len(data))
 
         while True:
             if len(data) <= 0:
@@ -146,7 +151,7 @@ class receiverAm(gateway.gateway):
 
     def reloadConfig(self):
         __doc__ = gateway.gateway.reloadConfig.__doc__
-        self.logger.writeLog(self.logger.INFO,'Demande de rechargement de configuration')
+        self.logger.info('Demande de rechargement de configuration')
 
         try:
 
@@ -167,10 +172,10 @@ class receiverAm(gateway.gateway):
 
             self.config.ficCollection = ficCollection
 
-            self.logger.writeLog(self.logger.INFO,'Succès du rechargement de la config')
+            self.logger.info('Succès du rechargement de la config')
 
         except Exception, e:
 
-            self.logger.writeLog(self.logger.ERROR,'Échec du rechargement de la config!')
+            self.logger.error('Échec du rechargement de la config!')
 
-            self.logger.writeLog(self.logger.DEBUG,"Erreur: %s", str(e.args))
+            self.logger.debug("Erreur: %s", str(e.args))

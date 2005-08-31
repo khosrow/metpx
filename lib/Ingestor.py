@@ -25,12 +25,20 @@ from CacheManager import CacheManager
 PXPaths.normalPaths()              # Access to PX paths
 
 class Ingestor(object):
+    """
+    Normally, an Ingestor will be in a Source. It can also be used for the only reason that this object has
+    access to all the configuration options of the clients. For this particular case, source=None. The DiskReader
+    use an ingestor to verify if an ingestName is matched by a client.
+    """
 
-    def __init__(self, source):
+    def __init__(self, source=None, logger=None):
 
         # General Attributes
         self.source = source
-        self.logger = source.logger
+        if source is not None:
+            self.logger = source.logger
+        elif logger is not None:
+            self.logger = logger
         self.pxManager = PXManager()              # Create a manager
         self.pxManager.setLogger(self.logger)     # Give the logger to the the manager
         self.pxManager.initNames()                # Set rx and tx names
@@ -55,7 +63,7 @@ class Ingestor(object):
         """
         for name in self.clientNames:
             self.clients[name] = Client(name)
-            self.clients[name].readConfig()
+            #self.clients[name].readConfig()
             #print self.clients[name].masks
 
     def getIngestName(self, receptionName):

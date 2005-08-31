@@ -27,7 +27,6 @@ sys.path.insert(1,sys.path[0] + '/../lib')
 sys.path.insert(1,sys.path[0] + '/../lib/importedLibs')
 
 from optparse import OptionParser
-import log
 import fet
 
 logger = {}
@@ -49,17 +48,17 @@ def ingestDir(d,s,logger):
 
     numfiles=0
 
-    logger.writeLog(logger.DEBUG, "répertoire " + d + " débute." )
+    logger.debug("répertoire " + d + " débute." )
     for r in os.listdir(d):
         if ( r[0] == '.' ) or ( r[0:4] == 'tmp_' ) or (r[-4:] == '.tmp' ) or not os.access(r, os.R_OK):
             continue
         i=fet.ingestName(r,s) # map reception name to ingest name
         rr=d + "/" + r
         if fet.ingest(i,rr, logger) == 1:
-            logger.writeLog(logger.INFO, "fichier " + rr + " ingérée comme " + i)
+            logger.info("fichier " + rr + " ingérée comme " + i)
             os.unlink( rr )
         else:
-            logger.writeLog(logger.ERROR, "fichier " + rr + " non-ingérable " )
+            logger.error("fichier " + rr + " non-ingérable " )
         numfiles = numfiles + 1
 
     return numfiles
@@ -78,18 +77,18 @@ def checkSource(s, sources,logger, igniter):
     """
 
     if not os.path.exists( fet.FET_DATA + fet.FET_RX):
-        logger.writeLog(logger.FATAL, "ingest queue directory does not exist" )
+        logger.critical("ingest queue directory does not exist" )
         return
 
     # initialize history array.
     dmodified = {}
-    logger.writeLog(logger.INFO, "Début du programme, initialization completée")
+    logger.info("Début du programme, initialization completée")
 
     while(1):
         if igniter.reloadMode == True:
            fet.startup(igniter.options, igniter.logger)
            igniter.reloadMode = False
-           logger.writeLog(logger.INFO, "%s has been reload" % igniter.direction)
+           logger.info("%s has been reload" % igniter.direction)
 
         dname = fet.sourceQDirName(s)
 
@@ -162,13 +161,13 @@ def sendFiles(c, files, chmod, ftp_mode, logger):
         f = p[p.rfind('/')+1:]
         m = fet.clientMatch(c,f)
         if not m:
-            logger.writeLog( logger.INFO, "file " + os.path.basename(f) + " removed, no matching imask" )
+            logger.info("file " + os.path.basename(f) + " removed, no matching imask" )
             os.unlink(p)
             continue
         dfn = fet.destFileName(f,m)
         #print "match is: ", m
         if dfn == '' or m[2] == 'NULL':
-            logger.writeLog(logger.ERROR, "fichier " + os.path.basename(f) + " pas routable par " + c )
+            logger.error("fichier " + os.path.basename(f) + " pas routable par " + c )
             continue
         else:
             (proto, dspec, uspec, pwspec, hspec, pspec) = fet.urlSplit(m[2])
@@ -177,10 +176,10 @@ def sendFiles(c, files, chmod, ftp_mode, logger):
                 try:
                     os.rename( p , there )
                     #os.unlink( p )
-                    logger.writeLog( logger.INFO, "fichier " + os.path.basename(f) + " livré à " + there )
+                    logger.info("fichier " + os.path.basename(f) + " livré à " + there )
                 except:
                     (type, value, tb) = sys.exc_info()
-                    logger.writeLog( logger.ERROR, "pas capable d'ecrire" + there + ": " + "type: %s, value: %s" % (type, value))
+                    logger.error("pas capable d'ecrire" + there + ": " + "type: %s, value: %s" % (type, value))
                     time.sleep(10)  # relax, buy a cherry blossom, don't be shy.
                     return #FIXME: no point to continue looping...
 
@@ -194,7 +193,7 @@ def sendFiles(c, files, chmod, ftp_mode, logger):
                     if ftphost != '':
                         ftp.quit()
                     if hspec == '':
-                        logger.writeLog( logger.ERROR, "pas de host défini pour " + c + repr(m) )
+                        logger.error("pas de host défini pour " + c + repr(m) )
                         continue
 
                     try:
@@ -204,7 +203,7 @@ def sendFiles(c, files, chmod, ftp_mode, logger):
                     except:
                         #excinfo= sys.exc_info()
                         (type, value, tb) = sys.exc_info()
-                        logger.writeLog( logger.ERROR, "pas capable de me brancher à " + uspec + '@' + hspec + "(old was " + ftphost + ": " + "type: %s, value: %s" % (type, value))
+                        logger.error("pas capable de me brancher à " + uspec + '@' + hspec + "(old was " + ftphost + ": " + "type: %s, value: %s" % (type, value))
                         time.sleep(10)  # relax, buy a cherry blossom, don't be shy.
                         return #FIXME: no point to continue looping...
 
@@ -233,61 +232,25 @@ def sendFiles(c, files, chmod, ftp_mode, logger):
                         ftp.voidcmd('SITE CHMOD ' + str(oct(chmod)) + ' ' + dfn)
                         
                     os.unlink( p )
-                    logger.writeLog( logger.INFO, "fichier " + os.path.basename(f) + " livré à "  + \
+                    logger.info("fichier " + os.path.basename(f) + " livré à "  + \
                       proto + ":" + hspec + " " + dspec + " " + dfn )
                 except:
                     (type, value, tb) = sys.exc_info()
-                    logger.writeLog( logger.ERROR, "pas capable d'écrire le fichier " + os.path.basename(p) + " à "  + proto + ":" + hspec + " " + dspec + " " + dfn + ": " + "type: %s, value: %s" % (type, value))
+                    logger.error("pas capable d'écrire le fichier " + os.path.basename(p) + " à "  + proto + ":" + hspec + " " + dspec + " " + dfn + ": " + "type: %s, value: %s" % (type, value))
                     try:
                         ftp.quit()
                     except:
                         (type, value, tb) = sys.exc_info()
-                        logger.writeLog( logger.ERROR, "ftq.quit() problem! " + "Type: %s, Value: %s" % (type, value))
+                        logger.error("ftq.quit() problem! " + "Type: %s, Value: %s" % (type, value))
 
                     time.sleep(10) # see cherry blossom above.
                     return
 
 
             else:
-                logger.writeLog( logger.INFO, "protocol " + proto + " pas encore implanté. Ça te tentera de t´y mettre?" )
+                logger.info("protocol " + proto + " pas encore implanté. Ça te tentera de t´y mettre?" )
 
 
     if ftphost != '':
         ftp.quit()
-
-
-def checkDir(d,logger):
-    """
-    given a single directory, read all the non-hidden entries and
-    attempt to ingest them.
-
-    if it works, remove it.
-    If not, just leave it there
-
-    """
-
-    dirfiles=[]
-
-    for t in os.listdir(d):
-        p=os.path.join(d,t)
-
-        if ( t[0] == '.' ) or ( t[0:4] == 'tmp_' ) or (t[-4:] == '.tmp' ) or not os.access(p, os.R_OK):
-            continue
-        dirfiles = dirfiles + [ p ]
-
-    return dirfiles
-
-
-logger = {}
-dmodified = {}
-
-def filePrio( x, y ):
-    """ comparator function for sort.
-
-        based on criteria (fields 4 and 6 are the priority and timestamp,
-        respectively.  )
-    """
-    xx = os.path.basename(x).split(':')
-    yy = os.path.basename(y).split(':')
-    return cmp ( xx[4] + xx[6], yy[4] + yy[6] )
 

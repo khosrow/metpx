@@ -13,7 +13,8 @@ import sys, os, os.path, time, pwd
 sys.path.insert(1, sys.path[0] + '/../lib')
 sys.path.insert(1,sys.path[0] + '/../lib/importedLibs')
 
-import fet
+import PXPaths
+PXPaths.normalPaths()
 
 def startThem(dir,name,cmd):
     """
@@ -33,19 +34,10 @@ def startThem(dir,name,cmd):
                  time.sleep(0.1)  # sleep A
              os.execl( sys.path[0] + '/' + name , name, id, cmd )
 
-    # Special case for collection: won't be done in the children because their
-    # last statement is os.excl()
-    if name == "pxReceiver":
-        if os.path.exists("/apps/px/etc/collection.conf"):
-            id = "collector"
-            if os.fork() == 0:
-                time.sleep(0.1)
-                os.execl( sys.path[0] + '/' + name , name, id, cmd )
-
 def start(cmd):
-    startThem( fet.FET_ETC + 'rx/', 'pxReceiver', cmd)
+    startThem(PXPaths.ETC + 'rx/', 'pxReceiver', cmd)
     time.sleep(0.3) # sleep B
-    startThem( fet.FET_ETC + 'tx/', 'pxSender', cmd)
+    startThem(PXPaths.ETC + 'tx/', 'pxSender', cmd)
     time.sleep(2)   # sleep C
 
 if os.getuid() == 0:

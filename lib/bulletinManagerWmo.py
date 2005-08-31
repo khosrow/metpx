@@ -20,10 +20,10 @@ class bulletinManagerWmo(bulletinManager.bulletinManager):
 
     def __init__(self,pathTemp,logger,pathSource=None, \
                     pathDest=None,maxCompteur=99999,lineSeparator='\n',extension=':', \
-                    pathFichierCircuit=None,mapEnteteDelai=None,use_pds=0):
+                    pathFichierCircuit=None,mapEnteteDelai=None,use_pds=0, source=None):
 
         bulletinManager.bulletinManager.__init__(self,pathTemp,logger, \
-                                        pathSource,pathDest,maxCompteur,lineSeparator,extension,pathFichierCircuit,mapEnteteDelai,use_pds)
+                                        pathSource,pathDest,maxCompteur,lineSeparator,extension,pathFichierCircuit,mapEnteteDelai,use_pds, source)
 
     def _bulletinManager__generateBulletin(self,rawBulletin):
         __doc__ = bulletinManager.bulletinManager._bulletinManager__generateBulletin.__doc__ + \

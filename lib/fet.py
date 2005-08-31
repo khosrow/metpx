@@ -37,7 +37,6 @@ import time
 import string
 import sys
 import signal
-import log
 from optparse import OptionParser
 
 
@@ -348,7 +347,7 @@ def readClients(logger):
         cliconf.close()
         client[0] = patterns
         clients[clientid] = copy.deepcopy(client)
-        logger.writeLog( logger.DEBUG, "read config of client " + clientid )
+        logger.debug("read config of client " + clientid )
         client[1]=''
         host=''
         port=''
@@ -424,7 +423,7 @@ def readSources(logger):
                  
                     if srcline[0] == 'extension':
                        if len(string.join(srcline[1:]).split(':')) != 5:
-                          logger.writeLog( logger.ERROR, "wrong number of fields in extension " + sourceid + " config: " + src )
+                          logger.error("wrong number of fields in extension " + sourceid + " config: " + src )
                        else:
                            source[srcline[0]] = ':' + string.join(srcline[1:])
                     elif srcline[0] == 'arrival':
@@ -434,14 +433,14 @@ def readSources(logger):
                     else:
                         source[srcline[0]] = string.join(srcline[1:])
                 except:
-                    logger.writeLog( logger.ERROR, "error in " + sourceid + " config: " + src )
+                    logger.error("error in " + sourceid + " config: " + src )
 
             src=srcconf.readline()
 
         srcconf.close()
 
         sources[sourceid] = copy.deepcopy(source)
-        logger.writeLog( logger.DEBUG, "read config of source " + sourceid )
+        logger.debug("read config of source " + sourceid )
 
 
 def readCollections(options,logger):
@@ -462,7 +461,7 @@ def readCollections(options,logger):
                 try:
                     exec( "options.collectionParams['"+ cf[1] +"']=" + string.join(cf[2:]) )
                 except:
-                    logger.writeLog(logger.ERROR, "error in collect spec: " + cfline )
+                    logger.error("error in collect spec: " + cfline )
             elif cf[0] == 'tooLate':
                 options.DelaiMaxSeq = int(cf[1])
             elif cf[0] == 'extension':
@@ -661,7 +660,7 @@ def directIngest(ingestname,clist,lfn,logger):
         return 0
 
     linkFile(lfn, dbn)
-    logger.writeLog( logger.INFO, "ingest " + dbn )
+    logger.info("ingest " + dbn )
 
     if len (clist) < 1:
         return 1
@@ -674,7 +673,7 @@ def directIngest(ingestname,clist,lfn,logger):
         cname=clientQDirName(c, ingestname)
         linkFile(dbn , cname + ingestname)
 
-    logger.writeLog( logger.INFO, "queued for " + string.join(clist) )
+    logger.info("queued for " + string.join(clist) )
     return 1
 
 def ingest(ingestname,lfn,logger):
@@ -719,7 +718,7 @@ def initDB(logger):
     global dirs_created
     global FET_DB
 
-    logger.writeLog( logger.INFO, "dbinit start")
+    logger.info("dbinit start")
     dirs_created = []
     createDir( FET_DATA + '/.' )
     createDir( FET_DATA + FET_RX )
@@ -741,7 +740,7 @@ def initDB(logger):
             except OSError:
                 # FIXME: Bad way (try, except) to handle a concurrency problem
                 (type, value, tb) = sys.exc_info()
-                logger.writeLog(logger.ERROR, "Type: %s, Value: %s" % (type, value))
+                logger.error("Type: %s, Value: %s" % (type, value))
                 pass                   
 
             if os.path.exists( lnk ):
@@ -751,7 +750,7 @@ def initDB(logger):
                 except OSError:
                     # FIXME: Bad way (try, except) to handle a concurrency problem
                     (type, value, tb) = sys.exc_info()
-                    logger.writeLog(logger.ERROR, "Type: %s, Value: %s" % (type, value))
+                    logger.error("Type: %s, Value: %s" % (type, value))
                     pass                   
 
     else:
@@ -760,7 +759,7 @@ def initDB(logger):
         except OSError:
             # FIXME: Bad way (try, except) to handle a concurrency problem
             (type, value, tb) = sys.exc_info()
-            logger.writeLog(logger.ERROR, "Type: %s, Value: %s" % (type, value))
+            logger.error("Type: %s, Value: %s" % (type, value))
             pass                   
 
         if os.path.exists( yl ):
@@ -769,10 +768,10 @@ def initDB(logger):
             except OSError:
                 # FIXME: Bad way (try, except) to handle a concurrency problem
                 (type, value, tb) = sys.exc_info()
-                logger.writeLog(logger.ERROR, "Type: %s, Value: %s" % (type, value))
+                logger.error("Type: %s, Value: %s" % (type, value))
                 pass                   
 
-    logger.writeLog( logger.INFO, "dbinit done")
+    logger.info("dbinit done")
 
 
 def startup(opts, logger):
@@ -800,7 +799,7 @@ def startup(opts, logger):
             cf=pxconf.readline()
         pxconf.close()
     except:
-        logger.writeLog( logger.INFO, "could not open global px config: " +
+        logger.info("could not open global px config: " +
                 FET_ETC + 'px.conf'  )
 
     if not options.use_pds:
@@ -823,7 +822,7 @@ def startup(opts, logger):
             opts.chmod = clients[options.client][7]
             opts.ftp_mode = clients[options.client][8]
         else:
-            logger.writeLog( logger.ERROR, "unknown client: " + options.client )
+            logger.error("unknown client: " + options.client )
 
     elif options.source:
         if options.source in sources.keys():
@@ -833,7 +832,7 @@ def startup(opts, logger):
             opts.mapEnteteDelai = s['mapEnteteDelai']
             opts.AddSMHeader = s['AddSMHeader']
         else:
-            logger.writeLog( logger.ERROR, "unknown source: " + options.source )
+            logger.error("unknown source: " + options.source )
     elif options.type == 'collector':
         pass
 

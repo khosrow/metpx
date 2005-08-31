@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 """
 #############################################################################################
-# Name: ncsRenamer
+# Name: bulletinFileReceiver
 # Author: Daniel Lemay (99% of the code is from LPT)
 # Date: December 2004
 #
@@ -18,37 +18,45 @@ import sys, os, os.path, signal, time
 sys.path.insert(1,sys.path[0] + '/../lib')
 sys.path.insert(1,sys.path[0] + '/../lib/importedLibs')
 
-import gateway, log, bulletinManager
+import bulletinManager
 from DiskReader import DiskReader
-import fet
+from Source import Source
+import PXPaths
 
-def run(logger, igniter):
+PXPaths.normalPaths()
+
+def run(source, igniter, logger, badLogger):
     bullManager = bulletinManager.bulletinManager(
-         fet.FET_DATA + fet.FET_RX + fet.options.source, logger,
-         fet.FET_DATA + fet.FET_RX + fet.options.source,
+         PXPaths.RXQ + source.name,
+         badLogger,
+         PXPaths.RXQ + source.name,
          '/apps/pds/RAW/-PRIORITY',
          9999,
          '\n',
-         fet.options.extension,
-         fet.FET_ETC + 'header2client.conf',
-         fet.options.mapEnteteDelai,
-         fet.options.use_pds )
+         source.extension,
+         PXPaths.ETC + 'header2client.conf',
+         source.mapEnteteDelai,
+         source.use_pds,
+         source)
 
     while True:
         # If a SIGHUP signal is received ...
         if igniter.reloadMode == True: 
-            fet.startup(igniter.options, igniter.logger)
+            source = Source(source.name, logger)
             bullManager = bulletinManager.bulletinManager(
-                               fet.FET_DATA + fet.FET_RX + fet.options.source, logger,
-                               fet.FET_DATA + fet.FET_RX + fet.options.source,
+                               PXPaths.RXQ +source.name,
+                               badLogger,
+                               PXPaths.RXQ + source.name,
                                '/apps/pds/RAW/-PRIORITY',
                                9999,
                                '\n',
-                               fet.options.extension,
-                               fet.FET_ETC + 'header2client.conf',
-                               fet.options.mapEnteteDelai,
-                               fet.options.use_pds )
-            logger.writeLog(logger.INFO, "%s has been reload" % igniter.direction)
+                               source.extension,
+                               PXPaths.ETC + 'header2client.conf',
+                               source.mapEnteteDelai,
+                               source.use_pds,
+                               source)
+
+            logger.info("%s has been reload" % igniter.direction)
             igniter.reloadMode = False
 
         # We put the bulletins (read from disk) in a dict (key = absolute filename)
@@ -65,12 +73,11 @@ def run(logger, igniter):
         # Write (and name correctly) the bulletins to disk, erase them after
         for index in range(len(data)):
             nb_bytes = len(data[index])
-            logger.writeLog(logger.INFO, "Lecture de %s: %d bytes" % (reader.sortedFiles[index], nb_bytes))
+            logger.info("Lecture de %s: %d bytes" % (reader.sortedFiles[index], nb_bytes))
             bullManager.writeBulletinToDisk(data[index], True, True)
             try:
                 os.unlink(reader.sortedFiles[index])
-                logger.writeLog(logger.DEBUG,"%s has been erased", os.path.basename(reader.sortedFiles[index]))
+                logger.debug("%s has been erased", os.path.basename(reader.sortedFiles[index]))
             except OSError, e:
                 (type, value, tb) = sys.exc_info()
-                logger.writeLog(logger.ERROR, "Unable to unlink %s ! Type: %s, Value: %s"
-                                    % (reader.sortedFiles[index], type, value))
+                logger.error("Unable to unlink %s ! Type: %s, Value: %s" % (reader.sortedFiles[index], type, value))

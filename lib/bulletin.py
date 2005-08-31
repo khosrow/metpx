@@ -86,7 +86,7 @@ class bulletin:
         # dans la classe spécialisée, par une méthode qui ne fait rien
         self.verifyHeader()
 
-        self.logger.writeLog(self.logger.VERYVERBOSE,"newBulletin: %s",stringBulletin)
+        self.logger.veryverbose("newBulletin: %s",stringBulletin)
 
     def splitlinesBulletin(self,stringBulletin):
         """splitlinesBulletin(stringBulletin) -> listeLignes
@@ -154,7 +154,7 @@ class bulletin:
                 # Le bulletin n'est pas binaire
                 return stringBulletin.split(self.lineSeparator)
         except Exception, e:
-            self.logger.writeLog(self.logger.EXCEPTION,'Erreur lors du decoupage du bulletin:\n'+''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
+            self.logger.exception('Erreur lors du decoupage du bulletin:\n'+''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
             self.setError('Erreur lors du découpage de lignes')
             return stringBulletin.split(self.lineSeparator)
 
@@ -249,7 +249,7 @@ class bulletin:
         """
         self.bulletin[0] = header
 
-        self.logger.writeLog(self.logger.DEBUG,"Nouvelle entête du bulletin: %s",header)
+        self.logger.debug("Nouvelle entête du bulletin: %s",header)
 
     def getType(self):
         """getType() -> type
@@ -404,7 +404,7 @@ class bulletin:
 
         if len(tokens[2]) > 6: # On enleve les ['z', 'Z'] ou ['utc', 'UTC'] s'ils sont presents dans le groupe JJHHMM
             tokens[2] = tokens[2][0:5]
-            self.logger.writeLog(self.logger.INFO, "Entete corrigee: le groupe JJHHMM a ete tronque (plus de 6 caracteres)")
+            self.logger.info("Entete corrigee: le groupe JJHHMM a ete tronque (plus de 6 caracteres)")
             self.setHeader(' '.join(tokens))
             tokens = self.getHeader().split()
 
@@ -422,7 +422,7 @@ class bulletin:
 
         if not tokens[3].isalpha() or len(tokens[3]) != 3 or tokens[3][0] not in ['C','A','R','P']:
             #self.setError('Entete non conforme (champ BBB incorrect')
-            self.logger.writeLog(self.logger.INFO,"Entete corrigee: 4ieme champ (et les suivants) enleve du header") 
+            self.logger.info("Entete corrigee: 4ieme champ (et les suivants) enleve du header") 
             parts = self.getHeader().split()
             del parts[3:]
             self.setHeader(' '.join(parts))
@@ -432,7 +432,7 @@ class bulletin:
                 (not tokens[4].isalpha() or len(tokens[4]) != 3 or tokens[4][0] not in ['C','A','R','P']):
 
             #self.setError('Entete non conforme4 (champ BBB no2 incorrect')
-            self.logger.writeLog(self.logger.INFO,"Entete corrigee: 5ieme champ (et les suivants) enleve du header")
+            self.logger.info("Entete corrigee: 5ieme champ (et les suivants) enleve du header")
             parts = self.getHeader().split()
             del parts[4:]
             self.setHeader(' '.join(parts))
@@ -441,7 +441,7 @@ class bulletin:
         if len(tokens) > 5:
 
             #self.setError('Entete non conforme (plus de 5 champs')
-            self.logger.writeLog(self.logger.INFO,"Entete corrigee: 6ieme champ (et les suivants) enleve du header")
+            self.logger.info("Entete corrigee: 6ieme champ (et les suivants) enleve du header")
             parts = self.getHeader().split()
             del parts[5:]
             self.setHeader(' '.join(parts))

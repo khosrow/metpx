@@ -62,7 +62,7 @@ class bulletinAm(bulletin.bulletin):
 #            bulletin.bulletin.verifyHeader(self)
 
         # Print de la station pour le debug
-        self.logger.writeLog(logger.DEBUG,"Station: %s",str(self.station))
+        self.logger.debug("Station: %s",str(self.station))
 
     def getStation(self):
         """getStation() -> station
@@ -203,15 +203,15 @@ class bulletinAm(bulletin.bulletin):
                 if station == None:
                     self.setError("Pattern de station non trouve ou non specifie")
 
-                    self.logger.writeLog(self.logger.WARNING,"Pattern de station non trouve")
-                    self.logger.writeLog(self.logger.WARNING,"Bulletin:\n"+self.getBulletin())
+                    self.logger.warning("Pattern de station non trouve")
+                    self.logger.warning("Bulletin:\n"+self.getBulletin())
 
                 # L'entête n'a pu être trouvée dans le fichier de collection, erreur
                 elif uneEnteteDeBulletin == None:
                     self.setError("Entete non trouvee dans le fichier de collection")
 
-                    self.logger.writeLog(self.logger.WARNING,"Station <" + station + "> non trouvee avec prefixe <" + premierMot + ">")
-                    self.logger.writeLog(self.logger.WARNING,"Bulletin:\n"+self.getBulletin())
+                    self.logger.warning("Station <" + station + "> non trouvee avec prefixe <" + premierMot + ">")
+                    self.logger.warning("Bulletin:\n"+self.getBulletin())
 
         if self.getType() in ['UG','UK','US'] and self.bulletin[1] == '':
             self.bulletin.remove('')

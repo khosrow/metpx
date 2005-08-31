@@ -13,8 +13,8 @@
 """
 import os, os.path, re, commands, time
 from MultiKeysStringSorter import MultiKeysStringSorter
+from Ingestor import Ingestor
 from stat import *
-import fet
 
 class _DirIterator(object):
     """ Author: Sebastien Keim
@@ -77,6 +77,7 @@ class DiskReader:
         self.sortedFiles = []                     # Sorted filenames
         self.data = []                            # Content of x filenames (x is set in getFilesContent())
         self.sorterClass = sorterClass            # Sorting algorithm that will be used by sort()
+        self.ingestor = Ingestor(source=None, logger=logger) # Give access to all configuration options of the clients
 
     def _validateName(self, basename):
         """
@@ -92,11 +93,7 @@ class DiskReader:
             return False
 
     def _matchPattern(self, basename):
-        pattern = fet.clientMatch(self.clientName, basename)
-        if pattern:
-           return True
-        else:
-           return False
+        return ingestor.isMatching(self.ingestor.clients[self.clientName], basename)
 
     def _getFilesList(self):
         """
@@ -146,7 +143,7 @@ class DiskReader:
                     if not self._validateName(basename):
                         os.unlink(file)
                         if self.logger is not None:
-                            self.logger.writeLog(self.logger.INFO, "Filename incorrect: " + file + " has been unlinked!")
+                            self.logger.info("Filename incorrect: " + file + " has been unlinked!")
                         continue
                 # If we use pattern matching
                 if self.patternMatching:
@@ -154,13 +151,13 @@ class DiskReader:
                     if not self._matchPattern(basename):
                         os.unlink(file)
                         if self.logger is not None:
-                            self.logger.writeLog(self.logger.INFO, "No pattern matching: " + file + " has been unlinked!")
+                            self.logger.info("No pattern matching: " + file + " has been unlinked!")
                         continue
 
                 # If we use stats informations (useful with rcp)
                 if self.mtime:
                     if  not time.time() - os.stat(file)[ST_MTIME] > self.mtime:
-                        self.logger.writeLog(self.logger.DEBUG, "File (%s) too recent (mtime = %d)" % (file, self.mtime))
+                        self.logger.debug("File (%s) too recent (mtime = %d)" % (file, self.mtime))
                         continue
 
                 # We don't want to exceed the batch value 
@@ -185,7 +182,7 @@ class DiskReader:
                 fileDesc = open(file, 'r')
                 self.data.append(fileDesc.read())
             except:
-                self.logger.writeLog(self.logger.WARNING,"DiskReader.getFilesContent(): " + file + " not on disk anymore")
+                self.logger.warning("DiskReader.getFilesContent(): " + file + " not on disk anymore")
                 # We don't raise the exception because we assume that this error has been created
                 # by a legitimate process that has cleared some client queue.
         return self.data

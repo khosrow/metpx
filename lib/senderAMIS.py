@@ -13,20 +13,22 @@
 
 """
 import os, sys, time, socket, curses.ascii
-import fet
 from DiskReader import DiskReader
 from MultiKeysStringSorter import MultiKeysStringSorter
 from CacheManager import CacheManager
+import PXPaths
+
+PXPaths.normalPaths()
 
 class senderAMIS: 
    
-   def __init__(self, options, logger):
-      self.options = options                          # Options
-      self.remoteHost = options.host                  # Remote host (name or ip) 
-      self.port = int(options.port)                   # Port to which the receiver is bind
+   def __init__(self, client, logger):
+      self.client = client                            # Client object (give access to all configuration options)
+      self.remoteHost = client.host                   # Remote host (name or ip) 
+      self.port = client.port                         # Port (int) to which the receiver is bind
       self.maxLength = 1000000                        # Maximum length that we can transmit on the link
       self.address = (self.remoteHost, self.port)     # Socket address
-      self.timeout = options.connect_timeout          # No timeout for now
+      self.timeout = client.timeout                   # No timeout for now
       self.logger = logger                            # Logger object
       self.socketAMIS = None                          # The socket
       self.reader = None                              # Object used to read and sort bulletins from disk 
@@ -52,45 +54,40 @@ class senderAMIS:
       while True:
          try:
             self.socketAMIS.connect(self.address)
-            self.logger.writeLog(self.logger.INFO, "AMIS Sender is now connected to: %s" % str(self.address))
+            self.logger.info("AMIS Sender is now connected to: %s" % str(self.address))
             break
          except socket.gaierror, e:
             #print "Address related error connecting to server: %s" % e
-            self.logger.writeLog(self.logger.ERROR, "Address related error connecting to server: %s" % e)
+            self.logger.error("Address related error connecting to server: %s" % e)
             sys.exit(1)
          except socket.error, e:
             (type, value, tb) = sys.exc_info()
-            self.logger.writeLog(self.logger.ERROR, "Type: %s, Value: %s, Sleeping 5 seconds ..." % (type, value))
-            #self.logger.writeLog(self.logger.ERROR, "Connection error: %s, sleeping ..." % e)
+            self.logger.error("Type: %s, Value: %s, Sleeping 5 seconds ..." % (type, value))
+            #self.logger.error("Connection error: %s, sleeping ..." % e)
             time.sleep(5)
 
    def shutdown(self):
       pass
 
    def read(self):
-      self.reader = DiskReader(fet.FET_DATA + fet.FET_TX + self.options.client,
-                               fet.clients[self.options.client][5],
-                               True,
-                               0,
-                               True,
-                               self.logger,
-                               eval(fet.clients[self.options.client][4]))
+      self.reader = DiskReader(PXPaths.TXQ  + self.client.name, self.client.batch,
+                               True, 0, True, self.logger, eval(client.sorter))
       self.reader.sort()
-      return(self.reader.getFilesContent(fet.clients[self.options.client][5]))
+      return self.reader.getFilesContent(client.batch)
 
    def write(self, data):
       if len(data) >= 1:
-         self.logger.writeLog(self.logger.INFO,"%d new bulletins will be sent", len(data))
+         self.logger.info("%d new bulletins will be sent", len(data))
 
          for index in range(len(data)):
             # If data[index] is already in cache, we don't send it
             if self.cacheManager.find(data[index], 'md5') is not None:
                 try:
                    os.unlink(self.reader.sortedFiles[index])
-                   self.logger.writeLog(self.logger.INFO,"%s has been erased (was cached)", os.path.basename(self.reader.sortedFiles[index]))
+                   self.logger.info("%s has been erased (was cached)", os.path.basename(self.reader.sortedFiles[index]))
                 except OSError, e:
                    (type, value, tb) = sys.exc_info()
-                   self.logger.writeLog(self.logger.ERROR, "Unable to unlink %s ! Type: %s, Value: %s" 
+                   self.logger.info("Unable to unlink %s ! Type: %s, Value: %s" 
                                         % (self.reader.sortedFiles[index], type, value))
                 continue
 
@@ -103,30 +100,28 @@ class senderAMIS:
                nbBytesToSend = len(bullAMIS)
                self.totBytes += nbBytesSent
                #print self.totBytes
-            self.logger.writeLog(self.logger.INFO,"(%5d Bytes) Bulletin %s livré", 
-                                 nbBytes, os.path.basename(self.reader.sortedFiles[index]))
+            self.logger.info("(%5d Bytes) Bulletin %s livré", nbBytes, os.path.basename(self.reader.sortedFiles[index]))
             try:
                os.unlink(self.reader.sortedFiles[index])
-               self.logger.writeLog(self.logger.DEBUG,"%s has been erased", os.path.basename(self.reader.sortedFiles[index]))
+               self.logger.debug("%s has been erased", os.path.basename(self.reader.sortedFiles[index]))
             except OSError, e:
                (type, value, tb) = sys.exc_info()
-               self.logger.writeLog(self.logger.ERROR, "Unable to unlink %s ! Type: %s, Value: %s" 
-                                    % (self.reader.sortedFiles[index], type, value))
-         #self.logger.writeLog(self.logger.INFO, "Caching stats: %s " % str(self.cacheManager.getStats()))
+               self.logger.info("Unable to unlink %s ! Type: %s, Value: %s" % (self.reader.sortedFiles[index], type, value))
+         #self.logger.info("Caching stats: %s " % str(self.cacheManager.getStats()))
          (stats, cached, total) = self.cacheManager.getStats()
          if total:
             percentage = "%2.2f %% of the last %i requests were cached (implied %i files were deleted)" % (cached/total * 100,  total, cached)
          else:
             percentage = "No entries in the cache"
-         self.logger.writeLog(self.logger.INFO, "Caching stats: %s => %s" % (str(stats), percentage))
+         self.logger.info("Caching stats: %s => %s" % (str(stats), percentage))
 
-         #self.logger.writeLog(self.logger.INFO, "Cache: %s " % str(self.cacheManager.cache))
+         #self.logger.info("Cache: %s " % str(self.cacheManager.cache))
 
       else:
          time.sleep(1)
 
       if (self.totBytes > 108000):
-         self.logger.writeLog(self.logger.INFO, self.printSpeed() + " Bytes/sec")
+         self.logger.info(self.printSpeed() + " Bytes/sec")
          #result = open('/apps/px/result', 'w')
          #result.write(self.printSpeed())
          #sys.exit()
@@ -160,14 +155,14 @@ class senderAMIS:
             self.write(data)
          except socket.error, e:
             (type, value, tb) = sys.exc_info()
-            self.logger.writeLog(self.logger.ERROR, "Sender error! Type: %s, Value: %s" % (type, value))
+            self.logger.error("Sender error! Type: %s, Value: %s" % (type, value))
             
             # We close the socket
             try:
                 self.socketAMIS.close()
             except:
                 (type, value, tb) = sys.exc_info()
-                self.logger.writeLog(self.logger.ERROR, "Problem in closing socket! Type: %s, Value: %s" % (type, value))
+                self.logger.error("Problem in closing socket! Type: %s, Value: %s" % (type, value))
 
             # We try to reconnect. 
             self._connect()

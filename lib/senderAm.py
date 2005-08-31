@@ -1,4 +1,3 @@
-# -*- coding: UTF-8 -*-
 import sys, gateway
 import socketManagerAm
 import bulletinManagerAm
@@ -6,7 +5,9 @@ import bulletinAm
 from socketManager import socketManagerException
 from DiskReader import DiskReader
 from MultiKeysStringSorter import MultiKeysStringSorter
-import fet
+import PXPaths
+
+PXPaths.normalPaths()
 
 class senderAm(gateway.gateway):
     __doc__ = gateway.gateway.__doc__ + \
@@ -39,7 +40,7 @@ class senderAm(gateway.gateway):
     Janvier 2005
     """
 
-    def __init__(self,path,options,logger):
+    def __init__(self,path, client,logger):
         """
         Nom:
         __init__
@@ -60,20 +61,14 @@ class senderAm(gateway.gateway):
         Date:
         Janvier 2005
         """
-        gateway.gateway.__init__(self,path,options,logger)
+        gateway.gateway.__init__(self,path, client,logger)
+        self.client = client
         self.establishConnection()
-        self.options = options
 
         # Instanciation du bulletinManagerAm selon les arguments issues du fichier
         # de configuration
-        self.logger.writeLog(logger.DEBUG,"Instanciation du bulletinManagerAm")
-        self.unBulletinManagerAm = bulletinManagerAm.bulletinManagerAm(
-                 fet.FET_DATA + fet.FET_TX + options.client, logger)
-        self.options.remoteHost = options.host
-        self.options.localPort = options.port
-        self.options.timeout    = options.connect_timeout
-
-        self.listeFichiersDejaChoisis = []
+        self.logger.debug("Instanciation du bulletinManagerAm")
+        self.unBulletinManagerAm = bulletinManagerAm.bulletinManagerAm(PXPaths.TXQ + client.name, logger)
         self.reader = None
 
     def shutdown(self):
@@ -105,7 +100,7 @@ class senderAm(gateway.gateway):
 
         self.write(resteDuBuffer)
 
-        self.logger.writeLog(self.logger.INFO,"Le senderAm est mort.  Traitement en cours reussi.")
+        self.logger.info("Le senderAm est mort.  Traitement en cours reussi.")
 
     def establishConnection(self):
         __doc__ = gateway.gateway.establishConnection.__doc__ + \
@@ -131,14 +126,14 @@ class senderAm(gateway.gateway):
         """
 
         # Instanciation du socketManagerAm
-        self.logger.writeLog(self.logger.DEBUG,"Instanciation du socketManagerAm")
+        self.logger.debug("Instanciation du socketManagerAm")
 
         self.unSocketManagerAm = \
                  socketManagerAm.socketManagerAm(
                          self.logger,type='master', \
-                         port=self.options.port,\
-                         remoteHost=self.options.host,
-                         timeout=self.options.connect_timeout)
+                         port=self.client.port,\
+                         remoteHost=self.client.host,
+                         timeout=self.client.timeout)
 
     def read(self):
         __doc__ =  gateway.gateway.read.__doc__ + \
@@ -163,16 +158,14 @@ class senderAm(gateway.gateway):
         Date:
         Janvier 2005
         """
-        self.reader = DiskReader(
-                 fet.FET_DATA + fet.FET_TX + self.options.client,
-                 fet.clients[self.options.client][5],
-                 True, # name validation
-                 0,    # we don't check modification time
-                 True, # priority tree
-                 self.logger,
-                 eval(self.options.sorter))
+        self.reader = DiskReader(PXPaths.TXQ + self.client.name, self.client.batch, 
+                                 True, # name validation
+                                 0,    # we don't check modification time
+                                 True, # priority tree
+                                 self.logger,
+                                 eval(self.client.sorter))
         self.reader.sort()
-        return(self.reader.getFilesContent(fet.clients[self.options.client][5]))
+        return self.reader.getFilesContent(self.clients.batch)
 
 
     def write(self,data):
@@ -198,7 +191,7 @@ class senderAm(gateway.gateway):
         Date:
         Janvier 2005
         """
-        self.logger.writeLog(self.logger.DEBUG,"%d nouveaux bulletins seront envoyes",len(data))
+        self.logger.debug("%d nouveaux bulletins seront envoyes",len(data))
 
         for index in range(len(data)):
             try:
@@ -211,15 +204,15 @@ class senderAm(gateway.gateway):
 
                 #si le bulletin a ete envoye correctement, le fichier est efface
                 if succes:
-                    #self.logger.writeLog(self.logger.INFO,"(%5d Bytes) Bulletin %s  livré ", 
+                    #self.logger.info("(%5d Bytes) Bulletin %s  livré ", 
                     #                     nbBytesToSend, self.reader.sortedFiles[index])
-                    self.logger.writeLog(self.logger.INFO,"Bulletin %s  livré ", self.reader.sortedFiles[index])
+                    self.logger.info("Bulletin %s  livré ", self.reader.sortedFiles[index])
                     self.unBulletinManagerAm.effacerFichier(self.reader.sortedFiles[index])
-                    self.logger.writeLog(self.logger.DEBUG,"senderAm.write(..): Effacage de " + self.reader.sortedFiles[index])
+                    self.logger.debug("senderAm.write(..): Effacage de " + self.reader.sortedFiles[index])
                 else:
-                    self.logger.writeLog(self.logger.INFO,"bulletin %s: probleme d'envoi ", self.reader.sortedFiles[index])
+                    self.logger.info("bulletin %s: probleme d'envoi ", self.reader.sortedFiles[index])
 
             except Exception, e:
             # e==104 or e==110 or e==32 or e==107 => connexion rompue
                 (type, value, tb) = sys.exc_info()
-                self.logger.writeLog(self.logger.ERROR,"Type: %s, Value: %s" % (type, value))
+                self.logger.error("Type: %s, Value: %s" % (type, value))

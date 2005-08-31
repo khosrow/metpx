@@ -92,13 +92,13 @@ class socketManager:
         # Binding avec le port local
         # Si ce n'est pas un master - Pierre Michaud 2004-12-15
         if self.type == 'slave':
-            self.logger.writeLog(self.logger.INFO,"Binding du socket avec le port %d",self.port)
+            self.logger.info("Binding du socket avec le port %d",self.port)
             while True:
                 try:
                     self.socket.bind(('',self.port))
                     break
                 except socket.error:
-                    self.logger.writeLog(self.logger.INFO," Bind failed")
+                    self.logger.info(" Bind failed")
                     time.sleep(10)
 
         # KEEP_ALIVE à True, pour que si la connexion tombe, la notification
@@ -116,7 +116,7 @@ class socketManager:
             if self.remoteHost == None:
                 raise socketManagerException('remoteHost (host,port) n\'est pas spécifié')
 
-            self.logger.writeLog(self.logger.INFO,"Tentative de connexion à l'hôte distant %s", str(self.remoteHost) )
+            self.logger.info("Tentative de connexion à l'hôte distant %s", str(self.remoteHost) )
 
             while True:
                 # Commented by DL (2005-03-30) at the request of AMB
@@ -134,7 +134,7 @@ class socketManager:
 
                 except socket.error:
                     (type, value, tb) = sys.exc_info()
-                    self.logger.writeLog(self.logger.ERROR, "Type: %s, Value: %s, Sleeping 30 seconds ..." % (type, value))
+                    self.logger.error("Type: %s, Value: %s, Sleeping 30 seconds ..." % (type, value))
                     time.sleep(30)
 
         #connexion type serveur (exemple PDS-NCCS: un receiver) ou bidirectionnelle
@@ -150,7 +150,7 @@ class socketManager:
                     self.socket.close()
                     raise socketManagerException('timeout dépassé')
                 """
-                self.logger.writeLog(self.logger.INFO,"En attente de connexion (mode listen)")
+                self.logger.info("En attente de connexion (mode listen)")
                 try:
                     conn, self.remoteHost = self.socket.accept()
                     break
@@ -161,8 +161,8 @@ class socketManager:
                     # Normally, this error is generated when a SIGHUP signal is sent and the system call (socket.accept())
                     # is interrupted
                     if value[0] == 4: 
-                       self.logger.writeLog(self.logger.WARNING, "Type: %s, Value: %s, [socket.accept()]" % (type, value))
-                       #self.logger.writeLog(self.logger.ERROR, ''.join(traceback.format_exception(type, value, tb)))
+                       self.logger.warning("Type: %s, Value: %s, [socket.accept()]" % (type, value))
+                       #self.logger.error(''.join(traceback.format_exception(type, value, tb)))
                     # For case we are not aware at this time, we raise the exception
                     else:
                        raise
@@ -175,7 +175,7 @@ class socketManager:
         #a mettre un receiver a terre en moins de deux...
         self.socket.setblocking(True)
 
-        self.logger.writeLog(self.logger.INFO,"Connexion établie avec %s",str(self.remoteHost))
+        self.logger.info("Connexion établie avec %s",str(self.remoteHost))
         self.connected = True
 
     def closeProperly(self):
@@ -197,14 +197,14 @@ class socketManager:
            Auteur:      Louis-Philippe Thériault
            Date:        Octobre 2004
         """
-        self.logger.writeLog(self.logger.INFO,"Fermeture du socket et copie du reste du buffer")
+        self.logger.info("Fermeture du socket et copie du reste du buffer")
 
         # Coupure de la connexion
         try:
             self.socket.shutdown(2)
-            self.logger.writeLog(self.logger.DEBUG,"Shutdown du socket: [OK]")
+            self.logger.debug("Shutdown du socket: [OK]")
         except Exception, e:
-            self.logger.writeLog(self.logger.DEBUG,"Shutdown du socket: [ERREUR]\n %s",str(e))
+            self.logger.debug("Shutdown du socket: [ERREUR]\n %s",str(e))
 
         # Copie du reste du buffer entrant après la connexion
         # Le bulletin doit être mis à non blocking si on
@@ -228,8 +228,8 @@ class socketManager:
         bulletinsRecus = self.getNextBulletins()
 
 
-        self.logger.writeLog(self.logger.INFO,"Succès de la fermeture de la connexion socket")
-        self.logger.writeLog(self.logger.DEBUG,"Nombre de bulletins dans le buffer : %d",len(bulletinsRecus))
+        self.logger.info("Succès de la fermeture de la connexion socket")
+        self.logger.debug("Nombre de bulletins dans le buffer : %d",len(bulletinsRecus))
 
         return (bulletinsRecus, 0)
 
@@ -260,7 +260,7 @@ class socketManager:
 
             status = self.checkNextMsgStatus()
 
-            self.logger.writeLog(self.logger.DEBUG,"Statut du prochain bulletin dans le buffer: %s", status )
+            self.logger.debug("Statut du prochain bulletin dans le buffer: %s", status )
 
             if status == 'INCOMPLETE':
                 break
@@ -312,10 +312,10 @@ class socketManager:
                     self.connected = False
 
                     if not onlySynch:
-                        self.logger.writeLog(self.logger.ERROR,"La connexion est brisée")
+                        self.logger.error("La connexion est brisée")
                         raise socketManagerException('la connexion est brisee')
 
-                self.logger.writeLog(self.logger.VERYVERBOSE,"Data reçu: %s",temp)
+                self.logger.veryverbose("Data reçu: %s",temp)
 
                 self.inBuffer = self.inBuffer + temp
                 break
@@ -325,14 +325,14 @@ class socketManager:
                 # Normally, this error is generated when a SIGHUP signal is sent and the system call (socket.recv(32768))
                 # is interrupted
                 if value[0] == 4: 
-                    self.logger.writeLog(self.logger.WARNING, "Type: %s, Value: %s, [socket.recv(32768)]" % (type, value))
+                    self.logger.warning("Type: %s, Value: %s, [socket.recv(32768)]" % (type, value))
                     break
 
                 if not onlySynch:
                 # La connexion est brisée
                     self.connected = False
 
-                    self.logger.writeLog(self.logger.ERROR,"La connexion est brisée")
+                    self.logger.error("La connexion est brisée")
                     raise socketManagerException('la connexion est brisee')
 
     def __transmitOutBuffer(self):

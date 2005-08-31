@@ -1,140 +1,128 @@
-#!/usr/bin/python
-# -*- coding: UTF-8 -*-
-#! /usr/bin/env python2
-# -----------------------------------------------------
-# Définition globale pour le traîtement effectué par un
-# sender (file2socket).
+#! /usr/bin/env python
+
+"""
+#############################################################################################
+# Name: pxSender
 #
-# Auteur:       Louis-Philippe Thériault
-# Modifications: Pierre Michaud
-# Date:         Octobre 2004
+# Authors: Louis-Philippe Theriault
+#          Peter Silva 
+#          Daniel Lemay
+#
+# Date: October 2004
+#
+# Description:
+#
+#############################################################################################
+"""
+import sys, os, pwd
 
-import sys, signal, pwd
+sys.path.insert(1,sys.path[0] + '/../lib')
+sys.path.insert(1,sys.path[0] + '/../etc')
+sys.path.insert(1,sys.path[0] + '/../lib/importedLibs')
 
-sys.path.append(sys.path[0] + '/../lib')
-sys.path.append(sys.path[0] + '/../etc')
-sys.path.append(sys.path[0] + '/../lib/importedLibs')
-
-from MultiKeysStringSorter import MultiKeysStringSorter
-from DiskReader import DiskReader
+import PXPaths, log
 from optparse import OptionParser
+from PXManager import PXManager
+from Logger import Logger
+from DiskReader import DiskReader
+from Client import Client
+from Source import Source
 from PXIgniter import PXIgniter
-import gateway, log, time
-import fet
-import os.path
 
-def main():
-    #global logger
-    #global unGateway
+# Initialize PX Paths
+PXPaths.normalPaths()
 
-    if os.geteuid() == 0:
+if __name__ == '__main__':
+    # We want this program to run under pds user
+    if not os.getuid() ==  pwd.getpwnam('pds')[2]:
         pdsUID = pwd.getpwnam("pds")[2]
         os.setuid(pdsUID)
-        #print "FATAL: Do not start as root. It will be a mess."
-        #sys.exit(2)
+    
+    usage =  """%prog [client] (start|stop|restart|reload|status)\n
+example 1: %prog cmc start   => will start cmc client
+example 2: %prog start       => will start all clients
+             """
 
-    direction = "sender"
-
-    # Message d'usage pour l' option parser
-    usage =  "%prog <client> (start|stop|restart|status)\n" \
-             "       Un sender lit les bulletins dans un repertoire du disque et les\n" \
-             "       envoie a un destinataire.  de\n"
-
-    # Instanciation de l'option parser
     parser = OptionParser(usage)
-    fet.addStandardOptions(parser)
 
-    options,args = parser.parse_args()
+    # We can set the logLevel to ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
+    parser.add_option("-l", "--logLevel",
+                      action="store", type="string", dest="logLevel", default="INFO",
+                      metavar="LOGLEVEL", help="Set the logging level [default: %default]")
 
-    # Deux arguments doivent etre fournis (source et commande)
+    options, args = parser.parse_args()
+
+    manager = PXManager()
+    manager.initPXPaths()
+    manager.initNames()
+    clientNames = manager.getTxNames()
+    #print clientNames
+
+    # The command will be applied to a particular client 
     if len(args) == 2:
-        if args[1] not in ['start', 'stop', 'status', 'restart', 'reload']:
+        if args[1] in ['start', 'stop', 'status', 'restart', 'reload']:
+            command = args[1]
+        else:
             parser.error("Wrong command name")
+
+        if args[0] in clientNames:
+            clientName = args[0]
+        else:
+            parser.error("Wrong client name")
+
     elif len(args) == 1:
-        parser.error("Client or command missing")
+            parser.error("Client or command missing")
     elif len(args) == 0:
         parser.error("Client and command missing")
     elif len(args) > 2:
         parser.error("Too many arguments")
 
-    options.client = args[0]
-    options.cmd    = args[1]
+    logName = PXPaths.LOG + "tx_%s.log" % clientName
+    lockPath = PXPaths.TXQ + clientName 
 
-    # FIXME: Vérifier que typeProtocole est défini et le fichier de log
+    # Better way to log (respect the standard way to call (.info, .error)) 
+    logger = Logger(logName, options.logLevel, 'TX' + clientName)
+    logger = logger.getLogger()
 
+    # Log with BAD function call, should be changed (and PXIgniter should be changed) 
+    badLogger = log.log(logName, debug=100) 
 
-    # Init du log
+    igniter = PXIgniter('sender', clientName, command, lockPath, logger)
 
-    #FIXME: want to log fet.startup messages, will leave chicken dropping
-    #       files when invalid clients are entered.
-    logger = log.log(options.dataDir + '/log/tx_' + options.client + '.log', options.debug )
-
-    fet.startup(options,logger)
-    if options.client not in fet.clients.keys():
-        logger.writeLog(logger.FATAL, "fin anormale, client invalide.")
-        print "fin anormale: client invalide."
-        sys.exit(1)
-
-    #fet.lockStopOrDie(fet.FET_DATA + fet.FET_TX + options.client + '/.lock' , options.cmd )
-    lockPath = fet.FET_DATA + fet.FET_TX + args[0]
-    igniter = PXIgniter(direction, options.type, options.client, options.cmd, lockPath, options, logger)
-
-    logger.writeLog(logger.INFO, "Début du programme, fichier de config chargé correctement")
-    logger.writeLog(logger.DEBUG,"Protocole %s sélectionné", options.type )
-
-
-    # Branchement selon le type de protocole
-    if options.type == 'am':
-
+    client = Client(clientName, logger)
+    igniter.setFlow(client)
+    
+    # Selection by protocol type
+    if client.type == 'am':
         import senderAm
-        unGateway = senderAm.senderAm('/dev/null',options,logger)
-        igniter.setGateway(unGateway)
-
-    elif options.type == 'wmo':
-
+        gateway = senderAm.senderAm('/dev/null', client, badLogger)
+        igniter.setGateway(gateway)
+    elif client.type == 'wmo':
         import senderWmo
-        unGateway = senderWmo.senderWmo('/dev/null',options,logger)
-        igniter.setGateway(unGateway)
-
-    elif options.type == 'amis':
-
+        gateway = senderWmo.senderWmo('/dev/null', client, badLogger)
+        igniter.setGateway(gateway)
+    elif client.type == 'amis':
         import senderAMIS
-        unGateway = senderAMIS.senderAMIS(options,logger)
-        igniter.setGateway(unGateway)
+        gateway = senderAMIS.senderAMIS(client, logger)
+        igniter.setGateway(gateway)
 
-    elif options.type == 'single-file':
+    elif client.type == 'single-file':
         import fetFile
 
         igniter.setGateway("DUMMY")
 
-        #fetFile.checkClient( options.client, fet.clients, fetFile.filePrio, logger )
         while True:
-            reader = DiskReader(fet.FET_DATA + fet.FET_TX + options.client, fet.options.batch,
+            reader = DiskReader(PXPaths.TXQ + client.name, client.batch,
                                 True, 0, True, logger, MultiKeysStringSorter)
             reader.sort()
             if len(reader.sortedFiles) >= 1:
-                sortedFiles = reader.sortedFiles[:fet.options.batch]
-                logger.writeLog(logger.INFO, "%d bulletins will be sent" % len(sortedFiles))
-                fetFile.sendFiles(options.client, reader.sortedFiles[:fet.options.batch], options.chmod, options.ftp_mode, logger)
+                sortedFiles = reader.sortedFiles[:client.batch]
+                logger.info("%d bulletins will be sent" % len(sortedFiles))
+                fetFile.sendFiles(client.name, reader.sortedFiles[:client.batch], client.chmod, client.ftp_mode, badLogger)
             else:
                 time.sleep(1)
 
     else:
-        raise Exception('Type de protocole non reconnu')
+        raise Exception('Unknown type') 
 
-    """
-    # Définition de la méthode de shutdown "propre"
-    def shutdown(sig,stack):
-        global unGateway
-        global logger
-
-        logger.writeLog(logger.INFO,"Fermeture du programme (signal=%d)",sig)
-
-        unGateway.shutdown()
-        sys.exit(-1)
-    """
-
-    unGateway.run()
-
-if __name__ == '__main__':
-    main()
+    gateway.run()

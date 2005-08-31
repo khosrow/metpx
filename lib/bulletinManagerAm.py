@@ -18,10 +18,10 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
     def __init__(self,pathTemp,logger,pathSource=None,pathDest=None,\
                     maxCompteur=99999,lineSeparator='\n',extension=':', \
                     pathFichierCircuit=None, SMHeaderFormat=False, \
-                    pathFichierStations=None, mapEnteteDelai=None, use_pds=0):
+                    pathFichierStations=None, mapEnteteDelai=None, use_pds=0, source=None):
 
         bulletinManager.bulletinManager.__init__(self,pathTemp,logger, \
-                                        pathSource,pathDest,maxCompteur,lineSeparator,extension,pathFichierCircuit,mapEnteteDelai,use_pds)
+                                        pathSource,pathDest,maxCompteur,lineSeparator,extension,pathFichierCircuit,mapEnteteDelai,use_pds, source)
 
         self.initMapEntetes(pathFichierStations)
         self.SMHeaderFormat = SMHeaderFormat
@@ -47,7 +47,7 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
         try:
             premierMot = rawBulletin.splitlines()[0].split()[0]
         except Exception, e:
-            self.logger.writeLog(self.logger.ERROR,"Erreur lors du découpage d'entête\nBulletin:\n%s",rawBulletin)
+            self.logger.error("Erreur lors du découpage d'entête\nBulletin:\n%s",rawBulletin)
             return False
 
         if len(premierMot) == 2 and premierMot in ["FC","FT"]:
@@ -150,13 +150,13 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
 
             self.initMapEntetes(pathFichierStations)
 
-            self.logger.writeLog(self.logger.INFO,"Succès du rechargement du fichier d'entêtes")
+            self.logger.info("Succès du rechargement du fichier d'entêtes")
 
         except Exception,e :
 
             self.mapEntetes = oldMapEntetes
 
-            self.logger.writeLog(self.logger.WARNING,"Échec du rechargement du fichier d'entêtes")
+            self.logger.warning("Échec du rechargement du fichier d'entêtes")
 
             raise
 
