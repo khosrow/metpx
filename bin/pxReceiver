@@ -20,12 +20,15 @@ sys.path.insert(1,sys.path[0] + '/../lib')
 sys.path.insert(1,sys.path[0] + '/../etc')
 sys.path.insert(1,sys.path[0] + '/../lib/importedLibs')
 
-import PXPaths, log
+import PXPaths
 from optparse import OptionParser
 from PXManager import PXManager
 from Logger import Logger
 from Source import Source
 from PXIgniter import PXIgniter
+
+# Initialize PX Paths
+PXPaths.normalPaths()
 
 if __name__ == '__main__':
     # We want this program to run under pds user
@@ -37,9 +40,6 @@ if __name__ == '__main__':
 example 1: %prog cmc start   => will start cmc source
 example 2: %prog start       => will start all sources
              """
-    # Initialize PX Paths
-    PXPaths.normalPaths()
-
     parser = OptionParser(usage)
 
     # We can set the logLevel to ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
@@ -77,12 +77,8 @@ example 2: %prog start       => will start all sources
     logName = PXPaths.LOG + "rx_%s.log" % sourceName
     lockPath = PXPaths.RXQ + sourceName 
 
-    # Better way to log
     logger = Logger(logName, options.logLevel, 'RX' + sourceName)
     logger = logger.getLogger()
-
-    # Log with BAD function call, should be changed (and PXIgniter should be changed) 
-    badLogger = log.log(logName, debug=100) 
 
     igniter = PXIgniter('receiver', sourceName, command, lockPath, logger)
 
@@ -92,20 +88,20 @@ example 2: %prog start       => will start all sources
     # Selection by protocol type
     if source.type == 'am':
         import receiverAm
-        gateway = receiverAm.receiverAm('/dev/null', source, badLogger)
+        gateway = receiverAm.receiverAm('/dev/null', source, logger)
         igniter.setGateway(unGateway)
     elif source.type == 'wmo':
         import receiverWmo
-        gateway = receiverWmo.receiverWmo('/dev/null', source, badLogger)
+        gateway = receiverWmo.receiverWmo('/dev/null', source, logger)
         igniter.setGateway(gateway)
     elif source.type == 'single-file':
         import fetFile
         igniter.setGateway('DUMMY')
-        fetFile.checkSource(sourceName, 'DUMMY', badLogger, igniter)
+        fetFile.checkSource(sourceName, 'DUMMY', logger, igniter)
     elif source.type == 'bulletin-file':
         import bulletinFileReceiver
         igniter.setGateway('DUMMY')
-        bulletinFileReceiver.run(source, igniter, logger, badLogger)
+        bulletinFileReceiver.run(source, igniter, logger)
     else:
         raise Exception('Unknown type') 
 

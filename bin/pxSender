@@ -20,7 +20,7 @@ sys.path.insert(1,sys.path[0] + '/../lib')
 sys.path.insert(1,sys.path[0] + '/../etc')
 sys.path.insert(1,sys.path[0] + '/../lib/importedLibs')
 
-import PXPaths, log
+import PXPaths
 from optparse import OptionParser
 from PXManager import PXManager
 from Logger import Logger
@@ -80,12 +80,8 @@ example 2: %prog start       => will start all clients
     logName = PXPaths.LOG + "tx_%s.log" % clientName
     lockPath = PXPaths.TXQ + clientName 
 
-    # Better way to log (respect the standard way to call (.info, .error)) 
     logger = Logger(logName, options.logLevel, 'TX' + clientName)
     logger = logger.getLogger()
-
-    # Log with BAD function call, should be changed (and PXIgniter should be changed) 
-    badLogger = log.log(logName, debug=100) 
 
     igniter = PXIgniter('sender', clientName, command, lockPath, logger)
 
@@ -95,11 +91,11 @@ example 2: %prog start       => will start all clients
     # Selection by protocol type
     if client.type == 'am':
         import senderAm
-        gateway = senderAm.senderAm('/dev/null', client, badLogger)
+        gateway = senderAm.senderAm('/dev/null', client, logger)
         igniter.setGateway(gateway)
     elif client.type == 'wmo':
         import senderWmo
-        gateway = senderWmo.senderWmo('/dev/null', client, badLogger)
+        gateway = senderWmo.senderWmo('/dev/null', client, logger)
         igniter.setGateway(gateway)
     elif client.type == 'amis':
         import senderAMIS
@@ -118,7 +114,7 @@ example 2: %prog start       => will start all clients
             if len(reader.sortedFiles) >= 1:
                 sortedFiles = reader.sortedFiles[:client.batch]
                 logger.info("%d bulletins will be sent" % len(sortedFiles))
-                fetFile.sendFiles(client.name, reader.sortedFiles[:client.batch], client.chmod, client.ftp_mode, badLogger)
+                fetFile.sendFiles(client.name, reader.sortedFiles[:client.batch], client.chmod, client.ftp_mode, logger)
             else:
                 time.sleep(1)
 

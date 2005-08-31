@@ -25,10 +25,10 @@ import PXPaths
 
 PXPaths.normalPaths()
 
-def run(source, igniter, logger, badLogger):
+def run(source, igniter, logger):
     bullManager = bulletinManager.bulletinManager(
          PXPaths.RXQ + source.name,
-         badLogger,
+         logger,
          PXPaths.RXQ + source.name,
          '/apps/pds/RAW/-PRIORITY',
          9999,
@@ -45,7 +45,7 @@ def run(source, igniter, logger, badLogger):
             source = Source(source.name, logger)
             bullManager = bulletinManager.bulletinManager(
                                PXPaths.RXQ +source.name,
-                               badLogger,
+                               logger,
                                PXPaths.RXQ + source.name,
                                '/apps/pds/RAW/-PRIORITY',
                                9999,
