@@ -1,0 +1,246 @@
+#!/usr/bin/env python2
+"""
+#############################################################################################
+# Name: pxLatencies
+#
+# Author: Daniel Lemay
+#
+# Date: 2005-09-01
+#
+# Description: Calculate latencies for a product (MPCN) sent to a client (wxo-b1)
+# 
+#   Usage:   This program should be called from a crontab. The entry should look like:
+#  
+#             34 18 * * * if test -x /apps/px/bin/pxLatencies; then /apps/px/bin/pxLatencies --days 3 > /dev/null 2>&1;fi
+#
+#############################################################################################
+"""
+
+import os, os.path, time, pwd, sys, getopt, commands, fnmatch
+sys.path.insert(1, sys.path[0] + '/../lib')
+sys.path.insert(1, '../lib')
+
+import PXPaths, dateLib
+from Logger import Logger
+from PXManager import PXManager
+
+class PXLatencies:
+
+    LOG_LEVEL = "INFO"      # Logging level
+    NB_DAYS_LEFT = None     # Number of days we left
+
+    # We want this program to run under pds user
+    if not os.getuid() ==  pwd.getpwnam('pds')[2]:
+        pdsUID = pwd.getpwnam("pds")[2]
+        os.setuid(pdsUID)
+
+    def __init__(self):
+
+        PXPaths.normalPaths()
+        self.manager = PXManager()
+        LOG_NAME = self.manager.LOG + 'pxLatencies.log'    # Log's name
+        logger = Logger(LOG_NAME, PXLatencies.LOG_LEVEL, "Latencies")
+
+        #self.getOptionsParser()
+        self.logger = logger.getLogger()
+        self.manager.setLogger(self.logger)
+
+        self.date = None     # Date for which we want to obtain stats
+        self.glob = None     # Products that we want to match
+        self.machines = []   # Machines were the logs can be found
+        self.sources = []    # Sources for which we will check arrival time of the products
+        self.client = []     # Client for which we will check delivery time of the products (ONLY ONE ENTRY in the list)
+        self.messages = []   # Special messages coming from weird results
+
+        self.goodRx = []     # Lines matching initial values
+        self.goodTx = []     # Lines matching initial values
+        self.receivingInfos = {} # Dict. addressed by filename and containing a tuple of (formatted date, date in seconds, machine) 
+        self.sendingInfos = {}   # Dict. addressed by filename and containing a tuple of (formatted date, date in seconds, machine) 
+
+        self.stats = {}   # Final stats
+        self.max = 0      # Maximum latency time in seconds
+        self.min = 9999   # Minimum latency time in seconds
+        self.mean = 0     # Mean latency time in seconds
+        
+        self.text = ''    # Results in plain text
+        self.html = ''    # Results in html
+
+        self.setInitalValues()  # Eventually could come from a configuration file or passed as arguments
+        self.obtainFiles()
+
+    def setInitalValues(self):
+        self.date = dateLib.getYesterdayFormatted() 
+        #self.date = '09/01/05' 
+        self.glob = 'MPCN'
+        self.machines = ['pds5.cmc.ec.gc.ca', 'pds6.cmc.ec.gc.ca']
+        self.sources = ['ncp1', 'ncp2']
+        self.clients = ['wxo-b1']
+
+    def obtainFiles(self):
+        for machine in self.machines:
+            self.manager.createDir(PXPaths.LAT_TMP +  machine)
+            for source in self.sources:
+                command = 'scp -q %s:%s %s' % (machine, PXPaths.LOG + 'rx_' + source + '*', PXPaths.LAT_TMP + '/' + machine)
+                (status, output) = commands.getstatusoutput(command)
+            for client in self.clients:
+                command = 'scp -q %s:%s %s' % (machine, PXPaths.LOG + 'tx_' + client + '*', PXPaths.LAT_TMP + '/' + machine)
+                (status, output) = commands.getstatusoutput(command)
+
+    def extractInfos(self, prefix, good, infos):
+
+        if prefix == 'rx':
+            #print("GOOD RX: %i" % len(good))
+            for (line, machine) in good:
+                date = line[:17]
+                filename = os.path.split(line[33:-1])[1]
+                #print (date, dateLib.getSecondsSinceEpoch(date), filename, machine)
+                infos[filename] = (date, dateLib.getSecondsSinceEpoch(date), machine)
+
+        if prefix == 'tx':
+            #print("GOOD TX: %i" % len(good))
+            for (line, machine) in good:
+                parts = line.split()
+                date = parts[0] + ' ' + parts[1]
+                filename = parts[4]
+                #print (date, dateLib.getSecondsSinceEpoch(date), filename, machine)
+                infos[filename] = (date, dateLib.getSecondsSinceEpoch(date), machine)
+
+        """    
+        for tuple in  self.goodRx:
+            print (tuple[0].strip(), tuple[1])
+        print "*************************************** TX ********************************"
+        for tuple in  self.goodTx:
+            print (tuple[0].strip(), tuple[1])
+        """
+
+    def extractGoodLines(self, prefix, good):
+        for machine in self.machines:
+            hostOnly = machine.split('.')[0]
+            lines = []
+            dirPath = PXPaths.LAT_TMP + '/' + machine
+            files = os.listdir(dirPath)
+            for file in [x for x in files if x[0:2] == prefix]:
+                lines.extend(open(dirPath + '/' + file).readlines())
+            good.extend(map(lambda x: (x, hostOnly), fnmatch.filter(lines, '%s*INFO*%s*' % (self.date, self.glob))))
+
+        #print len(good)
+        
+    def makeStats(self):
+        total_latency = 0.0
+        for file in self.sendingInfos:        
+            if file in self.receivingInfos:
+                date, seconds, machine = self.receivingInfos[file]
+                latency = self.sendingInfos[file][1] - seconds
+                self.stats[file] =  (date, machine, latency)
+                total_latency += latency
+                if latency > self.max:
+                    self.max = latency
+                elif latency < self.min:
+                    self.min = latency 
+        if len(self.stats) > 0:
+            self.mean =  total_latency / len(self.stats)
+        else:
+            self.mean = 0
+
+    def setTextResults(self):
+   
+        part1 = """
+<HTML>
+<BODY>
+<PRE>
+"""
+
+        part2 = """
+####################################################################################################
+#                               LATENCIES STATS ( %s )                                       
+####################################################################################################
+# Number of files is: %s 
+# Max. latency time is: %i seconds
+# Mean latency time is: %4.2f seconds
+# Min. latency time is: %i seconds
+####################################################################################################
+#               FILENAME                                                   ARRIVAL       LATENCY  
+####################################################################################################
+""" % (self.date, len(self.stats), self.max, self.mean, self.min)
+
+
+        part3 = ''
+        for file in self.stats:
+            date, machine, latency = self.stats[file]
+            part3 += ("# %s (%s)   %s   %i        \n" %  (file, machine, date, latency))            
+        #part3.strip('\n')
+
+        part4 = """
+####################################################################################################
+"""
+        part5 = """
+</HTML>
+</BODY>
+</PRE>
+"""
+
+        part1 = part1.lstrip()
+        part2 = part2.lstrip()
+        part4 = part4.lstrip()
+        part5 = part5.lstrip()
+
+        self.text =  part2 + part3 + part4
+        self.html =  part1 + part2 + part3 + part4 + part5
+
+    def mailHtmlResults(self):
+        import smtplib
+        import mailLib
+        
+        receivers = ['warnings_latencies@ec.gc.ca']
+        receivers = ['daniel.lemay', 'peter.silva']
+        #receivers = ['daniel.lemay']
+        
+        subject = "MPCN Latencies (%s) : MAX = %i seconds,  MEAN = %4.2f seconds,  MIN = %i seconds" % (self.date, self.max, self.mean, self.min)
+        message = mailLib.createhtmlmail(self.html, self.text, subject)
+        server = smtplib.SMTP("smtp.cmc.ec.gc.ca")
+        #server.set_debuglevel(1)
+        server.sendmail('warning_latencies@ec.gc.ca', receivers, message)
+        server.quit()
+
+    def getOptionsParser(self):
+
+        nbDaysLeft = False
+
+        try:
+            opts, args = getopt.getopt(sys.argv[1:], 'd:h', ['help', 'days='])
+            #print opts
+            #print args
+        except getopt.GetoptError:
+            # print help information and exit:
+            usage()
+            sys.exit(2)
+
+        for option, value in opts:
+            if option in ('-h', '--help'):
+                usage()
+                sys.exit()
+            if option in ('-d', '--days'):
+                nbDaysLeft = True
+                value = int(value)
+                if value > 0:
+                   PXDBCleaner.NB_DAYS_LEFT = value
+                   #print type(PXDBCleaner.NB_DAYS_LEFT)
+                else:
+                    usage()
+                    sys.exit(2)
+
+        # We must give the number of days we want to leave on the disk
+        if nbDaysLeft  is False:
+            usage()
+            sys.exit()
+
+if __name__ == '__main__':
+
+    latencier =  PXLatencies()
+    latencier.extractGoodLines('rx', latencier.goodRx)
+    latencier.extractGoodLines('tx', latencier.goodTx)
+    latencier.extractInfos('rx', latencier.goodRx, latencier.receivingInfos)
+    latencier.extractInfos('tx', latencier.goodTx, latencier.sendingInfos)
+    latencier.makeStats()
+    latencier.setTextResults()
+    latencier.mailHtmlResults()
