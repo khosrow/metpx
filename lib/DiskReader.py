@@ -46,7 +46,7 @@ class _DirIterator(object):
 
 class DiskReader:
 
-    def __init__(self, path, batch=20000, validation=False, mtime=0, prioTree=False, logger=None, sorterClass=None):
+    def __init__(self, path, batch=20000, validation=False, patternMatching=False, mtime=0, prioTree=False, logger=None, sorterClass=None):
         """
         Set the root path and the sorter class used for sorting
 
@@ -66,18 +66,19 @@ class DiskReader:
         self.path = path                          # Path from where we ingest filenames
         self.clientName = os.path.basename(path)  # Last part of the path correspond to client name 
         self.validation = validation              # Name Validation active (True or False)
-        self.patternMatching = validation         # Pattern matching active (True or False)
+        self.patternMatching = patternMatching    # Pattern matching active (True or False)
         self.logger = logger                      # Use to log information
         self.batch = batch                        # Maximum number of files that we are interested to sort
         self.mtime = mtime                        # If we want to check modification time before taking a file                             
-        if prioTree: # If we want to use predifine priority directories tree
+        if prioTree: # If we want to use predefine priority directories tree
             self.files = self._getFilesList()                          # List of filenames under the priorities
         else:
             self.files = self. _getFilesListForOneBranch(path, batch)  # List of filenames under the path
         self.sortedFiles = []                     # Sorted filenames
         self.data = []                            # Content of x filenames (x is set in getFilesContent())
         self.sorterClass = sorterClass            # Sorting algorithm that will be used by sort()
-        self.ingestor = Ingestor(source=None, logger=logger) # Give access to all configuration options of the clients
+        if patternMatching:
+            self.ingestor = Ingestor(source=None, logger=logger) # Give access to all configuration options of the clients
 
     def _validateName(self, basename):
         """

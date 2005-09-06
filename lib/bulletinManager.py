@@ -584,8 +584,9 @@ class bulletinManager:
 
         lignes = os.read(fic,os.stat(pathHeader2circuit)[6])
 
+        #self.logger.info("Validating header2client.conf, clients:" + string.join(self.source.ingestor.clientNames))
         bogus=[]
-        self.logger.info("Validating header2client.conf, clients:" + string.join(self.source.ingestor.clientNames))
+        routable=[] # sub group of the clients, only ones for which we can route bulletins
         for ligne in lignes.splitlines():
             uneLigneSplitee = ligne.split(':')
             ahl = uneLigneSplitee[0]
@@ -600,13 +601,17 @@ class bulletinManager:
                     #if g in fet.clients.keys():
                     if g in self.source.ingestor.clientNames:
                         gs = gs + [ g ]
+                        if g not in routable: routable.append(g)
                     else:
                         if g not in bogus:
                             bogus = bogus + [ g ]
-                            self.logger.warning("client (%s) invalide, ignorée ", g )
+                            #self.logger.warning("client (%s) invalide, ignorée ", g )
+                            self.logger.warning("Client '%s' is in header2client.conf but inexistant in px", g )
                 self.mapCircuits[ahl]['routing_groups'] =  gs
+                
             except IndexError:
                 raise bulletinManagerException('Les champs ne concordent pas dans le fichier header2circuit',ligne)
+        self.logger.info("From header2client.conf we learn that we can route bulletins to: %s" % routable)
 
     def getMapCircuits(self):
         """getMapCircuits() -> mapCircuits

@@ -53,7 +53,6 @@ example 2: %prog start       => will start all sources
     manager.initPXPaths()
     manager.initNames()
     sourceNames = manager.getRxNames()
-    #print sourceNames
 
     # The command will be applied to a particular source 
     if len(args) == 2:
@@ -95,13 +94,13 @@ example 2: %prog start       => will start all sources
         gateway = receiverWmo.receiverWmo('/dev/null', source, logger)
         igniter.setGateway(gateway)
     elif source.type == 'single-file':
-        import fetFile
         igniter.setGateway('DUMMY')
-        fetFile.checkSource(sourceName, 'DUMMY', logger, igniter)
+        #fetFile.checkSource(sourceName, 'DUMMY', logger, igniter)
+        source.ingestor.ingestSingleFile(igniter)
     elif source.type == 'bulletin-file':
-        import bulletinFileReceiver
         igniter.setGateway('DUMMY')
-        bulletinFileReceiver.run(source, igniter, logger)
+        #bulletinFileReceiver.run(source, igniter, logger)
+        source.ingestor.ingestBulletinFile(igniter)
     else:
         raise Exception('Unknown type') 
 

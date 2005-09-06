@@ -86,7 +86,7 @@ class bulletin:
         # dans la classe spécialisée, par une méthode qui ne fait rien
         self.verifyHeader()
 
-        self.logger.veryverbose("newBulletin: %s",stringBulletin)
+        self.logger.veryverbose("newBulletin: %s" % stringBulletin)
 
     def splitlinesBulletin(self,stringBulletin):
         """splitlinesBulletin(stringBulletin) -> listeLignes

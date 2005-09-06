@@ -33,6 +33,7 @@ class Client(object):
             self.logger = self.logger.getLogger()
         else:
             self.logger = logger
+        self.logger.info("Initialisation of client %s" % self.name)
         self.host = None                          # Remote host address (or ip) where to send files
         self.type = 'single-file'                 # Must be in ['single-file', 'bulletin-file', 'file', 'am', 'wmo', 'amis']
         self.protocol = None                      # First thing in the url: ftp, file, am, wmo, amis
@@ -49,9 +50,10 @@ class Client(object):
         self.user = None                    # User name used to connect
         self.passwd = None                  # Password 
         self.chmod = 0                      # If set to a value different than 0, umask 777 followed by a chmod of the value will be done
-        self.ftp_mode = 'passive'           # default is 'passive', can be set to 'active'
+        self.ftp_mode = 'passive'           # Default is 'passive', can be set to 'active'
 
         self.readConfig()
+        self.printInfos(self)
 
     def readConfig(self):
 
@@ -101,7 +103,7 @@ class Client(object):
 
         config.close()
     
-        self.logger.debug("Configuration file of client %s has been read" % (self.name))
+        #self.logger.debug("Configuration file of client %s has been read" % (self.name))
 
 
     def printInfos(self, client):

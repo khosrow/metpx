@@ -124,7 +124,7 @@ class receiverWmo(gateway.gateway):
         else:
             raise gateway.gatewayException("Le lecteur ne peut être accédé")
 
-        self.logger.veryveryverbose("%d nouveaux bulletins lus",len(data))
+        self.logger.veryveryverbose("%d nouveaux bulletins lus" % len(data))
 
         return data
 
@@ -139,7 +139,7 @@ class receiverWmo(gateway.gateway):
            Date:        Octobre 2004
         """
 
-        self.logger.veryveryverbose("%d nouveaux bulletins seront écrits",len(data))
+        self.logger.veryveryverbose("%d nouveaux bulletins seront écrits" % len(data))
 
         while True:
             if len(data) <= 0:

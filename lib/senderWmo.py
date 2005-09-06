@@ -63,8 +63,8 @@ class senderWmo(gateway.gateway):
         Novembre 2004
         """
         gateway.gateway.__init__(self, path, client, logger)
-        self.establishConnection()
         self.client = client
+        self.establishConnection()
 
         # Instanciation du bulletinManagerWmo selon les arguments issues du fichier
         # de configuration
@@ -166,7 +166,7 @@ class senderWmo(gateway.gateway):
                                  0,     # we don't check modification time
                                  True,  # priority tree
                                  self.logger,
-                                 eval(client.sorter))
+                                 eval(self.client.sorter))
         self.reader.sort()
         return self.reader.getFilesContent(self.client.batch)
 

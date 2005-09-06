@@ -46,9 +46,9 @@ class PXIgniter(Igniter):
       elif commentID == 'No lock':
          print "No lock on the %s %s. Are you sure it was started?" % (self.direction, self.flowName)
       elif commentID == 'Restarted successfully':
-         print "%s %s has been restarted successfully!" % (self.direction, self.flowName)
+         print "%s %s has been restarted successfully!" % (self.direction.capitalize(), self.flowName)
       elif commentID == 'Status, started':
-         print "%s %s is running with PID %d" % (self.direction, self.flowName, self.lockpid)
+         print "%s %s is running with PID %d" % (self.direction.capitalize(), self.flowName, self.lockpid)
       elif commentID == 'Status, not running':
          print "* %s %s is not running" % (self.direction, self.flowName)
       elif commentID == 'Status, locked':
@@ -62,7 +62,7 @@ class PXIgniter(Igniter):
       signal.signal(signal.SIGTERM, self._shutdown)
       signal.signal(signal.SIGINT, self._shutdown)
       signal.signal(signal.SIGHUP, self._reload)
-      self.logger.info("%s %s has been started" % (self.direction, self.flowName))
+      self.logger.info("%s %s has been started" % (self.direction.capitalize(), self.flowName))
 
    def stop(self):
       # If it is locked ...
@@ -90,7 +90,7 @@ class PXIgniter(Igniter):
       Do the real work here.
       """
       #print "shutdown() has been called"
-      self.logger.info("%s %s (type: %s) has been stopped" % (self.direction, self.flowName, self.type))
+      self.logger.info("%s %s (type: %s) has been stopped" % (self.direction.capitalize(), self.flowName, self.type))
       os.kill(self.lockpid, signal.SIGKILL)
 
    def _reload(self, sig, stack):
@@ -108,7 +108,7 @@ class PXIgniter(Igniter):
          # particular source/client is by restarting it!
          if os.fork() == 0:
             self.restart()
-            self.logger.info("%s has been reloaded by restarting it" % self.direction)
+            self.logger.info("%s has been reloaded by restarting it" % self.direction.capitalize())
          else:
             pass
       else:
@@ -118,7 +118,7 @@ class PXIgniter(Igniter):
             #fet.startup(self.flow, self.logger)
             # We assign the defaults and reread the configuration file (in __init__)
             self.flow.__init__(self.flow.name, self.flow.logger)
-            self.logger.info("%s has been reloaded" % self.direction)
+            self.logger.info("%s has been reloaded" % self.direction.capitalize())
             if self.type == 'amis':
                 self.gateway.cacheManager.clear()
                 self.logger.info("Cache has been cleared") 
@@ -136,13 +136,13 @@ class PXIgniter(Igniter):
                #print "addSM: %s" % (self.flow.addSMHeader)
                self.gateway.unBulletinManager.reloadMapCircuit('/dev/null')
                self.gateway.unBulletinManager.reloadMapEntetes(self.gateway.pathFichierStations)
-               self.logger.info("%s has been reloaded" % self.direction)
+               self.logger.info("%s has been reloaded" % self.direction.capitalize())
             if self.type == 'wmo':
                self.gateway.unBulletinManager.extension = self.flow.extension
                self.gateway.unBulletinManager.reloadMapCircuit('/dev/null')
-               self.logger.info("%s has been reloaded" % self.direction)
+               self.logger.info("%s has been reloaded" % self.direction.capitalize())
             if self.type == 'single-file':
-               self.reloadMode = True
+               self.logger.info("%s has been reloaded" % self.direction.capitalize())
             if self.type == 'bulletin-file':
                self.reloadMode = True
             if self.type == 'collector':

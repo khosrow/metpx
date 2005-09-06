@@ -5,7 +5,8 @@
 # Authors: Peter Silva (imperative style)
 #          Daniel Lemay (OO style)
 #
-# Date: 2005-08-21
+# Date: 2005-01-10 (Initial version by PS)
+#       2005-08-21 (OO version by DL)
 #
 # Description:
 #
@@ -35,6 +36,8 @@ class Ingestor(object):
 
         # General Attributes
         self.source = source
+        self.ingestDir = PXPaths.RXQ + self.source.name
+        self.reader = None
         if source is not None:
             self.logger = source.logger
         elif logger is not None:
@@ -45,8 +48,8 @@ class Ingestor(object):
         self.clientNames = self.pxManager.getTxNames() # Obtains the list of client's names (the ones to wich we can link files)
         self.clients = {}   # All the Client objects
         self.dbDirsCache = CacheManager(maxEntries=200000, timeout=25*3600)      # Directories created in the DB
-        self.clientDirsCache =  CacheManager(maxEntries=100000, timeout=2*3600)  # Directories created in TXQ
-        self.logger.info("Source %s can link files to clients: %s" % (source.name, self.clientNames))
+        self.clientDirsCache = CacheManager(maxEntries=100000, timeout=2*3600)   # Directories created in TXQ
+        self.logger.info("Ingestor (source %s) can link files to clients: %s" % (source.name, self.clientNames))
 
     def createDir(self, dir, cacheManager):
         if cacheManager.find(dir) == None:
@@ -54,7 +57,7 @@ class Ingestor(object):
                 os.makedirs(dir, 01775)
             except OSError:
                 (type, value, tb) = sys.exc_info()
-                self.logger.error("Problem when creating dir (%s) => Type: %s, Value: %s" % (dir, type, value)) 
+                self.logger.warning("Problem when creating dir (%s) => Type: %s, Value: %s" % (dir, type, value)) 
 
     def setClients(self):
         """"
@@ -62,7 +65,7 @@ class Ingestor(object):
         configuration options (mainly masks) of the Client objects.
         """
         for name in self.clientNames:
-            self.clients[name] = Client(name)
+            self.clients[name] = Client(name, self.logger)
             #self.clients[name].readConfig()
             #print self.clients[name].masks
 
@@ -90,7 +93,7 @@ class Ingestor(object):
         """
         parts = ingestName.split(':')
         priority = parts[4].split('.')[0]
-        return PXPaths.TXQ + '/' + clientName + '/' + priority + '/' + time.strftime("%Y%m%d%H", time.gmtime()) + '/' + ingestName
+        return PXPaths.TXQ + clientName + '/' + priority + '/' + time.strftime("%Y%m%d%H", time.gmtime()) + '/' + ingestName
 
     def getDBName(self, ingestName):
         """
@@ -132,6 +135,7 @@ class Ingestor(object):
         return matchingClientNames
 
     def ingest(self, receptionName, ingestName, clientNames):
+        self.logger.info("Reception Name: %s" % receptionName)
         dbName = self.getDBName(ingestName)
 
         if dbName == '':
@@ -140,10 +144,29 @@ class Ingestor(object):
         
         self.createDir(os.path.dirname(dbName), self.dbDirsCache)
         os.link(receptionName, dbName)
-        self.logger.info("Ingest %s" % dbName)
+
+        self.logger.debug("DBDirsCache: %s" % self.dbDirsCache.cache)
+        stats, cached, total = self.dbDirsCache.getStats()
+        if total:
+            percentage = "%2.2f %% of the last %i requests were cached" % (cached/total * 100,  total)
+        else:
+            percentage = "No entries in the cache"
+        self.logger.debug("DB Caching stats: %s => %s" % (str(stats), percentage))
+
+
+        self.logger.debug("ClientDirsCache: %s" % self.clientDirsCache.cache)
+        stats, cached, total = self.clientDirsCache.getStats()
+        if total:
+             percentage = "%2.2f %% of the last %i requests were cached" % (cached/total * 100,  total)
+        else:
+             percentage = "No entries in the cache"
+        self.logger.debug("Client Caching stats: %s => %s" % (str(stats), percentage))
+
+        self.logger.info("Ingestion Name: %s" % ingestName)
+        self.logger.info("DB Name: %s" % dbName)
 
         # Problem bulletins are databased, but not sent to clients
-        if ingestname.find("PROBLEM_BULLETIN") is not -1:
+        if ingestName.find("PROBLEM_BULLETIN") is not -1:
             return 1
 
         for name in clientNames:
@@ -151,8 +174,95 @@ class Ingestor(object):
             self.createDir(os.path.dirname(clientQueueName), self.clientDirsCache)
             os.link(dbName, clientQueueName)
 
-        self.logger.info("Queued for %s" % string.join(clientNames))
+        self.logger.info("Queued for: %s" % string.join(clientNames))
         return 1
+    
+    def run(self):
+        if self.source.type == 'single-file':
+            self.ingestSingleFile()
+        elif self.source.type == 'bulletin-file':
+            self.ingestBulletinFile()
 
+    def ingestSingleFile(self, igniter):
+        from DiskReader import DiskReader
+        while True:
+            # FIXME: Maybe it would be costless to instanciate DiskReader before the while, so we instanciate it only
+            # one time initially and at reload ater. Same thing for ingestBulletinFile
+            reader = DiskReader(self.ingestDir, self.source.batch, False, False,
+                                self.source.mtime, False, self.source.logger, self.source.sorter)
+            reader.sort()
+            if len(reader.sortedFiles) >= 1:
+                sortedFiles = reader.sortedFiles[:self.source.batch]
+                self.logger.info("%d files will be ingested" % len(sortedFiles))
+                for file in sortedFiles:
+                    ingestName = self.getIngestName(os.path.basename(file)) 
+                    matchingClients = self.getMatchingClientNamesFromMasks(ingestName)
+                    self.logger.info("Matching (from patterns) client names: %s" % matchingClients)
+                    self.ingest(file, ingestName, matchingClients)
+                    os.unlink(file)
+            else:
+                time.sleep(1)
+
+    def ingestBulletinFile(self, igniter):
+        from DiskReader import DiskReader
+        import bulletinManager
+
+        bullManager = bulletinManager.bulletinManager(
+                    PXPaths.RXQ + self.source.name,
+                    self.logger,
+                    PXPaths.RXQ + self.source.name,
+                    '/apps/pds/RAW/-PRIORITY',
+                    9999,
+                    '\n',
+                    self.source.extension,
+                    PXPaths.ETC + 'header2client.conf',
+                    self.source.mapEnteteDelai,
+                    self.source.use_pds,
+                    self.source)
+
+        while True:
+            # If a SIGHUP signal is received ...
+            if igniter.reloadMode == True:
+                bullManager = bulletinManager.bulletinManager(
+                               PXPaths.RXQ + self.source.name,
+                               self.logger,
+                               PXPaths.RXQ + self.source.name,
+                               '/apps/pds/RAW/-PRIORITY',
+                               9999,
+                               '\n',
+                               self.source.extension,
+                               PXPaths.ETC + 'header2client.conf',
+                               self.source.mapEnteteDelai,
+                               self.source.use_pds,
+                               self.source)
+
+                self.logger.info("%s has been reload" % igniter.direction.capitalize())
+                igniter.reloadMode = False
+
+            # We put the bulletins (read from disk) in a dict (key = absolute filename)
+            #bulletinsBrutsDict = bullManager.readBulletinFromDisk([bullManager.pathSource])
+            # If a file has been modified in less than mtime (3 seconds now), we don't touch it
+            reader = DiskReader(bullManager.pathSource, self.source.batch, validation=False,
+                                patternMatching=False,  mtime=3, prioTree=False, logger=self.source.logger)
+            reader.sort()
+            data = reader.getFilesContent(reader.batch)
+
+            if len(data) == 0:
+                time.sleep(1)
+                continue
+
+            # Write (and name correctly) the bulletins to disk, erase them after
+            for index in range(len(data)):
+                nb_bytes = len(data[index])
+                self.logger.info("Lecture de %s: %d bytes" % (reader.sortedFiles[index], nb_bytes))
+                bullManager.writeBulletinToDisk(data[index], True, True)
+                try:
+                    os.unlink(reader.sortedFiles[index])
+                    self.logger.debug("%s has been erased", os.path.basename(reader.sortedFiles[index]))
+                except OSError, e:
+                    (type, value, tb) = sys.exc_info()
+                    self.logger.error("Unable to unlink %s ! Type: %s, Value: %s" % (reader.sortedFiles[index], type, value))
+
+    
 if __name__ == '__main__':
     pass

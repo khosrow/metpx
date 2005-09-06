@@ -34,7 +34,12 @@ class Source(object):
         else:
             self.logger = logger
         self.logger.info("Initialisation of source %s" % self.name)
-        self.ingestor = Ingestor(self)
+
+        if hasattr(self, 'ingestor'):
+            # Will happen only when a reload occurs
+            self.ingestor.__init__(self)
+        else:
+            self.ingestor = Ingestor(self)
 
         # Attributes coming from the configuration file of the source
         #self.extension = 'nws-grib:-CCCC:-TT:-CIRCUIT:Direct'  # Extension to be added to the ingest name
@@ -46,9 +51,13 @@ class Source(object):
         self.mapEnteteDelai = None                             #
         self.addSMHeader = False                               #
         self.use_pds = False                                   #
-
+        self.validation = False                                # Validate the filename (ex: prio an timestamp)
+        self.sorter = None                                     # No sorting on the filnames
+        self.mtime = 0                                         # Integer indicating the number of seconds a file must not have 
+                                                               # been touched before being picked
         self.readConfig()
         self.ingestor.setClients()
+        self.printInfos(self)
 
     def readConfig(self):
 
@@ -77,10 +86,13 @@ class Source(object):
                             self.logger.error("Extension (%s) for source %s has wrong number of fields" % (words[1], self.name)) 
                         else:
                             self.extension = ':' + words[1]
-                    elif words[0] == 'AddSMHeader' and isTrue(words[1]): self.addSMHeader = True
+                    elif words[0] == 'batch': self.batch = int(words[1])
                     elif words[0] == 'type': self.type = words[1]
                     elif words[0] == 'port': self.port = int(words[1])
-                    elif words[0] == 'batch': self.batch = int(words[1])
+                    elif words[0] == 'AddSMHeader' and isTrue(words[1]): self.addSMHeader = True
+                    elif words[0] == 'validation' and isTrue(words[1]): self.validation = True
+                    elif words[0] == 'mtime': self.mtime = int(words[1])
+                    elif words[0] == 'sorter': self.sorter = words[1]
                     elif words[0] == 'arrival': self.mapEnteteDelai = {words[1]:(int(words[2]), int(words[3]))}
 
                 except:
@@ -97,8 +109,11 @@ class Source(object):
         print("Batch: %s" %  source.batch)
         print("Port: %s" % source.port)
         print("Extension: %s" % source.extension)
-        print("Arrival: %s" % source.arrival)
+        print("Arrival: %s" % source.mapEnteteDelai)
         print("addSMHeader: %s" % source.addSMHeader)
+        print("Validation: %s" % source.validation)
+        print("mtime: %s" % source.mtime)
+        print("Sorter: %s" % source.sorter)
         
         """
         print("******************************************")

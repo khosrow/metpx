@@ -14,7 +14,7 @@
 #
 #############################################################################################
 """
-import sys, os, pwd
+import sys, os, pwd, time
 
 sys.path.insert(1,sys.path[0] + '/../lib')
 sys.path.insert(1,sys.path[0] + '/../etc')
@@ -101,20 +101,20 @@ example 2: %prog start       => will start all clients
         import senderAMIS
         gateway = senderAMIS.senderAMIS(client, logger)
         igniter.setGateway(gateway)
-
     elif client.type == 'single-file':
-        import fetFile
-
+        from MultiKeysStringSorter import MultiKeysStringSorter
+        import SenderFTP
         igniter.setGateway("DUMMY")
-
         while True:
             reader = DiskReader(PXPaths.TXQ + client.name, client.batch,
-                                True, 0, True, logger, MultiKeysStringSorter)
+                                True, False, 0, True, logger, MultiKeysStringSorter)
             reader.sort()
             if len(reader.sortedFiles) >= 1:
                 sortedFiles = reader.sortedFiles[:client.batch]
                 logger.info("%d bulletins will be sent" % len(sortedFiles))
-                fetFile.sendFiles(client.name, reader.sortedFiles[:client.batch], client.chmod, client.ftp_mode, logger)
+                #fetFile.sendFiles(client.name, reader.sortedFiles[:client.batch], client.chmod, client.ftp_mode, logger)
+                sender = SenderFTP.SenderFTP(client, logger)
+                sender.send(sortedFiles)
             else:
                 time.sleep(1)
 

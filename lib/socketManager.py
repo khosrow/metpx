@@ -315,7 +315,7 @@ class socketManager:
                         self.logger.error("La connexion est brisée")
                         raise socketManagerException('la connexion est brisee')
 
-                self.logger.veryverbose("Data reçu: %s",temp)
+                self.logger.veryverbose("Data reçu: %s" % temp)
 
                 self.inBuffer = self.inBuffer + temp
                 break
