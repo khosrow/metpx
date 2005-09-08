@@ -65,6 +65,7 @@ class PXLat:
         self.type = 'boxes'
         self.interval = 1
         self.imageName = None
+        self.nopull = False
         self.messages = []               # FIXME: Special messages coming from weird results
 
         self.goodRx = []     # Lines matching initial values
@@ -92,7 +93,8 @@ Note: Defaults are set for all options"""
 
         self.setInitalValues()  # Eventually could come from a configuration file or passed as arguments
 
-        self.obtainFiles()
+        if not self.nopull:
+            self.obtainFiles()
 
     def setInitalValues(self):
         #parser.print_help()
@@ -116,6 +118,8 @@ Note: Defaults are set for all options"""
             self.type = options.type
         else:
             self.type = 'lines'
+
+        self.nopull = options.nopull
 
         """
         print self.date
@@ -159,6 +163,15 @@ Note: Defaults are set for all options"""
     def makeLatencyGraph(self):
         import Gnuplot, Gnuplot.funcutils
 
+        machines = []
+        for machine in self.machines:
+            machines.append(machine.split('.')[0])
+
+        machinesString = 'Machines: %s' % str(machines)
+        clientString = 'Client: %s' % str(self.client)
+        sourcesString = 'Sources: %s' % str(self.sources)
+        allString = machinesString + "\n" + clientString + "\n" +  sourcesString
+
         width = dateLib.DAY
         interval = self.interval * dateLib.MINUTE
         separators = dateLib.getSeparators(width, interval)
@@ -166,12 +179,28 @@ Note: Defaults are set for all options"""
         #print xtics
 
         graph = Gnuplot.Gnuplot()
+
+        graph('set linestyle 1 lt 4 lw 5')
+        graph('set linestyle 2 lt 3 lw 3')
+
+        #graph('set key left top Left title "%s" box 1' % machinesString)
+        #graph('set key left samplen 3 top Left title "%s" box 1' % sourcesString)
+        #graph('set key left bottom')
+        #graph('set key box linestyle 1')
+        
+        graph('set label "%s" at screen 0.09, screen 0.9' % machinesString)
+        graph('set label "%s" at screen 0.09, screen 0.88' % clientString)
+        graph('set label "%s" at screen 0.09, screen 0.86' % sourcesString)
+
         graph.title('%s Latencies (%s)' % (self.pattern, dateLib.getISODate(self.date)))
         graph.xlabel('time (hours)')
         graph.ylabel('latency (seconds)')
+
         graph('set grid')
+        #graph('set grid linestyle 1')
         #graph('set xtics ("low" 0, "medium" 30, "high" 100)')
         graph('set xtics (%s)' % xtics)
+
         if self.type == 'lines':
             graph('set data style lines')  
         elif self.type == 'impulses':
@@ -180,17 +209,12 @@ Note: Defaults are set for all options"""
             graph('set data style boxes')  
         elif self.type == 'linespoints':
             graph('set data style linespoints')  
+
         graph('set terminal png small color')
+
         self.imageName = "%s_latencies.%s.png" % (self.pattern, dateLib.getISODate(self.date, False))
         graph('set output "%s%s"' % (PXPaths.LAT_RESULTS, self.imageName))
-        #graph('set label "Machines: %s" at 50, 1' % self.machines)
-        machines = []
-        for machine in self.machines:
-            machines.append(machine.split('.')[0])
-        graph('set label "Machines: %s" at screen 0.09, screen 0.9' % str(machines))
-        graph('set label "Client: %s" at screen 0.09, screen 0.88' % str(self.client))
-        graph('set label "Sources: %s" at screen 0.09, screen 0.86' % self.sources)
-        
+
         #graph.plot([[0, 1.1], [1, 5.8], [2, 3.3], [3, 100]])
         graph.plot(self.getPairs(self.fillBuckets(dateLib.getEmptyBuckets(separators))))
 
@@ -395,6 +419,9 @@ Note: Defaults are set for all options"""
 
         parser.add_option("-g", "--graph", action="store_false", dest="graph", default=True,
                           help="No graphic")
+
+        parser.add_option("-n", "--nopull", action="store_true", dest="nopull", default=False,
+                          help="Don't pull any log files")
 
         parser.add_option("-i", "--interval", type="int", dest="interval", default=1,
                           help="Interval (in minutes) for which a point will be calculated.")
