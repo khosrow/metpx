@@ -1,33 +1,44 @@
 #!/usr/bin/env python2
 """
 #############################################################################################
-# Name: pxLatencies
+# Name: pxLat
 #
 # Author: Daniel Lemay
 #
 # Date: 2005-09-01
 #
-# Description: Calculate latencies for a product (MPCN) sent to a client (wxo-b1)
+# Description: Calculate latencies for a product (MPCN for example) sent to a client (wxo-b1 for example)
 # 
-#   Usage:   This program should be called from a crontab. The entry should look like:
+#   Usage:   This program can be called from a crontab or from command-line. Crontab entry should look like:
 #  
-#             34 18 * * * if test -x /apps/px/bin/pxLatencies; then /apps/px/bin/pxLatencies --days 3 > /dev/null 2>&1;fi
+#             34 18 * * * if test -x /apps/px/bin/pxLat; then /apps/px/bin/pxLat  > /dev/null 2>&1;fi
 #
+#   For informations about command-line:  pxLat -h | --help
 #############################################################################################
 """
 
-import os, os.path, time, pwd, sys, getopt, commands, fnmatch
-sys.path.insert(1, sys.path[0] + '/../lib')
-sys.path.insert(1, '../lib')
+import sys, os, os.path, time, pwd, commands, fnmatch
+sys.path.append(sys.path[0] + '/../lib')
+sys.path.append('../lib')
+sys.path.append(sys.path[0] + '/../lib/importedLibs')
+sys.path.append('../lib/importedLibs')
 
 import PXPaths, dateLib
 from Logger import Logger
 from PXManager import PXManager
+from optparse import OptionParser
+from Numeric import *
 
-class PXLatencies:
+from email.MIMEText import MIMEText
+from email.MIMEMultipart import MIMEMultipart
+from email.MIMEBase import MIMEBase
+from email import Utils, Encoders
+import mimetypes, sys
+
+
+class PXLat:
 
     LOG_LEVEL = "INFO"      # Logging level
-    NB_DAYS_LEFT = None     # Number of days we left
 
     # We want this program to run under pds user
     if not os.getuid() ==  pwd.getpwnam('pds')[2]:
@@ -39,18 +50,21 @@ class PXLatencies:
         PXPaths.normalPaths()
         self.manager = PXManager()
         LOG_NAME = self.manager.LOG + 'pxLatencies.log'    # Log's name
-        logger = Logger(LOG_NAME, PXLatencies.LOG_LEVEL, "Latencies")
-
-        #self.getOptionsParser()
+        logger = Logger(LOG_NAME, PXLat.LOG_LEVEL, "Latencies")
         self.logger = logger.getLogger()
         self.manager.setLogger(self.logger)
 
-        self.date = None     # Date for which we want to obtain stats
-        self.glob = None     # Products that we want to match
-        self.machines = []   # Machines were the logs can be found
-        self.sources = []    # Sources for which we will check arrival time of the products
-        self.client = []     # Client for which we will check delivery time of the products (ONLY ONE ENTRY in the list)
-        self.messages = []   # Special messages coming from weird results
+        #self.date = '09/04/05'  # Date for which we want to obtain stats
+        self.date = dateLib.getYesterdayFormatted() # Date for which we want to obtain stats
+        self.pattern = 'MPCN'      # Products that we want to match
+        self.machines = ['pds5.cmc.ec.gc.ca', 'pds6.cmc.ec.gc.ca']   # Machines were the logs can be found
+        self.sources = ['ncp1', 'ncp2']  # Sources for which we will check arrival time of the products
+        self.client = ['wxo-b1']         # Client for which we will check delivery time of the products (ONLY ONE ENTRY in the list)
+        self.recipients = ['drlemay@videotron.ca']
+        self.graph = True
+        self.type = 'boxes'
+        self.interval = 1
+        self.messages = []               # FIXME: Special messages coming from weird results
 
         self.goodRx = []     # Lines matching initial values
         self.goodTx = []     # Lines matching initial values
@@ -65,24 +79,134 @@ class PXLatencies:
         self.text = ''    # Results in plain text
         self.html = ''    # Results in html
 
+        usage = """%prog [options]
+
+example 1: %prog --date '09/04/05' --pattern 'MPCN' --machines pds5,pds6 --sources ncp1,ncp2 --client wxo-b1
+example 2: %prog -d '09/04/05' -g 'MPCN' -m pds5,pds6 -s ncp1,ncp2 -c wxo-b1
+
+Note: Defaults are set for all options"""
+
+        self.parser = OptionParser(usage)
+        self.addOptions(self.parser)
+
         self.setInitalValues()  # Eventually could come from a configuration file or passed as arguments
-        self.obtainFiles()
+
+        #self.obtainFiles()
 
     def setInitalValues(self):
-        self.date = dateLib.getYesterdayFormatted() 
-        #self.date = '09/01/05' 
-        self.glob = 'MPCN'
-        self.machines = ['pds5.cmc.ec.gc.ca', 'pds6.cmc.ec.gc.ca']
-        self.sources = ['ncp1', 'ncp2']
-        self.clients = ['wxo-b1']
+        #parser.print_help()
+        #print sys.argv
+        (options, args) = self.parser.parse_args()
+       
+        if fnmatch.fnmatch(options.date, '20[0-9][5-9][0-1][0-9][0-3][0-9]'):
+            self.date = dateLib.ISOToBad(options.date)
+        else:
+            self.parser.error("Date format must be: YYYYMMDD")
+
+        self.pattern = options.pattern
+        self.machines = options.machines.replace(' ', '').split(',')
+        self.sources = options.sources.replace(' ', '').split(',')
+        self.client = options.client.replace(' ', '').split(',')
+        self.recipients = options.recipients.replace(' ', '').split(',')
+        self.graph = options.graph
+        self.interval = options.interval
+        if self.type in ['lines', 'linespoint', 'boxes', 'impulses']:
+            self.type = options.type
+        else:
+            self.type = 'lines'
+
+        """
+        print self.date
+        print self.pattern
+        print self.machines
+        print self.sources
+        print self.client
+        print self.recipients
+        """
+
+    def _eraseFiles(self):
+        for dir in os.listdir(PXPaths.LAT_TMP):
+            fullPath = PXPaths.LAT_TMP + dir
+            command = 'rm -rf %s' % fullPath
+            (status, output) = commands.getstatusoutput(command)
+
+    def getPairs(self, buckets):
+        # Get coordinates of points (x,y)
+        pairs = []
+        for (index, values) in buckets.items():
+            if values[2]:
+                mean_lat = values[3]/values[2]
+            else:
+                mean_lat = 0.0
+            pairs.append([index, mean_lat])
+        return pairs
+
+    def fillBuckets(self, buckets):
+        for (file, stats) in self.getSortedStats(self.stats):
+            seconds = dateLib.getSeconds(stats[0])
+            for (index, choicer) in buckets.items():
+                if seconds <= choicer[1] and seconds >= choicer[0]:
+                    buckets[index][2] += 1        # Make a count
+                    buckets[index][3] += stats[2] # Add latencies
+                    break
+        return buckets
+
+    def makeLatencyGraph(self):
+        import Gnuplot, Gnuplot.funcutils
+
+        width = dateLib.DAY
+        interval = self.interval * dateLib.MINUTE
+        separators = dateLib.getSeparators(width, interval)
+        xtics = self.getXTics(len(separators), interval)
+        #print xtics
+
+        graph = Gnuplot.Gnuplot()
+        graph.title('%s Latencies (%s)' % (self.pattern, dateLib.getISODate(self.date)))
+        graph.xlabel('time (hours)')
+        graph.ylabel('latency (seconds)')
+        graph('set grid')
+        #graph('set xtics ("low" 0, "medium" 30, "high" 100)')
+        graph('set xtics (%s)' % xtics)
+        if self.type == 'lines':
+            graph('set data style lines')  
+        elif self.type == 'impulses':
+            graph('set data style impulses')  
+        elif self.type == 'boxes':
+            graph('set data style boxes')  
+        elif self.type == 'linespoints':
+            graph('set data style linespoints')  
+        graph('set terminal png small color')
+        graph('set output "latencies.png"')
+        #graph('set label "Machines: %s" at 50, 1' % self.machines)
+        machines = []
+        for machine in self.machines:
+            machines.append(machine.split('.')[0])
+        graph('set label "Machines: %s" at screen 0.09, screen 0.9' % str(machines))
+        graph('set label "Client: %s" at screen 0.09, screen 0.88' % str(self.client))
+        graph('set label "Sources: %s" at screen 0.09, screen 0.86' % self.sources)
+        
+        #graph.plot([[0, 1.1], [1, 5.8], [2, 3.3], [3, 100]])
+        graph.plot(self.getPairs(self.fillBuckets(dateLib.getEmptyBuckets(separators))))
+
+    def getXTics(self, nbPoints, interval):
+        nbTics = 24 # This is the number we want (each hour). We don't count the tic at 0
+        mult = int(nbPoints/nbTics) # Rounding ???
+        xtics = ''
+
+        for i in range(0, nbTics + 1):
+            spread = mult * i
+            xtics += '"%i" %i, ' % (i, spread)
+        
+        return xtics[:-2]
 
     def obtainFiles(self):
+        #self._eraseFiles()
         for machine in self.machines:
             self.manager.createDir(PXPaths.LAT_TMP +  machine)
             for source in self.sources:
                 command = 'scp -q %s:%s %s' % (machine, PXPaths.LOG + 'rx_' + source + '*', PXPaths.LAT_TMP + '/' + machine)
                 (status, output) = commands.getstatusoutput(command)
-            for client in self.clients:
+            for client in self.client:
                 command = 'scp -q %s:%s %s' % (machine, PXPaths.LOG + 'tx_' + client + '*', PXPaths.LAT_TMP + '/' + machine)
                 (status, output) = commands.getstatusoutput(command)
 
@@ -117,11 +241,11 @@ class PXLatencies:
         for machine in self.machines:
             hostOnly = machine.split('.')[0]
             lines = []
-            dirPath = PXPaths.LAT_TMP + '/' + machine
+            dirPath = PXPaths.LAT_TMP + machine
             files = os.listdir(dirPath)
             for file in [x for x in files if x[0:2] == prefix]:
                 lines.extend(open(dirPath + '/' + file).readlines())
-            good.extend(map(lambda x: (x, hostOnly), fnmatch.filter(lines, '%s*INFO*%s*' % (self.date, self.glob))))
+            good.extend(map(lambda x: (x, hostOnly), fnmatch.filter(lines, '%s*INFO*%s*' % (self.date, self.pattern))))
 
         #print len(good)
         
@@ -131,7 +255,7 @@ class PXLatencies:
             if file in self.receivingInfos:
                 date, seconds, machine = self.receivingInfos[file]
                 latency = self.sendingInfos[file][1] - seconds
-                self.stats[file] =  (date, machine, latency)
+                self.stats[file] =  (date[9:17], machine, latency)
                 total_latency += latency
                 if latency > self.max:
                     self.max = latency
@@ -142,105 +266,149 @@ class PXLatencies:
         else:
             self.mean = 0
 
+    def getSortedStats(self, statsDict):
+        # Will be sorted by date
+        items = [(v,k) for k,v in statsDict.items()]
+        items.sort()
+        return [(k,v) for v,k in items]
+
+    def saveResults(self, path):
+        file = open('%s%s_latencies.%s' % (path, self.pattern, dateLib.getISODate(self.date, False)), 'w')
+        file.write(self.text)
+        file.close()
+
     def setTextResults(self):
    
         part1 = """
 <HTML>
-<BODY>
 <PRE>
+<BODY>
+"""
+        part1a = """
+<img src="cid:latencies.png" alt="Latencies Graph">
+<br>
 """
 
         part2 = """
 ####################################################################################################
-#                               LATENCIES STATS ( %s )                                       
+#                             %s LATENCIES STATS (%s)                                       
 ####################################################################################################
 # Number of files is: %s 
 # Max. latency time is: %i seconds
 # Mean latency time is: %4.2f seconds
 # Min. latency time is: %i seconds
 ####################################################################################################
-#               FILENAME                                                   ARRIVAL       LATENCY  
+# ARRIVAL     LATENCY    FILENAME
 ####################################################################################################
-""" % (self.date, len(self.stats), self.max, self.mean, self.min)
+""" % (self.pattern, dateLib.getISODate(self.date), len(self.stats), self.max, self.mean, self.min)
 
 
         part3 = ''
-        for file in self.stats:
-            date, machine, latency = self.stats[file]
-            part3 += ("# %s (%s)   %s   %i        \n" %  (file, machine, date, latency))            
+        for (key, value) in self.getSortedStats(self.stats):
+            date, machine, latency = value
+            part3 += ("# %s  %6i       %s  (%s)    \n" %  (date, latency, key, machine))            
         #part3.strip('\n')
 
         part4 = """
 ####################################################################################################
 """
         part5 = """
-</HTML>
 </BODY>
 </PRE>
+</HTML>
 """
 
         part1 = part1.lstrip()
+        part1a = part1a.lstrip()
         part2 = part2.lstrip()
         part4 = part4.lstrip()
         part5 = part5.lstrip()
 
         self.text =  part2 + part3 + part4
-        self.html =  part1 + part2 + part3 + part4 + part5
+
+        if self.graph:
+            self.html =  part1 + part1a + part2 + part3 + part4 + part5
+        else:
+            self.html =  part1 + part2 + part3 + part4 + part5
+
+    def mailHtmlResults1(self):
+        import smtplib
+        import mailLib
+
+        msg = MIMEMultipart('related')
+        #msg = MIMEMultipart()
+        msg['To'] = 'warnings_latencies'
+        msg['From'] = 'warning_latencies <warning_latencies@ec.gc.ca>'
+        msg['Subject'] = "%s Latencies (%s) : MAX = %i seconds,  MEAN = %4.2f seconds,  MIN = %i seconds" % (self.pattern, dateLib.getISODate(self.date), self.max, self.mean, self.min)
+        msg['Date'] = Utils.formatdate(localtime = 1)
+        msg['Message-ID'] = Utils.make_msgid()
+        
+        body = MIMEMultipart('alternative')
+        body.attach(mailLib.genpart(self.text, 'text/plain'))
+        body.attach(mailLib.genpart(self.html, 'text/html; format=flowed'))
+        msg.attach(body)
+
+        #msg.attach(mailLib.genpart(self.html, 'text/html; format=flowed'))
+
+        if self.graph:
+            msg.attach(mailLib.inlineImage('latencies.png'))
+            #msg.attach(mailLib.attachment('latencies.png'))
+       
+        server = smtplib.SMTP("smtp.cmc.ec.gc.ca")
+        #server.set_debuglevel(1)
+        server.sendmail('warning_latencies@ec.gc.ca', self.recipients, msg.as_string())
+        server.quit()
 
     def mailHtmlResults(self):
         import smtplib
         import mailLib
         
-        receivers = ['warnings_latencies@ec.gc.ca']
-        receivers = ['daniel.lemay', 'peter.silva']
-        #receivers = ['daniel.lemay']
-        
-        subject = "MPCN Latencies (%s) : MAX = %i seconds,  MEAN = %4.2f seconds,  MIN = %i seconds" % (self.date, self.max, self.mean, self.min)
+        subject = "%s Latencies (%s) : MAX = %i seconds,  MEAN = %4.2f seconds,  MIN = %i seconds" % (self.pattern, dateLib.getISODate(self.date), self.max, self.mean, self.min)
         message = mailLib.createhtmlmail(self.html, self.text, subject)
         server = smtplib.SMTP("smtp.cmc.ec.gc.ca")
         #server.set_debuglevel(1)
-        server.sendmail('warning_latencies@ec.gc.ca', receivers, message)
+        server.sendmail('warning_latencies@ec.gc.ca', self.recipients, message)
         server.quit()
 
-    def getOptionsParser(self):
+    def addOptions(self, parser):
+        #date, pattern, machines, sources, client
+        parser.add_option("-d", "--date", action="store", type="string", dest="date", default=dateLib.getISODate(self.date, False), metavar="DATE",
+                          help="Date for which we want stats")
 
-        nbDaysLeft = False
+        parser.add_option("-p", "--pattern", dest="pattern", default="MPCN",
+                          help="Pattern we want to catch in the logs")
 
-        try:
-            opts, args = getopt.getopt(sys.argv[1:], 'd:h', ['help', 'days='])
-            #print opts
-            #print args
-        except getopt.GetoptError:
-            # print help information and exit:
-            usage()
-            sys.exit(2)
+        parser.add_option("-m", "--machines", action="store", type="string", dest="machines", default='pds5.cmc.ec.gc.ca, pds6.cmc.ec.gc.ca',
+                          help="Machines where the logs are")
 
-        for option, value in opts:
-            if option in ('-h', '--help'):
-                usage()
-                sys.exit()
-            if option in ('-d', '--days'):
-                nbDaysLeft = True
-                value = int(value)
-                if value > 0:
-                   PXDBCleaner.NB_DAYS_LEFT = value
-                   #print type(PXDBCleaner.NB_DAYS_LEFT)
-                else:
-                    usage()
-                    sys.exit(2)
+        parser.add_option("-s", "--sources", action="store", type="string", dest="sources", default='ncp1,ncp2',
+                          help="Sources' names")
 
-        # We must give the number of days we want to leave on the disk
-        if nbDaysLeft  is False:
-            usage()
-            sys.exit()
+        parser.add_option("-c", "--client", action="store", type="string", dest="client", default='wxo-b1',
+                          help="Client's name")
+
+        parser.add_option("-g", "--graph", action="store_false", dest="graph", default=True,
+                          help="No graphic")
+
+        parser.add_option("-i", "--interval", type="int", dest="interval", default=1,
+                          help="Interval (in minutes) for which a point will be calculated.")
+
+        parser.add_option("-t", "--type", action="store", type="string", dest="type", default='lines',
+                          help="Graph type: ['lines', 'linespoint', 'boxes', 'impulses']")
+
+        parser.add_option("-r", "--recipients", action="store", type="string", dest="recipients", default='daniel.lemay',
+                          help="Mail recipients list")
 
 if __name__ == '__main__':
 
-    latencier =  PXLatencies()
+    latencier =  PXLat()
     latencier.extractGoodLines('rx', latencier.goodRx)
     latencier.extractGoodLines('tx', latencier.goodTx)
     latencier.extractInfos('rx', latencier.goodRx, latencier.receivingInfos)
     latencier.extractInfos('tx', latencier.goodTx, latencier.sendingInfos)
     latencier.makeStats()
+    if latencier.graph:
+        latencier.makeLatencyGraph()
     latencier.setTextResults()
-    latencier.mailHtmlResults()
+    latencier.saveResults(PXPaths.LAT_RESULTS)
+    latencier.mailHtmlResults1()
