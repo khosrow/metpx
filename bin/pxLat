@@ -60,10 +60,11 @@ class PXLat:
         self.machines = ['pds5.cmc.ec.gc.ca', 'pds6.cmc.ec.gc.ca']   # Machines were the logs can be found
         self.sources = ['ncp1', 'ncp2']  # Sources for which we will check arrival time of the products
         self.client = ['wxo-b1']         # Client for which we will check delivery time of the products (ONLY ONE ENTRY in the list)
-        self.recipients = ['drlemay@videotron.ca']
+        self.recipients = None
         self.graph = True
         self.type = 'boxes'
         self.interval = 1
+        self.imageName = None
         self.messages = []               # FIXME: Special messages coming from weird results
 
         self.goodRx = []     # Lines matching initial values
@@ -81,8 +82,8 @@ class PXLat:
 
         usage = """%prog [options]
 
-example 1: %prog --date '09/04/05' --pattern 'MPCN' --machines pds5,pds6 --sources ncp1,ncp2 --client wxo-b1
-example 2: %prog -d '09/04/05' -g 'MPCN' -m pds5,pds6 -s ncp1,ncp2 -c wxo-b1
+example 1: %prog --date '20050928' --pattern 'MPCN' --machines pds5,pds6 --sources ncp1,ncp2 --client wxo-b1
+example 2: %prog -d '20050928' -p 'MPCN' -m pds5,pds6 -s ncp1,ncp2 -c wxo-b1 -r 'daniel.lemay' -g
 
 Note: Defaults are set for all options"""
 
@@ -91,7 +92,7 @@ Note: Defaults are set for all options"""
 
         self.setInitalValues()  # Eventually could come from a configuration file or passed as arguments
 
-        #self.obtainFiles()
+        self.obtainFiles()
 
     def setInitalValues(self):
         #parser.print_help()
@@ -107,7 +108,8 @@ Note: Defaults are set for all options"""
         self.machines = options.machines.replace(' ', '').split(',')
         self.sources = options.sources.replace(' ', '').split(',')
         self.client = options.client.replace(' ', '').split(',')
-        self.recipients = options.recipients.replace(' ', '').split(',')
+        if options.recipients is not None:
+            self.recipients = options.recipients.replace(' ', '').split(',')
         self.graph = options.graph
         self.interval = options.interval
         if self.type in ['lines', 'linespoint', 'boxes', 'impulses']:
@@ -122,6 +124,9 @@ Note: Defaults are set for all options"""
         print self.sources
         print self.client
         print self.recipients
+        print self.graph
+        print self.interval
+        print self.type
         """
 
     def _eraseFiles(self):
@@ -176,7 +181,8 @@ Note: Defaults are set for all options"""
         elif self.type == 'linespoints':
             graph('set data style linespoints')  
         graph('set terminal png small color')
-        graph('set output "latencies.png"')
+        self.imageName = "%s_latencies.%s.png" % (self.pattern, dateLib.getISODate(self.date, False))
+        graph('set output "%s%s"' % (PXPaths.LAT_RESULTS, self.imageName))
         #graph('set label "Machines: %s" at 50, 1' % self.machines)
         machines = []
         for machine in self.machines:
@@ -285,9 +291,9 @@ Note: Defaults are set for all options"""
 <BODY>
 """
         part1a = """
-<img src="cid:latencies.png" alt="Latencies Graph">
+<img src="cid:%s%s" alt="Latencies Graph">
 <br>
-"""
+""" % (PXPaths.LAT_RESULTS, self.imageName)
 
         part2 = """
 ####################################################################################################
@@ -338,7 +344,7 @@ Note: Defaults are set for all options"""
         msg = MIMEMultipart('related')
         #msg = MIMEMultipart()
         msg['To'] = 'warnings_latencies'
-        msg['From'] = 'warning_latencies <warning_latencies@ec.gc.ca>'
+        msg['From'] = 'warnings_latencies <warnings_latencies@ec.gc.ca>'
         msg['Subject'] = "%s Latencies (%s) : MAX = %i seconds,  MEAN = %4.2f seconds,  MIN = %i seconds" % (self.pattern, dateLib.getISODate(self.date), self.max, self.mean, self.min)
         msg['Date'] = Utils.formatdate(localtime = 1)
         msg['Message-ID'] = Utils.make_msgid()
@@ -351,12 +357,12 @@ Note: Defaults are set for all options"""
         #msg.attach(mailLib.genpart(self.html, 'text/html; format=flowed'))
 
         if self.graph:
-            msg.attach(mailLib.inlineImage('latencies.png'))
-            #msg.attach(mailLib.attachment('latencies.png'))
+            msg.attach(mailLib.inlineImage(PXPaths.LAT_RESULTS + self.imageName))
+            #msg.attach(mailLib.attachment(PXPaths.LAT_RESULTS +self.imageName))
        
         server = smtplib.SMTP("smtp.cmc.ec.gc.ca")
         #server.set_debuglevel(1)
-        server.sendmail('warning_latencies@ec.gc.ca', self.recipients, msg.as_string())
+        server.sendmail('warnings_latencies@ec.gc.ca', self.recipients, msg.as_string())
         server.quit()
 
     def mailHtmlResults(self):
@@ -367,7 +373,7 @@ Note: Defaults are set for all options"""
         message = mailLib.createhtmlmail(self.html, self.text, subject)
         server = smtplib.SMTP("smtp.cmc.ec.gc.ca")
         #server.set_debuglevel(1)
-        server.sendmail('warning_latencies@ec.gc.ca', self.recipients, message)
+        server.sendmail('warnings_latencies@ec.gc.ca', self.recipients, message)
         server.quit()
 
     def addOptions(self, parser):
@@ -396,7 +402,7 @@ Note: Defaults are set for all options"""
         parser.add_option("-t", "--type", action="store", type="string", dest="type", default='lines',
                           help="Graph type: ['lines', 'linespoint', 'boxes', 'impulses']")
 
-        parser.add_option("-r", "--recipients", action="store", type="string", dest="recipients", default='daniel.lemay',
+        parser.add_option("-r", "--recipients", action="store", type="string", dest="recipients",
                           help="Mail recipients list")
 
 if __name__ == '__main__':
@@ -411,4 +417,6 @@ if __name__ == '__main__':
         latencier.makeLatencyGraph()
     latencier.setTextResults()
     latencier.saveResults(PXPaths.LAT_RESULTS)
-    latencier.mailHtmlResults1()
+    if latencier.recipients:
+        latencier.mailHtmlResults1()
+    print latencier.text
