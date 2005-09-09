@@ -83,10 +83,18 @@ class PXLat:
 
         usage = """%prog [options]
 
-example 1: %prog --date '20050928' --pattern 'MPCN' --machines pds5,pds6 --sources ncp1,ncp2 --client wxo-b1
-example 2: %prog -d '20050928' -p 'MPCN' -m pds5,pds6 -s ncp1,ncp2 -c wxo-b1 -r 'daniel.lemay' -g
+Note: Defaults are set for all options, YESTERDAY cannot 
 
-Note: Defaults are set for all options"""
+example 1: %prog  (equivalent to: %prog --date YESTERDAY --pattern MPCN --machines pds5,pds6 --sources ncp1,ncp2 --client wxo-b1)
+example 2: %prog --date 20050928 --pattern MPCN --machines pds5,pds6 --sources ncp1,ncp2 --client wxo-b1
+example 3: %prog -d 20050928 -p 'MPCN*CWAO' -m pds5,pds6 -s ncp1,ncp2 -c wxo-b1 -r daniel.lemay,ambeaubien -g
+example 4: %prog -d 20050928 -p SACN -m pds5,pds6 -s ncp1,ncp2 -c wxo-b1 -r daniel.lemay,ambeaubien -n
+
+Note: Option -n | --nopull is useful when you know that the logs needed to extract stats are already present in the 
+temporary directory. No need to pull them again.
+"""
+
+
 
         self.parser = OptionParser(usage)
         self.addOptions(self.parser)
@@ -403,7 +411,7 @@ Note: Defaults are set for all options"""
     def addOptions(self, parser):
         #date, pattern, machines, sources, client
         parser.add_option("-d", "--date", action="store", type="string", dest="date", default=dateLib.getISODate(self.date, False), metavar="DATE",
-                          help="Date for which we want stats")
+                          help="Date for which we want stats (ISO Format: YYYYMMDD)")
 
         parser.add_option("-p", "--pattern", dest="pattern", default="MPCN",
                           help="Pattern we want to catch in the logs")
@@ -424,13 +432,13 @@ Note: Defaults are set for all options"""
                           help="Don't pull any log files")
 
         parser.add_option("-i", "--interval", type="int", dest="interval", default=1,
-                          help="Interval (in minutes) for which a point will be calculated.")
+                          help="Interval (in minutes) for which a point will be calculated. Will 'smooth' the graph")
 
         parser.add_option("-t", "--type", action="store", type="string", dest="type", default='lines',
                           help="Graph type: ['lines', 'linespoint', 'boxes', 'impulses']")
 
         parser.add_option("-r", "--recipients", action="store", type="string", dest="recipients",
-                          help="Mail recipients list")
+                          help="Mail results to addresses in the list")
 
 if __name__ == '__main__':
 
