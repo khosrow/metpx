@@ -255,7 +255,7 @@ Note: Defaults are set for all options"""
             for (line, machine) in good:
                 parts = line.split()
                 date = parts[0] + ' ' + parts[1]
-                filename = parts[4]
+                filename = os.path.basename(parts[4])
                 #print (date, dateLib.getSecondsSinceEpoch(date), filename, machine)
                 infos[filename] = (date, dateLib.getSecondsSinceEpoch(date), machine)
 
