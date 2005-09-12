@@ -205,8 +205,9 @@ def sendFiles(c, files, chmod, ftp_mode, logger):
                         #excinfo= sys.exc_info()
                         (type, value, tb) = sys.exc_info()
                         logger.writeLog( logger.ERROR, "pas capable de me brancher à " + uspec + '@' + hspec + "(old was " + ftphost + ": " + "type: %s, value: %s" % (type, value))
-                        time.sleep(10)  # relax, buy a cherry blossom, don't be shy.
-                        return #FIXME: no point to continue looping...
+                        #time.sleep(10)  # relax, buy a cherry blossom, don't be shy.
+                        #return #FIXME: no point to continue looping...
+                        continue
 
                     originalDir = ftp.pwd()
                     ftphost=hspec
