@@ -20,8 +20,8 @@
 import sys, os, os.path, time, pwd, commands, fnmatch
 sys.path.append(sys.path[0] + '/../lib')
 sys.path.append('../lib')
-sys.path.append(sys.path[0] + '/../lib/importedLibs')
-sys.path.append('../lib/importedLibs')
+sys.path.insert(1, sys.path[0] + '/../lib/importedLibs')
+sys.path.insert(1, '../lib/importedLibs')
 
 import PXPaths, dateLib
 from Logger import Logger
@@ -66,6 +66,7 @@ class PXLat:
         self.interval = 1
         self.imageName = None
         self.nopull = False
+        self.keep = False
         self.messages = []               # FIXME: Special messages coming from weird results
 
         self.goodRx = []     # Lines matching initial values
@@ -91,16 +92,16 @@ example 3: %prog -d 20050928 -p 'MPCN*CWAO' -m pds5,pds6 -s ncp1,ncp2 -c wxo-b1 
 example 4: %prog -d 20050928 -p SACN -m pds5,pds6 -s ncp1,ncp2 -c wxo-b1 -r daniel.lemay,ambeaubien -n
 
 Note: Option -n | --nopull is useful when you know that the logs needed to extract stats are already present in the 
-temporary directory. No need to pull them again.
+temporary directory. No need to pull them again. When --nopull is selected, --keep is set to True. 
 """
-
-
 
         self.parser = OptionParser(usage)
         self.addOptions(self.parser)
 
         self.setInitalValues()  # Eventually could come from a configuration file or passed as arguments
 
+        if not self.keep:
+            self.eraseFiles()
         if not self.nopull:
             self.obtainFiles()
 
@@ -128,6 +129,10 @@ temporary directory. No need to pull them again.
             self.type = 'lines'
 
         self.nopull = options.nopull
+        if self.nopull:
+            self.keep = True
+        else:
+            self.keep = options.keep
 
         """
         print self.date
@@ -141,7 +146,7 @@ temporary directory. No need to pull them again.
         print self.type
         """
 
-    def _eraseFiles(self):
+    def eraseFiles(self):
         for dir in os.listdir(PXPaths.LAT_TMP):
             fullPath = PXPaths.LAT_TMP + dir
             command = 'rm -rf %s' % fullPath
@@ -224,7 +229,9 @@ temporary directory. No need to pull them again.
         graph('set output "%s%s"' % (PXPaths.LAT_RESULTS, self.imageName))
 
         #graph.plot([[0, 1.1], [1, 5.8], [2, 3.3], [3, 100]])
+        #graph('set multiplot')
         graph.plot(self.getPairs(self.fillBuckets(dateLib.getEmptyBuckets(separators))))
+        #graph.plot('x')
 
     def getXTics(self, nbPoints, interval):
         nbTics = 24 # This is the number we want (each hour). We don't count the tic at 0
@@ -238,7 +245,6 @@ temporary directory. No need to pull them again.
         return xtics[:-2]
 
     def obtainFiles(self):
-        #self._eraseFiles()
         for machine in self.machines:
             self.manager.createDir(PXPaths.LAT_TMP +  machine)
             for source in self.sources:
@@ -280,7 +286,12 @@ temporary directory. No need to pull them again.
             hostOnly = machine.split('.')[0]
             lines = []
             dirPath = PXPaths.LAT_TMP + machine
-            files = os.listdir(dirPath)
+            try:
+                files = os.listdir(dirPath)
+            except OSError:
+                print "%s doesn't exist!\nDon't use -n|--nopull option if you don't have some data." % dirPath
+                sys.exit(1)
+                
             for file in [x for x in files if x[0:2] == prefix]:
                 lines.extend(open(dirPath + '/' + file).readlines())
             good.extend(map(lambda x: (x, hostOnly), fnmatch.filter(lines, '%s*INFO*%s*' % (self.date, self.pattern))))
@@ -430,6 +441,9 @@ temporary directory. No need to pull them again.
 
         parser.add_option("-n", "--nopull", action="store_true", dest="nopull", default=False,
                           help="Don't pull any log files")
+
+        parser.add_option("-k", "--keep", action="store_true", dest="keep", default=False,
+                          help="Keep log files downloaded from a previous execution")
 
         parser.add_option("-i", "--interval", type="int", dest="interval", default=1,
                           help="Interval (in minutes) for which a point will be calculated. Will 'smooth' the graph")
