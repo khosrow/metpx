@@ -16,7 +16,7 @@
 #   For informations about command-line:  pxLat -h | --help
 #############################################################################################
 """
-import os, pwd, sys, fnmatch
+import os, pwd, sys, commands, fnmatch
 sys.path.append(sys.path[0] + '/../lib')
 sys.path.append('../lib')
 sys.path.insert(1, sys.path[0] + '/../lib/importedLibs')
@@ -51,7 +51,7 @@ class PapLat:
     def __init__(self):
         PXPaths.normalPaths()
         self.manager = PXManager()
-        LOG_NAME = self.manager.LOG + 'pxLatencies.log'    # Log's name
+        LOG_NAME = self.manager.LOG + 'paplat.log'    # Log's name
         logger = Logger(LOG_NAME, PapLat.LOG_LEVEL, "Latencies")
         self.logger = logger.getLogger()
         self.manager.setLogger(self.logger)
@@ -97,7 +97,22 @@ temporary directory. No need to pull them again. When --nopull is selected, --ke
         
         patterns = options.patterns.replace(' ', '').split(',')
         machines = options.machines.replace(' ', '').split(',')
+
         sources = options.sources.replace(' ', '').split(',')
+        if sources[0] == '__ALL__':
+            #self.manager.initNames() 
+            #sources = self.manager.getRxNames()
+            sources = []
+            command = 'ssh %s ls %s' % (machines[0], PXPaths.RX_CONF)
+            (status, output) = commands.getstatusoutput(command)
+            for line in output.split():
+                if line[-5:] == '.conf':
+                    sources.append(line[:-5])
+            if len(sources) == 0:
+                print("You must indicate a source!")
+                print "If you need help: paplat -h"
+                sys.exit(1)
+
         clients = options.clients.replace(' ', '').split(',')
 
         pdsPatterns = options.pdsPatterns.replace(' ', '').split(',')
