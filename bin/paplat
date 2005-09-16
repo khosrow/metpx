@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 """
 #############################################################################################
-# Name: PapLat
+# Name: papLat
 #
 # Author: Daniel Lemay
 #
@@ -65,14 +65,15 @@ class PapLat:
 
 Note: Defaults are set for all options but -p|--patterns and --pdsPatterns.
       YESTERDAY cannot be used in command line.
+      With --pdsPatterns you can add :x if you want to use xferlogs
 
 example 1: %prog -p MPCN (equivalent to: %prog --date YESTERDAY --patterns MPCN --machines pds5,pds6 --sources ncp1,ncp2 --clients wxo-b1)
-example 2: %prog --pdsPatterns ACC
+example 2: %prog --pdsPatterns ACC (equivalent to: %prog -d YESTERDAY --pdsPatterns ACC -m pds1,pds2,pds3,pds4 -s pdschkprod --pdsClients wxo-b1-oper-ww
 example 3: %prog --date 20050928 --patterns MPCN --machines pds5,pds6 --sources ncp1,ncp2 --clients wxo-b1
 example 4: %prog -d 20050928 -p 'MPCN*CWAO' -m pds5,pds6 -s ncp1,ncp2 -c wxo-b1 -r daniel.lemay,ambeaubien -g
-example 5: %prog -d 20050928 -p SACN -m pds5,pds6 -s ncp1,ncp2 -c wxo-b1 -r daniel.lemay,ambeaubien -n
-example 6: %prog -p MPCN --pdsPatterns ACC -r warnings_latencies
-example 7: %prog -p MPCN,SACN -r warnings_latencies
+example 5: %prog -p MPCN --pdsPatterns ACC -r warnings_latencies
+example 6: %prog -p MPCN,SACN -r warnings_latencies
+example 7: %prog -p MPCN,SACN --pdsPatterns ACC,ACC:x -c amdar --pdsClients condor
 
 
 Note: Option -n | --nopull is useful when you know that the logs needed to extract stats are already present in the
@@ -82,10 +83,9 @@ temporary directory. No need to pull them again. When --nopull is selected, --ke
         self.parser = OptionParser(usage)
         self.addOptions(self.parser)
 
-        self.setInitalValues()            # Eventually could come from a configuration file or passed as arguments
+        self.start()     
 
-    def setInitalValues(self):
-        #parser.print_help()
+    def start(self):
         #print sys.argv
         (options, args) = self.parser.parse_args()
 
@@ -111,11 +111,10 @@ temporary directory. No need to pull them again. When --nopull is selected, --ke
         if pdsPatterns[0] == '':
             del pdsPatterns[0]
 
-        if (len(patterns) + len(pdsPatterns)) > 2:
-            print "Too much patterns. 2 Patterns maximum"
-            sys.exit(1)
-        elif (len(patterns) + len(pdsPatterns)) == 0:
+        if (len(patterns) + len(pdsPatterns)) == 0:
             print "You must indicate a pattern! Default pattern don't exists"
+            print "If you need help: paplat -h"
+            #self.parser.print_help()
             sys.exit(1)
 
         # For now, only one client of each type (PX, PDS).
@@ -207,7 +206,8 @@ temporary directory. No need to pull them again. When --nopull is selected, --ke
                           help="Pattern we want to catch in the PX logs")
 
         parser.add_option("--pdsPatterns", dest="pdsPatterns", default="",
-                          help="Pattern we want to catch in the PDS logs")
+                          help="Pattern we want to catch in the PDS logs. If you want to use xferlogs to"
+                               "calculate waiting time, add :x to the pattern. Ex: --pdsPatterns MPCN:x,ACC,RADAR:x")
 
         parser.add_option("-m", "--machines", action="store", type="string", dest="machines", default='pds5.cmc.ec.gc.ca, pds6.cmc.ec.gc.ca',
                           help="Machines where the PX logs are")
