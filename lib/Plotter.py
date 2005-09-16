@@ -96,14 +96,26 @@ class Plotter:
             for machine in latencier.machines:
                 machines.append(machine.split('.')[0])
 
+
+            systemString = 'System: %s' % latencier.system
             machinesString = 'Machines: %s' % str(machines)
             clientString = 'Client: %s' % latencier.client
             sourcesString = 'Sources: %s' % str(latencier.sources)
-            allString = machinesString + "\n" + clientString + "\n" +  sourcesString
+            rejectedString = '# Files rejected: %i' % latencier.rejected
+            (filename, (time, host, lat)) = latencier.maxInfos
+            maxInfos1 = 'Maximum occurs at: %s' % (time)
+            maxInfos2 = '%s(%s)' % (filename, host)
+            xferlogString = 'Xferlog used: %s' % ['No', 'Yes'][latencier.xstats]
 
+
+            self.graph('set label "%s" at screen 1.00, screen %3.2f' % (systemString, 0.40 + ((nbLatenciers -1) - i) * 0.5))
             self.graph('set label "%s" at screen 1.00, screen %3.2f' % (machinesString, 0.38 + ((nbLatenciers -1) - i) * 0.5))
             self.graph('set label "%s" at screen 1.00, screen %3.2f' % (clientString, 0.36 + ((nbLatenciers -1) -i) * 0.5))
             self.graph('set label "%s" at screen 1.00, screen %3.2f' % (sourcesString, 0.34  + ((nbLatenciers -1) -i) * 0.5))
+            self.graph('set label "%s" at screen 1.00, screen %3.2f' % (xferlogString, 0.32  + ((nbLatenciers -1) -i) * 0.5))
+            self.graph('set label "%s" at screen 1.00, screen %3.2f' % (maxInfos1 , 0.30 + ((nbLatenciers -1) - i) * 0.5))
+            self.graph('set label "%s" at screen 1.00, screen %3.2f' % (rejectedString , 0.28 + ((nbLatenciers -1) - i) * 0.5))
+            #self.graph('set label "%s" at screen 1.00, screen %3.2f' % (maxInfos2 , 0.28 + ((nbLatenciers -1) - i) * 0.5))
             i += 1
 
         self.graph('set linestyle 1 lt 4 lw 5')
@@ -137,7 +149,7 @@ class Plotter:
 
         #self.graph.plot([[0, 1.1], [1, 5.8], [2, 3.3], [3, 100]])
 
-        self.imageName = "%s_latencies.%s.png" % (self.latenciers[0].pattern, dateLib.getISODate(self.latenciers[0].date, False))
+        self.imageName = "%s_latencies.%s_%s.png" % (self.latenciers[0].pattern, dateLib.getISODate(self.latenciers[0].date, False), self.latenciers[0].random)
 
         self.graph('set output "%s%s"' % (PXPaths.LAT_RESULTS, self.imageName))
 
