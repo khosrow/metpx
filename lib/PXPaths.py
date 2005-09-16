@@ -14,7 +14,7 @@ import os.path
 
 def normalPaths():
 
-    global ROOT, BIN, LIB, LOG, ETC, RXQ, TXQ, DB, RX_CONF, TX_CONF
+    global ROOT, BIN, LIB, LOG, ETC, RXQ, TXQ, DB, RX_CONF, TX_CONF, LAT, LAT_RESULTS, LAT_TMP
 
     ROOT = '/apps/px/'
     BIN = ROOT + 'bin/'
@@ -26,6 +26,12 @@ def normalPaths():
     DB = ROOT + 'db/'
     RX_CONF = ETC + 'rx/'
     TX_CONF = ETC + 'tx/'
+
+    #Paths for pxLatencies
+    LAT = ROOT + 'latencies/'
+    LAT_RESULTS = LAT + 'results/'
+    LAT_TMP = LAT + 'tmp/'
+
 
 def drbdPaths(rootPath):
 
