@@ -100,7 +100,10 @@ class Plotter:
             systemString = 'System: %s' % latencier.system
             machinesString = 'Machines: %s' % str(machines)
             clientString = 'Client: %s' % latencier.client
-            sourcesString = 'Sources: %s' % str(latencier.sources)
+            if latencier.sources[0] == '__ALL__':
+                sourcesString = 'Sources: **ALL**'
+            else:
+                sourcesString = 'Sources: %s' % str(latencier.sources)
             rejectedString = '# Files rejected: %i' % latencier.rejected
             (filename, (time, host, lat)) = latencier.maxInfos
             maxInfos1 = 'Maximum occurs at: %s' % (time)
@@ -179,8 +182,13 @@ class Plotter:
                 self.graph("set key title 'MAX: %i,  MEAN: %4.2f, MIN: %i  (#files: %i)' box lt 2" % (
                                            self.latenciers[i].max, self.latenciers[i].mean,
                                            self.latenciers[i].min, len(self.latenciers[i].sortedStats)))
-    
-            self.graph.title('%s Latencies (%s)' % (self.latenciers[i].pattern, dateLib.getISODate(latencier.date)))
+            
+            if self.latenciers[i].pattern == '__ALL__':
+                pattern = 'ALL'
+            else:
+                pattern = self.latenciers[i].pattern
+
+            self.graph.title('%s Latencies for %s (%s)' % (pattern, str(self.latenciers[i].client), dateLib.getISODate(latencier.date)))
             self.graph.plot(Gnuplot.Data(self.getPairs(self.latenciers[i].sortedStats), with="%s %s 2" % (self.type, color)))
     
             #plotItem = Gnuplot.PlotItems.PlotItem(Gnuplot.Data(self.getPairs(self.latenciers[0].sortedStats), title="MPCN")

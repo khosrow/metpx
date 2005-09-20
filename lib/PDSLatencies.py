@@ -19,7 +19,7 @@ from Latencies import Latencies
 
 class PDSLatencies(Latencies):
 
-    def __init__(self, nopull=False, keep=True, date=None, pattern='ACC', machines=['pds1', 'pds2', 'pds3', 'pds4'], sources=['pdschkprod'], client='wxo-b1-oper-ww', xstats=False):
+    def __init__(self, nopull=False, keep=False, date=None, pattern='ACC', machines=['pds1', 'pds2', 'pds3', 'pds4'], sources=['pdschkprod'], client='wxo-b1-oper-ww', xstats=False):
 
         Latencies.__init__(self, nopull, keep, date, xstats) # Parent Constructor
 
@@ -29,12 +29,13 @@ class PDSLatencies(Latencies):
         self.client = client       # Client for which we will check delivery time of the products (ONLY ONE ENTRY in the list)
         self.system = 'PDS'
 
-        if not self.keep:
-            self.eraseFiles()
         if not self.nopull:
             self.obtainFiles()
         
         self.start()
+
+        if not self.keep:
+            self.eraseFiles()
 
     def obtainFiles(self):
         date = dateLib.getISODate(self.date, False)
@@ -110,8 +111,12 @@ class PDSLatencies(Latencies):
                 parts = line.split()
                 hhmmss = parts[3][:-1] 
                 date = '%s %s' % (mmddyy, hhmmss)
-                filename_parts = os.path.split(parts[9])[1].split(':')
-                filename = ':'.join(filename_parts[:-2])
+                if self.xstats:
+                    # Remove ::20050918000030
+                    filename_parts = os.path.split(parts[9])[1].split(':')
+                    filename = ':'.join(filename_parts[:-2])
+                else:
+                    filename = os.path.split(parts[9])[1] 
                 #print (date, dateLib.getSecondsSinceEpoch(date), filename, machine)
                 infos[filename] = (date, dateLib.getSecondsSinceEpoch(date), machine)
             #print len(infos)
@@ -133,9 +138,15 @@ class PDSLatencies(Latencies):
                 parts = line.split()
                 hhmmss = parts[3][:-1]
                 date = '%s %s' % (mmddyy, hhmmss)
-                # We have to call basename because the format is not the same for different senders (file, bulletin)
-                filename_parts = parts[7].split(':')
-                filename = ':'.join(filename_parts[:-3])
+                if self.xstats:
+                    # Remove ::20050918020123:pds4
+                    filename_parts = parts[7].split(':')
+                    filename = ':'.join(filename_parts[:-3])
+                else:
+                    # Only remove machine name
+                    filename_parts = parts[7].split(':') 
+                    filename = ':'.join(filename_parts[:-1])
+
                 #print (date, dateLib.getSecondsSinceEpoch(date), filename, machine)
                 infos[filename] = (date, dateLib.getSecondsSinceEpoch(date), machine)
             #print len(infos)

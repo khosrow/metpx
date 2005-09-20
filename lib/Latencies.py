@@ -20,7 +20,7 @@ from PXManager import PXManager
 
 class Latencies:
 
-    def __init__(self, nopull=False, keep=True, date=None, xstats=False):
+    def __init__(self, nopull=False, keep=False, date=None, xstats=False):
 
         PXPaths.normalPaths()
         self.manager = PXManager()
@@ -59,7 +59,7 @@ class Latencies:
         self.random = str(random.random())[2:]   # Unique identificator permitting the program to be run in parallel
         self.system = None                       # 'PDS' or 'PX'
         self.rejected = 0                        # Count of rejected files
-        self.maxInfos = []                       # Count of rejected files
+        self.maxInfos = ['NO FILE', ('00:00:00', 'No machine', 0)]   # Informations about the max.
 
 
     def start(self):
@@ -74,7 +74,7 @@ class Latencies:
         #self.printStats()
 
     def eraseFiles(self):
-        for dir in os.listdir(PXPaths.LAT_TMP):
+        for dir in fnmatch.filter(os.listdir(PXPaths.LAT_TMP), '*' + self.random):
             fullPath = PXPaths.LAT_TMP + dir
             command = 'rm -rf %s' % fullPath
             (status, output) = commands.getstatusoutput(command)
@@ -141,6 +141,12 @@ class Latencies:
                     self.maxInfos = [file, self.stats[file]]
                 elif bigLat < self.min:
                     self.min = bigLat
+
+                if bigLat > 40000:
+                    print file, bigLat, machine
+                    print self.xferlogInfos[file]
+                    print self.receivingInfos[file]
+                    print self.sendingInfos[file]
             else:
                 self.rejected += 1
 
