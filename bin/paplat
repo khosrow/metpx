@@ -63,9 +63,15 @@ class PapLat:
 
         usage = """%prog [options]
 
-Note: Defaults are set for all options but -p|--patterns and --pdsPatterns.
-      YESTERDAY cannot be used in command line.
-      With --pdsPatterns you can add :x if you want to use xferlogs
+Notes: - Defaults are set for all options but -p|--patterns and --pdsPatterns.
+       - YESTERDAY cannot be used in command line.
+       - With -p|--patterns or --pdsPatterns you can add :x if you want to use xferlogs
+       - With -p|--patterns or --pdsPatterns you can use __ALL__ to indicate that you are not interessed in 
+         a specific product(pattern) but to all products.
+       - With -s|--sources you can use __ALL__ to utilise all sources without naming them (only useful for PX client)
+       - Restriction: Only one client of each type (PX and PDS) in a command
+
+WARNING: Xferlog option (PATTERN:x) is not reliable on PDS when filenames are not unique. Not tested on PX (lack of data)
 
 example 1: %prog -p MPCN (equivalent to: %prog --date YESTERDAY --patterns MPCN --machines pds5,pds6 --sources ncp1,ncp2 --clients wxo-b1)
 example 2: %prog --pdsPatterns ACC (equivalent to: %prog -d YESTERDAY --pdsPatterns ACC -m pds1,pds2,pds3,pds4 -s pdschkprod --pdsClients wxo-b1-oper-ww
@@ -74,10 +80,7 @@ example 4: %prog -d 20050928 -p 'MPCN*CWAO' -m pds5,pds6 -s ncp1,ncp2 -c wxo-b1 
 example 5: %prog -p MPCN --pdsPatterns ACC -r warnings_latencies
 example 6: %prog -p MPCN,SACN -r warnings_latencies
 example 7: %prog -p MPCN,SACN --pdsPatterns ACC,ACC:x -c amdar --pdsClients condor
-
-
-Note: Option -n | --nopull is useful when you know that the logs needed to extract stats are already present in the
-temporary directory. No need to pull them again. When --nopull is selected, --keep is set to True.
+example 8: %prog -r daniel.lemay -p MPCN,__ALL__ --pdsPatterns __ALL__,__ALL__:x --pdsClients wxo-b1-oper-data 
 """
 
         self.parser = OptionParser(usage)
@@ -89,9 +92,6 @@ temporary directory. No need to pull them again. When --nopull is selected, --ke
         #print sys.argv
         (options, args) = self.parser.parse_args()
 
-        if options.nopull:
-            options.keep = True
-
         if not fnmatch.fnmatch(options.date, '20[0-9][5-9][0-1][0-9][0-3][0-9]'):
             self.parser.error("Date format must be: YYYYMMDD")
         
@@ -99,6 +99,7 @@ temporary directory. No need to pull them again. When --nopull is selected, --ke
         machines = options.machines.replace(' ', '').split(',')
 
         sources = options.sources.replace(' ', '').split(',')
+        """
         if sources[0] == '__ALL__':
             #self.manager.initNames() 
             #sources = self.manager.getRxNames()
@@ -112,7 +113,7 @@ temporary directory. No need to pull them again. When --nopull is selected, --ke
                 print("You must indicate a source!")
                 print "If you need help: paplat -h"
                 sys.exit(1)
-
+        """
         clients = options.clients.replace(' ', '').split(',')
 
         pdsPatterns = options.pdsPatterns.replace(' ', '').split(',')
@@ -135,7 +136,11 @@ temporary directory. No need to pull them again. When --nopull is selected, --ke
         # For now, only one client of each type (PX, PDS).
         # Two latenciers maximum if we want the program to function.
         for pattern in patterns:
-            latencier = PXLatencies(options.nopull, options.keep, options.date, pattern, machines, sources, clients[0])
+            parts = pattern.split(':')
+            if len(parts) == 2 and parts[1] == 'x':
+                latencier = PXLatencies(options.nopull, options.keep, options.date, parts[0], machines, sources, clients[0], True)
+            else:
+                latencier = PXLatencies(options.nopull, options.keep, options.date, pattern, machines, sources, clients[0])
             self.latenciers.append(latencier)
 
         for pattern in pdsPatterns:
@@ -188,7 +193,7 @@ temporary directory. No need to pull them again. When --nopull is selected, --ke
         #msg = MIMEMultipart()
         msg['To'] = 'warnings_latencies'
         msg['From'] = 'warnings_latencies <warnings_latencies@ec.gc.ca>'
-        msg['Subject'] = "%s Latencies (%s) : MAX = %i seconds,  MEAN = %4.2f seconds,  MIN = %i seconds" % (self.latenciers[0].pattern, 
+        msg['Subject'] = "%s Latencies for %s (%s) : MAX = %i seconds,  MEAN = %4.2f seconds,  MIN = %i seconds" % (self.latenciers[0].pattern, self.latenciers[0].client,
                           dateLib.getISODate(self.latenciers[0].date), self.latenciers[0].max, self.latenciers[0].mean, self.latenciers[0].min)
         msg['Date'] = Utils.formatdate(localtime = 1)
         msg['Message-ID'] = Utils.make_msgid()
@@ -240,10 +245,11 @@ temporary directory. No need to pull them again. When --nopull is selected, --ke
                           help="No graphic")
 
         parser.add_option("-n", "--nopull", action="store_true", dest="nopull", default=False,
-                          help="Don't pull any log files")
+                          help="Don't work now")
+                          #help="Don't pull any log files")
 
         parser.add_option("-k", "--keep", action="store_true", dest="keep", default=False,
-                          help="Keep log files downloaded from a previous execution")
+                          help="Keep log files you will download")
 
         parser.add_option("-v", "--view", action="store_true", dest="view", default=False,
                           help="Print results at the screen (only the first pattern)")
