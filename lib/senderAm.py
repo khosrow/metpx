@@ -1,8 +1,21 @@
+"""
+#############################################################################################
+# Name: senderAm.py
+#
+# Author: Pierre Michaud
+#
+# Date: Janvier 2005
+#
+# Contributors: Daniel Lemay
+#
+# Description:
+#
+#############################################################################################
+"""
 import sys, gateway
 import socketManagerAm
 import bulletinManagerAm
 import bulletinAm
-from socketManager import socketManagerException
 from DiskReader import DiskReader
 from MultiKeysStringSorter import MultiKeysStringSorter
 import PXPaths
@@ -10,57 +23,8 @@ import PXPaths
 PXPaths.normalPaths()
 
 class senderAm(gateway.gateway):
-    __doc__ = gateway.gateway.__doc__ + \
-    """
-    #### CLASSE senderAm ####
-
-    Nom:
-    senderAm
-
-    Paquetage:
-
-    Statut:
-    Classe concrete
-
-    Responsabilites:
-    -Lire des bulletins en format Am;
-    -Envoyer les bulletins Am lus selon un ordre de priorite dans une arborescence;
-    -Communiquer en respectant le protocole Am.
-
-    Attributs:
-    Attribut de la classe parent gateway
-
-    Methodes:
-    Methodes de la classe parent gateway
-
-    Auteur:
-    Pierre Michaud
-
-    Date:
-    Janvier 2005
-    """
 
     def __init__(self,path, client,logger):
-        """
-        Nom:
-        __init__
-
-        Parametres d'entree:
-        -path:  repertoire ou se trouve la configuration
-        -logger:        reference a un objet log
-
-        Parametres de sortie:
-        -Aucun
-
-        Description:
-        Instancie un objet senderAm.
-
-        Auteur:
-        Pierre Michaud
-
-        Date:
-        Janvier 2005
-        """
         gateway.gateway.__init__(self,path, client,logger)
         self.client = client
         self.establishConnection()
@@ -69,31 +33,17 @@ class senderAm(gateway.gateway):
         # de configuration
         self.logger.debug("Instanciation du bulletinManagerAm")
         self.unBulletinManagerAm = bulletinManagerAm.bulletinManagerAm(PXPaths.TXQ + client.name, logger)
-        self.reader = None
+        self.reader = DiskReader(PXPaths.TXQ + self.client.name,
+                                 self.client.batch,           # Number of files we read each time
+                                 self.client.validation,      # name validation (Bool)
+                                 self.client.patternMatching, # pattern matching (Bool)
+                                 self.client.mtime,           # check modification time (integer)
+                                 True,                        # priority tree
+                                 self.logger,
+                                 eval(self.client.sorter),
+                                 self.client)
 
     def shutdown(self):
-        __doc__ = gateway.gateway.shutdown.__doc__ + \
-        """
-        ### senderAm ###
-        Nom:
-        shutdown
-
-        Parametres d'entree:
-        -Aucun
-
-        Parametres de sortie:
-        -Aucun
-
-        Description:
-        Termine proprement l'existence d'un senderAm.  Les taches en cours sont terminees
-        avant d'eliminer le senderAm.
-
-        Nom:
-        Pierre Michaud
-
-        Date:
-        Janvier 2005
-        """
         gateway.gateway.shutdown(self)
 
         resteDuBuffer, nbBullEnv = self.unSocketManagerAm.closeProperly()
@@ -103,28 +53,6 @@ class senderAm(gateway.gateway):
         self.logger.info("Le senderAm est mort.  Traitement en cours reussi.")
 
     def establishConnection(self):
-        __doc__ = gateway.gateway.establishConnection.__doc__ + \
-        """
-        ### senderAm ###
-        Nom:
-        establishConnection
-
-        Parametres d'entree:
-        -Aucun
-
-        Parametres de sortie:
-        -Aucun
-
-        Description:
-        Initialise la connexion avec le destinataire.
-
-        Nom:
-        Pierre Michaud
-
-        Date:
-        Janvier 2005
-        """
-
         # Instanciation du socketManagerAm
         self.logger.debug("Instanciation du socketManagerAm")
 
@@ -136,61 +64,16 @@ class senderAm(gateway.gateway):
                          timeout=self.client.timeout)
 
     def read(self):
-        __doc__ =  gateway.gateway.read.__doc__ + \
-        """
-        ### senderAm ###
-        Nom:
-        read
-
-        Parametres d'entree:
-        -Aucun
-
-        Parametres de sortie:
-        -data: dictionnaire du contenu d'un fichier selon son chemin absolu
-
-        Description:
-        Lit les bulletins contenus dans un repertoire.  Le repertoire
-        contient les bulletins de la priorite courante.
-
-        Nom:
-        Pierre Michaud
-
-        Date:
-        Janvier 2005
-        """
-        self.reader = DiskReader(PXPaths.TXQ + self.client.name, self.client.batch, 
-                                 True, # name validation
-                                 0,    # we don't check modification time
-                                 True, # priority tree
-                                 self.logger,
-                                 eval(self.client.sorter))
-        self.reader.sort()
-        return self.reader.getFilesContent(self.clients.batch)
-
+        if self.igniter.reloadMode == True:
+            # We assign the defaults and reread the configuration file (in __init__)
+            self.client.__init__(self.client.name, self.client.logger)
+            self.resetReader()
+            self.logger.info("Sender AM has been reloaded")
+            self.igniter.reloadMode = False
+        self.reader.read()
+        return self.reader.getFilesContent(self.client.batch)
 
     def write(self,data):
-        __doc__ =  gateway.gateway.write.__doc__ + \
-        """
-        ### senderAm ###
-        Nom:
-        write
-
-        Parametres d'entree:
-        -data: dictionnaire du contenu d'un fichier selon son chemin absolu
-
-        Parametres de sortie:
-        -Aucun
-
-        Description:
-        Genere les bulletins en format AM issus du dictionnaire data
-        et les ecrit au socket approprie.
-
-        Nom:
-        Pierre Michaud
-
-        Date:
-        Janvier 2005
-        """
         self.logger.debug("%d nouveaux bulletins seront envoyes",len(data))
 
         for index in range(len(data)):

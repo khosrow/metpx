@@ -25,13 +25,16 @@ class senderAMIS:
    def __init__(self, client, logger):
       self.client = client                            # Client object (give access to all configuration options)
       self.remoteHost = client.host                   # Remote host (name or ip) 
-      self.port = client.port                         # Port (int) to which the receiver is bind
+      self.port = int(client.port)                    # Port (int) to which the receiver is bind
       self.maxLength = 1000000                        # Maximum length that we can transmit on the link
       self.address = (self.remoteHost, self.port)     # Socket address
       self.timeout = client.timeout                   # No timeout for now
       self.logger = logger                            # Logger object
       self.socketAMIS = None                          # The socket
-      self.reader = None                              # Object used to read and sort bulletins from disk 
+      self.igniter = None      
+      self.reader = DiskReader(PXPaths.TXQ  + self.client.name, self.client.batch,                            
+                               self.client.validation, self.client.patternMatching, 
+                               self.client.mtime, True, self.logger, eval(client.sorter), self.client)
 
       self.totBytes = 0
       self.initialTime = time.time()
@@ -41,6 +44,14 @@ class senderAMIS:
 
       self._connect()
       #self.run()
+
+   def setIgniter(self, igniter):
+      self.igniter = igniter 
+
+   def resetReader(self):
+      self.reader = DiskReader(PXPaths.TXQ  + self.client.name, self.client.batch,
+                               self.client.validation, self.client.patternMatching,
+                               self.client.mtime, True, self.logger, eval(client.sorter), self.client)
 
    def _connect(self):
       self.socketAMIS = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -70,9 +81,15 @@ class senderAMIS:
       pass
 
    def read(self):
-      self.reader = DiskReader(PXPaths.TXQ  + self.client.name, self.client.batch,
-                               True, 0, True, self.logger, eval(client.sorter))
-      self.reader.sort()
+      if self.igniter.reloadMode == True:
+         # We assign the defaults and reread the configuration file (in __init__)
+         self.client.__init__(self.client.name, self.client.logger)
+         self.resetReader()
+         self.cacheManager.clear()
+         self.logger.info("Cache has been cleared")
+         self.logger.info("Sender AMIS has been reloaded")
+         self.igniter.reloadMode = False
+      self.reader.read()
       return self.reader.getFilesContent(client.batch)
 
    def write(self, data):

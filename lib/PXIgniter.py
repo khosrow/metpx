@@ -113,22 +113,16 @@ class PXIgniter(Igniter):
             pass
       else:
          #print self.gateway
-
          if self.direction == 'sender':
-            #fet.startup(self.flow, self.logger)
-            # We assign the defaults and reread the configuration file (in __init__)
-            self.flow.__init__(self.flow.name, self.flow.logger)
-            self.logger.info("%s has been reloaded" % self.direction.capitalize())
-            if self.type == 'amis':
-                self.gateway.cacheManager.clear()
-                self.logger.info("Cache has been cleared") 
+            self.reloadMode = True
 
          elif self.direction == 'receiver':
-            #fet.startup(self.flow, self.logger)
-            # We assign the defaults, reread configuration file for the source 
-            # and reread all configuration file for the clients (all this in __init__)
-            self.flow.__init__(self.flow.name, self.flow.logger)
             if self.type == 'am':
+               # FIXME: Should be put in amReceiver code
+               # We assign the defaults, reread configuration file for the source 
+               # and reread all configuration file for the clients (all this in __init__)
+               self.flow.__init__(self.flow.name, self.flow.logger)
+
                self.gateway.unBulletinManager.extension = self.flow.extension
                self.gateway.unBulletinManager.addSMHeader = self.flow.addSMHeader
                #print self.flow
@@ -138,12 +132,16 @@ class PXIgniter(Igniter):
                self.gateway.unBulletinManager.reloadMapEntetes(self.gateway.pathFichierStations)
                self.logger.info("%s has been reloaded" % self.direction.capitalize())
             if self.type == 'wmo':
+               # FIXME: Should be put in wmoReceiver code
+               # We assign the defaults, reread configuration file for the source 
+               # and reread all configuration file for the clients (all this in __init__)
+               self.flow.__init__(self.flow.name, self.flow.logger)
+
                self.gateway.unBulletinManager.extension = self.flow.extension
                self.gateway.unBulletinManager.reloadMapCircuit('/dev/null')
                self.logger.info("%s has been reloaded" % self.direction.capitalize())
-            if self.type == 'single-file':
-               self.logger.info("%s has been reloaded" % self.direction.capitalize())
-            if self.type == 'bulletin-file':
+
+            if self.type == 'single-file' or self.type == 'bulletin-file':
                self.reloadMode = True
             if self.type == 'collector':
                #self.gateway.reloadConfig()

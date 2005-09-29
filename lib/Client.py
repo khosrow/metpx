@@ -12,7 +12,7 @@
 #############################################################################################
 
 """
-import sys, os, os.path, commands, re, signal
+import sys, os, re, time, fnmatch
 import PXPaths
 from URLParser import URLParser
 from Logger import Logger
@@ -34,11 +34,16 @@ class Client(object):
         else:
             self.logger = logger
         self.logger.info("Initialisation of client %s" % self.name)
-        self.host = None                          # Remote host address (or ip) where to send files
+        self.host = 'localhost'                   # Remote host address (or ip) where to send files
         self.type = 'single-file'                 # Must be in ['single-file', 'bulletin-file', 'file', 'am', 'wmo', 'amis']
         self.protocol = None                      # First thing in the url: ftp, file, am, wmo, amis
         self.batch = 100                          # Number of files that will be read in each pass
         self.timeout = 10                         # Time we wait between each tentative to connect
+        self.validation = True                    # Validation of the filename (prio + date)
+        self.patternMatching = True               # Verification of the emask and imask of the client before sending a file
+        self.mtime = 0                            # Integer indicating the number of seconds a file must not have
+                                                  # been touched before being picked
+
         self.sorter = 'MultiKeysStringSorter'     # Class (or object) used to sort
         self.masks = []                           # All the masks (imask and emask)
         self.url = None
@@ -56,6 +61,14 @@ class Client(object):
         self.printInfos(self)
 
     def readConfig(self):
+        
+        def isTrue(s):
+            if  s == 'True' or s == 'true' or s == 'yes' or s == 'on' or \
+                s == 'Yes' or s == 'YES' or s == 'TRUE' or s == 'ON' or \
+                s == '1' or  s == 'On' :
+                return True
+            else:
+                return False
 
         def stringToOctal(string):
             if len(string) != 3:
@@ -63,7 +76,7 @@ class Client(object):
             else:
                 return int(string[0])*64 + int(string[1])*8 + int(string[2])
 
-        currentDir = '.'         # Current directory
+        currentDir = '.'                # Current directory
         currentFileOption = 'WHATFN'    # Under what filename the file will be sent (WHATFN, NONE, etc., See PDS)
 
         filePath = PXPaths.TX_CONF +  self.name + '.conf'
@@ -89,6 +102,10 @@ class Client(object):
                         (self.protocol, currentDir, self.user, self.passwd, self.host, self.port) =  urlParser.parse()
                         if len(words) > 2:
                             currentFileOption = words[2]
+                    elif words[0] == 'validation': self.validation =  isTrue(words[1])
+                    elif words[0] == 'patternMatching': self.patternMatching =  isTrue(words[1])
+                    elif words[0] == 'mtime': self.mtime = int(words[1])
+                    elif words[0] == 'sorter': self.sorter = words[1]
                     elif words[0] == 'type': self.type = words[1]
                     elif words[0] == 'protocol': self.protocol = words[1]
                     elif words[0] == 'host': self.host = words[1]
@@ -101,10 +118,57 @@ class Client(object):
                 except:
                     self.logger.error("Problem with this line (%s) in configuration file of client %s" % (words, self.name))
 
+        if not self.validation:
+            self.sorter = 'None'    # Must be a string because eval will be subsequently applied to this
+
         config.close()
     
         #self.logger.debug("Configuration file of client %s has been read" % (self.name))
 
+    def _getMatchingMask(self, filename): 
+        for mask in self.masks:
+            if fnmatch.fnmatch(filename, mask[0]):
+                try:
+                    if mask[2]:
+                        return mask
+                except:
+                    return None
+        return None
+
+    def getDestInfos(self, filename):
+        """
+        WHATFN         -- First part (':') of filename 
+        HEADFN         -- Use first 2 fields of filename
+        NONE           -- Use the entire filename
+        TIME or TIME:  -- TIME stamp appended
+        DESTFN=fname   -- Change the filename to fname
+
+        ex: mask[2] = 'NONE:TIME'
+        """
+        mask = self._getMatchingMask(filename)
+        if mask:
+            timeSuffix = ''
+            firstPart = filename.split(':')[0]
+            destFileName = filename
+            for spec in mask[2].split(':'):
+                if spec == 'WHATFN':
+                    destFileName =  firstPart
+                elif spec == 'HEADFN':
+                    headParts = firstPart.split('_')
+                    if len(headParts) >= 2:
+                        destFileName = headParts[0] + '_' + headParts[1] 
+                    else:
+                        destFileName = headParts[0] 
+                elif spec == 'NONE':
+                    destFileName =  filename
+                elif spec == 'TIME':
+                    timeSuffix = ':' + time.strftime("%Y%m%d%H%M%S", time.gmtime())
+                else:
+                    self.logger.error("Don't understand this DESTFN parameter: %s" % spec)
+                    return (None, None) 
+            return (destFileName + timeSuffix, mask[1])
+        else:
+            return (None, None) 
 
     def printInfos(self, client):
         print("==========================================================================")
@@ -121,6 +185,8 @@ class Client(object):
         print("Passwd: %s" % client.passwd)
         print("Chmod: %s" % client.chmod)
         print("FTP Mode: %s" % client.ftp_mode)
+        print("Validation: %s" % client.validation)
+        print("Pattern Matching: %s" % client.patternMatching)
 
         print("******************************************")
         print("*       Client Masks                     *")
@@ -130,71 +196,18 @@ class Client(object):
             print mask
         print("==========================================================================")
 
-
-    def destFileName(ingestname, climatch):
-        """ return the appropriate destination give the climatch client specification.
-    
-        return the appropriate destination file name for a given client match from patterns.
-    
-        DESTFN=fname -- change the destination file name to fname
-        WHATFN       -- change the file name
-        HEADFN       -- Use first 2 fieds of as the destination file name
-        NONE         -- use the entire ingest name, except...
-        TIME or TIME:   -- TIME stamp appended
-        TIME:RASTER:COMPRESS:GZIP -- modifiers... hmm... (forget for now...)
-        SENDER        -- SENDER=
-    
-        FIXME: unknowns:
-          SENDER not implemented
-          is DESTFN:TIME allowed? reversing order
-          does one add <thismachine> after TIME ?
-          INFO Jul 22 17:00:01: /apps/pds//bin//pdsftpxfer: INFO: File SACN59_CWAO_221600_RRB_208967:AMTCP2FILE-EXT:PDS1-DEV:BULLETIN:ASCII::20040722164923:pds1-dev   sent to ppp1.cmc.ec.gc.ca as    S
-    ACN59_CWAO_221600_RRB_208967    Bytes= 75
-          pdschkprod-bulletin-francais.20050109:INFO Jan 09 16:09:15: pdschkprod 1887: Written 3867 bytes: /apps/pds/pdsdb/BULLETIN/tornade/CMQ/ACC-FP55WG7409160137:tornade:CMQ:BULLETIN:ASCII:SENDER=A
-    CC-FP55WG7409160137X.TXT:20050109160915
-          pdschkprod-bulletin-francais.20050109:INFO Jan 09 16:13:39: pdschkprod 1887: Written 4972 bytes: /apps/pds/pdsdb/BULLETIN/tornade/CMQ/ACC-FP54XK7309160151:tornade:CMQ:BULLETIN:ASCII:SENDER=A
-    CC-FP54XK7309160151X.TXT:20050109161339
-          p
-          What do the RASTER etc... options do? just add suffix?
-    
-        """
-    
-    # print "climatch: ", climatch
-        specs=climatch[3].split(':')
-    #  print 'climatch[4] is +' + climatch[4] + '+'
-        dname=ingestname.split(':')[0]
-        time_suffix=''
-    
-        for spec in specs:
-            if spec == 'TIME':
-                time_suffix= ':' + time.strftime( "%Y%m%d%H%M%S", time.gmtime(time.time()) )
-            elif (spec == 'WHATFN') or (spec == ''):  # blank results from "TIME" alone as spec
-                dfn=dname
-            elif spec == 'HEADFN':
-                head=dname.split('_')
-                dfn=head[0] + '_' + head[1]
-            elif spec == 'NONE':
-                dfn=ingestname
-            elif re.compile('DESTFN=.*').match(spec):
-                dfn=spec[7:]
-            elif (spec[0:4] == 'RASTER') or (spec[0:4] == 'COMPR' ):
-                dfn= dname + ':' + spec
-            elif spec[0] == '/':
-                dfn= spec[4] + '/' + dname # local directory name
-            elif spec == 'SENDER':
-                dfn= (dname[5].split('='))[1]
-            else:
-                print 'ERROR: do not understand destfn parameter: ', climatch
-                return ''
-    
-        return dfn + time_suffix
-
 if __name__ == '__main__':
 
-    #client =  Client('amis')
+    client =  Client('wxo-b1')
     #client.readConfig()
     #client.printInfos(client)
+    print client.getDestInfos('AWCNALO:TUTU:TITI:TOTO:MIMI:Directi')
+    print client.getDestInfos('FPCN_DAN_MAN_lkdslfk:TUTU:TITI:TOTO:MIMI:Directi')
+    print client.getDestInfos('WLCN_MAN_lkdslfk:TUTU:TITI:TOTO:MIMI:Direct')
+    print client.getDestInfos('SMALLO:TUTU:TITI:TOTO:MIMI:Direct')
+    print client.getDestInfos('WTCNALLO:TUTU:TITI:TOTO:MIMI:Direct')
 
+    """
     for filename in os.listdir(PXPaths.TX_CONF):
         if filename[-5:] != '.conf': 
             continue
@@ -203,3 +216,4 @@ if __name__ == '__main__':
             client.readConfig()
             client.printInfos(client)
 
+    """

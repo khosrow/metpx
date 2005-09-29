@@ -1,6 +1,9 @@
 # -*- coding: UTF-8 -*-
 """Superclasse pour un gateway de transfert de bulletins"""
 import imp, time, sys
+from DiskReader import DiskReader
+import PXPaths
+PXPaths.normalPaths()
 
 __version__ = '2.0'
 
@@ -51,6 +54,22 @@ class gateway:
         self.pathToConfigFile = path
         self.logger = logger
         self.flow = flow 
+        self.igniter = None
+        self.reader = None
+
+    def resetReader(self):
+        self.reader = DiskReader(PXPaths.TXQ + self.flow.name,
+                                 self.flow.batch,            # Number of files we read each time
+                                 self.flow.validation,       # name validation
+                                 self.flow.patternMatching,  # pattern matching
+                                 self.flow.mtime,            # we don't check modification time
+                                 True,                       # priority tree
+                                 self.logger,
+                                 eval(self.flow.sorter),
+                                 self.flow)
+
+    def setIgniter(self, igniter):
+        self.igniter = igniter
 
     def loadConfig(path):
         """loadConfig(path)

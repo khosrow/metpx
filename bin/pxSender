@@ -92,23 +92,33 @@ example 2: %prog start       => will start all clients
     if client.type == 'am':
         import senderAm
         gateway = senderAm.senderAm('/dev/null', client, logger)
+        gateway.setIgniter(igniter)
         igniter.setGateway(gateway)
     elif client.type == 'wmo':
         import senderWmo
         gateway = senderWmo.senderWmo('/dev/null', client, logger)
+        gateway.setIgniter(igniter)
         igniter.setGateway(gateway)
     elif client.type == 'amis':
         import senderAMIS
         gateway = senderAMIS.senderAMIS(client, logger)
+        gateway.setIgniter(igniter)
         igniter.setGateway(gateway)
     elif client.type == 'single-file':
         from MultiKeysStringSorter import MultiKeysStringSorter
         import SenderFTP
         igniter.setGateway("DUMMY")
+        reader = DiskReader(PXPaths.TXQ + client.name, client.batch, client.validation, False,
+                            client.mtime, True, logger, eval(client.sorter), client)
         while True:
-            reader = DiskReader(PXPaths.TXQ + client.name, client.batch,
-                                True, False, 0, True, logger, MultiKeysStringSorter)
-            reader.sort()
+            if igniter.reloadMode:
+                client.__init__(client.name, client.logger)
+                reader = DiskReader(PXPaths.TXQ + client.name, client.batch, client.validation, False,
+                                    client.mtime, True, logger, eval(client.sorter), client)
+                logger.info("Sender FTP has been reloaded")
+                igniter.reloadMode = False
+
+            reader.read()
             if len(reader.sortedFiles) >= 1:
                 sortedFiles = reader.sortedFiles[:client.batch]
                 logger.info("%d bulletins will be sent" % len(sortedFiles))

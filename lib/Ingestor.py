@@ -28,17 +28,16 @@ PXPaths.normalPaths()              # Access to PX paths
 class Ingestor(object):
     """
     Normally, an Ingestor will be in a Source. It can also be used for the only reason that this object has
-    access to all the configuration options of the clients. For this particular case, source=None. The DiskReader
-    use an ingestor to verify if an ingestName is matched by a client.
+    access to all the configuration options of the clients. For this particular case, source=None.
     """
 
     def __init__(self, source=None, logger=None):
 
         # General Attributes
         self.source = source
-        self.ingestDir = PXPaths.RXQ + self.source.name
         self.reader = None
         if source is not None:
+            self.ingestDir = PXPaths.RXQ + self.source.name
             self.logger = source.logger
         elif logger is not None:
             self.logger = logger
@@ -49,7 +48,8 @@ class Ingestor(object):
         self.clients = {}   # All the Client objects
         self.dbDirsCache = CacheManager(maxEntries=200000, timeout=25*3600)      # Directories created in the DB
         self.clientDirsCache = CacheManager(maxEntries=100000, timeout=2*3600)   # Directories created in TXQ
-        self.logger.info("Ingestor (source %s) can link files to clients: %s" % (source.name, self.clientNames))
+        if source is not None:
+            self.logger.info("Ingestor (source %s) can link files to clients: %s" % (source.name, self.clientNames))
 
     def createDir(self, dir, cacheManager):
         if cacheManager.find(dir) == None:
@@ -185,12 +185,18 @@ class Ingestor(object):
 
     def ingestSingleFile(self, igniter):
         from DiskReader import DiskReader
+        reader = DiskReader(self.ingestDir, self.source.batch, self.source.validation, self.source.patternMatching,
+                            self.source.mtime, False, self.source.logger, self.source.sorter)
         while True:
-            # FIXME: Maybe it would be costless to instanciate DiskReader before the while, so we instanciate it only
-            # one time initially and at reload ater. Same thing for ingestBulletinFile
-            reader = DiskReader(self.ingestDir, self.source.batch, False, False,
-                                self.source.mtime, False, self.source.logger, self.source.sorter)
-            reader.sort()
+            if igniter.reloadMode == True:
+                # We assign the defaults, reread configuration file for the source
+                # and reread all configuration file for the clients (all this in __init__)
+                self.source.__init__(self.source.name, self.source.logger)
+                reader = DiskReader(self.ingestDir, self.source.batch, self.source.validation, self.source.patternMatching,
+                                    self.source.mtime, False, self.source.logger, self.source.sorter)
+                self.logger.info("Receiver has been reloaded")
+                igniter.reloadMode = False
+            reader.read()
             if len(reader.sortedFiles) >= 1:
                 sortedFiles = reader.sortedFiles[:self.source.batch]
                 self.logger.info("%d files will be ingested" % len(sortedFiles))
@@ -220,9 +226,14 @@ class Ingestor(object):
                     self.source.use_pds,
                     self.source)
 
+        reader = DiskReader(bullManager.pathSource, self.source.batch, self.source.validation, self.source.patternMatching,
+                            self.source.mtime, False, self.source.logger, self.source.sorter)
         while True:
             # If a SIGHUP signal is received ...
             if igniter.reloadMode == True:
+                # We assign the defaults, reread configuration file for the source
+                # and reread all configuration file for the clients (all this in __init__)
+                self.source.__init__(self.source.name, self.source.logger)
                 bullManager = bulletinManager.bulletinManager(
                                PXPaths.RXQ + self.source.name,
                                self.logger,
@@ -235,21 +246,20 @@ class Ingestor(object):
                                self.source.mapEnteteDelai,
                                self.source.use_pds,
                                self.source)
+                reader = DiskReader(bullManager.pathSource, self.source.batch, self.source.validation, self.source.patternMatching,
+                                    self.source.mtime, False, self.source.logger, self.source.sorter)
 
-                self.logger.info("%s has been reload" % igniter.direction.capitalize())
+                self.logger.info("Receiver has been reloaded")
                 igniter.reloadMode = False
 
-            # We put the bulletins (read from disk) in a dict (key = absolute filename)
-            #bulletinsBrutsDict = bullManager.readBulletinFromDisk([bullManager.pathSource])
-            # If a file has been modified in less than mtime (3 seconds now), we don't touch it
-            reader = DiskReader(bullManager.pathSource, self.source.batch, validation=False,
-                                patternMatching=False,  mtime=3, prioTree=False, logger=self.source.logger)
-            reader.sort()
+            reader.read()
             data = reader.getFilesContent(reader.batch)
 
             if len(data) == 0:
                 time.sleep(1)
                 continue
+            else:
+                self.logger.info("%d new bulletins will be ingested", len(data))
 
             # Write (and name correctly) the bulletins to disk, erase them after
             for index in range(len(data)):

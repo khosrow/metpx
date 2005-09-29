@@ -11,9 +11,8 @@
 #############################################################################################
 
 """
-import os, os.path, re, commands, time
+import os, sys, os.path, re, commands, time, fnmatch
 from MultiKeysStringSorter import MultiKeysStringSorter
-from Ingestor import Ingestor
 from stat import *
 
 class _DirIterator(object):
@@ -46,7 +45,7 @@ class _DirIterator(object):
 
 class DiskReader:
 
-    def __init__(self, path, batch=20000, validation=False, patternMatching=False, mtime=0, prioTree=False, logger=None, sorterClass=None):
+    def __init__(self, path, batch=20000, validation=False, patternMatching=False, mtime=0, prioTree=False, logger=None, sorterClass=None, client=None):
         """
         Set the root path and the sorter class used for sorting
 
@@ -70,16 +69,24 @@ class DiskReader:
         self.logger = logger                      # Use to log information
         self.batch = batch                        # Maximum number of files that we are interested to sort
         self.mtime = mtime                        # If we want to check modification time before taking a file                             
-        if prioTree: # If we want to use predefine priority directories tree
-            self.files = self._getFilesList()                          # List of filenames under the priorities
-        else:
-            self.files = self. _getFilesListForOneBranch(path, batch)  # List of filenames under the path
         self.sortedFiles = []                     # Sorted filenames
         self.data = []                            # Content of x filenames (x is set in getFilesContent())
+        self.prioTree = prioTree                  # Boolean that determine if the "priorities" structure is enforced
         self.sorterClass = sorterClass            # Sorting algorithm that will be used by sort()
-        if patternMatching:
-            self.ingestor = Ingestor(source=None, logger=logger) # Give access to all configuration options of the clients
+        self.client = client                      # Client object, only used when patternMatching is True
 
+        #self.read()
+
+    def read(self):
+        self.sortedFiles = []
+        self.data = []
+        if self.prioTree: # If we want to use predefine priority directories tree
+            self.files = self._getFilesList()                          # List of filenames under the priorities
+        else:
+            self.files = self. _getFilesListForOneBranch(self.path, self.batch)  # List of filenames under the path
+
+        self.sort()
+        
     def _validateName(self, basename):
         """
         Validate that the filename has the following form:
@@ -94,7 +101,17 @@ class DiskReader:
             return False
 
     def _matchPattern(self, basename):
-        return ingestor.isMatching(self.ingestor.clients[self.clientName], basename)
+        """
+        Verify if basename is matching one mask of a client
+        """
+        for mask in self.client.masks:
+            if fnmatch.fnmatch(basename, mask[0]):
+                try:
+                    if mask[2]:
+                        return True
+                except:
+                    return False
+        return False
 
     def _getFilesList(self):
         """

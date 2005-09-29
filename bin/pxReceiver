@@ -88,7 +88,7 @@ example 2: %prog start       => will start all sources
     if source.type == 'am':
         import receiverAm
         gateway = receiverAm.receiverAm('/dev/null', source, logger)
-        igniter.setGateway(unGateway)
+        igniter.setGateway(gateway)
     elif source.type == 'wmo':
         import receiverWmo
         gateway = receiverWmo.receiverWmo('/dev/null', source, logger)

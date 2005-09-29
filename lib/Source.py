@@ -52,6 +52,7 @@ class Source(object):
         self.addSMHeader = False                               #
         self.use_pds = False                                   #
         self.validation = False                                # Validate the filename (ex: prio an timestamp)
+        self.patternMatching = False                           # No pattern matching
         self.sorter = None                                     # No sorting on the filnames
         self.mtime = 0                                         # Integer indicating the number of seconds a file must not have 
                                                                # been touched before being picked

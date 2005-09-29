@@ -38,6 +38,8 @@ def run(source, igniter, logger):
          source.mapEnteteDelai,
          source.use_pds,
          source)
+    # We put the bulletins (read from disk) in a dict (key = absolute filename)
+    reader = DiskReader(bullManager.pathSource, batch=1000, validation=False, mtime=3, prioTree=False, logger=logger)
 
     while True:
         # If a SIGHUP signal is received ...
@@ -55,15 +57,13 @@ def run(source, igniter, logger):
                                source.mapEnteteDelai,
                                source.use_pds,
                                source)
+            # We put the bulletins (read from disk) in a dict (key = absolute filename)
+            reader = DiskReader(bullManager.pathSource, batch=1000, validation=False, mtime=3, prioTree=False, logger=logger)
 
             logger.info("%s has been reload" % igniter.direction)
             igniter.reloadMode = False
 
-        # We put the bulletins (read from disk) in a dict (key = absolute filename)
-        #bulletinsBrutsDict = bullManager.readBulletinFromDisk([bullManager.pathSource])
-        # If a file has been modified in less than mtime (3 seconds now), we don't touch it
-        reader = DiskReader(bullManager.pathSource, batch=1000, validation=False, mtime=3, prioTree=False, logger=logger)
-        reader.sort()
+        reader.read()
         data = reader.getFilesContent(reader.batch)
 
         if len(data) == 0:
