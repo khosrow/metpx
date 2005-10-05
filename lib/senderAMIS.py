@@ -34,7 +34,7 @@ class senderAMIS:
       self.igniter = None      
       self.reader = DiskReader(PXPaths.TXQ  + self.client.name, self.client.batch,                            
                                self.client.validation, self.client.patternMatching, 
-                               self.client.mtime, True, self.logger, eval(client.sorter), self.client)
+                               self.client.mtime, True, self.logger, eval(self.client.sorter), self.client)
 
       self.totBytes = 0
       self.initialTime = time.time()
@@ -51,7 +51,7 @@ class senderAMIS:
    def resetReader(self):
       self.reader = DiskReader(PXPaths.TXQ  + self.client.name, self.client.batch,
                                self.client.validation, self.client.patternMatching,
-                               self.client.mtime, True, self.logger, eval(client.sorter), self.client)
+                               self.client.mtime, True, self.logger, eval(self.client.sorter), self.client)
 
    def _connect(self):
       self.socketAMIS = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -90,7 +90,7 @@ class senderAMIS:
          self.logger.info("Sender AMIS has been reloaded")
          self.igniter.reloadMode = False
       self.reader.read()
-      return self.reader.getFilesContent(client.batch)
+      return self.reader.getFilesContent(self.client.batch)
 
    def write(self, data):
       if len(data) >= 1:
