@@ -42,7 +42,7 @@ class PDSLatencies(Latencies):
         
         # Used for xferlog
         (dummy, month, day) = dateLib.getISODateParts(date)
-        if day[0] == 0:
+        if day[0] == '0':
             day = ' ' +  day[1]
         monthAbbrev = dateLib.getMonthAbbrev(month)
 

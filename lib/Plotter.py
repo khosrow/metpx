@@ -107,7 +107,7 @@ class Plotter:
             rejectedString = '# Files rejected: %i' % latencier.rejected
             (filename, (time, host, lat)) = latencier.maxInfos
             maxInfos1 = 'Maximum occurs at: %s' % (time)
-            maxInfos2 = '%s(%s)' % (filename, host)
+            maxInfos2 = '%s (%s)' % (filename.split(':')[0], host)
             xferlogString = 'Xferlog used: %s' % ['No', 'Yes'][latencier.xstats]
 
 
@@ -117,8 +117,8 @@ class Plotter:
             self.graph('set label "%s" at screen 1.00, screen %3.2f' % (sourcesString, 0.34  + ((nbLatenciers -1) -i) * 0.5))
             self.graph('set label "%s" at screen 1.00, screen %3.2f' % (xferlogString, 0.32  + ((nbLatenciers -1) -i) * 0.5))
             self.graph('set label "%s" at screen 1.00, screen %3.2f' % (maxInfos1 , 0.30 + ((nbLatenciers -1) - i) * 0.5))
-            self.graph('set label "%s" at screen 1.00, screen %3.2f' % (rejectedString , 0.28 + ((nbLatenciers -1) - i) * 0.5))
-            #self.graph('set label "%s" at screen 1.00, screen %3.2f' % (maxInfos2 , 0.28 + ((nbLatenciers -1) - i) * 0.5))
+            self.graph('set label "%s" at screen 1.00, screen %3.2f' % (maxInfos2 , 0.28 + ((nbLatenciers -1) - i) * 0.5))
+            self.graph('set label "%s" at screen 1.00, screen %3.2f' % (rejectedString , 0.26 + ((nbLatenciers -1) - i) * 0.5))
             i += 1
 
         self.graph('set linestyle 1 lt 4 lw 5')
