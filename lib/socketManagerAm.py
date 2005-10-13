@@ -98,11 +98,9 @@ class socketManagerAm(socketManager.socketManager):
         header = list(tmp[0:size])
 
         paddedHeader = header + nulList[len(header):]
-
-        for i in range(size):
-            if paddedHeader[i]==chr(curses.ascii.LF):
-                paddedHeader[i]=chr(curses.ascii.NUL)
+        
         header = string.join(paddedHeader,'')
+        header = header.replace(chr(curses.ascii.LF), chr(curses.ascii.NUL), 1)
 
         #unsigned long src_inet, dst_inet
         src_inet = 0
@@ -187,6 +185,8 @@ class socketManagerAm(socketManager.socketManager):
         try:
             #preparation du bulletin pour l'envoi
             data = self.wrapBulletin(bulletin)
+            #print repr(data)
+            #print("======================================================================")
 
             #tentative d'envoi et controle de la connexion
             #mettre le try/except dans un while(1)????
