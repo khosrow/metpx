@@ -99,10 +99,8 @@ class socketManagerAm(socketManager.socketManager):
 
         paddedHeader = header + nulList[len(header):]
 
-        for i in range(size):
-            if paddedHeader[i]==chr(curses.ascii.LF):
-                paddedHeader[i]=chr(curses.ascii.NUL)
         header = string.join(paddedHeader,'')
+        header = header.replace(chr(curses.ascii.LF), chr(curses.ascii.NUL), 1)
 
         #unsigned long src_inet, dst_inet
         src_inet = 0
