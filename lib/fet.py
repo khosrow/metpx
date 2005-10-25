@@ -280,7 +280,7 @@ def readClients(logger):
         clientid = cfname[:-5]
         mask=cliconf.readline()
         destdir=''
-        client=clientdefaults
+        client=clientdefaults[:]
         patterns = []
         protocol = 'ftp'
         user=''
