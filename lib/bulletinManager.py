@@ -191,6 +191,8 @@ class bulletinManager:
         else:
             entete = ' '.join(unBulletin.getHeader().split()[:2])
 
+            # For MG: Pattern Matching could be inserted here, using entete
+
             if self.mapCircuits.has_key(entete):
                 clist = self.mapCircuits[entete]['routing_groups']
             else:

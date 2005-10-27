@@ -185,6 +185,7 @@ class Ingestor(object):
 
     def ingestSingleFile(self, igniter):
         from DiskReader import DiskReader
+        # For MG: Ajoute self.source a la fin du DiskReader et modifie la methode _matchPattern
         reader = DiskReader(self.ingestDir, self.source.batch, self.source.validation, self.source.patternMatching,
                             self.source.mtime, False, self.source.logger, self.source.sorter)
         while True:
