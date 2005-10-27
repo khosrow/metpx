@@ -5,7 +5,8 @@
 # Authors: Peter Silva (imperative style)
 #          Daniel Lemay (OO style)
 #
-# Date:
+# Date: 2005-01-10 (Initial version by PS)
+#       2005-08-21 (OO version by DL)
 #
 # Description:
 #

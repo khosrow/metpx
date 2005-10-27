@@ -100,6 +100,12 @@ class DiskReader:
             #print "Don't match: " + basename
             return False
 
+    # FIXME: Adjust _matchPattern method for the case where self.client is a Client object and for when
+    # self.client is a Source object
+    # if type(self.client) == 'Source':
+    #   DO THIS
+    # elif type(self.client) == 'Client':
+    #   DO THAT
     def _matchPattern(self, basename):
         """
         Verify if basename is matching one mask of a client

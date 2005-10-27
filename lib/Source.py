@@ -5,7 +5,8 @@
 # Authors: Peter Silva (imperative style)
 #          Daniel Lemay (OO style)
 #
-# Date:
+# Date: 2005-01-10 (Initial version by PS)
+#       2005-08-21 (OO version by DL)
 #
 # Description:
 #
@@ -87,6 +88,8 @@ class Source(object):
                             self.logger.error("Extension (%s) for source %s has wrong number of fields" % (words[1], self.name)) 
                         else:
                             self.extension = ':' + words[1]
+                    #elif words[0] == 'imask': self.masks.append((words[1], currentDir, currentFileOption))
+                    #elif words[0] == 'emask': self.masks.append((words[1],))
                     elif words[0] == 'batch': self.batch = int(words[1])
                     elif words[0] == 'type': self.type = words[1]
                     elif words[0] == 'port': self.port = int(words[1])
