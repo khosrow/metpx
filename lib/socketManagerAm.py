@@ -197,9 +197,9 @@ class socketManagerAm(socketManager.socketManager):
                 #verifier si l'envoi est un succes
                 if bytesSent != len(data):
                     self.connected=False
-                    return 0
+                    return (0, bytesSent)
                 else:
-                    return 1
+                    return (1, bytesSent)
 
             except socket.error, e:
                 #erreurs potentielles: 104, 107, 110 ou 32

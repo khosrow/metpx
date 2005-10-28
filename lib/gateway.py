@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 """Superclasse pour un gateway de transfert de bulletins"""
 import imp, time, sys
+from MultiKeysStringSorter import MultiKeysStringSorter
 from DiskReader import DiskReader
 import PXPaths
 PXPaths.normalPaths()

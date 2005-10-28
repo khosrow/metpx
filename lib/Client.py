@@ -178,6 +178,7 @@ class Client(object):
         print("Type: %s" % client.type)
         print("Protocol: %s" % client.protocol)
         print("Batch: %s" %  client.batch)
+        print("Mtime: %i" % client.mtime)
         print("Timeout: %s" % client.timeout)
         print("Sorter: %s" % client.sorter)
         print("URL: %s" % client.url)
