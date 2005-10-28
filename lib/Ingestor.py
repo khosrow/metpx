@@ -185,16 +185,21 @@ class Ingestor(object):
 
     def ingestSingleFile(self, igniter):
         from DiskReader import DiskReader
-        # For MG: Ajoute self.source a la fin du DiskReader et modifie la methode _matchPattern
+
+        # Ajoute self.source a la fin du DiskReader MG (As proposed by DL)
+
         reader = DiskReader(self.ingestDir, self.source.batch, self.source.validation, self.source.patternMatching,
-                            self.source.mtime, False, self.source.logger, self.source.sorter)
+                            self.source.mtime, False, self.source.logger, self.source.sorter, self.source )
+
         while True:
             if igniter.reloadMode == True:
                 # We assign the defaults, reread configuration file for the source
                 # and reread all configuration file for the clients (all this in __init__)
                 self.source.__init__(self.source.name, self.source.logger)
+
+                # Ajoute self.source a la fin du DiskReader MG (As proposed by DL)
                 reader = DiskReader(self.ingestDir, self.source.batch, self.source.validation, self.source.patternMatching,
-                                    self.source.mtime, False, self.source.logger, self.source.sorter)
+                                    self.source.mtime, False, self.source.logger, self.source.sorter, self.source )
                 self.logger.info("Receiver has been reloaded")
                 igniter.reloadMode = False
             reader.read()

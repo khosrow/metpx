@@ -191,15 +191,21 @@ class bulletinManager:
         else:
             entete = ' '.join(unBulletin.getHeader().split()[:2])
 
-            # For MG: Pattern Matching could be inserted here, using entete
+            # MG use filename for Pattern File Matching from source ...  (As Proposed by DL )
+
+	    if not self.source.fileMatchMask(nomFichier) :
+               self.logger.warning("Fichier Bulletin rejete par rx mask : " + nomFichier)
+               os.unlink(tempNom)
+	       return
 
             if self.mapCircuits.has_key(entete):
-                clist = self.mapCircuits[entete]['routing_groups']
+               clist = self.mapCircuits[entete]['routing_groups']
             else:
-                clist = []
+               clist = []
 
             #fet.directIngest( nomFichier, clist, tempNom, self.logger )
             self.source.ingestor.ingest(tempNom, nomFichier, clist)
+
             os.unlink(tempNom)
 
 

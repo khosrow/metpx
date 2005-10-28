@@ -12,6 +12,7 @@
 
 """
 import os, sys, os.path, re, commands, time, fnmatch
+import Client,Source
 from MultiKeysStringSorter import MultiKeysStringSorter
 from stat import *
 
@@ -100,23 +101,26 @@ class DiskReader:
             #print "Don't match: " + basename
             return False
 
-    # FIXME: Adjust _matchPattern method for the case where self.client is a Client object and for when
-    # self.client is a Source object
-    # if type(self.client) == 'Source':
-    #   DO THIS
-    # elif type(self.client) == 'Client':
-    #   DO THAT
+#   module written by MG ... proposed by DL
+
     def _matchPattern(self, basename):
         """
         Verify if basename is matching one mask of a client
         """
-        for mask in self.client.masks:
-            if fnmatch.fnmatch(basename, mask[0]):
-                try:
-                    if mask[2]:
-                        return True
-                except:
-                    return False
+
+        if self.client == None : return True
+
+        if isinstance(self.client,Source.Source) : return self.client.fileMatchMask(basename)
+
+        if isinstance(self.client,Client.Client) :
+
+           for mask in self.client.masks:
+               if fnmatch.fnmatch(basename, mask[0]):
+                  try:
+                       if mask[2]: return True
+                  except:
+                       return False
+
         return False
 
     def _getFilesList(self):

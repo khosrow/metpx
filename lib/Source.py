@@ -7,13 +7,14 @@
 #
 # Date: 2005-01-10 (Initial version by PS)
 #       2005-08-21 (OO version by DL)
+#       2005-10-28 (mask in source by MG)
 #
 # Description:
 #
 #############################################################################################
 
 """
-import sys, os, os.path, time, string, commands, re, signal
+import sys, os, os.path, time, string, commands, re, signal, fnmatch
 import PXPaths
 from Logger import Logger
 from Ingestor import Ingestor
@@ -45,7 +46,7 @@ class Source(object):
         # Attributes coming from the configuration file of the source
         #self.extension = 'nws-grib:-CCCC:-TT:-CIRCUIT:Direct'  # Extension to be added to the ingest name
         self.batch = 100                          # Number of files that will be read in each pass
-        self.masks = []                           # All the masks (imask and emask): Not used now, maybe in the future
+        self.masks = []                           # All the masks (imask and emask)
         self.extension = ':MISSING:MISSING:MISSING:MISSING:'   # Extension to be added to the ingest name
         self.type = None                                       # Must be in ['single-file', 'bulletin-file', 'am', 'wmo']
         self.port = None                                       # Port number if type is in ['am', 'wmo']
@@ -79,6 +80,12 @@ class Source(object):
             print("Type: %s, Value: %s" % (type, value))
             return 
 
+        # current dir and filename could eventually be used
+	# for file renaming and perhaps file move (like a special receiver/dispatcher)
+
+	currentDir = '.'                # just to preserve consistency with client : unused in source for now
+	currentFileOption = 'WHATFN'    # just to preserve consistency with client : unused in source for now
+
         for line in config.readlines():
             words = line.split()
             if (len(words) >= 2 and not re.compile('^[ \t]*#').search(line)):
@@ -88,12 +95,13 @@ class Source(object):
                             self.logger.error("Extension (%s) for source %s has wrong number of fields" % (words[1], self.name)) 
                         else:
                             self.extension = ':' + words[1]
-                    #elif words[0] == 'imask': self.masks.append((words[1], currentDir, currentFileOption))
-                    #elif words[0] == 'emask': self.masks.append((words[1],))
+                    elif words[0] == 'imask': self.masks.append((words[1], currentDir, currentFileOption))
+                    elif words[0] == 'emask': self.masks.append((words[1],))
                     elif words[0] == 'batch': self.batch = int(words[1])
                     elif words[0] == 'type': self.type = words[1]
                     elif words[0] == 'port': self.port = int(words[1])
                     elif words[0] == 'AddSMHeader' and isTrue(words[1]): self.addSMHeader = True
+		    elif words[0] == 'patternMatching': self.patternMatching =  isTrue(words[1])
                     elif words[0] == 'validation' and isTrue(words[1]): self.validation = True
                     elif words[0] == 'mtime': self.mtime = int(words[1])
                     elif words[0] == 'sorter': self.sorter = words[1]
@@ -104,7 +112,32 @@ class Source(object):
 
         config.close()
 
+	if len(self.masks) > 0 : self.patternMatching = True
+
         self.logger.debug("Configuration file of source  %s has been read" % (self.name))
+
+    # IMPORTANT NOTE HERE FALLBACK BEHAVIOR IS TO ACCEPT THE FILE
+    # THIS IS THE OPPOSITE OF THE CLIENT WHERE THE FALLBACK IS REJECT
+
+    def fileMatchMask(self, filename):
+
+	# fallback behavior 
+
+        if not self.patternMatching : return True
+        if len(self.masks) == 0     : return True
+
+        # check against the masks
+
+	for mask in self.masks:
+            if fnmatch.fnmatch(filename, mask[0]):
+               try:
+                    if mask[2]: return True
+               except:
+                    return False
+
+	# fallback behavior 
+
+        return True
 
     def printInfos(self, source):
         print("==========================================================================")
@@ -116,17 +149,17 @@ class Source(object):
         print("Arrival: %s" % source.mapEnteteDelai)
         print("addSMHeader: %s" % source.addSMHeader)
         print("Validation: %s" % source.validation)
+        print("patternMatching: %s" % source.patternMatching)
         print("mtime: %s" % source.mtime)
         print("Sorter: %s" % source.sorter)
         
-        """
         print("******************************************")
         print("*       Source Masks                     *")
         print("******************************************")
 
         for mask in self.masks:
             print mask
-        """
+
         print("==========================================================================")
 
 if __name__ == '__main__':
