@@ -192,11 +192,10 @@ class bulletinManager:
             entete = ' '.join(unBulletin.getHeader().split()[:2])
 
             # MG use filename for Pattern File Matching from source ...  (As Proposed by DL )
-
-	    if not self.source.fileMatchMask(nomFichier) :
+            if not self.source.fileMatchMask(nomFichier) :
                self.logger.warning("Fichier Bulletin rejete par rx mask : " + nomFichier)
                os.unlink(tempNom)
-	       return
+               return
 
             if self.mapCircuits.has_key(entete):
                clist = self.mapCircuits[entete]['routing_groups']

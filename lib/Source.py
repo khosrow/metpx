@@ -81,10 +81,10 @@ class Source(object):
             return 
 
         # current dir and filename could eventually be used
-	# for file renaming and perhaps file move (like a special receiver/dispatcher)
+        # for file renaming and perhaps file move (like a special receiver/dispatcher)
 
-	currentDir = '.'                # just to preserve consistency with client : unused in source for now
-	currentFileOption = 'WHATFN'    # just to preserve consistency with client : unused in source for now
+        currentDir = '.'                # just to preserve consistency with client : unused in source for now
+        currentFileOption = 'WHATFN'    # just to preserve consistency with client : unused in source for now
 
         for line in config.readlines():
             words = line.split()
@@ -101,7 +101,7 @@ class Source(object):
                     elif words[0] == 'type': self.type = words[1]
                     elif words[0] == 'port': self.port = int(words[1])
                     elif words[0] == 'AddSMHeader' and isTrue(words[1]): self.addSMHeader = True
-		    elif words[0] == 'patternMatching': self.patternMatching =  isTrue(words[1])
+                    elif words[0] == 'patternMatching': self.patternMatching =  isTrue(words[1])
                     elif words[0] == 'validation' and isTrue(words[1]): self.validation = True
                     elif words[0] == 'mtime': self.mtime = int(words[1])
                     elif words[0] == 'sorter': self.sorter = words[1]
@@ -112,7 +112,7 @@ class Source(object):
 
         config.close()
 
-	if len(self.masks) > 0 : self.patternMatching = True
+        if len(self.masks) > 0 : self.patternMatching = True
 
         self.logger.debug("Configuration file of source  %s has been read" % (self.name))
 
@@ -121,21 +121,21 @@ class Source(object):
 
     def fileMatchMask(self, filename):
 
-	# fallback behavior 
+    # fallback behavior 
 
         if not self.patternMatching : return True
         if len(self.masks) == 0     : return True
 
         # check against the masks
 
-	for mask in self.masks:
+        for mask in self.masks:
             if fnmatch.fnmatch(filename, mask[0]):
                try:
                     if mask[2]: return True
                except:
                     return False
 
-	# fallback behavior 
+        # fallback behavior 
 
         return True
 

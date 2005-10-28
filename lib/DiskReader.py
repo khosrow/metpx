@@ -12,7 +12,7 @@
 
 """
 import os, sys, os.path, re, commands, time, fnmatch
-import Client,Source
+import Client, Source
 from MultiKeysStringSorter import MultiKeysStringSorter
 from stat import *
 

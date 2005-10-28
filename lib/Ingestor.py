@@ -189,7 +189,7 @@ class Ingestor(object):
         # Ajoute self.source a la fin du DiskReader MG (As proposed by DL)
 
         reader = DiskReader(self.ingestDir, self.source.batch, self.source.validation, self.source.patternMatching,
-                            self.source.mtime, False, self.source.logger, self.source.sorter, self.source )
+                            self.source.mtime, False, self.source.logger, self.source.sorter, self.source)
 
         while True:
             if igniter.reloadMode == True:
@@ -199,7 +199,7 @@ class Ingestor(object):
 
                 # Ajoute self.source a la fin du DiskReader MG (As proposed by DL)
                 reader = DiskReader(self.ingestDir, self.source.batch, self.source.validation, self.source.patternMatching,
-                                    self.source.mtime, False, self.source.logger, self.source.sorter, self.source )
+                                    self.source.mtime, False, self.source.logger, self.source.sorter, self.source)
                 self.logger.info("Receiver has been reloaded")
                 igniter.reloadMode = False
             reader.read()
