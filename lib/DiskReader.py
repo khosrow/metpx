@@ -101,8 +101,7 @@ class DiskReader:
             #print "Don't match: " + basename
             return False
 
-#   module written by MG ... proposed by DL
-
+    # Method augmented by MG ... proposed by DL
     def _matchPattern(self, basename):
         """
         Verify if basename is matching one mask of a client
@@ -166,6 +165,13 @@ class DiskReader:
                 # Files we don't want to touch
                 if basename[0] == '.' or basename[-4:] == ".tmp" or not os.access(file, os.R_OK):
                     continue
+
+                # If we use stats informations (useful with rcp)
+                if self.mtime:
+                    if  not time.time() - os.stat(file)[ST_MTIME] > self.mtime:
+                        self.logger.debug("File (%s) too recent (mtime = %d)" % (file, self.mtime))
+                        continue
+
                 # If we use name validation 
                 if self.validation:
                     if not self._validateName(basename):
@@ -173,6 +179,7 @@ class DiskReader:
                         if self.logger is not None:
                             self.logger.info("Filename incorrect: " + file + " has been unlinked!")
                         continue
+
                 # If we use pattern matching
                 if self.patternMatching:
                     # Does the filename match a pattern ?
@@ -180,12 +187,6 @@ class DiskReader:
                         os.unlink(file)
                         if self.logger is not None:
                             self.logger.info("No pattern matching: " + file + " has been unlinked!")
-                        continue
-
-                # If we use stats informations (useful with rcp)
-                if self.mtime:
-                    if  not time.time() - os.stat(file)[ST_MTIME] > self.mtime:
-                        self.logger.debug("File (%s) too recent (mtime = %d)" % (file, self.mtime))
                         continue
 
                 # We don't want to exceed the batch value 
