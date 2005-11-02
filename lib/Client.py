@@ -4,9 +4,12 @@
 #
 # Authors: Peter Silva (imperative style)
 #          Daniel Lemay (OO style)
+#          Michel Grenier (directory path with patterns)
+#                         (directory path mkdir if doesn't exist)
 #
 # Date: 2005-01-10 (Initial version by PS)
 #       2005-08-21 (OO version by DL)
+#       2005-11-01 (Path stuff by MG)
 #
 # Description:
 #
@@ -57,6 +60,8 @@ class Client(object):
         self.passwd = None                  # Password 
         self.chmod = 0                      # If set to a value different than 0, umask 777 followed by a chmod of the value will be done
         self.ftp_mode = 'passive'           # Default is 'passive', can be set to 'active'
+        self.dir_mkdir = False              # Verification and creation of directory inside ftp...
+        self.dir_pattern = False            # Verification of patterns in destination directory
 
         self.readConfig()
         self.printInfos(self)
@@ -116,6 +121,8 @@ class Client(object):
                     elif words[0] == 'timeout': self.timeout = int(words[1])
                     elif words[0] == 'chmod': self.chmod = stringToOctal(words[1])
                     elif words[0] == 'ftp_mode': self.ftp_mode = words[1]
+                    elif words[0] == 'dir_pattern': self.dir_pattern =  isTrue(words[1])
+                    elif words[0] == 'dir_mkdir': self.dir_mkdir =  isTrue(words[1])
                 except:
                     self.logger.error("Problem with this line (%s) in configuration file of client %s" % (words, self.name))
 
@@ -187,6 +194,8 @@ class Client(object):
         print("Passwd: %s" % client.passwd)
         print("Chmod: %s" % client.chmod)
         print("FTP Mode: %s" % client.ftp_mode)
+        print("DIR Pattern: %s" % client.dir_pattern)
+        print("DIR Mkdir  : %s" % client.dir_mkdir)
         print("Validation: %s" % client.validation)
         print("Pattern Matching: %s" % client.patternMatching)
 
