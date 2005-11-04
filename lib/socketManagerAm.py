@@ -3,7 +3,7 @@
 
 __version__ = '2.0'
 
-import struct, socket, curses, curses.ascii, string
+import struct, socket, curses, curses.ascii, string, time
 import socketManager
 
 class socketManagerAm(socketManager.socketManager):
@@ -107,15 +107,18 @@ class socketManagerAm(socketManager.socketManager):
         dst_inet = 0
 
         #unsigned char threads[4]
-        threads='0'+chr(255)+'0'+'0'
+        #threads='0'+chr(255)+'0'+'0'
+        threads= chr(0) + chr(255) + chr(0) + chr(0)
 
         #unsigned int start, length
         start = 0
         length = socket.htonl( len(bulletin.getBulletin()) )
 
         #time_t firsttime, timestamp
-        firsttime = chr(curses.ascii.NUL)
-        timestamp = chr(curses.ascii.NUL)
+        #firsttime = chr(curses.ascii.NUL)
+        #timestamp = chr(curses.ascii.NUL)
+        firsttime = int(time.time())
+        timestamp = int(time.time())
 
         #char future[20]
         future = chr(curses.ascii.NUL)
