@@ -37,7 +37,8 @@ class socketManagerAm(socketManager.socketManager):
         # La taille du amRec est prise d'a partir du fichier ytram.h, à l'origine dans
         # amtcp2file. Pour la gestion des champs l'on se refere au module struct
         # de Python.
-        self.patternAmRec = '80sLL4sii4s4s20s'
+        #self.patternAmRec = '80sLL4sii4s4s20s'
+        self.patternAmRec = '80sLL4siiii20s'
         self.sizeAmRec = struct.calcsize(self.patternAmRec)
 
     def unwrapBulletin(self):
@@ -117,8 +118,8 @@ class socketManagerAm(socketManager.socketManager):
         #time_t firsttime, timestamp
         #firsttime = chr(curses.ascii.NUL)
         #timestamp = chr(curses.ascii.NUL)
-        firsttime = int(time.time())
-        timestamp = int(time.time())
+        firsttime = socket.htonl(int(time.time()))
+        timestamp = socket.htonl(int(time.time()))
 
         #char future[20]
         future = chr(curses.ascii.NUL)
