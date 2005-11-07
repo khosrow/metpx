@@ -127,11 +127,14 @@ class Ingestor(object):
                     return False
         return False
 
-    def getMatchingClientNamesFromMasks(self, ingestName):
+    def getMatchingClientNamesFromMasks(self, ingestName, potentialClientNames):
         matchingClientNames = []
-        for name in self.clientNames:
-            if self.isMatching(self.clients[name], ingestName):
-                matchingClientNames.append(name)
+        for name in potentialClientNames:
+            try:
+                if self.isMatching(self.clients[name], ingestName):
+                    matchingClientNames.append(name)
+            except KeyError:
+                pass
         return matchingClientNames
 
     def ingest(self, receptionName, ingestName, clientNames):
@@ -208,7 +211,7 @@ class Ingestor(object):
                 self.logger.info("%d files will be ingested" % len(sortedFiles))
                 for file in sortedFiles:
                     ingestName = self.getIngestName(os.path.basename(file)) 
-                    matchingClients = self.getMatchingClientNamesFromMasks(ingestName)
+                    matchingClients = self.getMatchingClientNamesFromMasks(ingestName, self.clientNames)
                     self.logger.info("Matching (from patterns) client names: %s" % matchingClients)
                     self.ingest(file, ingestName, matchingClients)
                     os.unlink(file)

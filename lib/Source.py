@@ -55,6 +55,7 @@ class Source(object):
         self.use_pds = False                                   #
         self.validation = False                                # Validate the filename (ex: prio an timestamp)
         self.patternMatching = False                           # No pattern matching
+        self.clientsPatternMatching = True                     # No clients pattern matching
         self.sorter = None                                     # No sorting on the filnames
         self.mtime = 0                                         # Integer indicating the number of seconds a file must not have 
                                                                # been touched before being picked
@@ -102,6 +103,7 @@ class Source(object):
                     elif words[0] == 'port': self.port = int(words[1])
                     elif words[0] == 'AddSMHeader' and isTrue(words[1]): self.addSMHeader = True
                     elif words[0] == 'patternMatching': self.patternMatching =  isTrue(words[1])
+                    elif words[0] == 'clientsPatternMatching': self.clientsPatternMatching =  isTrue(words[1])
                     elif words[0] == 'validation' and isTrue(words[1]): self.validation = True
                     elif words[0] == 'mtime': self.mtime = int(words[1])
                     elif words[0] == 'sorter': self.sorter = words[1]

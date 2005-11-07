@@ -202,6 +202,9 @@ class bulletinManager:
             else:
                clist = []
 
+            if self.source.clientsPatternMatching:
+                clist = self.source.ingestor.getMatchingClientNamesFromMasks(nomFichier, clist)
+
             #fet.directIngest( nomFichier, clist, tempNom, self.logger )
             self.source.ingestor.ingest(tempNom, nomFichier, clist)
 
