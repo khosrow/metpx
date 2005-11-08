@@ -109,7 +109,10 @@ class DiskReader:
 
         if self.client == None : return True
 
-        if isinstance(self.client,Source.Source) : return self.client.fileMatchMask(basename)
+        if isinstance(self.client,Source.Source) :
+	   matchmask = self.client.fileMatchMask(basename)
+	   if matchmask == False : self.logger.warning("Fichier rejete par rx mask : " + basename )
+	   return matchmask
 
         if isinstance(self.client,Client.Client) :
 
