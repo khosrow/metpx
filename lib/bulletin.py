@@ -251,6 +251,67 @@ class bulletin:
 
         self.logger.debug("Nouvelle entête du bulletin: %s",header)
 
+    def getStation(self):
+        """getStation() -> station
+
+           station      : String
+
+           Retourne la station associée au bulletin,
+           retourne None si elle est introuvable.
+
+           Visibilité:  Publique
+           Auteur:      Louis-Philippe Thériault
+           Date:        Octobre 2004
+        """
+
+        print(" ********************* BULLETIN GET STATION APPELE ")
+        station = None
+        try:
+            premiereLignePleine = ""
+            bulletin = self.bulletin
+
+            # Cas special, il faut aller chercher la prochaine ligne pleine
+            for ligne in bulletin[1:]:
+                premiereLignePleine = ligne
+                if len(premiereLignePleine) > 1: break
+
+            print " ********************* header = ", bulletin[0][0:7]
+            # Embranchement selon les differents types de bulletins
+            if bulletin[0][0:2] == "SA":
+                if bulletin[1].split()[0] in ["METAR","LWIS"]:
+                    station = premiereLignePleine.split()[1]
+                else:
+                    station = premiereLignePleine.split()[0]
+
+            elif bulletin[0][0:2] == "SP":
+                station = premiereLignePleine.split()[1]
+
+            elif bulletin[0][0:2] in ["SI","SM"]:
+                station = premiereLignePleine.split()[0]
+
+            elif bulletin[0][0:6] in "SRCN40":
+                station = premiereLignePleine.split()[0]
+
+            elif bulletin[0][0:2] in ["FC","FT"]:
+                if premiereLignePleine.split()[1] == "AMD":
+                    station = premiereLignePleine.split()[2]
+                else:
+                    station = premiereLignePleine.split()[1]
+
+            elif bulletin[0][0:2] in ["UE","UG","UK","UL","UQ","US"]:
+                station = premiereLignePleine.split()[2]
+
+            elif bulletin[0][0:2] in ["RA","MA","CA"]:
+                station = premiereLignePleine.split()[0].split('/')[0]
+                if station[0] == '?': station = station[1:]
+
+        except Exception:
+            station = None
+
+        if station != None and station[-1] == '=': station = station[:-1]
+
+        return station
+
     def getType(self):
         """getType() -> type
 
@@ -446,3 +507,8 @@ class bulletin:
             del parts[5:]
             self.setHeader(' '.join(parts))
             return
+
+
+if __name__ == '__main__':
+ pass
+		               
