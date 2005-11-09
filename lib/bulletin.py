@@ -264,7 +264,7 @@ class bulletin:
            Date:        Octobre 2004
         """
 
-        print(" ********************* BULLETIN GET STATION APPELE ")
+        #print(" ********************* BULLETIN GET STATION APPELE ")
         station = None
         try:
             premiereLignePleine = ""
@@ -275,7 +275,7 @@ class bulletin:
                 premiereLignePleine = ligne
                 if len(premiereLignePleine) > 1: break
 
-            print " ********************* header = ", bulletin[0][0:7]
+            #print " ********************* header = ", bulletin[0][0:7]
             # Embranchement selon les differents types de bulletins
             if bulletin[0][0:2] == "SA":
                 if bulletin[1].split()[0] in ["METAR","LWIS"]:
