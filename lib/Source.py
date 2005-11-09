@@ -15,6 +15,9 @@
 
 """
 import sys, os, os.path, time, string, commands, re, signal, fnmatch
+
+sys.path.insert(1,sys.path[0] + '/../lib/importedLibs')
+
 import PXPaths
 from Logger import Logger
 from Ingestor import Ingestor
@@ -45,8 +48,10 @@ class Source(object):
 
         # Attributes coming from the configuration file of the source
         #self.extension = 'nws-grib:-CCCC:-TT:-CIRCUIT:Direct'  # Extension to be added to the ingest name
+        self.debug = False                        # If we want sections with debug code to be executed
         self.batch = 100                          # Number of files that will be read in each pass
         self.masks = []                           # All the masks (imask and emask)
+        self.tmasks = []                          # All the transformation maks (timask, temask)
         self.extension = ':MISSING:MISSING:MISSING:MISSING:'   # Extension to be added to the ingest name
         self.type = None                                       # Must be in ['single-file', 'bulletin-file', 'am', 'wmo']
         self.port = None                                       # Port number if type is in ['am', 'wmo']
@@ -86,6 +91,7 @@ class Source(object):
 
         currentDir = '.'                # just to preserve consistency with client : unused in source for now
         currentFileOption = 'WHATFN'    # just to preserve consistency with client : unused in source for now
+        currentTransformation = 'GIFFY' # Default transformation for tmasks
 
         for line in config.readlines():
             words = line.split()
@@ -98,6 +104,9 @@ class Source(object):
                             self.extension = ':' + words[1]
                     elif words[0] == 'imask': self.masks.append((words[1], currentDir, currentFileOption))
                     elif words[0] == 'emask': self.masks.append((words[1],))
+                    elif words[0] == 'timask': self.tmasks.append((words[1], currentTransformation))
+                    elif words[0] == 'temask': self.tmasks.append((words[1],))
+                    elif words[0] == 'transformation': currentTransformation = words[1]
                     elif words[0] == 'batch': self.batch = int(words[1])
                     elif words[0] == 'type': self.type = words[1]
                     elif words[0] == 'port': self.port = int(words[1])
@@ -105,6 +114,7 @@ class Source(object):
                     elif words[0] == 'patternMatching': self.patternMatching =  isTrue(words[1])
                     elif words[0] == 'clientsPatternMatching': self.clientsPatternMatching =  isTrue(words[1])
                     elif words[0] == 'validation' and isTrue(words[1]): self.validation = True
+                    elif words[0] == 'debug' and isTrue(words[1]): self.debug = True
                     elif words[0] == 'mtime': self.mtime = int(words[1])
                     elif words[0] == 'sorter': self.sorter = words[1]
                     elif words[0] == 'arrival': self.mapEnteteDelai = {words[1]:(int(words[2]), int(words[3]))}
@@ -117,6 +127,15 @@ class Source(object):
         if len(self.masks) > 0 : self.patternMatching = True
 
         self.logger.debug("Configuration file of source  %s has been read" % (self.name))
+
+    def getTransformation(self, filename):
+        for mask in self.tmasks:
+            if fnmatch.fnmatch(filename, mask[0]):
+                try:
+                    return mask[1]
+                except:
+                    return None
+        return None
 
     # IMPORTANT NOTE HERE FALLBACK BEHAVIOR IS TO ACCEPT THE FILE
     # THIS IS THE OPPOSITE OF THE CLIENT WHERE THE FALLBACK IS REJECT
@@ -164,8 +183,18 @@ class Source(object):
 
         print("==========================================================================")
 
+        print("******************************************")
+        print("*       Source T-Masks                     *")
+        print("******************************************")
+
+        for mask in self.tmasks:
+            print mask
+
+        print("==========================================================================")
+
 if __name__ == '__main__':
 
+    """
     source=  Source('tutu')
     #source.readConfig()
     source.printInfos(source)
@@ -176,6 +205,7 @@ if __name__ == '__main__':
     print source.ingestor.getDBName(source.ingestor.getIngestName('toto:titi:tata'))
     print source.ingestor.isMatching(source.ingestor.clients['amis'], source.ingestor.getIngestName('toto:titi:tata'))
     print source.ingestor.getMatchingClientNamesFromMasks(source.ingestor.getIngestName('toto:titi:tata'))
+    """
     """
     for filename in os.listdir(PXPaths.RX_CONF):
         if filename[-5:] != '.conf': 
@@ -188,3 +218,8 @@ if __name__ == '__main__':
             print source.ingestor.getIngestName('toto')
 
     """
+    source = Source('wmo')
+    if source.getTransformation('ALLOxxxxBonjour'): print source.getTransformation('ALLOxxxxBonjour')
+    if source.getTransformation('TUTU'): print source.getTransformation('TUTU')
+    if source.getTransformation('*Salut*Bonjour'): print source.getTransformation('*Salut*Bonjour')
+    
