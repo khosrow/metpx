@@ -41,12 +41,12 @@ class SenderFTP(object):
 
 
     def dirPattern(self,file,basename,destDir,destName) :
-    """
-    MG 20051101
-    TODO  this could be improved... bulletins could be read in and info extracted from there...
-    it was decided to take possible dir info from the basename
-    ex of basename = SNCN19_CWAO_011340_0001:test:CWAO:SN:3:Direct:20051101134041
-    """
+        """
+        MG 20051101
+        TODO  this could be improved... bulletins could be read in and info extracted from there...
+        it was decided to take possible dir info from the basename
+        ex of basename = SNCN19_CWAO_011340_0001:test:CWAO:SN:3:Direct:20051101134041
+        """
 
         BN = basename.split(":")
         EN = BN[0].split("_")
@@ -67,10 +67,10 @@ class SenderFTP(object):
 
 
     def matchPattern(self,BN,EN,keywd,defval) :
-    """
-    MG 20051101
-    Matching keyword with different patterns
-    """
+        """
+        MG 20051101
+        Matching keyword with different patterns
+        """
 
         if   keywd[:4] == "{T1}"    : return (EN[0])[0:1]   + keywd[4:]
         elif keywd[:4] == "{T2}"    : return (EN[0])[1:2]   + keywd[4:]
@@ -93,11 +93,11 @@ class SenderFTP(object):
 
 
     def dirMkdir(self,destDir) :
-    """
-    MG 20051101
-    No error check intentionnal... if we were not succesfull than
-    the error will be detected when we will STOR
-    """
+        """
+        MG 20051101
+        No error check intentionnal... if we were not succesfull than
+        the error will be detected when we will STOR
+        """
         self.ftp.cwd(self.originalDir)
 
         try   :
