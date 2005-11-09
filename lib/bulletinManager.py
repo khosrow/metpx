@@ -193,14 +193,23 @@ class bulletinManager:
 
             # MG use filename for Pattern File Matching from source ...  (As Proposed by DL )
             if not self.source.fileMatchMask(nomFichier) :
-               self.logger.warning("Fichier Bulletin rejete par rx mask : " + nomFichier)
-               os.unlink(tempNom)
-               return
+                self.logger.warning("Bulletin file rejected because of RX mask: " + nomFichier)
+                """
+                transfo = self.source.getTransformation(nomFichier)
+                if transfo:
+                    newNames = Transformations.transfo(tempNom)
+
+                    for name in newNames:
+                        self.source.ingestor.ingest()
+                """
+
+                os.unlink(tempNom)
+                return
 
             if self.mapCircuits.has_key(entete):
-               clist = self.mapCircuits[entete]['routing_groups']
+                clist = self.mapCircuits[entete]['routing_groups']
             else:
-               clist = []
+                clist = []
 
             if self.source.clientsPatternMatching:
                 clist = self.source.ingestor.getMatchingClientNamesFromMasks(nomFichier, clist)
