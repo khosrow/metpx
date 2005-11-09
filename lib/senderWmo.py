@@ -94,7 +94,8 @@ class senderWmo(gateway.gateway):
         return self.reader.getFilesContent(self.client.batch)
 
     def write(self,data):
-        self.logger.info("%d nouveaux bulletins sont envoyes",len(data))
+        #self.logger.info("%d nouveaux bulletins sont envoyes",len(data))
+        self.logger.info("%d new bulletins will be sent", len(data))
 
         for index in range(len(data)):
             # If data[index] is already in cache, we don't send it
@@ -104,7 +105,7 @@ class senderWmo(gateway.gateway):
                     self.logger.info("%s has been erased (was cached)", os.path.basename(self.reader.sortedFiles[index]))
                 except OSError, e:
                     (type, value, tb) = sys.exc_info()
-                    self.logger.info("Unable to unlink %s ! Type: %s, Value: %s"
+                    self.logger.error("Unable to unlink %s ! Type: %s, Value: %s"
                                       % (self.reader.sortedFiles[index], type, value))
                 continue
             
@@ -118,12 +119,12 @@ class senderWmo(gateway.gateway):
                 #si le bulletin a ete envoye correctement, le fichier est efface
                 if succes:
                     self.totBytes += nbBytesSent
-                    self.logger.info("(%5d Bytes) Bulletin %s livré ", nbBytesSent, os.path.basename(self.reader.sortedFiles[index]))
-                    #self.logger.info("Bulletin %s livré ", os.path.basename(self.reader.sortedFiles[index]) )
+                    #self.logger.info("(%5d Bytes) Bulletin %s livré ", nbBytesSent, os.path.basename(self.reader.sortedFiles[index]))
+                    self.logger.info("(%5d Bytes) Bulletin %s delivered" % (nbBytesSent, os.path.basename(self.reader.sortedFiles[index])))
                     self.unBulletinManagerWmo.effacerFichier(self.reader.sortedFiles[index])
-                    self.logger.debug("senderWmo.write(..): Effacage de " + self.reader.sortedFiles[index])
+                    self.logger.debug("%s has been erased" % self.reader.sortedFiles[index])
                 else:
-                    self.logger.info("%s: probleme d'envoi ", os.path.basename(self.reader.sortedFiles[index]))
+                    self.logger.error("%s: Sending problem" % os.path.basename(self.reader.sortedFiles[index]))
 
             except Exception, e:
             # e==104 or e==110 or e==32 or e==107 => connexion rompue
@@ -139,5 +140,5 @@ class senderWmo(gateway.gateway):
         self.logger.info("Caching stats: %s => %s" % (str(stats), percentage))
 
         # Log infos about tx speed 
-        if (self.totBytes > 108000):
+        if (self.totBytes > 1000000):
             self.logger.info(self.printSpeed() + " Bytes/sec")

@@ -14,7 +14,7 @@
 #############################################################################################
 
 """
-import sys, os, os.path, time
+import sys, os, os.path, time, stat
 import PXPaths
 from URLParser import URLParser
 from Logger import Logger
@@ -39,12 +39,14 @@ class SenderFTP(object):
         if self.client.protocol == 'ftp':
             self.ftp = self.ftpConnect()
 
-#   MG 20051101
-#   TODO  this could be improved... bulletins could be read in and info extracted from there...
-#   it was decided to take possible dir info from the basename
-#   ex of basename = SNCN19_CWAO_011340_0001:test:CWAO:SN:3:Direct:20051101134041
 
     def dirPattern(self,file,basename,destDir,destName) :
+    """
+    MG 20051101
+    TODO  this could be improved... bulletins could be read in and info extracted from there...
+    it was decided to take possible dir info from the basename
+    ex of basename = SNCN19_CWAO_011340_0001:test:CWAO:SN:3:Direct:20051101134041
+    """
 
         BN = basename.split(":")
         EN = BN[0].split("_")
@@ -63,10 +65,12 @@ class SenderFTP(object):
 
         return ndestDir
 
-#   MG 20051101
-#   Matching keyword with different patterns
 
     def matchPattern(self,BN,EN,keywd,defval) :
+    """
+    MG 20051101
+    Matching keyword with different patterns
+    """
 
         if   keywd[:4] == "{T1}"    : return (EN[0])[0:1]   + keywd[4:]
         elif keywd[:4] == "{T2}"    : return (EN[0])[1:2]   + keywd[4:]
@@ -87,11 +91,13 @@ class SenderFTP(object):
 
         return defval
 
-#   MG 20051101
-#   No error check intentionnal... if we were not succesfull than
-#   the error will be detected when we will STOR
 
     def dirMkdir(self,destDir) :
+    """
+    MG 20051101
+    No error check intentionnal... if we were not succesfull than
+    the error will be detected when we will STOR
+    """
         self.ftp.cwd(self.originalDir)
 
         try   :
@@ -134,6 +140,7 @@ class SenderFTP(object):
     def send(self, files):
         currentFTPDir = ''
         for file in files:
+            nbBytes = os.stat(file)[stat.ST_SIZE] 
             basename = os.path.basename(file)
             destName, destDir = self.client.getDestInfos(basename)
 
@@ -148,7 +155,7 @@ class SenderFTP(object):
                     try:
                         if self.client.dir_mkdir == True and not os.path.isdir(destDir) : os.makedirs(destDir)
                         os.rename(file, destDir + '/' + destName)
-                        self.logger.info("File %s delivered to %s://%s@%s%s%s" % (file, self.client.protocol, self.client.user, self.client.host, '/' + destDir + '/', destName))
+                        self.logger.info("(%i Bytes) File %s delivered to %s://%s@%s%s%s" % (nbBytes, file, self.client.protocol, self.client.user, self.client.host, '/' + destDir + '/', destName))
 
                     except:
                         self.logger.error("Unable to do move operation to: %s" % (destDir + '/' + destName))
@@ -186,10 +193,10 @@ class SenderFTP(object):
                             fileObject.close()
                             self.ftp.voidcmd('SITE CHMOD ' + str(oct(self.client.chmod)) + ' ' + destName)
                         os.unlink(file)
-                        self.logger.info("File %s delivered to %s://%s@%s%s%s" % (file, self.client.protocol, self.client.user, self.client.host, '/' + destDir + '/', destName))
+                        self.logger.info("(%i Bytes) File %s delivered to %s://%s@%s%s%s" % (nbBytes, file, self.client.protocol, self.client.user, self.client.host, '/' + destDir + '/', destName))
                     except:
                         (type, value, tb) = sys.exc_info()
-                        self.logger.error("Unable to delivered to %s://@%s%s%s, Type: %s, Value: %s" % 
+                        self.logger.error("Unable to deliver to %s://@%s%s%s, Type: %s, Value: %s" % 
                                                     (self.client.protocol, '/' + self.client.host, destDir + '/', destName, type, value))
                         time.sleep(1)
                         

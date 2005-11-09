@@ -94,7 +94,8 @@ class senderAm(gateway.gateway):
         return self.reader.getFilesContent(self.client.batch)
 
     def write(self,data):
-        self.logger.debug("%d nouveaux bulletins seront envoyes",len(data))
+        #self.logger.debug("%d nouveaux bulletins seront envoyes",len(data))
+        self.logger.info("%d new bulletins will be sent", len(data))
 
         for index in range(len(data)):
             # If data[index] is already in cache, we don't send it
@@ -118,12 +119,13 @@ class senderAm(gateway.gateway):
                 #si le bulletin a ete envoye correctement, le fichier est efface
                 if succes:
                     self.totBytes += nbBytesSent
-                    self.logger.info("(%5d Bytes) Bulletin %s  livré ", nbBytesSent, os.path.basename(self.reader.sortedFiles[index]))
-                    #self.logger.info("Bulletin %s  livré ", self.reader.sortedFiles[index])
+                    #self.logger.info("(%5d Bytes) Bulletin %s  livré ", nbBytesSent, os.path.basename(self.reader.sortedFiles[index]))
+                    self.logger.info("(%5d Bytes) Bulletin %s  delivered" % (nbBytesSent, os.path.basename(self.reader.sortedFiles[index])))
                     self.unBulletinManagerAm.effacerFichier(self.reader.sortedFiles[index])
-                    self.logger.debug("senderAm.write(..): Effacage de " + self.reader.sortedFiles[index])
+                    #self.logger.debug("senderAm.write(..): Effacage de " + self.reader.sortedFiles[index])
+                    self.logger.debug("%s has been erased" % self.reader.sortedFiles[index])
                 else:
-                    self.logger.info("bulletin %s: probleme d'envoi ", self.reader.sortedFiles[index])
+                    self.logger.info("%s: Sending problem" % self.reader.sortedFiles[index])
 
             except Exception, e:
             # e==104 or e==110 or e==32 or e==107 => connexion rompue
@@ -139,5 +141,5 @@ class senderAm(gateway.gateway):
         self.logger.info("Caching stats: %s => %s" % (str(stats), percentage))
 
         # Log infos about tx speed
-        if (self.totBytes > 10):
+        if (self.totBytes > 1000000):
             self.logger.info(self.printSpeed() + " Bytes/sec")

@@ -104,7 +104,7 @@ class senderAMIS:
                    self.logger.info("%s has been erased (was cached)", os.path.basename(self.reader.sortedFiles[index]))
                 except OSError, e:
                    (type, value, tb) = sys.exc_info()
-                   self.logger.info("Unable to unlink %s ! Type: %s, Value: %s" 
+                   self.logger.error("Unable to unlink %s ! Type: %s, Value: %s" 
                                         % (self.reader.sortedFiles[index], type, value))
                 continue
 
@@ -117,13 +117,14 @@ class senderAMIS:
                nbBytesToSend = len(bullAMIS)
                self.totBytes += nbBytesSent
                #print self.totBytes
-            self.logger.info("(%5d Bytes) Bulletin %s livré", nbBytes, os.path.basename(self.reader.sortedFiles[index]))
+            #self.logger.info("(%5d Bytes) Bulletin %s livré", nbBytes, os.path.basename(self.reader.sortedFiles[index]))
+            self.logger.info("(%5d Bytes) Bulletin %s delivered" % (nbBytes, os.path.basename(self.reader.sortedFiles[index])))
             try:
                os.unlink(self.reader.sortedFiles[index])
                self.logger.debug("%s has been erased", os.path.basename(self.reader.sortedFiles[index]))
             except OSError, e:
                (type, value, tb) = sys.exc_info()
-               self.logger.info("Unable to unlink %s ! Type: %s, Value: %s" % (self.reader.sortedFiles[index], type, value))
+               self.logger.error("Unable to unlink %s ! Type: %s, Value: %s" % (self.reader.sortedFiles[index], type, value))
          #self.logger.info("Caching stats: %s " % str(self.cacheManager.getStats()))
          (stats, cached, total) = self.cacheManager.getStats()
          if total:
