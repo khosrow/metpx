@@ -12,12 +12,8 @@
 #
 #############################################################################################
 
-1) Devrait mettre la possibilite de router le data socket, non seulement avec le fichier 
-header2client.conf mais aussi avec les masks des senders. Ca devrait ralentir les sources, mais
-augmenter la rapidite des clients. Possibilite de desactiver cette fonction.
-
 """
-import sys, os, os.path, string, fnmatch, time, signal
+import sys, os, os.path, string, fnmatch, time, signal, stat
 import PXPaths
 from PXManager import PXManager
 from Client import Client
@@ -138,7 +134,7 @@ class Ingestor(object):
         return matchingClientNames
 
     def ingest(self, receptionName, ingestName, clientNames):
-        self.logger.info("Reception Name: %s" % receptionName)
+        self.logger.debug("Reception Name: %s" % receptionName)
         dbName = self.getDBName(ingestName)
 
         if dbName == '':
@@ -148,25 +144,29 @@ class Ingestor(object):
         self.createDir(os.path.dirname(dbName), self.dbDirsCache)
         os.link(receptionName, dbName)
 
-        self.logger.debug("DBDirsCache: %s" % self.dbDirsCache.cache)
-        stats, cached, total = self.dbDirsCache.getStats()
-        if total:
-            percentage = "%2.2f %% of the last %i requests were cached" % (cached/total * 100,  total)
-        else:
-            percentage = "No entries in the cache"
-        self.logger.debug("DB Caching stats: %s => %s" % (str(stats), percentage))
+        nbBytes = os.stat(receptionName)[stat.ST_SIZE]
+
+        if self.source.debug:
+            self.logger.info("DBDirsCache: %s" % self.dbDirsCache.cache)
+            stats, cached, total = self.dbDirsCache.getStats()
+            if total:
+                percentage = "%2.2f %% of the last %i requests were cached" % (cached/total * 100,  total)
+            else:
+                percentage = "No entries in the cache"
+            self.logger.info("DB Caching stats: %s => %s" % (str(stats), percentage))
 
 
-        self.logger.debug("ClientDirsCache: %s" % self.clientDirsCache.cache)
-        stats, cached, total = self.clientDirsCache.getStats()
-        if total:
-             percentage = "%2.2f %% of the last %i requests were cached" % (cached/total * 100,  total)
-        else:
-             percentage = "No entries in the cache"
-        self.logger.debug("Client Caching stats: %s => %s" % (str(stats), percentage))
+            self.logger.debug("ClientDirsCache: %s" % self.clientDirsCache.cache)
+            stats, cached, total = self.clientDirsCache.getStats()
+            if total:
+                percentage = "%2.2f %% of the last %i requests were cached" % (cached/total * 100,  total)
+            else:
+                percentage = "No entries in the cache"
+            self.logger.debug("Client Caching stats: %s => %s" % (str(stats), percentage))
 
-        self.logger.info("Ingestion Name: %s" % ingestName)
-        self.logger.info("DB Name: %s" % dbName)
+            self.logger.info("Ingestion Name: %s" % ingestName)
+            
+        self.logger.info("[%i Bytes] Ingested in DB as %s" % (nbBytes, dbName))
 
         # Problem bulletins are databased, but not sent to clients
         if ingestName.find("PROBLEM_BULLETIN") is not -1:
@@ -189,8 +189,6 @@ class Ingestor(object):
     def ingestSingleFile(self, igniter):
         from DiskReader import DiskReader
 
-        # Ajoute self.source a la fin du DiskReader MG (As proposed by DL)
-
         reader = DiskReader(self.ingestDir, self.source.batch, self.source.validation, self.source.patternMatching,
                             self.source.mtime, False, self.source.logger, self.source.sorter, self.source)
 
@@ -200,7 +198,6 @@ class Ingestor(object):
                 # and reread all configuration file for the clients (all this in __init__)
                 self.source.__init__(self.source.name, self.source.logger)
 
-                # Ajoute self.source a la fin du DiskReader MG (As proposed by DL)
                 reader = DiskReader(self.ingestDir, self.source.batch, self.source.validation, self.source.patternMatching,
                                     self.source.mtime, False, self.source.logger, self.source.sorter, self.source)
                 self.logger.info("Receiver has been reloaded")
@@ -212,7 +209,7 @@ class Ingestor(object):
                 for file in sortedFiles:
                     ingestName = self.getIngestName(os.path.basename(file)) 
                     matchingClients = self.getMatchingClientNamesFromMasks(ingestName, self.clientNames)
-                    self.logger.info("Matching (from patterns) client names: %s" % matchingClients)
+                    self.logger.debug("Matching (from patterns) client names: %s" % matchingClients)
                     self.ingest(file, ingestName, matchingClients)
                     os.unlink(file)
             else:
@@ -268,12 +265,12 @@ class Ingestor(object):
                 time.sleep(1)
                 continue
             else:
-                self.logger.info("%d new bulletins will be ingested", len(data))
+                self.logger.info("%d bulletins will be ingested", len(data))
 
             # Write (and name correctly) the bulletins to disk, erase them after
             for index in range(len(data)):
-                nb_bytes = len(data[index])
-                self.logger.info("Lecture de %s: %d bytes" % (reader.sortedFiles[index], nb_bytes))
+                #nb_bytes = len(data[index])
+                #self.logger.info("Lecture de %s: %d bytes" % (reader.sortedFiles[index], nb_bytes))
                 bullManager.writeBulletinToDisk(data[index], True, True)
                 try:
                     os.unlink(reader.sortedFiles[index])
