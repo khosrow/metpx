@@ -59,7 +59,7 @@ class Source(object):
         self.addSMHeader = False                               #
         self.use_pds = False                                   #
         self.validation = False                                # Validate the filename (ex: prio an timestamp)
-        self.patternMatching = False                           # No pattern matching
+        self.patternMatching = True                            # No pattern matching
         self.clientsPatternMatching = True                     # No clients pattern matching
         self.sorter = None                                     # No sorting on the filnames
         self.mtime = 0                                         # Integer indicating the number of seconds a file must not have 
@@ -137,18 +137,11 @@ class Source(object):
                     return None
         return None
 
+    def fileMatchMask(self, filename):
     # IMPORTANT NOTE HERE FALLBACK BEHAVIOR IS TO ACCEPT THE FILE
     # THIS IS THE OPPOSITE OF THE CLIENT WHERE THE FALLBACK IS REJECT
 
-    def fileMatchMask(self, filename):
-
-    # fallback behavior 
-
-        if not self.patternMatching : return True
-        if len(self.masks) == 0     : return True
-
         # check against the masks
-
         for mask in self.masks:
             if fnmatch.fnmatch(filename, mask[0]):
                try:
@@ -157,7 +150,6 @@ class Source(object):
                     return False
 
         # fallback behavior 
-
         return True
 
     def printInfos(self, source):

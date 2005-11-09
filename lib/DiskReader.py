@@ -107,23 +107,20 @@ class DiskReader:
         Verify if basename is matching one mask of a client
         """
 
-        if self.client == None : return True
+        if self.client == None: return True
 
-        if isinstance(self.client,Source.Source) :
-	   matchmask = self.client.fileMatchMask(basename)
-	   if matchmask == False : self.logger.warning("Fichier rejete par rx mask : " + basename )
-	   return matchmask
+        if isinstance(self.client, Source.Source):
+            return self.client.fileMatchMask(basename), 'RX'
 
-        if isinstance(self.client,Client.Client) :
-
+        elif isinstance(self.client, Client.Client):
            for mask in self.client.masks:
                if fnmatch.fnmatch(basename, mask[0]):
                   try:
-                       if mask[2]: return True
+                       if mask[2]: return True, 'TX'
                   except:
-                       return False
+                       return False, 'TX'
 
-        return False
+        return False, 'TX'
 
     def _getFilesList(self):
         """
@@ -186,10 +183,11 @@ class DiskReader:
                 # If we use pattern matching
                 if self.patternMatching:
                     # Does the filename match a pattern ?
-                    if not self._matchPattern(basename):
+                    match, type = self._matchPattern(basename)
+                    if not match:
                         os.unlink(file)
                         if self.logger is not None:
-                            self.logger.info("No pattern matching: " + file + " has been unlinked!")
+                            self.logger.info("No pattern (%s) matching: %s has been unlinked!" % (type, file))
                         continue
 
                 # We don't want to exceed the batch value 
