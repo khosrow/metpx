@@ -166,7 +166,7 @@ class Ingestor(object):
 
             self.logger.info("Ingestion Name: %s" % ingestName)
             
-        self.logger.info("[%i Bytes] Ingested in DB as %s" % (nbBytes, dbName))
+        self.logger.info("(%i Bytes) Ingested in DB as %s" % (nbBytes, dbName))
 
         # Problem bulletins are databased, but not sent to clients
         if ingestName.find("PROBLEM_BULLETIN") is not -1:
