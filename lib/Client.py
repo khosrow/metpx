@@ -38,6 +38,7 @@ class Client(object):
         else:
             self.logger = logger
         self.logger.info("Initialisation of client %s" % self.name)
+        self.debug = False                        # If we want sections with debug code to be executed
         self.host = 'localhost'                   # Remote host address (or ip) where to send files
         self.type = 'single-file'                 # Must be in ['single-file', 'bulletin-file', 'file', 'am', 'wmo', 'amis']
         self.protocol = None                      # First thing in the url: ftp, file, am, wmo, amis
@@ -118,6 +119,7 @@ class Client(object):
                     elif words[0] == 'user': self.user = words[1]
                     elif words[0] == 'password': self.passwd = words[1]
                     elif words[0] == 'batch': self.batch = int(words[1])
+                    elif words[0] == 'debug' and isTrue(words[1]): self.debug = True
                     elif words[0] == 'timeout': self.timeout = int(words[1])
                     elif words[0] == 'chmod': self.chmod = stringToOctal(words[1])
                     elif words[0] == 'ftp_mode': self.ftp_mode = words[1]
