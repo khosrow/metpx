@@ -192,8 +192,10 @@ class bulletinManager:
             entete = ' '.join(unBulletin.getHeader().split()[:2])
 
             # MG use filename for Pattern File Matching from source ...  (As Proposed by DL )
-            if not self.source.fileMatchMask(nomFichier) :
-                self.logger.warning("Bulletin file rejected because of RX mask: " + nomFichier)
+            if self.source.patternMatching:
+                if not self.source.fileMatchMask(nomFichier) :
+                    self.logger.warning("Bulletin file rejected because of RX mask: " + nomFichier)
+
                 """
                 transfo = self.source.getTransformation(nomFichier)
                 if transfo:
@@ -203,8 +205,8 @@ class bulletinManager:
                         self.source.ingestor.ingest()
                 """
 
-                os.unlink(tempNom)
-                return
+                    os.unlink(tempNom)
+                    return
 
             if self.mapCircuits.has_key(entete):
                 clist = self.mapCircuits[entete]['routing_groups']
