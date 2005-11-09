@@ -195,6 +195,8 @@ class bulletinManager:
             if self.source.patternMatching:
                 if not self.source.fileMatchMask(nomFichier) :
                     self.logger.warning("Bulletin file rejected because of RX mask: " + nomFichier)
+                    os.unlink(tempNom)
+                    return
 
                 """
                 transfo = self.source.getTransformation(nomFichier)
@@ -205,8 +207,6 @@ class bulletinManager:
                         self.source.ingestor.ingest()
                 """
 
-                    os.unlink(tempNom)
-                    return
 
             if self.mapCircuits.has_key(entete):
                 clist = self.mapCircuits[entete]['routing_groups']
