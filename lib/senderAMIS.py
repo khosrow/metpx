@@ -125,21 +125,20 @@ class senderAMIS:
             except OSError, e:
                (type, value, tb) = sys.exc_info()
                self.logger.error("Unable to unlink %s ! Type: %s, Value: %s" % (self.reader.sortedFiles[index], type, value))
-         #self.logger.info("Caching stats: %s " % str(self.cacheManager.getStats()))
+      else:
+         time.sleep(1)
+
+      if (self.totBytes > 108000):
+         self.logger.info(self.printSpeed() + " Bytes/sec")
+         # Log infos about caching
          (stats, cached, total) = self.cacheManager.getStats()
          if total:
             percentage = "%2.2f %% of the last %i requests were cached (implied %i files were deleted)" % (cached/total * 100,  total, cached)
          else:
             percentage = "No entries in the cache"
          self.logger.info("Caching stats: %s => %s" % (str(stats), percentage))
-
          #self.logger.info("Cache: %s " % str(self.cacheManager.cache))
 
-      else:
-         time.sleep(1)
-
-      if (self.totBytes > 108000):
-         self.logger.info(self.printSpeed() + " Bytes/sec")
          #result = open('/apps/px/result', 'w')
          #result.write(self.printSpeed())
          #sys.exit()

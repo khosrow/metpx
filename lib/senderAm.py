@@ -132,14 +132,14 @@ class senderAm(gateway.gateway):
                 (type, value, tb) = sys.exc_info()
                 self.logger.error("Type: %s, Value: %s" % (type, value))
 
-        # Log infos about caching
-        (stats, cached, total) = self.cacheManager.getStats()
-        if total:
-            percentage = "%2.2f %% of the last %i requests were cached (implied %i files were deleted)" % (cached/total * 100,  total, cached)
-        else:
-            percentage = "No entries in the cache"
-        self.logger.info("Caching stats: %s => %s" % (str(stats), percentage))
-
         # Log infos about tx speed
         if (self.totBytes > 1000000):
             self.logger.info(self.printSpeed() + " Bytes/sec")
+            # Log infos about caching
+            (stats, cached, total) = self.cacheManager.getStats()
+            if total:
+                percentage = "%2.2f %% of the last %i requests were cached (implied %i files were deleted)" % (cached/total * 100,  total, cached)
+            else:
+                percentage = "No entries in the cache"
+            self.logger.info("Caching stats: %s => %s" % (str(stats), percentage))
+
