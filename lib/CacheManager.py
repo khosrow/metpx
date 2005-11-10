@@ -28,14 +28,14 @@ class CacheManager(object):
         if len(self.cache) < self.maxEntries:
             self.cache[key] = [time.time(), 1]
         else:
-            #print "Was full, try TimeoutClear"
-            self.TimeoutClear()
+            #print "Was full, try timeoutClear"
+            self.timeoutClear()
             if len(self.cache) < self.maxEntries:
-                #print "TimeoutClear was sufficient"
+                #print "timeoutClear was sufficient"
                 self.cache[key] = [time.time(), 1]
             else:
                 # Remove the least recently used (LRU) item
-                #print "TimeoutClear was insufficient, we delete LRU"
+                #print "timeoutClear was insufficient, we delete LRU"
                 temp = [(item[1][0], item[0]) for item in self.cache.items()]
                 temp.sort()            
                 del self.cache[temp[0][1]]
@@ -61,9 +61,9 @@ class CacheManager(object):
     def clear(self):
         self.cache = {}
 
-    def TimeoutClear(self):
+    def timeoutClear(self):
         # Remove all the elements that are older than oldest acceptable time
-        print self.getStats()
+        #print self.getStats()
         oldestAcceptableTime = time.time() - self.timeout
         for item  in self.cache.items():
             if item[1][0] < oldestAcceptableTime:
