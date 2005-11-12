@@ -149,6 +149,8 @@ class SenderFTP(object):
                 destDir = destDir[1:]
                 if destDir == '':
                     destDirString = '/'
+                elif destDir == '/':
+                    destDirString = '//'
                 else:
                     destDirString = '/' + destDir + '/'
 
