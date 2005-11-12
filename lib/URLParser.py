@@ -71,6 +71,7 @@ class URLParser:
 if __name__ == '__main__':
 
     parser = URLParser('ftp://pds:Lred7ans@px-op.cmc.ec.gc.ca//apps/px/rxq/fromPxatx')
+    parser = URLParser('ftp://FTPonly:FTy7u8@67.46.119.154/')
     #parser = URLParser('wmo://pxatx-priv.cmc.ec.gc.ca:24901')
     #parser = URLParser('am://pxatx-priv.cmc.ec.gc.ca:24901')
     #parser = URLParser('amis://pxatx-priv.cmc.ec.gc.ca:24901')

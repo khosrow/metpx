@@ -147,6 +147,10 @@ class SenderFTP(object):
             if destName:
                 # We remove the first / (if there was only one => relative path, if there was two => absolute path)
                 destDir = destDir[1:]
+                if destDir == '':
+                    destDirString = '/'
+                else:
+                    destDirString = '/' + destDir + '/'
 
                 if self.client.dir_pattern == True :
                    destDir = self.dirPattern(file,basename,destDir,destName)
@@ -155,10 +159,10 @@ class SenderFTP(object):
                     try:
                         if self.client.dir_mkdir == True and not os.path.isdir(destDir) : os.makedirs(destDir)
                         os.rename(file, destDir + '/' + destName)
-                        self.logger.info("(%i Bytes) File %s delivered to %s://%s@%s%s%s" % (nbBytes, file, self.client.protocol, self.client.user, self.client.host, '/' + destDir + '/', destName))
+                        self.logger.info("(%i Bytes) File %s delivered to %s://%s@%s%s%s" % (nbBytes, file, self.client.protocol, self.client.user, self.client.host, destDirString, destName))
 
                     except:
-                        self.logger.error("Unable to do move operation to: %s" % (destDir + '/' + destName))
+                        self.logger.error("Unable to do move operation to: %s" % (destDirString + destName))
                         time.sleep(1)
                 elif self.client.protocol == 'ftp':
                     if currentFTPDir != destDir:
@@ -191,11 +195,11 @@ class SenderFTP(object):
                             fileObject.close()
                             self.ftp.voidcmd('SITE CHMOD ' + str(oct(self.client.chmod)) + ' ' + destName)
                         os.unlink(file)
-                        self.logger.info("(%i Bytes) File %s delivered to %s://%s@%s%s%s" % (nbBytes, file, self.client.protocol, self.client.user, self.client.host, '/' + destDir + '/', destName))
+                        self.logger.info("(%i Bytes) File %s delivered to %s://%s@%s%s%s" % (nbBytes, file, self.client.protocol, self.client.user, self.client.host, destDirString, destName))
                     except:
                         (type, value, tb) = sys.exc_info()
                         self.logger.error("Unable to deliver to %s://%s@%s%s%s, Type: %s, Value: %s" % 
-                                                    (self.client.protocol, self.client.user, self.client.host, destDir + '/', destName, type, value))
+                                                    (self.client.protocol, self.client.user, self.client.host, destDirString, destName, type, value))
                         time.sleep(1)
                         
                         # FIXME: Faire des cas particuliers selon les exceptions recues
