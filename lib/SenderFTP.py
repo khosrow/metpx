@@ -162,12 +162,10 @@ class SenderFTP(object):
                         time.sleep(1)
                 elif self.client.protocol == 'ftp':
                     if currentFTPDir != destDir:
-                        cdir = False
-                        if self.client.dir_mkdir == True :
-                           cdir = self.dirMkdir(destDir)
-                        if cdir :
-                           currentFTPDir = destDir
-                        else    :
+                        if self.client.dir_mkdir:
+                            if self.dirMkdir(destDir):
+                                currentFTPDir = destDir
+                        else:
                            try:
                                self.ftp.cwd(self.originalDir)
                                self.ftp.cwd(destDir)
@@ -196,8 +194,8 @@ class SenderFTP(object):
                         self.logger.info("(%i Bytes) File %s delivered to %s://%s@%s%s%s" % (nbBytes, file, self.client.protocol, self.client.user, self.client.host, '/' + destDir + '/', destName))
                     except:
                         (type, value, tb) = sys.exc_info()
-                        self.logger.error("Unable to deliver to %s://@%s%s%s, Type: %s, Value: %s" % 
-                                                    (self.client.protocol, '/' + self.client.host, destDir + '/', destName, type, value))
+                        self.logger.error("Unable to deliver to %s://%s@%s%s%s, Type: %s, Value: %s" % 
+                                                    (self.client.protocol, self.client.user, self.client.host, destDir + '/', destName, type, value))
                         time.sleep(1)
                         
                         # FIXME: Faire des cas particuliers selon les exceptions recues
