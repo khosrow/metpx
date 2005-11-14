@@ -88,13 +88,6 @@ class socketManagerAm(socketManager.socketManager):
         tmp = bulletin.getBulletin()
         size = struct.calcsize('80s')
 
-        """
-        Commented by DL (2005-02-24)
-        header = tmp[0:size]
-        listeHeader=[]
-        for i in header:
-            listeHeader.append(i)
-        """
         nulList = [chr(curses.ascii.NUL) for x in range(size)]
         header = list(tmp[0:size])
 
