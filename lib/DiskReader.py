@@ -107,20 +107,20 @@ class DiskReader:
         Verify if basename is matching one mask of a client
         """
 
-        if self.client == None: return True
+        if self.client == None: return (True, 'RX')
 
         if isinstance(self.client, Source.Source):
-            return self.client.fileMatchMask(basename), 'RX'
+            return (self.client.fileMatchMask(basename), 'RX')
 
         elif isinstance(self.client, Client.Client):
            for mask in self.client.masks:
                if fnmatch.fnmatch(basename, mask[0]):
                   try:
-                       if mask[2]: return True, 'TX'
+                       if mask[2]: return (True, 'TX')
                   except:
-                       return False, 'TX'
+                       return (False, 'TX')
 
-        return False, 'TX'
+        return (False, 'TX')
 
     def _getFilesList(self):
         """
