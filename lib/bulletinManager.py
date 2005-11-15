@@ -4,7 +4,10 @@
    Auteur:      Louis-Philippe Thériault
    Date:        Octobre 2004
 """
-import math, string, os, bulletinPlain, traceback, sys, time, fet
+import math, string, os, bulletinPlain, traceback, sys, time
+import PXPaths
+
+PXPaths.normalPaths()
 
 __version__ = '2.0'
 
@@ -83,7 +86,8 @@ class bulletinManager:
             extension=':',
             pathFichierCircuit=None,
             mapEnteteDelai=None,
-            use_pds=0):
+            use_pds=0,
+            source=None):
 
         self.logger = logger
         self.pathSource = self.__normalizePath(pathSource)
@@ -96,6 +100,7 @@ class bulletinManager:
         self.extension = extension
         self.lineSeparator = lineSeparator
         self.mapEnteteDelai = mapEnteteDelai
+        self.source = source
 
         #map du contenu de bulletins en format brut
         #associe a leur arborescence absolue
@@ -109,7 +114,7 @@ class bulletinManager:
         try:
             os.remove(nomFichier)
         except:
-            self.logger.writeLog(self.logger.ERROR,"(BulletinManager.effacerFichier(): Erreur d'effacement d'un bulletin)")
+            self.logger.error("(BulletinManager.effacerFichier(): Erreur d'effacement d'un bulletin)")
             raise
 
     def writeBulletinToDisk(self,unRawBulletin,compteur=True,includeError=True):
@@ -164,8 +169,8 @@ class bulletinManager:
         except (OSError,TypeError), e:
             # Le nom du fichier est invalide, génération d'un nouveau nom
 
-            self.logger.writeLog(self.logger.WARNING,"Manipulation du fichier impossible! (Ecriture avec un nom non standard)")
-            self.logger.writeLog(self.logger.EXCEPTION,"Exception: " + ''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
+            self.logger.warning("Manipulation du fichier impossible! (Ecriture avec un nom non standard)")
+            self.logger.error("Exception: " + ''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
 
             nomFichier = self.getFileName(unBulletin,error=True,compteur=compteur)
             tempNom = self.pathTemp + nomFichier
@@ -182,18 +187,39 @@ class bulletinManager:
                 os.mkdir(pathDest, 0755)
 
             os.rename( tempNom , pathDest + nomFichier )
-            self.logger.writeLog(self.logger.INFO, "Ecriture du fichier <%s>",pathDest + nomFichier)
+            self.logger.info("Ecriture du fichier <%s>",pathDest + nomFichier)
         else:
             entete = ' '.join(unBulletin.getHeader().split()[:2])
+
+            # MG use filename for Pattern File Matching from source ...  (As Proposed by DL )
+            if self.source.patternMatching:
+                if not self.source.fileMatchMask(nomFichier) :
+                    self.logger.warning("Bulletin file rejected because of RX mask: " + nomFichier)
+                    os.unlink(tempNom)
+                    return
+
+                """
+                transfo = self.source.getTransformation(nomFichier)
+                if transfo:
+                    newNames = Transformations.transfo(tempNom)
+
+                    for name in newNames:
+                        self.source.ingestor.ingest()
+                """
+
 
             if self.mapCircuits.has_key(entete):
                 clist = self.mapCircuits[entete]['routing_groups']
             else:
                 clist = []
 
-            fet.directIngest( nomFichier, clist, tempNom, self.logger )
-            os.unlink(tempNom)
+            if self.source.clientsPatternMatching:
+                clist = self.source.ingestor.getMatchingClientNamesFromMasks(nomFichier, clist)
 
+            #fet.directIngest( nomFichier, clist, tempNom, self.logger )
+            self.source.ingestor.ingest(tempNom, nomFichier, clist)
+
+            os.unlink(tempNom)
 
 
     def __generateBulletin(self,rawBulletin):
@@ -259,7 +285,7 @@ class bulletinManager:
             return map
 
         except Exception, e:
-            self.logger.writeLog(self.logger.ERROR,"bulletinManager.readBulletinFromDisk: Erreur de chargement des bulletins: %s",str(e.args))
+            self.logger.error("bulletinManager.readBulletinFromDisk: Erreur de chargement des bulletins: %s",str(e.args))
             raise
 
     def getMapBulletinsBruts(self,listeFichiers):
@@ -305,7 +331,7 @@ class bulletinManager:
             return self.mapBulletinsBruts
 
         except Exception, e:
-            self.logger.writeLog(self.logger.ERROR,"bulletinManager.getMapBulletinsBruts(): Erreur de lecture des bulletins: %s",str(e.args))
+            self.logger.error("bulletinManager.getMapBulletinsBruts(): Erreur de lecture des bulletins: %s",str(e.args))
             raise
 
     def getListeFichiers(self,repertoire,listeFichiersDejaChoisis):
@@ -359,7 +385,7 @@ class bulletinManager:
             return listeFichiersChoisis
 
         except Exception, e:
-            self.logger.writeLog(self.logger.ERROR,"bulletinManager.getListeFichiers(): Liste des repertoires invalide: %s",str(e.args))
+            self.logger.error("bulletinManager.getListeFichiers(): Liste des repertoires invalide: %s",str(e.args))
             return 1
 
     def ordonnancer(self,listeRepertoires):
@@ -393,7 +419,7 @@ class bulletinManager:
             return sourceChoisie
 
         except:
-            self.logger.writeLog(self.logger.ERROR,"(Liste de repertoires invalide)")
+            self.logger.error("(Liste de repertoires invalide)")
 
     def getListeNomsFichiersAbsolus(self):
         return self.mapBulletinsBruts.keys()
@@ -445,14 +471,14 @@ class bulletinManager:
                 if strCompteur == '':
                     strCompteur = ' ' + string.zfill(self.compteur, len(str(self.maxCompteur)))
 
-                self.logger.writeLog(self.logger.WARNING,e)
+                self.logger.warning(e)
                 return ('PROBLEM_BULLETIN ' + bulletin.getHeader() + strCompteur + self.getExtension(bulletin,error=True)).replace(' ','_')
 
         elif bulletin.getError() != None and not error:
-            self.logger.writeLog( self.logger.WARNING, "Le bulletin est erronné " + bulletin.getError()[0] )
+            self.logger.warning("Le bulletin est erronné " + bulletin.getError()[0] )
             return ('PROBLEM_BULLETIN ' + bulletin.getHeader() + strCompteur + self.getExtension(bulletin,error)).replace(' ','_')
         else:
-            self.logger.writeLog(self.logger.WARNING, "L'entête n'est pas imprimable" )
+            self.logger.warning("L'entête n'est pas imprimable" )
             return ('PROBLEM_BULLETIN ' + 'UNPRINTABLE HEADER' + strCompteur + self.getExtension(bulletin,error)).replace(' ','_')
 
     def getExtension(self,bulletin,error=False):
@@ -537,13 +563,13 @@ class bulletinManager:
 
             self.initMapCircuit(pathHeader2circuit)
 
-            self.logger.writeLog(self.logger.INFO,"Succès du rechargement du fichier de Circuits")
+            self.logger.info("Succès du rechargement du fichier de Circuits")
 
         except Exception, e:
 
             self.mapCircuits = oldMapCircuits
 
-            self.logger.writeLog(self.logger.WARNING,"bulletinManager.reloadMapCircuit(): Échec du rechargement du fichier de Circuits")
+            self.logger.warning("bulletinManager.reloadMapCircuit(): Échec du rechargement du fichier de Circuits")
 
             raise
 
@@ -571,7 +597,7 @@ class bulletinManager:
 
         # Test d'existence du fichier
         try:
-            pathHeader2circuit = fet.FET_ETC + 'header2client.conf'
+            pathHeader2circuit = PXPaths.ETC + 'header2client.conf'
 
             fic = os.open( pathHeader2circuit, os.O_RDONLY )
         except Exception:
@@ -579,8 +605,9 @@ class bulletinManager:
 
         lignes = os.read(fic,os.stat(pathHeader2circuit)[6])
 
+        #self.logger.info("Validating header2client.conf, clients:" + string.join(self.source.ingestor.clientNames))
         bogus=[]
-        self.logger.writeLog( self.logger.INFO, "validating header2client.conf, clients:" + string.join(fet.clients.keys()) )
+        routable=[] # sub group of the clients, only ones for which we can route bulletins
         for ligne in lignes.splitlines():
             uneLigneSplitee = ligne.split(':')
             ahl = uneLigneSplitee[0]
@@ -592,15 +619,20 @@ class bulletinManager:
                 self.mapCircuits[ahl]['priority'] = uneLigneSplitee[2]
                 gs=[]
                 for g in uneLigneSplitee[1].split() :
-                    if g in fet.clients.keys():
+                    #if g in fet.clients.keys():
+                    if g in self.source.ingestor.clientNames:
                         gs = gs + [ g ]
+                        if g not in routable: routable.append(g)
                     else:
                         if g not in bogus:
                             bogus = bogus + [ g ]
-                            self.logger.writeLog( self.logger.WARNING, "client (%s) invalide, ignorée ", g )
+                            #self.logger.warning("client (%s) invalide, ignorée ", g )
+                            self.logger.warning("Client '%s' is in header2client.conf but inexistant in px", g )
                 self.mapCircuits[ahl]['routing_groups'] =  gs
+                
             except IndexError:
                 raise bulletinManagerException('Les champs ne concordent pas dans le fichier header2circuit',ligne)
+        self.logger.info("From header2client.conf we learn that we can route bulletins to: %s" % routable)
 
     def getMapCircuits(self):
         """getMapCircuits() -> mapCircuits
@@ -672,14 +704,14 @@ class bulletinManager:
         try:
             entete = ' '.join(bulletin.getHeader().split()[:2])
         except Exception:
-            self.logger.writeLog(self.logger.ERROR,"Entête non standard, priorité impossible à déterminer(%s)",bulletin.getHeader())
+            self.logger.error("Entête non standard, priorité impossible à déterminer(%s)",bulletin.getHeader())
             return self.pathDest.replace('-PRIORITY','PROBLEM')
 
         if self.mapCircuits != None:
             # Si le circuitage est activé
             if not self.mapCircuits.has_key(entete):
                     # Entête est introuvable
-                self.logger.writeLog(self.logger.ERROR,"Entête introuvable, priorité impossible à déterminer")
+                self.logger.error("Entête introuvable, priorité impossible à déterminer")
                 return self.pathDest.replace('-PRIORITY','PROBLEM')
 
             return self.pathDest.replace('-PRIORITY',self.mapCircuits[entete]['priority'])
@@ -752,5 +784,5 @@ class bulletinManager:
         # Calcul de l'interval de validité
         if not( -1 * abs(minimum) < nbMinNow - nbMinBullTime < maximum ):
             # La différence se situe en dehors de l'intervale de validité
-            self.logger.writeLog(self.logger.WARNING,"Délai en dehors des limites permises bulletin: "+unBulletin.getHeader()+', heure présente '+now)
+            self.logger.warning("Délai en dehors des limites permises bulletin: "+unBulletin.getHeader()+', heure présente '+now)
             unBulletin.setError('Bulletin en dehors du delai permis')

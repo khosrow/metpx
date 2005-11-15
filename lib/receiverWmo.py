@@ -6,7 +6,9 @@ import socketManagerWmo
 import bulletinManagerWmo
 import socketManager
 from socketManager import socketManagerException
-import fet
+import PXPaths
+
+PXPaths.normalPaths()
 
 class receiverWmo(gateway.gateway):
     __doc__ = gateway.gateway.__doc__ + \
@@ -20,23 +22,24 @@ class receiverWmo(gateway.gateway):
     Date:   Octobre 2004
     """
 
-    def __init__(self,path,options,logger):
-        gateway.gateway.__init__(self,path,options,logger)
+    def __init__(self,path,source,logger):
+        gateway.gateway.__init__(self,path,source,logger)
 
-        self.options = options
+        self.source = source 
         self.establishConnection()
 
-        self.logger.writeLog(logger.DEBUG,"Instanciation du bulletinManagerWmo")
+        self.logger.debug("Instanciation du bulletinManagerWmo")
 
         # Instanciation du bulletinManagerWmo avec la panoplie d'arguments.
         self.unBulletinManager = \
                   bulletinManagerWmo.bulletinManagerWmo(
-                     fet.FET_DATA + fet.FET_RX + options.source, logger, \
+                     PXPaths.RXQ + source.name, logger, \
                      pathDest = '/apps/pds/RAW/-PRIORITY', \
                      pathFichierCircuit = '/dev/null', \
-                     extension = options.extension, \
-                     mapEnteteDelai = options.mapEnteteDelai,
-                     use_pds = options.use_pds )
+                     extension = source.extension, \
+                     mapEnteteDelai = source.mapEnteteDelai,
+                     use_pds = source.use_pds,
+                     source = source)
 
     def shutdown(self):
         __doc__ = gateway.gateway.shutdown.__doc__ + \
@@ -60,7 +63,7 @@ class receiverWmo(gateway.gateway):
 
             self.write(resteDuBuffer)
 
-        self.logger.writeLog(self.logger.INFO,"Succès du traîtement du reste de l'info")
+        self.logger.info("Succès du traîtement du reste de l'info")
 
     def establishConnection(self):
         __doc__ = gateway.gateway.establishConnection.__doc__ + \
@@ -79,13 +82,13 @@ class receiverWmo(gateway.gateway):
            Date:        Octobre 2004
         """
 
-        self.logger.writeLog(self.logger.DEBUG,"Instanciation du socketManagerWmo")
+        self.logger.debug("Instanciation du socketManagerWmo")
 
         # Instanciation du socketManagerWmo
 
         self.unSocketManagerWmo = \
                   socketManagerWmo.socketManagerWmo(self.logger,type='slave', \
-                                                         port=self.options.port)
+                                                         port=self.source.port)
 
     def read(self):
         __doc__ =  gateway.gateway.read.__doc__ + \
@@ -101,7 +104,7 @@ class receiverWmo(gateway.gateway):
            Modification le 25 janvier 2005: getNextBulletins()
            retourne une liste de bulletins.
 
-	   Modification le 7 Fév 2005: Si une corruption est détectée dans les
+           Modification le 7 Fév 2005: Si une corruption est détectée dans les
            données, la connection se réinitialise. (LP)
 
            Auteur:      Louis-Philippe Thériault
@@ -111,18 +114,17 @@ class receiverWmo(gateway.gateway):
                 data = self.unSocketManagerWmo.getNextBulletins()
             except socketManager.socketManagerException, e:
                 if e.args[0] == 'la connexion est brisee':
-                    self.logger.writeLog(self.logger.ERROR,"Perte de connection, traîtement du reste du buffer")
+                    self.logger.error("Perte de connection, traîtement du reste du buffer")
                     data, nbBullEnv = self.unSocketManagerWmo.closeProperly()
                 elif e.args[0] == 'corruption dans les données':
-                    self.logger.writeLog(self.logger.ERROR,\
-                       "Corruption détectée dans les données\nContenu du buffer:\n%s" % e.args[2])
+                    self.logger.error("Corruption détectée dans les données\nContenu du buffer:\n%s" % e.args[2])
                     data, nbBullEnv = self.unSocketManagerWmo.closeProperly()
                 else:
                     raise
         else:
             raise gateway.gatewayException("Le lecteur ne peut être accédé")
 
-        self.logger.writeLog(self.logger.VERYVERYVERBOSE,"%d nouveaux bulletins lus",len(data))
+        self.logger.veryveryverbose("%d nouveaux bulletins lus" % len(data))
 
         return data
 
@@ -137,7 +139,7 @@ class receiverWmo(gateway.gateway):
            Date:        Octobre 2004
         """
 
-        self.logger.writeLog(self.logger.VERYVERYVERBOSE,"%d nouveaux bulletins seront écrits",len(data))
+        self.logger.veryveryverbose("%d nouveaux bulletins seront écrits" % len(data))
 
         while True:
             if len(data) <= 0:
@@ -149,7 +151,7 @@ class receiverWmo(gateway.gateway):
 
     def reloadConfig(self):
         __doc__ = gateway.gateway.reloadConfig.__doc__
-        self.logger.writeLog(self.logger.INFO,'Demande de rechargement de configuration')
+        self.logger.info('Demande de rechargement de configuration')
 
         try:
 
@@ -163,10 +165,10 @@ class receiverWmo(gateway.gateway):
 
             self.config.ficCircuits = ficCircuits
 
-            self.logger.writeLog(self.logger.INFO,'Succès du rechargement de la config')
+            self.logger.info('Succès du rechargement de la config')
 
         except Exception, e:
 
-            self.logger.writeLog(self.logger.ERROR,'Échec du rechargement de la config!')
+            self.logger.error('Échec du rechargement de la config!')
 
-            self.logger.writeLog(self.logger.DEBUG,"Erreur: %s", str(e.args))
+            self.logger.debug("Erreur: %s", str(e.args))

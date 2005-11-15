@@ -49,91 +49,6 @@ class bulletinAm(bulletin.bulletin):
         self.mapEntetes = mapEntetes
         self.SMHeaderFormat = SMHeaderFormat
 
-        self.station = "PASCALCULE"             # None veut dire qu'elle n'est pas trouvée.
-                                                # C'est pour ca qu'elle est initialisée comme
-                                                # ca.
-        try:
-            self.station = self.getStation()
-        except Exception:
-            self.station = None
-
-        # Vérification de l'entête pour les bulletins dont on ne traîteras pas
-#        if self.station == "PASDESTATION":
-#            bulletin.bulletin.verifyHeader(self)
-
-        # Print de la station pour le debug
-        self.logger.writeLog(logger.DEBUG,"Station: %s",str(self.station))
-
-    def getStation(self):
-        """getStation() -> station
-
-           station      : String
-
-           Retourne la station associée au bulletin,
-           retourne None si elle est introuvable.
-
-           Visibilité:  Publique
-           Auteur:      Louis-Philippe Thériault
-           Date:        Octobre 2004
-        """
-        if self.station == "PASCALCULE" and len(self.getHeader().split()[0]) == 2:
-
-            try:
-                station  = ""
-                premiereLignePleine = ""
-                bulletin = self.bulletin
-
-                # Cas special, il faut aller chercher la prochaine ligne pleine
-                for ligne in bulletin[1:]:
-                    premiereLignePleine = ligne
-
-                    if len(premiereLignePleine) > 1:
-                        break
-
-                # Embranchement selon les differents types de bulletins
-                if bulletin[0][0:2] == "SA":
-                    if bulletin[1].split()[0] in ["METAR","LWIS"]:
-                        station = premiereLignePleine.split()[1]
-                    else:
-                        station = premiereLignePleine.split()[0]
-
-                elif bulletin[0][0:2] == "SP":
-                    station = premiereLignePleine.split()[1]
-
-                elif bulletin[0][0:2] in ["SI","SM"]:
-                    station = premiereLignePleine.split()[0]
-
-                elif bulletin[0][0:2] in ["FC","FT"]:
-                    if premiereLignePleine.split()[1] == "AMD":
-                        station = premiereLignePleine.split()[2]
-                    else:
-                        station = premiereLignePleine.split()[1]
-
-                elif bulletin[0][0:2] in ["UE","UG","UK","UL","UQ","US"]:
-                    station = premiereLignePleine.split()[2]
-
-                elif bulletin[0][0:2] in ["RA","MA","CA"]:
-                    station = premiereLignePleine.split()[0].split('/')[0]
-
-                    if station[0] == '?':
-                        station = station[1:]
-                else:
-                    station = None
-
-            except Exception:
-                station = None
-
-            self.station = station
-
-        elif self.station == "PASCALCULE" and len(self.getHeader().split()[0]) != 2:
-            self.station = "PASDESTATION"
-
-        if self.station != None and self.station[-1] == '=':
-            self.station = self.station[:-1]
-
-        return self.station
-
-
     def doSpecificProcessing(self):
         __doc__ = bulletin.bulletin.doSpecificProcessing.__doc__ + \
         """### Ajout de bulletinAm ###
@@ -203,15 +118,15 @@ class bulletinAm(bulletin.bulletin):
                 if station == None:
                     self.setError("Pattern de station non trouve ou non specifie")
 
-                    self.logger.writeLog(self.logger.WARNING,"Pattern de station non trouve")
-                    self.logger.writeLog(self.logger.WARNING,"Bulletin:\n"+self.getBulletin())
+                    self.logger.warning("Pattern de station non trouve")
+                    self.logger.warning("Bulletin:\n"+self.getBulletin())
 
                 # L'entête n'a pu être trouvée dans le fichier de collection, erreur
                 elif uneEnteteDeBulletin == None:
                     self.setError("Entete non trouvee dans le fichier de collection")
 
-                    self.logger.writeLog(self.logger.WARNING,"Station <" + station + "> non trouvee avec prefixe <" + premierMot + ">")
-                    self.logger.writeLog(self.logger.WARNING,"Bulletin:\n"+self.getBulletin())
+                    self.logger.warning("Station <" + station + "> non trouvee avec prefixe <" + premierMot + ">")
+                    self.logger.warning("Bulletin:\n"+self.getBulletin())
 
         if self.getType() in ['UG','UK','US'] and self.bulletin[1] == '':
             self.bulletin.remove('')

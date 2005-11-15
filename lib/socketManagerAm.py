@@ -3,7 +3,7 @@
 
 __version__ = '2.0'
 
-import struct, socket, curses, curses.ascii, string
+import struct, socket, curses, curses.ascii, string, time
 import socketManager
 
 class socketManagerAm(socketManager.socketManager):
@@ -37,7 +37,8 @@ class socketManagerAm(socketManager.socketManager):
         # La taille du amRec est prise d'a partir du fichier ytram.h, à l'origine dans
         # amtcp2file. Pour la gestion des champs l'on se refere au module struct
         # de Python.
-        self.patternAmRec = '80sLL4sii4s4s20s'
+        #self.patternAmRec = '80sLL4sii4s4s20s'
+        self.patternAmRec = '80sLL4siiii20s'
         self.sizeAmRec = struct.calcsize(self.patternAmRec)
 
     def unwrapBulletin(self):
@@ -87,18 +88,11 @@ class socketManagerAm(socketManager.socketManager):
         tmp = bulletin.getBulletin()
         size = struct.calcsize('80s')
 
-        """
-        Commented by DL (2005-02-24)
-        header = tmp[0:size]
-        listeHeader=[]
-        for i in header:
-            listeHeader.append(i)
-        """
         nulList = [chr(curses.ascii.NUL) for x in range(size)]
         header = list(tmp[0:size])
 
         paddedHeader = header + nulList[len(header):]
-        
+
         header = string.join(paddedHeader,'')
         header = header.replace(chr(curses.ascii.LF), chr(curses.ascii.NUL), 1)
 
@@ -107,15 +101,18 @@ class socketManagerAm(socketManager.socketManager):
         dst_inet = 0
 
         #unsigned char threads[4]
-        threads='0'+chr(255)+'0'+'0'
+        #threads='0'+chr(255)+'0'+'0'
+        threads= chr(0) + chr(255) + chr(0) + chr(0)
 
         #unsigned int start, length
         start = 0
         length = socket.htonl( len(bulletin.getBulletin()) )
 
         #time_t firsttime, timestamp
-        firsttime = chr(curses.ascii.NUL)
-        timestamp = chr(curses.ascii.NUL)
+        #firsttime = chr(curses.ascii.NUL)
+        #timestamp = chr(curses.ascii.NUL)
+        firsttime = socket.htonl(int(time.time()))
+        timestamp = socket.htonl(int(time.time()))
 
         #char future[20]
         future = chr(curses.ascii.NUL)
@@ -186,7 +183,7 @@ class socketManagerAm(socketManager.socketManager):
             #preparation du bulletin pour l'envoi
             data = self.wrapBulletin(bulletin)
             #print repr(data)
-            #print("======================================================================")
+            #print('=====================================================================')
 
             #tentative d'envoi et controle de la connexion
             #mettre le try/except dans un while(1)????
@@ -197,20 +194,20 @@ class socketManagerAm(socketManager.socketManager):
                 #verifier si l'envoi est un succes
                 if bytesSent != len(data):
                     self.connected=False
-                    return 0
+                    return (0, bytesSent)
                 else:
-                    return 1
+                    return (1, bytesSent)
 
             except socket.error, e:
                 #erreurs potentielles: 104, 107, 110 ou 32
-                self.logger.writeLog(self.logger.ERROR,"senderAm.write(): la connexion est rompue: %s",str(e.args))
+                self.logger.error("senderAm.write(): la connexion est rompue: %s",str(e.args))
                 #modification du statut de la connexion
                 #tentative de reconnexion
                 self.connected = False
-                self.logger.writeLog(self.logger.INFO,"senderAm.write(): tentative de reconnexion")
+                self.logger.info("senderAm.write(): tentative de reconnexion")
                 self.socket.close()
                 self._socketManager__establishConnection()
 
         except Exception, e:
-            self.logger.writeLog(self.logger.ERROR,"socketManagerAm.sendBulletin(): erreur d'envoi: %s",str(e.args))
+            self.logger.error("socketManagerAm.sendBulletin(): erreur d'envoi: %s",str(e.args))
             raise

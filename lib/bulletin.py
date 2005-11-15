@@ -86,7 +86,7 @@ class bulletin:
         # dans la classe spécialisée, par une méthode qui ne fait rien
         self.verifyHeader()
 
-        self.logger.writeLog(self.logger.VERYVERBOSE,"newBulletin: %s",stringBulletin)
+        self.logger.veryverbose("newBulletin: %s" % stringBulletin)
 
     def splitlinesBulletin(self,stringBulletin):
         """splitlinesBulletin(stringBulletin) -> listeLignes
@@ -154,7 +154,7 @@ class bulletin:
                 # Le bulletin n'est pas binaire
                 return stringBulletin.split(self.lineSeparator)
         except Exception, e:
-            self.logger.writeLog(self.logger.EXCEPTION,'Erreur lors du decoupage du bulletin:\n'+''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
+            self.logger.exception('Erreur lors du decoupage du bulletin:\n'+''.join(traceback.format_exception(Exception,e,sys.exc_traceback)))
             self.setError('Erreur lors du découpage de lignes')
             return stringBulletin.split(self.lineSeparator)
 
@@ -249,7 +249,71 @@ class bulletin:
         """
         self.bulletin[0] = header
 
-        self.logger.writeLog(self.logger.DEBUG,"Nouvelle entête du bulletin: %s",header)
+        self.logger.debug("Nouvelle entête du bulletin: %s",header)
+
+    def getStation(self):
+        """getStation() -> station
+
+           station      : String
+
+           Retourne la station associée au bulletin,
+           retourne None si elle est introuvable.
+
+           Visibilité:  Publique
+           Auteur:      Louis-Philippe Thériault
+           Date:        Octobre 2004
+        """
+
+        #print(" ********************* BULLETIN GET STATION APPELE ")
+        station = None
+        try:
+            premiereLignePleine = ""
+            bulletin = self.bulletin
+
+            # Cas special, il faut aller chercher la prochaine ligne pleine
+            for ligne in bulletin[1:]:
+                premiereLignePleine = ligne
+                if len(premiereLignePleine) > 1: break
+
+            #print " ********************* header = ", bulletin[0][0:7]
+            # Embranchement selon les differents types de bulletins
+            if bulletin[0][0:2] == "SA":
+                if bulletin[1].split()[0] in ["METAR","LWIS"]:
+                    station = premiereLignePleine.split()[1]
+                else:
+                    station = premiereLignePleine.split()[0]
+
+            elif bulletin[0][0:2] == "SP":
+                station = premiereLignePleine.split()[1]
+
+            elif bulletin[0][0:2] in ["SI","SM"]:
+                station = premiereLignePleine.split()[0]
+
+            elif bulletin[0][0:6] in "SRCN40":
+                station = premiereLignePleine.split()[0]
+
+            elif bulletin[0][0:2] in ["FC","FT"]:
+                if premiereLignePleine.split()[1] == "AMD":
+                    station = premiereLignePleine.split()[2]
+                else:
+                    station = premiereLignePleine.split()[1]
+
+            elif bulletin[0][0:2] in ["UE","UG","UK","UL","UQ","US"]:
+                station = premiereLignePleine.split()[2]
+
+            elif bulletin[0][0:2] in ["RA","MA","CA"]:
+                station = premiereLignePleine.split()[0].split('/')[0]
+
+        except Exception:
+            station = None
+
+        if station != None :
+           while station[0] == '?' :
+                 station = station[1:]
+           station = station.split('?')[0]
+           if station[-1] == '=' : station = station[:-1]
+
+        return station
 
     def getType(self):
         """getType() -> type
@@ -404,7 +468,7 @@ class bulletin:
 
         if len(tokens[2]) > 6: # On enleve les ['z', 'Z'] ou ['utc', 'UTC'] s'ils sont presents dans le groupe JJHHMM
             tokens[2] = tokens[2][0:5]
-            self.logger.writeLog(self.logger.INFO, "Entete corrigee: le groupe JJHHMM a ete tronque (plus de 6 caracteres)")
+            self.logger.info("Entete corrigee: le groupe JJHHMM a ete tronque (plus de 6 caracteres)")
             self.setHeader(' '.join(tokens))
             tokens = self.getHeader().split()
 
@@ -417,22 +481,25 @@ class bulletin:
             self.setError('Entete non conforme (format des 3 premiers champs incorrects)')
             return
 
-        if len(tokens) <= 3:
+        if len(tokens) == 3:
+            # put an empty BBB
+            parts = self.getHeader().split()
+            self.setHeader(' '.join(parts) + ' ')
             return
 
         if not tokens[3].isalpha() or len(tokens[3]) != 3 or tokens[3][0] not in ['C','A','R','P']:
             #self.setError('Entete non conforme (champ BBB incorrect')
-            self.logger.writeLog(self.logger.INFO,"Entete corrigee: 4ieme champ (et les suivants) enleve du header") 
+            self.logger.info("Entete corrigee: 4ieme champ (et les suivants) enleve du header") 
             parts = self.getHeader().split()
             del parts[3:]
-            self.setHeader(' '.join(parts))
+            self.setHeader(' '.join(parts) + ' ')
             return
 
         if len(tokens) == 5 and \
                 (not tokens[4].isalpha() or len(tokens[4]) != 3 or tokens[4][0] not in ['C','A','R','P']):
 
             #self.setError('Entete non conforme4 (champ BBB no2 incorrect')
-            self.logger.writeLog(self.logger.INFO,"Entete corrigee: 5ieme champ (et les suivants) enleve du header")
+            self.logger.info("Entete corrigee: 5ieme champ (et les suivants) enleve du header")
             parts = self.getHeader().split()
             del parts[4:]
             self.setHeader(' '.join(parts))
@@ -441,8 +508,12 @@ class bulletin:
         if len(tokens) > 5:
 
             #self.setError('Entete non conforme (plus de 5 champs')
-            self.logger.writeLog(self.logger.INFO,"Entete corrigee: 6ieme champ (et les suivants) enleve du header")
+            self.logger.info("Entete corrigee: 6ieme champ (et les suivants) enleve du header")
             parts = self.getHeader().split()
             del parts[5:]
             self.setHeader(' '.join(parts))
             return
+
+
+if __name__ == '__main__':
+ pass

@@ -1,225 +1,145 @@
 # -*- coding: UTF-8 -*-
-import sys, gateway
+"""
+#############################################################################################
+# Name: senderAm.py
+#
+# Author: Pierre Michaud
+#
+# Date: Janvier 2005
+#
+# Contributors: Daniel Lemay
+#
+# Description:
+#
+#############################################################################################
+"""
+import sys, os.path, time
+import gateway
 import socketManagerAm
 import bulletinManagerAm
 import bulletinAm
-from socketManager import socketManagerException
-from DiskReader import DiskReader
+
 from MultiKeysStringSorter import MultiKeysStringSorter
-import fet
+from DiskReader import DiskReader
+from CacheManager import CacheManager
+import PXPaths
+
+PXPaths.normalPaths()
 
 class senderAm(gateway.gateway):
-    __doc__ = gateway.gateway.__doc__ + \
-    """
-    #### CLASSE senderAm ####
 
-    Nom:
-    senderAm
-
-    Paquetage:
-
-    Statut:
-    Classe concrete
-
-    Responsabilites:
-    -Lire des bulletins en format Am;
-    -Envoyer les bulletins Am lus selon un ordre de priorite dans une arborescence;
-    -Communiquer en respectant le protocole Am.
-
-    Attributs:
-    Attribut de la classe parent gateway
-
-    Methodes:
-    Methodes de la classe parent gateway
-
-    Auteur:
-    Pierre Michaud
-
-    Date:
-    Janvier 2005
-    """
-
-    def __init__(self,path,options,logger):
-        """
-        Nom:
-        __init__
-
-        Parametres d'entree:
-        -path:  repertoire ou se trouve la configuration
-        -logger:        reference a un objet log
-
-        Parametres de sortie:
-        -Aucun
-
-        Description:
-        Instancie un objet senderAm.
-
-        Auteur:
-        Pierre Michaud
-
-        Date:
-        Janvier 2005
-        """
-        gateway.gateway.__init__(self,path,options,logger)
+    def __init__(self,path, client,logger):
+        gateway.gateway.__init__(self,path, client,logger)
+        self.client = client
         self.establishConnection()
-        self.options = options
 
         # Instanciation du bulletinManagerAm selon les arguments issues du fichier
         # de configuration
-        self.logger.writeLog(logger.DEBUG,"Instanciation du bulletinManagerAm")
-        self.unBulletinManagerAm = bulletinManagerAm.bulletinManagerAm(
-                 fet.FET_DATA + fet.FET_TX + options.client, logger)
-        self.options.remoteHost = options.host
-        self.options.localPort = options.port
-        self.options.timeout    = options.connect_timeout
+        self.logger.debug("Instanciation du bulletinManagerAm")
+        self.unBulletinManagerAm = bulletinManagerAm.bulletinManagerAm(PXPaths.TXQ + client.name, logger)
+        self.reader = DiskReader(PXPaths.TXQ + self.client.name,
+                                 self.client.batch,           # Number of files we read each time
+                                 self.client.validation,      # name validation (Bool)
+                                 self.client.patternMatching, # pattern matching (Bool)
+                                 self.client.mtime,           # check modification time (integer)
+                                 True,                        # priority tree
+                                 self.logger,
+                                 eval(self.client.sorter),
+                                 self.client)
 
-        self.listeFichiersDejaChoisis = []
-        self.reader = None
+        # Mechanism to eliminate multiple copies of a bulletin
+        self.totBytes = 0
+        self.initialTime = time.time()
+        self.finalTime = None
+
+        self.cacheManager = CacheManager(maxEntries=120000, timeout=8*3600)
+
+    def printSpeed(self):
+        elapsedTime = time.time() - self.initialTime
+        speed = self.totBytes/elapsedTime
+        self.totBytes = 0
+        self.initialTime = time.time()
+        return "Speed = %i" % int(speed)
 
     def shutdown(self):
-        __doc__ = gateway.gateway.shutdown.__doc__ + \
-        """
-        ### senderAm ###
-        Nom:
-        shutdown
-
-        Parametres d'entree:
-        -Aucun
-
-        Parametres de sortie:
-        -Aucun
-
-        Description:
-        Termine proprement l'existence d'un senderAm.  Les taches en cours sont terminees
-        avant d'eliminer le senderAm.
-
-        Nom:
-        Pierre Michaud
-
-        Date:
-        Janvier 2005
-        """
         gateway.gateway.shutdown(self)
 
         resteDuBuffer, nbBullEnv = self.unSocketManagerAm.closeProperly()
 
         self.write(resteDuBuffer)
 
-        self.logger.writeLog(self.logger.INFO,"Le senderAm est mort.  Traitement en cours reussi.")
+        self.logger.info("Le senderAm est mort.  Traitement en cours reussi.")
 
     def establishConnection(self):
-        __doc__ = gateway.gateway.establishConnection.__doc__ + \
-        """
-        ### senderAm ###
-        Nom:
-        establishConnection
-
-        Parametres d'entree:
-        -Aucun
-
-        Parametres de sortie:
-        -Aucun
-
-        Description:
-        Initialise la connexion avec le destinataire.
-
-        Nom:
-        Pierre Michaud
-
-        Date:
-        Janvier 2005
-        """
-
         # Instanciation du socketManagerAm
-        self.logger.writeLog(self.logger.DEBUG,"Instanciation du socketManagerAm")
+        self.logger.debug("Instanciation du socketManagerAm")
 
         self.unSocketManagerAm = \
                  socketManagerAm.socketManagerAm(
                          self.logger,type='master', \
-                         port=self.options.port,\
-                         remoteHost=self.options.host,
-                         timeout=self.options.connect_timeout)
+                         port=self.client.port,\
+                         remoteHost=self.client.host,
+                         timeout=self.client.timeout)
 
     def read(self):
-        __doc__ =  gateway.gateway.read.__doc__ + \
-        """
-        ### senderAm ###
-        Nom:
-        read
-
-        Parametres d'entree:
-        -Aucun
-
-        Parametres de sortie:
-        -data: dictionnaire du contenu d'un fichier selon son chemin absolu
-
-        Description:
-        Lit les bulletins contenus dans un repertoire.  Le repertoire
-        contient les bulletins de la priorite courante.
-
-        Nom:
-        Pierre Michaud
-
-        Date:
-        Janvier 2005
-        """
-        self.reader = DiskReader(
-                 fet.FET_DATA + fet.FET_TX + self.options.client,
-                 fet.clients[self.options.client][5],
-                 True, # name validation
-                 0,    # we don't check modification time
-                 True, # priority tree
-                 self.logger,
-                 eval(self.options.sorter))
-        self.reader.sort()
-        return(self.reader.getFilesContent(fet.clients[self.options.client][5]))
-
+        if self.igniter.reloadMode == True:
+            # We assign the defaults and reread the configuration file (in __init__)
+            self.client.__init__(self.client.name, self.client.logger)
+            self.resetReader()
+            self.cacheManager.clear()
+            self.logger.info("Cache has been cleared")
+            self.logger.info("Sender AM has been reloaded")
+            self.igniter.reloadMode = False
+        self.reader.read()
+        return self.reader.getFilesContent(self.client.batch)
 
     def write(self,data):
-        __doc__ =  gateway.gateway.write.__doc__ + \
-        """
-        ### senderAm ###
-        Nom:
-        write
-
-        Parametres d'entree:
-        -data: dictionnaire du contenu d'un fichier selon son chemin absolu
-
-        Parametres de sortie:
-        -Aucun
-
-        Description:
-        Genere les bulletins en format AM issus du dictionnaire data
-        et les ecrit au socket approprie.
-
-        Nom:
-        Pierre Michaud
-
-        Date:
-        Janvier 2005
-        """
-        self.logger.writeLog(self.logger.DEBUG,"%d nouveaux bulletins seront envoyes",len(data))
+        #self.logger.debug("%d nouveaux bulletins seront envoyes",len(data))
+        self.logger.info("%d new bulletins will be sent", len(data))
 
         for index in range(len(data)):
+            # If data[index] is already in cache, we don't send it
+            if self.cacheManager.find(data[index], 'md5') is not None:
+                try:
+                    os.unlink(self.reader.sortedFiles[index])
+                    self.logger.info("%s has been erased (was cached)", os.path.basename(self.reader.sortedFiles[index]))
+                except OSError, e:
+                    (type, value, tb) = sys.exc_info()
+                    self.logger.info("Unable to unlink %s ! Type: %s, Value: %s"
+                                      % (self.reader.sortedFiles[index], type, value))
+                continue
+
             try:
                 rawBulletin = data[index]
                 unBulletinAm = bulletinAm.bulletinAm(rawBulletin,self.logger,lineSeparator='\r\r\n')
-                #nbBytesToSend = len(unBulletinAm)
 
                 # C'est dans l'appel a sendBulletin que l'on verifie si la connexion doit etre reinitialisee ou non
-                succes = self.unSocketManagerAm.sendBulletin(unBulletinAm)
+                succes, nbBytesSent = self.unSocketManagerAm.sendBulletin(unBulletinAm)
 
                 #si le bulletin a ete envoye correctement, le fichier est efface
                 if succes:
-                    #self.logger.writeLog(self.logger.INFO,"(%5d Bytes) Bulletin %s  livré ", 
-                    #                     nbBytesToSend, self.reader.sortedFiles[index])
-                    self.logger.writeLog(self.logger.INFO,"Bulletin %s  livré ", self.reader.sortedFiles[index])
+                    self.totBytes += nbBytesSent
+                    #self.logger.info("(%5d Bytes) Bulletin %s  livré ", nbBytesSent, os.path.basename(self.reader.sortedFiles[index]))
+                    self.logger.info("(%5d Bytes) Bulletin %s  delivered" % (nbBytesSent, os.path.basename(self.reader.sortedFiles[index])))
                     self.unBulletinManagerAm.effacerFichier(self.reader.sortedFiles[index])
-                    self.logger.writeLog(self.logger.DEBUG,"senderAm.write(..): Effacage de " + self.reader.sortedFiles[index])
+                    #self.logger.debug("senderAm.write(..): Effacage de " + self.reader.sortedFiles[index])
+                    self.logger.debug("%s has been erased" % self.reader.sortedFiles[index])
                 else:
-                    self.logger.writeLog(self.logger.INFO,"bulletin %s: probleme d'envoi ", self.reader.sortedFiles[index])
+                    self.logger.info("%s: Sending problem" % self.reader.sortedFiles[index])
 
             except Exception, e:
             # e==104 or e==110 or e==32 or e==107 => connexion rompue
                 (type, value, tb) = sys.exc_info()
-                self.logger.writeLog(self.logger.ERROR,"Type: %s, Value: %s" % (type, value))
+                self.logger.error("Type: %s, Value: %s" % (type, value))
+
+        # Log infos about tx speed
+        if (self.totBytes > 1000000):
+            self.logger.info(self.printSpeed() + " Bytes/sec")
+            # Log infos about caching
+            (stats, cached, total) = self.cacheManager.getStats()
+            if total:
+                percentage = "%2.2f %% of the last %i requests were cached (implied %i files were deleted)" % (cached/total * 100,  total, cached)
+            else:
+                percentage = "No entries in the cache"
+            self.logger.info("Caching stats: %s => %s" % (str(stats), percentage))
+

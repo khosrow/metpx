@@ -1,6 +1,10 @@
 # -*- coding: UTF-8 -*-
 """Superclasse pour un gateway de transfert de bulletins"""
 import imp, time, sys
+from MultiKeysStringSorter import MultiKeysStringSorter
+from DiskReader import DiskReader
+import PXPaths
+PXPaths.normalPaths()
 
 __version__ = '2.0'
 
@@ -35,8 +39,7 @@ class gateway:
 
                             - Chemin d'accès vers le fichier de config
 
-            options         - liste d'options fet.
-                              pour remplace tous les 'config'.
+            flow            - Source ou Client (Permet d'acceder toutes les options)
 
             logger          Objet logger
 
@@ -48,10 +51,26 @@ class gateway:
        Auteur:      Louis-Philippe Thériault
        Date:        Octobre 2004
     """
-    def __init__(self,path,options,logger):
+    def __init__(self, path, flow, logger):
         self.pathToConfigFile = path
         self.logger = logger
-        self.options = options
+        self.flow = flow 
+        self.igniter = None
+        self.reader = None
+
+    def resetReader(self):
+        self.reader = DiskReader(PXPaths.TXQ + self.flow.name,
+                                 self.flow.batch,            # Number of files we read each time
+                                 self.flow.validation,       # name validation
+                                 self.flow.patternMatching,  # pattern matching
+                                 self.flow.mtime,            # we don't check modification time
+                                 True,                       # priority tree
+                                 self.logger,
+                                 eval(self.flow.sorter),
+                                 self.flow)
+
+    def setIgniter(self, igniter):
+        self.igniter = igniter
 
     def loadConfig(path):
         """loadConfig(path)
@@ -162,7 +181,7 @@ class gateway:
            Auteur:      Louis-Philippe Thériault
            Date:        Octobre 2004
         """
-        self.logger.writeLog(self.logger.INFO,"Fermeture propre du gateway")
+        self.logger.info("Fermeture propre du gateway")
 
     def checkLooping(self, unElementDeData):
         """checkLooping() -> bool
@@ -190,4 +209,4 @@ class gateway:
            Auteur:      Louis-Philippe Thériault
            Date:        Décembre 2004
         """
-        self.logger.writeLog(self.logger.INFO,'Demande de rechargement de configuration... non implanté!')
+        self.logger.info('Demande de rechargement de configuration... non implanté!')

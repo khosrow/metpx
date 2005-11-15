@@ -11,10 +11,10 @@
 #############################################################################################
 
 """
-import os, os.path, re, commands, time
+import os, sys, os.path, re, commands, time, fnmatch
+import Client, Source
 from MultiKeysStringSorter import MultiKeysStringSorter
 from stat import *
-import fet
 
 class _DirIterator(object):
     """ Author: Sebastien Keim
@@ -46,7 +46,7 @@ class _DirIterator(object):
 
 class DiskReader:
 
-    def __init__(self, path, batch=20000, validation=False, mtime=0, prioTree=False, logger=None, sorterClass=None):
+    def __init__(self, path, batch=20000, validation=False, patternMatching=False, mtime=0, prioTree=False, logger=None, sorterClass=None, client=None):
         """
         Set the root path and the sorter class used for sorting
 
@@ -66,18 +66,28 @@ class DiskReader:
         self.path = path                          # Path from where we ingest filenames
         self.clientName = os.path.basename(path)  # Last part of the path correspond to client name 
         self.validation = validation              # Name Validation active (True or False)
-        self.patternMatching = validation         # Pattern matching active (True or False)
+        self.patternMatching = patternMatching    # Pattern matching active (True or False)
         self.logger = logger                      # Use to log information
         self.batch = batch                        # Maximum number of files that we are interested to sort
         self.mtime = mtime                        # If we want to check modification time before taking a file                             
-        if prioTree: # If we want to use predifine priority directories tree
-            self.files = self._getFilesList()                          # List of filenames under the priorities
-        else:
-            self.files = self. _getFilesListForOneBranch(path, batch)  # List of filenames under the path
         self.sortedFiles = []                     # Sorted filenames
         self.data = []                            # Content of x filenames (x is set in getFilesContent())
+        self.prioTree = prioTree                  # Boolean that determine if the "priorities" structure is enforced
         self.sorterClass = sorterClass            # Sorting algorithm that will be used by sort()
+        self.client = client                      # Client object, only used when patternMatching is True
 
+        #self.read()
+
+    def read(self):
+        self.sortedFiles = []
+        self.data = []
+        if self.prioTree: # If we want to use predefine priority directories tree
+            self.files = self._getFilesList()                          # List of filenames under the priorities
+        else:
+            self.files = self. _getFilesListForOneBranch(self.path, self.batch)  # List of filenames under the path
+
+        self.sort()
+        
     def _validateName(self, basename):
         """
         Validate that the filename has the following form:
@@ -91,12 +101,26 @@ class DiskReader:
             #print "Don't match: " + basename
             return False
 
+    # Method augmented by MG ... proposed by DL
     def _matchPattern(self, basename):
-        pattern = fet.clientMatch(self.clientName, basename)
-        if pattern:
-           return True
-        else:
-           return False
+        """
+        Verify if basename is matching one mask of a client
+        """
+
+        if self.client == None: return (True, 'RX')
+
+        if isinstance(self.client, Source.Source):
+            return (self.client.fileMatchMask(basename), 'RX')
+
+        elif isinstance(self.client, Client.Client):
+           for mask in self.client.masks:
+               if fnmatch.fnmatch(basename, mask[0]):
+                  try:
+                       if mask[2]: return (True, 'TX')
+                  except:
+                       return (False, 'TX')
+
+        return (False, 'TX')
 
     def _getFilesList(self):
         """
@@ -141,26 +165,29 @@ class DiskReader:
                 # Files we don't want to touch
                 if basename[0] == '.' or basename[-4:] == ".tmp" or not os.access(file, os.R_OK):
                     continue
+
+                # If we use stats informations (useful with rcp)
+                if self.mtime:
+                    if  not time.time() - os.stat(file)[ST_MTIME] > self.mtime:
+                        self.logger.debug("File (%s) too recent (mtime = %d)" % (file, self.mtime))
+                        continue
+
                 # If we use name validation 
                 if self.validation:
                     if not self._validateName(basename):
                         os.unlink(file)
                         if self.logger is not None:
-                            self.logger.writeLog(self.logger.INFO, "Filename incorrect: " + file + " has been unlinked!")
+                            self.logger.info("Filename incorrect: " + file + " has been unlinked!")
                         continue
+
                 # If we use pattern matching
                 if self.patternMatching:
                     # Does the filename match a pattern ?
-                    if not self._matchPattern(basename):
+                    match, type = self._matchPattern(basename)
+                    if not match:
                         os.unlink(file)
                         if self.logger is not None:
-                            self.logger.writeLog(self.logger.INFO, "No pattern matching: " + file + " has been unlinked!")
-                        continue
-
-                # If we use stats informations (useful with rcp)
-                if self.mtime:
-                    if  not time.time() - os.stat(file)[ST_MTIME] > self.mtime:
-                        self.logger.writeLog(self.logger.DEBUG, "File (%s) too recent (mtime = %d)" % (file, self.mtime))
+                            self.logger.info("No pattern (%s) matching: %s has been unlinked!" % (type, file))
                         continue
 
                 # We don't want to exceed the batch value 
@@ -185,7 +212,7 @@ class DiskReader:
                 fileDesc = open(file, 'r')
                 self.data.append(fileDesc.read())
             except:
-                self.logger.writeLog(self.logger.WARNING,"DiskReader.getFilesContent(): " + file + " not on disk anymore")
+                self.logger.warning("DiskReader.getFilesContent(): " + file + " not on disk anymore")
                 # We don't raise the exception because we assume that this error has been created
                 # by a legitimate process that has cleared some client queue.
         return self.data

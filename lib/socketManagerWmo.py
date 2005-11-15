@@ -134,18 +134,18 @@ class socketManagerWmo(socketManager.socketManager):
 
         try:
             msg_length = int(msg_length)
-            self.logger.writeLog(self.logger.DEBUG,"Longueur du message: %d",msg_length)
+            self.logger.debug("Longueur du message: %d",msg_length)
         except ValueError:
-            self.logger.writeLog(self.logger.DEBUG,"Corruption: longueur n'est pas lisible")
+            self.logger.debug("Corruption: longueur n'est pas lisible")
             return 'CORRUPT'
 
         if not msg_type in ['BI','AN','FX']:
-            self.logger.writeLog(self.logger.DEBUG,"Corruption: Type de message est incorrec")
+            self.logger.debug("Corruption: Type de message est incorrec")
             return 'CORRUPT'
 
         if len(self.inBuffer) >= self.sizeWmoRec + msg_length:
             if ord(self.inBuffer[self.sizeWmoRec]) != curses.ascii.SOH or ord(self.inBuffer[self.sizeWmoRec+msg_length-1]) != curses.ascii.ETX:
-                self.logger.writeLog(self.logger.DEBUG,"Corruption: Caractères de contrôle incorrects")
+                self.logger.debug("Corruption: Caractères de contrôle incorrects")
                 return 'CORRUPT'
 
             return 'OK'
@@ -191,20 +191,20 @@ class socketManagerWmo(socketManager.socketManager):
                 #verifier si l'envoi est un succes
                 if bytesSent != len(data):
                     self.connected=False
-                    return 0
+                    return (0, bytesSent)
                 else:
-                    return 1
+                    return (1, bytesSent)
 
             except socket.error, e:
                 #erreurs potentielles: 104, 107, 110 ou 32
-                self.logger.writeLog(self.logger.ERROR,"senderWmo.write(): la connexion est rompue: %s",str(e.args))
+                self.logger.error("senderWmo.write(): la connexion est rompue: %s",str(e.args))
                 #modification du statut de la connexion
                 #tentative de reconnexion
                 self.connected = False
-                self.logger.writeLog(self.logger.INFO,"senderWmo.write(): tentative de reconnexion")
+                self.logger.info("senderWmo.write(): tentative de reconnexion")
                 self.socket.close()
                 self._socketManager__establishConnection()
 
         except Exception, e:
-            self.logger.writeLog(self.logger.ERROR,"socketManagerWmo.sendBulletin(): erreur d'envoi: %s",str(e.args))
+            self.logger.error("socketManagerWmo.sendBulletin(): erreur d'envoi: %s",str(e.args))
             raise
