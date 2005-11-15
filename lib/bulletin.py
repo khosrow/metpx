@@ -303,12 +303,15 @@ class bulletin:
 
             elif bulletin[0][0:2] in ["RA","MA","CA"]:
                 station = premiereLignePleine.split()[0].split('/')[0]
-                if station[0] == '?': station = station[1:]
 
         except Exception:
             station = None
 
-        if station != None and station[-1] == '=': station = station[:-1]
+        if station != None :
+           while station[0] == '?' :
+                 station = station[1:]
+           station = station.split('?')[0]
+           if station[-1] == '=' : station = station[:-1]
 
         return station
 
@@ -478,7 +481,10 @@ class bulletin:
             self.setError('Entete non conforme (format des 3 premiers champs incorrects)')
             return
 
-        if len(tokens) <= 3:
+        if len(tokens) == 3:
+            # put an empty BBB
+            parts = self.getHeader().split()
+            self.setHeader(' '.join(parts) + '  ')
             return
 
         if not tokens[3].isalpha() or len(tokens[3]) != 3 or tokens[3][0] not in ['C','A','R','P']:
@@ -486,7 +492,7 @@ class bulletin:
             self.logger.info("Entete corrigee: 4ieme champ (et les suivants) enleve du header") 
             parts = self.getHeader().split()
             del parts[3:]
-            self.setHeader(' '.join(parts))
+            self.setHeader(' '.join(parts) + '  ')
             return
 
         if len(tokens) == 5 and \
