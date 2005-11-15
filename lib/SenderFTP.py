@@ -147,15 +147,16 @@ class SenderFTP(object):
             if destName:
                 # We remove the first / (if there was only one => relative path, if there was two => absolute path)
                 destDir = destDir[1:]
+
+                if self.client.dir_pattern == True :
+                   destDir = self.dirPattern(file,basename,destDir,destName)
+
                 if destDir == '':
                     destDirString = '/'
                 elif destDir == '/':
                     destDirString = '//'
                 else:
                     destDirString = '/' + destDir + '/'
-
-                if self.client.dir_pattern == True :
-                   destDir = self.dirPattern(file,basename,destDir,destName)
 
                 if self.client.protocol == 'file':
                     try:
