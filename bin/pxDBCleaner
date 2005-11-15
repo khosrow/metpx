@@ -21,6 +21,7 @@
 
 import os, time, pwd, sys, time, getopt, commands
 sys.path.insert(1, sys.path[0] + '/../lib')
+sys.path.insert(1,sys.path[0] + '/../lib/importedLibs')
 
 import PXPaths
 from Logger import Logger
