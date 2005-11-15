@@ -122,7 +122,6 @@ example 2: %prog start       => will start all clients
             if len(reader.sortedFiles) >= 1:
                 sortedFiles = reader.sortedFiles[:client.batch]
                 logger.info("%d bulletins will be sent" % len(sortedFiles))
-                #fetFile.sendFiles(client.name, reader.sortedFiles[:client.batch], client.chmod, client.ftp_mode, logger)
                 sender = SenderFTP.SenderFTP(client, logger)
                 sender.send(sortedFiles)
             else:

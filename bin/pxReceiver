@@ -95,11 +95,9 @@ example 2: %prog start       => will start all sources
         igniter.setGateway(gateway)
     elif source.type == 'single-file':
         igniter.setGateway('DUMMY')
-        #fetFile.checkSource(sourceName, 'DUMMY', logger, igniter)
         source.ingestor.ingestSingleFile(igniter)
     elif source.type == 'bulletin-file':
         igniter.setGateway('DUMMY')
-        #bulletinFileReceiver.run(source, igniter, logger)
         source.ingestor.ingestBulletinFile(igniter)
     else:
         raise Exception('Unknown type') 
