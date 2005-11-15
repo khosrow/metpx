@@ -48,12 +48,10 @@ class bulletinManagerWmo(bulletinManager.bulletinManager):
            Date:        Octobre 2004
         """
 
-	station = None
+        station = None
 
-	if (bulletin.getHeader().split(' ')[0])[:6] == "SRCN40" :
+        if (bulletin.getHeader().split(' ')[0])[:6] == "SRCN40" :
             station = bulletin.getStation()
-
-        print(" station = %s " % station )
 
         if station == None or error:
             return bulletinManager.bulletinManager.getFileName(self,bulletin,error,compteur)

@@ -104,7 +104,7 @@ class receiverWmo(gateway.gateway):
            Modification le 25 janvier 2005: getNextBulletins()
            retourne une liste de bulletins.
 
-	   Modification le 7 Fév 2005: Si une corruption est détectée dans les
+           Modification le 7 Fév 2005: Si une corruption est détectée dans les
            données, la connection se réinitialise. (LP)
 
            Auteur:      Louis-Philippe Thériault
