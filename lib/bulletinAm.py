@@ -140,6 +140,11 @@ class bulletinAm(bulletin.bulletin):
             self.replaceChar('\x03','')
             self.replaceChar('\x04','')
 
+        if self.bulletin[0][:4] in ['SACN']:
+            self.replaceChar('\x14','')
+            self.replaceChar('\x15','')
+
+
         bulletin.bulletin.verifyHeader(self)
 
     def getFormattedSystemTime(self):
