@@ -7,6 +7,8 @@
 import math, string, os, bulletinPlain, traceback, sys, time
 import PXPaths
 
+import bulletinWmo
+
 PXPaths.normalPaths()
 
 __version__ = '2.0'
@@ -436,7 +438,44 @@ class bulletinManager:
 
         return path
 
-    def getFileName(self,bulletin,error=False, compteur=True):
+    def createWhatFn(self,bulletin,compteur=True ):
+        """createWhatFn(bulletin[,compteur]) -> whatfn
+
+           Return the first token of the filename. Build out of the
+           bulletin header, the station (if defined) and a counter
+           the WHATFN should looked like (if all the informations needed
+           are available)
+
+           SACN31_CWAO_121435_RRA_CYUL_045440 
+
+           Missing info are going to be left empty
+           possible outcome are :
+
+           SACN31_CWAO_121435__CYUL_045440
+           SACN31_CWAO_121435_CCA__045440
+        """
+
+        # compteur
+        strCompteur = ''
+        if compteur :
+           strCompteur = string.zfill(self.compteur, len(str(self.maxCompteur)))
+
+        # station
+        station = bulletin.getStation()
+        if isinstance(bulletin, bulletinWmo.bulletinWmo) and (bulletin.getHeader())[:6] != "SRCN40" : station = None
+        if station == None : station = ''
+
+        # header
+        header = bulletin.getHeader()
+        header = header.replace(' ','_')
+
+        # whatfn
+        whatfn = header + '_' + station + '_' + strCompteur
+
+        return whatfn
+
+
+    def getFileName(self,bulletin,error=False, compteur=True ):
         """getFileName(bulletin[,error, compteur]) -> fileName
 
            Retourne le nom du fichier pour le bulletin. Si error
@@ -453,33 +492,31 @@ class bulletinManager:
 
                 Générer le nom du fichier pour le bulletin concerné.
         """
-        if compteur or bulletin.getError() != None or error:
-            compteur = True
-            strCompteur = ' ' + string.zfill(self.compteur, len(str(self.maxCompteur)))
-        else:
-            strCompteur = ''
+
+        # whatfn
+        whatfn = self.createWhatFn(bulletin,compteur)
 
         if bulletin.getError() == None and not error:
+
         # Bulletin normal
             try:
-                return (bulletin.getHeader() + strCompteur + self.getExtension(bulletin,error)).replace(' ','_')
-            except Exception, e:
-            # Une erreur est détectée (probablement dans l'extension) et le nom est généré avec des erreurs
+                return  whatfn + '_' + self.getExtension(bulletin,error).replace(' ','_')
 
+            except Exception, e:
+                # Une erreur est détectée (probablement dans l'extension) et le nom est généré avec des erreurs
                 # Si le compteur n'a pas été calculé, c'est que le bulletin était correct,
                 # mais si on est ici dans le code, c'est qu'il y a eu une erreur.
-                if strCompteur == '':
-                    strCompteur = ' ' + string.zfill(self.compteur, len(str(self.maxCompteur)))
 
                 self.logger.warning(e)
-                return ('PROBLEM_BULLETIN ' + bulletin.getHeader() + strCompteur + self.getExtension(bulletin,error=True)).replace(' ','_')
+                whatfn = self.createWhatFn(bulletin,compteur)
+                return 'PROBLEM_BULLETIN_' + whatfn + '_' + self.getExtension(bulletin,error=True).replace(' ','_')
 
         elif bulletin.getError() != None and not error:
             self.logger.warning("Le bulletin est erronné " + bulletin.getError()[0] )
-            return ('PROBLEM_BULLETIN ' + bulletin.getHeader() + strCompteur + self.getExtension(bulletin,error)).replace(' ','_')
+            return 'PROBLEM_BULLETIN_' + whatfn + '_' + self.getExtension(bulletin,error=True).replace(' ','_')
         else:
             self.logger.warning("L'entête n'est pas imprimable" )
-            return ('PROBLEM_BULLETIN ' + 'UNPRINTABLE HEADER' + strCompteur + self.getExtension(bulletin,error)).replace(' ','_')
+            return ('PROBLEM_BULLETIN ' + 'UNPRINTABLE HEADER ' + self.getExtension(bulletin,error)).replace(' ','_')
 
     def getExtension(self,bulletin,error=False):
         """getExtension(bulletin) -> extension

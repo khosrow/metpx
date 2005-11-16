@@ -208,35 +208,3 @@ class bulletinManagerAm(bulletinManager.bulletinManager):
                 self.mapEntetes[uneCle] = uneEntete
 
                 self.mapEntetes2mapStations[unPrefixe + uneEntete[:-1]][station] = None
-
-
-    def getFileName(self,bulletin,error=False,compteur=True):
-        __doc__ = bulletinManager.bulletinManager.getFileName.__doc__ + \
-        """### Ajout de bulletinManagerAm ###
-
-           Ajout de la station dans le nom si elle est disponible
-
-           Visibilité:  Privée
-           Auteur:      Louis-Philippe Thériault
-           Date:        Octobre 2004
-        """
-        station = bulletin.getStation()
-
-        if station == None or station == "PASDESTATION" or error:
-            return bulletinManager.bulletinManager.getFileName(self,bulletin,error,compteur)
-        else:
-            nom = bulletinManager.bulletinManager.getFileName(self,bulletin,error,True)
-
-            if compteur:
-                nom = ':'.join( [ '_'.join( \
-                                        nom.split(':')[0].split('_')[:-1] + [station] + \
-                                        nom.split(':')[0].split('_')[-1:]) ] \
-                                        + nom.split(':')[1:] )
-            else:
-            # Pas de compteur
-                nom = ':'.join( [ '_'.join( \
-                                        nom.split(':')[0].split('_') + [station] ) ] \
-                                        + nom.split(':')[1:] )
-
-
-            return nom
