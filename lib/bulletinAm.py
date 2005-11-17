@@ -141,8 +141,8 @@ class bulletinAm(bulletin.bulletin):
             self.replaceChar('\x04','')
 
         if self.bulletin[0][:4] in ['SACN']:
-            self.replaceChar('\x14','')
-            self.replaceChar('\x15','')
+            self.replaceChar('\x0e','')
+            self.replaceChar('\x0f','')
 
 
         bulletin.bulletin.verifyHeader(self)
