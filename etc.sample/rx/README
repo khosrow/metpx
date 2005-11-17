@@ -57,11 +57,11 @@ arrival CA 5 20
 arrival WO 20 40
     Mapping of what the valid times to receive a given type of bulletin are.
     In this example for CA's, -5 or +20 minutes versus the issue time is 
-    the valid interval.
+    the valid interval. Only used when type is am.
 
 AddSMHeader True
     True if a header is to be inserted at the beginning of a SM or SI bulletins.
-    The header is of the form: "AAXX jjhh4\\n".
+    The header is of the form: "AAXX jjhh4\\n". Only used when type is am.
 
 =========================================================================================
 Developper's option' descriptions
