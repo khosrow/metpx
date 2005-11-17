@@ -100,3 +100,5 @@ class bulletinWmo(bulletin.bulletin):
         # Si pas de newline, on en ajoute un à la fin
         if self.bulletin[-1] != '':
             self.bulletin += ['']
+
+        bulletin.bulletin.verifyHeader(self)
