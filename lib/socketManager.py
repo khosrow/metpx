@@ -92,7 +92,7 @@ class socketManager:
         # Binding avec le port local
         # Si ce n'est pas un master - Pierre Michaud 2004-12-15
         if self.type == 'slave':
-            self.logger.info("Binding du socket avec le port %d",self.port)
+            self.logger.info("Socket binding with port %d",self.port)
             while True:
                 try:
                     self.socket.bind(('',self.port))
@@ -116,7 +116,7 @@ class socketManager:
             if self.remoteHost == None:
                 raise socketManagerException('remoteHost (host,port) n\'est pas spécifié')
 
-            self.logger.info("Tentative de connexion à l'hôte distant %s", str(self.remoteHost) )
+            self.logger.info("Trying to connect remote host %s", str(self.remoteHost) )
 
             while True:
                 # Commented by DL (2005-03-30) at the request of AMB
@@ -150,7 +150,7 @@ class socketManager:
                     self.socket.close()
                     raise socketManagerException('timeout dépassé')
                 """
-                self.logger.info("En attente de connexion (mode listen)")
+                self.logger.info("Waiting for a connexion (listen mode)")
                 try:
                     conn, self.remoteHost = self.socket.accept()
                     break
@@ -175,7 +175,7 @@ class socketManager:
         #a mettre un receiver a terre en moins de deux...
         self.socket.setblocking(True)
 
-        self.logger.info("Connexion établie avec %s",str(self.remoteHost))
+        self.logger.info("Connexion established with %s",str(self.remoteHost))
         self.connected = True
 
     def closeProperly(self):
