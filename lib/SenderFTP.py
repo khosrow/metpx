@@ -170,8 +170,14 @@ class SenderFTP(object):
                 elif self.client.protocol == 'ftp':
                     if currentFTPDir != destDir:
                         if self.client.dir_mkdir:
-                            if self.dirMkdir(destDir):
-                                currentFTPDir = destDir
+                           try:
+                               if self.dirMkdir(destDir):
+                                  currentFTPDir = destDir
+                           except:
+                               (type, value, tb) = sys.exc_info()
+                               self.logger.error("Unable to mkdir to: %s, Type: %s, Value:%s" % (destDir, type, value))
+                               time.sleep(1)
+                               continue
                         else:
                            try:
                                self.ftp.cwd(self.originalDir)
