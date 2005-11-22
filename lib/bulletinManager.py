@@ -500,7 +500,7 @@ class bulletinManager:
 
         # Bulletin normal
             try:
-                return  whatfn + '_' + self.getExtension(bulletin,error).replace(' ','_')
+                return  whatfn + self.getExtension(bulletin,error).replace(' ','_')
 
             except Exception, e:
                 # Une erreur est détectée (probablement dans l'extension) et le nom est généré avec des erreurs
@@ -509,11 +509,11 @@ class bulletinManager:
 
                 self.logger.warning(e)
                 whatfn = self.createWhatFn(bulletin,compteur)
-                return 'PROBLEM_BULLETIN_' + whatfn + '_' + self.getExtension(bulletin,error=True).replace(' ','_')
+                return 'PROBLEM_BULLETIN_' + whatfn + self.getExtension(bulletin,error=True).replace(' ','_')
 
         elif bulletin.getError() != None and not error:
             self.logger.warning("Le bulletin est erronné " + bulletin.getError()[0] )
-            return 'PROBLEM_BULLETIN_' + whatfn + '_' + self.getExtension(bulletin,error=True).replace(' ','_')
+            return 'PROBLEM_BULLETIN_' + whatfn + self.getExtension(bulletin,error=True).replace(' ','_')
         else:
             self.logger.warning("L'entête n'est pas imprimable" )
             return ('PROBLEM_BULLETIN ' + 'UNPRINTABLE HEADER ' + self.getExtension(bulletin,error)).replace(' ','_')

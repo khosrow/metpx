@@ -264,16 +264,23 @@ class bulletin:
            Date:        Octobre 2004
         """
 
+
         #print(" ********************* BULLETIN GET STATION APPELE ")
+
         station = None
         try:
             premiereLignePleine = ""
+            deuxiemeLignePleine = ""
             bulletin = self.bulletin
 
             # Cas special, il faut aller chercher la prochaine ligne pleine
+            i = 0
             for ligne in bulletin[1:]:
+                i += 1
                 premiereLignePleine = ligne
-                if len(premiereLignePleine) > 1: break
+                if len(premiereLignePleine) > 1:
+                   if len(bulletin) > i+1 : deuxiemeLignePleine = bulletin[i+1]
+                   break
 
             #print " ********************* header = ", bulletin[0][0:7]
             # Embranchement selon les differents types de bulletins
@@ -288,6 +295,11 @@ class bulletin:
 
             elif bulletin[0][0:2] in ["SI","SM"]:
                 station = premiereLignePleine.split()[0]
+                if station == "AAXX" :
+                   if deuxiemeLignePleine != "" :
+                      station = deuxiemeLignePleine.split()[0]
+                   else :
+                      station = None
 
             elif bulletin[0][0:6] in "SRCN40":
                 station = premiereLignePleine.split()[0]
@@ -312,6 +324,8 @@ class bulletin:
                  station = station[1:]
            station = station.split('?')[0]
            if station[-1] == '=' : station = station[:-1]
+
+        self.station = station
 
         return station
 
