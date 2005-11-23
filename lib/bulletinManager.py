@@ -14,67 +14,51 @@ PXPaths.normalPaths()
 __version__ = '2.0'
 
 class bulletinManagerException(Exception):
-    """Classe d'exception spécialisés relatives au bulletin managers"""
     pass
 
 class bulletinManager:
-    """Gestionnaire de bulletins général. S'occupe de la manipulation
-       des bulletins en tant qu'entités, mais ne fait pas de traîtements
-       à l'intérieur des bulletins.
+    """Manipulates bulletins as entities.  Does not modify contents.
+       Bulletin Managers take care of reading bulletins from and writing them
+       to disk.
 
        pathTemp             path
-
-                            - Obligatoire, doit être sur le même file system que
-                              pathSource/pathDest
+           - Required, must be on the same file system as pathSource/pathDest.
 
        pathSource           path
-
-                            Répertoire d´ou les fichiers sont lus.
+           - Directory from which bulletins are read (if necessary.)
 
        pathDest             path
-                            Répertoire ou les fichiers sont écrits.
-                            en mode use_pds pathDest est necessaire.
-                            Si le manager ne fait qu'écrire les fichier sur le disque,
-                            seul pathDest est nécessaire.
-                            en mode fet, le fichier va etre directement ingéré
+           - Directory to which bulletins are written.
+             (only needed if use_pds=true)
 
        mapEnteteDelai       map
 
-                            - Gestion pour la validité des fichiers concernant les délais.
+            - maps bulletin headers to valid reception times.
 
-                            - Map d'entêtes pointant sur des tuples, avec comme champ [0] le nombre de minutes
-                              avant, et champ [1] le nombre de minutes après, pour que le bulletin soit valide.
+                   the elements are tuples, 
+                       -- element[0] is number of max. minutes before the hour, 
+                       -- element[1] is number of max. minutes after the hour.
 
-                            Nb: Mettre à None pour désactiver la fonction de validité des fichiers
-                                concernant les délais.
+                       -- Set the map to None to turn off header validity checking.
 
-                            Ex: mapEnteteDelai = { 'CA':(5,20),'WO':(20,40)}
+                    sample: mapEnteteDelai = { 'CA':(5,20),'WO':(20,40)}
 
        SMHeaderFormat       Bool
 
-                            - Ajout du champ "AAXX jjhh4\\n" aux bulletins SM/SI.
+            - if true, Add a line "AAXX jjhh4\\n" to SM/SI bulletins.
 
        ficCollection        path
-
-                            - Path vers le fichier de collection correctement formatte
-                              Doit etre mis a None si on veut garder les bulletins
-                              intouchés.
-
-                            Nb: Mettre a None pour desactiver cette fonction
+        
+            - Collection configuration file.
+                Set to None to deactivate message collection.
 
        pathFichierCircuit   path
-
-                            - Remplace le -CIRCUIT dans l'extension par la liste de circuits
-                              séparés par un point.
-
-                            Nb: Mettre a None pour desactiver cette fonction
+             - The routing table.  (Header2circuit.conf)
+             - set to None to disable. 
 
        maxCompteur          Int
+             - Maximum number before rollover of unique numbers in file names.
 
-                            - Compteur à ajouter à la fin des fichiers (dans le nom du fichier)
-
-       Un bulletin manager est en charge de la lecture et écriture des
-       bulletins sur le disque.
 
     """
 
@@ -124,24 +108,20 @@ class bulletinManager:
 
            unRawBulletin        String
 
-                                - Le unRawBulletin est un string, et il est instancié
-                                  en bulletin avane l'écriture sur le disque
-                                - Les modifications sont effectuées via
-                                  unObjetBulletin.doSpecificProcessing() avant
-                                  l'écriture
+                     - unRawBulletin is a string, instantiated
+                       as a bulletin before it is written to disk 
+                     - modifications to the contents are done via a
+                       unObjetBulletin.doSpecificProcessing() call
+                       before writing.
 
            compteur             Bool
 
-                                - Si à True, le compteur est inclut dans le nom du fichier
+                     - If true, include counter in file name.
 
            includeError         Bool
 
-                                - Si à True et que le bulletin est erronné, le message
-                                  d'erreur est inséré au début du bulletin
-
-           Utilisation:
-
-                   Écrit le bulletin sur le disque. Le bulletin est une simple string.
+                     - If true, and the bulletin is problematic, prepend
+                       the bulletin data with a diagnostic message.
 
         """
 
