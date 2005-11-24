@@ -4,9 +4,10 @@
    Auteur:      Louis-Philippe Thériault
    Date:        Octobre 2004
 """
-import math, string, os, bulletinPlain, traceback, sys, time
+import math, re, string, os, bulletinPlain, traceback, sys, time
 import PXPaths
 
+import bulletinAm
 import bulletinWmo
 
 PXPaths.normalPaths()
@@ -440,9 +441,18 @@ class bulletinManager:
         if compteur :
            strCompteur = string.zfill(self.compteur, len(str(self.maxCompteur)))
 
-        # station
+        # station name : must be alphanumeric
         station = bulletin.getStation()
-        if isinstance(bulletin, bulletinWmo.bulletinWmo) and (bulletin.getHeader())[:6] != "SRCN40" : station = None
+        if station != None and re.escape(station) != station  : station = None
+
+        # bulletinAm      always have the station name in the WhatFn (if found)
+        # bulletinWmo     SRCN40 have the station name in the WhatFn (if found)
+        # bulletin-file ? SRCN40 have the station name in the WhatFn (if found)
+
+        if  not isinstance(bulletin, bulletinAm.bulletinAm) :
+            if (bulletin.getHeader())[:6] != "SRCN40"       : station = None
+
+        # station name not found -> than remain empty
         if station == None : station = ''
 
         # header
