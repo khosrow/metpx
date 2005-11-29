@@ -140,7 +140,12 @@ class SenderFTP(object):
     def send(self, files):
         currentFTPDir = ''
         for file in files:
-            nbBytes = os.stat(file)[stat.ST_SIZE] 
+            try:
+                nbBytes = os.stat(file)[stat.ST_SIZE] 
+            except:
+                (type, value, tb) = sys.exc_info()
+                self.logger.error("Unable to stat %s, Type: %s, Value: %s" % (file, type, value))
+                continue
             basename = os.path.basename(file)
             destName, destDir = self.client.getDestInfos(basename)
 
@@ -163,10 +168,10 @@ class SenderFTP(object):
                         if self.client.dir_mkdir == True and not os.path.isdir(destDir) : os.makedirs(destDir)
                         os.rename(file, destDir + '/' + destName)
                         self.logger.info("(%i Bytes) File %s delivered to %s://%s@%s%s%s" % (nbBytes, file, self.client.protocol, self.client.user, self.client.host, destDirString, destName))
-
                     except:
                         self.logger.error("Unable to do move operation to: %s" % (destDirString + destName))
                         time.sleep(1)
+
                 elif self.client.protocol == 'ftp':
                     if currentFTPDir != destDir:
                         if self.client.dir_mkdir:
