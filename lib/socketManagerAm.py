@@ -182,8 +182,8 @@ class socketManagerAm(socketManager.socketManager):
         try:
             #preparation du bulletin pour l'envoi
             data = self.wrapBulletin(bulletin)
-            #print repr(data)
-            #print('=====================================================================')
+            print repr(data)
+            print('=====================================================================')
 
             #tentative d'envoi et controle de la connexion
             #mettre le try/except dans un while(1)????
