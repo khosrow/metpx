@@ -32,9 +32,9 @@ PXPaths.normalPaths()
 
 if __name__ == '__main__':
     # We want this program to run under pds user
-    if not os.getuid() ==  pwd.getpwnam('pds')[2]:
-        pdsUID = pwd.getpwnam("pds")[2]
-        os.setuid(pdsUID)
+    #if not os.getuid() ==  pwd.getpwnam('pds')[2]:
+    #    pdsUID = pwd.getpwnam("pds")[2]
+    #    os.setuid(pdsUID)
     
     usage =  """%prog [source] (start|stop|restart|reload|status)\n
 example 1: %prog cmc start   => will start cmc source

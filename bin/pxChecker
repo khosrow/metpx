@@ -31,9 +31,9 @@ class PXChecker:
     LOG_LEVEL = "INFO"      # Logging level
 
     # We want this program to run under pds user
-    if not os.getuid() ==  pwd.getpwnam('pds')[2]:
-        pdsUID = pwd.getpwnam("pds")[2]
-        os.setuid(pdsUID)
+    #if not os.getuid() ==  pwd.getpwnam('pds')[2]:
+    #    pdsUID = pwd.getpwnam("pds")[2]
+    #    os.setuid(pdsUID)
 
     def __init__(self):
 

@@ -35,9 +35,9 @@ class PXDBCleaner:
     NB_DAYS_LEFT = None     # Number of days we left
 
     # We want this program to run under pds user
-    if not os.getuid() ==  pwd.getpwnam('pds')[2]:
-        pdsUID = pwd.getpwnam("pds")[2]
-        os.setuid(pdsUID)
+    #if not os.getuid() ==  pwd.getpwnam('pds')[2]:
+    #    pdsUID = pwd.getpwnam("pds")[2]
+    #    os.setuid(pdsUID)
 
     def __init__(self):
 
