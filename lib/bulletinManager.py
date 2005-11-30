@@ -436,30 +436,44 @@ class bulletinManager:
            SACN31_CWAO_121435_CCA__045440
         """
 
-        # compteur
+        # header : 1 - get header from bulletin
+        #          2-  must be alphanumeric
+
+        header = bulletin.getHeader()
+        if (header.replace(' ','')).isalnum() :
+           header = header.replace(' ','_')
+        else :
+           header = None
+
+        # station name :  1- bulletin header must be good
+        #                 2- get station from bulletin
+        #                 3- must be alphanumeric
+        #                 4- station in WhatFn is conditional to some bulletin type
+        #                    bulletinAm      always have the station name in the WhatFn (if found)
+        #                    bulletinWmo     SRCN40 have the station name in the WhatFn (if found)
+        #                    bulletin-file ? SRCN40 have the station name in the WhatFn (if found)
+
+        station = ''
+        if header != None :
+           station = bulletin.getStation()
+           if station == None       : station = ''
+           if not station.isalnum() : station = ''
+           if not isinstance(bulletin, bulletinAm.bulletinAm) :
+              if (bulletin.getHeader())[:6] != "SRCN40"       : station = ''
+               
+
+        # adding a counter to the file name insure its uniqueness
+
         strCompteur = ''
         if compteur :
            strCompteur = string.zfill(self.compteur, len(str(self.maxCompteur)))
 
-        # station name : must be alphanumeric
-        station = bulletin.getStation()
-        if station != None and re.escape(station) != station  : station = None
+        # correct header if needed
 
-        # bulletinAm      always have the station name in the WhatFn (if found)
-        # bulletinWmo     SRCN40 have the station name in the WhatFn (if found)
-        # bulletin-file ? SRCN40 have the station name in the WhatFn (if found)
-
-        if  not isinstance(bulletin, bulletinAm.bulletinAm) :
-            if (bulletin.getHeader())[:6] != "SRCN40"       : station = None
-
-        # station name not found -> than remain empty
-        if station == None : station = ''
-
-        # header
-        header = bulletin.getHeader()
-        header = header.replace(' ','_')
+        if header == None : header = 'UNPRINTABLE_HEADER'
 
         # whatfn
+
         whatfn = header + '_' + station + '_' + strCompteur
 
         return whatfn
