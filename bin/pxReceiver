@@ -36,6 +36,17 @@ if __name__ == '__main__':
     #    pdsUID = pwd.getpwnam("pds")[2]
     #    os.setuid(pdsUID)
     
+    # Only if run as root, we will try to change the user
+    # id to pds user. It's because at reboot time init try 
+    # to start px as root
+    if os.getuid() == 0:
+        try: 
+            pdsUID = pwd.getpwnam("pds")[2]
+            os.setuid(pdsUID)
+        except:
+            print "No pds user on this machine. Don't start as root!"
+            sys.exit(2)
+    
     usage =  """%prog [source] (start|stop|restart|reload|status)\n
 example 1: %prog cmc start   => will start cmc source
 example 2: %prog start       => will start all sources

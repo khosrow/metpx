@@ -31,7 +31,7 @@ def startThem(dir,name,cmd):
         counter += 1
         if os.fork() == 0:
              if counter == 2:
-                 time.sleep(0.1)  # sleep A
+                 time.sleep(0.2)  # sleep A
              os.execl( sys.path[0] + '/' + name , name, id, cmd )
 
 def start(cmd):
@@ -40,19 +40,18 @@ def start(cmd):
     startThem(PXPaths.ETC + 'tx/', 'pxSender', cmd)
     time.sleep(2)   # sleep C
 
+# Only if run as root, we will try to change the user
+# id to pds user. It's because at reboot time init try
+# to start px as root
 if os.getuid() == 0:
-    pdsUID = pwd.getpwnam("pds")[2]
-    os.setuid(pdsUID)
-    #print "FATAL: Do not start as root. It will be a mess."
-    #sys.exit(2)
+    try:
+        pdsUID = pwd.getpwnam("pds")[2]
+        os.setuid(pdsUID)
+    except:
+        print "No pds user on this machine. Don't start as root!"
+        sys.exit(2)
 
-"""
-if len(sys.argv) < 2:
-    print "USAGE: px (start|stop|restart|status) "
-    sys.exit(1)
-"""
-
-# Deux arguments doivent etre fournis (source et commande)
+# Two arguments must be supplied (source and command)
 if len(sys.argv) == 2:
     if sys.argv[1] not in ['start', 'stop', 'status', 'restart', 'reload']:
         print "USAGE: px (start|stop|restart|reload|status) "
