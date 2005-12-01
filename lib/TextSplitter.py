@@ -108,7 +108,7 @@ class TextSplitter:
 
     def breakLongText(self):
         """
-        Will break text in group of maxsize. Contrary to breakLongText, this 
+        Will break text in group of maxsize. Contrary to breakLongText1, this 
         method will procede correctly in case of line longer than maxSize.
         """
 
@@ -160,7 +160,7 @@ class TextSplitter:
         maxSize, a problem will result. If this is a situation with which we 
         have to deal, this method will have to be rewritten
 
-        Check breakLongText1 if you need to treat long line
+        Check breakLongText if you need to treat long line
 
         FIXME: Deal with empty text
         """
@@ -192,3 +192,32 @@ class TextSplitter:
 
         self.__blocks = blocks 
         return blocks
+
+if __name__ == "__main__":
+
+    # The case tested here is an extreme case where all lines composing
+    # the message are longer than maxSize. This is not representing a realistic
+    # case where in practice a line will never be longer than the maxSize.
+
+    maxSize = 25 
+    alignment = '/r/n'
+    overhead = 5 
+
+    text = """
+Ceci est un essai afin de voir le fonctionnement
+de ce test splitter. J'espere obtenir des 
+resultats concluants. Je commence a etre tanne
+de taper des niaiseries, je vais donc proceder a
+l'essai immediatement.
+
+
+DL
+"""
+
+    splitter = TextSplitter(text, maxSize, alignment, overhead)
+    print splitter.getLines()
+    splitter.breakLongText()
+
+    for line in splitter.getBlocks():
+        print line, len(line)
+        
