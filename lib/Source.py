@@ -66,7 +66,7 @@ class Source(object):
                                                                # been touched before being picked
         self.readConfig()
         self.ingestor.setClients()
-        self.printInfos(self)
+        #self.printInfos(self)
 
     def readConfig(self):
 

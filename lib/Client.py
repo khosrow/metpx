@@ -65,7 +65,7 @@ class Client(object):
         self.dir_pattern = False            # Verification of patterns in destination directory
 
         self.readConfig()
-        self.printInfos(self)
+        #self.printInfos(self)
 
     def readConfig(self):
         
