@@ -171,6 +171,8 @@ class Client(object):
                         destFileName = headParts[0] 
                 elif spec == 'NONE':
                     destFileName =  filename
+                elif re.compile('DESTFN=.*').match(spec):
+                    destFileName = spec[7:]
                 elif spec == 'TIME':
                     timeSuffix = ':' + time.strftime("%Y%m%d%H%M%S", time.gmtime())
                 else:
