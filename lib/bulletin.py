@@ -463,6 +463,11 @@ class bulletin:
         """
         header = self.getHeader()
 
+        # remove duplicate spaces
+        tokens = header.split()
+        header = ' '.join(tokens)
+        self.setHeader(header)
+
         if header=='':
             self.setError('Entete vide')
             return
