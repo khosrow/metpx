@@ -142,7 +142,11 @@ class Ingestor(object):
             return 0
         
         self.createDir(os.path.dirname(dbName), self.dbDirsCache)
-        os.link(receptionName, dbName)
+        try:
+            os.link(receptionName, dbName)
+        except OSError:
+            (type, value, tb) = sys.exc_info()
+            self.logger.error("Unable to link %s %s, Type: %s, Value: %s" % (receptionName, dbName, type, value))
 
         nbBytes = os.stat(receptionName)[stat.ST_SIZE]
 
@@ -175,7 +179,11 @@ class Ingestor(object):
         for name in clientNames:
             clientQueueName = self.getClientQueueName(name, ingestName)
             self.createDir(os.path.dirname(clientQueueName), self.clientDirsCache)
-            os.link(dbName, clientQueueName)
+            try:
+                os.link(dbName, clientQueueName)
+            except OSError:
+                (type, value, tb) = sys.exc_info()
+                self.logger.error("Unable to link %s %s, Type: %s, Value: %s" % (dbName, clientQueueName, type, value))
 
         self.logger.info("Queued for: %s" % string.join(clientNames))
         return 1
