@@ -53,7 +53,7 @@ class Ingestor(object):
                 os.makedirs(dir, 01775)
             except OSError:
                 (type, value, tb) = sys.exc_info()
-                self.logger.warning("Problem when creating dir (%s) => Type: %s, Value: %s" % (dir, type, value)) 
+                self.logger.debug("Problem when creating dir (%s) => Type: %s, Value: %s" % (dir, type, value)) 
 
     def setClients(self):
         """"
@@ -142,11 +142,12 @@ class Ingestor(object):
             return 0
         
         self.createDir(os.path.dirname(dbName), self.dbDirsCache)
-        try:
-            os.link(receptionName, dbName)
-        except OSError:
-            (type, value, tb) = sys.exc_info()
-            self.logger.error("Unable to link %s %s, Type: %s, Value: %s" % (receptionName, dbName, type, value))
+        #try:
+        #    os.link(receptionName, dbName)
+        #except OSError:
+        #    (type, value, tb) = sys.exc_info()
+        #    self.logger.error("Unable to link %s %s, Type: %s, Value: %s" % (receptionName, dbName, type, value))
+        os.link(receptionName, dbName)
 
         nbBytes = os.stat(receptionName)[stat.ST_SIZE]
 
@@ -179,11 +180,12 @@ class Ingestor(object):
         for name in clientNames:
             clientQueueName = self.getClientQueueName(name, ingestName)
             self.createDir(os.path.dirname(clientQueueName), self.clientDirsCache)
-            try:
-                os.link(dbName, clientQueueName)
-            except OSError:
-                (type, value, tb) = sys.exc_info()
-                self.logger.error("Unable to link %s %s, Type: %s, Value: %s" % (dbName, clientQueueName, type, value))
+            #try:
+            #    os.link(dbName, clientQueueName)
+            #except OSError:
+            #    (type, value, tb) = sys.exc_info()
+            #    self.logger.error("Unable to link %s %s, Type: %s, Value: %s" % (dbName, clientQueueName, type, value))
+            os.link(dbName, clientQueueName)
 
         self.logger.info("Queued for: %s" % string.join(clientNames))
         return 1
