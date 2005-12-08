@@ -27,7 +27,7 @@ class Logger:
        
       # Standard error is redirected in the log
       # FIXME: Potential problem when rotating occurs
-      #sys.stderr = open(logname, 'a')
+      sys.stderr = open(logname, 'a')
 
       # Custom levels
       logging.addLevelName(45, 'EXCEPTION')
