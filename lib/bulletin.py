@@ -501,9 +501,6 @@ class bulletin:
             return
 
         if len(tokens) == 3:
-            # put an empty BBB
-            parts = self.getHeader().split()
-            self.setHeader(' '.join(parts) + ' ')
             return
 
         if not tokens[3].isalpha() or len(tokens[3]) != 3 or tokens[3][0] not in ['C','A','R','P']:
@@ -511,7 +508,7 @@ class bulletin:
             self.logger.info("Entete corrigee: 4ieme champ (et les suivants) enleve du header") 
             parts = self.getHeader().split()
             del parts[3:]
-            self.setHeader(' '.join(parts) + ' ')
+            self.setHeader(' '.join(parts))
             return
 
         if len(tokens) == 5 and \
@@ -532,7 +529,6 @@ class bulletin:
             del parts[5:]
             self.setHeader(' '.join(parts))
             return
-
 
 if __name__ == '__main__':
  pass
