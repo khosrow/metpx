@@ -137,7 +137,7 @@ example 2: %prog start       => will start all clients
             reader.read()
             if len(reader.sortedFiles) >= 1:
                 sortedFiles = reader.sortedFiles[:client.batch]
-                logger.info("%d bulletins will be sent" % len(sortedFiles))
+                logger.info("%d files will be sent" % len(sortedFiles))
                 sender = SenderFTP.SenderFTP(client, logger)
                 sender.send(sortedFiles)
             else:
