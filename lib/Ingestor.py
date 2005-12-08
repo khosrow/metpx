@@ -53,7 +53,7 @@ class Ingestor(object):
                 os.makedirs(dir, 01775)
             except OSError:
                 (type, value, tb) = sys.exc_info()
-                self.logger.warning("Problem when creating dir (%s) => Type: %s, Value: %s" % (dir, type, value)) 
+                self.logger.debug("Problem when creating dir (%s) => Type: %s, Value: %s" % (dir, type, value)) 
 
     def setClients(self):
         """"
