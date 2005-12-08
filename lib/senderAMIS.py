@@ -118,7 +118,7 @@ class senderAMIS:
                self.totBytes += nbBytesSent
                #print self.totBytes
             #self.logger.info("(%5d Bytes) Bulletin %s livré", nbBytes, os.path.basename(self.reader.sortedFiles[index]))
-            self.logger.info("(%5d Bytes) Bulletin %s delivered" % (nbBytes, os.path.basename(self.reader.sortedFiles[index])))
+            self.logger.info("(%i Bytes) Bulletin %s delivered" % (nbBytes, os.path.basename(self.reader.sortedFiles[index])))
             try:
                os.unlink(self.reader.sortedFiles[index])
                self.logger.debug("%s has been erased", os.path.basename(self.reader.sortedFiles[index]))

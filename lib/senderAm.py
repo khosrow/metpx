@@ -120,7 +120,7 @@ class senderAm(gateway.gateway):
                 if succes:
                     self.totBytes += nbBytesSent
                     #self.logger.info("(%5d Bytes) Bulletin %s  livré ", nbBytesSent, os.path.basename(self.reader.sortedFiles[index]))
-                    self.logger.info("(%5d Bytes) Bulletin %s  delivered" % (nbBytesSent, os.path.basename(self.reader.sortedFiles[index])))
+                    self.logger.info("(%i Bytes) Bulletin %s  delivered" % (nbBytesSent, os.path.basename(self.reader.sortedFiles[index])))
                     self.unBulletinManagerAm.effacerFichier(self.reader.sortedFiles[index])
                     #self.logger.debug("senderAm.write(..): Effacage de " + self.reader.sortedFiles[index])
                     self.logger.debug("%s has been erased" % self.reader.sortedFiles[index])
