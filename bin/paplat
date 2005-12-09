@@ -194,7 +194,7 @@ example 8: %prog -r daniel.lemay -p MPCN,__ALL__ --pdsPatterns __ALL__,__ALL__:x
         msg['To'] = 'warnings_latencies'
         msg['From'] = 'warnings_latencies <warnings_latencies@ec.gc.ca>'
         msg['Subject'] = "%s Latencies for %s (%s) : MAX = %i seconds,  MEAN = %4.2f seconds,  MIN = %i seconds" % (self.latenciers[0].pattern, self.latenciers[0].client,
-                          dateLib.getISODate(self.latenciers[0].date), self.latenciers[0].max, self.latenciers[0].mean, self.latenciers[0].min)
+                          dateLib.getISODateDashed(self.latenciers[0].date), self.latenciers[0].max, self.latenciers[0].mean, self.latenciers[0].min)
         msg['Date'] = Utils.formatdate(localtime = 1)
         msg['Message-ID'] = Utils.make_msgid()
     
@@ -219,7 +219,7 @@ example 8: %prog -r daniel.lemay -p MPCN,__ALL__ --pdsPatterns __ALL__,__ALL__:x
 
     def addOptions(self, parser):
         #date, pattern, machines, sources, clients
-        parser.add_option("-d", "--date", action="store", type="string", dest="date", default=dateLib.getISODate(dateLib.getYesterdayFormatted(), False), metavar="DATE",
+        parser.add_option("-d", "--date", action="store", type="string", dest="date", default=dateLib.getYesterdayFormatted(), metavar="DATE",
                           help="Date for which we want stats (ISO Format: YYYYMMDD)")
 
         parser.add_option("-p", "--patterns", dest="patterns", default="",
