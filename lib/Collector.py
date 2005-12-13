@@ -22,9 +22,14 @@ PXPaths.normalPaths()              # Access to PX paths
 class Collector(object):
 
     def __init__(self, logger=None):
-        self.logger = logger
+        self.logger = logger   # Logger object
 
     def collect(self, filename):
+        """
+        Read the content of filename and determine what to do. If the bulletin must be sent
+        immediately, return the bulletin (as a string). If it must be retained for later treatment,
+        return an empty string.
+        """
         self.logger.info("Collector.collect() has been called")
         file = open(filename, 'r')
         rawBull = file.read()
