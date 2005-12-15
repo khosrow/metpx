@@ -8,6 +8,10 @@
 #
 # Description: Useful PX Paths
 #
+#
+# Revision History: 
+#   2005-12-09  NSD         Added collection db path to environment.
+#
 #############################################################################################
 """
 import os, os.path
@@ -34,7 +38,7 @@ def readConfig():
 
 def normalPaths():
 
-    global ROOT, BIN, LIB, LOG, ETC, RXQ, TXQ, DB, RX_CONF, TX_CONF, LAT, LAT_RESULTS, LAT_TMP
+    global ROOT, BIN, LIB, LOG, ETC, RXQ, TXQ, DB, RX_CONF, TX_CONF, LAT, LAT_RESULTS, LAT_TMP, COLLECTION_DB
 
     try:
         envVar = os.path.normpath(os.environ['PXROOT'])
@@ -51,6 +55,7 @@ def normalPaths():
     DB = ROOT + 'db/'
     RX_CONF = ETC + 'rx/'
     TX_CONF = ETC + 'tx/'
+    COLLECTION_DB = ROOT + 'collection'
 
     #Paths for pxLatencies
     LAT = ROOT + 'latencies/'
@@ -60,7 +65,7 @@ def normalPaths():
 
 def drbdPaths(rootPath):
 
-    global ROOT, BIN, LIB, LOG, ETC, RXQ, TXQ, DB, RX_CONF, TX_CONF, LAT, LAT_RESULTS, LAT_TMP
+    global ROOT, BIN, LIB, LOG, ETC, RXQ, TXQ, DB, RX_CONF, TX_CONF, LAT, LAT_RESULTS, LAT_TMP, COLLECTION_DB
 
     ROOT = os.path.normpath(rootPath) + '/'
     BIN = ROOT + 'bin/'
@@ -72,6 +77,7 @@ def drbdPaths(rootPath):
     DB = ROOT + 'db/'
     RX_CONF = ETC + 'rx/'
     TX_CONF = ETC + 'tx/'
+    COLLECTION_DB = ROOT + 'collection'
 
     #Paths for pxLatencies
     LAT = ROOT + 'latencies/'
