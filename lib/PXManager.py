@@ -8,6 +8,9 @@
 #
 # Description:
 #
+# Revision History: 
+#   2005-12-09  NSD         Created collection db dir.
+#
 #############################################################################################
 
 """
@@ -43,7 +46,7 @@ class PXManager(SystemManager):
         #self.rxPaths = ['/apps/px/toto/', '/apps/px/titi/', '/apps/px/tata/']
 
     def initPXPaths(self):
-        # ROOT, BIN, LIB, LOG, ETC, RXQ, TXQ, DB, RX_CONF, TX_CONF
+        # ROOT, BIN, LIB, LOG, ETC, RXQ, TXQ, DB, RX_CONF, TX_CONF, COLLECTION_DB
         self.createDir(PXPaths.BIN)
         self.createDir(PXPaths.LIB)
         self.createDir(PXPaths.LOG)
@@ -52,6 +55,7 @@ class PXManager(SystemManager):
         self.createDir(PXPaths.RXQ)
         self.createDir(PXPaths.TXQ)
         self.createDir(PXPaths.DB)
+        self.createDir(PXPaths.COLLECTION_DB)
 
     def initNames(self):
         if not os.path.isdir(PXPaths.ROOT):
