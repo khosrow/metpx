@@ -12,6 +12,8 @@
 #
 # Description:
 #
+# Revision History: 
+#   2005-12-14  NSD         Adding new collection type.
 #############################################################################################
 """
 import sys, os, pwd
@@ -110,6 +112,12 @@ example 2: %prog start       => will start all sources
     elif source.type == 'bulletin-file':
         igniter.setGateway('DUMMY')
         source.ingestor.ingestBulletinFile(igniter)
+    elif source.type == 'collector':
+        #-----------------------------------------------------------
+        # COMPLETEME: CollectionScheduler of type 'collector'
+        # goes here.
+        #-----------------------------------------------------------
+        pass
     else:
         raise Exception('Unknown type') 
 
