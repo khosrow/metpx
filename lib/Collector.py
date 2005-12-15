@@ -21,7 +21,8 @@ PXPaths.normalPaths()              # Access to PX paths
 
 class Collector(object):
 
-    def __init__(self, logger=None):
+    def __init__(self, source, logger=None):
+        self.source = source   # Source object containing configuration infos about the collector
         self.logger = logger   # Logger object
 
     def collect(self, filename):
@@ -31,6 +32,7 @@ class Collector(object):
         return an empty string.
         """
         self.logger.info("Collector.collect() has been called")
+        self.logger.info("Masks: %s" % str(self.source.masks))
         file = open(filename, 'r')
         rawBull = file.read()
         self.logger.info("%s" % rawBull)

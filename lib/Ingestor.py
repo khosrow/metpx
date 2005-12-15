@@ -28,7 +28,7 @@ class Ingestor(object):
     """
 
     def __init__(self, source=None, logger=None):
-
+        
         # General Attributes
         self.source = source
         self.reader = None
@@ -44,8 +44,13 @@ class Ingestor(object):
         self.clients = {}   # All the Client objects
         self.dbDirsCache = CacheManager(maxEntries=200000, timeout=25*3600)      # Directories created in the DB
         self.clientDirsCache = CacheManager(maxEntries=100000, timeout=2*3600)   # Directories created in TXQ
+        self.collector = None  # Access to collector configuration options
         if source is not None:
             self.logger.info("Ingestor (source %s) can link files to clients: %s" % (source.name, self.clientNames))
+
+    def setCollector(self, name):
+        from Source import Source
+        self.collector = Source(name, self.logger)
 
     def createDir(self, dir, cacheManager):
         if cacheManager.find(dir) == None:

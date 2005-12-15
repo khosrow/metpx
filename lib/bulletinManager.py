@@ -206,7 +206,7 @@ class bulletinManager:
             self.source.ingestor.ingest(tempNom, nomFichier, clist)
 
             if self.source.collection and self.regex.search(nomFichier):
-                rawBull = Collector(self.logger).collect(tempNom)
+                rawBull = Collector(self.source.ingestor.collector, self.logger).collect(tempNom)
                 if rawBull:
                     originalExtension = self.extension
                     self.extension = self.extension.replace('Direct', 'Collected')

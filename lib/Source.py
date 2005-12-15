@@ -29,8 +29,6 @@ class Source(object):
 
     def __init__(self, name='toto', logger=None) :
         
-        #Flow.__init__(self, name, 'sender', type, batch) # Parent constructor
-
         # General Attributes
         self.name = name                          # Source's name
         if logger is None:
@@ -39,12 +37,6 @@ class Source(object):
         else:
             self.logger = logger
         self.logger.info("Initialisation of source %s" % self.name)
-
-        if hasattr(self, 'ingestor'):
-            # Will happen only when a reload occurs
-            self.ingestor.__init__(self)
-        else:
-            self.ingestor = Ingestor(self)
 
         # Attributes coming from the configuration file of the source
         #self.extension = 'nws-grib:-CCCC:-TT:-CIRCUIT:Direct'  # Extension to be added to the ingest name
@@ -62,11 +54,22 @@ class Source(object):
         self.patternMatching = True                            # No pattern matching
         self.clientsPatternMatching = True                     # No clients pattern matching
         self.sorter = None                                     # No sorting on the filnames
+        self.collection = None                                 # None for no collection, else the name of the collector
         self.mtime = 0                                         # Integer indicating the number of seconds a file must not have 
                                                                # been touched before being picked
-        self.collection = False                                # If true, rxCollector will be called on appropriate files
         self.readConfig()
+
+        if hasattr(self, 'ingestor'):
+            # Will happen only when a reload occurs
+            self.ingestor.__init__(self)
+        else:
+            self.ingestor = Ingestor(self)
+
         self.ingestor.setClients()
+
+        if self.collection:
+            self.ingestor.setCollector(self.collection)
+
         self.printInfos(self)
 
     def readConfig(self):
@@ -115,7 +118,7 @@ class Source(object):
                     elif words[0] == 'patternMatching': self.patternMatching =  isTrue(words[1])
                     elif words[0] == 'clientsPatternMatching': self.clientsPatternMatching =  isTrue(words[1])
                     elif words[0] == 'validation' and isTrue(words[1]): self.validation = True
-                    elif words[0] == 'collection' and isTrue(words[1]): self.collection = True
+                    elif words[0] == 'collection': self.collection = words[1] 
                     elif words[0] == 'debug' and isTrue(words[1]): self.debug = True
                     elif words[0] == 'mtime': self.mtime = int(words[1])
                     elif words[0] == 'sorter': self.sorter = words[1]
