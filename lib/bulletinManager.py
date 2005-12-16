@@ -1,13 +1,25 @@
 # -*- coding: UTF-8 -*-
-"""Gestionnaire de bulletins
-
-   Auteur:      Louis-Philippe Thériault
-   Date:        Octobre 2004
+"""        
+#############################################################################################
+# Name: bulletinManager.py
+#
+# Authors: Louis-Philippe Thériault
+#         
+# Date: Octobre 2004 
+#       
+#
+# Description: Gestionnaire de bulletins
+#
+#
+# Revision History: 
+#   2005-10-01  NSD         Adding collection capability.
+#
+#############################################################################################
 """
 import math, re, string, os, bulletinPlain, traceback, sys, time
 import PXPaths
 
-from Collector import Collector
+from CollectionManager import CollectionManager
 import bulletinAm
 import bulletinWmo
 
@@ -205,8 +217,12 @@ class bulletinManager:
             #fet.directIngest( nomFichier, clist, tempNom, self.logger )
             self.source.ingestor.ingest(tempNom, nomFichier, clist)
 
+            #-----------------------------------------------------------------------------------------
+            # Collecting the report if collection is turned on and transmitting the collection 
+            # bulletin if necessary
+            #-----------------------------------------------------------------------------------------
             if self.source.collection and self.regex.search(nomFichier):
-                rawBull = Collector(self.source.ingestor.collector, self.logger).collect(tempNom)
+                rawBull = CollectionManager(self.source.ingestor.collector, self.logger).collectReport(tempNom)
                 if rawBull:
                     originalExtension = self.extension
                     self.extension = self.extension.replace('Direct', 'Collected')
