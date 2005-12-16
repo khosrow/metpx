@@ -62,15 +62,21 @@ class Source(object):
         #-----------------------------------------------------------------------------------------
         # Setting up default collection configuration values
         #-----------------------------------------------------------------------------------------
+        self.sentCollectionToken = ''        #Dir name token used to identify collections which have been transmitted.
         self.headersToCollect = []      #Title for report in the form TT from (TTAAii)
         self.headersValidTime = []      #The amount of time in minutes past the hour for which the report is considered on time.
         self.headersLateCycle = []      #Specified in minutes.  After the valid time period, we will check this often for late arrivals.
         self.headersTimeToLive = []     #The amount of time in hours for which the reports will be kept in the collection db.
-
+        
         #-----------------------------------------------------------------------------------------
         # Parse the configuration file
         #-----------------------------------------------------------------------------------------
         self.readConfig()
+
+        #-----------------------------------------------------------------------------------------
+        # Make sure the collection params are valid
+        #-----------------------------------------------------------------------------------------
+        self.validateCollectionParams()
 
         if hasattr(self, 'ingestor'):
             # Will happen only when a reload occurs
@@ -136,6 +142,11 @@ class Source(object):
                     elif words[0] == 'mtime': self.mtime = int(words[1])
                     elif words[0] == 'sorter': self.sorter = words[1]
                     elif words[0] == 'arrival': self.mapEnteteDelai = {words[1]:(int(words[2]), int(words[3]))}
+                    elif words[0] == 'sentCollectionToken': self.sentCollectionToken = words[1]
+                    elif words[0] == 'header': self.headersToCollect.append((words[1],))
+                    elif words[0] == 'headerValidTime': self.headersValidTime.append((words[1],))
+                    elif words[0] == 'headerLateCycle': self.headersLateCycle.append((words[1],))
+                    elif words[0] == 'headerTimeToLive': self.headersTimeToLive.append((words[1],))
 
                 except:
                     self.logger.error("Problem with this line (%s) in configuration file of source %s" % (words, self.name))
@@ -194,7 +205,7 @@ class Source(object):
         print("==========================================================================")
 
         print("******************************************")
-        print("*       Source T-Masks                     *")
+        print("*       Source T-Masks                   *")
         print("******************************************")
 
         for mask in self.tmasks:
@@ -202,6 +213,58 @@ class Source(object):
 
         print("==========================================================================")
 
+        print("******************************************")
+        print("*       Collection Params                *")
+        print("******************************************")        
+
+        print("Sent Collection Identifier: %s" % self.sentCollectionToken)
+
+        print ("HEADER  ValidTime  LateCycle  TimeToLive")
+        for position, header in enumerate(self.headersToCollect):
+            print ("%s %6s %10s %10s" % (header,  self.headersValidTime[position], \
+            self.headersLateCycle[position], self.headersTimeToLive[position]))
+        
+        print("==========================================================================")
+
+
+    def validateCollectionParams(self):
+        """ validateCollectionParams(self)
+
+        The purpose of this method is to make sure that the collection config parameters
+        are valid.
+        """
+        if self.type == 'collector':
+            #-----------------------------------------------------------------------------------------
+            # Check sent collection identifier
+            #-----------------------------------------------------------------------------------------
+            if self.sentCollectionToken == '':
+                self.logger.error("Error: No value given for the 'sentCollectionToken' parameter in configuration file: %s" % (self.name))
+                self.terminateWithError()
+
+            #-----------------------------------------------------------------------------------------
+            # Check other collection parameters.  All lists below should have the same size
+            #-----------------------------------------------------------------------------------------
+            if not (len(self.headersToCollect) == len(self.headersValidTime) == len(self.headersLateCycle) == len(self.headersTimeToLive)):
+                    self.logger.error("Error: There should be the same number of parameters given for EACH header in Configuration file: %s" % (self.name))
+                    self.terminateWithError()
+                
+
+    def terminateWithError (self):
+        """ terminateWithError(self)
+
+        The purpose of this method is to perform cleanup operations and return from the script 
+        with an error
+        """
+        #-----------------------------------------------------------------------------------------
+        # perform cleanup before termination
+        #-----------------------------------------------------------------------------------------
+
+        #-----------------------------------------------------------------------------------------
+        # Terminate this script
+        #-----------------------------------------------------------------------------------------
+        sys.exit()
+
+      
 if __name__ == '__main__':
 
     """
