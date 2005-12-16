@@ -11,6 +11,8 @@
 #
 # Description:
 #
+# Revision History: 
+#               2005-12-15 Added parsing of collection conf file
 #############################################################################################
 
 """
@@ -57,6 +59,17 @@ class Source(object):
         self.collection = None                                 # None for no collection, else the name of the collector
         self.mtime = 0                                         # Integer indicating the number of seconds a file must not have 
                                                                # been touched before being picked
+        #-----------------------------------------------------------------------------------------
+        # Setting up default collection configuration values
+        #-----------------------------------------------------------------------------------------
+        self.headersToCollect = []      #Title for report in the form TT from (TTAAii)
+        self.headersValidTime = []      #The amount of time in minutes past the hour for which the report is considered on time.
+        self.headersLateCycle = []      #Specified in minutes.  After the valid time period, we will check this often for late arrivals.
+        self.headersTimeToLive = []     #The amount of time in hours for which the reports will be kept in the collection db.
+
+        #-----------------------------------------------------------------------------------------
+        # Parse the configuration file
+        #-----------------------------------------------------------------------------------------
         self.readConfig()
 
         if hasattr(self, 'ingestor'):
