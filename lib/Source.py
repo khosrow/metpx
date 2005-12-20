@@ -143,10 +143,10 @@ class Source(object):
                     elif words[0] == 'sorter': self.sorter = words[1]
                     elif words[0] == 'arrival': self.mapEnteteDelai = {words[1]:(int(words[2]), int(words[3]))}
                     elif words[0] == 'sentCollectionToken': self.sentCollectionToken = words[1]
-                    elif words[0] == 'header': self.headersToCollect.append((words[1],))
-                    elif words[0] == 'headerValidTime': self.headersValidTime.append((words[1],))
-                    elif words[0] == 'headerLateCycle': self.headersLateCycle.append((words[1],))
-                    elif words[0] == 'headerTimeToLive': self.headersTimeToLive.append((words[1],))
+                    elif words[0] == 'header': self.headersToCollect.append(words[1])
+                    elif words[0] == 'headerValidTime': self.headersValidTime.append(words[1])
+                    elif words[0] == 'headerLateCycle': self.headersLateCycle.append(words[1])
+                    elif words[0] == 'headerTimeToLive': self.headersTimeToLive.append(words[1])
 
                 except:
                     self.logger.error("Problem with this line (%s) in configuration file of source %s" % (words, self.name))
@@ -221,7 +221,7 @@ class Source(object):
 
         print ("HEADER  ValidTime  LateCycle  TimeToLive")
         for position, header in enumerate(self.headersToCollect):
-            print ("%s %6s %10s %10s" % (header,  self.headersValidTime[position], \
+            print ("%0s %7s %10s %11s" % (header,  self.headersValidTime[position], \
             self.headersLateCycle[position], self.headersTimeToLive[position]))
         
         print("==========================================================================")
