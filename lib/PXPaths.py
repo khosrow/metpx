@@ -55,7 +55,7 @@ def normalPaths():
     DB = ROOT + 'db/'
     RX_CONF = ETC + 'rx/'
     TX_CONF = ETC + 'tx/'
-    COLLECTION_DB = ROOT + 'collection'
+    COLLECTION_DB = ROOT + 'collection/'
 
     #Paths for pxLatencies
     LAT = ROOT + 'latencies/'
