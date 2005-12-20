@@ -111,7 +111,12 @@ class bulletinManager:
 
         # Collection regex
         self.regex = re.compile(r'SACN|SICN|SMCN')
-      
+
+        #-----------------------------------------------------------------------------------------
+        # Create a collection manager if collections are enabled.
+        #-----------------------------------------------------------------------------------------
+        if self.source.collection:
+            self.collectionManager = CollectionManager(self.source.ingestor.collector, self.logger)
 
     def effacerFichier(self,nomFichier):
         try:
@@ -222,7 +227,7 @@ class bulletinManager:
             # bulletin if necessary
             #-----------------------------------------------------------------------------------------
             if self.source.collection and self.regex.search(nomFichier):
-                rawBull = CollectionManager(self.source.ingestor.collector, self.logger).collectReport(tempNom)
+                rawBull = self.collectionManager.collectReport(tempNom)
                 if rawBull:
                     originalExtension = self.extension
                     self.extension = self.extension.replace('Direct', 'Collected')
