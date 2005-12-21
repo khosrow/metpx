@@ -67,7 +67,7 @@ class Source(object):
         self.headersValidTime = []        #The amount of time in minutes past the hour for which the report is considered on time.
         self.headersLateCycle = []        #Specified in minutes.  After the valid time period, we will check this often for late arrivals.
         self.headersTimeToLive = []       #The amount of time in hours for which the reports will be kept in the collection db.
-        self.futureDatedReportWindow = 0  #The amount of time in minutes a report may be in the futere and still acceptable.
+        self.futureDatedReportWindow = [] #The amount of time in minutes a report may be in the futere and still acceptable.
 
         #-----------------------------------------------------------------------------------------
         # Parse the configuration file
@@ -148,7 +148,7 @@ class Source(object):
                     elif words[0] == 'headerValidTime': self.headersValidTime.append(words[1])
                     elif words[0] == 'headerLateCycle': self.headersLateCycle.append(words[1])
                     elif words[0] == 'headerTimeToLive': self.headersTimeToLive.append(words[1])
-                    elif words[0] == 'futureDatedReportWindow': self.futureDatedReportWindow = words[1]
+                    elif words[0] == 'futureDatedReportWindow': self.futureDatedReportWindow.append(words[1])
 
                 except:
                     self.logger.error("Problem with this line (%s) in configuration file of source %s" % (words, self.name))
@@ -220,12 +220,12 @@ class Source(object):
         print("******************************************")        
 
         print("Sent Collection Identifier: %s" % self.sentCollectionToken)
-        print("Future-dated Report window: %s minutes" % self.futureDatedReportWindow)
-
-        print ("\nHEADER  ValidTime  LateCycle  TimeToLive")
+        
+        print ("\nHeader  Valid Time  Late Cycle  Time To Live  Future-Dated Time Window")
         for position, header in enumerate(self.headersToCollect):
-            print ("%0s %7s %10s %11s" % (header,  self.headersValidTime[position], \
-            self.headersLateCycle[position], self.headersTimeToLive[position]))
+            print ("%s %7s %11s %12s %13s" % (header,  self.headersValidTime[position], \
+            self.headersLateCycle[position], self.headersTimeToLive[position], \
+            self.futureDatedReportWindow[position]))
         
         print("==========================================================================")
 
@@ -247,7 +247,9 @@ class Source(object):
             #-----------------------------------------------------------------------------------------
             # Check other collection parameters.  All lists below should have the same size
             #-----------------------------------------------------------------------------------------
-            if not (len(self.headersToCollect) == len(self.headersValidTime) == len(self.headersLateCycle) == len(self.headersTimeToLive)):
+            if not (len(self.headersToCollect) == len(self.headersValidTime) \
+                    == len(self.headersLateCycle) == len(self.headersTimeToLive) \
+                    == len(self.futureDatedReportWindow)):
                     self.logger.error("Error: There should be the same number of parameters given for EACH header in Configuration file: %s" % (self.name))
                     self.terminateWithError()
 
