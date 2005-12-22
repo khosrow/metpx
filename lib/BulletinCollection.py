@@ -28,8 +28,8 @@ class BulletinCollection(bulletin.bulletin):
         in order to carry out collections.
         This class will add the following attributes to a bulletin:
 
-            BBB     string
-                    -Represents the BBB field for a report or bulletin
+            collectionBBB     string
+                    -Represents the BBB field for a collection
 
             bulletinTimeStamp   string
                                 -Timestamp for this bulletin
@@ -48,48 +48,43 @@ class BulletinCollection(bulletin.bulletin):
         headerTokens = string.split(self.getHeader()) 
 
         #-----------------------------------------------------------------------------------------
-        # the timstamp is always the last token in header
+        # the timstamp is always the third token in header
         #-----------------------------------------------------------------------------------------
-        timeStamp = headerTokens[len(headerTokens) - 1] 
+        timeStamp = headerTokens[2] 
 
         return timeStamp
 
-        """ REMOVEME: The following single line is equivelent to getTimeStamp():
-        return string.split(self.getHeader())[len(string.split(self.getHeader())) -1]
-        """
-
-
+    
     """ The following get & set methods are here to make CollectionManager easy to read
         They do the obvious.
     """
-    def getBBB(self):
-        return self.BBB
+    def getCollectionBBB(self):
+        return self.collectionBBB
 
-    def setBBB(self, newBBB):
-        self.BBB = newBBB
+    def setCollectionBBB(self, newCollectionBBB):
+        self.collectionBBB = newCollectionBBB
             
-    def getB1(self):
-        return self.BBB[0]
+    def getCollectionB1(self):
+        return self.collectionBBB[0]
 
-    def getB2(self):
-        return self.BBB[1]
+    def getCollectionB2(self):
+        return self.collectionBBB[1]
 
-    def getB3(self):
-        return self.BBB[2]
+    def getCollectionB3(self):
+        return self.collectionBBB[2]
 
-    def setB1(self, newB):
-        self.BBB = "%s%s%s" % (newB, self.BBB[1], self.BBB[2])
+    def setCollectionB1(self, newCollectionB):
+        self.collectionBBB = "%s%s%s" % (newCollectionB, self.collectionBBB[1], self.collectionBBB[2])
 
-    def setB2(self, newB):
-        self.BBB = "%s%s%s" % (self.BBB[0], newB, self.BBB[2])
+    def setCollectionB2(self, newCollectionB):
+        self.collectionBBB = "%s%s%s" % (self.collectionBBB[0], newCollectionB, self.collectionBBB[2])
 
-    def setB3(self, newB):
-        self.BBB = "%s%s%s" % (self.BBB[0], self.BBB[1]. newB)
+    def setCollectionB3(self, newCollectionB):
+        self.collectionBBB = "%s%s%s" % (self.collectionBBB[0], self.collectionBBB[1]. newCollectionB)
 
     def getTwoLetterHeader(self):
         """ getTwoLetterHeaderp() parses the header and returns the two letter header
             (I.e 'SA' will be returned for 'SACNXX')
-
         """
         #-----------------------------------------------------------------------------------------
         # split header into tokens
@@ -102,4 +97,67 @@ class BulletinCollection(bulletin.bulletin):
         TwoLetterHeader = headerTokens[0] 
 
         return TwoLetterHeader[:2]
-   
+
+
+    def getBulletinMinutesField(self):
+        """ getBulletinMinutesField() parses the header and returns the minutes field
+            of the bulletin.
+        """
+        #-----------------------------------------------------------------------------------------
+        # get the timestamp
+        #-----------------------------------------------------------------------------------------
+        timeStamp = self.getTimeStamp() 
+        
+        #-----------------------------------------------------------------------------------------
+        # the minutes field is made up of the last two chars in the timestamp in DDHHMM
+        #-----------------------------------------------------------------------------------------
+        minutesField = timeStamp[(len(timeStamp) -2):]
+
+        return minutesField
+
+
+    def getBulletinHoursField(self):
+        """ getBulletinHoursField() parses the header and returns the hours field
+            of the bulletin.
+        """
+        #-----------------------------------------------------------------------------------------
+        # get the timestamp
+        #-----------------------------------------------------------------------------------------
+        timeStamp = self.getTimeStamp()  
+
+        #-----------------------------------------------------------------------------------------
+        # the hours field is made up of the middle two chars in the timestamp in DDHHMM
+        #-----------------------------------------------------------------------------------------
+        hoursField = timeStamp[2:4]
+
+        return hoursField
+
+
+    def getBulletinDaysField(self):
+        """ getBulletinDaysField() parses the header and returns the days field
+            of the bulletin.
+        """
+        #-----------------------------------------------------------------------------------------
+        # get the timestamp
+        #-----------------------------------------------------------------------------------------
+        timeStamp = self.getTimeStamp()  
+
+        #-----------------------------------------------------------------------------------------
+        # the hours field is made up of the first two chars in the timestamp in DDHHMM
+        #-----------------------------------------------------------------------------------------
+        daysField = timeStamp[:2]
+
+        return daysField
+
+
+    def getReportBBB(self):
+        """ getReportBBB() -> BBB || False
+
+            parses the header and returns the BBB field
+            in the bulletin, or False if one does not exist.
+        """
+        #-----------------------------------------------------------------------------------------
+        # split header into tokens
+        #-----------------------------------------------------------------------------------------
+        headerTokens = string.split(self.getHeader()) 
+        print headerTokens
