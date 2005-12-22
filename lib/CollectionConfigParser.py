@@ -18,6 +18,10 @@
 __version__ = '1.0'
 
 from Logger import Logger
+import string
+import PXPaths
+
+PXPaths.normalPaths()              # Access to PX paths
 
 class CollectionConfigParser:
     """ CollectionConfigParser():
@@ -38,3 +42,59 @@ class CollectionConfigParser:
             the hour a bulletin of this type is considered valid according to the global
             collection config parameters.
         """
+        #-----------------------------------------------------------------------------------------
+        # Find out the index of the given header in the headersToCollect list
+        #-----------------------------------------------------------------------------------------
+        headerIndex = self.getIndexForHeader(header)
+
+        #-----------------------------------------------------------------------------------------
+        # Now return the appropriate element in the headersValidTime list
+        #-----------------------------------------------------------------------------------------
+        return self.source.headersValidTime[headerIndex]
+
+
+    def getIndexForHeader (self, header):
+        """ getIndexForHeader (self, Header) -> index
+
+            Given the Two letter header, returns the index of this header in the 
+            headersToCollect list
+        """
+        #-----------------------------------------------------------------------------------------
+        # Find out the index of the given header in the headersToCollect list
+        #-----------------------------------------------------------------------------------------
+        return self.source.headersToCollect.index(header)
+
+
+    def getFutureDatedReportWindowByHeader (self, header):
+        """ getFutureDatedReportWindowByHeader (self, Header) -> int
+
+            Given the Two letter header, returns the future-dated time window for this
+            header type
+        """
+        #-----------------------------------------------------------------------------------------
+        # Find out the index of the given header in the headersToCollect list
+        #-----------------------------------------------------------------------------------------
+        headerIndex = self.getIndexForHeader(header)
+
+        #-----------------------------------------------------------------------------------------
+        # Now return the appropriate element in the headersValidTime list
+        #-----------------------------------------------------------------------------------------
+        return self.source.futureDatedReportWindow[headerIndex]
+
+
+    def getCollectionPath (self):
+        """ getCollectionPath (self) -> string
+
+            Returns a string representing the location path to the collection dir
+            (I.e. /apps/px/collection)
+        """
+        #-----------------------------------------------------------------------------------------
+        # 
+        #-----------------------------------------------------------------------------------------
+        self.logger.info ("The collection_db path is: %s" %PXPaths.COLLECTION_DB)
+
+
+        #-----------------------------------------------------------------------------------------
+        # 
+        #-----------------------------------------------------------------------------------------
+        return PXPaths.COLLECTION_DB

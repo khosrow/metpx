@@ -65,7 +65,7 @@ class BulletinCollection(bulletin.bulletin):
     def getBBB(self):
         return self.BBB
 
-    def setBBB(newBBB):
+    def setBBB(self, newBBB):
         self.BBB = newBBB
             
     def getB1(self):
@@ -77,14 +77,29 @@ class BulletinCollection(bulletin.bulletin):
     def getB3(self):
         return self.BBB[2]
 
-    def setB1(newB):
-        self.BBB[0] = newB
+    def setB1(self, newB):
+        self.BBB = "%s%s%s" % (newB, self.BBB[1], self.BBB[2])
 
-    def setB2(newB):
-        self.BBB[1] = newB
+    def setB2(self, newB):
+        self.BBB = "%s%s%s" % (self.BBB[0], newB, self.BBB[2])
 
-    def setB3(newB):
-        self.BBB[2] = newB
+    def setB3(self, newB):
+        self.BBB = "%s%s%s" % (self.BBB[0], self.BBB[1]. newB)
 
+    def getTwoLetterHeader(self):
+        """ getTwoLetterHeaderp() parses the header and returns the two letter header
+            (I.e 'SA' will be returned for 'SACNXX')
 
+        """
+        #-----------------------------------------------------------------------------------------
+        # split header into tokens
+        #-----------------------------------------------------------------------------------------
+        headerTokens = string.split(self.getHeader()) 
+
+        #-----------------------------------------------------------------------------------------
+        # the first two letters of the first element make up the two-letter header
+        #-----------------------------------------------------------------------------------------
+        TwoLetterHeader = headerTokens[0] 
+
+        return TwoLetterHeader[:2]
    
