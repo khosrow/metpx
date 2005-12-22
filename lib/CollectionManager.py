@@ -20,11 +20,14 @@ __version__ = '1.0'
 import sys, os, os.path, time, string, commands, re, signal, fnmatch
 sys.path.insert(1,sys.path[0] + '/../lib/importedLibs')
 
+import datetime 
 import PXPaths
 from Logger import Logger
 import CollectionBuilder
 import CollectionConfigParser
 import time
+import BulletinCollection
+import BulletinWriter
 
 PXPaths.normalPaths()              # Access to PX paths
 
@@ -37,6 +40,7 @@ class CollectionManager(object):
            Author:      National Software Development<nssib@ec.gc.ca>
            Date:        December 2005
     """
+
 
     def __init__(self, source, logger=None):
         self.source = source   # Source object containing configuration infos about the collector
@@ -53,6 +57,16 @@ class CollectionManager(object):
         #-----------------------------------------------------------------------------------------
         self.collectionConfig = CollectionConfigParser.CollectionConfigParser(self.logger,self.source)
 
+        #-----------------------------------------------------------------------------------------
+        # A placeholder for the bulletin object that will be set for this class to use
+        #-----------------------------------------------------------------------------------------
+        self.bulletin = ''
+
+        #-----------------------------------------------------------------------------------------
+        # A BulletinWriter object to carry out disk-related tasks
+        #-----------------------------------------------------------------------------------------
+        self.bulletinWriter = BulletinWriter.BulletinWriter(self.logger,self.collectionConfig)
+
 
     def collectReport(self, fileName):
         """ collectReports (self, fileName)
@@ -68,44 +82,182 @@ class CollectionManager(object):
                 EmptyString: Empty Text sring - Indicating that the bulleting does not
                                                 need to be sent immediately.
         """
-      
         #-----------------------------------------------------------------------------------------
         # use collectionBuilder to create a bulletin object from the given file
         #-----------------------------------------------------------------------------------------
-        bulletin = self.collectionBuilder.buildBulletinFromFile(fileName)
-
+        self.bulletin = self.collectionBuilder.buildBulletinFromFile(fileName)
+        
         #-----------------------------------------------------------------------------------------
-        # Let's find out if the report arrived on time
+        # Let's find out if the report arrived on time.  If so, write the report bulletin
+        # to disk.
         #-----------------------------------------------------------------------------------------
-        if (self.isReportOnTime(bulletin)):
-            self.logger.info("COMPLETEME: The report was on time")
+        self.logger.info("The bulletin timestap is: %s" %self.bulletin.getTimeStamp())
+        if (self.isReportOnTime()):
+            self.bulletinWriter.writeOnTimeBulletinToDisk(self.bulletin)
         else:
             self.logger.info("COMPLETEME: The report was NOT on time")
-
-        #-----------------------------------------------------------------------------------------
-        # REMOVEME
-        #-----------------------------------------------------------------------------------------
-        #self.logger.info("Source.type in collector is: %s" % self.source.type)
-        #self.logger.info("The new bulletin's Header is: %s" % bulletin.getHeader())
-        #self.logger.info("The new bulletin's time is: %s" % bulletin.getTimeStamp())
-
+            self.doesReportHaveBbbField()
+            
         #-----------------------------------------------------------------------------------------
         # COMPLETEME
         #-----------------------------------------------------------------------------------------
-        return 'THIS IS A FAKE RETURN IN CollectionManager.py'
+        return 'COMPLETEME:THIS IS A FAKE RETURN IN CollectionManager.py'
 
 
-    def isReportOnTime(self, bulletin):
-        """ isReportOnTime(bulletin) -> Boolean
+    def isReportOnTime(self):
+        """ isReportOnTime() -> Boolean
 
             Given the bulletin, returns True if the bulletin is considered on time
             and an empty string if the bulletin is not considered on time.
-        """
-        presentTime = time.strftime("%d%H%M",time.localtime())
-        bulletinTime = bulletin.getTimeStamp()
 
-        self.logger.info("COMPLETEME presentTime is: %s" % presentTime)
-        self.logger.info("COMPLETEME bulletin time is: %s" % bulletinTime)
+            The incoming bulletin is considered on time if it is from less than
+            futureDatedReportWindow mintues in the future and for hourly bulletins only,
+            it is less than headerValidTime minutes late.
+
+            Return Values:
+                True: string    -Returned if bulletin is considered on time.
+                False: string   -Returned if bulletin is not considered on time.
+        """
+        True = 'True'
+        False = ''
+        #-----------------------------------------------------------------------------------------
+        # Only reports created for the top of the hour may be considered on time.
+        #-----------------------------------------------------------------------------------------
+        reportPeriodMins = self.bulletin.getBulletinMinutesField()
+        if (reportPeriodMins == '00'):
+            
+            #-----------------------------------------------------------------------------------------
+            # Find out how many minutes past the hour is considered on-time for this bulletin type
+            #-----------------------------------------------------------------------------------------
+            maxPastDateInMins = self.collectionConfig. \
+            getReportValidTimeByHeader(self.bulletin.getTwoLetterHeader())
+
+            #-----------------------------------------------------------------------------------------
+            # Find out how far in the future an acceptable report may be
+            #-----------------------------------------------------------------------------------------
+            maxFutureDateInMins = self.collectionConfig. \
+            getFutureDatedReportWindowByHeader(self.bulletin.getTwoLetterHeader())
+
+            #-----------------------------------------------------------------------------------------
+            # In order for this bulletin to be on time, it must fall in between the maximum past
+            # date and the maximum future date
+            #-----------------------------------------------------------------------------------------
+            futureCheck = self.isBulletinWithinFutureWindow(maxFutureDateInMins)
+            pastCheck = self.isBulletinWithinPastWindow(maxPastDateInMins)
+
+            #-----------------------------------------------------------------------------------------
+            # If bulletin falls in between both limits, then it is on time
+            #-----------------------------------------------------------------------------------------
+            if (futureCheck) and (pastCheck):
+                return True
+            else:
+                return False
+        else:
+            return False
+
+        
+    def isBulletinWithinFutureWindow(self, maxFutureDateInMins):
+        """ isBulletinWithinFutureWindow(maxFutureDateInMins) -> Boolean
+
+            This method makes sure that the incoming bulletin does not exceed the 
+            maximum future date.  It will return a boolean value of True or False
+            based on the outcome
+        """
+        True = 'True'
+        False = ''
+        #-----------------------------------------------------------------------------------------
+        # Produce time objects needed for comparisons.
+        # The bulletin has no month or year, so assume present year and month
+        #-----------------------------------------------------------------------------------------
+        presentDateTime = datetime.datetime.now()
+        maxFutureDateTime = presentDateTime + datetime.timedelta(minutes = long(maxFutureDateInMins))
+        bulletinDateTime = datetime.datetime(presentDateTime.year, presentDateTime.month, \
+                           int(self.bulletin.getBulletinDaysField()), \
+                           int(self.bulletin.getBulletinHoursField()), \
+                           int(self.bulletin.getBulletinMinutesField())) 
+
+        #-----------------------------------------------------------------------------------------
+        # If our maxFutureDateTime spans into a new year, then it is possible
+        # that the bulletin may have the new year as its year
+        #-----------------------------------------------------------------------------------------
+        if (maxFutureDateTime.year > presentDateTime.year):
+            bulletinDateTime = bulletinDateTime.replace(year = maxFutureDateTime.year)
+
+        #-----------------------------------------------------------------------------------------
+        # If our maxFutureDateTime spans into a new month, then it is possible
+        # that the bulletin may have the new month as its month
+        #-----------------------------------------------------------------------------------------
+        if (maxFutureDateTime.month != presentDateTime.month):
+            bulletinDateTime = bulletinDateTime.replace(month = maxFutureDateTime.month)
+
+        #-----------------------------------------------------------------------------------------
+        # If the bulletin is still more futuristic than the maxFutureDateTime, then it's from 
+        # too far into the future to be considered on time.
+        #-----------------------------------------------------------------------------------------
+        if (bulletinDateTime > maxFutureDateTime):
+            return False
+        else:
+            return True
+
+
+    def isBulletinWithinPastWindow(self, maxPastDateInMins):
+        """ isBulletinWithinPastWindow(maxPastDateInMins) -> Boolean
+
+            This method makes sure that the incoming bulletin does not exceed the 
+            maximum past date.  It will return a boolean value of True or False
+            based on the outcome
+        """
+        True = 'True'
+        False = ''
+        #-----------------------------------------------------------------------------------------
+        # Produce time objects needed for comparisons.
+        # The bulletin has no month or year, so assume present year and month
+        #-----------------------------------------------------------------------------------------
+        presentDateTime = datetime.datetime.now()
+        maxPastDateTime = presentDateTime - datetime.timedelta(minutes = long(maxPastDateInMins))
+        bulletinDateTime = datetime.datetime(presentDateTime.year, presentDateTime.month, \
+                           int(self.bulletin.getBulletinDaysField()), \
+                           int(self.bulletin.getBulletinHoursField()), \
+                           int(self.bulletin.getBulletinMinutesField())) 
+
+        #-----------------------------------------------------------------------------------------
+        # If our maxPastDateTime spans into a previous year, then it is possible
+        # that the bulletin may have the previous year as its year
+        #-----------------------------------------------------------------------------------------
+        if (maxPastDateTime.year < presentDateTime.year):
+            bulletinDateTime = bulletinDateTime.replace(year = maxPastDateTime.year)
+
+        #-----------------------------------------------------------------------------------------
+        # If our maxPastDateTime spans into a previous month, then it is possible
+        # that the bulletin may have the previous month as its month
+        #-----------------------------------------------------------------------------------------
+        if (maxPastDateTime.month != presentDateTime.month):
+            bulletinDateTime = bulletinDateTime.replace(month = maxPastDateTime.month)
+
+        #-----------------------------------------------------------------------------------------
+        # If the bulletin is still older than the maxPastDateTime, then it's too old and 
+        # cannot be considered on time.
+        #-----------------------------------------------------------------------------------------
+        if (bulletinDateTime < maxPastDateTime):
+            return False
+        else:
+            return True
+
+
+
+    def doesReportHaveBbbField(self):
+        """ doesReportHaveBbbField() -> Boolean
+
+            This method makes returns True if the incoming bulletin has a BBB field 
+            specified.  It will return False if a BBB field is not specified
+        """
+        True = 'True'
+        False = ''
+        #-----------------------------------------------------------------------------------------
+        # get the BBB field of the bulletin
+        #-----------------------------------------------------------------------------------------
+        bulletinBBB = self.bulletin.getReportBBB()
+
 
 if __name__ == '__main__':
     pass
