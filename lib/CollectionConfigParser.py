@@ -88,13 +88,4 @@ class CollectionConfigParser:
             Returns a string representing the location path to the collection dir
             (I.e. /apps/px/collection)
         """
-        #-----------------------------------------------------------------------------------------
-        # 
-        #-----------------------------------------------------------------------------------------
-        self.logger.info ("The collection_db path is: %s" %PXPaths.COLLECTION_DB)
-
-
-        #-----------------------------------------------------------------------------------------
-        # 
-        #-----------------------------------------------------------------------------------------
         return PXPaths.COLLECTION_DB
