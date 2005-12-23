@@ -36,7 +36,10 @@ class BulletinCollection(bulletin.bulletin):
             
 
     """
-
+    #-----------------------------------------------------------------------------------------
+    # Class attributes
+    #-----------------------------------------------------------------------------------------
+    collectionBBB = '   '
 
     def getTimeStamp(self):
         """ getTimeStamp() parses the header and returns the timestamp as a string
@@ -51,7 +54,6 @@ class BulletinCollection(bulletin.bulletin):
         # the timstamp is always the third token in header
         #-----------------------------------------------------------------------------------------
         timeStamp = headerTokens[2] 
-
         return timeStamp
 
     
@@ -80,7 +82,7 @@ class BulletinCollection(bulletin.bulletin):
         self.collectionBBB = "%s%s%s" % (self.collectionBBB[0], newCollectionB, self.collectionBBB[2])
 
     def setCollectionB3(self, newCollectionB):
-        self.collectionBBB = "%s%s%s" % (self.collectionBBB[0], self.collectionBBB[1]. newCollectionB)
+        self.collectionBBB = "%s%s%s" % (self.collectionBBB[0], self.collectionBBB[1], newCollectionB)
 
     def getTwoLetterHeader(self):
         """ getTwoLetterHeaderp() parses the header and returns the two letter header
@@ -95,7 +97,6 @@ class BulletinCollection(bulletin.bulletin):
         # the first two letters of the first element make up the two-letter header
         #-----------------------------------------------------------------------------------------
         TwoLetterHeader = headerTokens[0] 
-
         return TwoLetterHeader[:2]
 
 
@@ -112,7 +113,6 @@ class BulletinCollection(bulletin.bulletin):
         # the minutes field is made up of the last two chars in the timestamp in DDHHMM
         #-----------------------------------------------------------------------------------------
         minutesField = timeStamp[(len(timeStamp) -2):]
-
         return minutesField
 
 
@@ -129,7 +129,6 @@ class BulletinCollection(bulletin.bulletin):
         # the hours field is made up of the middle two chars in the timestamp in DDHHMM
         #-----------------------------------------------------------------------------------------
         hoursField = timeStamp[2:4]
-
         return hoursField
 
 
@@ -146,18 +145,70 @@ class BulletinCollection(bulletin.bulletin):
         # the hours field is made up of the first two chars in the timestamp in DDHHMM
         #-----------------------------------------------------------------------------------------
         daysField = timeStamp[:2]
-
         return daysField
 
 
     def getReportBBB(self):
-        """ getReportBBB() -> BBB || False
+        """ getReportBBB() -> String || False
 
             parses the header and returns the BBB field
             in the bulletin, or False if one does not exist.
         """
+        False == ''
         #-----------------------------------------------------------------------------------------
         # split header into tokens
         #-----------------------------------------------------------------------------------------
         headerTokens = string.split(self.getHeader()) 
-        print headerTokens
+        
+        #-----------------------------------------------------------------------------------------
+        # The header looks like "SACN58 CWAO 231334 BBB".  The BBB field is the fourth element
+        #-----------------------------------------------------------------------------------------
+        if (len(headerTokens) > 3):
+            return headerTokens[3]
+        else:
+            return False
+
+
+    def getReportB1(self):
+        """ getReportB1() -> Char || False
+
+            parses the header and returns the first element
+            of the BBB field in the bulletin, or False if one 
+            does not exist.
+        """
+        False == ''
+        #-----------------------------------------------------------------------------------------
+        # get the report's BBB field
+        #-----------------------------------------------------------------------------------------
+        reportBBB = self.getReportBBB()
+        
+        #-----------------------------------------------------------------------------------------
+        # return first element
+        #-----------------------------------------------------------------------------------------
+        if (reportBBB):
+            return reportBBB[0]
+        else:
+            return False
+
+
+    def getReportB2(self):
+        """ getReportB2() -> Char || False
+
+            parses the header and returns the second element
+            of the BBB field in the bulletin, or False if one 
+            does not exist.
+        """
+        False == ''
+        #-----------------------------------------------------------------------------------------
+        # get the report's BBB field
+        #-----------------------------------------------------------------------------------------
+        reportBBB = self.getReportBBB()
+
+        #-----------------------------------------------------------------------------------------
+        # return second element
+        #-----------------------------------------------------------------------------------------
+        if (reportBBB):
+            return reportBBB[1]
+        else:
+            return False
+        
