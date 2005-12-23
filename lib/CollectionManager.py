@@ -73,7 +73,10 @@ class CollectionManager(object):
 
             Read the content of filename and determine if the bulletin needs to be 
             sent immediately, or if it can be sent at the end of the collection
-            interval.
+            interval. This method contains all of the business logic neede to 
+            determine if a bulletin needs to be collected.  For more information
+            about the business logic and the flow of this method, please see the 
+            "Collection Process Flow diagram" document.
 
             Return values:
                 rawBulletin: Text string -  returning the bulletin so that it can be sent
@@ -95,12 +98,28 @@ class CollectionManager(object):
         if (self.isReportOnTime()):
             self.bulletinWriter.writeOnTimeBulletinToDisk(self.bulletin)
         else:
-            self.logger.info("COMPLETEME: The report was NOT on time")
-            self.doesReportHaveBbbField()
-            
+            #-----------------------------------------------------------------------------------------
+            # In this section we'll attempt to determine the value of the Collection's B1 anb B2 
+            # variables. 
+            #-----------------------------------------------------------------------------------------
+            if (self.doesReportHaveBbbField()):
+                self.bulletin.setCollectionB1(self.bulletin.getReportB1())
+                self.bulletin.setCollectionB2(self.bulletin.getReportB2())
+            else:
+                self.bulletin.setCollectionB1("R")
+                self.bulletin.setCollectionB2("R")
+
+            #-----------------------------------------------------------------------------------------
+            # In this section we'll attempt to determine the value of the Collection's B3 variable
+            #-----------------------------------------------------------------------------------------
+            if (self.isReportOlderThan24H()):
+                self.bulletin.setCollectionB3("Z")
+            else:
+                pass
         #-----------------------------------------------------------------------------------------
         # COMPLETEME
         #-----------------------------------------------------------------------------------------
+        print "The collection's BBB is now:", self.bulletin.getCollectionBBB()
         return 'COMPLETEME:THIS IS A FAKE RETURN IN CollectionManager.py'
 
 
@@ -203,9 +222,10 @@ class CollectionManager(object):
     def isBulletinWithinPastWindow(self, maxPastDateInMins):
         """ isBulletinWithinPastWindow(maxPastDateInMins) -> Boolean
 
-            This method makes sure that the incoming bulletin does not exceed the 
-            maximum past date.  It will return a boolean value of True or False
-            based on the outcome
+            This method accepts a variable in minutes and returns False 
+            if the incoming bulletin is older than maxPastDateInMins.  
+            It will return True if the bulletin is newer than the 
+            maxPastDateInMins.
         """
         True = 'True'
         False = ''
@@ -244,7 +264,6 @@ class CollectionManager(object):
             return True
 
 
-
     def doesReportHaveBbbField(self):
         """ doesReportHaveBbbField() -> Boolean
 
@@ -257,6 +276,36 @@ class CollectionManager(object):
         # get the BBB field of the bulletin
         #-----------------------------------------------------------------------------------------
         bulletinBBB = self.bulletin.getReportBBB()
+
+        #-----------------------------------------------------------------------------------------
+        # The report has a BBB field if the returning string was not empty
+        #-----------------------------------------------------------------------------------------
+        if (bulletinBBB):
+            return True
+        else:
+            return False
+
+
+    def isReportOlderThan24H(self):
+        """ isReportOlderThan24H -> Boolean
+
+            This method returns True if the incoming bulletin is older than
+            24 hours and False if it is not.
+        """
+        True = 'True'
+        False = ''
+        #-----------------------------------------------------------------------------------------
+        # 24 hours equals 1440 minutes.  
+        # A returned value of true from isBulletinWithinPastWindow means that the 
+        # bulletin is not older than 24 hours
+        #-----------------------------------------------------------------------------------------
+        if (self.isBulletinWithinPastWindow(1440)):
+            return False
+        else:
+            return True
+
+
+
 
 
 if __name__ == '__main__':
