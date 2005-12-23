@@ -18,6 +18,7 @@
 __version__ = '1.0'
 
 import string
+import BulletinCollection
 from Logger import Logger
 import sys
 import os
@@ -115,10 +116,17 @@ class BulletinWriter:
             sent        bool
                         set to true if you're checking to see if a collection has been marked as sent.
                         set to false if you're checking to see if an unsent collection exists.
+                        COMPLETEME
         """
+        #-----------------------------------------------------------------------------------------
+        # calculate the name of the directory corresponding to the collection in question.
+        #-----------------------------------------------------------------------------------------
+        dirName = self.calculateDirName(self, reportType, timeStamp, BBB) 
 
-        dirName = self.calculateDirName(self, reportType, timeStamp, BBB) # calculate the name of the directory corresponding to the collection in question.
-        return access(dirName, F_OK) # check for the existence of dirName
+        #-----------------------------------------------------------------------------------------
+        # Return True if the dir exists and False otherwise
+        #-----------------------------------------------------------------------------------------
+        return os.access(dirName, os.F_OK) 
 
 
     def calculateDirName(self, reportType, timeStamp, BBB):
@@ -132,12 +140,14 @@ class BulletinWriter:
             BBB         string
                         The BBB field for the collection.
         """
+        #-----------------------------------------------------------------------------------------
         # do most of the dirName caculatino here:
-        dirName = "%s%s/%s" % (self.collectionConfigParser.getCollectionPath(), 
-                           reportType,
-                           timeStamp)
+        #-----------------------------------------------------------------------------------------
+        dirName = "%s%s/%s" % (self.collectionConfigParser.getCollectionPath(), reportType, timeStamp)
 
+        #-----------------------------------------------------------------------------------------
         # Add the BBB field, or if the BBB field is null, add the ontime dir tag.
+        #-----------------------------------------------------------------------------------------
         if BBB == "":
             dirName = "%s/%smin" % (dirName, self.collectionConfigParser.getReportValidTimeByHeader(reportType))
         else:
