@@ -115,12 +115,40 @@ class CollectionManager(object):
             if (self.isReportOlderThan24H()):
                 self.bulletin.setCollectionB3("Z")
             else:
-                pass
-        #-----------------------------------------------------------------------------------------
-        # COMPLETEME
-        #-----------------------------------------------------------------------------------------
-        print "The collection's BBB is now:", self.bulletin.getCollectionBBB()
-        return 'COMPLETEME:THIS IS A FAKE RETURN IN CollectionManager.py'
+                #-----------------------------------------------------------------------------------------
+                # Determining if B1B2W_sent exists. If yes, set B3 to "Xn".  If not, then increment B3
+                # from A to W until we find an unused B3 character
+                #-----------------------------------------------------------------------------------------
+                if(self.bulletinWriter.doesCollectionExist(self.bulletin.getTwoLetterHeader(), \
+                                                           self.bulletin.getTimeStamp(), \
+                                                           self.bulletin.getCollectionB1() + \
+                                                           self.bulletin.getCollectionB2() + \
+                                                           'W', 'True')):
+                    tempB3 = self.findNextXValue()
+                    self.bulletin.setCollectionB3(tempB3)
+                else:
+                    tempB3 = self.findNextAvailableB3Value()
+                    self.bulletin.setCollectionB3(tempB3)
+
+            #-----------------------------------------------------------------------------------------
+            # Now that we've determined the BBB value for our collection, we need to write it to the 
+            # collection directory (regardless of whether it's immediate or scheduled).
+            #-----------------------------------------------------------------------------------------
+            self.bulletinWriter.writeBulletinToDisk(self.bulletin)
+
+            print "REMOVEME: The report's header is: ", self.bulletin.getHeader()
+            print "REMOVEME: The collection's BBB is now: ", self.bulletin.getCollectionBBB()
+            print "REMOVEME: The bulletin is: ",self.bulletin.bulletin
+            #-----------------------------------------------------------------------------------------
+            # At this point all collection worthy report bulletins have been written to disk.
+            # Now we need to know which are immediate and which are scheduled.  Reports with BBB 
+            # beginning with CC or AA are immediate.  Reports beginning with RR which are older 
+            # than 1HR are also immediate. The difference between immediate and scheduled
+            # is that immediate collections are returned to the caller by this method.
+            #-----------------------------------------------------------------------------------------
+            if ((self.bulletin.getCollectionB1 in ('A', 'C')) or 
+                (self.bulletin.getCollectionB1 in ('R',) and (self.isReportOlderThan1H()))):
+                return self.bulletin.bulletin
 
 
     def isReportOnTime(self):
@@ -304,7 +332,73 @@ class CollectionManager(object):
         else:
             return True
 
+    def isReportOlderThan1H(self):
+        """ isReportOlderThan1H -> Boolean
 
+            This method returns True if the incoming bulletin is older than
+            1 hour and False if it is not.
+        """
+        True = 'True'
+        False = ''
+        #-----------------------------------------------------------------------------------------
+        # 1 hour equals 60 minutes.  
+        # A returned value of true from isBulletinWithinPastWindow means that the 
+        # bulletin is not older than 24 hours
+        #-----------------------------------------------------------------------------------------
+        if (self.isBulletinWithinPastWindow(60)):
+            return False
+        else:
+            return True
+
+
+    def findNextXValue (self):
+        """ findNextXValue() -> string
+
+            This function returns the character 'X', or 'Xn' where n is a
+            positive integer in the case where the directory B1B2X exists
+        """
+        #-----------------------------------------------------------------------------------------
+        # In the simple case, the directory B1B2X_sent will not exists and we'll just return X
+        #-----------------------------------------------------------------------------------------
+        if not (self.bulletinWriter.doesCollectionExist(self.bulletin.getTwoLetterHeader(), \
+                                                           self.bulletin.getTimeStamp(), \
+                                                           self.bulletin.getCollectionB1() + \
+                                                           self.bulletin.getCollectionB2() + \
+                                                           'X', 'True')):
+            return 'X'
+
+        #-----------------------------------------------------------------------------------------
+        # If directory B1B2X_sent exists, return X1 or X2, or X3 ..
+        #-----------------------------------------------------------------------------------------
+        else:
+            counter = 1
+            while (self.bulletinWriter.doesCollectionExist(self.bulletin.getTwoLetterHeader(), \
+                                                           self.bulletin.getTimeStamp(), \
+                                                           self.bulletin.getCollectionB1() + \
+                                                           self.bulletin.getCollectionB2() + \
+                                                           'X'+str(counter), 'True')):
+                counter = counter + 1
+            else:
+                return 'X'+str(counter)
+
+
+    def findNextAvailableB3Value(self):
+        """ findNextAvailableB3Value() -> Character
+
+            This function looks for the next available alphabet character
+            ranging from A to W to use as the collection's B3 value
+        """
+
+        charSet = 'ABCDEFGHIJKLMNOPQRSTUVW'
+
+        for char in charSet:
+            if not (self.bulletinWriter.doesCollectionExist(self.bulletin.getTwoLetterHeader(), \
+                                                           self.bulletin.getTimeStamp(), \
+                                                           self.bulletin.getCollectionB1() + \
+                                                           self.bulletin.getCollectionB2() + \
+                                                           char, 'True')):
+                return char
+                
 
 
 
