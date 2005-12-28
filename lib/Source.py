@@ -143,7 +143,7 @@ class Source(object):
                     elif words[0] == 'mtime': self.mtime = int(words[1])
                     elif words[0] == 'sorter': self.sorter = words[1]
                     elif words[0] == 'arrival': self.mapEnteteDelai = {words[1]:(int(words[2]), int(words[3]))}
-                    elif words[0] == 'sentCollectionToken': self.sentCollectionToken = words[1]
+                    elif words[0] == 'sentCollectionToken': self.sentCollectionToken = string.strip(words[1],'\'')
                     elif words[0] == 'header': self.headersToCollect.append(words[1])
                     elif words[0] == 'headerValidTime': self.headersValidTime.append(words[1])
                     elif words[0] == 'headerLateCycle': self.headersLateCycle.append(words[1])
