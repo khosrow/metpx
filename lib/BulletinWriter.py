@@ -54,25 +54,66 @@ class BulletinWriter:
         
         #-----------------------------------------------------------------------------------------
         # calculate the filename for the new file
-        # note that the timestamp is not included so that newer bulletins will overwrite previous
-        # bulletins.
+        # note that the timestamp is not included so that newer bulletins from the same station
+        # will overwrite previous bulletins.
         #-----------------------------------------------------------------------------------------
-        filename = "%s_%s" % (bull.getType(), bull.getStation())
+        fileName = "%s_%s" % (bull.getType(), bull.getStation())
         
         #-----------------------------------------------------------------------------------------
         # open the file and write the bulletin to disk
         #-----------------------------------------------------------------------------------------
-        fullName = "%s/%s" % (bulletinPath, filename)
+        self._writeToDisk(bull, bulletinPath, fileName)
+        
 
+    def writeBulletinToDisk(self, bull):
+        """ writeBulletinToDisk() takes a bulletin object as a parameter and writes it to
+            disk in the appropriate directory in the collection db using the config options 
+            found in collectionConfigParser
+
+            bull    bulletin
+                    the bulletin to be written to the collections db.
+        """
+        #-----------------------------------------------------------------------------------------
+        # calculate the path for the new file
+        # note that the BBB field is "" since this is an OnTimeBulletin
+        #-----------------------------------------------------------------------------------------
+        bulletinPath = self.calculateDirName(bull.getType(), bull.getTimeStamp(), \
+                                             bull.getCollectionBBB())
+        
+        #-----------------------------------------------------------------------------------------
+        # calculate the filename for the new file.
+        # note that the timestamp is not included so that newer bulletins from the same station
+        # will overwrite previous bulletins.
+        #-----------------------------------------------------------------------------------------
+        fileName = "%s_%s" % (bull.getType(), bull.getStation())
+        
+        #-----------------------------------------------------------------------------------------
+        # open the file and write the bulletin to disk
+        #-----------------------------------------------------------------------------------------
+        self._writeToDisk(bull, bulletinPath, fileName)
+        
+
+    def _writeToDisk(self, bulletin, bulletinPath, fileName):
+        """ _writeToDisk(self, path, fileName)
+
+            This is a helper function which accepts a path and a filename for the 
+            purpose of creating the file in the given path using the bulletin as
+            content.  If the path dir does not exist, it will be created.
+        
+        """
+        fullName = "%s/%s" % (bulletinPath, fileName)
         #-----------------------------------------------------------------------------------------
         # create the directory path only if it doesn't exist
         #-----------------------------------------------------------------------------------------
         if not(os.access(bulletinPath, os.F_OK)):
             os.makedirs(bulletinPath)
-
+        print "Write path is: ",fullName
+        #-----------------------------------------------------------------------------------------
+        # create the file using the bulletin as content
+        #-----------------------------------------------------------------------------------------
         fd = open(fullName, "w")
-        fd.write(bull.getBulletin())
-        fd.close()                 
+        fd.write(bulletin.getBulletin())
+        fd.close()      
 
 
     def markCollectionAsSent(self, reportType, timeStamp, BBB):
@@ -89,7 +130,7 @@ class BulletinWriter:
             BBB         string
                         The BBB field for the collection.
         """
-        oldDirName =  self.calculateDirName(self, reportType, timeStamp, BBB) # create the old collection name, just incase it exists and we need to move it.
+        oldDirName =  self.calculateDirName(reportType, timeStamp, BBB) # create the old collection name, just incase it exists and we need to move it.
         newDirName =  "%s_sent" % (oldDirName) # when this method is complete, this dir will exist
 
         # Check to see if the unsent collection already exists
@@ -113,18 +154,23 @@ class BulletinWriter:
             BBB         string
                         The BBB field for the collection.
 
-            sent        bool
+            sent        'True' || ''
                         set to true if you're checking to see if a collection has been marked as sent.
                         set to false if you're checking to see if an unsent collection exists.
-                        COMPLETEME
         """
         #-----------------------------------------------------------------------------------------
         # calculate the name of the directory corresponding to the collection in question.
         #-----------------------------------------------------------------------------------------
-        dirName = self.calculateDirName(self, reportType, timeStamp, BBB) 
+        dirName = self.calculateDirName(reportType, timeStamp, BBB) 
 
         #-----------------------------------------------------------------------------------------
-        # Return True if the dir exists and False otherwise
+        # find what the sent token is if we were called with sent = True
+        #-----------------------------------------------------------------------------------------
+        if (sent):
+            dirName = dirName+self.collectionConfigParser.getSentCollectionToken()   
+            
+        #-----------------------------------------------------------------------------------------
+        # return True if the dir exists and False otherwise
         #-----------------------------------------------------------------------------------------
         return os.access(dirName, os.F_OK) 
 
