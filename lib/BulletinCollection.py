@@ -61,7 +61,7 @@ class BulletinCollection(bulletin.bulletin):
         They do the obvious.
     """
     def getCollectionBBB(self):
-        return self.collectionBBB
+        return string.strip(self.collectionBBB)
 
     def setCollectionBBB(self, newCollectionBBB):
         self.collectionBBB = newCollectionBBB
