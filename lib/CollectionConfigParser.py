@@ -89,3 +89,13 @@ class CollectionConfigParser:
             (I.e. /apps/px/collection)
         """
         return PXPaths.COLLECTION_DB
+
+
+    def getSentCollectionToken (self):
+        """ getSentCollectionToken (self) -> string
+
+            Returns a string representing the sent collection
+            (I.e. The '_sent' in '/apps/px/collection/SA/281400/RR_sent')
+        """
+        return self.source.sentCollectionToken
+
