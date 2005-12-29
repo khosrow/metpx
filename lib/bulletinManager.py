@@ -146,7 +146,7 @@ class bulletinManager:
                        the bulletin data with a diagnostic message.
 
         """
-
+        
         if self.pathDest == None:
             raise bulletinManagerException("opération impossible, pathDest n'est pas fourni")
 
@@ -154,7 +154,7 @@ class bulletinManager:
             self.compteur = 0
 
         self.compteur += 1
-
+        
         unBulletin = self.__generateBulletin(unRawBulletin)
         unBulletin.doSpecificProcessing()
 
@@ -233,10 +233,17 @@ class bulletinManager:
                     self.extension = self.extension.replace('Direct', 'Collected')
                     self._writeBulletinToDisk(rawBull) 
                     self.extension = originalExtension
+                    #-----------------------------------------------------------------------------------------
+                    # At this point the collection bulletin has been ingested and queued for transmission
+                    # within the _writeBulletinToDisk method above.
+                    # From the viewpoint of the collection module, the collection bulletin has been sent
+                    # and we now need to mark it as such in the ../collection/ temporary db.
+                    #-----------------------------------------------------------------------------------------
+                    self.collectionManager.markCollectionAsSent(tempNom)
             os.unlink(tempNom)
 
     def _writeBulletinToDisk(self,unRawBulletin,compteur=True,includeError=True):
-
+        
         if self.pathDest == None:
             raise bulletinManagerException("opération impossible, pathDest n'est pas fourni")
 
