@@ -211,4 +211,23 @@ class BulletinCollection(bulletin.bulletin):
             return reportBBB[1]
         else:
             return False
-        
+
+
+    def bulletinAsString(self):
+        """ bulletinAsString([list]) -> string
+
+            Converts a bulletin which is stored as a list into 
+            a string.
+            (I.e. ['SACN98 CWAO 291600 ','ZMJ SA 1600 AUTO8 M M M 089////M/ 3009 92MM=', '']
+                  will be converted into "SACN98 CWAO 291600 
+                                          ZMJ SA 1600 AUTO8 M M M 089////M/ 3009 92MM=" 
+
+        """
+        #-----------------------------------------------------------------------------------------
+        # Stripping out all list related symbols
+        #-----------------------------------------------------------------------------------------
+        bullString = ''
+        for element in self.bulletin:
+            bullString = bullString+str(element)+"\n"
+
+        return string.strip(bullString)
