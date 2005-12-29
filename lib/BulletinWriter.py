@@ -75,7 +75,6 @@ class BulletinWriter:
         """
         #-----------------------------------------------------------------------------------------
         # calculate the path for the new file
-        # note that the BBB field is "" since this is an OnTimeBulletin
         #-----------------------------------------------------------------------------------------
         bulletinPath = self.calculateDirName(bull.getType(), bull.getTimeStamp(), \
                                              bull.getCollectionBBB())
