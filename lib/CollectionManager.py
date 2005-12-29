@@ -12,7 +12,7 @@
 #               module.
 #
 # Revision History: 
-#               2005-12-13 Daniel Lemay provided function stub
+#               2005-12-13 Daniel Lemay provided class stub
 #############################################################################################
 """
 __version__ = '1.0'
@@ -134,11 +134,12 @@ class CollectionManager(object):
             # Now that we've determined the BBB value for our collection, we need to write it to the 
             # collection directory (regardless of whether it's immediate or scheduled).
             #-----------------------------------------------------------------------------------------
-            self.bulletinWriter.writeBulletinToDisk(self.bulletin)
+            self.bulletinWriter.writeReportBulletinToDisk(self.bulletin)
 
+            
             print "REMOVEME: The report's header is: ", self.bulletin.getHeader()
             print "REMOVEME: The collection's BBB is now: ", self.bulletin.getCollectionBBB()
-            print "REMOVEME: The bulletin is: ",self.bulletin.bulletin
+            
             #-----------------------------------------------------------------------------------------
             # At this point all collection worthy report bulletins have been written to disk.
             # Now we need to know which are immediate and which are scheduled.  Reports with BBB 
@@ -146,9 +147,10 @@ class CollectionManager(object):
             # than 1HR are also immediate. The difference between immediate and scheduled
             # is that immediate collections are returned to the caller by this method.
             #-----------------------------------------------------------------------------------------
-            if ((self.bulletin.getCollectionB1 in ('A', 'C')) or 
-                (self.bulletin.getCollectionB1 in ('R',) and (self.isReportOlderThan1H()))):
-                return self.bulletin.bulletin
+            if ((self.bulletin.getCollectionB1() in ('A', 'C')) or
+                (self.bulletin.getCollectionB1() in ('R') and (self.isReportOlderThan1H()))):
+                print "REMOVEME: The returning bulletin is: ",self.bulletin.bulletinAsString()
+                return self.bulletin.bulletinAsString()
 
 
     def isReportOnTime(self):
@@ -354,7 +356,7 @@ class CollectionManager(object):
     def findNextXValue (self):
         """ findNextXValue() -> string
 
-            This function returns the character 'X', or 'Xn' where n is a
+            This method returns the character 'X', or 'Xn' where n is a
             positive integer in the case where the directory B1B2X exists
         """
         #-----------------------------------------------------------------------------------------
@@ -385,7 +387,7 @@ class CollectionManager(object):
     def findNextAvailableB3Value(self):
         """ findNextAvailableB3Value() -> Character
 
-            This function looks for the next available alphabet character
+            This method looks for the next available alphabet character
             ranging from A to W to use as the collection's B3 value
         """
 
@@ -400,7 +402,25 @@ class CollectionManager(object):
                 return char
                 
 
+    def markCollectionAsSent(self,fileName):
+        """ markCollectionAsSent(fileName) 
 
+            This is a wrapper for BulletinWriter.markCollectionAsSent().
+            It's purpose is to indicate that a collection bulletin
+            has been sent (queued for transmission).
+        """
+        #-----------------------------------------------------------------------------------------
+        # use collectionBuilder to create a bulletin object from the given file
+        #-----------------------------------------------------------------------------------------
+        self.bulletin = self.collectionBuilder.buildBulletinFromFile(fileName)
+
+        #-----------------------------------------------------------------------------------------
+        # call method to mark the appropriate collection as sent
+        #-----------------------------------------------------------------------------------------
+        self.bulletinWriter.markCollectionAsSent(self.bulletin.getTwoLetterHeader(), \
+                                                 self.bulletin.getTimeStamp(), \
+                                                 self.bulletin.getCollectionBBB())
+        
 
 if __name__ == '__main__':
     pass
