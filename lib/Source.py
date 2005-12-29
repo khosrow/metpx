@@ -254,11 +254,41 @@ class Source(object):
                     self.terminateWithError()
 
             #-----------------------------------------------------------------------------------------
+            # Make sure that headerValidTime is valid
+            #-----------------------------------------------------------------------------------------
+            for item in self.headersValidTime:
+                if (int(item) < 0) or (int(item) > 60):
+                    self.logger.error("Error: The given 'headerValidTime' parameter in Configuration file: %s must be between 0 and 60" % (self.name))
+                    self.terminateWithError()
+            
+            #-----------------------------------------------------------------------------------------
+            # Make sure that headerLateCycle is valid
+            #-----------------------------------------------------------------------------------------
+            for item in self.headersLateCycle:
+                if (int(item) < 0):
+                    self.logger.error("Error: The given 'headerLateCycle' parameter in Configuration file: %s must be positive" % (self.name))
+                    self.terminateWithError()
+
+            #-----------------------------------------------------------------------------------------
             # Make sure that futureDatedReportWindow is valid
             #-----------------------------------------------------------------------------------------
-            if (self.futureDatedReportWindow < 0):
-                self.logger.error("Error: The 'futureDatedReportWindow' parameter is given an invalid value in Configuration file: %s" % (self.name))
-                self.terminateWithError()
+            for item in self.futureDatedReportWindow:
+                if (int(item) < 0):
+                    self.logger.error("Error: The 'futureDatedReportWindow' parameter is given an invalid value in Configuration file: %s" % (self.name))
+                    self.terminateWithError()
+
+            #-----------------------------------------------------------------------------------------
+            # The headerTimeToLive determines how long (in minutes) collection bulletins will be
+            # kept in the ../collection/.. temp db before being cleaned.  This value must be greater 
+            # than 24 hours. This is because the temp db is used to keep track of the state of the 
+            # collection application and deleting collections younger or equal to 24 hours could
+            # jeopardize the validity of the collection's BBB value
+            #-----------------------------------------------------------------------------------------
+            for item in self.headersTimeToLive:
+                if (int(item) <= 24):
+                    self.logger.error("Error: The 'headerTimeToLive' parameter must be set to a value greater than 24 in Configuration file: %s" % (self.name))
+                    self.terminateWithError()
+
 
     def terminateWithError (self):
         """ terminateWithError(self)
