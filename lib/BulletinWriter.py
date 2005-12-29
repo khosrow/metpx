@@ -65,8 +65,8 @@ class BulletinWriter:
         self._writeToDisk(bull, bulletinPath, fileName)
         
 
-    def writeBulletinToDisk(self, bull):
-        """ writeBulletinToDisk() takes a bulletin object as a parameter and writes it to
+    def writeReportBulletinToDisk(self, bull):
+        """ writeReportBulletinToDisk() takes a bulletin object as a parameter and writes it to
             disk in the appropriate directory in the collection db using the config options 
             found in collectionConfigParser
 
@@ -96,7 +96,7 @@ class BulletinWriter:
     def _writeToDisk(self, bulletin, bulletinPath, fileName):
         """ _writeToDisk(self, path, fileName)
 
-            This is a helper function which accepts a path and a filename for the 
+            This is a helper method which accepts a path and a filename for the 
             purpose of creating the file in the given path using the bulletin as
             content.  If the path dir does not exist, it will be created.
         
@@ -107,20 +107,25 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         if not(os.access(bulletinPath, os.F_OK)):
             os.makedirs(bulletinPath)
-        print "Write path is: ",fullName
+        
         #-----------------------------------------------------------------------------------------
         # create the file using the bulletin as content
         #-----------------------------------------------------------------------------------------
-        fd = open(fullName, "w")
+        try:
+            fd = open(fullName, "w")
+        except IOError:
+            self.logger.exception("Cannot create file: %s" % fullName)
         fd.write(bulletin.getBulletin())
         fd.close()      
 
 
     def markCollectionAsSent(self, reportType, timeStamp, BBB):
-        """
-        markCollectionAsSent is used to record on disk that a collection with the given parameters has been sent.
-                        This is so that we can make future calls to doesCollectionExist() with the "sent" parameter
-                        set to TRUE.
+        """ markCollectionAsSent()
+
+            Used to record on disk that a collection with the given parameters has been sent.
+            This allows us to determine which collections were sent, and which ones have not
+            yet been sent 
+
             reportType  string
                         the 2 letter code for the bulletin type, such as SA or SI or SM.
 
@@ -130,16 +135,28 @@ class BulletinWriter:
             BBB         string
                         The BBB field for the collection.
         """
-        oldDirName =  self.calculateDirName(reportType, timeStamp, BBB) # create the old collection name, just incase it exists and we need to move it.
-        newDirName =  "%s_sent" % (oldDirName) # when this method is complete, this dir will exist
+        True = 'True'
+        False = ''
+        #-----------------------------------------------------------------------------------------
+        # This is the directory name before being marked as sent
+        #-----------------------------------------------------------------------------------------
+        oldDirName =  self.calculateDirName(reportType, timeStamp, BBB)        
 
-        # Check to see if the unsent collection already exists
-        if (doesCollectionExist(reportType, timeStamp, BBB, FALSE)):
-            # the collection exists, so RENAME the existing collection
+        #-----------------------------------------------------------------------------------------
+        # This is the directory name after it has been marked as sent
+        #-----------------------------------------------------------------------------------------
+        newDirName =  "%s%s" % (oldDirName,self.collectionConfigParser.getSentCollectionToken()) 
+        print "REMOVEME: Marking dirs as sent.  oldName: ",oldDirName
+        print "NewName:",newDirName
+        #-----------------------------------------------------------------------------------------
+        # Making sure that we don't try to rename a non-existent directory.  Insurance: If the new
+        # dir name doesn't exist, create an empty dir with the new name so as to maintain the state 
+        # of the application
+        #-----------------------------------------------------------------------------------------
+        if (self.doesCollectionExist(reportType, timeStamp, BBB, False)):
             os.rename(oldDirName, newDirName)
-        else:
-            # The collection doesn't exist, so instead we need to CREATE an empty  directory saying that the collection was sent.
-            mkdir(newDirName)
+        elif not (self.doesCollectionExist(reportType, timeStamp, BBB, True)):
+            os.mkdir(newDirName)
 
 
     def doesCollectionExist(self, reportType, timeStamp, BBB, sent):  
