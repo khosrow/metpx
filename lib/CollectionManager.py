@@ -85,6 +85,7 @@ class CollectionManager(object):
                 EmptyString: Empty Text sring - Indicating that the bulleting does not
                                                 need to be sent immediately.
         """
+        EmptyString = ''
         #-----------------------------------------------------------------------------------------
         # use collectionBuilder to create a bulletin object from the given file
         #-----------------------------------------------------------------------------------------
@@ -149,8 +150,10 @@ class CollectionManager(object):
             #-----------------------------------------------------------------------------------------
             if ((self.bulletin.getCollectionB1() in ('A', 'C')) or
                 (self.bulletin.getCollectionB1() in ('R') and (self.isReportOlderThan1H()))):
-                print "REMOVEME: The returning bulletin is: ",self.bulletin.bulletinAsString()
-                return self.bulletin.bulletinAsString()
+                print "REMOVEME: The returning bulletin for immediate xmission: ",self.bulletin.bulletinAsString()
+                return self.bulletin.bulletinAsString(),self.bulletin.getCollectionBBB()
+            else:
+                return EmptyString,EmptyString
 
 
     def isReportOnTime(self):
@@ -402,13 +405,14 @@ class CollectionManager(object):
                 return char
                 
 
-    def markCollectionAsSent(self,fileName):
+    def markCollectionAsSent(self,fileName,collectionBBBValue):
         """ markCollectionAsSent(fileName) 
 
             This is a wrapper for BulletinWriter.markCollectionAsSent().
             It's purpose is to indicate that a collection bulletin
             has been sent (queued for transmission).
         """
+        print ("REMOVEME: the filename and bbb are %s, %s" %(fileName,collectionBBBValue))
         #-----------------------------------------------------------------------------------------
         # use collectionBuilder to create a bulletin object from the given file
         #-----------------------------------------------------------------------------------------
@@ -419,7 +423,7 @@ class CollectionManager(object):
         #-----------------------------------------------------------------------------------------
         self.bulletinWriter.markCollectionAsSent(self.bulletin.getTwoLetterHeader(), \
                                                  self.bulletin.getTimeStamp(), \
-                                                 self.bulletin.getCollectionBBB())
+                                                 collectionBBBValue)
         
 
 if __name__ == '__main__':
