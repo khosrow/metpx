@@ -227,7 +227,7 @@ class bulletinManager:
             # bulletin if necessary
             #-----------------------------------------------------------------------------------------
             if self.source.collection and self.regex.search(nomFichier):
-                rawBull = self.collectionManager.collectReport(tempNom)
+                rawBull,collectionBBBValue = self.collectionManager.collectReport(tempNom)
                 if rawBull:
                     originalExtension = self.extension
                     self.extension = self.extension.replace('Direct', 'Collected')
@@ -239,7 +239,7 @@ class bulletinManager:
                     # From the viewpoint of the collection module, the collection bulletin has been sent
                     # and we now need to mark it as such in the ../collection/ temporary db.
                     #-----------------------------------------------------------------------------------------
-                    self.collectionManager.markCollectionAsSent(tempNom)
+                    self.collectionManager.markCollectionAsSent(tempNom, collectionBBBValue)
             os.unlink(tempNom)
 
     def _writeBulletinToDisk(self,unRawBulletin,compteur=True,includeError=True):
