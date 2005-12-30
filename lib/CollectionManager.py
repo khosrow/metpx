@@ -95,7 +95,6 @@ class CollectionManager(object):
         # Let's find out if the report arrived on time.  If so, write the report bulletin
         # to disk.
         #-----------------------------------------------------------------------------------------
-        self.logger.info("The bulletin timestap is: %s" %self.bulletin.getTimeStamp())
         if (self.isReportOnTime()):
             self.bulletinWriter.writeOnTimeBulletinToDisk(self.bulletin)
         else:
@@ -152,8 +151,12 @@ class CollectionManager(object):
                 (self.bulletin.getCollectionB1() in ('R') and (self.isReportOlderThan1H()))):
                 print "REMOVEME: The returning bulletin for immediate xmission: ",self.bulletin.bulletinAsString()
                 return self.bulletin.bulletinAsString(),self.bulletin.getCollectionBBB()
-            else:
-                return EmptyString,EmptyString
+
+        #-----------------------------------------------------------------------------------------
+        # If we got this far, then there's no need for an immediate collection and so we need
+        # to return with EmptyStrings
+        #-----------------------------------------------------------------------------------------
+        return EmptyString,EmptyString
 
 
     def isReportOnTime(self):
