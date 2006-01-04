@@ -231,3 +231,15 @@ class BulletinCollection(bulletin.bulletin):
             bullString = bullString+str(element)+"\n"
 
         return string.strip(bullString)
+
+
+    def buildCollectionBulletin(self):
+        """ buildCollectionBulletin()
+
+            This method constructs a collection bulletin based on the report
+            contained within itself.  The collection bulletin will of course
+            come complete with the the appropriate BBB values
+        """
+        #-----------------------------------------------------------------------------------------
+        # COMPLETEME: find out what the collection header should look like
+        #-----------------------------------------------------------------------------------------
