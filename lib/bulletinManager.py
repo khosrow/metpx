@@ -231,7 +231,6 @@ class bulletinManager:
                 collectionBulletin = self.collectionManager.collectReport(tempNom)
                 if collectionBulletin:
                     rawBull = collectionBulletin.bulletinAsString()
-                    collectionBBBValue = collectionBulletin.getCollectionBBB()
                     originalExtension = self.extension
                     self.extension = self.extension.replace('Direct', 'Collected')
                     self._writeBulletinToDisk(rawBull) 
@@ -242,7 +241,7 @@ class bulletinManager:
                     # From the viewpoint of the collection module, the collection bulletin has been sent
                     # and we now need to mark it as such in the ../collection/ temporary db.
                     #-----------------------------------------------------------------------------------------
-                    self.collectionManager.markCollectionAsSent(tempNom, collectionBBBValue)
+                    self.collectionManager.markCollectionAsSent(collectionBulletin)
             os.unlink(tempNom)
 
     def _writeBulletinToDisk(self,unRawBulletin,compteur=True,includeError=True):
