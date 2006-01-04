@@ -224,11 +224,14 @@ class bulletinManager:
 
             #-----------------------------------------------------------------------------------------
             # Collecting the report if collection is turned on and transmitting the collection 
-            # bulletin if necessary
+            # bulletin if necessary.  Note that the collectReport(tempNom) function returns an
+            # object of the class BulletinCollection and from it we extract the raw bulletin
             #-----------------------------------------------------------------------------------------
             if self.source.collection and self.regex.search(nomFichier):
-                rawBull,collectionBBBValue = self.collectionManager.collectReport(tempNom)
-                if rawBull:
+                collectionBulletin = self.collectionManager.collectReport(tempNom)
+                if collectionBulletin:
+                    rawBull = collectionBulletin.bulletinAsString()
+                    collectionBBBValue = collectionBulletin.getCollectionBBB()
                     originalExtension = self.extension
                     self.extension = self.extension.replace('Direct', 'Collected')
                     self._writeBulletinToDisk(rawBull) 
