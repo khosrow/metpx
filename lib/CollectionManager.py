@@ -79,13 +79,12 @@ class CollectionManager(object):
             "Collection Process Flow diagram" document.
 
             Return values:
-                rawBulletin: Text string -  returning the bulletin so that it can be sent
-                                            immediately.
-
-                EmptyString: Empty Text sring - Indicating that the bulleting does not
-                                                need to be sent immediately.
+                self.Bulletin: BulletinCollection -  A collection object containing a
+                                                     collection which needs to be 
+                                                     transmitted immediately or nothing
+                                                     if the collection does not need to
+                                                     be transmitted immediately.
         """
-        EmptyString = ''
         #-----------------------------------------------------------------------------------------
         # use collectionBuilder to create a bulletin object from the given file
         #-----------------------------------------------------------------------------------------
@@ -149,16 +148,16 @@ class CollectionManager(object):
             #-----------------------------------------------------------------------------------------
             if ((self.bulletin.getCollectionB1() in ('A', 'C')) or
                 (self.bulletin.getCollectionB1() in ('R') and (self.isReportOlderThan1H()))):
+                #-----------------------------------------------------------------------------------------
+                # Build a collection bulletin from the report bulletin and return to caller
+                # for immediate transmission
+                #-----------------------------------------------------------------------------------------
+                self.bulletin.buildCollectionBulletin()
                 print "REMOVEME: The returning bulletin for immediate xmission: ",self.bulletin.bulletinAsString()
-                return self.bulletin.bulletinAsString(),self.bulletin.getCollectionBBB()
+                
+                return self.bulletin
 
-        #-----------------------------------------------------------------------------------------
-        # If we got this far, then there's no need for an immediate collection and so we need
-        # to return with EmptyStrings
-        #-----------------------------------------------------------------------------------------
-        return EmptyString,EmptyString
-
-
+        
     def isReportOnTime(self):
         """ isReportOnTime() -> Boolean
 
