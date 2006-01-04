@@ -118,7 +118,7 @@ class BulletinWriter:
         fd.close()      
 
 
-    def markCollectionAsSent(self, reportType, timeStamp, BBB):
+    def markCollectionAsSent(self, collectionBulletin):
         """ markCollectionAsSent()
 
             Used to record on disk that a collection with the given parameters has been sent.
@@ -136,6 +136,9 @@ class BulletinWriter:
         """
         True = 'True'
         False = ''
+        reportType = collectionBulletin.getType()
+        timeStamp = collectionBulletin.getTimeStamp()
+        BBB = collectionBulletin.getCollectionBBB()
         #-----------------------------------------------------------------------------------------
         # This is the directory name before being marked as sent
         #-----------------------------------------------------------------------------------------
