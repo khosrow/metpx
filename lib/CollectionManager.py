@@ -407,25 +407,17 @@ class CollectionManager(object):
                 return char
                 
 
-    def markCollectionAsSent(self,fileName,collectionBBBValue):
+    def markCollectionAsSent(self, collectionBulletin):
         """ markCollectionAsSent(fileName) 
 
             This is a wrapper for BulletinWriter.markCollectionAsSent().
             It's purpose is to indicate that a collection bulletin
             has been sent (queued for transmission).
         """
-        print ("REMOVEME: the filename and bbb are %s, %s" %(fileName,collectionBBBValue))
-        #-----------------------------------------------------------------------------------------
-        # use collectionBuilder to create a bulletin object from the given file
-        #-----------------------------------------------------------------------------------------
-        self.bulletin = self.collectionBuilder.buildBulletinFromFile(fileName)
-
         #-----------------------------------------------------------------------------------------
         # call method to mark the appropriate collection as sent
         #-----------------------------------------------------------------------------------------
-        self.bulletinWriter.markCollectionAsSent(self.bulletin.getTwoLetterHeader(), \
-                                                 self.bulletin.getTimeStamp(), \
-                                                 collectionBBBValue)
+        self.bulletinWriter.markCollectionAsSent(collectionBulletin)
         
 
 if __name__ == '__main__':
