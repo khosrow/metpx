@@ -233,13 +233,43 @@ class BulletinCollection(bulletin.bulletin):
         return string.strip(bullString)
 
 
+    def setReportBBB(self,BBB):
+        """ setReportBBB(BBB)
+
+            Given a BBB string, this method sets the report's BBB field to the 
+            given BBB variable
+        """
+        False == ''
+        #-----------------------------------------------------------------------------------------
+        # split header into tokens
+        #-----------------------------------------------------------------------------------------
+        headerTokens = string.split(self.getHeader()) 
+        
+        #-----------------------------------------------------------------------------------------
+        # The header looks like "SACN58 CWAO 231334 BBB".  The BBB field is the fourth element
+        #-----------------------------------------------------------------------------------------
+        if (len(headerTokens) >= 3):
+            newHeader = headerTokens[0]+' '+headerTokens[1]+' '+headerTokens[2]+' '+BBB
+            self.setHeader(string.strip(newHeader))
+
+        print "REMOVEME: Modified the collection's bbb. New HDR is: ",self.getHeader()
+        
+
     def buildCollectionBulletin(self):
         """ buildCollectionBulletin()
 
             This method constructs a collection bulletin based on the report
-            contained within itself.  The collection bulletin will of course
-            come complete with the the appropriate BBB values
+            contained within its bulletin attribute.  The collection bulletin 
+            will of course come complete with the the appropriate BBB values.  
+            The new collection bulletin is then returned to the caller
         """
         #-----------------------------------------------------------------------------------------
-        # COMPLETEME: find out what the collection header should look like
+        # Create a collection bulletin which is initially just a copy of the report bulletin
         #-----------------------------------------------------------------------------------------
+        newCollectionBulletin = self
+
+        #-----------------------------------------------------------------------------------------
+        # Here, we need to update or create the report's BBB value with that of the collection
+        #-----------------------------------------------------------------------------------------
+        newCollectionBulletin.setReportBBB(newCollectionBulletin.getCollectionBBB())
+        return newCollectionBulletin

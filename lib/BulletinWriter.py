@@ -49,13 +49,14 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         # calculate the path for the new file
         # note that the BBB field is "" since this is an OnTimeBulletin
+        # (/apps/px/collection/SA/041200/CYOW/7min)
         #-----------------------------------------------------------------------------------------
-        bulletinPath = self.calculateDirName(bull.getType(), bull.getTimeStamp(), "")
+        bulletinPath = self.calculateOnTimeDirName(bull)
         
         #-----------------------------------------------------------------------------------------
-        # calculate the filename for the new file
+        # calculate the filename for the new file (SA_WRO)
         # note that the timestamp is not included so that newer bulletins from the same station
-        # will overwrite previous bulletins.
+        # will overwrite previous bulletins. 
         #-----------------------------------------------------------------------------------------
         fileName = "%s_%s" % (bull.getType(), bull.getStation())
         
@@ -74,13 +75,12 @@ class BulletinWriter:
                     the bulletin to be written to the collections db.
         """
         #-----------------------------------------------------------------------------------------
-        # calculate the path for the new file
+        # calculate the path for the new file (/apps/px/collection/SA/041200/CYOW/RRA)
         #-----------------------------------------------------------------------------------------
-        bulletinPath = self.calculateDirName(bull.getType(), bull.getTimeStamp(), \
-                                             bull.getCollectionBBB())
-        
+        bulletinPath = self.calculateBBBDirName(bull)
+
         #-----------------------------------------------------------------------------------------
-        # calculate the filename for the new file.
+        # calculate the filename for the new file. (SA_WRO)
         # note that the timestamp is not included so that newer bulletins from the same station
         # will overwrite previous bulletins.
         #-----------------------------------------------------------------------------------------
@@ -138,52 +138,45 @@ class BulletinWriter:
         False = ''
         reportType = collectionBulletin.getType()
         timeStamp = collectionBulletin.getTimeStamp()
+        origin = collectionBulletin.getOrigin()
         BBB = collectionBulletin.getCollectionBBB()
         #-----------------------------------------------------------------------------------------
-        # This is the directory name before being marked as sent
+        # This is the directory name before being marked as sent 
+        # (/apps/px/collection/SA/041200/CYOW/CCA)
         #-----------------------------------------------------------------------------------------
-        oldDirName =  self.calculateDirName(reportType, timeStamp, BBB)        
-
+        oldDirName =  self.calculateBBBDirName(collectionBulletin)
+        
         #-----------------------------------------------------------------------------------------
         # This is the directory name after it has been marked as sent
+        # (/apps/px/collection/SA/041200/CYOW/CCA_sent)
         #-----------------------------------------------------------------------------------------
         newDirName =  "%s%s" % (oldDirName,self.collectionConfigParser.getSentCollectionToken()) 
         print "REMOVEME: Marking dirs as sent.  oldName: ",oldDirName
         print "NewName:",newDirName
         #-----------------------------------------------------------------------------------------
-        # Making sure that we don't try to rename a non-existent directory.  Insurance: If the new
-        # dir name doesn't exist, create an empty dir with the new name so as to maintain the state 
-        # of the application
+        # Making sure that we don't try to rename a non-existent directory.  If old dir exists, 
+        # then rename it to the new name.  If the old dir doesn't exist and the new one doesn't
+        # exist, then create the new empty so as to maintain the state of the application
         #-----------------------------------------------------------------------------------------
-        if (self.doesCollectionExist(reportType, timeStamp, BBB, False)):
+        if (self._doesCollectionExist(oldDirName, False)):
             os.rename(oldDirName, newDirName)
-        elif not (self.doesCollectionExist(reportType, timeStamp, BBB, True)):
+        elif not (self._doesCollectionExist(newDirName, False)):
             os.mkdir(newDirName)
 
 
-    def doesCollectionExist(self, reportType, timeStamp, BBB, sent):  
+    def _doesCollectionExist(self, dirName, sent):  
         """
-        doesCollectionExist returns TRUE if there's a directory matching the above parameters.
-            reportType  string
-                        the 2 letter code for the bulletin type, such as SA or SI or SM.
-
-            timeStamp   string
-                        The timestamp from the bulletin header.
-
-            BBB         string
-                        The BBB field for the collection.
+        _doesCollectionExist returns TRUE if there's a directory matching the above parameters.
+            dirName     string
+                        The path we're to search for
 
             sent        'True' || ''
                         set to true if you're checking to see if a collection has been marked as sent.
                         set to false if you're checking to see if an unsent collection exists.
         """
+        
         #-----------------------------------------------------------------------------------------
-        # calculate the name of the directory corresponding to the collection in question.
-        #-----------------------------------------------------------------------------------------
-        dirName = self.calculateDirName(reportType, timeStamp, BBB) 
-
-        #-----------------------------------------------------------------------------------------
-        # find what the sent token is if we were called with sent = True
+        # find out if '<dirname>_sent' exists if we were called with sent = True
         #-----------------------------------------------------------------------------------------
         if (sent):
             dirName = dirName+self.collectionConfigParser.getSentCollectionToken()   
@@ -194,7 +187,36 @@ class BulletinWriter:
         return os.access(dirName, os.F_OK) 
 
 
-    def calculateDirName(self, reportType, timeStamp, BBB):
+    def doesCollectionWithB3Exist(self, bulletin, B3, sent):  
+        """
+        doesCollectionWithB3Exist returns TRUE if there's a directory matching the above parameters.
+            bulletin    BulletinCollection
+                        A bulletin
+
+            B3          character string
+                        The B3 character.
+
+            sent        'True' || ''
+                        set to true if you're checking to see if a collection has been marked as sent.
+                        set to false if you're checking to see if an unsent collection exists.
+        """
+        #-----------------------------------------------------------------------------------------
+        # calculate the base dir path (/apps/px/collection/SA/041200/CYOW)
+        #-----------------------------------------------------------------------------------------
+        dirName = self._calculateDirName(bulletin.getType(), bulletin.getTimeStamp(), bulletin.getOrigin())
+        
+        #-----------------------------------------------------------------------------------------
+        # build the BBB value to look for (/apps/px/collection/SA/041200/CYOW/RRB3) 
+        #-----------------------------------------------------------------------------------------
+        BBB = string.strip(bulletin.getCollectionB1() + bulletin.getCollectionB2() + B3)
+        dirName = "%s/%s" %(dirName, BBB)
+        #-----------------------------------------------------------------------------------------
+        # find out if the directory exists
+        #-----------------------------------------------------------------------------------------
+        return self._doesCollectionExist(dirName, sent) 
+
+
+    def _calculateDirName(self, reportType, timeStamp, origin):
         """ This method calculates the directory name of a collection, given the above parameters
             reportType  string
                         the 2 letter code for the bulletin type, such as SA or SI or SM.
@@ -202,20 +224,50 @@ class BulletinWriter:
             timeStamp   string
                         The timestamp from the bulletin header.
 
-            BBB         string
-                        The BBB field for the collection.
+            origin      string
+                        The orgin of the bulletin
         """
         #-----------------------------------------------------------------------------------------
-        # do most of the dirName caculatino here:
+        # Find the basic collection path (/apps/px/collection/SA/041200/CYOW)
         #-----------------------------------------------------------------------------------------
-        dirName = "%s%s/%s" % (self.collectionConfigParser.getCollectionPath(), reportType, timeStamp)
-
-        #-----------------------------------------------------------------------------------------
-        # Add the BBB field, or if the BBB field is null, add the ontime dir tag.
-        #-----------------------------------------------------------------------------------------
-        if BBB == "":
-            dirName = "%s/%smin" % (dirName, self.collectionConfigParser.getReportValidTimeByHeader(reportType))
-        else:
-            dirName = "%s/%s" % (dirName, BBB)
-
+        dirName = "%s%s/%s/%s" % (self.collectionConfigParser.getCollectionPath(), reportType, timeStamp, origin)
         return dirName
+
+
+    def calculateOnTimeDirName(self, bulletin):
+        """ calculateOnTimeDirName(bulletin)
+
+            Given a bulletin, this method calculates the on time directory path for the 
+            bulletin.
+        """
+        #-----------------------------------------------------------------------------------------
+        # calculate the base dir path (/apps/px/collection/SA/041200/CYOW)
+        #-----------------------------------------------------------------------------------------
+        dirName = self._calculateDirName(bulletin.getType(), bulletin.getTimeStamp(), bulletin.getOrigin())
+
+        reportType = bulletin.getType()
+        validTime = self.collectionConfigParser.getReportValidTimeByHeader(reportType)
+        #-----------------------------------------------------------------------------------------
+        # Append the on-time dir name to the path (/apps/px/collection/SA/041200/CYOW/7min)
+        #-----------------------------------------------------------------------------------------
+        dirName = "%s/%smin" % (dirName, validTime)
+        return string.strip(dirName)
+
+
+    def calculateBBBDirName(self, bulletin):
+        """ calculateBBBDirName(bulletin)
+
+            Given a bulletin, this method calculates the directory path for the 
+            bulletin including the BBB field in the path.
+        """
+        #-----------------------------------------------------------------------------------------
+        # calculate the base dir path (/apps/px/collection/SA/041200/CYOW)
+        #-----------------------------------------------------------------------------------------
+        dirName = self._calculateDirName(bulletin.getType(), bulletin.getTimeStamp(), bulletin.getOrigin())
+
+        BBB = bulletin.getCollectionBBB()
+        #-----------------------------------------------------------------------------------------
+        # Add the BBB field to the path (/apps/px/collection/SA/041200/CYOW/RRA)
+        #-----------------------------------------------------------------------------------------
+        dirName = "%s/%s" % (dirName, BBB)
+        return string.strip(dirName)

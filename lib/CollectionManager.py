@@ -40,7 +40,7 @@ class CollectionManager(object):
            Author:      National Software Development<nssib@ec.gc.ca>
            Date:        December 2005
     """
-
+    
 
     def __init__(self, source, logger=None):
         self.source = source   # Source object containing configuration infos about the collector
@@ -66,7 +66,10 @@ class CollectionManager(object):
         # A BulletinWriter object to carry out disk-related tasks
         #-----------------------------------------------------------------------------------------
         self.bulletinWriter = BulletinWriter.BulletinWriter(self.logger,self.collectionConfig)
-
+        #-----------------------------------------------------------------------------------------
+        # A general flag used to find out if we're looking for collections which have been sent
+        #-----------------------------------------------------------------------------------------
+        self.lookForSentDir = 'True'
 
     def collectReport(self, fileName):
         """ collectReports (self, fileName)
@@ -118,11 +121,7 @@ class CollectionManager(object):
                 # Determining if B1B2W_sent exists. If yes, set B3 to "Xn".  If not, then increment B3
                 # from A to W until we find an unused B3 character
                 #-----------------------------------------------------------------------------------------
-                if(self.bulletinWriter.doesCollectionExist(self.bulletin.getTwoLetterHeader(), \
-                                                           self.bulletin.getTimeStamp(), \
-                                                           self.bulletin.getCollectionB1() + \
-                                                           self.bulletin.getCollectionB2() + \
-                                                           'W', 'True')):
+                if(self.bulletinWriter.doesCollectionWithB3Exist(self.bulletin, 'W', self.lookForSentDir)):
                     tempB3 = self.findNextXValue()
                     self.bulletin.setCollectionB3(tempB3)
                 else:
@@ -135,10 +134,9 @@ class CollectionManager(object):
             #-----------------------------------------------------------------------------------------
             self.bulletinWriter.writeReportBulletinToDisk(self.bulletin)
 
-            
-            print "REMOVEME: The report's header is: ", self.bulletin.getHeader()
-            print "REMOVEME: The collection's BBB is now: ", self.bulletin.getCollectionBBB()
-            
+            print "\nREMOVEME: The incoming report: ",self.bulletin.bulletinAsString()
+            print "REMOVEME: The collection's BBB is now set to: ", self.bulletin.getCollectionBBB()
+
             #-----------------------------------------------------------------------------------------
             # At this point all collection worthy report bulletins have been written to disk.
             # Now we need to know which are immediate and which are scheduled.  Reports with BBB 
@@ -149,13 +147,13 @@ class CollectionManager(object):
             if ((self.bulletin.getCollectionB1() in ('A', 'C')) or
                 (self.bulletin.getCollectionB1() in ('R') and (self.isReportOlderThan1H()))):
                 #-----------------------------------------------------------------------------------------
-                # Build a collection bulletin from the report bulletin and return to caller
+                # Build a collection bulletin from a single report bulletin and return to caller
                 # for immediate transmission
                 #-----------------------------------------------------------------------------------------
-                self.bulletin.buildCollectionBulletin()
-                print "REMOVEME: The returning bulletin for immediate xmission: ",self.bulletin.bulletinAsString()
+                newCollectionBulletin = self.bulletin.buildCollectionBulletin()
+                print "REMOVEME: Returning collection for xmission: ",newCollectionBulletin.bulletinAsString()
                 
-                return self.bulletin
+                return newCollectionBulletin
 
         
     def isReportOnTime(self):
@@ -367,11 +365,7 @@ class CollectionManager(object):
         #-----------------------------------------------------------------------------------------
         # In the simple case, the directory B1B2X_sent will not exists and we'll just return X
         #-----------------------------------------------------------------------------------------
-        if not (self.bulletinWriter.doesCollectionExist(self.bulletin.getTwoLetterHeader(), \
-                                                           self.bulletin.getTimeStamp(), \
-                                                           self.bulletin.getCollectionB1() + \
-                                                           self.bulletin.getCollectionB2() + \
-                                                           'X', 'True')):
+        if not (self.bulletinWriter.doesCollectionWithB3Exist(self.bulletin, 'X', self.lookForSentDir)):
             return 'X'
 
         #-----------------------------------------------------------------------------------------
@@ -379,11 +373,8 @@ class CollectionManager(object):
         #-----------------------------------------------------------------------------------------
         else:
             counter = 1
-            while (self.bulletinWriter.doesCollectionExist(self.bulletin.getTwoLetterHeader(), \
-                                                           self.bulletin.getTimeStamp(), \
-                                                           self.bulletin.getCollectionB1() + \
-                                                           self.bulletin.getCollectionB2() + \
-                                                           'X'+str(counter), 'True')):
+            while (self.bulletinWriter.doesCollectionWithB3Exist(self.bulletin, 'X'+str(counter), \
+                                                                 self.lookForSentDir)):
                 counter = counter + 1
             else:
                 return 'X'+str(counter)
@@ -399,11 +390,7 @@ class CollectionManager(object):
         charSet = 'ABCDEFGHIJKLMNOPQRSTUVW'
 
         for char in charSet:
-            if not (self.bulletinWriter.doesCollectionExist(self.bulletin.getTwoLetterHeader(), \
-                                                           self.bulletin.getTimeStamp(), \
-                                                           self.bulletin.getCollectionB1() + \
-                                                           self.bulletin.getCollectionB2() + \
-                                                           char, 'True')):
+            if not (self.bulletinWriter.doesCollectionWithB3Exist(self.bulletin, char, self.lookForSentDir)):
                 return char
                 
 
