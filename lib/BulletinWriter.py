@@ -154,11 +154,12 @@ class BulletinWriter:
         print "REMOVEME: Marking dirs as sent.  oldName: ",oldDirName
         print "NewName:",newDirName
         #-----------------------------------------------------------------------------------------
-        # Making sure that we don't try to rename a non-existent directory.  If old dir exists, 
-        # then rename it to the new name.  If the old dir doesn't exist and the new one doesn't
-        # exist, then create the new empty so as to maintain the state of the application
+        # Making sure that we don't try to rename a non-existent directory.  If old dir exists and
+        # the new one doesn't exist, then rename it to the new name.  Otherwise if the new dir 
+        # doesn't exist, then create the new empty so as to maintain the state of the application
         #-----------------------------------------------------------------------------------------
-        if (self._doesCollectionExist(oldDirName, False)):
+        if ((self._doesCollectionExist(oldDirName, False)) and \
+        not self._doesCollectionExist(newDirName, False)):
             os.rename(oldDirName, newDirName)
         elif not (self._doesCollectionExist(newDirName, False)):
             os.mkdir(newDirName)
