@@ -158,29 +158,23 @@ class BulletinWriter:
         # the new one doesn't exist, then rename it to the new name.  Otherwise if the new dir 
         # doesn't exist, then create the new empty so as to maintain the state of the application
         #-----------------------------------------------------------------------------------------
-        if ((self._doesCollectionExist(oldDirName, False)) and \
-        not self._doesCollectionExist(newDirName, False)):
+        if ((self._doesCollectionExist(oldDirName)) and \
+        not self._doesCollectionExist(newDirName)):
             os.rename(oldDirName, newDirName)
-        elif not (self._doesCollectionExist(newDirName, False)):
+        elif not (self._doesCollectionExist(newDirName)):
             os.mkdir(newDirName)
 
 
-    def _doesCollectionExist(self, dirName, sent):  
+    def _doesSentCollectionExist(self, dirName):  
         """
-        _doesCollectionExist returns TRUE if there's a directory matching the above parameters.
+        _doesCollectionExist returns TRUE if dirName_sent exists and FALSE otherwise.
             dirName     string
                         The path we're to search for
-
-            sent        'True' || ''
-                        set to true if you're checking to see if a collection has been marked as sent.
-                        set to false if you're checking to see if an unsent collection exists.
         """
-        
         #-----------------------------------------------------------------------------------------
-        # find out if '<dirname>_sent' exists if we were called with sent = True
+        # find out if '<dirname>_sent' exists
         #-----------------------------------------------------------------------------------------
-        if (sent):
-            dirName = dirName+self.collectionConfigParser.getSentCollectionToken()   
+        dirName = dirName+self.collectionConfigParser.getSentCollectionToken()   
             
         #-----------------------------------------------------------------------------------------
         # return True if the dir exists and False otherwise
@@ -188,33 +182,86 @@ class BulletinWriter:
         return os.access(dirName, os.F_OK) 
 
 
-    def doesCollectionWithB3Exist(self, bulletin, B3, sent):  
+    def _doesBusyCollectionExist(self, dirName):  
         """
-        doesCollectionWithB3Exist returns TRUE if there's a directory matching the above parameters.
+        _doesBusyCollectionExist returns TRUE if dirName_busy exists and FALSE otherwise.
+            dirName     string
+                        The path we're to search for
+        """
+        #-----------------------------------------------------------------------------------------
+        # find out if '<dirname>_busy' exists
+        #-----------------------------------------------------------------------------------------
+        dirName = dirName+self.collectionConfigParser.getBusyCollectionToken()   
+            
+        #-----------------------------------------------------------------------------------------
+        # return True if the dir exists and False otherwise
+        #-----------------------------------------------------------------------------------------
+        return os.access(dirName, os.F_OK) 
+
+    def _doesCollectionExist(self, dirName):  
+        """
+        _doesCollectionExist returns TRUE if dirName exists and FALSE otherwise.
+            dirName     string
+                        The path we're to search for
+        """
+        #-----------------------------------------------------------------------------------------
+        # return True if the dir exists and False otherwise
+        #-----------------------------------------------------------------------------------------
+        return os.access(dirName, os.F_OK) 
+
+
+    def doesBusyCollectionWithB3Exist(self, bulletin, B3):
+        """
+        doesBusyCollectionWithB3Exist returns TRUE if there's a directory matching the B3 from
+        above and the '_busy' tag.
             bulletin    BulletinCollection
                         A bulletin
 
             B3          character string
                         The B3 character.
-
-            sent        'True' || ''
-                        set to true if you're checking to see if a collection has been marked as sent.
-                        set to false if you're checking to see if an unsent collection exists.
         """
         #-----------------------------------------------------------------------------------------
         # calculate the base dir path (/apps/px/collection/SA/041200/CYOW)
         #-----------------------------------------------------------------------------------------
         dirName = self._calculateDirName(bulletin.getType(), bulletin.getTimeStamp(), bulletin.getOrigin())
-        
+
         #-----------------------------------------------------------------------------------------
         # build the BBB value to look for (/apps/px/collection/SA/041200/CYOW/RRB3) 
         #-----------------------------------------------------------------------------------------
         BBB = string.strip(bulletin.getCollectionB1() + bulletin.getCollectionB2() + B3)
         dirName = "%s/%s" %(dirName, BBB)
+
         #-----------------------------------------------------------------------------------------
         # find out if the directory exists
         #-----------------------------------------------------------------------------------------
-        return self._doesCollectionExist(dirName, sent) 
+        return self._doesBusyCollectionExist(dirName)
+
+    
+    def doesSentCollectionWithB3Exist(self, bulletin, B3):
+        """
+        doesSentCollectionWithB3Exist returns TRUE if there's a directory matching the B3 from
+        above and the '_sent' tag.
+            bulletin    BulletinCollection
+                        A bulletin
+
+            B3          character string
+                        The B3 character.
+        """
+        #-----------------------------------------------------------------------------------------
+        # calculate the base dir path (/apps/px/collection/SA/041200/CYOW)
+        #-----------------------------------------------------------------------------------------
+        dirName = self._calculateDirName(bulletin.getType(), bulletin.getTimeStamp(), bulletin.getOrigin())
+
+        #-----------------------------------------------------------------------------------------
+        # build the BBB value to look for (/apps/px/collection/SA/041200/CYOW/RRB3) 
+        #-----------------------------------------------------------------------------------------
+        BBB = string.strip(bulletin.getCollectionB1() + bulletin.getCollectionB2() + B3)
+        dirName = "%s/%s" %(dirName, BBB)
+
+        #-----------------------------------------------------------------------------------------
+        # find out if the directory exists
+        #-----------------------------------------------------------------------------------------
+        return self._doesSentCollectionExist(dirName)
 
 
     def _calculateDirName(self, reportType, timeStamp, origin):

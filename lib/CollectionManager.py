@@ -66,10 +66,7 @@ class CollectionManager(object):
         # A BulletinWriter object to carry out disk-related tasks
         #-----------------------------------------------------------------------------------------
         self.bulletinWriter = BulletinWriter.BulletinWriter(self.logger,self.collectionConfig)
-        #-----------------------------------------------------------------------------------------
-        # A general flag used to find out if we're looking for collections which have been sent
-        #-----------------------------------------------------------------------------------------
-        self.lookForSentDir = 'True'
+
 
     def collectReport(self, fileName):
         """ collectReports (self, fileName)
@@ -118,10 +115,11 @@ class CollectionManager(object):
                 self.bulletin.setCollectionB3("Z")
             else:
                 #-----------------------------------------------------------------------------------------
-                # Determining if B1B2W_sent exists. If yes, set B3 to "Xn".  If not, then increment B3
-                # from A to W until we find an unused B3 character
+                # Determining if B1B2W_sent or B1B2W_busy exist. If yes, set B3 to "Xn".  If not, then 
+                # increment B3 from A to W until we find an unused B3 character
                 #-----------------------------------------------------------------------------------------
-                if(self.bulletinWriter.doesCollectionWithB3Exist(self.bulletin, 'W', self.lookForSentDir)):
+                if(self.bulletinWriter.doesBusyCollectionWithB3Exist(self.bulletin, 'W') or
+                   self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, 'W')):
                     tempB3 = self.findNextXValue()
                     self.bulletin.setCollectionB3(tempB3)
                 else:
@@ -363,18 +361,20 @@ class CollectionManager(object):
             positive integer in the case where the directory B1B2X exists
         """
         #-----------------------------------------------------------------------------------------
-        # In the simple case, the directory B1B2X_sent will not exists and we'll just return X
+        # In the simple case, the directory B1B2X_sent or B1B2X_busy will not exists and we'll 
+        # just return X
         #-----------------------------------------------------------------------------------------
-        if not (self.bulletinWriter.doesCollectionWithB3Exist(self.bulletin, 'X', self.lookForSentDir)):
+        if not (self.bulletinWriter.doesBusyCollectionWithB3Exist(self.bulletin, 'X') or
+                self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, 'X')):
             return 'X'
 
         #-----------------------------------------------------------------------------------------
-        # If directory B1B2X_sent exists, return X1 or X2, or X3 ..
+        # If directory B1B2X_sent or B1B2X_busy exists, return X1 or X2, or X3 ..
         #-----------------------------------------------------------------------------------------
         else:
             counter = 1
-            while (self.bulletinWriter.doesCollectionWithB3Exist(self.bulletin, 'X'+str(counter), \
-                                                                 self.lookForSentDir)):
+            while (self.bulletinWriter.doesBusyCollectionWithB3Exist(self.bulletin, 'X'+str(counter)) or
+                   self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, 'X'+str(counter))):
                 counter = counter + 1
             else:
                 return 'X'+str(counter)
@@ -390,7 +390,8 @@ class CollectionManager(object):
         charSet = 'ABCDEFGHIJKLMNOPQRSTUVW'
 
         for char in charSet:
-            if not (self.bulletinWriter.doesCollectionWithB3Exist(self.bulletin, char, self.lookForSentDir)):
+            if not (self.bulletinWriter.doesBusyCollectionWithB3Exist(self.bulletin, char) or
+                    self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, char)):
                 return char
                 
 
