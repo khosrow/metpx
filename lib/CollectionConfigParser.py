@@ -99,3 +99,11 @@ class CollectionConfigParser:
         """
         return self.source.sentCollectionToken
 
+    def getBusyCollectionToken (self):
+        """ getBusyCollectionToken (self) -> string
+
+            Returns a string representing a collection in generation
+            (I.e. The '_busy' in '/apps/px/collection/SA/281400/RR_busy')
+        """
+        return self.source.busyCollectionToken
+
