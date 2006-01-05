@@ -89,7 +89,7 @@ class CollectionManager(object):
         # use collectionBuilder to create a bulletin object from the given file
         #-----------------------------------------------------------------------------------------
         self.bulletin = self.collectionBuilder.buildBulletinFromFile(fileName)
-        
+        print "\nREMOVEME: The incoming report: ",self.bulletin.bulletinAsString()
         #-----------------------------------------------------------------------------------------
         # Let's find out if the report arrived on time.  If so, write the report bulletin
         # to disk.
@@ -113,13 +113,14 @@ class CollectionManager(object):
             #-----------------------------------------------------------------------------------------
             if (self.isReportOlderThan24H()):
                 self.bulletin.setCollectionB3("Z")
+
             else:
                 #-----------------------------------------------------------------------------------------
                 # Determining if B1B2W_sent or B1B2W_busy exist. If yes, set B3 to "Xn".  If not, then 
                 # increment B3 from A to W until we find an unused B3 character
                 #-----------------------------------------------------------------------------------------
-                if(self.bulletinWriter.doesBusyCollectionWithB3Exist(self.bulletin, 'W') or
-                   self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, 'W')):
+                if (self.bulletinWriter.doesBusyCollectionWithB3Exist(self.bulletin, 'W') or
+                    self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, 'W')):
                     tempB3 = self.findNextXValue()
                     self.bulletin.setCollectionB3(tempB3)
                 else:
@@ -132,7 +133,7 @@ class CollectionManager(object):
             #-----------------------------------------------------------------------------------------
             self.bulletinWriter.writeReportBulletinToDisk(self.bulletin)
 
-            print "\nREMOVEME: The incoming report: ",self.bulletin.bulletinAsString()
+            
             print "REMOVEME: The collection's BBB is now set to: ", self.bulletin.getCollectionBBB()
 
             #-----------------------------------------------------------------------------------------
@@ -142,8 +143,7 @@ class CollectionManager(object):
             # than 1HR are also immediate. The difference between immediate and scheduled
             # is that immediate collections are returned to the caller by this method.
             #-----------------------------------------------------------------------------------------
-            if ((self.bulletin.getCollectionB1() in ('A', 'C')) or
-                (self.bulletin.getCollectionB1() in ('R') and (self.isReportOlderThan1H()))):
+            if (self.isAnImmediateCollection()):
                 #-----------------------------------------------------------------------------------------
                 # Build a collection bulletin from a single report bulletin and return to caller
                 # for immediate transmission
@@ -406,7 +406,27 @@ class CollectionManager(object):
         # call method to mark the appropriate collection as sent
         #-----------------------------------------------------------------------------------------
         self.bulletinWriter.markCollectionAsSent(collectionBulletin)
+
+
+    def isAnImmediateCollection(self):
+        """ isAnImmediateCollection()  
+
+            This method returns True or False based on whether or not the
+            current bulletin warrants immediate transmission. Reports beginning 
+            with BBB = CC or AA are immediate.  Reports beginning with RR which are 
+            older than 1HR are also immediate. 
+        """
+        True = 'True'
+        False = ''
+
+        if ((self.bulletin.getCollectionB1() in ('A', 'C')) or
+            (self.bulletin.getCollectionB1() in ('R') and (self.isReportOlderThan1H()))):
+            return True
+        else:
+            return False
         
+
+
 
 if __name__ == '__main__':
     pass
