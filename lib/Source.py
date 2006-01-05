@@ -63,6 +63,7 @@ class Source(object):
         # Setting up default collection configuration values
         #-----------------------------------------------------------------------------------------
         self.sentCollectionToken = ''     #Dir name token used to identify collections which have been transmitted.
+        self.busyCollectionToken = ''     #Dir name token used to identify that a collection is currently being generated.
         self.headersToCollect = []        #Title for report in the form TT from (TTAAii)
         self.headersValidTime = []        #The amount of time in minutes past the hour for which the report is considered on time.
         self.headersLateCycle = []        #Specified in minutes.  After the valid time period, we will check this often for late arrivals.
@@ -144,6 +145,7 @@ class Source(object):
                     elif words[0] == 'sorter': self.sorter = words[1]
                     elif words[0] == 'arrival': self.mapEnteteDelai = {words[1]:(int(words[2]), int(words[3]))}
                     elif words[0] == 'sentCollectionToken': self.sentCollectionToken = string.strip(words[1],'\'')
+                    elif words[0] == 'busyCollectionToken': self.busyCollectionToken = string.strip(words[1],'\'')
                     elif words[0] == 'header': self.headersToCollect.append(words[1])
                     elif words[0] == 'headerValidTime': self.headersValidTime.append(words[1])
                     elif words[0] == 'headerLateCycle': self.headersLateCycle.append(words[1])
@@ -220,6 +222,8 @@ class Source(object):
         print("******************************************")        
 
         print("Sent Collection Identifier: %s" % self.sentCollectionToken)
+        print("Busy Collection Identifier: %s" % self.busyCollectionToken)
+
         
         print ("\nHeader  Valid Time  Late Cycle  Time To Live  Future-Dated Time Window")
         for position, header in enumerate(self.headersToCollect):
@@ -242,6 +246,13 @@ class Source(object):
             #-----------------------------------------------------------------------------------------
             if self.sentCollectionToken == '':
                 self.logger.error("Error: No value given for the 'sentCollectionToken' parameter in configuration file: %s" % (self.name))
+                self.terminateWithError()
+
+            #-----------------------------------------------------------------------------------------
+            # Check busy collection identifier
+            #-----------------------------------------------------------------------------------------
+            if self.busyCollectionToken == '':
+                self.logger.error("Error: No value given for the 'busyCollectionToken' parameter in configuration file: %s" % (self.name))
                 self.terminateWithError()
 
             #-----------------------------------------------------------------------------------------
