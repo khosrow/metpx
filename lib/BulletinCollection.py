@@ -84,8 +84,8 @@ class BulletinCollection(bulletin.bulletin):
     def setCollectionB3(self, newCollectionB):
         self.collectionBBB = "%s%s%s" % (self.collectionBBB[0], self.collectionBBB[1], newCollectionB)
 
-    def getTwoLetterHeader(self):
-        """ getTwoLetterHeaderp() parses the header and returns the two letter header
+    def getTwoLetterType(self):
+        """ getTwoLetterType() parses the header and returns the two letter header
             (I.e 'SA' will be returned for 'SACNXX')
         """
         #-----------------------------------------------------------------------------------------
@@ -96,8 +96,22 @@ class BulletinCollection(bulletin.bulletin):
         #-----------------------------------------------------------------------------------------
         # the first two letters of the first element make up the two-letter header
         #-----------------------------------------------------------------------------------------
-        TwoLetterHeader = headerTokens[0] 
-        return TwoLetterHeader[:2]
+        TwoLetterType = headerTokens[0] 
+        return TwoLetterType[:2]
+
+
+    def getFullType(self):
+        """ getFullHeaderType() parses the header and returns the type
+            (I.e 'SACN51' from SACN51 CWAO 062000)
+        """
+        #-----------------------------------------------------------------------------------------
+        # split header into tokens
+        #-----------------------------------------------------------------------------------------
+        headerTokens = string.split(self.getHeader()) 
+        #-----------------------------------------------------------------------------------------
+        # the full type is the first element in the header
+        #-----------------------------------------------------------------------------------------
+        return headerTokens[0]
 
 
     def getBulletinMinutesField(self):
