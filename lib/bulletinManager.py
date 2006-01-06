@@ -362,14 +362,19 @@ class bulletinManager:
 
            SACN31_CWAO_121435__CYUL_045440
            SACN31_CWAO_121435_CCA__045440
+
+
         """
 
-        # header : 1 - get header from bulletin
-        #          2-  must be alphanumeric
+        # header : 1- get header from bulletin
+        #          2- must be alphanumeric
+        #          3- consider an empty BBB to add an '_'
 
         header = bulletin.getHeader()
         if (header.replace(' ','')).isalnum() :
+           parts  = header.split()
            header = header.replace(' ','_')
+           if len(parts) < 4 : header = header + '_'
         else :
            header = None
 
