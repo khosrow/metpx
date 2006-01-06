@@ -49,16 +49,16 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         # calculate the path for the new file
         # note that the BBB field is "" since this is an OnTimeBulletin
-        # (/apps/px/collection/SA/041200/CYOW/7min)
+        # (/apps/px/collection/SA/041200/CYOW/SACNXX/7min)
         #-----------------------------------------------------------------------------------------
         bulletinPath = self.calculateOnTimeDirName(bull)
         
         #-----------------------------------------------------------------------------------------
-        # calculate the filename for the new file (SA_WRO)
+        # calculate the filename for the new file (WRO)
         # note that the timestamp is not included so that newer bulletins from the same station
         # will overwrite previous bulletins. 
         #-----------------------------------------------------------------------------------------
-        fileName = "%s_%s" % (bull.getType(), bull.getStation())
+        fileName = "%s" % (bull.getStation())
         
         #-----------------------------------------------------------------------------------------
         # open the file and write the bulletin to disk
@@ -221,9 +221,10 @@ class BulletinWriter:
                         The B3 character.
         """
         #-----------------------------------------------------------------------------------------
-        # calculate the base dir path (/apps/px/collection/SA/041200/CYOW)
+        # calculate the base dir path (/apps/px/collection/SA/041200/CYOW/SACNXX)
         #-----------------------------------------------------------------------------------------
-        dirName = self._calculateDirName(bulletin.getType(), bulletin.getTimeStamp(), bulletin.getOrigin())
+        dirName = self._calculateDirName(bulletin.getTwoLetterType(), bulletin.getTimeStamp(), \
+                                         bulletin.getOrigin(), bulletin.getFullType())
 
         #-----------------------------------------------------------------------------------------
         # build the BBB value to look for (/apps/px/collection/SA/041200/CYOW/RRB3) 
@@ -248,9 +249,10 @@ class BulletinWriter:
                         The B3 character.
         """
         #-----------------------------------------------------------------------------------------
-        # calculate the base dir path (/apps/px/collection/SA/041200/CYOW)
+        # calculate the base dir path (/apps/px/collection/SA/041200/CYOW/SACNXX)
         #-----------------------------------------------------------------------------------------
-        dirName = self._calculateDirName(bulletin.getType(), bulletin.getTimeStamp(), bulletin.getOrigin())
+        dirName = self._calculateDirName(bulletin.getTwoLetterType(), bulletin.getTimeStamp(), \
+                                         bulletin.getOrigin(), bulletin.getFullType())
 
         #-----------------------------------------------------------------------------------------
         # build the BBB value to look for (/apps/px/collection/SA/041200/CYOW/RRB3) 
@@ -264,7 +266,34 @@ class BulletinWriter:
         return self._doesSentCollectionExist(dirName)
 
 
-    def _calculateDirName(self, reportType, timeStamp, origin):
+    def doesCollectionWithB3Exist(self, bulletin, B3):
+        """
+        doesCollectionWithB3Exist returns TRUE if there's a directory matching the B3 from
+        above.
+            bulletin    BulletinCollection
+                        A bulletin
+
+            B3          character string
+                        The B3 character.
+        """
+        #-----------------------------------------------------------------------------------------
+        # calculate the base dir path (/apps/px/collection/SA/041200/CYOW/SACNXX)
+        #-----------------------------------------------------------------------------------------
+        dirName = self._calculateDirName(bulletin.getTwoLetterType(), bulletin.getTimeStamp(), \
+                                         bulletin.getOrigin(), bulletin.getFullType())
+
+        #-----------------------------------------------------------------------------------------
+        # build the BBB value to look for (/apps/px/collection/SA/041200/CYOW/RRB3) 
+        #-----------------------------------------------------------------------------------------
+        BBB = string.strip(bulletin.getCollectionB1() + bulletin.getCollectionB2() + B3)
+        dirName = "%s/%s" %(dirName, BBB)
+        #-----------------------------------------------------------------------------------------
+        # find out if the directory exists
+        #-----------------------------------------------------------------------------------------
+        return self._doesCollectionExist(dirName)
+
+
+    def _calculateDirName(self, reportType, timeStamp, origin, fullType):
         """ This method calculates the directory name of a collection, given the above parameters
             reportType  string
                         the 2 letter code for the bulletin type, such as SA or SI or SM.
@@ -274,11 +303,15 @@ class BulletinWriter:
 
             origin      string
                         The orgin of the bulletin
+
+            fullType    string
+                        The full Type of the bulletin (SACNXX)
         """
         #-----------------------------------------------------------------------------------------
-        # Find the basic collection path (/apps/px/collection/SA/041200/CYOW)
+        # Find the basic collection path (/apps/px/collection/SA/041200/CYOW/SACNXX)
         #-----------------------------------------------------------------------------------------
-        dirName = "%s%s/%s/%s" % (self.collectionConfigParser.getCollectionPath(), reportType, timeStamp, origin)
+        dirName = "%s%s/%s/%s/%s" % (self.collectionConfigParser.getCollectionPath(), reportType, \
+                                     timeStamp, origin, fullType)
         return dirName
 
 
@@ -289,14 +322,15 @@ class BulletinWriter:
             bulletin.
         """
         #-----------------------------------------------------------------------------------------
-        # calculate the base dir path (/apps/px/collection/SA/041200/CYOW)
+        # calculate the base dir path (/apps/px/collection/SA/041200/CYOW/SACNXX)
         #-----------------------------------------------------------------------------------------
-        dirName = self._calculateDirName(bulletin.getType(), bulletin.getTimeStamp(), bulletin.getOrigin())
+        dirName = self._calculateDirName(bulletin.getTwoLetterType(), bulletin.getTimeStamp(), \
+                                         bulletin.getOrigin(), bulletin.getFullType())
 
-        reportType = bulletin.getType()
+        reportType = bulletin.getTwoLetterType()
         validTime = self.collectionConfigParser.getReportValidTimeByHeader(reportType)
         #-----------------------------------------------------------------------------------------
-        # Append the on-time dir name to the path (/apps/px/collection/SA/041200/CYOW/7min)
+        # Append the on-time dir name to the path (/apps/px/collection/SA/041200/CYOW/SACNXX/7min)
         #-----------------------------------------------------------------------------------------
         dirName = "%s/%smin" % (dirName, validTime)
         return string.strip(dirName)
@@ -309,9 +343,10 @@ class BulletinWriter:
             bulletin including the BBB field in the path.
         """
         #-----------------------------------------------------------------------------------------
-        # calculate the base dir path (/apps/px/collection/SA/041200/CYOW)
+        # calculate the base dir path (/apps/px/collection/SA/041200/CYOW/SACNXX)
         #-----------------------------------------------------------------------------------------
-        dirName = self._calculateDirName(bulletin.getType(), bulletin.getTimeStamp(), bulletin.getOrigin())
+        dirName = self._calculateDirName(bulletin.getTwoLetterType(), bulletin.getTimeStamp(), \
+                                         bulletin.getOrigin(), bulletin.getFullType())
 
         BBB = bulletin.getCollectionBBB()
         #-----------------------------------------------------------------------------------------

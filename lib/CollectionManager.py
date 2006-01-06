@@ -90,6 +90,7 @@ class CollectionManager(object):
         #-----------------------------------------------------------------------------------------
         self.bulletin = self.collectionBuilder.buildBulletinFromFile(fileName)
         print "\nREMOVEME: The incoming report: ",self.bulletin.bulletinAsString()
+        
         #-----------------------------------------------------------------------------------------
         # Let's find out if the report arrived on time.  If so, write the report bulletin
         # to disk.
@@ -114,8 +115,25 @@ class CollectionManager(object):
             if (self.isReportOlderThan24H()):
                 self.bulletin.setCollectionB3("Z")
 
+            #-----------------------------------------------------------------------------------------
+            # If the incoming bulletin is an immediate one, don't bother checking to see if the
+            # directory is '_busy' for '_sent'.  Just quickly move on and find the next available 
+            # B3 value.  This can be done because immediate collections consist of only a single
+            # bulletin and not more.  Therefore, there's no chance that we would need to place
+            # this report in an existing directory.
+            #-----------------------------------------------------------------------------------------
+            elif(self.isAnImmediateCollection()):
+                if (self.bulletinWriter.doesCollectionWithB3Exist(self.bulletin, 'W')):
+                    tempB3 = self.findNextXValue()
+                    self.bulletin.setCollectionB3(tempB3)
+                else:
+                    tempB3 = self.findNextAvailableB3Value()
+                    self.bulletin.setCollectionB3(tempB3)
+                
             else:
                 #-----------------------------------------------------------------------------------------
+                # Now we're dealing with a non-immediate bulletin and so it's possible that it may
+                # have to be placed in an already-existing directory.
                 # Determining if B1B2W_sent or B1B2W_busy exist. If yes, set B3 to "Xn".  If not, then 
                 # increment B3 from A to W until we find an unused B3 character
                 #-----------------------------------------------------------------------------------------
@@ -133,9 +151,7 @@ class CollectionManager(object):
             #-----------------------------------------------------------------------------------------
             self.bulletinWriter.writeReportBulletinToDisk(self.bulletin)
 
-            
             print "REMOVEME: The collection's BBB is now set to: ", self.bulletin.getCollectionBBB()
-
             #-----------------------------------------------------------------------------------------
             # At this point all collection worthy report bulletins have been written to disk.
             # Now we need to know which are immediate and which are scheduled.  Reports with BBB 
@@ -180,13 +196,13 @@ class CollectionManager(object):
             # Find out how many minutes past the hour is considered on-time for this bulletin type
             #-----------------------------------------------------------------------------------------
             maxPastDateInMins = self.collectionConfig. \
-            getReportValidTimeByHeader(self.bulletin.getTwoLetterHeader())
+            getReportValidTimeByHeader(self.bulletin.getTwoLetterType())
 
             #-----------------------------------------------------------------------------------------
             # Find out how far in the future an acceptable report may be
             #-----------------------------------------------------------------------------------------
             maxFutureDateInMins = self.collectionConfig. \
-            getFutureDatedReportWindowByHeader(self.bulletin.getTwoLetterHeader())
+            getFutureDatedReportWindowByHeader(self.bulletin.getTwoLetterType())
 
             #-----------------------------------------------------------------------------------------
             # In order for this bulletin to be on time, it must fall in between the maximum past
@@ -361,23 +377,42 @@ class CollectionManager(object):
             positive integer in the case where the directory B1B2X exists
         """
         #-----------------------------------------------------------------------------------------
-        # In the simple case, the directory B1B2X_sent or B1B2X_busy will not exists and we'll 
-        # just return X
+        # If we're dealing with an immediate collection, don't waste time looking for '_busy' 
+        # or '_sent' in dir name
         #-----------------------------------------------------------------------------------------
-        if not (self.bulletinWriter.doesBusyCollectionWithB3Exist(self.bulletin, 'X') or
-                self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, 'X')):
-            return 'X'
+        if(self.isAnImmediateCollection()):
+            #-----------------------------------------------------------------------------------------
+            # In the simple case, the directory B1B2X  wont exists and we'll just return X.  
+            # Otherwise we need to return X1 or X2, or X3 ..
+            #-----------------------------------------------------------------------------------------
+            if not (self.bulletinWriter.doesCollectionWithB3Exist(self.bulletin, 'X')):
+                return 'X'
+            else:
+                counter = 1
+                while (self.bulletinWriter.doesCollectionWithB3Exist(self.bulletin, 'X'+str(counter))):
+                    counter = counter + 1
+                else:
+                    return 'X'+str(counter)
 
         #-----------------------------------------------------------------------------------------
-        # If directory B1B2X_sent or B1B2X_busy exists, return X1 or X2, or X3 ..
+        # Here we're dealing with a non-immediate bulelletn. Look for '_busy' or '_sent' in dir
+        # name
         #-----------------------------------------------------------------------------------------
         else:
-            counter = 1
-            while (self.bulletinWriter.doesBusyCollectionWithB3Exist(self.bulletin, 'X'+str(counter)) or
-                   self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, 'X'+str(counter))):
-                counter = counter + 1
+            #-----------------------------------------------------------------------------------------
+            # In the simple case, the directory B1B2X_sent or B1B2X_busy will not exists and we'll 
+            # just return X.  Otherwise we need to return X1 or X2, or X3 ..
+            #-----------------------------------------------------------------------------------------
+            if not (self.bulletinWriter.doesBusyCollectionWithB3Exist(self.bulletin, 'X') or
+                    self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, 'X')):
+                return 'X'
             else:
-                return 'X'+str(counter)
+                counter = 1
+                while (self.bulletinWriter.doesBusyCollectionWithB3Exist(self.bulletin, 'X'+str(counter)) or
+                       self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, 'X'+str(counter))):
+                    counter = counter + 1
+                else:
+                    return 'X'+str(counter)
 
 
     def findNextAvailableB3Value(self):
@@ -386,15 +421,27 @@ class CollectionManager(object):
             This method looks for the next available alphabet character
             ranging from A to W to use as the collection's B3 value
         """
-
         charSet = 'ABCDEFGHIJKLMNOPQRSTUVW'
+        #-----------------------------------------------------------------------------------------
+        # If we're dealing with an immediate collection, don't waste time looking for '_busy' 
+        # or '_sent' in dir name
+        #-----------------------------------------------------------------------------------------
+        if(self.isAnImmediateCollection()):
+            for char in charSet:
+                if not (self.bulletinWriter.doesCollectionWithB3Exist(self.bulletin, char)):
+                    return char
 
-        for char in charSet:
-            if not (self.bulletinWriter.doesBusyCollectionWithB3Exist(self.bulletin, char) or
-                    self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, char)):
-                return char
+        #-----------------------------------------------------------------------------------------
+        # Here we're dealing with a non-immediate bulelletn. Look for '_busy' or '_sent' in dir
+        # name
+        #-----------------------------------------------------------------------------------------
+        else:
+            for char in charSet:
+                if not (self.bulletinWriter.doesBusyCollectionWithB3Exist(self.bulletin, char) or
+                        self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, char)):
+                    return char
+
                 
-
     def markCollectionAsSent(self, collectionBulletin):
         """ markCollectionAsSent(fileName) 
 
@@ -418,7 +465,6 @@ class CollectionManager(object):
         """
         True = 'True'
         False = ''
-
         if ((self.bulletin.getCollectionB1() in ('A', 'C')) or
             (self.bulletin.getCollectionB1() in ('R') and (self.isReportOlderThan1H()))):
             return True
