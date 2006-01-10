@@ -22,6 +22,9 @@ import BulletinCollection
 from Logger import Logger
 import sys
 import os
+import tempfile
+
+
 
 class BulletinWriter:
     """ BulletinWriter():
@@ -61,7 +64,8 @@ class BulletinWriter:
         fileName = "%s" % (bull.getStation())
         
         #-----------------------------------------------------------------------------------------
-        # open the file and write the bulletin to disk
+        # open the file and write the bulletin to disk 
+        # (/apps/px/collection/SA/041200/CYOW/SACNXX/7min/WRO)
         #-----------------------------------------------------------------------------------------
         self._writeToDisk(bull, bulletinPath, fileName)
         
@@ -75,25 +79,45 @@ class BulletinWriter:
                     the bulletin to be written to the collections db.
         """
         #-----------------------------------------------------------------------------------------
-        # calculate the path for the new file (/apps/px/collection/SA/041200/CYOW/RRA)
+        # calculate the path for the new file (/apps/px/collection/SA/041200/CYOW/SACNXX/RRA)
         #-----------------------------------------------------------------------------------------
         bulletinPath = self.calculateBBBDirName(bull)
 
         #-----------------------------------------------------------------------------------------
-        # calculate the filename for the new file. (SA_WRO)
+        # calculate the filename for the new file. (WRO)
         # note that the timestamp is not included so that newer bulletins from the same station
         # will overwrite previous bulletins.
         #-----------------------------------------------------------------------------------------
-        fileName = "%s_%s" % (bull.getType(), bull.getStation())
+        fileName = "%s" % (bull.getStation())
         
+        #-----------------------------------------------------------------------------------------
+        # calculate the base dir we need to lock (/apps/px/collection/SA/041200/CYOW/SACNXX)
+        #-----------------------------------------------------------------------------------------
+        dirPath = self._calculateControlDestPath(bull.getTwoLetterType(), \
+                                                 bull.getTimeStampWithMinsSetToZero(), \
+                                                 bull.getOrigin(), bull.getFullType())
+        #-----------------------------------------------------------------------------------------
+        # Lock the semaphore so that another Px thread doesn't interfere
+        #-----------------------------------------------------------------------------------------
+        self.lockDirBranch(dirPath)
+
         #-----------------------------------------------------------------------------------------
         # open the file and write the bulletin to disk
         #-----------------------------------------------------------------------------------------
         self._writeToDisk(bull, bulletinPath, fileName)
-        
 
+        #-----------------------------------------------------------------------------------------
+        # Unlock the semaphore 
+        #-----------------------------------------------------------------------------------------
+        self.unlockDirBranch(dirPath)
+
+  
     def _writeToDisk(self, bulletin, bulletinPath, fileName):
         """ _writeToDisk(self, path, fileName)
+
+            path        string  I.e. (/apps/px/collection/SA/041200/CYOW/SACNxx/RRA)
+
+            fileName    string  I.e. (WRO)
 
             This is a helper method which accepts a path and a filename for the 
             purpose of creating the file in the given path using the bulletin as
@@ -115,8 +139,8 @@ class BulletinWriter:
         except IOError:
             self.logger.exception("Cannot create file: %s" % fullName)
         fd.write(bulletin.getBulletin())
-        fd.close()      
-
+        fd.close()  
+        
 
     def markCollectionAsSent(self, collectionBulletin):
         """ markCollectionAsSent()
@@ -125,23 +149,21 @@ class BulletinWriter:
             This allows us to determine which collections were sent, and which ones have not
             yet been sent 
         """
-        reportType = collectionBulletin.getType()
         timeStamp = collectionBulletin.getTimeStampWithMinsSetToZero()
         origin = collectionBulletin.getOrigin()
         BBB = collectionBulletin.getCollectionBBB()
         #-----------------------------------------------------------------------------------------
         # This is the directory name before being marked as sent 
-        # (/apps/px/collection/SA/041200/CYOW/CCA)
+        # (/apps/px/collection/SA/041200/CYOW/SACNxx/CCA)
         #-----------------------------------------------------------------------------------------
         oldDirName =  self.calculateBBBDirName(collectionBulletin)
         
         #-----------------------------------------------------------------------------------------
         # This is the directory name after it has been marked as sent
-        # (/apps/px/collection/SA/041200/CYOW/CCA_sent)
+        # (/apps/px/collection/SA/041200/CYOW/SACNxx/CCA_sent)
         #-----------------------------------------------------------------------------------------
         newDirName =  "%s%s" % (oldDirName,self.collectionConfigParser.getSentCollectionToken()) 
-        print "REMOVEME: Marking dirs as sent.  oldName: ",oldDirName
-        print "NewName:",newDirName
+        print "REMOVEME: Marking dirs as sent.  Renaming from: ",oldDirName, "To:",newDirName
         #-----------------------------------------------------------------------------------------
         # Making sure that we don't try to rename a non-existent directory.  If old dir exists and
         # the new one doesn't exist, then rename it to the new name.  Otherwise if the new dir 
@@ -217,7 +239,7 @@ class BulletinWriter:
                                          bulletin.getOrigin(), bulletin.getFullType())
 
         #-----------------------------------------------------------------------------------------
-        # build the BBB value to look for (/apps/px/collection/SA/041200/CYOW/RRB3) 
+        # build the BBB value to look for (/apps/px/collection/SA/041200/CYOW/SACNxx/RRB3) 
         #-----------------------------------------------------------------------------------------
         BBB = string.strip(bulletin.getCollectionB1() + bulletin.getCollectionB2() + B3)
         dirName = "%s/%s" %(dirName, BBB)
@@ -246,7 +268,7 @@ class BulletinWriter:
                                          bulletin.getOrigin(), bulletin.getFullType())
 
         #-----------------------------------------------------------------------------------------
-        # build the BBB value to look for (/apps/px/collection/SA/041200/CYOW/RRB3) 
+        # build the BBB value to look for (/apps/px/collection/SA/041200/CYOW/SACNxx/RRB3) 
         #-----------------------------------------------------------------------------------------
         BBB = string.strip(bulletin.getCollectionB1() + bulletin.getCollectionB2() + B3)
         dirName = "%s/%s" %(dirName, BBB)
@@ -275,7 +297,7 @@ class BulletinWriter:
                                          bulletin.getOrigin(), bulletin.getFullType())
 
         #-----------------------------------------------------------------------------------------
-        # build the BBB value to look for (/apps/px/collection/SA/041200/CYOW/RRB3) 
+        # build the BBB value to look for (/apps/px/collection/SA/041200/CYOW/SACNxx/RRB3) 
         #-----------------------------------------------------------------------------------------
         BBB = string.strip(bulletin.getCollectionB1() + bulletin.getCollectionB2() + B3)
         dirName = "%s/%s" %(dirName, BBB)
@@ -303,6 +325,28 @@ class BulletinWriter:
         # Find the basic collection path (/apps/px/collection/SA/041200/CYOW/SACNXX)
         #-----------------------------------------------------------------------------------------
         dirName = "%s%s/%s/%s/%s" % (self.collectionConfigParser.getCollectionPath(), reportType, \
+                                     timeStamp, origin, fullType)
+        return dirName
+
+
+    def _calculateControlDestPath(self, reportType, timeStamp, origin, fullType):
+        """ This method calculates the directory name of the lock directory, given the parameters
+            reportType  string
+                        the 2 letter code for the bulletin type, such as SA or SI or SM.
+
+            timeStamp   string
+                        The timestamp from the bulletin header.
+
+            origin      string
+                        The orgin of the bulletin
+
+            fullType    string
+                        The full Type of the bulletin (SACNXX)
+        """
+        #-----------------------------------------------------------------------------------------
+        # Find the basic collection path (/apps/px/collection/SA/041200/CYOW/SACNXX)
+        #-----------------------------------------------------------------------------------------
+        dirName = "%s%s/%s/%s/%s" % (self.collectionConfigParser.getCollectionControlPath(), reportType, \
                                      timeStamp, origin, fullType)
         return dirName
 
@@ -346,7 +390,63 @@ class BulletinWriter:
 
         BBB = bulletin.getCollectionBBB()
         #-----------------------------------------------------------------------------------------
-        # Add the BBB field to the path (/apps/px/collection/SA/041200/CYOW/RRA)
+        # Add the BBB field to the path (/apps/px/collection/SA/041200/CYOW/SACNxx/RRA)
         #-----------------------------------------------------------------------------------------
         dirName = "%s/%s" % (dirName, BBB)
         return string.strip(dirName)
+
+
+    def lockDirBranch (self,dirPath):
+        """ lockDirBranch(path)
+
+            dirPath    string  A directory path (/apps/px/collection/SA/041200/CYOW/SACNXX)
+
+            This our custom made semaphore lock method.
+            This method takes a dirPath and locks that branch and its descendants.
+            I.e. Given '/apps/px/collection/SA' SA and all its descentants will be 
+            locked.
+        """
+        False = ''
+        #-----------------------------------------------------------------------------------------
+        # Obtain dir where our lock 'dir' will be kept (/apps/px/collection/control/)
+        #-----------------------------------------------------------------------------------------
+        LockDirPath = self.collectionConfigParser.getCollectionControlPath()
+        
+        #-----------------------------------------------------------------------------------------
+        # Create a randomly-named dir (/apps/px/collection/control/<randomDirName>)
+        #-----------------------------------------------------------------------------------------
+        randomDirNamePath = tempfile.mkdtemp(False,False,LockDirPath)
+
+        randomDirName = randomDirNamePath.split('/')
+        randomDirName = randomDirName[len(randomDirName) -1]
+
+        #-----------------------------------------------------------------------------------------
+        # Create the new dir name using the random token in the destination name
+        #(/apps/px/collection/SA/041200/CYOW/SACNXX/<randomDirName>)
+        #-----------------------------------------------------------------------------------------
+        newDirNamePath = dirPath + '/' + randomDirName
+        print "REMOVEME: moving:",randomDirNamePath," To: ",newDirNamePath
+        os.renames(randomDirNamePath,newDirNamePath)
+
+        #-----------------------------------------------------------------------------------------
+        # Check to make sure that we got the semaphore
+        #-----------------------------------------------------------------------------------------
+        if(self._doesCollectionExist(newDirNamePath)):
+
+        sys.exit()
+
+
+    def unlockDirBranch (self,dirPath):
+        """ unlockDirBranch(path)
+
+            dirPath    string  A directory path
+
+            This our custom made semaphore unlock method.
+            This method takes a dirPath and unlocks that the branch and its descendants.
+            I.e. Given '/apps/px/collection/SA' SA and all its descentants will be 
+            unlocked.
+        """
+        #-----------------------------------------------------------------------------------------
+        # COMPLETEME
+        #-----------------------------------------------------------------------------------------
+        
