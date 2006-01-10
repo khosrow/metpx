@@ -39,11 +39,10 @@ class BulletinCollection(bulletin.bulletin):
     #-----------------------------------------------------------------------------------------
     # Class attributes
     #-----------------------------------------------------------------------------------------
-    collectionBBB = '   '
-
+    collectionBBB = '   '   #The BBB value which we'll dertermine for the collection bulletin
+    
     def getTimeStamp(self):
         """ getTimeStamp() parses the header and returns the timestamp as a string
-
         """
         #-----------------------------------------------------------------------------------------
         # split header into tokens
@@ -56,7 +55,18 @@ class BulletinCollection(bulletin.bulletin):
         timeStamp = headerTokens[2] 
         return timeStamp
 
-    
+
+    def getTimeStampWithMinsSetToZero(self):
+        """ getTimeStampWithMinsSetToZero() returns the timestamp but with the minute
+            field set to zero.
+        """
+        #-----------------------------------------------------------------------------------------
+        # sets mins to zero
+        #-----------------------------------------------------------------------------------------
+        zeroedMinTime = self.getBulletinDaysField() + self.getBulletinHoursField() + '00'
+        return zeroedMinTime
+
+
     """ The following get & set methods are here to make CollectionManager easy to read
         They do the obvious.
     """
@@ -253,7 +263,6 @@ class BulletinCollection(bulletin.bulletin):
             Given a BBB string, this method sets the report's BBB field to the 
             given BBB variable
         """
-        False == ''
         #-----------------------------------------------------------------------------------------
         # split header into tokens
         #-----------------------------------------------------------------------------------------
@@ -269,8 +278,8 @@ class BulletinCollection(bulletin.bulletin):
         print "REMOVEME: Modified the collection's bbb. New HDR is: ",self.getHeader()
         
 
-    def buildCollectionBulletin(self):
-        """ buildCollectionBulletin()
+    def buildImmediateCollectionFromReport(self):
+        """ buildImmediateCollectionFromReport()
 
             This method constructs a collection bulletin based on the report
             contained within its bulletin attribute.  The collection bulletin 
@@ -286,4 +295,43 @@ class BulletinCollection(bulletin.bulletin):
         # Here, we need to update or create the report's BBB value with that of the collection
         #-----------------------------------------------------------------------------------------
         newCollectionBulletin.setReportBBB(newCollectionBulletin.getCollectionBBB())
+
+        #-----------------------------------------------------------------------------------------
+        # If we're dealing with a late (RRx) bulletin, change the minutes field to '00'.
+        # I.e. 'SACN94 CWAO 080319' becomes 'SACN94 CWAO 080300'
+        #-----------------------------------------------------------------------------------------
+        if(newCollectionBulletin.getCollectionB1() in ('R')):
+            newCollectionBulletin.setBulletinMinutesField('00')
         return newCollectionBulletin
+
+
+    def setBulletinMinutesField(self,newValue):
+        """ setBulletinMinutesField(newValue)
+
+            This method sets the minutes in the bulletin's timestamp (located
+            in the header) to the given value.
+            I.e. 'SACN94 CWAO 080319' becomes 'SACN94 CWAO 080300'
+
+            newValue    string  Represents the minutes in ddhhmm
+        """
+        #-----------------------------------------------------------------------------------------
+        # Build the new time stamp
+        #-----------------------------------------------------------------------------------------
+        timeStamp = self.getTimeStamp()
+        newTimeStamp = timeStamp[:-2]+ newValue
+
+        #-----------------------------------------------------------------------------------------
+        # get the header as a list
+        #-----------------------------------------------------------------------------------------
+        headerTokens = string.split(self.getHeader()) 
+
+        #-----------------------------------------------------------------------------------------
+        # The header looks like "SACN58 CWAO 231334 BBB".  Replace the time stamp
+        #-----------------------------------------------------------------------------------------
+        if (len(headerTokens) >= 3):
+            newHeader = headerTokens
+            newHeader[2] = newTimeStamp
+            newHeader = string.join(newHeader)
+            self.setHeader(string.strip(newHeader))
+
+        print "REMOVEME: Modified the collection's timeStamp. New HDR is: ",self.getHeader()
