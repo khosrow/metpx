@@ -38,7 +38,8 @@ def readConfig():
 
 def normalPaths():
 
-    global ROOT, BIN, LIB, LOG, ETC, RXQ, TXQ, DB, RX_CONF, TX_CONF, LAT, LAT_RESULTS, LAT_TMP, COLLECTION_DB
+    global ROOT, BIN, LIB, LOG, ETC, RXQ, TXQ, DB, RX_CONF, TX_CONF, LAT, LAT_RESULTS, LAT_TMP, \
+           COLLECTION_DB, COLLECTION_CONTROL
 
     try:
         envVar = os.path.normpath(os.environ['PXROOT'])
@@ -56,6 +57,7 @@ def normalPaths():
     RX_CONF = ETC + 'rx/'
     TX_CONF = ETC + 'tx/'
     COLLECTION_DB = ROOT + 'collection/'
+    COLLECTION_CONTROL = COLLECTION_DB + 'control/'
 
     #Paths for pxLatencies
     LAT = ROOT + 'latencies/'
@@ -65,7 +67,8 @@ def normalPaths():
 
 def drbdPaths(rootPath):
 
-    global ROOT, BIN, LIB, LOG, ETC, RXQ, TXQ, DB, RX_CONF, TX_CONF, LAT, LAT_RESULTS, LAT_TMP, COLLECTION_DB
+    global ROOT, BIN, LIB, LOG, ETC, RXQ, TXQ, DB, RX_CONF, TX_CONF, LAT, LAT_RESULTS, LAT_TMP, \
+           COLLECTION_DB, COLLECTION_CONTROL
 
     ROOT = os.path.normpath(rootPath) + '/'
     BIN = ROOT + 'bin/'
@@ -78,6 +81,7 @@ def drbdPaths(rootPath):
     RX_CONF = ETC + 'rx/'
     TX_CONF = ETC + 'tx/'
     COLLECTION_DB = ROOT + 'collection'
+    COLLECTION_CONTROL = COLLECTION_DB + 'control/'
 
     #Paths for pxLatencies
     LAT = ROOT + 'latencies/'

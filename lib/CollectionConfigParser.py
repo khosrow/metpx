@@ -91,6 +91,16 @@ class CollectionConfigParser:
         return PXPaths.COLLECTION_DB
 
 
+    def getCollectionControlPath (self):
+        """ getCollectionControlPath (self) -> string
+
+            Returns a string representing the location path to the collection 
+            control dir
+            (I.e. /apps/px/collection/control)
+        """
+        return PXPaths.COLLECTION_CONTROL
+
+
     def getSentCollectionToken (self):
         """ getSentCollectionToken (self) -> string
 
@@ -106,4 +116,10 @@ class CollectionConfigParser:
             (I.e. The '_busy' in '/apps/px/collection/SA/281400/RR_busy')
         """
         return self.source.busyCollectionToken
+
+    def getNumHeadersToCollect (self):
+        """ getNumHeadersToCollect (self) -> int
+            Return the number of different header entries in the config file.
+        """
+        return len(self.source.headersToCollect)
 
