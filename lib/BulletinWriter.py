@@ -124,20 +124,9 @@ class BulletinWriter:
             Used to record on disk that a collection with the given parameters has been sent.
             This allows us to determine which collections were sent, and which ones have not
             yet been sent 
-
-            reportType  string
-                        the 2 letter code for the bulletin type, such as SA or SI or SM.
-
-            timeStamp   string
-                        The timestamp from the bulletin header.
-
-            BBB         string
-                        The BBB field for the collection.
         """
-        True = 'True'
-        False = ''
         reportType = collectionBulletin.getType()
-        timeStamp = collectionBulletin.getTimeStamp()
+        timeStamp = collectionBulletin.getTimeStampWithMinsSetToZero()
         origin = collectionBulletin.getOrigin()
         BBB = collectionBulletin.getCollectionBBB()
         #-----------------------------------------------------------------------------------------
@@ -223,7 +212,8 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         # calculate the base dir path (/apps/px/collection/SA/041200/CYOW/SACNXX)
         #-----------------------------------------------------------------------------------------
-        dirName = self._calculateDirName(bulletin.getTwoLetterType(), bulletin.getTimeStamp(), \
+        dirName = self._calculateDirName(bulletin.getTwoLetterType(), \
+                                         bulletin.getTimeStampWithMinsSetToZero(), \
                                          bulletin.getOrigin(), bulletin.getFullType())
 
         #-----------------------------------------------------------------------------------------
@@ -251,7 +241,8 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         # calculate the base dir path (/apps/px/collection/SA/041200/CYOW/SACNXX)
         #-----------------------------------------------------------------------------------------
-        dirName = self._calculateDirName(bulletin.getTwoLetterType(), bulletin.getTimeStamp(), \
+        dirName = self._calculateDirName(bulletin.getTwoLetterType(), \
+                                         bulletin.getTimeStampWithMinsSetToZero(), \
                                          bulletin.getOrigin(), bulletin.getFullType())
 
         #-----------------------------------------------------------------------------------------
@@ -279,7 +270,8 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         # calculate the base dir path (/apps/px/collection/SA/041200/CYOW/SACNXX)
         #-----------------------------------------------------------------------------------------
-        dirName = self._calculateDirName(bulletin.getTwoLetterType(), bulletin.getTimeStamp(), \
+        dirName = self._calculateDirName(bulletin.getTwoLetterType(), \
+                                         bulletin.getTimeStampWithMinsSetToZero(), \
                                          bulletin.getOrigin(), bulletin.getFullType())
 
         #-----------------------------------------------------------------------------------------
@@ -319,12 +311,15 @@ class BulletinWriter:
         """ calculateOnTimeDirName(bulletin)
 
             Given a bulletin, this method calculates the on time directory path for the 
-            bulletin.
+            bulletin. Note that since all bulletins are considered on time, the
+            directory's minute field will be force to 00 indicating that all 
+            items in this directory are on time and meant for the top of the hour.
         """
         #-----------------------------------------------------------------------------------------
         # calculate the base dir path (/apps/px/collection/SA/041200/CYOW/SACNXX)
         #-----------------------------------------------------------------------------------------
-        dirName = self._calculateDirName(bulletin.getTwoLetterType(), bulletin.getTimeStamp(), \
+        dirName = self._calculateDirName(bulletin.getTwoLetterType(), \
+                                         bulletin.getTimeStampWithMinsSetToZero(), \
                                          bulletin.getOrigin(), bulletin.getFullType())
 
         reportType = bulletin.getTwoLetterType()
@@ -345,7 +340,8 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         # calculate the base dir path (/apps/px/collection/SA/041200/CYOW/SACNXX)
         #-----------------------------------------------------------------------------------------
-        dirName = self._calculateDirName(bulletin.getTwoLetterType(), bulletin.getTimeStamp(), \
+        dirName = self._calculateDirName(bulletin.getTwoLetterType(), \
+                                         bulletin.getTimeStampWithMinsSetToZero(), \
                                          bulletin.getOrigin(), bulletin.getFullType())
 
         BBB = bulletin.getCollectionBBB()
