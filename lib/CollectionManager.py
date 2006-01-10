@@ -17,7 +17,7 @@
 """
 __version__ = '1.0'
 
-import sys, os, os.path, time, string, commands, re, signal, fnmatch
+import sys, os, os.path, string, commands, re, signal, fnmatch
 sys.path.insert(1,sys.path[0] + '/../lib/importedLibs')
 
 import datetime 
@@ -106,34 +106,17 @@ class CollectionManager(object):
                 self.bulletin.setCollectionB1(self.bulletin.getReportB1())
                 self.bulletin.setCollectionB2(self.bulletin.getReportB2())
             else:
-                self.bulletin.setCollectionB1("R")
-                self.bulletin.setCollectionB2("R")
+                self.bulletin.setCollectionB1('R')
+                self.bulletin.setCollectionB2('R')
 
             #-----------------------------------------------------------------------------------------
             # In this section we'll attempt to determine the value of the Collection's B3 variable
             #-----------------------------------------------------------------------------------------
             if (self.isReportOlderThan24H()):
-                self.bulletin.setCollectionB3("Z")
+                self.bulletin.setCollectionB3('Z')
 
-            #-----------------------------------------------------------------------------------------
-            # If the incoming bulletin is an immediate one, don't bother checking to see if the
-            # directory is '_busy' for '_sent'.  Just quickly move on and find the next available 
-            # B3 value.  This can be done because immediate collections consist of only a single
-            # bulletin and not more.  Therefore, there's no chance that we would need to place
-            # this report in an existing directory.
-            #-----------------------------------------------------------------------------------------
-            elif(self.isAnImmediateCollection()):
-                if (self.bulletinWriter.doesCollectionWithB3Exist(self.bulletin, 'W')):
-                    tempB3 = self.findNextXValue()
-                    self.bulletin.setCollectionB3(tempB3)
-                else:
-                    tempB3 = self.findNextAvailableB3Value()
-                    self.bulletin.setCollectionB3(tempB3)
-                
             else:
                 #-----------------------------------------------------------------------------------------
-                # Now we're dealing with a non-immediate bulletin and so it's possible that it may
-                # have to be placed in an already-existing directory.
                 # Determining if B1B2W_sent or B1B2W_busy exist. If yes, set B3 to "Xn".  If not, then 
                 # increment B3 from A to W until we find an unused B3 character
                 #-----------------------------------------------------------------------------------------
@@ -164,7 +147,7 @@ class CollectionManager(object):
                 # Build a collection bulletin from a single report bulletin and return to caller
                 # for immediate transmission
                 #-----------------------------------------------------------------------------------------
-                newCollectionBulletin = self.bulletin.buildCollectionBulletin()
+                newCollectionBulletin = self.bulletin.buildImmediateCollectionFromReport()
                 print "REMOVEME: Returning collection for xmission: ",newCollectionBulletin.bulletinAsString()
                 
                 return newCollectionBulletin
@@ -377,42 +360,19 @@ class CollectionManager(object):
             positive integer in the case where the directory B1B2X exists
         """
         #-----------------------------------------------------------------------------------------
-        # If we're dealing with an immediate collection, don't waste time looking for '_busy' 
-        # or '_sent' in dir name
+        # In the simple case, the directory B1B2X_sent or B1B2X_busy will not exists and we'll 
+        # just return X.  Otherwise we need to return X1 or X2, or X3 ..
         #-----------------------------------------------------------------------------------------
-        if(self.isAnImmediateCollection()):
-            #-----------------------------------------------------------------------------------------
-            # In the simple case, the directory B1B2X  wont exists and we'll just return X.  
-            # Otherwise we need to return X1 or X2, or X3 ..
-            #-----------------------------------------------------------------------------------------
-            if not (self.bulletinWriter.doesCollectionWithB3Exist(self.bulletin, 'X')):
-                return 'X'
-            else:
-                counter = 1
-                while (self.bulletinWriter.doesCollectionWithB3Exist(self.bulletin, 'X'+str(counter))):
-                    counter = counter + 1
-                else:
-                    return 'X'+str(counter)
-
-        #-----------------------------------------------------------------------------------------
-        # Here we're dealing with a non-immediate bulelletn. Look for '_busy' or '_sent' in dir
-        # name
-        #-----------------------------------------------------------------------------------------
+        if not (self.bulletinWriter.doesBusyCollectionWithB3Exist(self.bulletin, 'X') or
+                self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, 'X')):
+            return 'X'
         else:
-            #-----------------------------------------------------------------------------------------
-            # In the simple case, the directory B1B2X_sent or B1B2X_busy will not exists and we'll 
-            # just return X.  Otherwise we need to return X1 or X2, or X3 ..
-            #-----------------------------------------------------------------------------------------
-            if not (self.bulletinWriter.doesBusyCollectionWithB3Exist(self.bulletin, 'X') or
-                    self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, 'X')):
-                return 'X'
+            counter = 1
+            while (self.bulletinWriter.doesBusyCollectionWithB3Exist(self.bulletin, 'X'+str(counter)) or
+                   self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, 'X'+str(counter))):
+                counter = counter + 1
             else:
-                counter = 1
-                while (self.bulletinWriter.doesBusyCollectionWithB3Exist(self.bulletin, 'X'+str(counter)) or
-                       self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, 'X'+str(counter))):
-                    counter = counter + 1
-                else:
-                    return 'X'+str(counter)
+                return 'X'+str(counter)
 
 
     def findNextAvailableB3Value(self):
@@ -423,23 +383,12 @@ class CollectionManager(object):
         """
         charSet = 'ABCDEFGHIJKLMNOPQRSTUVW'
         #-----------------------------------------------------------------------------------------
-        # If we're dealing with an immediate collection, don't waste time looking for '_busy' 
-        # or '_sent' in dir name
+        # Look for '_busy' or '_sent' in dir name
         #-----------------------------------------------------------------------------------------
-        if(self.isAnImmediateCollection()):
-            for char in charSet:
-                if not (self.bulletinWriter.doesCollectionWithB3Exist(self.bulletin, char)):
-                    return char
-
-        #-----------------------------------------------------------------------------------------
-        # Here we're dealing with a non-immediate bulelletn. Look for '_busy' or '_sent' in dir
-        # name
-        #-----------------------------------------------------------------------------------------
-        else:
-            for char in charSet:
-                if not (self.bulletinWriter.doesBusyCollectionWithB3Exist(self.bulletin, char) or
-                        self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, char)):
-                    return char
+        for char in charSet:
+            if not (self.bulletinWriter.doesBusyCollectionWithB3Exist(self.bulletin, char) or
+                    self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, char)):
+                return char
 
                 
     def markCollectionAsSent(self, collectionBulletin):
