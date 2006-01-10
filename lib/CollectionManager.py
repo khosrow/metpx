@@ -144,12 +144,17 @@ class CollectionManager(object):
             #-----------------------------------------------------------------------------------------
             if (self.isAnImmediateCollection()):
                 #-----------------------------------------------------------------------------------------
+                # If we're dealing with immediate bulletins, change the minutes field to '00'.
+                # I.e. 'SACN94 CWAO 080319' becomes 'SACN94 CWAO 080300'
+                #-----------------------------------------------------------------------------------------
+                self.bulletin.setBulletinMinutesField('00')
+
+                #-----------------------------------------------------------------------------------------
                 # Build a collection bulletin from a single report bulletin and return to caller
                 # for immediate transmission
                 #-----------------------------------------------------------------------------------------
                 newCollectionBulletin = self.bulletin.buildImmediateCollectionFromReport()
                 print "REMOVEME: Returning collection for xmission: ",newCollectionBulletin.bulletinAsString()
-                
                 return newCollectionBulletin
 
         

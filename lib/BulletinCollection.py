@@ -295,13 +295,6 @@ class BulletinCollection(bulletin.bulletin):
         # Here, we need to update or create the report's BBB value with that of the collection
         #-----------------------------------------------------------------------------------------
         newCollectionBulletin.setReportBBB(newCollectionBulletin.getCollectionBBB())
-
-        #-----------------------------------------------------------------------------------------
-        # If we're dealing with a late (RRx) bulletin, change the minutes field to '00'.
-        # I.e. 'SACN94 CWAO 080319' becomes 'SACN94 CWAO 080300'
-        #-----------------------------------------------------------------------------------------
-        if(newCollectionBulletin.getCollectionB1() in ('R')):
-            newCollectionBulletin.setBulletinMinutesField('00')
         return newCollectionBulletin
 
 
