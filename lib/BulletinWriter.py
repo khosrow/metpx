@@ -99,7 +99,7 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         # Lock the semaphore so that another Px thread doesn't interfere
         #-----------------------------------------------------------------------------------------
-        self.lockDirBranch(dirPath)
+        #self.lockDirBranch(dirPath)
 
         #-----------------------------------------------------------------------------------------
         # open the file and write the bulletin to disk
@@ -109,7 +109,7 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         # Unlock the semaphore 
         #-----------------------------------------------------------------------------------------
-        self.unlockDirBranch(dirPath)
+        #self.unlockDirBranch(dirPath)
 
   
     def _writeToDisk(self, bulletin, bulletinPath, fileName):
@@ -431,9 +431,7 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         # Check to make sure that we got the semaphore
         #-----------------------------------------------------------------------------------------
-        if(self._doesCollectionExist(newDirNamePath)):
 
-        sys.exit()
 
 
     def unlockDirBranch (self,dirPath):
