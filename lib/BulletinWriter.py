@@ -23,6 +23,8 @@ from Logger import Logger
 import sys
 import os
 import tempfile
+import shutil
+import datetime
 
 
 
@@ -99,8 +101,8 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         # Lock the semaphore so that another Px thread doesn't interfere
         #-----------------------------------------------------------------------------------------
-        #self.lockDirBranch(dirPath)
-
+        key = self.lockDirBranch(dirPath)
+        print "Locked semaphore, key is:",key
         #-----------------------------------------------------------------------------------------
         # open the file and write the bulletin to disk
         #-----------------------------------------------------------------------------------------
@@ -109,7 +111,9 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         # Unlock the semaphore 
         #-----------------------------------------------------------------------------------------
-        #self.unlockDirBranch(dirPath)
+        print "Unlocking semaphore, key is:",key
+        self.unlockDirBranch(key)
+        
 
   
     def _writeToDisk(self, bulletin, bulletinPath, fileName):
@@ -405,7 +409,14 @@ class BulletinWriter:
             This method takes a dirPath and locks that branch and its descendants.
             I.e. Given '/apps/px/collection/SA' SA and all its descentants will be 
             locked.
+
+            This is the first version of this method and there is room for improvement:  
+            If a receiver should crash after creating the key directory, all other receivers 
+            will busy-wait because they think that someone is actually using the lock!
+            Therefore our busy-wait will timeout after maxBusyWait seconds.
         """
+        maxBusyWait = 6     # Max seconds we'll busy wait, waiting for lock
+        True = 'True'
         False = ''
         #-----------------------------------------------------------------------------------------
         # Obtain dir where our lock 'dir' will be kept (/apps/px/collection/control/)
@@ -413,38 +424,81 @@ class BulletinWriter:
         LockDirPath = self.collectionConfigParser.getCollectionControlPath()
         
         #-----------------------------------------------------------------------------------------
-        # Create a randomly-named dir (/apps/px/collection/control/<randomDirName>)
+        # Create a random key which will indicate when we have attained a lock
         #-----------------------------------------------------------------------------------------
-        randomDirNamePath = tempfile.mkdtemp(False,False,LockDirPath)
-
-        randomDirName = randomDirNamePath.split('/')
-        randomDirName = randomDirName[len(randomDirName) -1]
-
-        #-----------------------------------------------------------------------------------------
-        # Create the new dir name using the random token in the destination name
-        #(/apps/px/collection/SA/041200/CYOW/SACNXX/<randomDirName>)
-        #-----------------------------------------------------------------------------------------
-        newDirNamePath = dirPath + '/' + randomDirName
-        print "REMOVEME: moving:",randomDirNamePath," To: ",newDirNamePath
-        os.renames(randomDirNamePath,newDirNamePath)
+        keyWithPath = tempfile.mkdtemp(False,False,LockDirPath)
+        key = os.path.basename(keyWithPath)
+        newDirNamePath = dirPath + '/' + key
 
         #-----------------------------------------------------------------------------------------
-        # Check to make sure that we got the semaphore
+        # Produce time objects needed for comparisons.
         #-----------------------------------------------------------------------------------------
+        initialTime = datetime.datetime.now()
 
+        #-----------------------------------------------------------------------------------------
+        # While the SACNxx dir exists, we will consider it locked
+        #-----------------------------------------------------------------------------------------
+        while(True):
+            while (True):
+                if(self._doesCollectionExist(dirPath)):
+                    waitingTime = datetime.datetime.now()
+                    elapsedTime = waitingTime - initialTime
+                    if (elapsedTime.seconds >= maxBusyWait):
+                        print "\nREMOVEME:%s seconds elapsed. del directory"%elapsedTime.seconds
+                        self._removeDirTree(dirPath)  
+                        break
+                    else:
+                        print"REMOVEME: elapsedTime is: %s, Not yet exceeded max wait. Continue to wait"%elapsedTime.seconds
+                        continue
+                else:
+                    break
 
+            #-----------------------------------------------------------------------------------------
+            # Create the key dir in the destination name
+            #(/apps/px/collection/SA/041200/CYOW/SACNXX/<key>)
+            #-----------------------------------------------------------------------------------------
+            os.renames(keyWithPath,newDirNamePath)
 
-    def unlockDirBranch (self,dirPath):
-        """ unlockDirBranch(path)
+            #-----------------------------------------------------------------------------------------
+            # Check to make sure that we got the semaphore and if so, return the key
+            # (/apps/px/collection/SA/041200/CYOW/SACNXX/<key>)
+            # Remember that both receivers may create their key in the directory at the same
+            # time, therefore we'll sort the dir listing and take the first entry only
+            #-----------------------------------------------------------------------------------------
+            dirList = os.listdir(dirPath)
+            dirList.sort()
+            if(dirList[0] == key):
+                return newDirNamePath
+                
 
-            dirPath    string  A directory path
+    def unlockDirBranch (self,key):
+        """ unlockDirBranch(path, key)
+
+            key        string   The name of the random key generated when
+                                the semaphore was locked.
 
             This our custom made semaphore unlock method.
-            This method takes a dirPath and unlocks that the branch and its descendants.
-            I.e. Given '/apps/px/collection/SA' SA and all its descentants will be 
-            unlocked.
+            This method takes a key and unlocks that the branch and its descendants.
+            I.e. Given '/apps/px/collection/control/SA/121300/CWAO/SACN44/-6kAPh',  
+            '/apps/px/collection/control/SA/121300/CWAO/SACN44/' will be unlocked.
         """
         #-----------------------------------------------------------------------------------------
-        # COMPLETEME
+        # We've been given key = '/apps/px/collection/control/SA/121300/CWAO/SACN44/-6kAPh'
+        # and if key exists, we need to remove 'SACN44/-6kAPh'
         #-----------------------------------------------------------------------------------------
-        
+        dirToRemove = os.path.dirname(key)
+        if(self._doesCollectionExist(key)):
+            self._removeDirTree(dirToRemove)
+        else:
+            self.logger.error("Could not find the %s directory for removal" %dirToRemove)
+
+
+    def _removeDirTree (self, dirTree):
+        """ _removeDirTree(dirTree)
+
+            This method removes the given dirTree and ignores
+            all errors that my be reported.
+        """
+        ignoreErrors = 'True'
+        print ("REMOVEME: Removing: %s"%dirTree)
+        shutil.rmtree(dirTree,ignoreErrors)
