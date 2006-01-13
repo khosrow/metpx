@@ -86,7 +86,7 @@ class CollectionConfigParser:
         """ getCollectionPath (self) -> string
 
             Returns a string representing the location path to the collection dir
-            (I.e. /apps/px/collection)
+            (I.e. /apps/px/collection/)
         """
         return PXPaths.COLLECTION_DB
 
@@ -117,9 +117,9 @@ class CollectionConfigParser:
         """
         return self.source.busyCollectionToken
 
-    def getNumHeadersToCollect (self):
-        """ getNumHeadersToCollect (self) -> int
-            Return the number of different header entries in the config file.
+    def getListOfTypes (self):
+        """ getListOfTypes (self) -> list
+            Return a list of two-letter types.
         """
-        return len(self.source.headersToCollect)
+        return self.source.headersToCollect
 
