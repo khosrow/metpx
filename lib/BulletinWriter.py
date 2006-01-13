@@ -414,6 +414,9 @@ class BulletinWriter:
             If a receiver should crash after creating the key directory, all other receivers 
             will busy-wait because they think that someone is actually using the lock!
             Therefore our busy-wait will timeout after maxBusyWait seconds.
+
+            For more information about the business logic and the flow of this method, 
+            please see the "Collection Process Flow diagram" document.
         """
         maxBusyWait = 6     # Max seconds we'll busy wait, waiting for lock
         True = 'True'
@@ -481,6 +484,9 @@ class BulletinWriter:
             This method takes a key and unlocks that the branch and its descendants.
             I.e. Given '/apps/px/collection/control/SA/121300/CWAO/SACN44/-6kAPh',  
             '/apps/px/collection/control/SA/121300/CWAO/SACN44/' will be unlocked.
+
+            For more information about the business logic and the flow of this method, 
+            please see the "Collection Process Flow diagram" document.
         """
         #-----------------------------------------------------------------------------------------
         # We've been given key = '/apps/px/collection/control/SA/121300/CWAO/SACN44/-6kAPh'
