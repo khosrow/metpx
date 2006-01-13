@@ -56,7 +56,7 @@ class BulletinWriter:
         # note that the BBB field is "" since this is an OnTimeBulletin
         # (/apps/px/collection/SA/041200/CYOW/SACNXX/7min)
         #-----------------------------------------------------------------------------------------
-        bulletinPath = self.calculateOnTimeDirName(bull)
+        bulletinPath = self._calculateOnTimeDirName(bull)
         
         #-----------------------------------------------------------------------------------------
         # calculate the filename for the new file (WRO)
@@ -83,7 +83,7 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         # calculate the path for the new file (/apps/px/collection/SA/041200/CYOW/SACNXX/RRA)
         #-----------------------------------------------------------------------------------------
-        bulletinPath = self.calculateBBBDirName(bull)
+        bulletinPath = self._calculateBBBDirName(bull)
 
         #-----------------------------------------------------------------------------------------
         # calculate the filename for the new file. (WRO)
@@ -160,7 +160,7 @@ class BulletinWriter:
         # This is the directory name before being marked as sent 
         # (/apps/px/collection/SA/041200/CYOW/SACNxx/CCA)
         #-----------------------------------------------------------------------------------------
-        oldDirName =  self.calculateBBBDirName(collectionBulletin)
+        oldDirName =  self._calculateBBBDirName(collectionBulletin)
         
         #-----------------------------------------------------------------------------------------
         # This is the directory name after it has been marked as sent
@@ -245,7 +245,7 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         # build the BBB value to look for (/apps/px/collection/SA/041200/CYOW/SACNxx/RRB3) 
         #-----------------------------------------------------------------------------------------
-        BBB = string.strip(bulletin.getCollectionB1() + bulletin.getCollectionB2() + B3)
+        BBB = (bulletin.getCollectionB1() + bulletin.getCollectionB2() + B3).strip()
         dirName = "%s/%s" %(dirName, BBB)
 
         #-----------------------------------------------------------------------------------------
@@ -274,7 +274,7 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         # build the BBB value to look for (/apps/px/collection/SA/041200/CYOW/SACNxx/RRB3) 
         #-----------------------------------------------------------------------------------------
-        BBB = string.strip(bulletin.getCollectionB1() + bulletin.getCollectionB2() + B3)
+        BBB = (bulletin.getCollectionB1() + bulletin.getCollectionB2() + B3).strip()
         dirName = "%s/%s" %(dirName, BBB)
 
         #-----------------------------------------------------------------------------------------
@@ -303,7 +303,7 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         # build the BBB value to look for (/apps/px/collection/SA/041200/CYOW/SACNxx/RRB3) 
         #-----------------------------------------------------------------------------------------
-        BBB = string.strip(bulletin.getCollectionB1() + bulletin.getCollectionB2() + B3)
+        BBB = (bulletin.getCollectionB1() + bulletin.getCollectionB2() + B3).strip()
         dirName = "%s/%s" %(dirName, BBB)
         #-----------------------------------------------------------------------------------------
         # find out if the directory exists
@@ -355,8 +355,8 @@ class BulletinWriter:
         return dirName
 
 
-    def calculateOnTimeDirName(self, bulletin):
-        """ calculateOnTimeDirName(bulletin)
+    def _calculateOnTimeDirName(self, bulletin):
+        """ _calculateOnTimeDirName(bulletin)
 
             Given a bulletin, this method calculates the on time directory path for the 
             bulletin. Note that since all bulletins are considered on time, the
@@ -376,11 +376,11 @@ class BulletinWriter:
         # Append the on-time dir name to the path (/apps/px/collection/SA/041200/CYOW/SACNXX/7min)
         #-----------------------------------------------------------------------------------------
         dirName = "%s/%smin" % (dirName, validTime)
-        return string.strip(dirName)
+        return dirName.strip()
 
 
-    def calculateBBBDirName(self, bulletin):
-        """ calculateBBBDirName(bulletin)
+    def _calculateBBBDirName(self, bulletin):
+        """ _calculateBBBDirName(bulletin)
 
             Given a bulletin, this method calculates the directory path for the 
             bulletin including the BBB field in the path.
@@ -397,7 +397,7 @@ class BulletinWriter:
         # Add the BBB field to the path (/apps/px/collection/SA/041200/CYOW/SACNxx/RRA)
         #-----------------------------------------------------------------------------------------
         dirName = "%s/%s" % (dirName, BBB)
-        return string.strip(dirName)
+        return dirName.strip()
 
 
     def lockDirBranch (self,dirPath):

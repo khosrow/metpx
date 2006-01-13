@@ -122,10 +122,10 @@ class CollectionManager(object):
                 #-----------------------------------------------------------------------------------------
                 if (self.bulletinWriter.doesBusyCollectionWithB3Exist(self.bulletin, 'W') or
                     self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, 'W')):
-                    tempB3 = self.findNextXValue()
+                    tempB3 = self._findNextXValue()
                     self.bulletin.setCollectionB3(tempB3)
                 else:
-                    tempB3 = self.findNextAvailableB3Value()
+                    tempB3 = self._findNextAvailableB3Value()
                     self.bulletin.setCollectionB3(tempB3)
 
             #-----------------------------------------------------------------------------------------
@@ -358,8 +358,8 @@ class CollectionManager(object):
             return True
 
 
-    def findNextXValue (self):
-        """ findNextXValue() -> string
+    def _findNextXValue (self):
+        """ _findNextXValue() -> string
 
             This method returns the character 'X', or 'Xn' where n is a
             positive integer in the case where the directory B1B2X exists
@@ -380,8 +380,8 @@ class CollectionManager(object):
                 return 'X'+str(counter)
 
 
-    def findNextAvailableB3Value(self):
-        """ findNextAvailableB3Value() -> Character
+    def _findNextAvailableB3Value(self):
+        """ _findNextAvailableB3Value() -> Character
 
             This method looks for the next available alphabet character
             ranging from A to W to use as the collection's B3 value

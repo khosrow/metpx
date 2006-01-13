@@ -47,7 +47,7 @@ class BulletinCollection(bulletin.bulletin):
         #-----------------------------------------------------------------------------------------
         # split header into tokens
         #-----------------------------------------------------------------------------------------
-        headerTokens = string.split(self.getHeader()) 
+        headerTokens = self.getHeader().split() 
 
         #-----------------------------------------------------------------------------------------
         # the timstamp is always the third token in header
@@ -71,7 +71,7 @@ class BulletinCollection(bulletin.bulletin):
         They do the obvious.
     """
     def getCollectionBBB(self):
-        return string.strip(self.collectionBBB)
+        return str(self.collectionBBB).strip()
 
     def setCollectionBBB(self, newCollectionBBB):
         self.collectionBBB = newCollectionBBB
@@ -101,7 +101,7 @@ class BulletinCollection(bulletin.bulletin):
         #-----------------------------------------------------------------------------------------
         # split header into tokens
         #-----------------------------------------------------------------------------------------
-        headerTokens = string.split(self.getHeader()) 
+        headerTokens = self.getHeader().split() 
 
         #-----------------------------------------------------------------------------------------
         # the first two letters of the first element make up the two-letter header
@@ -117,7 +117,7 @@ class BulletinCollection(bulletin.bulletin):
         #-----------------------------------------------------------------------------------------
         # split header into tokens
         #-----------------------------------------------------------------------------------------
-        headerTokens = string.split(self.getHeader()) 
+        headerTokens = self.getHeader().split() 
         #-----------------------------------------------------------------------------------------
         # the full type is the first element in the header
         #-----------------------------------------------------------------------------------------
@@ -182,7 +182,7 @@ class BulletinCollection(bulletin.bulletin):
         #-----------------------------------------------------------------------------------------
         # split header into tokens
         #-----------------------------------------------------------------------------------------
-        headerTokens = string.split(self.getHeader()) 
+        headerTokens = self.getHeader().split() 
         
         #-----------------------------------------------------------------------------------------
         # The header looks like "SACN58 CWAO 231334 BBB".  The BBB field is the fourth element
@@ -254,7 +254,7 @@ class BulletinCollection(bulletin.bulletin):
         for element in self.bulletin:
             bullString = bullString+str(element)+"\n"
 
-        return string.strip(bullString)
+        return bullString.strip()
 
 
     def setReportBBB(self,BBB):
@@ -266,14 +266,14 @@ class BulletinCollection(bulletin.bulletin):
         #-----------------------------------------------------------------------------------------
         # split header into tokens
         #-----------------------------------------------------------------------------------------
-        headerTokens = string.split(self.getHeader()) 
+        headerTokens = self.getHeader().split() 
         
         #-----------------------------------------------------------------------------------------
         # The header looks like "SACN58 CWAO 231334 BBB".  The BBB field is the fourth element
         #-----------------------------------------------------------------------------------------
         if (len(headerTokens) >= 3):
             newHeader = headerTokens[0]+' '+headerTokens[1]+' '+headerTokens[2]+' '+BBB
-            self.setHeader(string.strip(newHeader))
+            self.setHeader(newHeader.strip())
 
         print "REMOVEME: Modified the collection's bbb. New HDR is: ",self.getHeader()
         
@@ -316,7 +316,7 @@ class BulletinCollection(bulletin.bulletin):
         #-----------------------------------------------------------------------------------------
         # get the header as a list
         #-----------------------------------------------------------------------------------------
-        headerTokens = string.split(self.getHeader()) 
+        headerTokens = self.getHeader().split() 
 
         #-----------------------------------------------------------------------------------------
         # The header looks like "SACN58 CWAO 231334 BBB".  Replace the time stamp
@@ -324,7 +324,7 @@ class BulletinCollection(bulletin.bulletin):
         if (len(headerTokens) >= 3):
             newHeader = headerTokens
             newHeader[2] = newTimeStamp
-            newHeader = string.join(newHeader)
-            self.setHeader(string.strip(newHeader))
+            newHeader = " ".join(newHeader)
+            self.setHeader(newHeader.strip())
 
         print "REMOVEME: Modified the collection's timeStamp. New HDR is: ",self.getHeader()

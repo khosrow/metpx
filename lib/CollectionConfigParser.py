@@ -45,7 +45,7 @@ class CollectionConfigParser:
         #-----------------------------------------------------------------------------------------
         # Find out the index of the given header in the headersToCollect list
         #-----------------------------------------------------------------------------------------
-        headerIndex = self.getIndexForHeader(header)
+        headerIndex = self._getIndexForHeader(header)
 
         #-----------------------------------------------------------------------------------------
         # Now return the appropriate element in the headersValidTime list
@@ -53,8 +53,8 @@ class CollectionConfigParser:
         return self.source.headersValidTime[headerIndex]
 
 
-    def getIndexForHeader (self, header):
-        """ getIndexForHeader (self, Header) -> index
+    def _getIndexForHeader (self, header):
+        """ _getIndexForHeader (self, Header) -> index
 
             Given the Two letter header, returns the index of this header in the 
             headersToCollect list
@@ -74,7 +74,7 @@ class CollectionConfigParser:
         #-----------------------------------------------------------------------------------------
         # Find out the index of the given header in the headersToCollect list
         #-----------------------------------------------------------------------------------------
-        headerIndex = self.getIndexForHeader(header)
+        headerIndex = self._getIndexForHeader(header)
 
         #-----------------------------------------------------------------------------------------
         # Now return the appropriate element in the headersValidTime list
