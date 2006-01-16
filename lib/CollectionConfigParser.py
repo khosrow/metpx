@@ -53,6 +53,41 @@ class CollectionConfigParser:
         return self.source.headersValidTime[headerIndex]
 
 
+    def getReportLateCycleByHeader (self, header):
+        """ getReportLateCycleByHeader (self, Header) -> string
+
+            Given the Two letter header, returns a string representing how often (in minutes) past
+            the initial valid time after the hour we need to run to collect late bulletins.
+        """
+        #-----------------------------------------------------------------------------------------
+        # Find out the index of the given header in the headersToCollect list
+        #-----------------------------------------------------------------------------------------
+        headerIndex = self._getIndexForHeader(header)
+
+        #-----------------------------------------------------------------------------------------
+        # Now return the appropriate element in the headersLateCycle list
+        #-----------------------------------------------------------------------------------------
+        return self.source.headersLateCycle[headerIndex]
+
+
+    def getTimeToLiveByHeader (self, header):
+        """ getTimeToLiveByHeader (self, Header) -> string
+
+            Given the Two letter header, returns a string representing how long (in hours) we
+            need to hang on to files of this header type before purging them from the 
+            /collection/<type> dir tree.
+        """
+        #-----------------------------------------------------------------------------------------
+        # Find out the index of the given header in the headersToCollect list
+        #-----------------------------------------------------------------------------------------
+        headerIndex = self._getIndexForHeader(header)
+
+        #-----------------------------------------------------------------------------------------
+        # Now return the appropriate element in the headersTimeToLive list
+        #-----------------------------------------------------------------------------------------
+        return self.source.headersTimeToLive[headerIndex]
+
+
     def _getIndexForHeader (self, header):
         """ _getIndexForHeader (self, Header) -> index
 
