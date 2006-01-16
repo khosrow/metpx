@@ -36,11 +36,14 @@ class BulletinCollection(bulletin.bulletin):
             
 
     """
-    #-----------------------------------------------------------------------------------------
-    # Class attributes
-    #-----------------------------------------------------------------------------------------
-    collectionBBB = '   '   #The BBB value which we'll dertermine for the collection bulletin
-    
+    def __init__(self,stringBulletin,logger,lineSeparator='\n'):
+        #-----------------------------------------------------------------------------------------
+        # Class attributes
+        #-----------------------------------------------------------------------------------------
+        bulletin.bulletin.__init__(self,stringBulletin,logger,lineSeparator='\n')
+        self.collectionBBB = '   '   #The BBB value which we'll dertermine for the collection bulletin
+
+
     def getTimeStamp(self):
         """ getTimeStamp() parses the header and returns the timestamp as a string
         """
