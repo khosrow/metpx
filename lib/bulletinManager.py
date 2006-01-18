@@ -179,7 +179,7 @@ class bulletinManager:
             nomFichier = self.getFileName(unBulletin,error=True,compteur=compteur)
             tempNom = self.pathTemp + nomFichier
             unFichier = os.open( tempNom, os.O_CREAT | os.O_WRONLY )
-
+        
         os.write( unFichier , unBulletin.getBulletin(includeError=includeError) )
         os.close( unFichier )
         os.chmod(tempNom,0644)
@@ -385,16 +385,17 @@ class bulletinManager:
         #                    bulletinAm      always have the station name in the WhatFn (if found)
         #                    bulletinWmo     SRCN40 have the station name in the WhatFn (if found)
         #                    bulletin-file ? SRCN40 have the station name in the WhatFn (if found)
+        #                    collector       Don't place station in the filename
 
         station = ''
         if header != None :
-           station = bulletin.getStation()
+           if not (self.source.type == 'collector'):
+              station = bulletin.getStation()
            if station == None       : station = ''
            if not station.isalnum() : station = ''
            if not isinstance(bulletin, bulletinAm.bulletinAm) :
               if (bulletin.getHeader())[:6] != "SRCN40"       : station = ''
-               
-
+           
         # adding a counter to the file name insure its uniqueness
 
         strCompteur = ''
