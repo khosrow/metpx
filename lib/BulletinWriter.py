@@ -151,17 +151,28 @@ class BulletinWriter:
 
             Used to record on disk that a collection with the given parameters has been sent.
             This allows us to determine which collections were sent, and which ones have not
-            yet been sent 
+            yet been sent.  Note that if the collection's BBB value is blank, then we must be
+            dealing with an on-time collection (/apps/px/collection/SA/041200/CYOW/SACNxx/nmin)
         """
         timeStamp = collectionBulletin.getTimeStampWithMinsSetToZero()
         origin = collectionBulletin.getOrigin()
         BBB = collectionBulletin.getCollectionBBB()
+
         #-----------------------------------------------------------------------------------------
         # This is the directory name before being marked as sent 
         # (/apps/px/collection/SA/041200/CYOW/SACNxx/CCA)
         #-----------------------------------------------------------------------------------------
-        oldDirName =  self._calculateBBBDirName(collectionBulletin)
-        
+        oldDirName = self._calculateBBBDirName(collectionBulletin)
+
+        #-----------------------------------------------------------------------------------------
+        # Empty BBB means that we're dealing with an on-time dir
+        #-----------------------------------------------------------------------------------------
+        print"REMOVEME: BBB is:",BBB.strip()
+        if not (BBB.strip()):
+            collectionType = collectionBulletin.getTwoLetterType()
+            collectionValidTime = self.collectionConfigParser.getReportValidTimeByHeader(collectionType)
+            oldDirName = "%s%smin" % (oldDirName, collectionValidTime)
+
         #-----------------------------------------------------------------------------------------
         # This is the directory name after it has been marked as sent
         # (/apps/px/collection/SA/041200/CYOW/SACNxx/CCA_sent)
@@ -408,7 +419,8 @@ class BulletinWriter:
             This our custom made semaphore lock method.
             This method takes a dirPath and locks that branch and its descendants.
             I.e. Given '/apps/px/collection/SA' SA and all its descentants will be 
-            locked.
+            locked and a 'key' such as '/apps/px/collection/SA/041200/CYOW/SACNXX/<key>'
+            is returned.
 
             This is the first version of this method and there is room for improvement:  
             If a receiver should crash after creating the key directory, all other receivers 
