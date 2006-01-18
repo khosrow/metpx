@@ -21,6 +21,11 @@ import bulletin
 import string
 from Logger import Logger
 
+#-----------------------------------------------------------------------------------------
+# Global attribute
+#-----------------------------------------------------------------------------------------
+blankValue = '   '
+
 class BulletinCollection(bulletin.bulletin):
     """ BulletinCollection(bulletin.bulletin):
 
@@ -41,7 +46,7 @@ class BulletinCollection(bulletin.bulletin):
         # Class attributes
         #-----------------------------------------------------------------------------------------
         bulletin.bulletin.__init__(self,stringBulletin,logger,lineSeparator='\n')
-        self.collectionBBB = '   '   #The BBB value which we'll dertermine for the collection bulletin
+        self.collectionBBB = blankValue   #The BBB value which we'll dertermine for the collection bulletin
 
 
     def getTimeStamp(self):
@@ -76,9 +81,6 @@ class BulletinCollection(bulletin.bulletin):
     def getCollectionBBB(self):
         return str(self.collectionBBB).strip()
 
-    def setCollectionBBB(self, newCollectionBBB):
-        self.collectionBBB = newCollectionBBB
-            
     def getCollectionB1(self):
         return self.collectionBBB[0]
 
