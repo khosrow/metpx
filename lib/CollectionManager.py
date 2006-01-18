@@ -79,17 +79,17 @@ class CollectionManager(object):
             "Collection Process Flow diagram" document.
 
             Return values:
-                self.Bulletin: BulletinCollection -  A collection object containing a
-                                                     collection which needs to be 
-                                                     transmitted immediately or nothing
-                                                     if the collection does not need to
-                                                     be transmitted immediately.
+                newCollectionBulleti: BulletinCollection -  A collection object containing a
+                                                            collection which needs to be 
+                                                            transmitted immediately or nothing
+                                                            if the collection does not need to
+                                                            be transmitted immediately.
         """
         #-----------------------------------------------------------------------------------------
         # use collectionBuilder to create a bulletin object from the given file
         #-----------------------------------------------------------------------------------------
         self.bulletin = self.collectionBuilder.buildBulletinFromFile(fileName)
-        print "\nREMOVEME: The incoming report: ",self.bulletin.bulletinAsString()
+        print "\nREMOVEME: The incoming report: ",self.bulletin.bulletin
         
         #-----------------------------------------------------------------------------------------
         # Let's find out if the report arrived on time.  If so, write the report bulletin
