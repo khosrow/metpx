@@ -45,7 +45,9 @@ class CollectionBuilder:
         self.lineSeparator = '\n'       # Liner separator used when generating bulletin
 
     def buildBulletinFromFile(self,fileName):
-        """ This method loads the information in the given file into a 
+        """ buildBulletinFromFile(fileName) -> :BulletinCollection
+
+            This method loads the information in the given file into a 
             bulletin object and returns it
 
         """
@@ -66,3 +68,38 @@ class CollectionBuilder:
         #-----------------------------------------------------------------------------------------
         return bulletinObject
 
+
+    def appendToCollectionFromFile(self, aCollection, fileName):
+        """ appendToCollectionFromFile(collection, fileName) -> :BulletinCollection
+
+            This method appends the report body given in 'fileName' to the 
+            collection bulletin object given in 'aCollection' and returns the 
+            new and updated 'aCollection' object.
+
+        """
+        #-----------------------------------------------------------------------------------------
+        # The bulleting looks like ['SACN48 CWAO 171600', 'METAR CYWK 171600Z 01005KT 15SM SCT011 
+        #                            M20/M26 A3002 RMK SF2 SLP228=', '']
+        # But the number of elements may change. Get rid of the first element because it's the
+        # header (element [0])
+        #-----------------------------------------------------------------------------------------
+        bulletinBody = self.buildBulletinFromFile(fileName).bulletin
+        bulletinBody.pop(0)
+
+        #-----------------------------------------------------------------------------------------
+        # Append bulletin elements to the body of the collection and return collection.
+        #-----------------------------------------------------------------------------------------
+        for element in bulletinBody:
+            aCollection.bulletin.append(element)
+        return self.stripCollection(aCollection)
+
+
+    def stripCollection(self, aCollection):
+        """ stripCollection() -> :BulletinCollection
+
+            This method removes newlines from the collection's bulletin
+            list.    print"\nREMOVEME: found %s spaces",aCollection.bulletin.count('')
+        """
+        while (aCollection.bulletin.count('')):
+            aCollection.bulletin.remove('')
+        return aCollection
