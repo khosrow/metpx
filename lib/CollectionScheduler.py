@@ -27,6 +27,7 @@ import threading
 import PXPaths 
 import CollectionBuilder
 import BulletinWriter
+import sys
 
 PXPaths.normalPaths()
 
@@ -66,6 +67,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         self.validTime = self.collectionConfig.getReportValidTimeByHeader(idType) 
         self.lateCycle = self.collectionConfig.getReportLateCycleByHeader(idType) 
         self.timeToLive = self.collectionConfig.getTimeToLiveByHeader(idType)	 
+        self.sentToken = self.collectionConfig.getSentCollectionToken()
 
         #-----------------------------------------------------------------------------------------
         # myRootDir points to the (/apps/px/collection/<idType>) sub-dir where this collector 
@@ -79,6 +81,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         self.collectionBuilder = CollectionBuilder.CollectionBuilder(self.logger)
         self.collection = ''
         self.collectionWriter = BulletinWriter.BulletinWriter(self.logger, self.collectionConfig)
+
         #-----------------------------------------------------------------------------------------
         # Instantiate a bulletinManager for us to use for collection bulletin transmission
         #-----------------------------------------------------------------------------------------
@@ -92,9 +95,9 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
                      source = collectionConfig.source)
 
         #-----------------------------------------------------------------------------------------
-        # Get the present datetime
+        # Datetime placeholder
         #-----------------------------------------------------------------------------------------
-        self.presentDateTime = datetime.datetime.now()
+        self.presentDateTime = ''
        
         
     def run(self):
@@ -105,12 +108,20 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             to be sent, cleans any old files which need to be cleaned, 
             calculate the next sleep interval, and sleep until then.
         """
+        #-----------------------------------------------------------------------------------------
+        # While master loop goes here.  Loop until stopped
+        # COMPLETEME
+        #-----------------------------------------------------------------------------------------
         print "\nREMOVEME:This is scheduler type: %s reporting in. My rootDir is: %s"%(self.idType,self.myRootDir)
         print "REMOVEME:self.validTime:%s" %self.validTime
         print "REMOVEME:self.lateCycle:%s"% self.lateCycle 
         print "REMOVEME:self.timeToLive:%s"% self.timeToLive 
         print "REMOVEME:My pid is:",os.getpid()
-        print "REMOVEME:PresentDatetime is:",self.presentDateTime
+        
+        #-----------------------------------------------------------------------------------------
+        # Get wakeup time (now)
+        #-----------------------------------------------------------------------------------------
+        self.presentDateTime = datetime.datetime.now()
 
         #-----------------------------------------------------------------------------------------
         # Send this hour's on-time collection if not already sent
@@ -120,7 +131,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         #-----------------------------------------------------------------------------------------
         # Find out if we should send this cycle's collection or not
         #-----------------------------------------------------------------------------------------
-        #self.sendThisCyclesCollections()
+        self.sendLateCollections()
 
         #-----------------------------------------------------------------------------------------
         # Cleanup old files
@@ -145,7 +156,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         # Loop until all on-time collections for this type are sent
         #-----------------------------------------------------------------------------------------
         foundPath = self.findOnTimeCollection()
-        print "REMOVEME: found:",foundPath
+        print "REMOVEME: found on-time:",foundPath
 
         while (foundPath):
             #-----------------------------------------------------------------------------------------
@@ -154,10 +165,12 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             self.buildCollection(foundPath)
 
             #-----------------------------------------------------------------------------------------
-            # This is an on-time collection, change the minutes field to '00' and set BBB to ''.
+            # This is an on-time collection, change the minutes field to '00' and set the collection's
+            # BBB and well as the report's BBB to ''.
             # I.e. 'SACN94 CWAO 080306' becomes 'SACN94 CWAO 080300'
             #-----------------------------------------------------------------------------------------
             self.collection.setBulletinMinutesField('00')
+            self.collection.setCollectionBBB('')
             self.collection.setReportBBB('')
             print "REMOVEME: collection is:",self.collection.bulletinAsString()
             #-----------------------------------------------------------------------------------------
@@ -185,7 +198,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             False is returned if no on-time collections are found.
         """
         #-----------------------------------------------------------------------------------------
-        # Search only if the on-time period has ended
+        # Search only if the on-time period for this hour has ended
         #-----------------------------------------------------------------------------------------
         if (int(self.presentDateTime.minute) >= int(self.validTime)):
 
@@ -218,7 +231,8 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         print "REMOVEME: Searching for:",directory," in:",searchPath 
         for root, dirs, files in os.walk(searchPath):
             for dir in dirs:
-                if (dir == directory):
+                if (dir.startswith(directory) and not dir.endswith(self.sentToken)):
+                    print "\nFound and returning:",os.path.join(root,dir)
                     return os.path.join(root,dir)
         return False
 
@@ -257,22 +271,114 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             This method is responsible for transmitting the on-time
             collection that we've produced.
         """
+        False = ''
         #-----------------------------------------------------------------------------------------
-        # COMPLETEME.  Need to find out how to send the bulletin to bulletinManager and 
-        # have it name the file correctly.
+        # Using the BulletinManager class to write the collection bulletin to the db and the
+        # queues of the senders
         #-----------------------------------------------------------------------------------------
-          
+        self.unBulletinManager.writeBulletinToDisk(self.collection.bulletinAsString())
 
 
+    def sendLateCollections(self):
+        """ sendLateCollections() 
 
+            Collect and send late collections if they have not yet been sent.  
+            Note that we need to use a mutex while we're creating collections in
+            RRx directories because receiver-collectors may try to place an
+            incoming report into those dirs.
+        """
+        #-----------------------------------------------------------------------------------------
+        # Loop until all Late (RRx) collections for this type are sent
+        #-----------------------------------------------------------------------------------------
+        foundPath = self.findLateCollection()
+        print "REMOVEME: found Late:",foundPath
 
+        while (foundPath):
 
+            #-----------------------------------------------------------------------------------------
+            # Get mutex to foundPath directory 
+            #-----------------------------------------------------------------------------------------
+            key = self.collectionWriter.lockDirBranch(os.path.dirname(foundPath))
+            
+            #-----------------------------------------------------------------------------------------
+            # Build on-time collection 
+            #-----------------------------------------------------------------------------------------
+            self.buildCollection(foundPath)
 
+            #-----------------------------------------------------------------------------------------
+            # Release mutex to foundPath directory 
+            #-----------------------------------------------------------------------------------------
+            self.collectionWriter.unlockDirBranch(key)
 
+            #-----------------------------------------------------------------------------------------
+            # This is a late collection, change the minutes field to '00' and set the BBB for the
+            # bulletin and the collection to the appropriate value (collection BBB is used to find
+            # the collection when marking it sent).
+            # I.e. 'SACN94 CWAO 080306' becomes 'SACN94 CWAO 080300 RRA'
+            #-----------------------------------------------------------------------------------------
+            self.collection.setBulletinMinutesField('00')
+            BBB = os.path.basename(foundPath)
+            self.collection.setCollectionBBB(BBB)
+            self.collection.setReportBBB(BBB)
+            print "REMOVEME: collection is:",self.collection.bulletinAsString()
+            #-----------------------------------------------------------------------------------------
+            # Transmit on-time collection
+            #-----------------------------------------------------------------------------------------
+            self.transmitCollection()
 
+            #-----------------------------------------------------------------------------------------
+            # Mark collection as sent
+            #-----------------------------------------------------------------------------------------
+            self.collectionWriter.markCollectionAsSent(self.collection)
 
+            #-----------------------------------------------------------------------------------------
+            # Look for the next unsent on-time collection
+            #-----------------------------------------------------------------------------------------
+            foundPath = self.findLateCollection()
+            
+    def findLateCollection(self):
+        """ findLateCollection() -> string
 
+            This method searches for late (RRx) collections which have not been sent
+            and returns the path to the directory where the collection
+            needs to be created (/apps/px/collection/SA/162000/CWAO/SACN42/RRA).
+            False is returned if no late collections are found.
+            If the previous cycle interval puts us in the past hour, then look for
+            late bulletins during last hour as well.  Otherwise, just look for lates
+            in the present hour.
+        """
+        False = ''
+        hour = []
+        #-----------------------------------------------------------------------------------------
+        # If the previous cycle interval puts us in the past hour, then look for late bulletins 
+        # during last hour as well
+        #-----------------------------------------------------------------------------------------
+        hour.append(int(self.presentDateTime.hour))
+        lateCycleTimedelta = datetime.timedelta(minutes = int(self.lateCycle))
+        oneHourTimedelta = datetime.timedelta(hours = 1)
+        tmpDate = self.presentDateTime - lateCycleTimedelta
+        if(int(self.presentDateTime.hour) == int((tmpDate + oneHourTimedelta).hour)):
+            hour.insert(0,int(tmpDate.hour))
+        print"\nhour is:",hour
 
+        #-----------------------------------------------------------------------------------------
+        # We now have something like hour = [14,15] or hour = [14]
+        # Build dir for this hour of the form "DDHHMM"
+        #-----------------------------------------------------------------------------------------
+        for element in hour:
+           hoursDir = "%s%s%s" %(self.presentDateTime.day,element, '00')
+           #-----------------------------------------------------------------------------------------
+           # search for any unsent late collections
+           #-----------------------------------------------------------------------------------------
+           searchPath = os.path.join(self.myRootDir, hoursDir)
+           foundPath = self.findDir(searchPath,'RR')
+           if (foundPath):
+               return foundPath
+           else:
+               continue
+        else:
+           return False
+       
 
 
 
