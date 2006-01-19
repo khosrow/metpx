@@ -93,7 +93,8 @@ class CollectionManager(object):
         
         #-----------------------------------------------------------------------------------------
         # Let's find out if the report arrived on time.  If so, write the report bulletin
-        # to disk.
+        # to disk.  No mutex is needed because the on-time collection will only be processed
+        # only after the on-time interval is over
         #-----------------------------------------------------------------------------------------
         if (self.isReportOnTime()):
             self.bulletinWriter.writeOnTimeBulletinToDisk(self.bulletin)
@@ -111,29 +112,67 @@ class CollectionManager(object):
 
             #-----------------------------------------------------------------------------------------
             # In this section we'll attempt to determine the value of the Collection's B3 variable
+            # No mutex necessary because this immediate collection will always be sent with RRZ
             #-----------------------------------------------------------------------------------------
             if (self.isReportOlderThan24H()):
                 self.bulletin.setCollectionB3('Z')
 
             else:
                 #-----------------------------------------------------------------------------------------
-                # Determining if B1B2W_sent or B1B2W_busy exist. If yes, set B3 to "Xn".  If not, then 
+                # Determining if B1B2W_sent exists. If yes, set B3 to "Xn".  If not, then 
                 # increment B3 from A to W until we find an unused B3 character
+                # The B3 value which we are about to determine will eventually determine the BBB of our
+                # the outgoing collection, therefore we must have mutex to make sure that we don't 
+                # duplicate a B3 value.  Race conditions could occur when:
+                # - Two collecting rcvrs receive two immediate collections at the same time for the same
+                #   origin and full header.  They should be sent CCA and CCB, but may both go out as CCA
+                # - A rcvr goes to place an old RRx into a collection directory which is being read
+                #   by a scheduled collection.
                 #-----------------------------------------------------------------------------------------
-                if (self.bulletinWriter.doesBusyCollectionWithB3Exist(self.bulletin, 'W') or
-                    self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, 'W')):
+
+                #-----------------------------------------------------------------------------------------
+                # Locking semaphore
+                #-----------------------------------------------------------------------------------------
+                dirToLock = \
+                    self.bulletinWriter.calculateBulletinDir(self.bulletin.getTwoLetterType(), \
+                                                             self.bulletin.getTimeStampWithMinsSetToZero(), \
+                                                             self.bulletin.getOrigin(), \
+                                                             self.bulletin.getFullType())
+                print"REMOVEME: Locking sem to check for B3. Locking:",dirToLock
+                key = self.bulletinWriter.lockDirBranch(dirToLock)
+                      
+                if (self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, 'W')):
                     tempB3 = self._findNextXValue()
                     self.bulletin.setCollectionB3(tempB3)
                 else:
                     tempB3 = self._findNextAvailableB3Value()
                     self.bulletin.setCollectionB3(tempB3)
-
+                #-----------------------------------------------------------------------------------------
+                # Unlocking semaphore
+                #-----------------------------------------------------------------------------------------
+                self.bulletinWriter.unlockDirBranch(key)
+                
             #-----------------------------------------------------------------------------------------
             # Now that we've determined the BBB value for our collection, we need to write it to the 
             # collection directory (regardless of whether it's immediate or scheduled).
             #-----------------------------------------------------------------------------------------
+            #-----------------------------------------------------------------------------------------
+            # Locking semaphore
+            #-----------------------------------------------------------------------------------------
+            dirToLock = \
+                self.bulletinWriter.calculateBulletinDir(self.bulletin.getTwoLetterType(), \
+                                                         self.bulletin.getTimeStampWithMinsSetToZero(), \
+                                                         self.bulletin.getOrigin(), \
+                                                         self.bulletin.getFullType())
+            print"REMOVEME: Locking sem to write the bulletin. Locking:",dirToLock
+            key = self.bulletinWriter.lockDirBranch(dirToLock)
+
             self.bulletinWriter.writeReportBulletinToDisk(self.bulletin)
 
+            #-----------------------------------------------------------------------------------------
+            # Unlocking semaphore
+            #-----------------------------------------------------------------------------------------
+            self.bulletinWriter.unlockDirBranch(key)
             print "REMOVEME: The collection's BBB is now set to: ", self.bulletin.getCollectionBBB()
             #-----------------------------------------------------------------------------------------
             # At this point all collection worthy report bulletins have been written to disk.
@@ -365,16 +404,14 @@ class CollectionManager(object):
             positive integer in the case where the directory B1B2X exists
         """
         #-----------------------------------------------------------------------------------------
-        # In the simple case, the directory B1B2X_sent or B1B2X_busy will not exists and we'll 
+        # In the simple case, the directory B1B2X_sent will not exists and we'll 
         # just return X.  Otherwise we need to return X1 or X2, or X3 ..
         #-----------------------------------------------------------------------------------------
-        if not (self.bulletinWriter.doesBusyCollectionWithB3Exist(self.bulletin, 'X') or
-                self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, 'X')):
+        if not (self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, 'X')):
             return 'X'
         else:
             counter = 1
-            while (self.bulletinWriter.doesBusyCollectionWithB3Exist(self.bulletin, 'X'+str(counter)) or
-                   self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, 'X'+str(counter))):
+            while (self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, 'X'+str(counter))):
                 counter = counter + 1
             else:
                 return 'X'+str(counter)
@@ -388,11 +425,10 @@ class CollectionManager(object):
         """
         charSet = 'ABCDEFGHIJKLMNOPQRSTUVW'
         #-----------------------------------------------------------------------------------------
-        # Look for '_busy' or '_sent' in dir name
+        # Look for '_sent' in dir name
         #-----------------------------------------------------------------------------------------
         for char in charSet:
-            if not (self.bulletinWriter.doesBusyCollectionWithB3Exist(self.bulletin, char) or
-                    self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, char)):
+            if not (self.bulletinWriter.doesSentCollectionWithB3Exist(self.bulletin, char)):
                 return char
 
                 

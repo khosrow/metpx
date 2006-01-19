@@ -81,41 +81,23 @@ class BulletinWriter:
                     the bulletin to be written to the collections db.
         """
         #-----------------------------------------------------------------------------------------
-        # calculate the path for the new file (/apps/px/collection/SA/041200/CYOW/SACNXX/RRA)
+        # calculate the path for the new file (/apps/px/collection/SA/041200/CYOW/SACNxx/RRA)
         #-----------------------------------------------------------------------------------------
         bulletinPath = self._calculateBBBDirName(bull)
 
         #-----------------------------------------------------------------------------------------
-        # calculate the filename for the new file. (WRO)
+        # calculate the filename for the new file. (The station name)
         # note that the timestamp is not included so that newer bulletins from the same station
         # will overwrite previous bulletins.
         #-----------------------------------------------------------------------------------------
         fileName = "%s" % (bull.getStation())
         
         #-----------------------------------------------------------------------------------------
-        # calculate the base dir we need to lock (/apps/px/collection/SA/041200/CYOW/SACNXX)
-        #-----------------------------------------------------------------------------------------
-        dirPath = self._calculateControlDestPath(bull.getTwoLetterType(), \
-                                                 bull.getTimeStampWithMinsSetToZero(), \
-                                                 bull.getOrigin(), bull.getFullType())
-        #-----------------------------------------------------------------------------------------
-        # Lock the semaphore so that another Px thread doesn't interfere
-        #-----------------------------------------------------------------------------------------
-        key = self.lockDirBranch(dirPath)
-        print "Locked semaphore, key is:",key
-        #-----------------------------------------------------------------------------------------
         # open the file and write the bulletin to disk
         #-----------------------------------------------------------------------------------------
         self._writeToDisk(bull, bulletinPath, fileName)
 
-        #-----------------------------------------------------------------------------------------
-        # Unlock the semaphore 
-        #-----------------------------------------------------------------------------------------
-        print "Unlocking semaphore, key is:",key
-        self.unlockDirBranch(key)
         
-
-  
     def _writeToDisk(self, bulletin, bulletinPath, fileName):
         """ _writeToDisk(self, path, fileName)
 
@@ -249,9 +231,9 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         # calculate the base dir path (/apps/px/collection/SA/041200/CYOW/SACNXX)
         #-----------------------------------------------------------------------------------------
-        dirName = self._calculateDirName(bulletin.getTwoLetterType(), \
-                                         bulletin.getTimeStampWithMinsSetToZero(), \
-                                         bulletin.getOrigin(), bulletin.getFullType())
+        dirName = self.calculateBulletinDir(bulletin.getTwoLetterType(), \
+                                            bulletin.getTimeStampWithMinsSetToZero(), \
+                                            bulletin.getOrigin(), bulletin.getFullType())
 
         #-----------------------------------------------------------------------------------------
         # build the BBB value to look for (/apps/px/collection/SA/041200/CYOW/SACNxx/RRB3) 
@@ -278,9 +260,9 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         # calculate the base dir path (/apps/px/collection/SA/041200/CYOW/SACNXX)
         #-----------------------------------------------------------------------------------------
-        dirName = self._calculateDirName(bulletin.getTwoLetterType(), \
-                                         bulletin.getTimeStampWithMinsSetToZero(), \
-                                         bulletin.getOrigin(), bulletin.getFullType())
+        dirName = self.calculateBulletinDir(bulletin.getTwoLetterType(), \
+                                            bulletin.getTimeStampWithMinsSetToZero(), \
+                                            bulletin.getOrigin(), bulletin.getFullType())
 
         #-----------------------------------------------------------------------------------------
         # build the BBB value to look for (/apps/px/collection/SA/041200/CYOW/SACNxx/RRB3) 
@@ -307,9 +289,9 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         # calculate the base dir path (/apps/px/collection/SA/041200/CYOW/SACNXX)
         #-----------------------------------------------------------------------------------------
-        dirName = self._calculateDirName(bulletin.getTwoLetterType(), \
-                                         bulletin.getTimeStampWithMinsSetToZero(), \
-                                         bulletin.getOrigin(), bulletin.getFullType())
+        dirName = self.calculateBulletinDir(bulletin.getTwoLetterType(), \
+                                            bulletin.getTimeStampWithMinsSetToZero(), \
+                                            bulletin.getOrigin(), bulletin.getFullType())
 
         #-----------------------------------------------------------------------------------------
         # build the BBB value to look for (/apps/px/collection/SA/041200/CYOW/SACNxx/RRB3) 
@@ -322,7 +304,7 @@ class BulletinWriter:
         return self._doesCollectionExist(dirName)
 
 
-    def _calculateDirName(self, reportType, timeStamp, origin, fullType):
+    def calculateBulletinDir(self, reportType, timeStamp, origin, fullType):
         """ This method calculates the directory name of a collection, given the above parameters
             reportType  string
                         the 2 letter code for the bulletin type, such as SA or SI or SM.
@@ -344,26 +326,23 @@ class BulletinWriter:
         return dirName
 
 
-    def _calculateControlDestPath(self, reportType, timeStamp, origin, fullType):
-        """ This method calculates the directory name of the lock directory, given the parameters
-            reportType  string
-                        the 2 letter code for the bulletin type, such as SA or SI or SM.
-
-            timeStamp   string
-                        The timestamp from the bulletin header.
-
-            origin      string
-                        The orgin of the bulletin
-
-            fullType    string
-                        The full Type of the bulletin (SACNXX)
+    def _calculateControlDestPath(self, collectionDirPath):
+        """ This method calculates and returns the directory name of the lock directory, 
+            given the regular path
+            collectionDirPath     string
+                                  Path such as (/apps/px/collection/SA/041200/CYOW/SACNXX)
         """
         #-----------------------------------------------------------------------------------------
-        # Find the basic collection path (/apps/px/collection/SA/041200/CYOW/SACNXX)
+        # convert the given path of (/apps/px/collection/SA/041200/CYOW/SACNXX) into 
+        # (/apps/px/collection/control/SA/041200/CYOW/SACNXX)
         #-----------------------------------------------------------------------------------------
-        dirName = "%s%s/%s/%s/%s" % (self.collectionConfigParser.getCollectionControlPath(), reportType, \
-                                     timeStamp, origin, fullType)
-        return dirName
+        collectionDirPath = collectionDirPath.split('/')
+        collectionIndex = collectionDirPath.index('collection')
+        collectionDirPath.insert(collectionIndex+1,'control')
+        dirName = ''
+        for element in collectionDirPath:
+            dirName = os.path.join(dirName,element)
+        return os.path.abspath(dirName)
 
 
     def _calculateOnTimeDirName(self, bulletin):
@@ -377,9 +356,9 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         # calculate the base dir path (/apps/px/collection/SA/041200/CYOW/SACNXX)
         #-----------------------------------------------------------------------------------------
-        dirName = self._calculateDirName(bulletin.getTwoLetterType(), \
-                                         bulletin.getTimeStampWithMinsSetToZero(), \
-                                         bulletin.getOrigin(), bulletin.getFullType())
+        dirName = self.calculateBulletinDir(bulletin.getTwoLetterType(), \
+                                            bulletin.getTimeStampWithMinsSetToZero(), \
+                                            bulletin.getOrigin(), bulletin.getFullType())
 
         reportType = bulletin.getTwoLetterType()
         validTime = self.collectionConfigParser.getReportValidTimeByHeader(reportType)
@@ -399,9 +378,9 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         # calculate the base dir path (/apps/px/collection/SA/041200/CYOW/SACNXX)
         #-----------------------------------------------------------------------------------------
-        dirName = self._calculateDirName(bulletin.getTwoLetterType(), \
-                                         bulletin.getTimeStampWithMinsSetToZero(), \
-                                         bulletin.getOrigin(), bulletin.getFullType())
+        dirName = self.calculateBulletinDir(bulletin.getTwoLetterType(), \
+                                            bulletin.getTimeStampWithMinsSetToZero(), \
+                                            bulletin.getOrigin(), bulletin.getFullType())
 
         BBB = bulletin.getCollectionBBB()
         #-----------------------------------------------------------------------------------------
@@ -422,17 +401,21 @@ class BulletinWriter:
             locked and a 'key' such as '/apps/px/collection/SA/041200/CYOW/SACNXX/<key>'
             is returned.
 
-            This is the first version of this method and there is room for improvement:  
-            If a receiver should crash after creating the key directory, all other receivers 
-            will busy-wait because they think that someone is actually using the lock!
-            Therefore our busy-wait will timeout after maxBusyWait seconds.
+            This is a limited blocking call that blocks the calling thread for up to
+            'maxBusyWait' seconds before breaking the lock and returning!
 
             For more information about the business logic and the flow of this method, 
             please see the "Collection Process Flow diagram" document.
         """
-        maxBusyWait = 6     # Max seconds we'll busy wait, waiting for lock
+        maxBusyWait = 10     # Max seconds we'll busy wait, waiting for lock
         True = 'True'
         False = ''
+        #-----------------------------------------------------------------------------------------
+        # convert the given path of (/apps/px/collection/SA/041200/CYOW/SACNXX) into 
+        # (/apps/px/collection/control/SA/041200/CYOW/SACNXX)
+        #-----------------------------------------------------------------------------------------
+        dirPath = self._calculateControlDestPath(dirPath)
+
         #-----------------------------------------------------------------------------------------
         # Obtain dir where our lock 'dir' will be kept (/apps/px/collection/control/)
         #-----------------------------------------------------------------------------------------
@@ -443,13 +426,13 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         keyWithPath = tempfile.mkdtemp(False,False,LockDirPath)
         key = os.path.basename(keyWithPath)
-        newDirNamePath = dirPath + '/' + key
+        keyDirPath = os.path.join(dirPath,key)
 
         #-----------------------------------------------------------------------------------------
         # Produce time objects needed for comparisons.
         #-----------------------------------------------------------------------------------------
         initialTime = datetime.datetime.now()
-
+        print"REMOVEME:Looking for lock:",dirPath
         #-----------------------------------------------------------------------------------------
         # While the SACNxx dir exists, we will consider it locked
         #-----------------------------------------------------------------------------------------
@@ -459,7 +442,7 @@ class BulletinWriter:
                     waitingTime = datetime.datetime.now()
                     elapsedTime = waitingTime - initialTime
                     if (elapsedTime.seconds >= maxBusyWait):
-                        print "\nREMOVEME:%s seconds elapsed. del directory"%elapsedTime.seconds
+                        self.logger.error("Had to break lock on: %s because max waiting time expired!"%dirPath)
                         self._removeDirTree(dirPath)  
                         break
                     else:
@@ -469,22 +452,21 @@ class BulletinWriter:
                     break
 
             #-----------------------------------------------------------------------------------------
-            # Create the key dir in the destination name
-            #(/apps/px/collection/SA/041200/CYOW/SACNXX/<key>)
+            # Create the key dir (/apps/px/collection/control/SA/041200/CYOW/SACNXX/<key>)
             #-----------------------------------------------------------------------------------------
-            os.renames(keyWithPath,newDirNamePath)
-
+            os.renames(keyWithPath,keyDirPath)
+            
             #-----------------------------------------------------------------------------------------
             # Check to make sure that we got the semaphore and if so, return the key
-            # (/apps/px/collection/SA/041200/CYOW/SACNXX/<key>)
+            # (/apps/px/collection/control/SA/041200/CYOW/SACNXX/<key>)
             # Remember that both receivers may create their key in the directory at the same
             # time, therefore we'll sort the dir listing and take the first entry only
             #-----------------------------------------------------------------------------------------
             dirList = os.listdir(dirPath)
             dirList.sort()
             if(dirList[0] == key):
-                return newDirNamePath
-                
+                return keyDirPath
+                            
 
     def unlockDirBranch (self,key):
         """ unlockDirBranch(path, key)
