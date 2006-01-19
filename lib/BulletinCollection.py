@@ -99,6 +99,14 @@ class BulletinCollection(bulletin.bulletin):
     def setCollectionB3(self, newCollectionB):
         self.collectionBBB = "%s%s%s" % (self.collectionBBB[0], self.collectionBBB[1], newCollectionB)
 
+    def setCollectionBBB(self,newBBB):
+        if not(newBBB):
+            self.colletionBBB = blankValue
+        elif(len(str(newBBB)) == 3):
+            self.collectionBBB = newBBB
+        else:
+            self.logger.error("The given BBB value: %s is invalid!" %newBBB)
+
     def getTwoLetterType(self):
         """ getTwoLetterType() parses the header and returns the two letter header
             (I.e 'SA' will be returned for 'SACNXX')
