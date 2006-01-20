@@ -81,7 +81,7 @@ class BulletinWriter:
                     the bulletin to be written to the collections db.
         """
         #-----------------------------------------------------------------------------------------
-        # calculate the path for the new file (/apps/px/collection/SA/041200/CYOW/SACNxx/RRA)
+        # calculate the path for the new bulletin (/apps/px/collection/SA/041200/CYOW/SACNxx/RRA)
         #-----------------------------------------------------------------------------------------
         bulletinPath = self._calculateBBBDirName(bull)
 
@@ -101,9 +101,9 @@ class BulletinWriter:
     def _writeToDisk(self, bulletin, bulletinPath, fileName):
         """ _writeToDisk(self, path, fileName)
 
-            path        string  I.e. (/apps/px/collection/SA/041200/CYOW/SACNxx/RRA)
+            bulletinPath    string  I.e. (/apps/px/collection/SA/041200/CYOW/SACNxx/RRA)
 
-            fileName    string  I.e. (WRO)
+            fileName        string  I.e. (WRO)
 
             This is a helper method which accepts a path and a filename for the 
             purpose of creating the file in the given path using the bulletin as
@@ -114,7 +114,7 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         # create the directory path only if it doesn't exist
         #-----------------------------------------------------------------------------------------
-        if not(os.access(bulletinPath, os.F_OK)):
+        if not(self._doesCollectionExist(bulletinPath)):
             os.makedirs(bulletinPath)
         
         #-----------------------------------------------------------------------------------------
@@ -127,6 +127,35 @@ class BulletinWriter:
         fd.write(bulletin.getBulletin())
         fd.close()  
         
+
+    def createBBB_BusyCollectionDir(self, bulletin):
+        """ createBBB_BusyCollectionDir(bulletin)
+
+            This method creates a collection directory with the _busy ending
+            so that another receiver looking for a B3 value at the same time
+            doesn't duplicate our selected B3 value.
+        """
+        #-----------------------------------------------------------------------------------------
+        # calculate the path for the new bulletin (/apps/px/collection/SA/041200/CYOW/SACNxx/RRA)
+        #-----------------------------------------------------------------------------------------
+        bulletinPath = self._calculateBBBDirName(bulletin)
+
+        #-----------------------------------------------------------------------------------------
+        # find '_busy' tag
+        #-----------------------------------------------------------------------------------------
+        busyTag = self.collectionConfigParser.getBusyCollectionToken()   
+    
+        #-----------------------------------------------------------------------------------------
+        # create the BBB_Busy directory path 
+        #-----------------------------------------------------------------------------------------
+        bulletinPath = bulletinPath + busyTag
+        print"REMOVEME: Marking dir busy:",bulletinPath
+        if not(self._doesCollectionExist(bulletinPath)):
+            os.makedirs(bulletinPath)
+        else:
+            self.logger.error("Cannot create directory: %s because it already exists!"%bulletinPath) 
+
+
 
     def markCollectionAsSent(self, collectionBulletin):
         """ markCollectionAsSent()
@@ -164,14 +193,17 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         # Making sure that we don't try to rename a non-existent directory.  If old dir exists and
         # the new one doesn't exist, then rename it to the new name.  Otherwise if the new dir 
-        # doesn't exist, then create the new empty so as to maintain the state of the application
+        # doesn't exist, then create the new empty so as to maintain the state of the application.
+        # Ignore if the empty dir already exists (just created by another rcvr)
         #-----------------------------------------------------------------------------------------
         if ((self._doesCollectionExist(oldDirName)) and \
         not self._doesCollectionExist(newDirName)):
             os.rename(oldDirName, newDirName)
         elif not (self._doesCollectionExist(newDirName)):
-            os.mkdir(newDirName)
-
+            try:
+                os.makedirs(newDirName)
+            except error:
+                pass
 
     def _doesSentCollectionExist(self, dirName):  
         """
@@ -187,7 +219,7 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         # return True if the dir exists and False otherwise
         #-----------------------------------------------------------------------------------------
-        return os.access(dirName, os.F_OK) 
+        return self._doesCollectionExist(dirName) 
 
 
     def _doesBusyCollectionExist(self, dirName):  
@@ -204,7 +236,7 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         # return True if the dir exists and False otherwise
         #-----------------------------------------------------------------------------------------
-        return os.access(dirName, os.F_OK) 
+        return self._doesCollectionExist(dirName) 
 
     def _doesCollectionExist(self, dirName):  
         """
@@ -342,7 +374,7 @@ class BulletinWriter:
         dirName = ''
         for element in collectionDirPath:
             dirName = os.path.join(dirName,element)
-        return os.path.abspath(dirName)
+        return os.path.join('/',dirName)
 
 
     def _calculateOnTimeDirName(self, bulletin):
@@ -382,7 +414,11 @@ class BulletinWriter:
                                             bulletin.getTimeStampWithMinsSetToZero(), \
                                             bulletin.getOrigin(), bulletin.getFullType())
 
+        #-----------------------------------------------------------------------------------------
+        # Returns the true BBB such as 'RRX1' or 'RRA'
+        #-----------------------------------------------------------------------------------------
         BBB = bulletin.getCollectionBBB()
+
         #-----------------------------------------------------------------------------------------
         # Add the BBB field to the path (/apps/px/collection/SA/041200/CYOW/SACNxx/RRA)
         #-----------------------------------------------------------------------------------------
@@ -419,12 +455,12 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         # Obtain dir where our lock 'dir' will be kept (/apps/px/collection/control/)
         #-----------------------------------------------------------------------------------------
-        LockDirPath = self.collectionConfigParser.getCollectionControlPath()
-        
+        lockDirPath = self.collectionConfigParser.getCollectionControlPath()
+
         #-----------------------------------------------------------------------------------------
         # Create a random key which will indicate when we have attained a lock
         #-----------------------------------------------------------------------------------------
-        keyWithPath = tempfile.mkdtemp(False,False,LockDirPath)
+        keyWithPath = tempfile.mkdtemp(False,False,lockDirPath)
         key = os.path.basename(keyWithPath)
         keyDirPath = os.path.join(dirPath,key)
 

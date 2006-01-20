@@ -31,15 +31,6 @@ import sys
 
 PXPaths.normalPaths()
 
-ONTIME_FLAG_CONSTANT = 'min'
-
-def containsAny(str, set):
-    """Check whether 'str' contains ANY of the chars in 'set'"""
-    return 1 in [c in str for c in set]
-
-def containsAll(str, set):
-    """Check whether 'str' contains ALL of the chars in 'set'"""
-    return 0 not in [c in str for c in set]
     
 class CollectionScheduler(threading.Thread,gateway.gateway):
     """
@@ -68,6 +59,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         self.lateCycle = self.collectionConfig.getReportLateCycleByHeader(idType) 
         self.timeToLive = self.collectionConfig.getTimeToLiveByHeader(idType)	 
         self.sentToken = self.collectionConfig.getSentCollectionToken()
+        self.busyToken = self.collectionConfig.getBusyCollectionToken()
 
         #-----------------------------------------------------------------------------------------
         # myRootDir points to the (/apps/px/collection/<idType>) sub-dir where this collector 
@@ -231,7 +223,8 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         print "REMOVEME: Searching for:",directory," in:",searchPath 
         for root, dirs, files in os.walk(searchPath):
             for dir in dirs:
-                if (dir.startswith(directory) and not dir.endswith(self.sentToken)):
+                if (dir.startswith(directory) and not (dir.endswith(self.sentToken) or
+                                                       dir.endswith(self.busyToken))):
                     print "\nFound and returning:",os.path.join(root,dir)
                     return os.path.join(root,dir)
         return False
@@ -306,11 +299,6 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             self.buildCollection(foundPath)
 
             #-----------------------------------------------------------------------------------------
-            # Release mutex to foundPath directory 
-            #-----------------------------------------------------------------------------------------
-            self.collectionWriter.unlockDirBranch(key)
-
-            #-----------------------------------------------------------------------------------------
             # This is a late collection, change the minutes field to '00' and set the BBB for the
             # bulletin and the collection to the appropriate value (collection BBB is used to find
             # the collection when marking it sent).
@@ -321,6 +309,17 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             self.collection.setCollectionBBB(BBB)
             self.collection.setReportBBB(BBB)
             print "REMOVEME: collection is:",self.collection.bulletinAsString()
+            #-----------------------------------------------------------------------------------------
+            # Mark directory as _busy so as to block the receivers from adding any more bulletins
+            # to this collection directory
+            #-----------------------------------------------------------------------------------------
+            self.collectionWriter.createBBB_BusyCollectionDir(self.collection)
+
+            #-----------------------------------------------------------------------------------------
+            # Release mutex to foundPath directory 
+            #-----------------------------------------------------------------------------------------
+            self.collectionWriter.unlockDirBranch(key)
+
             #-----------------------------------------------------------------------------------------
             # Transmit on-time collection
             #-----------------------------------------------------------------------------------------
