@@ -305,9 +305,17 @@ class BulletinCollection(bulletin.bulletin):
         newCollectionBulletin = self
 
         #-----------------------------------------------------------------------------------------
-        # Here, we need to update or create the report's BBB value with that of the collection
+        # Here, we need to update or create the report's BBB value with that of the collection, 
+        # but we're taking care to set a report's BBB to 'CCX' instead of 'CCX1'
         #-----------------------------------------------------------------------------------------
-        newCollectionBulletin.setReportBBB(newCollectionBulletin.getCollectionBBB())
+        newCollectionBulletin.setReportBBB(newCollectionBulletin.getCollectionB1() + \
+                                           newCollectionBulletin.getCollectionB2() + \
+                                           newCollectionBulletin.getCollectionB3())
+
+        #-----------------------------------------------------------------------------------------
+        # Change the minutes field to '00'. I.e. 'SACN94 CWAO 080319' becomes 'SACN94 CWAO 080300'
+        #-----------------------------------------------------------------------------------------
+        newCollectionBulletin.setBulletinMinutesField('00')
         return newCollectionBulletin
 
 
