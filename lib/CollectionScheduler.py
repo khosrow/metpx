@@ -28,6 +28,7 @@ import PXPaths
 import CollectionBuilder
 import BulletinWriter
 import sys
+import time
 
 PXPaths.normalPaths()
 
@@ -57,7 +58,8 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         #-----------------------------------------------------------------------------------------
         self.validTime = self.collectionConfig.getReportValidTimeByHeader(idType) 
         self.lateCycle = self.collectionConfig.getReportLateCycleByHeader(idType) 
-        self.timeToLive = self.collectionConfig.getTimeToLiveByHeader(idType)	 
+        self.timeToLive = self.collectionConfig.getTimeToLiveByHeader(idType)	
+        self.timeToLive = datetime.timedelta(hours = int(self.timeToLive))
         self.sentToken = self.collectionConfig.getSentCollectionToken()
         self.busyToken = self.collectionConfig.getBusyCollectionToken()
 
@@ -66,6 +68,12 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         # will be operating
         #-----------------------------------------------------------------------------------------
         self.myRootDir = self.collectionConfig.getCollectionPath() + idType 
+
+        #-----------------------------------------------------------------------------------------
+        # myControlDir points to the (/apps/px/collection/control/<idType>) sub-dir where this 
+        # collector's control files are stored
+        #-----------------------------------------------------------------------------------------
+        self.myControlDir = self.collectionConfig.getCollectionControlPath() + idType 
 
         #-----------------------------------------------------------------------------------------
         # Bulletin and tools to be used for creating a collection bulletin
@@ -89,7 +97,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         #-----------------------------------------------------------------------------------------
         # Datetime placeholder
         #-----------------------------------------------------------------------------------------
-        self.presentDateTime = ''
+        self.startDateTime = ''
        
         
     def run(self):
@@ -113,7 +121,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         #-----------------------------------------------------------------------------------------
         # Get wakeup time (now)
         #-----------------------------------------------------------------------------------------
-        self.presentDateTime = datetime.datetime.now()
+        self.startDateTime = datetime.datetime.now()
 
         #-----------------------------------------------------------------------------------------
         # Send this hour's on-time collection if not already sent
@@ -133,7 +141,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         #-----------------------------------------------------------------------------------------
         # sleep until next event
         #-----------------------------------------------------------------------------------------
-        #self.sleepUntil(self.calculateSleepTime())
+        self.sleepUntil(self.calculateSleepTime())
 
         
     def sendThisHoursOnTimeCollections(self):
@@ -192,12 +200,12 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         #-----------------------------------------------------------------------------------------
         # Search only if the on-time period for this hour has ended
         #-----------------------------------------------------------------------------------------
-        if (int(self.presentDateTime.minute) >= int(self.validTime)):
+        if (int(self.startDateTime.minute) >= int(self.validTime)):
 
             #-----------------------------------------------------------------------------------------
             # Build dir for this hour of the form "DDHHMM"
             #-----------------------------------------------------------------------------------------
-            thisHoursDir = "%s%s%s" %(self.presentDateTime.day,self.presentDateTime.hour, '00')
+            thisHoursDir = "%s%s%s" %(self.startDateTime.day,self.startDateTime.hour, '00')
 
             #-----------------------------------------------------------------------------------------
             # search for any of this hour's unsent on-time collections
@@ -215,8 +223,9 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             directory   string  The name of the directory to 
                                 look for
             
-            This method returns the path of the first instance 
-            of 'directory' under the 'searchPath' sub-tree.
+            This method returns the path of the first directory
+            under the 'searchPath' sub-tree which matches 
+            'directory' and does not end with _busy or _sent.
             False is returned if no match is found.
         """
         False = ''
@@ -352,11 +361,11 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         # If the previous cycle interval puts us in the past hour, then look for late bulletins 
         # during last hour as well
         #-----------------------------------------------------------------------------------------
-        hour.append(int(self.presentDateTime.hour))
+        hour.append(int(self.startDateTime.hour))
         lateCycleTimedelta = datetime.timedelta(minutes = int(self.lateCycle))
         oneHourTimedelta = datetime.timedelta(hours = 1)
-        tmpDate = self.presentDateTime - lateCycleTimedelta
-        if(int(self.presentDateTime.hour) == int((tmpDate + oneHourTimedelta).hour)):
+        tmpDate = self.startDateTime - lateCycleTimedelta
+        if(int(self.startDateTime.hour) == int((tmpDate + oneHourTimedelta).hour)):
             hour.insert(0,int(tmpDate.hour))
         print"\nhour is:",hour
 
@@ -365,7 +374,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         # Build dir for this hour of the form "DDHHMM"
         #-----------------------------------------------------------------------------------------
         for element in hour:
-           hoursDir = "%s%s%s" %(self.presentDateTime.day,element, '00')
+           hoursDir = "%s%s%s" %(self.startDateTime.day,element, '00')
            #-----------------------------------------------------------------------------------------
            # search for any unsent late collections
            #-----------------------------------------------------------------------------------------
@@ -389,12 +398,108 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         #-----------------------------------------------------------------------------------------
         # Clean myRootDir (/apps/px/collection/<idType>)
         #-----------------------------------------------------------------------------------------
-        # COMPLETEME
+        dirAge = self.startDateTime - self.timeToLive
+        oldDirFound = self.findDirOlderThan(self.myRootDir,dirAge)
+        while (oldDirFound):
+            print "Found old dir: ",oldDirFound
+            #-----------------------------------------------------------------------------------------
+            # Remove found dir
+            #-----------------------------------------------------------------------------------------
+            self.collectionWriter.removeDirTree(oldDirFound)
+
+            #-----------------------------------------------------------------------------------------
+            # Look for next old dir
+            #-----------------------------------------------------------------------------------------
+            oldDirFound = self.findDirOlderThan(self.myRootDir,dirAge)
 
         #-----------------------------------------------------------------------------------------
         # Clean control dir (/apps/px/collection/control/<idType>)
         #-----------------------------------------------------------------------------------------
+        oldDirFound = self.findDirOlderThan(self.myControlDir,dirAge)
+        while (oldDirFound):
+            print "Found old dir: ",oldDirFound
+            #-----------------------------------------------------------------------------------------
+            # Remove found dir
+            #-----------------------------------------------------------------------------------------
+            self.collectionWriter.removeDirTree(oldDirFound)
+
+            #-----------------------------------------------------------------------------------------
+            # Look for next old dir
+            #-----------------------------------------------------------------------------------------
+            oldDirFound = self.findDirOlderThan(self.myControlDir,dirAge)
+            
+
+    def findDirOlderThan (self,searchPath, dateTimeValue):
+        """ findDirOlderThan(searchPath, directory) -> Boolean
+
+            searchPath      string      The root path of the search
+
+            dateTimeValue   datetime    A datetime value used for 
+                                        comparison
+            
+            This method returns the path of the first directory under 
+            the 'searchPath' sub-tree which is older than dateTimeValue.
+            False is returned if no match is found.
+        """
+        False = ''
+        dateTimeValue = dateTimeValue.timetuple()
+        for root, dirs, files in os.walk(searchPath):
+            for dir in dirs:
+                dirModTime = os.stat(os.path.join(root,dir))
+                dirModTime = time.localtime(dirModTime.st_mtime)
+                
+                #-----------------------------------------------------------------------------------------
+                # Returning dirs older than Time To Live
+                #-----------------------------------------------------------------------------------------
+                if(dirModTime <= dateTimeValue):
+                    return os.path.join(root,dir)
+        return False
+        
+
+    def calculateSleepTime(self):
+        """ calculateSleepTime() -> Time in seconds
+
+            This method is responsible for calculating our sleep time between
+            the current session and when we should wake up next.
+        """
+        currentDateTime = datetime.datetime.now()
+        sleepTime = 0
+        #-----------------------------------------------------------------------------------------
+        # If we're in the validTime window, then our next wakeup is validTime + lateCycle
+        #-----------------------------------------------------------------------------------------
+        if (int(self.startDateTime.minute) <= int(self.validTime)):
+            sleepTime = (self.validTime + self.lateCycle) * 60 
+            
+
+
+        #-----------------------------------------------------------------------------------------
+        # Make sure our proposed sleepTime isn't in the past, if it is, wake up in 1 second
+        #-----------------------------------------------------------------------------------------
+        sleepTimeDelta = datetime.timedelta(seconds = sleepTime)
+        if((self.startDateTime + sleepTimeDelta) < currentDateTime):
+            sleepTime = 1
+
+        print "startTime: ",self.startDateTime
+        print "sleepTimeDelta: ",sleepTimeDelta
+        print "currentTime: ",currentDateTime
+        print "start + sleepDelta: ",self.startDateTime + sleepTimeDelta
+
+        #-----------------------------------------------------------------------------------------
+        # Return sleep Time
+        #-----------------------------------------------------------------------------------------
+        return sleepTime
+
+
+    def sleepUntil(self,secondsToSleep):
+        """ sleepUntil()
+
+            This method is responsible for sleeping until the
+            next wakeup.
+        """
+        #-----------------------------------------------------------------------------------------
         # COMPLETEME
+        #-----------------------------------------------------------------------------------------
+        
 
 
 
@@ -402,32 +507,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
 
 
 
-
-
-
-
-
-
-
-        #self.presentDateTime = "%s%s%s" %(self.presentDateTime.day,self.presentDateTime.hour, \
-        #                                  self.presentDateTime.minute)
-
-        #while True:
-            # FIXME: need to insert config reload code.  See Ingestor.py line 211
-        #    bulletinCollection = self._findAScheduledCollectionToSend()
-        #    if bulletinCollection != "":
-        #        self.write(bulletinCollection)
-        #        
-        #    else:
-                # There are no collections to send, so sleep until the next one.
-        #        nextEvent = self._calcDurationUntilNextEvent()
-        #        sleep(nextEvent)
-
-
-
-
-
-
+     ####################################################################################
 
 
 
