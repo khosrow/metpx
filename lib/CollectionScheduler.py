@@ -108,40 +108,42 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             to be sent, cleans any old files which need to be cleaned, 
             calculate the next sleep interval, and sleep until then.
         """
+        True = 'True'
         #-----------------------------------------------------------------------------------------
-        # While master loop goes here.  Loop until stopped
-        # COMPLETEME
+        # Live forever..until you're told to die!
         #-----------------------------------------------------------------------------------------
-        print "\nREMOVEME:This is scheduler type: %s reporting in. My rootDir is: %s"%(self.idType,self.myRootDir)
-        print "REMOVEME:self.validTime:%s" %self.validTime
-        print "REMOVEME:self.lateCycle:%s"% self.lateCycle 
-        print "REMOVEME:self.timeToLive:%s"% self.timeToLive 
-        print "REMOVEME:My pid is:",os.getpid()
+        while (True):
+
+            print "\nREMOVEME:This is scheduler type: %s reporting in. My rootDir is: %s"%(self.idType,self.myRootDir)
+            print "REMOVEME:self.validTime:%s" %self.validTime
+            print "REMOVEME:self.lateCycle:%s"% self.lateCycle 
+            print "REMOVEME:self.timeToLive:%s"% self.timeToLive 
+            print "REMOVEME:My pid is:",os.getpid()
         
-        #-----------------------------------------------------------------------------------------
-        # Get wakeup time (now)
-        #-----------------------------------------------------------------------------------------
-        self.startDateTime = datetime.datetime.now()
+            #-----------------------------------------------------------------------------------------
+            # Get wakeup time (now)
+            #-----------------------------------------------------------------------------------------
+            self.startDateTime = datetime.datetime.now()
 
-        #-----------------------------------------------------------------------------------------
-        # Send this hour's on-time collection if not already sent
-        #-----------------------------------------------------------------------------------------
-        self.sendThisHoursOnTimeCollections()
+            #-----------------------------------------------------------------------------------------
+            # Send this hour's on-time collection if not already sent
+            #-----------------------------------------------------------------------------------------
+            self.sendThisHoursOnTimeCollections()
 
-        #-----------------------------------------------------------------------------------------
-        # Find out if we should send this cycle's collection or not
-        #-----------------------------------------------------------------------------------------
-        self.sendLateCollections()
+            #-----------------------------------------------------------------------------------------
+            # Find out if we should send this cycle's collection or not
+            #-----------------------------------------------------------------------------------------
+            self.sendLateCollections()
 
-        #-----------------------------------------------------------------------------------------
-        # Cleanup old directories and files under the /apps/px/collection sub-tree
-        #-----------------------------------------------------------------------------------------
-        self.purgeOldDirsAndFiles()
-
-        #-----------------------------------------------------------------------------------------
-        # sleep until next event
-        #-----------------------------------------------------------------------------------------
-        self.sleepUntil(self.calculateSleepTime())
+            #-----------------------------------------------------------------------------------------
+            # Cleanup old directories and files under the /apps/px/collection sub-tree
+            #-----------------------------------------------------------------------------------------
+            self.purgeOldDirsAndFiles()
+            print "REMOVEME: Finished purging old files"
+            #-----------------------------------------------------------------------------------------
+            # sleep until next event
+            #-----------------------------------------------------------------------------------------
+            self.sleepUntil(self.calculateSleepTime())
 
         
     def sendThisHoursOnTimeCollections(self):
@@ -343,7 +345,8 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             # Look for the next unsent on-time collection
             #-----------------------------------------------------------------------------------------
             foundPath = self.findLateCollection()
-            
+
+
     def findLateCollection(self):
         """ findLateCollection() -> string
 
@@ -355,13 +358,19 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             late bulletins during last hour as well.  Otherwise, just look for lates
             in the present hour.
         """
+        currentTime = datetime.datetime.now()
         False = ''
         hour = []
+        #-----------------------------------------------------------------------------------------
+        # Search for this hour's late collections only if it is validTime + 1 lateCycle
+        #-----------------------------------------------------------------------------------------
+        if (int(currentTime.minute) >= (int(self.validTime) + int(self.lateCycle))):
+            hour.append(int(self.startDateTime.hour))
+
         #-----------------------------------------------------------------------------------------
         # If the previous cycle interval puts us in the past hour, then look for late bulletins 
         # during last hour as well
         #-----------------------------------------------------------------------------------------
-        hour.append(int(self.startDateTime.hour))
         lateCycleTimedelta = datetime.timedelta(minutes = int(self.lateCycle))
         oneHourTimedelta = datetime.timedelta(hours = 1)
         tmpDate = self.startDateTime - lateCycleTimedelta
@@ -461,41 +470,52 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
 
             This method is responsible for calculating our sleep time between
             the current session and when we should wake up next.
-        """
-        currentDateTime = datetime.datetime.now()
-        sleepTime = 0
-        #-----------------------------------------------------------------------------------------
-        # If we're in the validTime window, then our next wakeup is validTime + lateCycle
-        #-----------------------------------------------------------------------------------------
-        if (int(self.startDateTime.minute) <= int(self.validTime)):
-            sleepTime = (self.validTime + self.lateCycle) * 60 
+
+            Precondition: We've completed running a scheduled session and
+                          now need to figuire out how long to sleep before 
+                          the next wakeup.
             
+        """
+        currentTime = datetime.datetime.now()
+        sleepTime = 0
+        multiplier = 0 
 
-
+        sleepTime = int(self.validTime) + (multiplier * int(self.lateCycle)) 
         #-----------------------------------------------------------------------------------------
-        # Make sure our proposed sleepTime isn't in the past, if it is, wake up in 1 second
+        # While our proposed sleep interval is in the past, we need to increment our sleepTime
+        # by one lateCycle
         #-----------------------------------------------------------------------------------------
-        sleepTimeDelta = datetime.timedelta(seconds = sleepTime)
-        if((self.startDateTime + sleepTimeDelta) < currentDateTime):
-            sleepTime = 1
+        while ((sleepTime - int(currentTime.minute)) < 0):
+            multiplier = multiplier + 1
+            sleepTime = int(self.validTime) + (multiplier * int(self.lateCycle))
+        else:
+            #-----------------------------------------------------------------------------------------
+            # Sleep only between now and when we need to wake up
+            #-----------------------------------------------------------------------------------------
+            sleepTime = sleepTime - int(currentTime.minute)
 
-        print "startTime: ",self.startDateTime
-        print "sleepTimeDelta: ",sleepTimeDelta
-        print "currentTime: ",currentDateTime
-        print "start + sleepDelta: ",self.startDateTime + sleepTimeDelta
+            print "startTime was: ",self.startDateTime
+            print "currentTime: ",currentTime
+            print "sleepTime: ",sleepTime
 
-        #-----------------------------------------------------------------------------------------
-        # Return sleep Time
-        #-----------------------------------------------------------------------------------------
-        return sleepTime
+            #-----------------------------------------------------------------------------------------
+            # Return sleep Time in seconds
+            #-----------------------------------------------------------------------------------------
+            return sleepTime * 60
 
-
+    
     def sleepUntil(self,secondsToSleep):
         """ sleepUntil()
 
             This method is responsible for sleeping until the
             next wakeup.
         """
+        print"REMOVEME: Going to sleep for: ",secondsToSleep,"seconds"
+        #-----------------------------------------------------------------------------------------
+        # Sleeping for the required abount of time
+        #-----------------------------------------------------------------------------------------
+        time.sleep(secondsToSleep)
+
         #-----------------------------------------------------------------------------------------
         # COMPLETEME
         #-----------------------------------------------------------------------------------------
@@ -545,29 +565,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             self.logger.debug("Erreur: %s", str(e.args))
         
     
-    def _calcDurationUntilNextEvent():
-        """
-            This will calculate the number of seconds (rounding up [hopfully]) until the next scheduled
-            collection is scheduled to be sent
-        """
-        #################################################################
-        # Check to see if we're currently in the headerValidTime window.
-        #################################################################
-        presentDateTime = datetime.datetime.now()
-        if presentDateTime.minute < self.collectionConfig.getValidTimeByHeader(self.getTwoLetterReportType()):
-            # calculate duration until the headerValidTime is up
-            minutesToWait = self.collectionConfig.getValidTimeByHeader (self.getTwoLetterReportType() - presentDateTime.minute -1)
-            secondsToWait = 60 - presentDateTime.seconds
-            return minutesToWait*60 + secondsToWait
-
-        #################################################################
-        # We're outside the headerValidTime, so the duration is simply
-        # the headerLateCycle in seconds.  
-        # Note: the lateCycle is stored in minutes, so we need to convert to seconds by multiplying by 60.
-        #################################################################
-        return 60*collectionConfig.getLateCycleByHeader(self.getTwoLetterReportType())
-
-
+    
     
 
 
