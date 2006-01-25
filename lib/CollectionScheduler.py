@@ -95,11 +95,11 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
                      source = collectionConfig.source)
 
         #-----------------------------------------------------------------------------------------
-        # Datetime placeholder
+        # startDatetime placeholder
         #-----------------------------------------------------------------------------------------
         self.startDateTime = ''
-       
-        
+
+
     def run(self):
         """ run()
 
@@ -114,11 +114,11 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         #-----------------------------------------------------------------------------------------
         while (True):
 
-            print "\nREMOVEME:This is scheduler type: %s reporting in. My rootDir is: %s"%(self.idType,self.myRootDir)
-            print "REMOVEME:self.validTime:%s" %self.validTime
-            print "REMOVEME:self.lateCycle:%s"% self.lateCycle 
-            print "REMOVEME:self.timeToLive:%s"% self.timeToLive 
-            print "REMOVEME:My pid is:",os.getpid()
+            self.logger.info("\nREMOVEME: This is scheduler type: %s reporting in. My rootDir is: %s"%(self.idType,self.myRootDir))
+            self.logger.info("REMOVEME: self.validTime: %s" %self.validTime)
+            self.logger.info("REMOVEME: self.lateCycle: %s"% self.lateCycle) 
+            self.logger.info("REMOVEME: self.timeToLive: %s"% self.timeToLive) 
+            self.logger.info("REMOVEME: My pid is: ",os.getpid())
         
             #-----------------------------------------------------------------------------------------
             # Get wakeup time (now)
@@ -128,23 +128,26 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             #-----------------------------------------------------------------------------------------
             # Send this hour's on-time collection if not already sent
             #-----------------------------------------------------------------------------------------
+            self.logger.info("REMOVEME: Sending on-time collections")
             self.sendThisHoursOnTimeCollections()
 
             #-----------------------------------------------------------------------------------------
             # Find out if we should send this cycle's collection or not
             #-----------------------------------------------------------------------------------------
+            self.logger.info("REMOVEME: Sending late collections")
             self.sendLateCollections()
 
             #-----------------------------------------------------------------------------------------
             # Cleanup old directories and files under the /apps/px/collection sub-tree
             #-----------------------------------------------------------------------------------------
+            self.logger.info("REMOVEME: Beginning old directory purge")
             self.purgeOldDirsAndFiles()
-            print "REMOVEME: Finished purging old files"
+            
             #-----------------------------------------------------------------------------------------
             # sleep until next event
             #-----------------------------------------------------------------------------------------
             self.sleepUntil(self.calculateSleepTime())
-
+            
         
     def sendThisHoursOnTimeCollections(self):
         """ sendThisHoursOnTimeCollections() 
@@ -158,8 +161,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         # Loop until all on-time collections for this type are sent
         #-----------------------------------------------------------------------------------------
         foundPath = self.findOnTimeCollection()
-        print "REMOVEME: found on-time:",foundPath
-
+        
         while (foundPath):
             #-----------------------------------------------------------------------------------------
             # Build on-time collection 
@@ -174,7 +176,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             self.collection.setBulletinMinutesField('00')
             self.collection.setCollectionBBB('')
             self.collection.setReportBBB('')
-            print "REMOVEME: collection is:",self.collection.bulletinAsString()
+
             #-----------------------------------------------------------------------------------------
             # Transmit on-time collection
             #-----------------------------------------------------------------------------------------
@@ -231,12 +233,13 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             False is returned if no match is found.
         """
         False = ''
-        print "REMOVEME: Searching for:",directory," in:",searchPath 
+        self.logger.info("REMOVEME: Searching for dir: %s in: %s"%(directory,searchPath)) 
+         
         for root, dirs, files in os.walk(searchPath):
             for dir in dirs:
                 if (dir.startswith(directory) and not (dir.endswith(self.sentToken) or
                                                        dir.endswith(self.busyToken))):
-                    print "\nFound and returning:",os.path.join(root,dir)
+                    self.logger.info("REMOVEME: Found dir and returning:",os.path.join(root,dir))
                     return os.path.join(root,dir)
         return False
 
@@ -295,8 +298,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         # Loop until all Late (RRx) collections for this type are sent
         #-----------------------------------------------------------------------------------------
         foundPath = self.findLateCollection()
-        print "REMOVEME: found Late:",foundPath
-
+       
         while (foundPath):
 
             #-----------------------------------------------------------------------------------------
@@ -319,7 +321,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             BBB = os.path.basename(foundPath)
             self.collection.setCollectionBBB(BBB)
             self.collection.setReportBBB(BBB)
-            print "REMOVEME: collection is:",self.collection.bulletinAsString()
+
             #-----------------------------------------------------------------------------------------
             # Mark directory as _busy so as to block the receivers from adding any more bulletins
             # to this collection directory
@@ -376,8 +378,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         tmpDate = self.startDateTime - lateCycleTimedelta
         if(int(self.startDateTime.hour) == int((tmpDate + oneHourTimedelta).hour)):
             hour.insert(0,int(tmpDate.hour))
-        print"\nhour is:",hour
-
+       
         #-----------------------------------------------------------------------------------------
         # We now have something like hour = [14,15] or hour = [14]
         # Build dir for this hour of the form "DDHHMM"
@@ -410,7 +411,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         dirAge = self.startDateTime - self.timeToLive
         oldDirFound = self.findDirOlderThan(self.myRootDir,dirAge)
         while (oldDirFound):
-            print "Found old dir: ",oldDirFound
+
             #-----------------------------------------------------------------------------------------
             # Remove found dir
             #-----------------------------------------------------------------------------------------
@@ -426,7 +427,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         #-----------------------------------------------------------------------------------------
         oldDirFound = self.findDirOlderThan(self.myControlDir,dirAge)
         while (oldDirFound):
-            print "Found old dir: ",oldDirFound
+
             #-----------------------------------------------------------------------------------------
             # Remove found dir
             #-----------------------------------------------------------------------------------------
@@ -477,31 +478,40 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             
         """
         currentTime = datetime.datetime.now()
-        sleepTime = 0
         multiplier = 0 
 
-        sleepTime = int(self.validTime) + (multiplier * int(self.lateCycle)) 
+        #-----------------------------------------------------------------------------------------
+        # The proposedSleepTime for SAs is:
+        # proposedSleepTime = (7min + (i * 5min)) - (present time)
+        # If proposal is in the past (negative), then increment i and recalculate
+        #-----------------------------------------------------------------------------------------
+        proposedSleepTime = int(self.validTime) + (multiplier * int(self.lateCycle))
+        proposedSleepTime = proposedSleepTime - int(currentTime.minute)
+
         #-----------------------------------------------------------------------------------------
         # While our proposed sleep interval is in the past, we need to increment our sleepTime
-        # by one lateCycle
+        # by one lateCycle.  Note that we don't break out of the loop if proposedSleepTime = 0.
+        # This is because:
+        #  -The run method runs calculateSleepInterval last, so if we're here during a wakup
+        #   interval, then it must be because we've already done everything and are looping 
+        #   because the wakeup minute has not yet passed.
+        #  -Also note that we're assuming that a particular run will not take us
+        #   from one interval right into another (i.e. duration is smaller than one lateCycle.
         #-----------------------------------------------------------------------------------------
-        while ((sleepTime - int(currentTime.minute)) < 0):
+        while (proposedSleepTime <= 0):
             multiplier = multiplier + 1
-            sleepTime = int(self.validTime) + (multiplier * int(self.lateCycle))
+            proposedSleepTime = int(self.validTime) + (multiplier * int(self.lateCycle))
+            proposedSleepTime = proposedSleepTime - int(currentTime.minute)
+
         else:
-            #-----------------------------------------------------------------------------------------
-            # Sleep only between now and when we need to wake up
-            #-----------------------------------------------------------------------------------------
-            sleepTime = sleepTime - int(currentTime.minute)
-
-            print "startTime was: ",self.startDateTime
-            print "currentTime: ",currentTime
-            print "sleepTime: ",sleepTime
-
+            
+            self.logger.info("REMOVEME: startTime was: %s"%self.startDateTime)
+            self.logger.info("REMOVEME: currentTime: %s"%currentTime)
+           
             #-----------------------------------------------------------------------------------------
             # Return sleep Time in seconds
             #-----------------------------------------------------------------------------------------
-            return sleepTime * 60
+            return proposedSleepTime * 60
 
     
     def sleepUntil(self,secondsToSleep):
@@ -510,7 +520,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             This method is responsible for sleeping until the
             next wakeup.
         """
-        print"REMOVEME: Going to sleep for: ",secondsToSleep,"seconds"
+        self.logger.info("REMOVEME: Going to sleep for: %s seconds"%secondsToSleep)
         #-----------------------------------------------------------------------------------------
         # Sleeping for the required abount of time
         #-----------------------------------------------------------------------------------------
