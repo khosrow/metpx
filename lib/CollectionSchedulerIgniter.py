@@ -24,7 +24,14 @@ sys.path.insert(1,sys.path[0] + '/../lib/importedLibs')
 from Logger import Logger
 import CollectionConfigParser
 import CollectionScheduler
+import time
 
+#-----------------------------------------------------------------------------------------
+# Global vars
+#-----------------------------------------------------------------------------------------
+False = ''
+True = 'True'
+stopRequested = False
 
 class CollectionSchedulerIgniter(object):
     """The CollectionSchedulerIgniter class
@@ -39,26 +46,58 @@ class CollectionSchedulerIgniter(object):
     """
     
 
-    def __init__(self, source, logger=None):
+    def __init__(self, source, logger):
         self.logger = logger   # Logger object
         self.source = source
+        self.True = 'True'
+        self.False = ''
 
         #-----------------------------------------------------------------------------------------
-        # Create the config parser. That is where we'll find out the details needed to create 
-        # CollectionSchedulers
+        # Create the config parser and get a list of our children
         #-----------------------------------------------------------------------------------------
         self.collectionConfig = CollectionConfigParser.CollectionConfigParser(self.logger,self.source)
+        self.listOfChildren = self.collectionConfig.getListOfTypes()
 
-        
+        #-----------------------------------------------------------------------------------------
+        # Installing signal handler to catch the Igniter's stop() signal
+        #-----------------------------------------------------------------------------------------
+        signal.signal(signal.SIGTERM, self._stopRequested)
+
+
+    def _stopRequested(self, sig, stack):
+        """ _stopRequested()
+
+            This method will signal to the children that they need to terminate
+            themselves because a 'stop' has been issued.  This method will then
+            terminate the parent (this process).
+        """
+        global stopRequested
+
+        #-----------------------------------------------------------------------------------------
+        # Code to indicate a 'stop' to the children
+        #-----------------------------------------------------------------------------------------
+        stopRequested = True
+        sys.exit()
+
+
     def run(self):
         """ run(self)
             start a CollectionScheduler for each of the report types (SA, SI, SM)
         """
-        for type in (self.collectionConfig.getListOfTypes()):
+        True = 'True'
+        print"CollSchedIgniter up and running. My pid is: ",os.getpid()
+        for childType in (self.listOfChildren):
             #-----------------------------------------------------------------------------------------
-            # Launching a thread to handle the collection of each type
+            # Launching a child thread for each collection type
             #-----------------------------------------------------------------------------------------
-            CollectionScheduler.CollectionScheduler(self.logger,self.collectionConfig,type).start()
+            newThread = CollectionScheduler.CollectionScheduler(self.logger,self.collectionConfig, childType)
+            newThread.start()
+            
+        #-----------------------------------------------------------------------------------------
+        # newThread.join() won't work, so Sleep Forever and wait to catch stop requests
+        #-----------------------------------------------------------------------------------------
+        while (True):
+            time.sleep(86400)
 
 
 if __name__ == '__main__':
