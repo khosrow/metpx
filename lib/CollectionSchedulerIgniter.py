@@ -25,6 +25,7 @@ from Logger import Logger
 import CollectionConfigParser
 import CollectionScheduler
 import time
+import PXIgniter
 
 #-----------------------------------------------------------------------------------------
 # Global vars
@@ -51,6 +52,7 @@ class CollectionSchedulerIgniter(object):
         self.source = source
         self.True = 'True'
         self.False = ''
+        self.children = []
 
         #-----------------------------------------------------------------------------------------
         # Create the config parser and get a list of our children
@@ -59,9 +61,11 @@ class CollectionSchedulerIgniter(object):
         self.listOfChildren = self.collectionConfig.getListOfTypes()
 
         #-----------------------------------------------------------------------------------------
-        # Installing signal handler to catch the Igniter's stop() signal
+        # Recording old handler for SIGTERM and intercepting it to listen for the 'stop' command
         #-----------------------------------------------------------------------------------------
+        self.oldHandler = signal.getsignal(signal.SIGTERM)
         signal.signal(signal.SIGTERM, self._stopRequested)
+
 
 
     def _stopRequested(self, sig, stack):
@@ -69,16 +73,25 @@ class CollectionSchedulerIgniter(object):
 
             This method will signal to the children that they need to terminate
             themselves because a 'stop' has been issued.  This method will then
-            terminate the parent (this process).
+            re-instate the previous handler and send SIGTERM back to the process
+            (this PID).
         """
         global stopRequested
 
         #-----------------------------------------------------------------------------------------
-        # Code to indicate a 'stop' to the children
+        # Code to indicate a 'stop' to the children and wait for them to terminate
         #-----------------------------------------------------------------------------------------
         stopRequested = True
-        sys.exit()
+        for child in self.children:
+            child.join()
 
+        #-----------------------------------------------------------------------------------------
+        # Re-instate the original handler and re-propagate the signal.  This will cause
+        # the PXIgniter kill this process with a SIGKILL
+        #-----------------------------------------------------------------------------------------
+        signal.signal(signal.SIGTERM,self.oldHandler)
+        os.kill(os.getpid(), signal.SIGTERM)
+        sys.exit()
 
     def run(self):
         """ run(self)
@@ -92,7 +105,8 @@ class CollectionSchedulerIgniter(object):
             #-----------------------------------------------------------------------------------------
             newThread = CollectionScheduler.CollectionScheduler(self.logger,self.collectionConfig, childType)
             newThread.start()
-            
+            self.children.append(newThread)
+
         #-----------------------------------------------------------------------------------------
         # newThread.join() won't work, so Sleep Forever and wait to catch stop requests
         #-----------------------------------------------------------------------------------------
