@@ -19,15 +19,16 @@
 """
 __version__ = '1.0'
 
+import CollectionSchedulerIgniter
 import bulletinManager
 import gateway
 import datetime
 import os
+import sys
 import threading
 import PXPaths 
 import CollectionBuilder
 import BulletinWriter
-import sys
 import time
 
 PXPaths.normalPaths()
@@ -45,14 +46,13 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         Author:      National Software Development<nssib@ec.gc.ca>
         Date:        January 2006
     """
-
     def __init__(self, logger,collectionConfig,idType):
         
         threading.Thread.__init__(self)
         self.logger = logger
         self.collectionConfig = collectionConfig
         self.idType = idType
-
+        
         #-----------------------------------------------------------------------------------------
         # Getting the particular config params for this idType
         #-----------------------------------------------------------------------------------------
@@ -86,7 +86,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         # Instantiate a bulletinManager for us to use for collection bulletin transmission
         #-----------------------------------------------------------------------------------------
         self.unBulletinManager = bulletinManager.bulletinManager( 
-                     PXPaths.RXQ + collectionConfig.source.name, logger, \
+                     PXPaths.RXQ + collectionConfig.source.name, self.logger, \
                      pathDest = '/apps/pds/RAW/-PRIORITY', \
                      pathFichierCircuit = '/dev/null', \
                      extension = collectionConfig.source.extension, \
@@ -99,7 +99,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         #-----------------------------------------------------------------------------------------
         self.startDateTime = ''
 
-
+        
     def run(self):
         """ run()
 
@@ -113,13 +113,19 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         # Live forever..until you're told to die!
         #-----------------------------------------------------------------------------------------
         while (True):
-
+        
             self.logger.info("\nREMOVEME: This is scheduler type: %s reporting in. My rootDir is: %s"%(self.idType,self.myRootDir))
             self.logger.info("REMOVEME: self.validTime: %s" %self.validTime)
-            self.logger.info("REMOVEME: self.lateCycle: %s"% self.lateCycle) 
-            self.logger.info("REMOVEME: self.timeToLive: %s"% self.timeToLive) 
-            self.logger.info("REMOVEME: My pid is: ",os.getpid())
-        
+            self.logger.info("REMOVEME: self.lateCycle: %s" %self.lateCycle) 
+            self.logger.info("REMOVEME: self.timeToLive: %s" %self.timeToLive) 
+            self.logger.info("REMOVEME: My pid is: %s" %os.getpid())
+            self.logger.info("REMOVEME: stop flag is: %s" %CollectionSchedulerIgniter.stopRequested)
+
+            #-----------------------------------------------------------------------------------------
+            # Check to see if we've been requested to stop and stop if necessary
+            #-----------------------------------------------------------------------------------------
+            self.checkStopReqeustStatus()
+
             #-----------------------------------------------------------------------------------------
             # Get wakeup time (now)
             #-----------------------------------------------------------------------------------------
@@ -239,7 +245,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             for dir in dirs:
                 if (dir.startswith(directory) and not (dir.endswith(self.sentToken) or
                                                        dir.endswith(self.busyToken))):
-                    self.logger.info("REMOVEME: Found dir and returning:",os.path.join(root,dir))
+                    self.logger.info("REMOVEME: Found dir and returning: %s" %os.path.join(root,dir))
                     return os.path.join(root,dir)
         return False
 
@@ -514,68 +520,70 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             return proposedSleepTime * 60
 
     
-    def sleepUntil(self,secondsToSleep):
+    def sleepUntil(self,secondsToldToSleep):
         """ sleepUntil()
 
-            This method is responsible for sleeping until the
-            next wakeup.
+            This method receives the number of seconds to sleep
+            and is responsible for sleeping that time while 
+            checking every once in a while to see if a stop has
+            been requested.
         """
-        self.logger.info("REMOVEME: Going to sleep for: %s seconds"%secondsToSleep)
         #-----------------------------------------------------------------------------------------
-        # Sleeping for the required abount of time
+        # This is how ofter we check to see if a stop has been requested
         #-----------------------------------------------------------------------------------------
-        time.sleep(secondsToSleep)
+        stopReqestCheckInterval = 2
+
+        self.logger.info("REMOVEME: Told to sleep for: %s seconds"%secondsToldToSleep)
+        self.logger.info("REMOVEME: stopReqestCheckInterval: %s seconds"%stopReqestCheckInterval)
 
         #-----------------------------------------------------------------------------------------
-        # COMPLETEME
+        # Don't sleep more than what's required
         #-----------------------------------------------------------------------------------------
-        
+        secondsToSleep = min(secondsToldToSleep,stopReqestCheckInterval)
 
+        while (secondsToSleep> 0):
+            
+            #-----------------------------------------------------------------------------------------
+            # Check to see if we've been requested to stop and stop if necessary
+            #-----------------------------------------------------------------------------------------
+            self.checkStopReqeustStatus()
 
+            #-----------------------------------------------------------------------------------------
+            # Sleeping the minimum
+            #-----------------------------------------------------------------------------------------
+            time.sleep(secondsToSleep)
 
+            #-----------------------------------------------------------------------------------------
+            # recalc seconds to sleep
+            #-----------------------------------------------------------------------------------------
+            secondsToldToSleep = secondsToldToSleep - secondsToSleep
+            secondsToSleep = min(secondsToldToSleep,stopReqestCheckInterval)
 
+            
+    def checkStopReqeustStatus(self):
+        """ checkStopReqeustStatus()
 
+            This method checks to see if the parent has asked us to stop.
+            If so, cleanup and exit.
+        """
+        #-----------------------------------------------------------------------------------------
+        # Stop if necessary
+        #-----------------------------------------------------------------------------------------
+        if(CollectionSchedulerIgniter.stopRequested):
+            self.cleanupAndExit()
 
+    def cleanupAndExit(self):
+        """ cleanupAndExit()
 
-     ####################################################################################
+            This mehod makes sure that we release the semaphore and
+            perform other cleanup taks and terminates this thread.
+        """
+        print"I'm: %s and I'm in cleanupAndExit()"%self.idType  
+        #-----------------------------------------------------------------------------------------
+        # Since the semaphore is locked only when we're preparing collections, we
+        # can exit here without performing any particular semaphore cleanup tasks
+        #-----------------------------------------------------------------------------------------
+        sys.exit()
 
-
-
-
-
-
-    def reloadConfig(self):
-        self.logger.info('Demande de rechargement de configuration')
-
-        try:
-
-            newConfig = gateway.gateway.loadConfig(self.pathToConfigFile)
-
-            ficCircuits = newConfig.ficCircuits
-            ficCollection = newConfig.ficCollection
-
-            # Reload du fichier de circuits
-            # -----------------------------
-            self.unBulletinManager.reloadMapCircuit(ficCircuits)
-
-            self.config.ficCircuits = ficCircuits
-
-            # Reload du fichier de stations
-            # -----------------------------
-            self.unBulletinManager.reloadMapEntetes(ficCollection)
-
-            self.config.ficCollection = ficCollection
-
-            self.logger.info('Succès du rechargement de la config')
-
-        except Exception, e:
-
-            self.logger.error('Échec du rechargement de la config!')
-
-            self.logger.debug("Erreur: %s", str(e.args))
-        
-    
-    
-    
 
 
