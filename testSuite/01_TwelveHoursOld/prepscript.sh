@@ -4,7 +4,7 @@
 
 # edit the first test file:
 NUM_HOURS_OLD=12
-INPUTDIR="/apps/px/test/04TwelveHoursOld/input"
+INPUTDIR=`pwd`/input
 
 # for each file in the inputdir,
 for bulletin in `ls $INPUTDIR`
@@ -18,5 +18,5 @@ do
    NEWDATE=`date -d "-$NUM_HOURS_OLD hour" +%d%H%M`
    #echo "NEWDATE is: $NEWDATE"
    
-   /apps/px/test/_searchAndChangeInFiles.sh "$INPUTDIR" $bulletin $OLDDATE $NEWDATE
+   ../_searchAndChangeInFiles.sh "$INPUTDIR" $bulletin $OLDDATE $NEWDATE
 done
