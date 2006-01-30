@@ -411,66 +411,41 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             exceeded the time-to-live value
 
         """
+        dirAge = self.startDateTime - self.timeToLive
         #-----------------------------------------------------------------------------------------
         # Clean myRootDir (/apps/px/collection/<idType>)
         #-----------------------------------------------------------------------------------------
-        dirAge = self.startDateTime - self.timeToLive
-        oldDirFound = self.findDirOlderThan(self.myRootDir,dirAge)
-        while (oldDirFound):
-
-            #-----------------------------------------------------------------------------------------
-            # Remove found dir
-            #-----------------------------------------------------------------------------------------
-            self.collectionWriter.removeDirTree(oldDirFound)
-
-            #-----------------------------------------------------------------------------------------
-            # Look for next old dir
-            #-----------------------------------------------------------------------------------------
-            oldDirFound = self.findDirOlderThan(self.myRootDir,dirAge)
-
+        self.findAndRemoveDirOlderThan(self.myRootDir,dirAge)
+                           
         #-----------------------------------------------------------------------------------------
         # Clean control dir (/apps/px/collection/control/<idType>)
         #-----------------------------------------------------------------------------------------
-        oldDirFound = self.findDirOlderThan(self.myControlDir,dirAge)
-        while (oldDirFound):
-
-            #-----------------------------------------------------------------------------------------
-            # Remove found dir
-            #-----------------------------------------------------------------------------------------
-            self.collectionWriter.removeDirTree(oldDirFound)
-
-            #-----------------------------------------------------------------------------------------
-            # Look for next old dir
-            #-----------------------------------------------------------------------------------------
-            oldDirFound = self.findDirOlderThan(self.myControlDir,dirAge)
+        self.findAndRemoveDirOlderThan(self.myControlDir,dirAge)
             
 
-    def findDirOlderThan (self,searchPath, dateTimeValue):
-        """ findDirOlderThan(searchPath, directory) -> Boolean
+    def findAndRemoveDirOlderThan (self,searchPath, dateTimeValue):
+        """ findAndRemoveDirOlderThan(searchPath, directory) -> Boolean
 
             searchPath      string      The root path of the search
 
             dateTimeValue   datetime    A datetime value used for 
                                         comparison
             
-            This method returns the path of the first directory under 
-            the 'searchPath' sub-tree which is older than dateTimeValue.
-            False is returned if no match is found.
+            This method searches starting from 'searchPath' and removes
+            all directories which are older than dateTimeValue.
         """
-        False = ''
         dateTimeValue = dateTimeValue.timetuple()
         for root, dirs, files in os.walk(searchPath):
             for dir in dirs:
                 dirModTime = os.stat(os.path.join(root,dir))
                 dirModTime = time.localtime(dirModTime.st_mtime)
-                
+
                 #-----------------------------------------------------------------------------------------
-                # Returning dirs older than Time To Live
+                # Removing dirs which are found to be older than Time To Live
                 #-----------------------------------------------------------------------------------------
                 if(dirModTime <= dateTimeValue):
-                    return os.path.join(root,dir)
-        return False
-        
+                    self.collectionWriter.removeDirTree(os.path.join(root,dir))
+
 
     def calculateSleepTime(self):
         """ calculateSleepTime() -> Time in seconds
