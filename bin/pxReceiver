@@ -29,6 +29,7 @@ from Logger import Logger
 from Source import Source
 from PXIgniter import PXIgniter
 
+
 # Initialize PX Paths
 PXPaths.normalPaths()
 
@@ -113,11 +114,9 @@ example 2: %prog start       => will start all sources
         igniter.setGateway('DUMMY')
         source.ingestor.ingestBulletinFile(igniter)
     elif source.type == 'collector':
-        #-----------------------------------------------------------
-        # COMPLETEME: CollectionScheduler of type 'collector'
-        # goes here.
-        #-----------------------------------------------------------
-        pass
+        igniter.setGateway('DUMMY')
+        import CollectionSchedulerIgniter
+        gateway = CollectionSchedulerIgniter.CollectionSchedulerIgniter(source, logger)
     else:
         raise Exception('Unknown type') 
 
