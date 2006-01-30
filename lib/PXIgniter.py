@@ -145,7 +145,7 @@ class PXIgniter(Igniter):
                self.reloadMode = True
             if self.type == 'collector':
                #self.gateway.reloadConfig()
-               print "Reload for collector not implemented yet"
+               print "** Please restart the collectionScheduler."
       
    def reload(self):
       """
