@@ -2,7 +2,7 @@
 # prepare input files
 ./prepscript.sh
 
-/apps/am/bin/amxmit input/*
+/apps/am/bin/amxmit input/S*
 
 
 
