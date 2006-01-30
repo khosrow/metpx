@@ -149,7 +149,7 @@ class BulletinWriter:
         # create the BBB_Busy directory path 
         #-----------------------------------------------------------------------------------------
         bulletinPath = bulletinPath + busyTag
-        print"REMOVEME: Marking dir busy:",bulletinPath
+        #print"REMOVEME: Marking dir busy:",bulletinPath
         if not(self._doesCollectionExist(bulletinPath)):
             os.makedirs(bulletinPath)
         else:
@@ -178,7 +178,7 @@ class BulletinWriter:
         #-----------------------------------------------------------------------------------------
         # Empty BBB means that we're dealing with an on-time dir
         #-----------------------------------------------------------------------------------------
-        print"REMOVEME: BBB is:",BBB.strip()
+        #print"REMOVEME: BBB is:",BBB.strip()
         if not (BBB.strip()):
             collectionType = collectionBulletin.getTwoLetterType()
             collectionValidTime = self.collectionConfigParser.getReportValidTimeByHeader(collectionType)
@@ -189,7 +189,7 @@ class BulletinWriter:
         # (/apps/px/collection/SA/041200/CYOW/SACNxx/CCA_sent)
         #-----------------------------------------------------------------------------------------
         newDirName =  "%s%s" % (oldDirName,self.collectionConfigParser.getSentCollectionToken()) 
-        print "REMOVEME: Marking dirs as sent.  Renaming from: ",oldDirName, "To:",newDirName
+        #print "REMOVEME: Marking dirs as sent.  Renaming from: ",oldDirName, "To:",newDirName
         #-----------------------------------------------------------------------------------------
         # Making sure that we don't try to rename a non-existent directory.  If old dir exists and
         # the new one doesn't exist, then rename it to the new name.  Otherwise if the new dir 
@@ -468,7 +468,7 @@ class BulletinWriter:
         # Produce time objects needed for comparisons.
         #-----------------------------------------------------------------------------------------
         initialTime = datetime.datetime.now()
-        print"REMOVEME:Looking for lock:",dirPath
+        #print"REMOVEME:Looking for lock:",dirPath
         #-----------------------------------------------------------------------------------------
         # While the SACNxx dir exists, we will consider it locked
         #-----------------------------------------------------------------------------------------
@@ -482,7 +482,7 @@ class BulletinWriter:
                         self.removeDirTree(dirPath)  
                         break
                     else:
-                        print"REMOVEME: elapsedTime is: %s, Not yet exceeded max wait. Continue to wait"%elapsedTime.seconds
+                        #print"REMOVEME: elapsedTime is: %s, Not yet exceeded max wait. Continue to wait"%elapsedTime.seconds
                         continue
                 else:
                     break
@@ -536,5 +536,5 @@ class BulletinWriter:
             all errors that my be reported.
         """
         ignoreErrors = 'True'
-        print ("REMOVEME: Removing: %s"%dirTree)
+        #self.logger.info("Removing directory: %s" %dirTree)
         shutil.rmtree(dirTree,ignoreErrors)

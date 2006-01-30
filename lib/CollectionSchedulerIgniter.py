@@ -98,7 +98,7 @@ class CollectionSchedulerIgniter(object):
             start a CollectionScheduler for each of the report types (SA, SI, SM)
         """
         True = 'True'
-        print"CollSchedIgniter up and running. My pid is: ",os.getpid()
+        #print"CollSchedIgniter up and running. My pid is: ",os.getpid()
         for childType in (self.listOfChildren):
             #-----------------------------------------------------------------------------------------
             # Launching a child thread for each collection type

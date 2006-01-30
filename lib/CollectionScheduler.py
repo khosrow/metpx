@@ -114,12 +114,12 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         #-----------------------------------------------------------------------------------------
         while (True):
         
-            self.logger.info("\nREMOVEME: This is scheduler type: %s reporting in. My rootDir is: %s"%(self.idType,self.myRootDir))
-            self.logger.info("REMOVEME: self.validTime: %s" %self.validTime)
-            self.logger.info("REMOVEME: self.lateCycle: %s" %self.lateCycle) 
-            self.logger.info("REMOVEME: self.timeToLive: %s" %self.timeToLive) 
-            self.logger.info("REMOVEME: My pid is: %s" %os.getpid())
-            self.logger.info("REMOVEME: stop flag is: %s" %CollectionSchedulerIgniter.stopRequested)
+            self.logger.info("Collector: %s waking up." %self.idType)
+            #self.logger.info("REMOVEME: self.validTime: %s" %self.validTime)
+            #self.logger.info("REMOVEME: self.lateCycle: %s" %self.lateCycle) 
+            #self.logger.info("REMOVEME: self.timeToLive: %s" %self.timeToLive) 
+            #self.logger.info("REMOVEME: My pid is: %s" %os.getpid())
+            #self.logger.info("REMOVEME: stop flag is: %s" %CollectionSchedulerIgniter.stopRequested)
 
             #-----------------------------------------------------------------------------------------
             # Check to see if we've been requested to stop and stop if necessary
@@ -134,19 +134,19 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             #-----------------------------------------------------------------------------------------
             # Send this hour's on-time collection if not already sent
             #-----------------------------------------------------------------------------------------
-            self.logger.info("REMOVEME: Sending on-time collections")
+            self.logger.info("Collector: %s searching for on-time collections to send" %self.idType)
             self.sendThisHoursOnTimeCollections()
 
             #-----------------------------------------------------------------------------------------
             # Find out if we should send this cycle's collection or not
             #-----------------------------------------------------------------------------------------
-            self.logger.info("REMOVEME: Sending late collections")
+            self.logger.info("Collector: %s searching for late collections to send" %self.idType)
             self.sendLateCollections()
 
             #-----------------------------------------------------------------------------------------
             # Cleanup old directories and files under the /apps/px/collection sub-tree
             #-----------------------------------------------------------------------------------------
-            self.logger.info("REMOVEME: Beginning old directory purge")
+            self.logger.info("Collector: %s Searching for old directories to remove" %self.idType)
             self.purgeOldDirsAndFiles()
             
             #-----------------------------------------------------------------------------------------
@@ -239,13 +239,13 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             False is returned if no match is found.
         """
         False = ''
-        self.logger.info("REMOVEME: Searching for dir: %s in: %s"%(directory,searchPath)) 
+        #self.logger.info("REMOVEME: Searching for dir: %s in: %s"%(directory,searchPath)) 
          
         for root, dirs, files in os.walk(searchPath):
             for dir in dirs:
                 if (dir.startswith(directory) and not (dir.endswith(self.sentToken) or
                                                        dir.endswith(self.busyToken))):
-                    self.logger.info("REMOVEME: Found dir and returning: %s" %os.path.join(root,dir))
+                    #self.logger.info("REMOVEME: Found dir and returning: %s" %os.path.join(root,dir))
                     return os.path.join(root,dir)
         return False
 
@@ -511,8 +511,8 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
 
         else:
             
-            self.logger.info("REMOVEME: startTime was: %s"%self.startDateTime)
-            self.logger.info("REMOVEME: currentTime: %s"%currentTime)
+            #self.logger.info("REMOVEME: startTime was: %s"%self.startDateTime)
+            #self.logger.info("REMOVEME: currentTime: %s"%currentTime)
            
             #-----------------------------------------------------------------------------------------
             # Return sleep Time in seconds
@@ -533,8 +533,8 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         #-----------------------------------------------------------------------------------------
         stopReqestCheckInterval = 2
 
-        self.logger.info("REMOVEME: Told to sleep for: %s seconds"%secondsToldToSleep)
-        self.logger.info("REMOVEME: stopReqestCheckInterval: %s seconds"%stopReqestCheckInterval)
+        self.logger.info("Collector: %s sleeping for: %s seconds" %(self.idType,secondsToldToSleep))
+        #self.logger.info("REMOVEME: stopReqestCheckInterval: %s seconds"%stopReqestCheckInterval)
 
         #-----------------------------------------------------------------------------------------
         # Don't sleep more than what's required
@@ -578,9 +578,9 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             This mehod makes sure that we release the semaphore and
             perform other cleanup taks and terminates this thread.
         """
-        print"I'm: %s and I'm in cleanupAndExit()"%self.idType  
+        self.logger.info("Collector thread: %s exiting." %self.idType)
+
         #-----------------------------------------------------------------------------------------
-        # Since the semaphore is locked only when we're preparing collections, we
         # can exit here without performing any particular semaphore cleanup tasks
         #-----------------------------------------------------------------------------------------
         sys.exit()

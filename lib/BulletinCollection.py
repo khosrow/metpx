@@ -288,7 +288,7 @@ class BulletinCollection(bulletin.bulletin):
             newHeader = headerTokens[0]+' '+headerTokens[1]+' '+headerTokens[2]+' '+BBB
             self.setHeader(newHeader.strip())
 
-        print "REMOVEME: Modified the collection's bbb. New HDR is: ",self.getHeader()
+        #print "REMOVEME: Modified the collection's bbb. New HDR is: ",self.getHeader()
         
 
     def buildImmediateCollectionFromReport(self):
@@ -348,4 +348,4 @@ class BulletinCollection(bulletin.bulletin):
             newHeader = " ".join(newHeader)
             self.setHeader(newHeader.strip())
 
-        print "REMOVEME: Modified the collection's timeStamp. New HDR is: ",self.getHeader()
+        #print "REMOVEME: Modified the collection's timeStamp. New HDR is: ",self.getHeader()

@@ -43,7 +43,7 @@ class CollectionManager(object):
     
 
     def __init__(self, source, logger=None):
-        self.source = source   # Source object containing configuration infos about the collector
+        self.source = source   # Source object containing configuration info about the collector
         self.logger = logger   # Logger object
 
         #-----------------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ class CollectionManager(object):
         # use collectionBuilder to create a bulletin object from the given file
         #-----------------------------------------------------------------------------------------
         self.bulletin = self.collectionBuilder.buildBulletinFromFile(fileName)
-        print "\nREMOVEME: The incoming report: ",self.bulletin.bulletin
+        #print "\nREMOVEME: The incoming report: ",self.bulletin.bulletin
         
         #-----------------------------------------------------------------------------------------
         # If the report was on-time, write the report bulletin to disk.  No mutex is needed because
@@ -120,7 +120,8 @@ class CollectionManager(object):
                 # for immediate transmission
                 #-----------------------------------------------------------------------------------------
                 newCollectionBulletin = self.bulletin.buildImmediateCollectionFromReport()
-                print "REMOVEME: Returning 24HR collection for xmission: ",newCollectionBulletin.bulletinAsString()
+                #print "REMOVEME: Returning 24HR collection for xmission: ",newCollectionBulletin.bulletinAsString()
+                self.logger.info("Returning 24HR collection for xmission: %s" %newCollectionBulletin.bulletinAsString())
                 return newCollectionBulletin
 
             else:
@@ -137,7 +138,7 @@ class CollectionManager(object):
                 dirToLock = self.bulletinWriter.calculateBulletinDir(self.bulletin.getTwoLetterType(), \
                                                      self.bulletin.getTimeStampWithMinsSetToZero(), \
                                                      self.bulletin.getOrigin(), self.bulletin.getFullType())
-                print"REMOVEME: Locking sem to check for B3. Locking:",dirToLock
+                #print"REMOVEME: Locking sem to check for B3. Locking:",dirToLock
                 key = self.bulletinWriter.lockDirBranch(dirToLock)
 
                 #-----------------------------------------------------------------------------------------
@@ -170,7 +171,7 @@ class CollectionManager(object):
                 # Unlocking semaphore
                 #-----------------------------------------------------------------------------------------
                 self.bulletinWriter.unlockDirBranch(key)
-                print "REMOVEME: The collection's BBB is now set to: ", self.bulletin.getCollectionBBB()
+                #print "REMOVEME: The collection's BBB is now set to: ", self.bulletin.getCollectionBBB()
                 #-----------------------------------------------------------------------------------------
                 # At this point all collection worthy report bulletins have been written to disk.
                 # Now we need to know which are immediate and which are scheduled.  Reports with BBB 
@@ -185,7 +186,8 @@ class CollectionManager(object):
                     # for immediate transmission
                     #-----------------------------------------------------------------------------------------
                     newCollectionBulletin = self.bulletin.buildImmediateCollectionFromReport()
-                    print "REMOVEME: Returning collection for xmission: ",newCollectionBulletin.bulletinAsString()
+                    #print "REMOVEME: Returning collection for xmission: ",newCollectionBulletin.bulletinAsString()
+                    self.logger.info("REMOVEME: Returning collection for xmission: %s" %newCollectionBulletin.bulletinAsString())
                     return newCollectionBulletin
 
         
