@@ -199,7 +199,7 @@ if __name__ == "__main__":
     # the message are longer than maxSize. This is not representing a realistic
     # case where in practice a line will never be longer than the maxSize.
 
-    maxSize = 25 
+    maxSize = 10000
     alignment = '/r/n'
     overhead = 5 
 
@@ -216,8 +216,9 @@ DL
 
     splitter = TextSplitter(text, maxSize, alignment, overhead)
     print splitter.getLines()
-    splitter.breakLongText()
+    blocks = splitter.breakLongText()
+    print blocks
 
-    for line in splitter.getBlocks():
-        print line, len(line)
+    #for line in splitter.getBlocks():
+    #    print line, len(line)
         
