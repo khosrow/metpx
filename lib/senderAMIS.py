@@ -81,6 +81,7 @@ class senderAMIS:
       pass
 
    def read(self):
+      """
       if self.igniter.reloadMode == True:
          # We assign the defaults and reread the configuration file (in __init__)
          self.client.__init__(self.client.name, self.client.logger)
@@ -89,6 +90,7 @@ class senderAMIS:
          self.logger.info("Cache has been cleared")
          self.logger.info("Sender AMIS has been reloaded")
          self.igniter.reloadMode = False
+      """
       self.reader.read()
       return self.reader.getFilesContent(self.client.batch)
 
@@ -187,4 +189,15 @@ class senderAMIS:
          #time.sleep(0.2)
 
 if __name__ == "__main__":
-   sender = senderAMIS("cisco-test.test.cmc.ec.gc.ca", 4001)
+   from Logger import Logger
+   from Client import Client
+
+   logger = Logger('/apps/px/log/amisTEST_DL.log', 'DEBUG', 'amisTEST_DL')
+   logger = logger.getLogger()
+
+   client = Client('amisTEST_DL', logger)
+   #receiver = "cisco-test.test.cmc.ec.gc.ca"
+   #port = 4001
+   #sender = senderAMIS("cisco-test.test.cmc.ec.gc.ca", 4001)
+   sender = senderAMIS(client, logger)
+   sender.run()
