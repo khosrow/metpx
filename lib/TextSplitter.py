@@ -199,8 +199,8 @@ if __name__ == "__main__":
     # the message are longer than maxSize. This is not representing a realistic
     # case where in practice a line will never be longer than the maxSize.
 
-    maxSize = 10000
-    alignment = '/r/n'
+    maxSize = 1800
+    alignment = '\r\n'
     overhead = 5 
 
     text = """
@@ -213,11 +213,18 @@ l'essai immediatement.
 
 DL
 """
-
+   
+    file = open('/apps/px/toSendAFTN/canada_warnings.xml:wxo-b1.cmc.ec.gc.ca:WEATHEROFFICE:WXO_WARNING:1:XML:20060106233004', 'r')
+    text = file.read()
     splitter = TextSplitter(text, maxSize, alignment, overhead)
-    print splitter.getLines()
+    #print splitter.getLines()
     blocks = splitter.breakLongText()
-    print blocks
+    i = 1 
+    for block in blocks:
+        print("*********** Begining of block #%s**********" % i)
+        print block[:20]
+        print("*********** End of block #%s**********" % i)
+        i +=1
 
     #for line in splitter.getBlocks():
     #    print line, len(line)
