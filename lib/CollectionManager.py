@@ -187,7 +187,7 @@ class CollectionManager(object):
                     #-----------------------------------------------------------------------------------------
                     newCollectionBulletin = self.bulletin.buildImmediateCollectionFromReport()
                     #print "REMOVEME: Returning collection for xmission: ",newCollectionBulletin.bulletinAsString()
-                    self.logger.info("REMOVEME: Returning collection for xmission: %s" %newCollectionBulletin.bulletinAsString())
+                    self.logger.info("Returning collection for xmission: %s" %newCollectionBulletin.bulletinAsString())
                     return newCollectionBulletin
 
         

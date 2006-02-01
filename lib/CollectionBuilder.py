@@ -98,7 +98,7 @@ class CollectionBuilder:
         """ stripCollection() -> :BulletinCollection
 
             This method removes newlines from the collection's bulletin
-            list.    print"\nREMOVEME: found %s spaces",aCollection.bulletin.count('')
+            list.    
         """
         while (aCollection.bulletin.count('')):
             aCollection.bulletin.remove('')
