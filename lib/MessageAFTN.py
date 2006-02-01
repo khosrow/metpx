@@ -29,28 +29,32 @@ class MessageAFTN:
     <VT><ETX>                                                    <-- End of message signal
 
     """
-
     DEBUG = 1
     MAX_TOTAL_SIZE = 2100 # Total printable and non-printable character count
                           # (header + text + ender) shall not exceed 2100 char.
     MAX_TEXT_SIZE = 1800  # Text portion must not exceed 1800 characters including spacing
-    END_OF_MESSAGE = chr(curses.ascii.VT) + chr(curses.ascii.ETX) # <VT><ETX>
+    MAX_TOTAL_OVERHEAD = MAX_TOTAL_SIZE - MAX_TEXT_SIZE  # <SOH> .... <VTX><ETX>
+    TEXT_SPECIFIC_OVERHEAD = 5 # <STX(1)>...<VTX(2)><ETX(3)> (Maybe a <CR(4)><LF(5)> on the last line of text)
 
-    def __init__(self, text=None, stationID=None, originatorAddress=None, priority=None, destAddress=[],
+    PRIORITIES = ["SS", "DD", "FF", "GG", "KK"]                   # Priority indicators
+    END_OF_MESSAGE = chr(curses.ascii.VT) + chr(curses.ascii.ETX) # <VT><ETX>
+    ALIGNMENT = chr(curses.ascii.CR) + chr(curses.ascii.LF)       # <CR><LF>
+    SOH = chr(curses.ascii.SOH)
+    STX = chr(curses.ascii.STX)
+    ETX = chr(curses.ascii.ETX)
+    ACK = chr(curses.ascii.ACK)
+
+    # For TEXT portion of the AFTN message, use only the following CAPITALIZED characters, numerals and signs
+    TEXT_CHARS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+                  'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+                  '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                  '-', '?', ':', '(', ')', '.', ',', "'", '=', '/', '+', '"']
+
+    def __init__(self, logger, text=None, stationID=None, originatorAddress=None, priority=None, destAddress=[],
                  CSN=None, filingTime=None, dateTime=None):
 
-        self.SOH = chr(curses.ascii.SOH)
-        self.STX = chr(curses.ascii.STX)
-        self.ALIGNMENT = chr(curses.ascii.CR) + chr(curses.ascii.LF)       # <CR><LF>
-        self.PRIORITIES = ["SS", "DD", "FF", "GG", "KK"]                   # Priority indicators
-        self.CSN_START = 1
-        self.CSN_MAX = 10000
-
-        # For TEXT portion of the AFTN message, use only the following CAPITALIZED characters, numerals and signs
-        self.TEXT_CHARS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-                           'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-                           '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-                           '-', '?', ':', '(', ')', '.', ',', "'", '=', '/', '+', '"']
+        # The logger object
+        self.logger = logger
 
         self.header = None              # Heading line, Destination address line, Origin address line
 
@@ -99,6 +103,12 @@ class MessageAFTN:
 
         if priority:
             self.message = self.createMessage()
+
+    def getTransmitID(self):
+        return self.transmitID
+
+    def getName(self):
+        return "%s_%s_%s" % (self.dateTime, self.stationID, self.CSN)
 
     def positionOfEndOfMessage(text, END_OF_MESSAGE=END_OF_MESSAGE):
         return text.find(END_OF_MESSAGE)
@@ -155,30 +165,41 @@ class MessageAFTN:
         print "*********************************** Fin (Message) *********************************"
         print "\n"
 
+    def setMessage(self, message):
+        self.message = message
+
     def setText(self, textString):
         self.textLines = textString.splitlines()
 
-    def getText(self):
-        pass
+    def getTextLines(self):
+        return self.textLines
 
     def messageToValues(self):
         self.messageLines = self.message.splitlines()
         if self._parseHeadingLine(self.messageLines[0]):
             if self._parseDestinationAddressLine(self.messageLines[1]):
                 if self._parseOriginAddressLine(self.messageLines[2]):
-                    self._parseText()
-                    return 1
+                    if self._parseText():
+                        return 1
         return 0
 
     def _parseHeadingLine(self, line):
-        if line[0] == self.SOH and line[1] == ' ' and len(line) == 18:
+        if line[0] == MessageAFTN.SOH and line[1] == ' ' and len(line) == 18:
             self.stationID = line[2:5]
             self.CSN = line[5:9]
             self.transmitID = line[2:9]
             self.dateTime = line[10:18]
+            self.logger.debug("Space is present and HeadingLine's length is 18 characters")
+            return 1
+        elif line[0] == MessageAFTN.SOH and line[1] != ' ' and len(line) == 17:
+            self.stationID = line[1:4]
+            self.CSN = line[4:8]
+            self.transmitID = line[1:8]
+            self.dateTime = line[9:17]
+            self.logger.debug("Space is absent and HeadingLine's length is 17 characters")
             return 1
         else:
-            print "Problem with HeadingLine, first char is not space or line length not equal 18"
+            self.logger.error("Problem with HeadingLine, first char is not space or line length not equal 18")
             return 0
 
     def _parseDestinationAddressLine(self, line):
@@ -193,7 +214,7 @@ class MessageAFTN:
 
             return 1
         else:
-            print "Problem with Destination Address Line, Zero Address!"
+            self.logger.error("Problem with Destination Address Line, Zero Address!")
             return 0
 
     def _parseOriginAddressLine(self, line):
@@ -206,33 +227,35 @@ class MessageAFTN:
 
             return 1
         else:
-            print "Problem with Origin Address Line, Bad line length (not 15 char)"
+            self.logger.error("Problem with Origin Address Line, Bad line length (not 15 char)")
             return 0
 
     def _parseText(self):
-        if self.messageLines[3][0] == self.STX and self.messageLines[-1] == MessageAFTN.END_OF_MESSAGE:
+        if self.messageLines[3][0] == MessageAFTN.STX and self.messageLines[-1] == MessageAFTN.END_OF_MESSAGE:
             self.textLines = self.messageLines[3:-1]   # Remove END_OF_MESSAGE line
             self.textLines[0] = self.textLines[0][1:]  # Remove <STX> char
+            return 1
         else:
-            print "Problem with STX or End of Message signal (<VT><ETX>)"
+            self.logger.error("Problem with STX or End of Message signal (<VT><ETX>)")
+            return 0
 
     def createMessage(self):
-        self.header = self.createHeader()
-        self.textBlock = self.createText()
+        self.header = self._createHeader()
+        self.textBlock = self._createText()
         return self.header + self.textBlock + MessageAFTN.END_OF_MESSAGE
 
-    def createHeader(self):
-        self.headingLine = self.createHeadingLine()
-        self.destinationAddressLine = self.createDestinationAddressLine()
-        self.originAddressLine = self.createOriginAddressLine()
+    def _createHeader(self):
+        self.headingLine = self._createHeadingLine()
+        self.destinationAddressLine = self._createDestinationAddressLine()
+        self.originAddressLine = self._createOriginAddressLine()
 
         return self.headingLine + self.destinationAddressLine + self.originAddressLine
 
-    def createHeadingLine(self):
-        #print "HeadingLine: %s %s %s%s" % (self.SOH, self.transmitID, self.dateTime, self.ALIGNMENT)
-        return "%s %s %s%s" % (self.SOH, self.transmitID, self.dateTime, self.ALIGNMENT)
+    def _createHeadingLine(self):
+        #print "HeadingLine: %s %s %s%s" % (MessageAFTN.SOH, self.transmitID, self.dateTime, MessageAFTN.ALIGNMENT)
+        return "%s %s %s%s" % (MessageAFTN.SOH, self.transmitID, self.dateTime, MessageAFTN.ALIGNMENT)
 
-    def createDestinationAddressLine(self):
+    def _createDestinationAddressLine(self):
         addressLine = ""
 
         if len(self.destAddress) == 0:
@@ -241,27 +264,29 @@ class MessageAFTN:
         for address in self.destAddress:
             addressLine += " " + address
 
-        addressLine = self.priority + addressLine + self.ALIGNMENT
+        addressLine = self.priority + addressLine + MessageAFTN.ALIGNMENT
         return addressLine
 
-    def createOriginAddressLine(self):
-        #print "Origin Line: %s %s%s" % (self.filingTime, self.originatorAddress, self.ALIGNMENT)
-        return "%s %s%s" % (self.filingTime, self.originatorAddress, self.ALIGNMENT)
+    def _createOriginAddressLine(self):
+        #print "Origin Line: %s %s%s" % (self.filingTime, self.originatorAddress, MessageAFTN.ALIGNMENT)
+        return "%s %s%s" % (self.filingTime, self.originatorAddress, MessageAFTN.ALIGNMENT)
 
-    def createText(self):
-        textBlock = self.STX
+    def _createText(self):
+        textBlock = MessageAFTN.STX
 
         for line in self.textLines:
-            textBlock += line + self.ALIGNMENT
+            textBlock += line + MessageAFTN.ALIGNMENT
 
         return textBlock
 
 
 if __name__ == "__main__":
 
+    """
     from DiskReader import DiskReader
 
     reader = DiskReader("/apps/px/bulletins")
+    reader.read()
     reader.sort()
     reader.getFilesContent()
 
@@ -278,28 +303,29 @@ if __name__ == "__main__":
 
     print myMessage.textLines
 
-"""
-   myMessage = MessageAFTN()
+    """
+    myMessage = MessageAFTN()
 
-   myMessage.message = myMessage.SOH + " ABC0044 14033608" + myMessage.ALIGNMENT + "GG CYYCYFYX AAAABBBB CCCCDDDD" + myMessage.ALIGNMENT + \
+    myMessage.message = myMessage.SOH + " ABC0044 14033608" + myMessage.ALIGNMENT + "GG CYYCYFYX AAAABBBB CCCCDDDD" + myMessage.ALIGNMENT + \
                      "140335 CYEGYFYX" + myMessage.ALIGNMENT + myMessage.STX + "04227 NOTAMN CYYC CALGARY INTL\r\n" + \
                      "CYYC ILS 16 AND 34 U/S 049141530\r\nTIL 040914800\r\n" + myMessage.END_OF_MESSAGE
 
 
-   print myMessage.message
-   myMessage.messageToValues()
-   print len(myMessage.message)
+    print myMessage.message
+    myMessage.messageToValues()
+    print len(myMessage.message)
 
-   print myMessage.stationID           # 3 Letters assigned by NavCanada for each circuit (ex: ABC)
-   print myMessage.CSN                 # Channel sequence number, 4 digits (ex: 0003)
-   print myMessage.transmitID          # stationID + CSN (ex: ABC0003)
-   print myMessage.dateTime            # 8-digits DDHHMMSS (ex:14033608)
-   print myMessage.priority            # Priority indicator (SS, DD, FF, GG or KK)
-   print myMessage.destAddress         # 8-letter group, max. 21 addresses
-   print myMessage.filingTime          # 6-digits DDHHMM (ex:140335) indicating date and time of filing the message for transmission.
-   print myMessage.originatorAddress   # 8-letter group identifying the message originator (CYEGYFYX)
-   print myMessage.textLines                #
+    print myMessage.stationID           # 3 Letters assigned by NavCanada for each circuit (ex: ABC)
+    print myMessage.CSN                 # Channel sequence number, 4 digits (ex: 0003)
+    print myMessage.transmitID          # stationID + CSN (ex: ABC0003)
+    print myMessage.dateTime            # 8-digits DDHHMMSS (ex:14033608)
+    print myMessage.priority            # Priority indicator (SS, DD, FF, GG or KK)
+    print myMessage.destAddress         # 8-letter group, max. 21 addresses
+    print myMessage.filingTime          # 6-digits DDHHMM (ex:140335) indicating date and time of filing the message for transmission.
+    print myMessage.originatorAddress   # 8-letter group identifying the message originator (CYEGYFYX)
+    print myMessage.textLines                #
 
 
-   myMessage.createMessage()
-"""
+    message = myMessage.createMessage()
+    print len(message)
+    print message
