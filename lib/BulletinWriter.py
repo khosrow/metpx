@@ -478,7 +478,7 @@ class BulletinWriter:
                     waitingTime = datetime.datetime.now()
                     elapsedTime = waitingTime - initialTime
                     if (elapsedTime.seconds >= maxBusyWait):
-                        self.logger.error("Had to break lock on: %s because max waiting time expired!"%dirPath)
+                        self.logger.critical("Had to break lock on: %s because max waiting time expired!"%dirPath)
                         self.removeDirTree(dirPath)  
                         break
                     else:
@@ -526,7 +526,7 @@ class BulletinWriter:
         if(self._doesCollectionExist(key)):
             self.removeDirTree(dirToRemove)
         else:
-            self.logger.error("Could not find the %s directory for removal" %dirToRemove)
+            self.logger.critical("Could not find the %s directory for removal" %dirToRemove)
 
 
     def removeDirTree (self, dirTree):
