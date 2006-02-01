@@ -248,37 +248,38 @@ class CollectionManager(object):
 
             This method makes sure that the incoming bulletin does not exceed the 
             maximum future date.  It will return a boolean value of True or False
-            based on the outcome
+            based on the outcome.  Note that the incoming bulletin doesn't have 
+            the month or year in its header, therefore the present month and year 
+            will be assumed. If the present month doesn't have the day number 
+            indicated in the bulletin, then we'll assume the bulletin is from 
+            the previous month.
         """
         True = 'True'
         False = ''
+        bulletinDaysField = int(self.bulletin.getBulletinDaysField())
         #-----------------------------------------------------------------------------------------
         # Produce time objects needed for comparisons.
         # The bulletin has no month or year, so assume present year and month
         #-----------------------------------------------------------------------------------------
         presentDateTime = datetime.datetime.now()
         maxFutureDateTime = presentDateTime + datetime.timedelta(minutes = long(maxFutureDateInMins))
-        bulletinDateTime = datetime.datetime(presentDateTime.year, presentDateTime.month, \
-                           int(self.bulletin.getBulletinDaysField()), \
-                           int(self.bulletin.getBulletinHoursField()), \
-                           int(self.bulletin.getBulletinMinutesField())) 
 
         #-----------------------------------------------------------------------------------------
-        # If our maxFutureDateTime spans into a new year, then it is possible
-        # that the bulletin may have the new year as its year
+        # We want to assume the present year and month for the incoming bulletin.  But if the 
+        # present month doesn't have the day number indicated in the bulletin, then we'll 
+        # assume the bulletin is from the previous month.
         #-----------------------------------------------------------------------------------------
-        if (maxFutureDateTime.year > presentDateTime.year):
-            bulletinDateTime = bulletinDateTime.replace(year = maxFutureDateTime.year)
-
+        if(bulletinDaysField > int(presentDateTime.day)):
+            bulletinDateTime = datetime.datetime(presentDateTime.year, (presentDateTime.month - 1), \
+                                     bulletinDaysField, int(self.bulletin.getBulletinHoursField()), \
+                                     int(self.bulletin.getBulletinMinutesField())) 
+        else:
+            bulletinDateTime = datetime.datetime(presentDateTime.year, presentDateTime.month, \
+                                     bulletinDaysField, int(self.bulletin.getBulletinHoursField()), \
+                                     int(self.bulletin.getBulletinMinutesField()))     
+        print bulletinDateTime
         #-----------------------------------------------------------------------------------------
-        # If our maxFutureDateTime spans into a new month, then it is possible
-        # that the bulletin may have the new month as its month
-        #-----------------------------------------------------------------------------------------
-        if (maxFutureDateTime.month != presentDateTime.month):
-            bulletinDateTime = bulletinDateTime.replace(month = maxFutureDateTime.month)
-
-        #-----------------------------------------------------------------------------------------
-        # If the bulletin is still more futuristic than the maxFutureDateTime, then it's from 
+        # If the bulletin is more futuristic than the maxFutureDateTime, then it's from 
         # too far into the future to be considered on time.
         #-----------------------------------------------------------------------------------------
         if (bulletinDateTime > maxFutureDateTime):
@@ -293,37 +294,39 @@ class CollectionManager(object):
             This method accepts a variable in minutes and returns False 
             if the incoming bulletin is older than maxPastDateInMins.  
             It will return True if the bulletin is newer than the 
-            maxPastDateInMins.
+            maxPastDateInMins. Note that the incoming bulletin doesn't have 
+            the month or year in its header, therefore the present month and 
+            year will be assumed.  If the present month doesn't have the day 
+            number indicated in the bulletin, then we'll assume the bulletin 
+            is from the previous month.
         """
         True = 'True'
         False = ''
+        bulletinDaysField = int(self.bulletin.getBulletinDaysField())
         #-----------------------------------------------------------------------------------------
         # Produce time objects needed for comparisons.
         # The bulletin has no month or year, so assume present year and month
         #-----------------------------------------------------------------------------------------
         presentDateTime = datetime.datetime.now()
         maxPastDateTime = presentDateTime - datetime.timedelta(minutes = long(maxPastDateInMins))
-        bulletinDateTime = datetime.datetime(presentDateTime.year, presentDateTime.month, \
-                           int(self.bulletin.getBulletinDaysField()), \
-                           int(self.bulletin.getBulletinHoursField()), \
-                           int(self.bulletin.getBulletinMinutesField())) 
 
         #-----------------------------------------------------------------------------------------
-        # If our maxPastDateTime spans into a previous year, then it is possible
-        # that the bulletin may have the previous year as its year
+        # We want to assume the present year and month for the incoming bulletin.  But if the 
+        # present month doesn't have the day number indicated in the bulletin, then we'll 
+        # assume the bulletin is from the previous month.
         #-----------------------------------------------------------------------------------------
-        if (maxPastDateTime.year < presentDateTime.year):
-            bulletinDateTime = bulletinDateTime.replace(year = maxPastDateTime.year)
+        if(bulletinDaysField > int(presentDateTime.day)):
+            bulletinDateTime = datetime.datetime(presentDateTime.year, (presentDateTime.month - 1), \
+                                     bulletinDaysField, int(self.bulletin.getBulletinHoursField()), \
+                                     int(self.bulletin.getBulletinMinutesField())) 
 
+        else:
+            bulletinDateTime = datetime.datetime(presentDateTime.year, presentDateTime.month, \
+                                     bulletinDaysField, int(self.bulletin.getBulletinHoursField()), \
+                                     int(self.bulletin.getBulletinMinutesField())) 
+        
         #-----------------------------------------------------------------------------------------
-        # If our maxPastDateTime spans into a previous month, then it is possible
-        # that the bulletin may have the previous month as its month
-        #-----------------------------------------------------------------------------------------
-        if (maxPastDateTime.month != presentDateTime.month):
-            bulletinDateTime = bulletinDateTime.replace(month = maxPastDateTime.month)
-
-        #-----------------------------------------------------------------------------------------
-        # If the bulletin is still older than the maxPastDateTime, then it's too old and 
+        # If the bulletin is older than the maxPastDateTime, then it's too old and 
         # cannot be considered on time.
         #-----------------------------------------------------------------------------------------
         if (bulletinDateTime < maxPastDateTime):
