@@ -211,12 +211,11 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         # Search only if the on-time period for this hour has ended
         #-----------------------------------------------------------------------------------------
         if (int(self.startDateTime.minute) >= int(self.validTime)):
-
             #-----------------------------------------------------------------------------------------
-            # Build dir for this hour of the form "DDHHMM"
+            # Build dir for this hour of the form "DDHH00"
             #-----------------------------------------------------------------------------------------
-            thisHoursDir = "%s%s%s" %(self.startDateTime.day,self.startDateTime.hour, '00')
-
+            thisHoursDir = self.startDateTime.strftime("%d%H") + '00' 
+            
             #-----------------------------------------------------------------------------------------
             # search for any of this hour's unsent on-time collections
             #-----------------------------------------------------------------------------------------
@@ -239,13 +238,12 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             False is returned if no match is found.
         """
         False = ''
-        #self.logger.info("REMOVEME: Searching for dir: %s in: %s"%(directory,searchPath)) 
-         
+        #print("REMOVEME: Searching for dir: %s in: %s"%(directory,searchPath)) 
         for root, dirs, files in os.walk(searchPath):
             for dir in dirs:
                 if (dir.startswith(directory) and not (dir.endswith(self.sentToken) or
                                                        dir.endswith(self.busyToken))):
-                    #self.logger.info("REMOVEME: Found dir and returning: %s" %os.path.join(root,dir))
+                    #print("REMOVEME: Found dir and returning: %s" %os.path.join(root,dir))
                     return os.path.join(root,dir)
         return False
 
@@ -373,24 +371,25 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         # Search for this hour's late collections only if it is validTime + 1 lateCycle
         #-----------------------------------------------------------------------------------------
         if (int(currentTime.minute) >= (int(self.validTime) + int(self.lateCycle))):
-            hour.append(int(self.startDateTime.hour))
-
+            hour.append(self.startDateTime.strftime("%H"))
+        
         #-----------------------------------------------------------------------------------------
-        # If the previous cycle interval puts us in the past hour, then look for late bulletins 
+        # If the previous cycle interval puts us in the previous hour, then look for late bulletins 
         # during last hour as well
         #-----------------------------------------------------------------------------------------
         lateCycleTimedelta = datetime.timedelta(minutes = int(self.lateCycle))
         oneHourTimedelta = datetime.timedelta(hours = 1)
         tmpDate = self.startDateTime - lateCycleTimedelta
         if(int(self.startDateTime.hour) == int((tmpDate + oneHourTimedelta).hour)):
-            hour.insert(0,int(tmpDate.hour))
-       
+            hour.insert(0,tmpDate.strftime("%H"))
+        
         #-----------------------------------------------------------------------------------------
         # We now have something like hour = [14,15] or hour = [14]
         # Build dir for this hour of the form "DDHHMM"
         #-----------------------------------------------------------------------------------------
         for element in hour:
-           hoursDir = "%s%s%s" %(self.startDateTime.day,element, '00')
+           hoursDir = self.startDateTime.strftime("%d") + str(element) + '00'
+           
            #-----------------------------------------------------------------------------------------
            # search for any unsent late collections
            #-----------------------------------------------------------------------------------------
@@ -546,6 +545,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         #-----------------------------------------------------------------------------------------
         if(CollectionSchedulerIgniter.stopRequested):
             self.cleanupAndExit()
+
 
     def cleanupAndExit(self):
         """ cleanupAndExit()

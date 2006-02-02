@@ -277,7 +277,7 @@ class CollectionManager(object):
             bulletinDateTime = datetime.datetime(presentDateTime.year, presentDateTime.month, \
                                      bulletinDaysField, int(self.bulletin.getBulletinHoursField()), \
                                      int(self.bulletin.getBulletinMinutesField()))     
-        print bulletinDateTime
+        
         #-----------------------------------------------------------------------------------------
         # If the bulletin is more futuristic than the maxFutureDateTime, then it's from 
         # too far into the future to be considered on time.
