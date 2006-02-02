@@ -116,7 +116,8 @@ example 2: %prog start       => will start all sources
     elif source.type == 'collector':
         igniter.setGateway('DUMMY')
         import CollectionSchedulerIgniter
-        gateway = CollectionSchedulerIgniter.CollectionSchedulerIgniter(source, logger)
+        collectionScheduler = CollectionSchedulerIgniter.CollectionSchedulerIgniter(source, logger)
+        collectionScheduler.run()
     else:
         raise Exception('Unknown type') 
 
