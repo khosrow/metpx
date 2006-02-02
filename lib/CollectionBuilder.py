@@ -54,7 +54,10 @@ class CollectionBuilder:
         #-----------------------------------------------------------------------------------------
         # Open the file and read contents
         #-----------------------------------------------------------------------------------------
-        file = open(fileName, 'r')
+        try:
+            file = open(fileName, 'r')
+        except IOError:
+            self.logger.exception("Cannot open file: %s for reading" % fileName)
         rawBulletin = file.read()
 
         #-----------------------------------------------------------------------------------------
