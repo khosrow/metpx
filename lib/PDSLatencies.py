@@ -38,7 +38,7 @@ class PDSLatencies(Latencies):
             self.eraseFiles()
 
     def obtainFiles(self):
-        date = dateLib.getISODate(self.date, False)
+        date = self.date
         
         # Used for xferlog
         (dummy, month, day) = dateLib.getISODateParts(date)
@@ -65,7 +65,7 @@ class PDSLatencies(Latencies):
                 xferlog.close()
 
     def extractGoodLines(self, prefix, good):
-        date = dateLib.getISODate(self.date, False)
+        date = self.date
         for machine in self.machines:
             hostOnly = machine.split('.')[0]
             lines = []
@@ -104,13 +104,12 @@ class PDSLatencies(Latencies):
                     good.extend(map(lambda x: (x, hostOnly), fnmatch.filter(lines, 'INFO*%s*sent to*' % (self.pattern))))
 
     def extractInfos(self, prefix, good, infos):
-        mmddyy = self.date
         if prefix == 'rx':
             #print("GOOD RX: %i" % len(good))
             for (line, machine) in good:
                 parts = line.split()
                 hhmmss = parts[3][:-1] 
-                date = '%s %s' % (mmddyy, hhmmss)
+                date = '%s %s' % (self.dateDashed, hhmmss)
                 if self.xstats:
                     # Remove ::20050918000030
                     filename_parts = os.path.split(parts[9])[1].split(':')
@@ -126,7 +125,7 @@ class PDSLatencies(Latencies):
             for (line, machine) in self.goodXferlog:
                 parts = line.split()
                 hhmmss = parts[3]
-                date = '%s %s' % (mmddyy, hhmmss)
+                date = '%s %s' % (self.dateDashed, hhmmss)
                 filename = os.path.split(parts[8])[1]
                 #print (date, dateLib.getSecondsSinceEpoch(date), filename, machine)
                 self.xferlogInfos[filename] = (date, dateLib.getSecondsSinceEpoch(date), machine)
@@ -137,7 +136,7 @@ class PDSLatencies(Latencies):
             for (line, machine) in good:
                 parts = line.split()
                 hhmmss = parts[3][:-1]
-                date = '%s %s' % (mmddyy, hhmmss)
+                date = '%s %s' % (self.dateDashed, hhmmss)
                 if self.xstats:
                     # Remove ::20050918020123:pds4
                     filename_parts = parts[7].split(':')

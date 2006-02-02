@@ -22,7 +22,7 @@ class LatMessage:
         self.html = ''              # Results in html
         self.latencier = latencier  # Latencier (PDS or PX)
         self.imageName = imageName  # Came from the plotter
-        self.date = dateLib.getISODate(self.latencier.date, False) # Date in ISO Format
+        self.date = self.latencier.date # Date in ISO Format
 
         self.setTextResults()
         self.saveResults(PXPaths.LAT_RESULTS)
@@ -57,7 +57,7 @@ class LatMessage:
 ####################################################################################################
 # ARRIVAL     LATENCY    FILENAME
 ####################################################################################################
-""" % (self.latencier.pattern, self.date, len(self.latencier.stats),
+""" % (self.latencier.pattern, self.date, len(self.latencier.sortedStats),
        self.latencier.max, self.latencier.mean, self.latencier.min)
 
         part3 = ''

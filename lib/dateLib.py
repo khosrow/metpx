@@ -24,30 +24,41 @@ def getISODateParts(date):
     # year, month, day
     return (date[0:4], date[4:6], date[6:])
 
+def getISODateDashed(ISODate):
+    return ISODate[0:4] + '-' + ISODate[4:6] + '-' + ISODate[6:]
+
 def getMonthAbbrev(month):
     return MONTHS[int(month) -1]
 
+"""
 def getSecondsSinceEpoch(date='08/30/05 20:06:59'):
     try:
         timeStruct = time.strptime(date, '%m/%d/%y %H:%M:%S')
     except:
         print date
     return time.mktime(timeStruct)
+"""
+def getSecondsSinceEpoch(date='2005-08-30 20:06:59'):
+    try:
+        timeStruct = time.strptime(date, '%Y-%m-%d %H:%M:%S')
+    except:
+        print date
+    return time.mktime(timeStruct)
     
 def getYesterdayInSeconds():
-    return now(time.gmtime())  - DAY
+    return now(time.gmtime()) - DAY
 
-def getYesterdayFormatted(format='%m/%d/%y'):
+def getYesterdayFormatted(format='%Y%m%d'):
     return time.strftime(format, time.gmtime(getYesterdayInSeconds()))
 
 def getISODate(string, dash=True):
-        # Format of string is : MM/DD/YY
-        month, day, year = string.split('/')
-        year = 2000 + int(year)
-        if dash: return (str(year) + '-' + month + '-' + day)
-        else: return (str(year) + month + day)
-        # In python 2.3 and later
-        #return datetime.date(year, month, day).isoformat()
+    # Format of string is : MM/DD/YY
+    month, day, year = string.split('/')
+    year = 2000 + int(year)
+    if dash: return (str(year) + '-' + month + '-' + day)
+    else: return (str(year) + month + day)
+    # In python 2.3 and later
+    #return datetime.date(year, month, day).isoformat()
 
 def ISOToBad(ISODate, dash=False):
     if dash:
@@ -94,7 +105,12 @@ if __name__ == '__main__':
     print getISODateParts('20050908')
     print getMonthAbbrev('12')
     """
+    """
     from bisect import bisect
     sep = getSeparators(DAY, 60)
     insert_point = bisect(sep, 179)
     print insert_point
+    """
+    print getISODateDashed('20051207')
+    print getSecondsSinceEpoch('1970-01-01 00:00:00')
+    print getSecondsSinceEpoch('1970-01-01 00:00:05')

@@ -28,9 +28,11 @@ class Latencies:
 
         # Date for which we want to obtain stats
         if date == None:
-            self.date = dateLib.getYesterdayFormatted()
+            self.date = dateLib.getYesterdayFormatted() # ISO Date
         else:
-            self.date = dateLib.ISOToBad(date)
+            self.date = date
+
+        self.dateDashed = dateLib.getISODateDashed(self.date)
 
         self.machines = []         # Machines were the logs can be found
         self.sources = []          # Sources for which we will check arrival time of the products
@@ -94,7 +96,7 @@ class Latencies:
             if file in self.receivingInfos:
                 date, seconds, machine = self.receivingInfos[file]
                 latency = self.sendingInfos[file][1] - seconds
-                self.stats[file] =  (date[9:17], machine, latency)
+                self.stats[file] =  (date[11:19], machine, latency)
                 total_latency += latency
                 if latency > self.max:
                     self.max = latency
@@ -133,7 +135,7 @@ class Latencies:
                 latency = self.sendingInfos[file][1] - seconds
                 total_latency += latency
 
-                self.stats[file] =  (xfer_date[9:17], machine, waiting + latency)
+                self.stats[file] =  (xfer_date[11:19], machine, waiting + latency)
                 
                 bigLat = latency + waiting
                 if bigLat > self.max:

@@ -40,8 +40,7 @@ class PXLatencies(Latencies):
     def obtainFiles(self):
 
         # Used for xferlog
-        date = dateLib.getISODate(self.date, False)
-        (dummy, month, day) = dateLib.getISODateParts(date)
+        (dummy, month, day) = dateLib.getISODateParts(self.date)
         if day[0] == '0':
             day = ' ' +  day[1]
         monthAbbrev = dateLib.getMonthAbbrev(month)
@@ -50,7 +49,7 @@ class PXLatencies(Latencies):
             self.manager.createDir(PXPaths.LAT_TMP +  machine + '_' + self.random)
             
             if self.sources[0] == '__ALL__':
-                command = "ssh %s grep -h -e \"'%s.*INFO.*ingest'\" %s/rx*" % (machine, self.date, PXPaths.LOG)
+                command = "ssh %s grep -h -e \"'%s.*INFO.*Ingested'\" %s/rx*" % (machine, self.dateDashed, PXPaths.LOG)
                 #print command
                 (status, output) = commands.getstatusoutput(command)
                 allSources = open(PXPaths.LAT_TMP + machine + '_' + self.random + '/rx_all.log', 'w')
@@ -58,7 +57,7 @@ class PXLatencies(Latencies):
                 allSources.close()
             else:
                 for source in self.sources:
-                    command = "ssh %s grep -h -e \"'%s.*INFO.*ingest'\" %s/rx_%s*" % (machine, self.date, PXPaths.LOG, source)
+                    command = "ssh %s grep -h -e \"'%s.*INFO.*Ingested'\" %s/rx_%s*" % (machine, self.dateDashed, PXPaths.LOG, source)
                     (status, output) = commands.getstatusoutput(command)
                     sourceFile = open(PXPaths.LAT_TMP + machine + '_' + self.random + '/rx_' + source, 'w')
                     sourceFile.write(output)
@@ -104,25 +103,23 @@ class PXLatencies(Latencies):
                     self.goodXferlog.extend(map(lambda x: (x, hostOnly), xferlogLines))
             elif self.pattern == '__ALL__' and prefix == 'tx':
                 #print("Lines length: %s" % str(len(lines)))
-                good.extend(map(lambda x: (x, hostOnly), fnmatch.filter(lines, '%s*[INFO]*fichier*' % (self.date))))
-                good.extend(map(lambda x: (x, hostOnly), fnmatch.filter(lines, '%s*[INFO]*Bulletin*' % (self.date))))
+                good.extend(map(lambda x: (x, hostOnly), fnmatch.filter(lines, '%s*[INFO]*delivered*' % (self.dateDashed))))
 
             elif prefix == 'rx': # With a pattern to match
-                good.extend(map(lambda x: (x, hostOnly), fnmatch.filter(lines, '%s*INFO*%s*' % (self.date, self.pattern))))
+                good.extend(map(lambda x: (x, hostOnly), fnmatch.filter(lines, '%s*INFO*%s*' % (self.dateDashed, self.pattern))))
                 if self.xstats:
                     self.goodXferlog.extend(map(lambda x: (x, hostOnly), fnmatch.filter(xferlogLines, '*%s*' % (self.pattern))))
             elif prefix == 'tx': # With a pattern to match
-                good.extend(map(lambda x: (x, hostOnly), fnmatch.filter(lines, '%s*INFO*%s*' % (self.date, self.pattern))))
+                good.extend(map(lambda x: (x, hostOnly), fnmatch.filter(lines, '%s*INFO*%s*' % (self.dateDashed, self.pattern))))
                 
             #print len(good)
 
     def extractInfos(self, prefix, good, infos):
-        mmddyy = self.date
         if prefix == 'rx':
             #print("GOOD RX: %i" % len(good))
             for (line, machine) in good:
-                date = line[:17]
-                filename = os.path.split(line[33:-1])[1]
+                date = line[:19]
+                filename = os.path.basename(line.split()[-1])
                 #print (date, dateLib.getSecondsSinceEpoch(date), filename, machine)
                 infos[filename] = (date, dateLib.getSecondsSinceEpoch(date), machine)
             self.goodRx = []
@@ -131,7 +128,7 @@ class PXLatencies(Latencies):
             for (line, machine) in self.goodXferlog:
                 parts = line.split()
                 hhmmss = parts[3]
-                date = '%s %s' % (mmddyy, hhmmss)
+                date = '%s %s' % (self.dateDashed, hhmmss)
                 filename = os.path.split(parts[8])[1]
                 #print (date, dateLib.getSecondsSinceEpoch(date), filename, machine)
                 self.xferlogInfos[filename] = (date, dateLib.getSecondsSinceEpoch(date), machine)
@@ -140,10 +137,8 @@ class PXLatencies(Latencies):
         if prefix == 'tx':
             #print("GOOD TX: %i" % len(good))
             for (line, machine) in good:
-                parts = line.split()
-                date = parts[0] + ' ' + parts[1]
-                # We have to call basename because the format is not the same for different senders (file, bulletin)
-                filename = os.path.basename(parts[4])
+                date = line[:19]
+                filename = os.path.basename(line.split()[6])
                 #print (date, dateLib.getSecondsSinceEpoch(date), filename, machine)
                 infos[filename] = (date, dateLib.getSecondsSinceEpoch(date), machine)
             self.goodTx = []

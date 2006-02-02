@@ -34,6 +34,7 @@ class Plotter:
         self.type = type                           # Type of graph must be in: ['linespoint', 'lines', 'boxes', 'impulses']
         self.interval = interval * dateLib.MINUTE  # Number of seconds between each point on the x-axis
         self.imageName = imageName                 # Name of the image file
+        self.color = None
 
         self.width = dateLib.DAY                   # Width of the x-axis in seconds
 
@@ -152,7 +153,7 @@ class Plotter:
 
         #self.graph.plot([[0, 1.1], [1, 5.8], [2, 3.3], [3, 100]])
 
-        self.imageName = "%s_latencies.%s_%s.png" % (self.latenciers[0].pattern, dateLib.getISODate(self.latenciers[0].date, False), self.latenciers[0].random)
+        self.imageName = "%s_latencies.%s_%s.png" % (self.latenciers[0].pattern, self.latenciers[0].date, self.latenciers[0].random)
 
         self.graph('set output "%s%s"' % (PXPaths.LAT_RESULTS, self.imageName))
 
@@ -188,7 +189,7 @@ class Plotter:
             else:
                 pattern = self.latenciers[i].pattern
 
-            self.graph.title('%s Latencies for %s (%s)' % (pattern, str(self.latenciers[i].client), dateLib.getISODate(latencier.date)))
+            self.graph.title('%s Latencies for %s (%s)' % (pattern, str(self.latenciers[i].client), dateLib.getISODateDashed(latencier.date)))
             self.graph.plot(Gnuplot.Data(self.getPairs(self.latenciers[i].sortedStats), with="%s %s 2" % (self.type, color)))
     
             #plotItem = Gnuplot.PlotItems.PlotItem(Gnuplot.Data(self.getPairs(self.latenciers[0].sortedStats), title="MPCN")
