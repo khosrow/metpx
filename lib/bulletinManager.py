@@ -761,3 +761,15 @@ class bulletinManager:
             # La différence se situe en dehors de l'intervale de validité
             self.logger.warning("Délai en dehors des limites permises bulletin: "+unBulletin.getHeader()+', heure présente '+now)
             unBulletin.setError('Bulletin en dehors du delai permis')
+
+
+    def reloadCollectionManager(self):
+        """ reloadCollectionManager()
+
+            The purposed of this method is to carry out a reload of the collectionManager 
+            used to create immediate collections in the case where a 'reload' command
+            is issued.
+        """
+        self.collectionManager.__init__(self.source.ingestor.collector, self.logger)
+
+        

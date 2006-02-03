@@ -146,6 +146,13 @@ class PXIgniter(Igniter):
             if self.type == 'collector':
                #self.gateway.reloadConfig()
                print "** Please restart the collectionScheduler."
+
+            #-----------------------------------------------------------------------------------------
+            # If this receiver is participating in producing collections, reload its collectionManager
+            #-----------------------------------------------------------------------------------------
+            if self.flow.collection:
+               self.gateway.unBulletinManager.reloadCollectionManager()
+               
       
    def reload(self):
       """
