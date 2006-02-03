@@ -73,8 +73,9 @@ class CollectionSchedulerIgniter(object):
 
             This method will signal to the children that they need to terminate
             themselves because a 'stop' has been issued.  This method will then
-            re-instate the previous handler and send SIGTERM back to the process
-            (this PID).
+            re-instate the previous handler and send SIGTERM back.  This will
+            allow whatever actions are dependent on the signal to continue to 
+            happen.
         """
         global stopRequested
 

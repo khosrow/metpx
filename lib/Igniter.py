@@ -116,12 +116,12 @@ class Igniter:
          else:
             self.printComment('Locked but not running')
             os.unlink(self.lock)
-
+      
       # If it is unlocked 
       else:
          self.printComment('No lock')
          sys.exit()
-
+      
       # Bye bye if stop is called directly
       if not self.comingFromRestart:
          sys.exit() 

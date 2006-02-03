@@ -80,7 +80,7 @@ class PXIgniter(Igniter):
       else:
          self.printComment('No lock')
          sys.exit()
-
+      
       # Bye bye if stop is called directly
       if not self.comingFromRestart:
          sys.exit() 
@@ -144,7 +144,6 @@ class PXIgniter(Igniter):
             if self.type == 'single-file' or self.type == 'bulletin-file':
                self.reloadMode = True
             if self.type == 'collector':
-               #self.gateway.reloadConfig()
                print "** Please restart the collectionScheduler."
 
             #-----------------------------------------------------------------------------------------

@@ -90,7 +90,7 @@ class CollectionManager(object):
         #-----------------------------------------------------------------------------------------
         self.bulletin = self.collectionBuilder.buildBulletinFromFile(fileName)
         #print "\nREMOVEME: The incoming report: ",self.bulletin.bulletin
-        
+
         #-----------------------------------------------------------------------------------------
         # If the report was on-time, write the report bulletin to disk.  No mutex is needed because
         # the on-time collection will only be processed only after the on-time interval is over.
