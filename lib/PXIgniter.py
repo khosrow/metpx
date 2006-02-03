@@ -144,7 +144,7 @@ class PXIgniter(Igniter):
             if self.type == 'single-file' or self.type == 'bulletin-file':
                self.reloadMode = True
             if self.type == 'collector':
-               print "** Please restart the collectionScheduler."
+               print "* Please restart the collectionScheduler manually (I.e. /apps/px/bin/pxReceiver collectionScheduler restart)"
 
             #-----------------------------------------------------------------------------------------
             # If this receiver is participating in producing collections, reload its collectionManager
