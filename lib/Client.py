@@ -52,6 +52,7 @@ class Client(object):
         self.sorter = 'MultiKeysStringSorter'     # Class (or object) used to sort
         self.masks = []                           # All the masks (imask and emask)
         self.url = None
+        self.collection = None                    # Client do not participate in the collection effort
 
         # Socket Attributes
         self.port = None 
