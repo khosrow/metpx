@@ -16,7 +16,6 @@
 import sys, os.path, time
 import gateway
 import socketManagerAm
-import bulletinManagerAm
 import bulletinAm
 
 from MultiKeysStringSorter import MultiKeysStringSorter
@@ -33,10 +32,6 @@ class senderAm(gateway.gateway):
         self.client = client
         self.establishConnection()
 
-        # Instanciation du bulletinManagerAm selon les arguments issues du fichier
-        # de configuration
-        self.logger.debug("Instanciation du bulletinManagerAm")
-        self.unBulletinManagerAm = bulletinManagerAm.bulletinManagerAm(PXPaths.TXQ + client.name, logger)
         self.reader = DiskReader(PXPaths.TXQ + self.client.name,
                                  self.client.batch,           # Number of files we read each time
                                  self.client.validation,      # name validation (Bool)
@@ -121,9 +116,14 @@ class senderAm(gateway.gateway):
                     self.totBytes += nbBytesSent
                     #self.logger.info("(%5d Bytes) Bulletin %s  livré ", nbBytesSent, os.path.basename(self.reader.sortedFiles[index]))
                     self.logger.info("(%i Bytes) Bulletin %s  delivered" % (nbBytesSent, os.path.basename(self.reader.sortedFiles[index])))
-                    self.unBulletinManagerAm.effacerFichier(self.reader.sortedFiles[index])
-                    #self.logger.debug("senderAm.write(..): Effacage de " + self.reader.sortedFiles[index])
-                    self.logger.debug("%s has been erased" % self.reader.sortedFiles[index])
+
+                    try:
+                        os.unlink(self.reader.sortedFiles[index])
+                        self.logger.debug("%s has been erased", os.path.basename(self.reader.sortedFiles[index]))
+                    except OSError, e:
+                        (type, value, tb) = sys.exc_info()
+                        self.logger.error("Unable to unlink %s ! Type: %s, Value: %s" % (self.reader.sortedFiles[index], type, value))
+                    
                 else:
                     self.logger.info("%s: Sending problem" % self.reader.sortedFiles[index])
 
