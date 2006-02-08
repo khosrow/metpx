@@ -308,6 +308,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             #-----------------------------------------------------------------------------------------
             # Get mutex to foundPath directory 
             #-----------------------------------------------------------------------------------------
+            startTime = time.time() # DL
             key = self.collectionWriter.lockDirBranch(os.path.dirname(foundPath))
             
             #-----------------------------------------------------------------------------------------
@@ -336,7 +337,8 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             # Release mutex to foundPath directory 
             #-----------------------------------------------------------------------------------------
             self.collectionWriter.unlockDirBranch(key)
-
+            stopTime = time.time() # DL
+            self.logger.info("Lock duration: %f seconds (%s)" % ((stopTime - startTime), foundPath)) # DL
             #-----------------------------------------------------------------------------------------
             # Transmit on-time collection
             #-----------------------------------------------------------------------------------------

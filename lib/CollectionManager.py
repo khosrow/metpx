@@ -17,7 +17,7 @@
 """
 __version__ = '1.0'
 
-import sys, os, os.path, string, commands, re, signal, fnmatch
+import sys, os, os.path, string, commands, re, signal, fnmatch, time
 sys.path.insert(1,sys.path[0] + '/../lib/importedLibs')
 
 import datetime 
@@ -139,6 +139,8 @@ class CollectionManager(object):
                                                      self.bulletin.getTimeStampWithMinsSetToZero(), \
                                                      self.bulletin.getOrigin(), self.bulletin.getFullType())
                 #print"REMOVEME: Locking sem to check for B3. Locking:",dirToLock
+
+                startTime = time.time() # DL
                 key = self.bulletinWriter.lockDirBranch(dirToLock)
 
                 #-----------------------------------------------------------------------------------------
@@ -171,6 +173,10 @@ class CollectionManager(object):
                 # Unlocking semaphore
                 #-----------------------------------------------------------------------------------------
                 self.bulletinWriter.unlockDirBranch(key)
+                stopTime = time.time() # DL
+
+                self.logger.info("Lock duration: %f seconds (%s)" % ((stopTime - startTime), dirToLock)) # DL
+
                 #print "REMOVEME: The collection's BBB is now set to: ", self.bulletin.getCollectionBBB()
                 #-----------------------------------------------------------------------------------------
                 # At this point all collection worthy report bulletins have been written to disk.
