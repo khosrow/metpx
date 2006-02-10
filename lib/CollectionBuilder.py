@@ -13,12 +13,14 @@
 #               overloading.
 #
 # Revision History: 
+#   Feb. 9, 2006  KA.  Moved buildImmediateCollectionFromReport here.
 #               
 #############################################################################################
 """
-__version__ = '1.0'
+__version__ = '1.1'
 
 import BulletinCollection
+import CollectionUtils
 from Logger import Logger
 
 class CollectionBuilder:
@@ -43,6 +45,7 @@ class CollectionBuilder:
     def __init__(self,logger):
         self.logger = logger            # Logger object
         self.lineSeparator = '\n'       # Liner separator used when generating bulletin
+
 
     def buildBulletinFromFile(self,fileName):
         """ buildBulletinFromFile(fileName) -> :BulletinCollection
@@ -97,6 +100,39 @@ class CollectionBuilder:
         return self.stripCollection(aCollection)
 
 
+    def buildImmediateCollectionFromReport(self,bulletin):
+        """ buildImmediateCollectionFromReport(bulletin)
+
+            This method constructs a collection bulletin based on the given
+            bulletin.  The collection bulletin will come complete with the 
+            the appropriate BBB values.  
+            The new collection bulletin is then returned to the caller
+        """
+        #-----------------------------------------------------------------------------------------
+        # Create a collection bulletin which is initially just a copy of the report bulletin
+        #-----------------------------------------------------------------------------------------
+        newCollectionBulletin = bulletin
+
+        #-----------------------------------------------------------------------------------------
+        # Here, we need to update or create the report's BBB value with that of the collection, 
+        # but we're taking care to set a report's BBB to 'CCX' instead of 'CCX1'
+        #-----------------------------------------------------------------------------------------
+        newCollectionBulletin.setReportBBB(newCollectionBulletin.getCollectionB1() + \
+                                           newCollectionBulletin.getCollectionB2() + \
+                                           newCollectionBulletin.getCollectionB3())
+
+        #-----------------------------------------------------------------------------------------
+        # Change the minutes field to '00'. I.e. 'SACN94 CWAO 080319' becomes 'SACN94 CWAO 080300'
+        #-----------------------------------------------------------------------------------------
+        newCollectionBulletin.setBulletinMinutesField('00')
+
+        #-----------------------------------------------------------------------------------------
+        # Set the new collection's directory path (where it is in the collection sub-dir)
+        #-----------------------------------------------------------------------------------------
+        newCollectionBulletin.setCollectionPath(CollectionUtils.calculateBBBDirName(bulletin))
+        return newCollectionBulletin
+
+
     def stripCollection(self, aCollection):
         """ stripCollection() -> :BulletinCollection
 
@@ -106,3 +142,6 @@ class CollectionBuilder:
         while (aCollection.bulletin.count('')):
             aCollection.bulletin.remove('')
         return aCollection
+
+
+    
