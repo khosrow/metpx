@@ -12,10 +12,13 @@
 #               module.
 #
 # Revision History: 
-#               2005-12-13 Daniel Lemay provided class stub
+#   2005-12-13 Daniel Lemay provided class stub
+#   Feb. 9, 2006 KA  Refactoring.  Moving methods beteween modules to increase
+#                    cohesion and allow for making collections as sent using the
+#                    path.  
 #############################################################################################
 """
-__version__ = '1.0'
+__version__ = '1.1'
 
 import sys, os, os.path, string, commands, re, signal, fnmatch, time
 sys.path.insert(1,sys.path[0] + '/../lib/importedLibs')
@@ -89,7 +92,7 @@ class CollectionManager(object):
         # use collectionBuilder to create a bulletin object from the given file
         #-----------------------------------------------------------------------------------------
         self.bulletin = self.collectionBuilder.buildBulletinFromFile(fileName)
-        #print "\nREMOVEME: The incoming report: ",self.bulletin.bulletin
+        #print "\nREMOVEME: The incoming report: ",self.bulletin.bulletinAsString()
 
         #-----------------------------------------------------------------------------------------
         # If the report was on-time, write the report bulletin to disk.  No mutex is needed because
@@ -119,8 +122,7 @@ class CollectionManager(object):
                 # Build a collection bulletin from a single report bulletin and return to caller
                 # for immediate transmission
                 #-----------------------------------------------------------------------------------------
-                newCollectionBulletin = self.bulletin.buildImmediateCollectionFromReport()
-                #print "REMOVEME: Returning 24HR collection for xmission: ",newCollectionBulletin.bulletinAsString()
+                newCollectionBulletin = self.collectionBuilder.buildImmediateCollectionFromReport(self.bulletin)
                 self.logger.info("Returning 24HR collection for xmission: %s" %newCollectionBulletin.bulletinAsString())
                 return newCollectionBulletin
 
@@ -191,7 +193,7 @@ class CollectionManager(object):
                     # Build a collection bulletin from a single report bulletin and return to caller
                     # for immediate transmission
                     #-----------------------------------------------------------------------------------------
-                    newCollectionBulletin = self.bulletin.buildImmediateCollectionFromReport()
+                    newCollectionBulletin = self.collectionBuilder.buildImmediateCollectionFromReport(self.bulletin)
                     #print "REMOVEME: Returning collection for xmission: ",newCollectionBulletin.bulletinAsString()
                     self.logger.info("Returning collection for xmission: %s" %newCollectionBulletin.bulletinAsString())
                     return newCollectionBulletin
@@ -439,7 +441,7 @@ class CollectionManager(object):
 
                 
     def markCollectionAsSent(self, collectionBulletin):
-        """ markCollectionAsSent(fileName) 
+        """ markCollectionAsSent(aCollectionBulletin) 
 
             This is a wrapper for BulletinWriter.markCollectionAsSent().
             It's purpose is to indicate that a collection bulletin
@@ -448,7 +450,7 @@ class CollectionManager(object):
         #-----------------------------------------------------------------------------------------
         # call method to mark the appropriate collection as sent
         #-----------------------------------------------------------------------------------------
-        self.bulletinWriter.markCollectionAsSent(collectionBulletin)
+        self.bulletinWriter.markCollectionAsSent(collectionBulletin.getCollectionPath())
 
 
     def isAnImmediateCollection(self):
