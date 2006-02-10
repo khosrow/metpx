@@ -13,7 +13,10 @@
 #               This class is similar to the receiverAM class.
 #
 # Revision History: 
-#   
+#   Feb. 9, 2006  KA.  Modified findDir() so that it searches for any dir containing 
+#                      'min' (for on-time) and 'RR' (for lates).  This is so that
+#                      on-time dirs can be found even when the validTime is changed
+#                      in the collector's config file.
 #               
 #############################################################################################
 """
@@ -187,11 +190,11 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             # Transmit on-time collection
             #-----------------------------------------------------------------------------------------
             self.transmitCollection()
-
+            
             #-----------------------------------------------------------------------------------------
             # Mark collection as sent
             #-----------------------------------------------------------------------------------------
-            self.collectionWriter.markCollectionAsSent(self.collection)
+            self.collectionWriter.markCollectionAsSent(self.collection.getCollectionPath())
 
             #-----------------------------------------------------------------------------------------
             # Look for the next unsent on-time collection
@@ -220,7 +223,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             # search for any of this hour's unsent on-time collections
             #-----------------------------------------------------------------------------------------
             searchPath = os.path.join(self.myRootDir, thisHoursDir)
-            foundPath = self.findDir(searchPath,self.validTime+'min')
+            foundPath = self.findDir(searchPath,'min')
             return foundPath
         
 
@@ -241,8 +244,8 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
         #print("REMOVEME: Searching for dir: %s in: %s"%(directory,searchPath)) 
         for root, dirs, files in os.walk(searchPath):
             for dir in dirs:
-                if (dir.startswith(directory) and not (dir.endswith(self.sentToken) or
-                                                       dir.endswith(self.busyToken))):
+                if (directory in dir and not (dir.endswith(self.sentToken) or
+                                              dir.endswith(self.busyToken))):
                     #print("REMOVEME: Found dir and returning: %s" %os.path.join(root,dir))
                     return os.path.join(root,dir)
         return False
@@ -274,7 +277,12 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             for report in reports:
                 self.collection = self.collectionBuilder.appendToCollectionFromFile(self.collection, \
                                   os.path.join(collectionPath, report))
-            
+
+            #-----------------------------------------------------------------------------------------
+            # Set the new collection's directory path (where it is in the collection sub-dir)
+            #-----------------------------------------------------------------------------------------
+            self.collection.setCollectionPath(collectionPath)
+    
 
     def transmitCollection(self):
         """ transmitOnTimeCollection()
@@ -347,7 +355,7 @@ class CollectionScheduler(threading.Thread,gateway.gateway):
             #-----------------------------------------------------------------------------------------
             # Mark collection as sent
             #-----------------------------------------------------------------------------------------
-            self.collectionWriter.markCollectionAsSent(self.collection)
+            self.collectionWriter.markCollectionAsSent(self.collection.getCollectionPath())
 
             #-----------------------------------------------------------------------------------------
             # Look for the next unsent on-time collection
