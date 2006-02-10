@@ -12,10 +12,11 @@
 #               functionality needed for collection operations.
 #
 # Revision History: 
-#               
+#   Feb. 9, 2006  KA.  Moving buildImmediateCollectionFromReport to CollectionBuilder.py
+#
 #############################################################################################
 """
-__version__ = '1.0'
+__version__ = '1.1'
 
 import bulletin
 import string
@@ -46,7 +47,8 @@ class BulletinCollection(bulletin.bulletin):
         # Class attributes
         #-----------------------------------------------------------------------------------------
         bulletin.bulletin.__init__(self,stringBulletin,logger,lineSeparator='\n')
-        self.collectionBBB = blankValue   #The BBB value which we'll dertermine for the collection bulletin
+        self.collectionBBB = blankValue   # The BBB value which we'll dertermine for the collection bulletin
+        self.collectionPath = ''          # Path of this bulletin in the 'collection' sub-dir
 
 
     def getTimeStamp(self):
@@ -291,34 +293,7 @@ class BulletinCollection(bulletin.bulletin):
         #print "REMOVEME: Modified the collection's bbb. New HDR is: ",self.getHeader()
         
 
-    def buildImmediateCollectionFromReport(self):
-        """ buildImmediateCollectionFromReport()
-
-            This method constructs a collection bulletin based on the report
-            contained within its bulletin attribute.  The collection bulletin 
-            will of course come complete with the the appropriate BBB values.  
-            The new collection bulletin is then returned to the caller
-        """
-        #-----------------------------------------------------------------------------------------
-        # Create a collection bulletin which is initially just a copy of the report bulletin
-        #-----------------------------------------------------------------------------------------
-        newCollectionBulletin = self
-
-        #-----------------------------------------------------------------------------------------
-        # Here, we need to update or create the report's BBB value with that of the collection, 
-        # but we're taking care to set a report's BBB to 'CCX' instead of 'CCX1'
-        #-----------------------------------------------------------------------------------------
-        newCollectionBulletin.setReportBBB(newCollectionBulletin.getCollectionB1() + \
-                                           newCollectionBulletin.getCollectionB2() + \
-                                           newCollectionBulletin.getCollectionB3())
-
-        #-----------------------------------------------------------------------------------------
-        # Change the minutes field to '00'. I.e. 'SACN94 CWAO 080319' becomes 'SACN94 CWAO 080300'
-        #-----------------------------------------------------------------------------------------
-        newCollectionBulletin.setBulletinMinutesField('00')
-        return newCollectionBulletin
-
-
+    
     def setBulletinMinutesField(self,newValue):
         """ setBulletinMinutesField(newValue)
 
@@ -349,3 +324,26 @@ class BulletinCollection(bulletin.bulletin):
             self.setHeader(newHeader.strip())
 
         #print "REMOVEME: Modified the collection's timeStamp. New HDR is: ",self.getHeader()
+
+
+    def setCollectionPath(self,path):
+        """ setCollectionPath(path)
+
+            Set the path for this collection to the given path.  The path is where this
+            bulletin resides in the 'colleciton' sub-dir.  
+            This path may be used to mark the collection as sent.
+        """
+        self.collectionPath = path
+
+
+    def getCollectionPath(self):
+        """ getCollectionPath()
+
+            Returns the collection's path.  The path is where this
+            bulletin resides in the 'colleciton' sub-dir.  
+            This path may be used to mark the collection as sent.
+        """
+        return self.collectionPath
+
+
+
