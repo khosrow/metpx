@@ -8,10 +8,12 @@
 #
 # Description: 
 #
+# Modification: Michel Grenier (splitting with a report maker like "=\n")
+#
 #############################################################################################
 
 """
-import sys, os, commands, signal
+import sys, os, commands, signal, string
 
 class TextSplitter:
     """
@@ -33,14 +35,15 @@ class TextSplitter:
     overhead: This is the number of fixed character added by the protocol to 
               encapsulate the message.
     """
-    def __init__(self, text, maxSize, alignment="\n", overhead=5):
+    def __init__(self, text, maxSize, alignment="\n", overhead=5, marker="=\n" ):
         self.__text = text                       # Original text (a string)
         self.__maxSize = maxSize                 # Maximum size for each string
         self.__alignment = alignment             # Alignment function (ex: '\r\n')
         self.__overhead = overhead               # Number of overhead character in a text block
+        self.__marker = marker                   # Marker for different splitting
         self.__alignmentLength = len(alignment)  # Length of the alignment function
         self.__lines = text.splitlines()         # Original text, splitted in lines (alignment removed)
-        self.__blocks = []                       # Final blocks of text that respect the maximum size
+        self.__blocks = []                       # Final blocks of text that respect the maximum size 
         #self.breakLongText()                     
 
     def setText(self, text):
@@ -193,39 +196,101 @@ class TextSplitter:
         self.__blocks = blocks 
         return blocks
 
+    def breakMarker(self):
+        """
+        Will break text in group of maxsize. The algorithm is carefull to cut
+        text on a marker... making sure that information is cut where it should
+        FIXME: Current behavior -> when a marker is not found... cut to maximum
+               would be better to raise an exception but it should never happen
+        """
+
+        blocks = []
+        first  = 0
+        text   = self.__text
+        eot    = len(text)
+        marker = self.__marker
+        lmark  = len(marker)
+
+        while first < eot :
+              last = first + self.__maxSize
+
+              if last < eot :
+                 marker_pos = string.rfind(text[first:last],marker)
+                 if marker_pos != -1 :
+                    last = first + marker_pos + lmark
+              else :
+                 last = eot
+
+              blocks.append(text[first:last])
+              first = last
+                 
+        self.__blocks = blocks 
+
+        return blocks
+
 if __name__ == "__main__":
 
     # The case tested here is an extreme case where all lines composing
     # the message are longer than maxSize. This is not representing a realistic
     # case where in practice a line will never be longer than the maxSize.
 
-    maxSize = 1800
-    alignment = '\r\n'
-    overhead = 5 
+    maxSize = 25
+    alignment = '/r/n'
+    overhead = 5
 
     text = """
-Ceci est un essai afin de voir le fonctionnement
-de ce test splitter. J'espere obtenir des 
-resultats concluants. Je commence a etre tanne
-de taper des niaiseries, je vais donc proceder a
-l'essai immediatement.
+    Ceci est un essai afin de voir le fonctionnement
+    de ce test splitter. J'espere obtenir des
+    resultats concluants. Je commence a etre tanne
+    de taper des niaiseries, je vais donc proceder a
+    l'essai immediatement.
 
 
-DL
-"""
-   
-    file = open('/apps/px/toSendAFTN/canada_warnings.xml:wxo-b1.cmc.ec.gc.ca:WEATHEROFFICE:WXO_WARNING:1:XML:20060106233004', 'r')
-    text = file.read()
+    DL
+    """
+
     splitter = TextSplitter(text, maxSize, alignment, overhead)
-    #print splitter.getLines()
-    blocks = splitter.breakLongText()
-    i = 1 
-    for block in blocks:
-        print("*********** Begining of block #%s**********" % i)
-        print block[:20]
-        print("*********** End of block #%s**********" % i)
-        i +=1
+    print splitter.getLines()
+    splitter.breakLongText()
 
-    #for line in splitter.getBlocks():
-    #    print line, len(line)
-        
+    for line in splitter.getBlocks():
+        print line, len(line)
+
+#
+#
+#if __name__ == "__main__":
+#
+#    # The case tested here is an extreme case where all lines composing
+#    # the message are longer than maxSize. This is not representing a realistic
+#    # case where in practice a line will never be longer than the maxSize.
+#
+#    maxSize = 20
+#    alignment = '\r\n'
+#    overhead = 5 
+#
+#    text = """
+#Ceci est un essai afin de voir le fonctionnement
+#de ce test splitter. J'espere obtenir des 
+#resultats concluants. Je commence a etre tanne
+#de taper des niaiseries, je vais donc proceder a
+#l'essai immediatement.
+#
+#
+#DL
+#"""
+#   
+##   file = open('/apps/px/toSendAFTN/canada_warnings.xml:wxo-b1.cmc.ec.gc.ca:WEATHEROFFICE:WXO_WARNING:1:XML:20060106233004', 'r')
+##   text = file.read()
+#    splitter = TextSplitter(text, maxSize, alignment, overhead)
+#    #print splitter.getLines()
+#    blocks = splitter.breakLongText()
+##   i = 1 
+##   for block in blocks:
+##       print("*********** Begining of block #%s**********" % i)
+##       print block[:20]
+##       print("*********** End of block #%s**********" % i)
+##       i +=1
+#
+#    for line in splitter.getBlocks():
+#        print line, len(line)
+#        

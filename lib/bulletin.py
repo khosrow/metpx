@@ -320,10 +320,13 @@ class bulletin:
             station = None
 
         if station != None :
-           while station[0] == '?' :
+           while len(station) > 1 and station[0] == '?' :
                  station = station[1:]
-           station = station.split('?')[0]
-           if station[-1] == '=' : station = station[:-1]
+           if station[0] != '?' :
+              station = station.split('?')[0]
+              if station[-1] == '=' : station = station[:-1]
+           else :
+              station = None
 
         self.station = station
 

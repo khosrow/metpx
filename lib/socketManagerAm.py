@@ -182,6 +182,7 @@ class socketManagerAm(socketManager.socketManager):
         try:
             #preparation du bulletin pour l'envoi
             data = self.wrapBulletin(bulletin)
+
             #print repr(data)
             #print('=====================================================================')
 
@@ -211,3 +212,12 @@ class socketManagerAm(socketManager.socketManager):
         except Exception, e:
             self.logger.error("socketManagerAm.sendBulletin(): erreur d'envoi: %s",str(e.args))
             raise
+
+    def writetofile(self,filename,data):
+           import sys, os
+           import random 
+           r = random.random()
+           str_r = '%f' % r
+           unFichier = os.open( filename + str_r, os.O_CREAT | os.O_WRONLY )
+           os.write( unFichier , data )
+           os.close( unFichier )

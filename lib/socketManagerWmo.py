@@ -41,6 +41,8 @@ class socketManagerWmo(socketManager.socketManager):
         self.maxCompteur = 99999
         self.compteur = 0
 
+        self.debugFile = False
+
     def unwrapBulletin(self):
         __doc__ = socketManager.socketManager.unwrapBulletin.__doc__ + \
         """### Ajout de socketManagerWmo ###
@@ -183,6 +185,10 @@ class socketManagerWmo(socketManager.socketManager):
             #preparation du bulletin pour l'envoi
             data = self.wrapBulletin(bulletin)
 
+            # debuging...!? keep the transmitted file
+            if self.debugFile :
+               self.writetofile("/tmp/WMO",data)
+
             #tentative d'envoi et controle de la connexion
             try:
                 #envoi du bulletin
@@ -208,3 +214,13 @@ class socketManagerWmo(socketManager.socketManager):
         except Exception, e:
             self.logger.error("socketManagerWmo.sendBulletin(): erreur d'envoi: %s",str(e.args))
             raise
+
+    # debug development module write data to file
+    def writetofile(self,filename,data):
+        import os,random
+
+        r = random.random()
+        str_r = '%f' % r
+        unFichier = os.open( filename + str_r, os.O_CREAT | os.O_WRONLY )
+        os.write( unFichier , data )
+        os.close( unFichier )

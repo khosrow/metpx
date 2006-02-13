@@ -6,6 +6,7 @@
 #          Daniel Lemay (OO style)
 #          Michel Grenier (directory path with patterns)
 #                         (directory path mkdir if doesn't exist)
+#                         (maxLength for segmentation when needed)
 #
 # Date: 2005-01-10 (Initial version by PS)
 #       2005-08-21 (OO version by DL)
@@ -42,6 +43,7 @@ class Client(object):
         self.host = 'localhost'                   # Remote host address (or ip) where to send files
         self.type = 'single-file'                 # Must be in ['single-file', 'bulletin-file', 'file', 'am', 'wmo', 'amis']
         self.protocol = None                      # First thing in the url: ftp, file, am, wmo, amis
+        self.maxLength = 0                        # maximum Length of a bulletin
         self.batch = 100                          # Number of files that will be read in each pass
         self.timeout = 10                         # Time we wait between each tentative to connect
         self.validation = True                    # Validation of the filename (prio + date)
@@ -116,6 +118,7 @@ class Client(object):
                     elif words[0] == 'sorter': self.sorter = words[1]
                     elif words[0] == 'type': self.type = words[1]
                     elif words[0] == 'protocol': self.protocol = words[1]
+                    elif words[0] == 'maxLength': self.maxLength = int(words[1])
                     elif words[0] == 'host': self.host = words[1]
                     elif words[0] == 'user': self.user = words[1]
                     elif words[0] == 'password': self.passwd = words[1]
