@@ -43,11 +43,12 @@ class Client(object):
         self.host = 'localhost'                   # Remote host address (or ip) where to send files
         self.type = 'single-file'                 # Must be in ['single-file', 'bulletin-file', 'file', 'am', 'wmo', 'amis']
         self.protocol = None                      # First thing in the url: ftp, file, am, wmo, amis
-        self.maxLength = 0                        # maximum Length of a bulletin
+        self.maxLength = 0                        # Maximum Length of a bulletin
         self.batch = 100                          # Number of files that will be read in each pass
         self.timeout = 10                         # Time we wait between each tentative to connect
         self.validation = True                    # Validation of the filename (prio + date)
         self.patternMatching = True               # Verification of the emask and imask of the client before sending a file
+        self.cache = True                         # Check if the file has already been sent (md5sum present in the cache)
         self.mtime = 0                            # Integer indicating the number of seconds a file must not have
                                                   # been touched before being picked
 
@@ -113,6 +114,7 @@ class Client(object):
                         if len(words) > 2:
                             currentFileOption = words[2]
                     elif words[0] == 'validation': self.validation =  isTrue(words[1])
+                    elif words[0] == 'cache': self.cache =  isTrue(words[1])
                     elif words[0] == 'patternMatching': self.patternMatching =  isTrue(words[1])
                     elif words[0] == 'mtime': self.mtime = int(words[1])
                     elif words[0] == 'sorter': self.sorter = words[1]
@@ -193,6 +195,7 @@ class Client(object):
         print("Type: %s" % client.type)
         print("Protocol: %s" % client.protocol)
         print("Batch: %s" %  client.batch)
+        print("Max length: %s" client.maxLength)
         print("Mtime: %i" % client.mtime)
         print("Timeout: %s" % client.timeout)
         print("Sorter: %s" % client.sorter)
@@ -206,6 +209,7 @@ class Client(object):
         print("DIR Mkdir  : %s" % client.dir_mkdir)
         print("Validation: %s" % client.validation)
         print("Pattern Matching: %s" % client.patternMatching)
+        print("Cache used: %s" % client.cache)
 
         print("******************************************")
         print("*       Client Masks                     *")
