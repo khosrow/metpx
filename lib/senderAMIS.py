@@ -92,7 +92,6 @@ class senderAMIS:
       pass
 
    def read(self):
-      """
       if self.igniter.reloadMode == True:
          # We assign the defaults and reread the configuration file (in __init__)
          self.client.__init__(self.client.name, self.client.logger)
@@ -101,7 +100,6 @@ class senderAMIS:
          self.logger.info("Cache has been cleared")
          self.logger.info("Sender AMIS has been reloaded")
          self.igniter.reloadMode = False
-      """
       self.reader.read()
       return self.reader.getFilesContent(self.client.batch)
 
