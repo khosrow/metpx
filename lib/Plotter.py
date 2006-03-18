@@ -106,6 +106,8 @@ class Plotter:
             else:
                 sourcesString = 'Sources: %s' % str(latencier.sources)
             rejectedString = '# Files rejected: %i' % latencier.rejected
+            overThresholdString = '# Files with lat. over %i seconds: %i' % (latencier.latencyThreshold, latencier.overThreshold)
+            underThresholdPString = '%% of files with lat. under %i seconds: %4.2f' % (latencier.latencyThreshold, latencier.underThresholdP)
             (filename, (time, host, lat)) = latencier.maxInfos
             maxInfos1 = 'Maximum occurs at: %s' % (time)
             maxInfos2 = '%s (%s)' % (filename.split(':')[0], host)
@@ -117,9 +119,11 @@ class Plotter:
             self.graph('set label "%s" at screen 1.00, screen %3.2f' % (clientString, 0.36 + ((nbLatenciers -1) -i) * 0.5))
             self.graph('set label "%s" at screen 1.00, screen %3.2f' % (sourcesString, 0.34  + ((nbLatenciers -1) -i) * 0.5))
             self.graph('set label "%s" at screen 1.00, screen %3.2f' % (xferlogString, 0.32  + ((nbLatenciers -1) -i) * 0.5))
-            self.graph('set label "%s" at screen 1.00, screen %3.2f' % (maxInfos1 , 0.30 + ((nbLatenciers -1) - i) * 0.5))
-            self.graph('set label "%s" at screen 1.00, screen %3.2f' % (maxInfos2 , 0.28 + ((nbLatenciers -1) - i) * 0.5))
-            self.graph('set label "%s" at screen 1.00, screen %3.2f' % (rejectedString , 0.26 + ((nbLatenciers -1) - i) * 0.5))
+            self.graph('set label "%s" at screen 1.00, screen %3.2f' % (maxInfos1, 0.30 + ((nbLatenciers -1) - i) * 0.5))
+            self.graph('set label "%s" at screen 1.00, screen %3.2f' % (maxInfos2, 0.28 + ((nbLatenciers -1) - i) * 0.5))
+            self.graph('set label "%s" at screen 1.00, screen %3.2f' % (underThresholdPString, 0.26 + ((nbLatenciers -1) - i) * 0.5))
+            self.graph('set label "%s" at screen 1.00, screen %3.2f' % (overThresholdString, 0.24 + ((nbLatenciers -1) - i) * 0.5))
+            self.graph('set label "%s" at screen 1.00, screen %3.2f' % (rejectedString, 0.22 + ((nbLatenciers -1) - i) * 0.5))
             i += 1
 
         self.graph('set linestyle 1 lt 4 lw 5')
@@ -172,15 +176,15 @@ class Plotter:
             self.graph('set origin 0, %3.2f' % ((const - i) * 0.5))
             try:
                 if self.latenciers[i].xstats:
-                    self.graph("set key title 'MAX: %i,  MEAN: %4.2f (mean wait: %4.2f), MIN: %i  (#files: %i)' box lt 2" % (
+                    self.graph("set key title 'MAX: %i,  MEAN: %4.2f (mean wait: %4.2f),  MIN: %i  (#files: %i)' box lt 2" % (
                                                self.latenciers[i].max, self.latenciers[i].mean,
                                                self.latenciers[i].meanWaiting, self.latenciers[i].min, len(self.latenciers[i].sortedStats)))
                 else:
-                    self.graph("set key title 'MAX: %i,  MEAN: %4.2f, MIN: %i  (#files: %i)' box lt 2" % (
+                    self.graph("set key title 'MAX: %i,  MEAN: %4.2f,  MIN: %i  (#files: %i)' box lt 2" % (
                                                self.latenciers[i].max, self.latenciers[i].mean,
                                                self.latenciers[i].min, len(self.latenciers[i].sortedStats)))
             except AttributeError:
-                self.graph("set key title 'MAX: %i,  MEAN: %4.2f, MIN: %i  (#files: %i)' box lt 2" % (
+                self.graph("set key title 'MAX: %i,  MEAN: %4.2f,  MIN: %i  (#files: %i)' box lt 2" % (
                                            self.latenciers[i].max, self.latenciers[i].mean,
                                            self.latenciers[i].min, len(self.latenciers[i].sortedStats)))
             
