@@ -56,6 +56,9 @@ class Latencies:
         self.max = 0               # Maximum latency time in seconds
         self.min = sys.maxint      # Minimum latency time in seconds
         self.mean = 0              # Mean latency time in seconds
+        self.latencyThreshold = 15 # We don't want to go over this threshold (in seconds)
+        self.overThreshold = 0     # Number of files with latency over threshold
+        self.underThresholdP = 0   # Percentage of files for which the latency is equal or under threshold
         self.meanWaiting = 0       # Mean waiting time before being noticed by the PDS
 
         self.random = str(random.random())[2:]   # Unique identificator permitting the program to be run in parallel
@@ -92,10 +95,15 @@ class Latencies:
 
     def makeStats(self):
         total_latency = 0.0
+
         for file in self.sendingInfos:        
             if file in self.receivingInfos:
                 date, seconds, machine = self.receivingInfos[file]
                 latency = self.sendingInfos[file][1] - seconds
+
+                if latency > self.latencyThreshold:
+                    self.overThreshold += 1
+
                 self.stats[file] =  (date[11:19], machine, latency)
                 total_latency += latency
                 if latency > self.max:
@@ -108,8 +116,10 @@ class Latencies:
 
         if len(self.stats) > 0:
             self.mean =  total_latency / len(self.stats)
+            self.underThresholdP =  (len(self.stats) - self.overThreshold) / float(len (self.stats)) * 100
         else:
             self.mean = 0
+            self.underThresholdP = 100
 
         if self.min == sys.maxint:
             self.min = 0
@@ -125,6 +135,7 @@ class Latencies:
     def makeXferStats(self):
         total_latency = 0.0
         total_waiting = 0.0
+
         for file in self.sendingInfos:        
             if file in self.receivingInfos and file in self.xferlogInfos:
                 xfer_date, seconds, machine = self.xferlogInfos[file]
@@ -133,6 +144,10 @@ class Latencies:
 
                 date, seconds, machine = self.receivingInfos[file]
                 latency = self.sendingInfos[file][1] - seconds
+
+                if latency > self.latencyThreshold:
+                    self.overThreshold += 1
+
                 total_latency += latency
 
                 self.stats[file] =  (xfer_date[11:19], machine, waiting + latency)
@@ -155,9 +170,12 @@ class Latencies:
         if len(self.stats) > 0:
             self.mean =  (total_latency + total_waiting) / len(self.stats)
             self.meanWaiting = total_waiting / len(self.stats)
+            self.underThresholdP =  (len(self.stats) - self.overThreshold) / float(len (self.stats)) * 100
+
         else:
             self.mean = 0
             self.meanWaiting = 0
+            self.underThresholdP = 100
 
         if self.min == sys.maxint:
             self.min = 0
