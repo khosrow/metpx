@@ -217,6 +217,24 @@ class DiskReader:
                 # by a legitimate process that has cleared some client queue.
         return self.data
 
+    def getFilenamesAndContent(self, number=1000000):
+        """
+        Set and return a list of tuples composed of the content (data) of corresponding filenames in the
+        SORTED list (imply sort() must be called before this function) and the filename. The number of
+        elements is determined by "number"
+        """
+        self.data = []
+        shortList = self.sortedFiles[0:number]
+        for file in shortList:
+            try:
+                fileDesc = open(file, 'r')
+                self.data.append((fileDesc.read(), file))
+            except:
+                self.logger.warning("DiskReader.getFilesContent(): " + file + " not on disk anymore")
+                # We don't raise the exception because we assume that this error has been created
+                # by a legitimate process that has cleared some client queue.
+        return self.data
+
     def sort(self):
         """
         Set and return a sorted list of the files
