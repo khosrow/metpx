@@ -233,7 +233,7 @@ class senderAMIS:
        succes  = True
        nbBytes = len(data)
 
-       if self.debugFile
+       if self.debugFile:
           self.writetofile("/tmp/AMIS",data)
        else :
           bullAMIS      = data
