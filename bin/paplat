@@ -57,28 +57,27 @@ class PapLat:
         self.manager.setLogger(self.logger)
 
         self.latenciers = []
-        self.plotter = None
+        self.plotters = []
         self.message = None
         self.recipients = []
 
         usage = """%prog [options]
 
-Notes: - Defaults are set for all options but -p|--patterns and --pdsPatterns.
+Notes: - Defaults are set for all options but -p|--patterns, --pdsPatterns and -c|--clients, --pdsClients.
        - YESTERDAY cannot be used in command line.
        - With -p|--patterns or --pdsPatterns you can add :x if you want to use xferlogs
        - With -p|--patterns or --pdsPatterns you can use __ALL__ to indicate that you are not interessed in 
          a specific product(pattern) but to all products.
        - With -s|--sources you can use __ALL__ to utilise all sources without naming them (only useful for PX client)
-       - Restriction: Only one client of each type (PX and PDS) in a command
 
 WARNING: Xferlog option (PATTERN:x) is not reliable on PDS when filenames are not unique. Not tested on PX (lack of data)
 
-example 1: %prog -p MPCN (equivalent to: %prog --date YESTERDAY --patterns MPCN --machines pds5,pds6 --sources ncp1,ncp2 --clients wxo-b1)
-example 2: %prog --pdsPatterns ACC (equivalent to: %prog -d YESTERDAY --pdsPatterns ACC -m pds1,pds2,pds3,pds4 -s pdschkprod --pdsClients wxo-b1-oper-ww
+example 1: %prog -p MPCN -c wxo-b1 (equivalent to: %prog --date YESTERDAY --patterns MPCN --machines pds5,pds6 --sources ncp1,ncp2 --clients wxo-b1)
+example 2: %prog --pdsPatterns ACC --pdsClients wxo-b1-oper-ww (equivalent to: %prog -d YESTERDAY --pdsPatterns ACC -m pds1,pds2,pds3,pds4 -s pdschkprod --pdsClients wxo-b1-oper-ww)
 example 3: %prog --date 20050928 --patterns MPCN --machines pds5,pds6 --sources ncp1,ncp2 --clients wxo-b1
 example 4: %prog -d 20050928 -p 'MPCN*CWAO' -m pds5,pds6 -s ncp1,ncp2 -c wxo-b1 -r daniel.lemay,ambeaubien -g
-example 5: %prog -p MPCN --pdsPatterns ACC -r warnings_latencies
-example 6: %prog -p MPCN,SACN -r warnings_latencies
+example 5: %prog -p MPCN --pdsPatterns ACC -c wxo-b1 -r warnings_latencies
+example 6: %prog -p MPCN,SACN -c wxo-b1 -r warnings_latencies
 example 7: %prog -p MPCN,SACN --pdsPatterns ACC,ACC:x -c amdar --pdsClients condor
 example 8: %prog -r daniel.lemay -p MPCN,__ALL__ --pdsPatterns __ALL__,__ALL__:x --pdsClients wxo-b1-oper-data 
 """
@@ -95,72 +94,87 @@ example 8: %prog -r daniel.lemay -p MPCN,__ALL__ --pdsPatterns __ALL__,__ALL__:x
         if not fnmatch.fnmatch(options.date, '20[0-9][5-9][0-1][0-9][0-3][0-9]'):
             self.parser.error("Date format must be: YYYYMMDD")
         
+        # PX args 
+        clients = options.clients.replace(' ', '').split(',')
         patterns = options.patterns.replace(' ', '').split(',')
         machines = options.machines.replace(' ', '').split(',')
-
         sources = options.sources.replace(' ', '').split(',')
-        """
-        if sources[0] == '__ALL__':
-            #self.manager.initNames() 
-            #sources = self.manager.getRxNames()
-            sources = []
-            command = 'ssh %s ls %s' % (machines[0], PXPaths.RX_CONF)
-            (status, output) = commands.getstatusoutput(command)
-            for line in output.split():
-                if line[-5:] == '.conf':
-                    sources.append(line[:-5])
-            if len(sources) == 0:
-                print("You must indicate a source!")
-                print "If you need help: paplat -h"
-                sys.exit(1)
-        """
-        clients = options.clients.replace(' ', '').split(',')
 
-        pdsPatterns = options.pdsPatterns.replace(' ', '').split(',')
-        pdsMachines = ['pds1', 'pds2', 'pds3', 'pds4']
-        pdsSources = ['pdschkprod']
-        pdsClients = options.pdsClients.replace(' ', '').split(',')
-
+        if clients[0] == '':
+            del clients[0]
         if patterns[0] == '':
             del patterns[0]
 
+        # PDS args
+        pdsClients = options.pdsClients.replace(' ', '').split(',')
+        pdsPatterns = options.pdsPatterns.replace(' ', '').split(',')
+        pdsMachines = ['pds1', 'pds2', 'pds3', 'pds4']
+        pdsSources = ['pdschkprod']
+
+        if pdsClients[0] == '':
+            del pdsClients[0]
         if pdsPatterns[0] == '':
             del pdsPatterns[0]
 
+        # Be sure to have at least 1 client
+        if (len(clients) + len(pdsClients)) == 0:
+            print "You must indicate a client! Default client don't exists"
+            print "If you need help: paplat -h"
+            #self.parser.print_help()
+            sys.exit(1)
+
+        # Be sure to have at least 1 pattern 
         if (len(patterns) + len(pdsPatterns)) == 0:
             print "You must indicate a pattern! Default pattern don't exists"
             print "If you need help: paplat -h"
             #self.parser.print_help()
             sys.exit(1)
 
-        # For now, only one client of each type (PX, PDS).
-        # Two latenciers maximum if we want the program to function.
-        for pattern in patterns:
-            parts = pattern.split(':')
-            if len(parts) == 2 and parts[1] == 'x':
-                latencier = PXLatencies(options.nopull, options.keep, options.date, parts[0], machines, sources, clients[0], True)
-            else:
-                latencier = PXLatencies(options.nopull, options.keep, options.date, pattern, machines, sources, clients[0])
-            self.latenciers.append(latencier)
+        # Create PX latenciers
+        for client in clients:
+            for pattern in patterns:
+                parts = pattern.split(':')
+                if len(parts) == 2 and parts[1] == 'x':
+                    latencier = PXLatencies(options.nopull, options.keep, options.date, parts[0], machines, sources, client, True)
+                else:
+                    latencier = PXLatencies(options.nopull, options.keep, options.date, pattern, machines, sources, client)
+                self.latenciers.append(latencier)
 
-        for pattern in pdsPatterns:
-            parts = pattern.split(':')
-            if len(parts) == 2 and parts[1] == 'x':
-                latencier = PDSLatencies(options.nopull, options.keep, options.date, parts[0], pdsMachines, pdsSources, pdsClients[0], True)
-            else:
-                latencier = PDSLatencies(options.nopull, options.keep, options.date, pattern, pdsMachines, pdsSources, pdsClients[0])
-            self.latenciers.append(latencier)
+        # Create PDS latenciers
+        for client in pdsClients:
+            for pattern in pdsPatterns:
+                print("Pattern: %s" % pattern)
+                parts = pattern.split(':')
+                print("Parts: %s" % parts)
+                if len(parts) == 2 and parts[1] == 'x':
+                    print("xferlog latencier will be created")
+                    latencier = PDSLatencies(options.nopull, options.keep, options.date, parts[0], pdsMachines, pdsSources, client, True)
+                else:
+                    print("normal latencier will be created")
+                    latencier = PDSLatencies(options.nopull, options.keep, options.date, pattern, pdsMachines, pdsSources, client)
+                self.latenciers.append(latencier)
 
+        # Default values for general options
         if not options.type in ['lines', 'linespoint', 'boxes', 'impulses']:
             options.type = 'lines'
 
         if options.graph:
-            self.plotter =  Plotter(options.type, options.interval)
-            for latencier in self.latenciers:
-                self.plotter.addLatencier(latencier)
-            self.plotter.plot()
-            if options.addText or options.view:
-                self.message = LatMessage(self.latenciers[0], self.plotter.imageName)
+            if options.individual:
+                i = 0
+                for latencier in self.latenciers:
+                    self.plotters.append(Plotter(options.type, options.interval))
+                    self.plotters[i].addLatencier(latencier)
+                    self.plotters[i].plot()
+                    if options.addText or options.view:
+                        self.message = LatMessage(self.latencier, self.plotters[i].imageName)
+                    i += 1
+            else:
+                self.plotters.append(Plotter(options.type, options.interval))
+                for latencier in self.latenciers:
+                    self.plotters[0].addLatencier(latencier)
+                self.plotters[0].plot()
+                if options.addText or options.view:
+                    self.message = LatMessage(self.latenciers[0], self.plotters[0].imageName)
         else:
             if options.addText or options.view:
                 self.message = LatMessage(self.latenciers[0])
@@ -205,11 +219,11 @@ example 8: %prog -r daniel.lemay -p MPCN,__ALL__ --pdsPatterns __ALL__,__ALL__:x
             body.attach(mailLib.genpart(self.message.html, 'text/html; format=flowed'))
             #msg.attach(mailLib.genpart(self.html, 'text/html; format=flowed'))
         else:
-            body.attach(mailLib.genpart('<html><body><img src="cid:%s%s" alt="Latencies Graph"></body></html>' % (PXPaths.LAT_RESULTS, self.plotter.imageName), 'text/html; format=flowed'))
+            body.attach(mailLib.genpart('<html><body><img src="cid:%s%s" alt="Latencies Graph"></body></html>' % (PXPaths.LAT_RESULTS, self.plotters[0].imageName), 'text/html; format=flowed'))
         msg.attach(body)
     
         if graph:
-            msg.attach(mailLib.inlineImage(PXPaths.LAT_RESULTS + self.plotter.imageName))
+            msg.attach(mailLib.inlineImage(PXPaths.LAT_RESULTS + self.plotters[0].imageName))
             #msg.attach(mailLib.attachment(PXPaths.LAT_RESULTS + self.plotter.imageName))
     
         server = smtplib.SMTP("smtp.cmc.ec.gc.ca")
@@ -235,10 +249,10 @@ example 8: %prog -r daniel.lemay -p MPCN,__ALL__ --pdsPatterns __ALL__,__ALL__:x
         parser.add_option("-s", "--sources", action="store", type="string", dest="sources", default='ncp1,ncp2',
                           help="PX Sources' names")
 
-        parser.add_option("-c", "--clients", action="store", type="string", dest="clients", default='wxo-b1',
+        parser.add_option("-c", "--clients", action="store", type="string", dest="clients", default="",
                           help="PX Clients' names")
 
-        parser.add_option("--pdsClients", action="store", type="string", dest="pdsClients", default='wxo-b1-oper-ww',
+        parser.add_option("--pdsClients", action="store", type="string", dest="pdsClients", default="",
                           help="PDS Clients' names")
 
         parser.add_option("-g", "--graph", action="store_false", dest="graph", default=True,
@@ -265,6 +279,9 @@ example 8: %prog -r daniel.lemay -p MPCN,__ALL__ --pdsPatterns __ALL__,__ALL__:x
 
         parser.add_option("-r", "--recipients", action="store", type="string", dest="recipients",
                           help="Mail results to addresses in the list")
+
+        parser.add_option("--individual", action="store_true", dest="individual", default=False,
+                          help="One graph per image")
 
 if __name__ == '__main__':
     
