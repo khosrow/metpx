@@ -15,16 +15,18 @@ import os, sys, time, commands, socket, select
 
 sys.path.insert(1,sys.path[0] + '/../lib')
 sys.path.insert(1,sys.path[0] + '/../etc')
-sys.path.insert(1,sys.path[0] + '/../../px/lib')
-sys.path.insert(1,sys.path[0] + '/../../px/lib/importedLibs')
+sys.path.insert(1,sys.path[0] + '/../../lib')
+sys.path.insert(1,sys.path[0] + '/../../lib/importedLibs')
+
+print sys.path
 
 from DiskReader import DiskReader
 from MessageManager import MessageManager
+from MessageParser import MessageParser
 from MessageAFTN import MessageAFTN
 from AckAFTN import AckAFTN
 from TextSplitter import TextSplitter
-from BulletinParser import BulletinParser
-import PXPaths
+import AFTNPaths
 
 class TransceiverAFTN:
     """
@@ -38,26 +40,32 @@ class TransceiverAFTN:
     def __init__(self, remoteHost='localhost', portR=56550, portS=5160, logger=None, subscriber=True):
         # FIXME: Many of these variable will be accessed directly from Source object (or Client?)
         # when coding will be more advanced.
+
+        AFTNPaths.normalPaths()
+        self.subscriber = subscriber                       # Determine if it will act like a subscriber or a provider(MHS)
+
         self.remoteHost = remoteHost                       # Remote host (name or ip)
         self.portR = portR                                 # Receiving port
         self.portS = portS                                 # Sending port
         self.logger = logger                               # Logger object
-        self.mm = MessageManager(logger)                   # Sending Message (AFTN) Manager
+        self.mm = MessageManager(logger, subscriber)       # Sending Message (AFTN) Manager
         self.maxLength = 1000000                           # Maximum length that we can transmit on the link
         self.remoteAddress = None                          # Remote address (where we will connect())
         self.timeout = 20.0                                # Timeout time in seconds
         self.socket = None                                 # Socket object
         self.batch = 10
         self.dataFromFiles = []
-        self.subscriber = subscriber                       # Determine if it will act like a subscriber or a provider(MHS)
         if subscriber:
-            self.readPath = '/apps/px/toSendAFTN'              # Where we read messages to send
-            self.writePath = '/apps/px/receivedAFTN'           # Where we write messages we receive
-            self.archivePath = '/apps/px/sentAFTN'             # Where we put sent messages
+            self.readPath = AFTNPaths.TO_SEND              # Where we read messages to send
+            self.writePath = AFTNPaths.RECEIVED            # Where we write messages we receive
+            self.archivePath = AFTNPaths.SENT              # Where we put sent messages
+            self.specialOrdersPath = AFTNPaths.SPECIAL_ORDERS
         else:
-            self.readPath = '/apps/px/toSendAFTN_pro'              # Where we read messages to send
-            self.writePath = '/apps/px/receivedAFTN_pro'           # Where we write messages we receive
-            self.archivePath = '/apps/px/sentAFTN_pro'             # Where we put sent messages
+            self.readPath = AFTNPaths.TO_SEND_PRO              # Where we read messages to send
+            self.writePath = AFTNPaths.RECEIVED_PRO            # Where we write messages we receive
+            self.archivePath = AFTNPaths.SENT_PRO              # Where we put sent messages
+            self.specialOrdersPath = AFTNPaths.SPECIAL_ORDERS_PRO
+
         self.reader = DiskReader(self.readPath, self.batch, False, False, 0, False, self.logger)
         self.debug = True                                  # Debugging switch
         
@@ -218,6 +226,17 @@ class TransceiverAFTN:
         poller.register(self.socket.fileno(), select.POLLIN | select.POLLERR | select.POLLHUP | select.POLLNVAL)
 
         while True:
+            # If service messages are in queue and we are not waiting for an ack ...
+            if len(mm.serviceQueue) and not mm.getWaitingForAck():
+               mm.partsToSend = [mm.serviceQueue.pop(0)]
+               mm.completePartsToSend(mm.partsToSend)  
+               mm.setFromDisk(False)
+               self._writeMessageToSocket([mm.partsToSend[0]], False, mm.nextPart)
+               mm.setFromDisk(True)
+                
+            # These special orders are useful to simulate problems ...
+            mm.doSpecialOrders(self.specialOrdersPath)
+            
             pollInfos = poller.poll(100)
             if len(pollInfos):
                 states = TransceiverAFTN.getStates(pollInfos[0][1], True)
@@ -294,28 +313,32 @@ class TransceiverAFTN:
 
         if len(buf): 
             self.logger.debug('Raw Buffer: %s' % repr(buf))
-            message, type = mm.parseReadBuffer(buf)
+            message, type = mm.parseReadBuffer(buf) # Only to find if it is an AFTN (SVC included) or Ack message
             if message:
                 if type == 'AFTN':
                     self.logger.debug("AFTN Message: %s" % repr(message))
-                    messageAFTN = MessageAFTN(self.logger)
-                    messageAFTN.setMessage(message)
-                    if not messageAFTN.messageToValues():
+                    mm.messageIn = MessageAFTN(self.logger)
+                    mm.messageIn.setMessage(message)
+                    if not mm.messageIn.messageToValues():
                         self.logger.error("Method MessageAFTN.messageToValues() has not worked correctly (returned 0)")
-                    self.logger.debug(messageAFTN.textLines)
+                    self.logger.debug(mm.messageIn.textLines)
 
-                    status = mm.isItPart(messageAFTN.textLines)
+                    status = mm.isItPart(mm.messageIn.textLines)
                     # Not part of a big message, possibly a SVC message
                     if status == 0:
-                        if messageAFTN.getTextLines()[0][:3] == "SVC":
-                            self.logger.info("*********************** SERVICE MESSAGE *****************************")
-                            self.logger.info(str(messageAFTN.getTextLines()))
-                            self.logger.info("********************* END SERVICE MESSAGE ***************************")
+                        #if mm.messageIn.getTextLines()[0][:3] == "SVC":
+                        #    self.logger.info("*********************** SERVICE MESSAGE *****************************")
+                        #    self.logger.info(str(mm.messageIn.getTextLines()))
+                        #    self.logger.info("********************* END SERVICE MESSAGE ***************************")
+                        #    suffix = 'SVC'
+                        mp = MessageParser(mm.messageIn.textLines)
+                        if mp.getType() == "SVC": 
                             suffix = 'SVC'
+                            self.logger.info("SVC Message: %s" % MessageParser.names[mp.serviceType])
                         else:
                             suffix = ''
-                        file = open(self.writePath + "/" + messageAFTN.getName() + suffix, 'w')
-                        for line in messageAFTN.textLines:
+                        file = open(self.writePath + "/" + mm.messageIn.getName() + suffix, 'w')
+                        for line in mm.messageIn.textLines:
                             file.write(line + '\n')
                         file.close()
                     # General part of a big message
@@ -324,7 +347,7 @@ class TransceiverAFTN:
                         pass
                     # Last part of a big message
                     elif status == -1:
-                        file = open(self.writePath + "/" + messageAFTN.getName(), 'w')
+                        file = open(self.writePath + "/" + mm.messageIn.getName(), 'w')
                         for line in mm.receivedParts:
                             file.write(line + '\n')
                         file.close()
@@ -332,30 +355,41 @@ class TransceiverAFTN:
 
                     # FIXME: The number of bytes include the ones associated to the protocol overhead,
                     # maybe a simple substraction should do the job.
-                    self.logger.info("(%i Bytes) Message %s has been received" % (len(message), messageAFTN.getName()))
+                    self.logger.info("(%i Bytes) Message %s has been received" % (len(message), mm.messageIn.getName()))
                     
                     if mm.ackUsed:
-                        self._writeAckToSocket(messageAFTN.getTransmitID())
+                        self._writeAckToSocket(mm.messageIn.getTransmitID())
                         mm.totAck += 1
                         #if mm.totAck == 5:
                         #    mm.ackUsed = False 
 
-                    # Is the CSN Order correct? FIXME: Maybe this code part should be put before we ack???
-                    tid = messageAFTN.getTransmitID()
+                    # Is the CSN Order correct?
+                    tid = mm.messageIn.getTransmitID()
                     if tid == mm.getWaitedTID():
                         self.logger.debug("The TID received (%s) is in correct order" % tid)
-                        mm.calcWaitedTID(tid)
                     elif mm.getWaitedTID() == None:
                         self.logger.debug("Waited TID is None => the received TID (%s) is the first since the program start" % tid)
-                        mm.calcWaitedTID(tid)
                     else:
                         self.logger.error("The TID received (%s) is not the one we were waiting for (%s)" % (tid, mm.getWaitedTID()))
                         if int(mm.getWaitedTID()[3:]) - int(tid[3:]) == 1:
                             self.logger.error("Difference is 1 => Probably my ack has been lost (or is late) and the other side has resend")
-                        # FIXME: A SVC Message should be send here. Given the fact that we receive the same message
+                        # FIXME: A SVC Message should be sent here. Given the fact that we receive the same message
                         # again, can we conclude that it is a retransmission (because our ack has not been received)
                         # or an error in numbering message?
-                        mm.calcWaitedTID(tid)
+                        if int(tid[3:])- int(mm.getWaitedTID()[3:]) < 0:
+                            messageText = "SVC LR %s EXP %s" % (tid, mm.getWaitedTID())
+                            if not mm.getWaitingForAck():
+                                mm.partsToSend = [messageText]
+                                mm.completePartsToSend(mm.partsToSend)  
+                                mm.setFromDisk(False)
+                                self._writeMessageToSocket([mm.partsToSend[0]], False, mm.nextPart)
+                                mm.setFromDisk(True)
+                            else:
+                                # We queue the message to send it after we receive the ack we wait for.
+                                self.logger.info("A service message (%s) will be queued" % messageText)
+                                mm.serviceQueue.append(messageText)
+                            
+                    mm.calcWaitedTID(tid)
                         
                 elif type == 'ACK':
                     self.logger.debug("Ack Message: %s" % repr(message))
@@ -410,9 +444,11 @@ class TransceiverAFTN:
 
             for index in range(len(data)):
                 if nextPart == 0:
-                    mm.header, mm.type = BulletinParser(data[index]).extractHeader()
+                    mp = MessageParser(data[index])
+                    mm.header, mm.type = mp.getHeader(), mp.getType()
                     self.logger.debug("Header: %s, Type: %s" % (mm.header, mm.type))
                 if mm.header== None and mm.type==None:
+                    self.logger.info(data[index])
                     self.logger.error("Header %s is not in adisrout" % mm.header)
                     time.sleep(10)
                     #self.deleteFile(self.reader.sortedFiles[index])
@@ -422,8 +458,8 @@ class TransceiverAFTN:
                     # If so, the CSN must not change!
                     mm.setFilingTime()
                     mm.nextCSN()
-                    messageAFTN = MessageAFTN(self.logger, data[index], mm.stationID, 'CYHQUSER', MessageAFTN.PRIORITIES[2],
-                                              'CYHQMHSN', mm.CSN, mm.filingTime, mm.dateTime)
+                    messageAFTN = MessageAFTN(self.logger, data[index], mm.stationID, mm.originatorAddress, MessageAFTN.PRIORITIES[2],
+                                              [mm.otherAddress], mm.CSN, mm.filingTime, mm.dateTime)
                     messageAFTN.setLogger(None)
                     mm.archiveObject(self.archivePath + '/' + mm.CSN, messageAFTN)
                 else:
@@ -447,12 +483,17 @@ class TransceiverAFTN:
                     nbBytesToSend = len(messageAFTN.message)
                     self.totBytes += nbBytesSent
 
+                if mm.isFromDisk():
+                    name = os.path.basename(self.reader.sortedFiles[index])
+                else:
+                    name = mp.getServiceName(mp.getServiceType())
+                    
                 if not rewrite:
                     self.logger.info("(%5d Bytes) Message %s %s (%s/%s) has been sent" % (self.totBytes, getWord(mm.type), 
-                                       os.path.basename(self.reader.sortedFiles[index]), mm.nextPart+1, mm.numberOfParts))
+                                       name, mm.nextPart+1, mm.numberOfParts))
                 else:
                     self.logger.info("(%5d Bytes) Message %s %s (%s/%s) has been resent" % (self.totBytes, getWord(mm.type), 
-                                       os.path.basename(self.reader.sortedFiles[index]), mm.nextPart+1, mm.numberOfParts))
+                                       name, mm.nextPart+1, mm.numberOfParts))
 
                 self.totBytes = 0
                 mm.setWaitingForAck(messageAFTN.getTransmitID())
@@ -461,15 +502,16 @@ class TransceiverAFTN:
                 # If the last part of a message (big or not) has been sent, erase the file.
                 # We do this even if we have not yet received the ack. At this point, we have already
                 # archive all the parts with their CSN as filename.
-                if mm.isLastPart():
-                    try:
-                        os.unlink(self.dataFromFiles[0][1])
-                        self.logger.debug("%s has been erased", os.path.basename(self.dataFromFiles[0][1]))
-                    except OSError, e:
-                        (type, value, tb) = sys.exc_info()
-                        self.logger.error("Unable to unlink %s ! Type: %s, Value: %s" % (self.dataFromFiles[0][1], type, value))
-                    del self.dataFromFiles[0]
-
+                if mm.isLastPart(): 
+                    if mm.isFromDisk():
+                        try:
+                            os.unlink(self.dataFromFiles[0][1])
+                            self.logger.debug("%s has been erased", os.path.basename(self.dataFromFiles[0][1]))
+                        except OSError, e:
+                            (type, value, tb) = sys.exc_info()
+                            self.logger.error("Unable to unlink %s ! Type: %s, Value: %s" % (self.dataFromFiles[0][1], type, value))
+                        del self.dataFromFiles[0]
+                
                 time.sleep(1)
         else:
             time.sleep(1)
@@ -499,7 +541,7 @@ if __name__ == "__main__":
     """
 
     if sys.argv[1] == "sub":
-        logger = Logger('/apps/px/log/subscriber.log', 'DEBUG', 'Sub')
+        logger = Logger('/apps/px/aftn/log/subscriber.log', 'DEBUG', 'Sub')
         logger = logger.getLogger()
         #subscriber = TransceiverAFTN('localhost', 56550, 5160, logger)
         #subscriber = TransceiverAFTN('192.168.250.3', 56550, 5160, logger)
@@ -509,7 +551,7 @@ if __name__ == "__main__":
         #print TransceiverAFTN.getStates(63)
         #print TransceiverAFTN.getStates(63, True)
     elif sys.argv[1] == "pro":
-        logger = Logger('/apps/px/log/provider.log', 'DEBUG', 'Pro')
+        logger = Logger('/apps/px/aftn/log/provider.log', 'DEBUG', 'Pro')
         logger = logger.getLogger()
         #provider = TransceiverAFTN('localhost', 5160, 56550, logger, False)
         provider = TransceiverAFTN(logger=logger, subscriber=False)

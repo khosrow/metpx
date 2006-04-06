@@ -14,7 +14,8 @@
 import os, sys, time, commands, re, curses.ascii, re, pickle
 
 from MessageAFTN import MessageAFTN
-import PXPaths
+from DiskReader import DiskReader
+import AFTNPaths
 
 class MessageManager:
 
@@ -33,24 +34,32 @@ class MessageManager:
 
     """
 
-    def __init__(self, logger=None):
+    def __init__(self, logger=None, subscriber=True):
         
-        PXPaths.normalPaths()
+        AFTNPaths.normalPaths()
 
         self.logger = logger   # Logger object
+        self.subscriber = subscriber
+        self.messageIn = None  # Last AFTN message received
+        self.messageOut = None # Last AFTN message sent
+        self.fromDisk = True   # Changed to False for Service Message created on the fly
         self.adisInfos = {}    # Dict. (key => header, value => a dict with priority, origin, and destination addresses
         self.adisOrder = []    # Ordering information about entries in adisInfos dictionary
         self.header = None     # Header of the bulletin for which we want to create an AFTN message
-        self.type = None       # Value in ['AFTN', 'SVC', 'RF', 'RQ', None]
-        self.originatorAddress = None # 8-letter group identifying the message originator (CYEGYFYX)
+        self.type = None       # Message type. Value must be in ['AFTN', 'SVC', 'RF', 'RQ', None]
+        self.originatorAddress = None # 8-letter group identifying the message originator (CYHQUSER)
+        self.otherAddress = None  # 8-letter group identifying the provider's address (CYHQMHSN)
         self.priority = None   # Priority indicator (SS, DD, FF, GG or KK)
         self.destAddress = []  # 8-letter group, max. 21 addresses
-        self.stationID = None  # Should be hardcoded here if unique, or read in a config file if multiple choices
-                               # are possible
+        self.stationID = None  # Value read from config. file
+        self.otherStationID = None # Provider (MHS) Station ID
         self.CSN = '0000'      # Channel sequence number, 4 digits (ex: 0003)
         self.filingTime = None # 6-digits DDHHMM (ex:140335) indicating date and time of filing the message for transmission.
         self.dateTime = None   # 8-digits DDHHMMSS (ex:14033608)
         self.readBuffer = ''   # Buffer where we put stuff read from the socket
+        
+        # Queueing Service Messages when waiting for an ack before sending
+        self.serviceQueue = []
 
         # Big message support (sending)
         self.partsToSend = []                       # Text parts of the broken message
@@ -67,17 +76,21 @@ class MessageManager:
         self.lastAckReceived = None   # None or the transmitID
         self.waitingForAck = None     # None or the transmitID 
         self.sendingInfos = (0, None) # Number of times a message has been sent and the sending time.
-        self.maxAckTime = 10  # Maximum time (in seconds) we wait for an ack, before resending.
+        self.maxAckTime = 100  # Maximum time (in seconds) we wait for an ack, before resending.
         self.maxSending = 3   # Maximum number of sendings of a message
         self.ackUsed = True   # We can use ack or not
         self.totAck = 0       # Count the number of ack (testing purpose only)
 
-        # CSN verification (receiving)
-        self.waitedTID = None  # Initially (when the program start) we are not sure what TID is expected
-
         # Read configuration infos
-        self.readConfig(PXPaths.ETC + "AFTN.conf")
-        self.createInfosDict(PXPaths.ETC + 'adisrout')
+        if self.subscriber:
+            self.readConfig(AFTNPaths.ETC + "AFTN.conf")
+        else:
+            self.readConfig(AFTNPaths.ETC + "AFTN_pro.conf")
+
+        self.createInfosDict(AFTNPaths.ETC + 'adisrout')
+
+        # CSN verification (receiving)
+        self.waitedTID = self.otherStationID + '0000'  # Initially (when the program start) we are not sure what TID is expected
 
         # Functionnality testing switches
         self.resendSameMessage = True
@@ -85,16 +98,84 @@ class MessageManager:
         # Read Buffer management
         self.unusedBuffer = ''        # Part of the buffer that was not used
 
+    def doSpecialOrders(self, path):
+        # Stop, restart, reload, deconnect, connect could be put here?
+        reader = DiskReader(path)
+        reader.read()
+        dataFromFiles = reader.getFilenamesAndContent()
+        for index in range(len(dataFromFiles)): 
+            words = dataFromFiles[index][0].strip().split() 
+            self.logger.info("Special Order: %s" % (dataFromFiles[index][0].strip()))
+
+            if words[0] == 'outCSN':
+                if words[1] == '+':
+                    self.nextCSN()
+                    self.logger.info("CSN = %s" % self.CSN)
+                elif words[1] == '-':
+                    # This case is only done for testing purpose. It is not complete and not correct when CSN 
+                    # value is 0 or 1
+                    self.nextCSN(str(int(self.CSN) - 2))
+                    self.logger.info("CSN = %s" % self.CSN)
+                elif words[1] == 'print':
+                    self.logger.info("CSN = %s" % self.CSN)
+                else:
+                    # We suppose it's a number, we don't verify!!
+                    self.nextCSN(words[1])
+                    self.logger.info("CSN = %s" % self.CSN)
+
+            elif words[0] == 'inCSN':
+                if words[1] == '+':
+                    self.calcWaitedTID(self.waitedTID)
+                    self.logger.info("Waited TID = %s" % self.waitedTID)
+                elif words[1] == '-':
+                    # This case is only done for testing purpose. It is not complete and not correct when waited TID
+                    # value is 0 or 1
+                    self.calcWaitedTID(self.otherStationID + "%04d" % (int(self.waitedTID[3:]) - 2))
+                    self.logger.info("Waited TID = %s" % self.waitedTID)
+                elif words[1] == 'print':
+                    self.logger.info("Waited TID = %s" % self.waitedTID)
+                else:
+                    # We suppose it's a number, we don't verify!!
+                    self.calcWaitedTID(self.otherStationID + "%04d" % int(words[1]))
+                    self.logger.info("Waited TID = %s" % self.waitedTID)
+
+            elif words[0] == 'ackWaited':
+                if words[1] == 'print':
+                    self.logger.info("Waiting for ack: %s" % self.getWaitingForAck())
+                else:
+                    self.setWaitingForAck(words[1])
+                    self.incrementSendingInfos()
+            elif words[0] == 'ackNotWaited':
+                self.setWaitingForAck(None)
+                self.resetSendingInfos()
+                self.updatePartsToSend()
+
+            else:
+                pass
+
+            try:
+                os.unlink(dataFromFiles[0][1])
+                self.logger.debug("%s has been erased", os.path.basename(dataFromFiles[index][1]))
+            except OSError, e:
+                (type, value, tb) = sys.exc_info()
+                self.logger.error("Unable to unlink %s ! Type: %s, Value: %s" % (dataFromFiles[index][1], type, value))
+
+    def isFromDisk(self):
+        return self.fromDisk
+
+    def setFromDisk(self, value):
+        self.fromDisk = value
+
     def archiveObject(self, filename, object):
-      file = open(filename, "wb")
-      pickle.dump(object, file)
-      file.close()
+        file = open(filename, "wb")
+        pickle.dump(object, file)
+        file.close()
 
     def unarchiveObject(self, filename):
-      file = open(filename, "rb")
-      object = pickle.load(file)
-      file.close()
-      return object
+        file = open(filename, "rb")
+        object = pickle.load(file)
+        file.close()
+        return object
 
     def calcWaitedTID(self, tid):
         self.setWaitedTID(tid[:3] + self.calcNextCSNString(tid[3:]))
@@ -250,7 +331,13 @@ class MessageManager:
 
             if words[0] == 'stationID':
                 self.stationID = words[1]
-            elif words[0] == 'toto':
+            elif words[0] == 'otherStationID':
+                self.otherStationID = words[1]
+            elif words[0] == 'originatorAddress':
+                self.originatorAddress = words[1]
+            elif words[0] == 'otherAddress':
+                self.otherAddress = words[1]
+            elif words[0] == '':
                 pass
             elif words[0] == 'titi':
                 pass
@@ -294,8 +381,6 @@ class MessageManager:
             elif words[0] == 'ADDR':
                 self.adisInfos[header]['addr'] += [words[1]]
 
-            elif words[0] == 'ORIGIN':
-                self.adisInfos[header]['origin'] = words[1]
 
         #print self.adisOrder
         #print self.adisInfos
@@ -308,7 +393,6 @@ class MessageManager:
 
         for val in self.adisOrder:
             if re.compile(val).search(header):
-                self.originatorAddress = self.adisInfos[val]['origin']
                 self.priority = self.adisInfos[val]['pri']
                 self.destAddress = self.adisInfos[val]['addr']
                 if not rewrite:
@@ -317,7 +401,6 @@ class MessageManager:
                 return
 
         self.header = None
-        self.originatorAddress = None
         self.priority = None
         self.destAddress = None
         self.filingTime = None
@@ -327,7 +410,9 @@ class MessageManager:
         print "**************************** Infos du Message Manager *****************************"
         print "Header: %s" % self.header
         print "Station ID: %s" % self.stationID
+        print "Other Station ID: %s" % self.otherStationID
         print "Originator Address: %s" % self.originatorAddress
+        print "Other Address: %s" % self.otherAddress
         print "Priority: %s" % self.priority
         print "Destination Addresses: %s" % self.destAddress
         print "Filing Time: %s" % self.filingTime
@@ -351,7 +436,7 @@ class MessageManager:
 
         return CSNString
 
-    def nextCSN(self):
+    def nextCSN(self, number=None):
         """
         The CSN sequence number is comprised of four (4) digits, and shall run from
         0001 to 0000 (representing 10000), then start over at 0001. The number series and
@@ -359,7 +444,10 @@ class MessageManager:
         shall begin at the start of a new day (0001Z UTC) for each destination.
         """
         #FIXME: We will have to check time before setting the CSN
-        self.CSN = self.calcNextCSNString(self.CSN)
+        if number:
+            self.CSN = self.calcNextCSNString(number)
+        else:
+            self.CSN = self.calcNextCSNString(self.CSN)
 
     def setFilingTime(self):
         self.filingTime = time.strftime("%d%H%M")
@@ -370,7 +458,7 @@ if __name__ == "__main__":
 
     from MessageAFTN import MessageAFTN
     from DiskReader import DiskReader
-    from BulletinParser import BulletinParser
+    from MessageParser import MessageParser
 
     print "Longueur Max = %d" % MessageAFTN.MAX_TEXT_SIZE
 
@@ -381,7 +469,7 @@ if __name__ == "__main__":
     reader.sort()
     for file in reader.getFilesContent(8):
        print file
-       mm.setInfos(BulletinParser(file).extractHeader())
+       mm.setInfos(MessageParser(file).getHeader())
        mm.printInfos()
        if mm.header:
           myMessage = MessageAFTN(file, mm.stationID, mm.originatorAddress,mm.priority,
