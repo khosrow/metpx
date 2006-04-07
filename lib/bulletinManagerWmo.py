@@ -1,4 +1,10 @@
 # -*- coding: UTF-8 -*-
+"""
+MetPX Copyright (C) 2004-2006  Environment Canada
+MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+named COPYING in the root of the source directory tree.
+"""
+
 """Gestion des bulletins "WMO" """
 
 import bulletinManager, bulletinWmo, os, string
