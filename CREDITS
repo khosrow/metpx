@@ -24,10 +24,12 @@ Added segmenting of messages on reception.
 Louis-Phillippe.Theriault  ampersand ec.gc.ca -- Early Developer
 First pass at design, all the early proofs of concept.  First receiver, 
 He who chose Python over C.  First sender, and all the complex data 
-transformations necesary on receipt of messages.  Bulletin Collection.  
+transformations necesary on receipt of messages.  First pass at Bulletin Collection.  
 After the first pass, and some review, implemented a second pass design 
 with more OO methodologies.
 
+Kaveh.Asfar & Travis Tiegs  ampersand ec.gc.ca -- Developer.
+Team in Downsview worked on second pass at bulletin collection.
 
 Pierre.Michaud ampersand ec.gc.ca -- Early Designer/Developer
 Worked with Louis-Phillippe of the second pass design.  Developer of the first 
@@ -51,7 +53,6 @@ Alfred.Gagne ampersand ec.gc.ca -- He who knows the data.
 WMO messaging standards expert.  participated in specification effort, 
 also testing.
   
-
 Lambros.Stamadianos, Dave.Spiegl  ampersand ec.gc.ca 
   participated in specs for the precursor of this project.
 
