@@ -314,8 +314,12 @@ class TransceiverAFTN:
         if len(buf): 
             self.logger.debug('Raw Buffer: %s' % repr(buf))
             message, type = mm.parseReadBuffer(buf) # Only to find if it is an AFTN (SVC included) or Ack message
-            if message:
+            while message:
                 if type == 'AFTN':
+                    ##############################################################################################
+                    # An AFTN Message has been read on the socket. It can be a SVC Message or a 
+                    # Standard Message.
+                    ##############################################################################################
                     self.logger.debug("AFTN Message: %s" % repr(message))
                     mm.messageIn = MessageAFTN(self.logger)
                     mm.messageIn.setMessage(message)
@@ -324,17 +328,19 @@ class TransceiverAFTN:
                     self.logger.debug(mm.messageIn.textLines)
 
                     status = mm.isItPart(mm.messageIn.textLines)
+
                     # Not part of a big message, possibly a SVC message
                     if status == 0:
-                        #if mm.messageIn.getTextLines()[0][:3] == "SVC":
-                        #    self.logger.info("*********************** SERVICE MESSAGE *****************************")
-                        #    self.logger.info(str(mm.messageIn.getTextLines()))
-                        #    self.logger.info("********************* END SERVICE MESSAGE ***************************")
-                        #    suffix = 'SVC'
                         mp = MessageParser(mm.messageIn.textLines)
                         if mp.getType() == "SVC": 
+                            ##############################################################################################
+                            # A Service  Message has been read on the socket. 
+                            ##############################################################################################
                             suffix = 'SVC'
-                            self.logger.info("SVC Message: %s" % MessageParser.names[mp.serviceType])
+                            self.logger.info("SVC Message Received(%s): %s" %(mm.messageIn.getTransmitID() ,MessageParser.names[mp.serviceType]))
+                            self.logger.info("*********************** SERVICE MESSAGE *****************************")
+                            self.logger.info(str(mm.messageIn.getTextLines()))
+                            self.logger.info("********************* END SERVICE MESSAGE ***************************")
                         else:
                             suffix = ''
                         file = open(self.writePath + "/" + mm.messageIn.getName() + suffix, 'w')
@@ -363,7 +369,9 @@ class TransceiverAFTN:
                         #if mm.totAck == 5:
                         #    mm.ackUsed = False 
 
-                    # Is the CSN Order correct?
+                    ##############################################################################################
+                    # Is the CSN Order correct? Maybe Service Message would have to be sent?
+                    ##############################################################################################
                     tid = mm.messageIn.getTransmitID()
                     if tid == mm.getWaitedTID():
                         self.logger.debug("The TID received (%s) is in correct order" % tid)
@@ -376,22 +384,36 @@ class TransceiverAFTN:
                         # FIXME: A SVC Message should be sent here. Given the fact that we receive the same message
                         # again, can we conclude that it is a retransmission (because our ack has not been received)
                         # or an error in numbering message?
-                        if int(tid[3:])- int(mm.getWaitedTID()[3:]) < 0:
+                        diffCSN = int(tid[3:])- int(mm.getWaitedTID()[3:])
+                        if diffCSN < 0:
                             messageText = "SVC LR %s EXP %s" % (tid, mm.getWaitedTID())
-                            if not mm.getWaitingForAck():
-                                mm.partsToSend = [messageText]
-                                mm.completePartsToSend(mm.partsToSend)  
-                                mm.setFromDisk(False)
-                                self._writeMessageToSocket([mm.partsToSend[0]], False, mm.nextPart)
-                                mm.setFromDisk(True)
+
+                        # FIXME: This implementation is done with only a partial comprehension of how this 
+                        # message should work. Should be completed later...
+                        elif diffCSN > 0: 
+                            if diffCSN == 1:
+                                messageText = "SVC QTA MIS %s" % mm.getWaitedTID()
                             else:
-                                # We queue the message to send it after we receive the ack we wait for.
-                                self.logger.info("A service message (%s) will be queued" % messageText)
-                                mm.serviceQueue.append(messageText)
+                                lastCSN = "%04d" % (int(tid[3:]) - 1)
+                                messageText = "SVC QTA MIS %s-%s" % (mm.getWaitedTID(), lastCSN)
+
+                        if not mm.getWaitingForAck():
+                            mm.partsToSend = [messageText]
+                            mm.completePartsToSend(mm.partsToSend)  
+                            mm.setFromDisk(False)
+                            self._writeMessageToSocket([mm.partsToSend[0]], False, mm.nextPart)
+                            mm.setFromDisk(True)
+                        else:
+                            # We queue the message to send it after we receive the ack we wait for.
+                            self.logger.info("A service message (%s) will be queued" % messageText)
+                            mm.serviceQueue.append(messageText)
                             
                     mm.calcWaitedTID(tid)
                         
                 elif type == 'ACK':
+                    ##############################################################################################
+                    # An Ack Message has been read on the socket. 
+                    ##############################################################################################
                     self.logger.debug("Ack Message: %s" % repr(message))
                     strippedMessage = message[2:9]
                     mm.setLastAckReceived(strippedMessage)
@@ -406,8 +428,10 @@ class TransceiverAFTN:
                         if int(mm.getWaitingForAck()[3:]) - int(strippedMessage[3:]) == 1:
                             self.logger.error("Difference is 1 => Probably my original message + the one I resend have been hacked (Timing problem)")
 
-            else:
-                self.logger.debug("No complete message. It's ok. We will try to complete it in the next pass.")
+                
+                message, type = mm.parseReadBuffer("") # Only to find if it is an AFTN (SVC included) or Ack message
+                if not message and type:
+                    self.logger.debug("Message (type=%s) uncomplete. It's ok. We will try to complete it in the next pass." % type)
 
         else:
             # If we are here, it normally means the other side has hangup(not sure in this case, because I use
