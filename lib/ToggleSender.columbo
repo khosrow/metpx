@@ -1,0 +1,134 @@
+"""
+MetPX Copyright (C) 2004-2006  Environment Canada
+MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+named COPYING in the root of the source directory tree.
+"""
+
+#!/bin/sh
+#
+# %SUBSTITUTE_IDENT_PACKAGE_VERSION_BUILDID_STRING%
+#
+# This script is to be run when the pds user wants to toggle the sender of
+# a particular client from STARTED to STOPPED and vice versa.  It sends the
+# pdssender or pdssendertw process a SIGUSR1 signal.
+#
+# To run the script, the user simply enters:
+#
+#   ToggleSender client_id
+#
+#   where client_id is a currently active client identifier found in the
+#   PDSstartupinfo file.
+#
+# Modification History:
+#
+# 26 Apr 99 - set PDS_ROOT to /apps/pds
+# 18 Jan 01 - modified to include version information so that the ident
+#             command or "-v" would work and "-h" would display the usage.
+#
+# July 2003   IRW    Linux port.  Tweaked echos.  On Linux, "wc -l" uses a tab,
+#                    so replaced "grep foo bar | wc -l" with "grep -c foo bar".
+#-------------------------------------------------------------------------------
+# Usage()
+#-------------------------------------------------------------------------------
+Usage() {
+    echo "Usage: ${ScriptName} -v"
+    echo "             Displays version information."
+    echo ""
+    echo "   or: ${ScriptName} -h"
+    echo "             Displays usage information."
+    echo ""
+    echo "   or: ${ScriptName} client_id"
+}
+
+if [ "${PDS_ROOT}" = "" ]
+then
+    PDS_ROOT=/apps/pds; export PDS_ROOT
+fi
+ScriptName=`basename $0`
+
+#
+# 2001-Jan-18 A.Li - Modified so that "-v" would display version information,
+#                    and "-h" would display the usage.
+#
+set -- `getopt vh $*`
+if [ $? != "0" ]
+then
+    Usage
+    exit 1
+fi
+#
+# get the options from the command line
+#
+while [ $# -gt 0 ]
+do
+    case $1 in
+    -v)
+        echo "${ScriptName}:"
+        echo "     \%SUBSTITUTE_IDENT_PACKAGE_VERSION_BUILDID_STRING%"
+        exit 0;
+        ;;
+    -h)
+        Usage
+        exit 0;
+        ;;
+    --)
+        shift
+        break
+        ;;
+    esac
+done
+
+StartupFile=${PDS_ROOT}/info/PDSstartupinfo
+PDS_Host=`hostname`
+
+#
+# the ClientId is mandatory so look for it
+#
+if [ $# != "1" ] ; then
+   Usage
+   exit 1
+fi
+ClientId=$1
+#echo "...ClientId=${ClientId}"
+
+#
+# check to make sure that the client is in the StartupFile
+#
+Found=`grep "pdssender" ${StartupFile} | grep -c " ${ClientId} "`
+if [ "${Found}" != "1" ]
+then
+   echo "The client: '${ClientId}' is not in ${StartupFile}"
+   exit 1
+fi
+
+#
+# get the process's pid from the entry
+#
+senderpid=`grep "pdssender" ${StartupFile} | grep " ${ClientId} " | awk '{print $2}'`
+state=`grep "pdssender" ${StartupFile} | grep " ${ClientId} " | awk '{print $4}'`
+echo "Found: ClientId=${ClientId}, senderpid=${senderpid}, state=${state}"
+
+#
+# prompt for confirmation before sending the SIGUSR1 signal to the process
+#
+#ans=
+#echo
+#echo "Do you really want to toggle \"${ClientId}\" on \"${PDS_Host}\" ?"
+#echo -n "Please enter y to continue, any other response will abort: "
+#read ans
+#if [ "${ans}" = "y" ] ; then
+   #
+   # send the SIGUSR1 signal to senderpid
+   #
+   kill -s SIGUSR1 ${senderpid}
+   if [ "${state}" = "STARTED" ] ; then
+      echo ""
+      echo "\"${ClientId}\" will be stopped on \"${PDS_Host}\""
+   else 
+      echo ""
+      echo "\"${ClientId}\" will be started on \"${PDS_Host}\""
+   fi
+#else
+#   echo ""
+#   echo "${ScriptName} aborted"
+#fi
