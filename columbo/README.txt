@@ -9,10 +9,6 @@ Welcome in Columbo's World
 
 This software is divised in three pieces:
 
-ColumboCrimeScene (CCS): This piece of software runs on the machines (PDS's) to collect information.
+ColumboCrimeScene (CCS): This piece of software runs on the machines (backends) on which we want to collect information.
 ColumboInvestigationRoom (CIR): This piece of software analyses information coming from CCS and produce results.
 ColumboShow(CS): This piece of software presents the results.
-
-Last Working Version: columbo-1-1
-Last Working Version: columbo-1-2
-
