@@ -93,14 +93,6 @@ class MessageManager:
         self.ackUsed = True   # We can use ack or not
         self.totAck = 0       # Count the number of ack (testing purpose only)
 
-        # Read configuration infos
-        #if self.subscriber:
-        #    self.readConfig(AFTNPaths.ETC + "AFTN.conf")
-        #else:
-        #    self.readConfig(AFTNPaths.ETC + "AFTN_pro.conf")
-
-        self.createInfosDict(AFTNPaths.ETC + 'adisrout')
-
         # CSN verification (receiving)
         self.waitedTID = self.otherStationID + '0000'  # Initially (when the program start) we are not sure what TID is expected
 
@@ -374,48 +366,6 @@ class MessageManager:
                 pass
 
         config.close()
-
-    def createInfosDict(self, filename):
-        """
-        Read and parse the file (adisrout) containing informations needed by the sender
-        """
-        try:
-            adisFile = open(filename, 'r')
-        except IOError:
-            (type, value, tb) = sys.exc_info()
-            print "Type: %s Value: %s (Try to open adisrout)" % (type, value)
-            sys.exit(103)
-
-        infos = adisFile.readlines()
-        adisFile.close()
-
-        for line in infos:
-
-            if line.isspace(): # we skip blank line
-                continue
-
-            words = line.split()
-            if words[0] == 'HDR':
-                while len(words[1]) < 6:
-                    words[1] = words[1] + '?'
-                while len(words[2]) < 4:
-                    words[2] = words[2] + '?'
-            
-                header = words[1] + " " + words[2]
-                self.adisOrder.append(header)
-                self.adisInfos[header] = {}
-                self.adisInfos[header]['addr'] = []
-
-            elif words[0] == 'PRI':
-                self.adisInfos[header]['pri'] = words[1]
-
-            elif words[0] == 'ADDR':
-                self.adisInfos[header]['addr'] += [words[1]]
-
-
-        #print self.adisOrder
-        #print self.adisInfos
-        #print len(self.adisInfos)
 
     def setInfos(self, header, rewrite=False):
         """
