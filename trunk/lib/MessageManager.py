@@ -14,8 +14,9 @@
 import os, sys, time, commands, re, curses.ascii, re, pickle
 
 from MessageAFTN import MessageAFTN
+from DirectRoutingParser import DirectRoutingParser
 from DiskReader import DiskReader
-import AFTNPaths
+import AFTNPaths, PXPaths
 
 class MessageManager:
 
@@ -34,25 +35,36 @@ class MessageManager:
 
     """
 
-    def __init__(self, logger=None, subscriber=True):
+    def __init__(self, logger=None, subscriber=True, sourlient=None):
         
         AFTNPaths.normalPaths()
+        PXPaths.normalPaths()
 
-        self.logger = logger   # Logger object
-        self.subscriber = subscriber
+        self.logger = logger         # Logger object
+        self.subscriber = subscriber # Boolean indicating if this is a subscriber or a provider
+        self.sourlient = sourlient   # Sourlient object
+
+        self.stationID = sourlient.stationID             # Value read from config. file
+        self.otherStationID = sourlient.otherStationID   # Provider (MHS) Station ID
+        self.address = sourlient.address                 # 8-letter group identifying the message originator (CYHQUSER)
+        self.otherAddress = sourlient.otherAddress       # 8-letter group identifying the provider's address (CYHQMHSN)
+
+        # Parse routing infos contained in the routing table
+        self.drp = DirectRoutingParser(PXPaths.ETC + 'header2client.conf', self.sourlient.ingestor.clientNames, logger)
+        self.drp.parse()
+
+        self.adisInfos = {}    # Dict. (key => header, value => a dict with priority, origin, and destination addresses
+        self.adisOrder = []    # Ordering information about entries in adisInfos dictionary
+
         self.messageIn = None  # Last AFTN message received
         self.messageOut = None # Last AFTN message sent
         self.fromDisk = True   # Changed to False for Service Message created on the fly
-        self.adisInfos = {}    # Dict. (key => header, value => a dict with priority, origin, and destination addresses
-        self.adisOrder = []    # Ordering information about entries in adisInfos dictionary
+
         self.header = None     # Header of the bulletin for which we want to create an AFTN message
+
         self.type = None       # Message type. Value must be in ['AFTN', 'SVC', 'RF', 'RQ', None]
-        self.originatorAddress = None # 8-letter group identifying the message originator (CYHQUSER)
-        self.otherAddress = None  # 8-letter group identifying the provider's address (CYHQMHSN)
         self.priority = None   # Priority indicator (SS, DD, FF, GG or KK)
         self.destAddress = []  # 8-letter group, max. 21 addresses
-        self.stationID = None  # Value read from config. file
-        self.otherStationID = None # Provider (MHS) Station ID
         self.CSN = '0000'      # Channel sequence number, 4 digits (ex: 0003)
         self.filingTime = None # 6-digits DDHHMM (ex:140335) indicating date and time of filing the message for transmission.
         self.dateTime = None   # 8-digits DDHHMMSS (ex:14033608)
@@ -82,10 +94,10 @@ class MessageManager:
         self.totAck = 0       # Count the number of ack (testing purpose only)
 
         # Read configuration infos
-        if self.subscriber:
-            self.readConfig(AFTNPaths.ETC + "AFTN.conf")
-        else:
-            self.readConfig(AFTNPaths.ETC + "AFTN_pro.conf")
+        #if self.subscriber:
+        #    self.readConfig(AFTNPaths.ETC + "AFTN.conf")
+        #else:
+        #    self.readConfig(AFTNPaths.ETC + "AFTN_pro.conf")
 
         self.createInfosDict(AFTNPaths.ETC + 'adisrout')
 
@@ -97,6 +109,21 @@ class MessageManager:
 
         # Read Buffer management
         self.unusedBuffer = ''        # Part of the buffer that was not used
+
+    def addHeaderToMessage(self, message):
+        """
+        """
+        import dateLib
+        wmoMessages = []
+        addresses = message.destAddress
+        default = self.drp.aftnMap.get('DEFAULT')
+        timestamp = dateLib.getYYGGgg()
+
+        for address in addresses:
+            header = self.drp.aftnMap.get(address, default) + " " + address[0:4] + " " + timestamp
+            message.textLines.insert(0, header))
+            wmoMessages.append('\n'.join(message.textLines))
+        return wmoMessages
 
     def doSpecialOrders(self, path):
         # Stop, restart, reload, deconnect, connect could be put here?
