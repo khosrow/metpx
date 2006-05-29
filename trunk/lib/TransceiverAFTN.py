@@ -51,7 +51,8 @@ class TransceiverAFTN:
         self.portS = sourlient.portS                       # Sending port
         
         self.batch = sourlient.batch                       # Number of files we read in a pass (20)
-        self.timeout = sourlient.timeout                   # Timeout time in seconds (20 sec.)
+        self.timeout = sourlient.timeout                   # Timeout time in seconds (default = 10 seconds)
+        self.sleepBetweenConnect = int('10')               # Time (in seconds) between connection trials 
         self.slow = sourlient.slow                         # Sleeps are added when we want to be able to decrypt log entries
         self.igniter = None                                # Igniter object (link to pid)
 
@@ -133,6 +134,8 @@ class TransceiverAFTN:
             maxTrials = 5 
 
         while trials < maxTrials:
+            if trials == 12:
+                self.sleepBetweenConnect = 60
             socketSender = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             socketSender.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
             socketSender.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -150,10 +153,10 @@ class TransceiverAFTN:
                 sys.exit(1)
             except socket.error, e:
                 (type, value, tb) = sys.exc_info()
-                logger.error("Type: %s, Value: %s, Sleeping 5 seconds ..." % (type, value))
+                logger.error("Type: %s, Value: %s, Sleeping %d seconds ..." % (type, value, self.sleepBetweenConnect))
                 socketSender.close()
                 socketSender = None
-                time.sleep(5)
+                time.sleep(self.sleepBetweenConnect)
 
         return socketSender
 
@@ -344,7 +347,8 @@ class TransceiverAFTN:
                             # A Service  Message has been read on the socket. 
                             ##############################################################################################
                             suffix = 'SVC'
-                            self.logger.info("SVC Message Received(%s): %s (%s)" %(mm.messageIn.getTransmitID(), str(mm.messageIn.getTextLines()), MessageParser.names[mp.serviceType]))
+                            self.logger.info("SVC Message Received(%s): %s (%s)" % (mm.messageIn.getTransmitID(), str(mm.messageIn.getTextLines()), MessageParser.names.get(mp.serviceType,
+                                              "The service type of this message is unknown. Contact Ron Knight")))
                             #self.logger.info("*********************** SERVICE MESSAGE *****************************")
                             #self.logger.info(str(mm.messageIn.getTextLines()))
                             #self.logger.info("********************* END SERVICE MESSAGE ***************************")
