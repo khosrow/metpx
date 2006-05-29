@@ -24,6 +24,8 @@ class MessageParser:
     names[5] = 'AFTN invalid addressee indicator' # Only the AFTN MHS will generate this message
     names[6] = 'AFTN unknown addressee'           # Only the AFTN MHS will generate this message
     names[7] = 'AFTN unauthorized station'        # Only the AFTN MHS will generate this message
+    names[8] = 'AFTN Incorrect Station Address'   # Only the AFTN MHS will generate this message (Not in the ICD, Ron told me)
+
 
     def __init__(self, text):
         if type(text) == str:
@@ -108,6 +110,8 @@ class MessageParser:
             self.serviceType = 2 
         elif wordsFirstLine[1] == "QTA" and wordsFirstLine[2] == "OGN" and wordsFirstLine[4] == "CORRUPT":
             self.serviceType = 3 
+        elif wordsFirstLine[1] == "QTA" and wordsFirstLine[2] == "OGN" and wordsFirstLine[4] == "INCORRECT":
+            self.serviceType = 8 
 
         if len(self.textLines) >= 3:
             wordsThirdLine = self.textLines[2].split()
