@@ -14,6 +14,7 @@
 import os, sys, time, commands, re, curses.ascii, re, pickle
 
 from MessageAFTN import MessageAFTN
+from bulletinManager import bulletinManager
 from DirectRoutingParser import DirectRoutingParser
 from DiskReader import DiskReader
 import AFTNPaths, PXPaths
@@ -44,25 +45,37 @@ class MessageManager:
         self.subscriber = subscriber # Boolean indicating if this is a subscriber or a provider
         self.sourlient = sourlient   # Sourlient object
 
+        self.name = sourlient.name                       # Transceiver's name
         self.stationID = sourlient.stationID             # Value read from config. file
         self.otherStationID = sourlient.otherStationID   # Provider (MHS) Station ID
         self.address = sourlient.address                 # 8-letter group identifying the message originator (CYHQUSER)
         self.otherAddress = sourlient.otherAddress       # 8-letter group identifying the provider's address (CYHQMHSN)
 
-        # Parse routing infos contained in the routing table
-        self.drp = DirectRoutingParser(PXPaths.ETC + 'header2client.conf', self.sourlient.ingestor.clientNames, logger)
-        self.drp.parse()
+        if self.name == 'aftnPro':
+            PXPaths.ROUTING_TABLE = '/apps/px/aftn/etc/header2client.conf.test.pro'
 
-        self.adisInfos = {}    # Dict. (key => header, value => a dict with priority, origin, and destination addresses
-        self.adisOrder = []    # Ordering information about entries in adisInfos dictionary
+        self.bullManager = bulletinManager(PXPaths.RXQ + self.name,
+                                      self.logger,
+                                      PXPaths.RXQ + self.name,
+                                      9999,
+                                      '\n',
+                                      self.sourlient.extension,
+                                      PXPaths.ROUTING_TABLE,
+                                      None,
+                                      self.sourlient) 
+
+        # Parse routing infos contained in the routing table
+        #self.drp = DirectRoutingParser(PXPaths.ROUTING_TABLE, self.sourlient.ingestor.clientNames, logger)
+        #self.drp.parse()
+        self.drp = self.bullManager.drp
+        self.priorities = {'1':'FF', '2':'FF', '3':'GG', '4':'GG', '5':'GG'}
 
         self.messageIn = None  # Last AFTN message received
         self.messageOut = None # Last AFTN message sent
         self.fromDisk = True   # Changed to False for Service Message created on the fly
 
-        self.header = None     # Header of the bulletin for which we want to create an AFTN message
-
         self.type = None       # Message type. Value must be in ['AFTN', 'SVC', 'RF', 'RQ', None]
+        self.header = None     # Message WMO Header
         self.priority = None   # Priority indicator (SS, DD, FF, GG or KK)
         self.destAddress = []  # 8-letter group, max. 21 addresses
         self.CSN = '0000'      # Channel sequence number, 4 digits (ex: 0003)
@@ -102,8 +115,16 @@ class MessageManager:
         # Read Buffer management
         self.unusedBuffer = ''        # Part of the buffer that was not used
 
+    def ingest(self, bulletin):
+        self.bullManager.writeBulletinToDisk(bulletin)
+
     def addHeaderToMessage(self, message):
         """
+        When no WMO header is present in the text part of an AFTN Message, we will create one 
+        for each destination address in the message.
+        ex: if self.drp.aftnMap['CWAOWXYZ'] == 'SACN32', the header will be 'SACN32 CWAO YYGGgg'
+        where YY= day of the month, GG=hours and gg=minutes
+        This method is only used at reception.
         """
         import dateLib
         wmoMessages = []
@@ -111,10 +132,19 @@ class MessageManager:
         default = self.drp.aftnMap.get('DEFAULT')
         timestamp = dateLib.getYYGGgg()
 
+        destLine = message.createDestinationAddressLine().strip() 
+        originLine = message.createOriginAddressLine().strip() 
+
+        destOriginLines = [destLine, originLine]
+
+        self.logger.debug("Addresses: %s" % addresses)
+
         for address in addresses:
             header = self.drp.aftnMap.get(address, default) + " " + address[0:4] + " " + timestamp
-            message.textLines.insert(0, header))
-            wmoMessages.append('\n'.join(message.textLines))
+            headerBlock = [header] + destOriginLines
+
+            #self.logger.info("Header in addHeader: %s" % header)
+            wmoMessages.append('\n'.join(headerBlock + message.textLines))
         return wmoMessages
 
     def doSpecialOrders(self, path):
@@ -178,6 +208,14 @@ class MessageManager:
             except OSError, e:
                 (type, value, tb) = sys.exc_info()
                 self.logger.error("Unable to unlink %s ! Type: %s, Value: %s" % (dataFromFiles[index][1], type, value))
+
+    def deleteFile(self,file):
+        try:
+            os.unlink(dataFromFiles[0][1])
+            self.logger.debug("%s has been erased", os.path.basename(dataFromFiles[index][1]))
+        except OSError, e:
+            (type, value, tb) = sys.exc_info()
+            self.logger.error("Unable to unlink %s ! Type: %s, Value: %s" % (dataFromFiles[index][1], type, value))
 
     def isFromDisk(self):
         return self.fromDisk
@@ -369,30 +407,32 @@ class MessageManager:
 
     def setInfos(self, header, rewrite=False):
         """
-        Informations obtained in the file (adisrout) is assigned to instance variables
+        Informations obtained in the DirectRoutingParser object are assigned to instance variables.
+        This method is only used when SENDING messages.
         """
-
-        for val in self.adisOrder:
-            if re.compile(val).search(header):
-                self.priority = self.adisInfos[val]['pri']
-                self.destAddress = self.adisInfos[val]['addr']
-                if not rewrite:
-                    self.setFilingTime()
-                    self.nextCSN()
-                return
-
-        self.header = None
-        self.priority = None
-        self.destAddress = None
-        self.filingTime = None
-        #print "This header (%s) is not in adisrout!" % header
+        if header in self.drp.routingInfos:
+            self.priority = self.priorities[self.drp.getHeaderPriority(header)]
+            self.destAddress = self.drp.getHeaderSubClients(header).get(self.name, [])
+            if self.destAddress == []:
+                self.logger.warning("No destination address for header %s and client %s" % (header, self.name))
+                return False
+            if not rewrite:
+                self.setFilingTime()
+                self.nextCSN()
+            return True
+        elif header == None:
+            self.logger.warning("No header found in the message")
+            return False
+        else:
+            self.logger.warning("Header %s is not in the routing table" % (header))
+            return False
 
     def printInfos(self):
         print "**************************** Infos du Message Manager *****************************"
         print "Header: %s" % self.header
         print "Station ID: %s" % self.stationID
         print "Other Station ID: %s" % self.otherStationID
-        print "Originator Address: %s" % self.originatorAddress
+        print "Originator Address: %s" % self.address
         print "Other Address: %s" % self.otherAddress
         print "Priority: %s" % self.priority
         print "Destination Addresses: %s" % self.destAddress
@@ -437,24 +477,47 @@ class MessageManager:
 
 if __name__ == "__main__":
 
+    import sys
+    sys.path.insert(1,sys.path[0] + '/../../lib/importedLibs')
+
+    from Logger import *
     from MessageAFTN import MessageAFTN
     from DiskReader import DiskReader
     from MessageParser import MessageParser
+    from Sourlient import Sourlient
+
+    logger = Logger('/apps/px/aftn/log/mm.log', 'DEBUG', 'mm')
+    logger = logger.getLogger()
+
+    sourlient = Sourlient('aftn', logger)
 
     print "Longueur Max = %d" % MessageAFTN.MAX_TEXT_SIZE
 
-    mm = MessageManager()
+    mm = MessageManager(logger, True, sourlient)
 
+   
     reader = DiskReader("/apps/px/bulletins", 8)
     reader.read()
     reader.sort()
+    """
     for file in reader.getFilesContent(8):
        print file
        mm.setInfos(MessageParser(file).getHeader())
        mm.printInfos()
        if mm.header:
-          myMessage = MessageAFTN(file, mm.stationID, mm.originatorAddress,mm.priority,
+          myMessage = MessageAFTN(logger, file, mm.stationID, mm.originatorAddress,mm.priority,
                                   mm.destAddress, mm.CSN, mm.filingTime, mm.dateTime)
 
           myMessage.printInfos()
 
+    """
+    for file in reader.getFilesContent(8):
+          #mm.setInfos('AACN02 CWAO13')
+          myMessage = MessageAFTN(logger, file, mm.stationID, mm.address, 'GG',
+                                  ['BIRDZQZZ', 'CYYZOWAC'], mm.CSN, '121800' , '12180001')
+          #myMessage = MessageAFTN(logger, file, mm.stationID, mm.address, mm.priority,
+          #                        mm.destAddress, mm.CSN, mm.filingTime, mm.dateTime)
+
+          myMessage.printInfos()
+          print mm.addHeaderToMessage(myMessage)
+          

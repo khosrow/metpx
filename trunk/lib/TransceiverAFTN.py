@@ -6,7 +6,7 @@
 #
 # Date: 2005-10-14
 #
-# Description:
+# Description: 
 #
 #############################################################################################
 
@@ -18,15 +18,13 @@ sys.path.insert(1,sys.path[0] + '/../etc')
 sys.path.insert(1,sys.path[0] + '/../../lib')
 sys.path.insert(1,sys.path[0] + '/../../lib/importedLibs')
 
-print sys.path
-
 from DiskReader import DiskReader
 from MessageManager import MessageManager
 from MessageParser import MessageParser
 from MessageAFTN import MessageAFTN
 from AckAFTN import AckAFTN
 from TextSplitter import TextSplitter
-import AFTNPaths
+import AFTNPaths, PXPaths
 
 class TransceiverAFTN:
     """
@@ -37,54 +35,62 @@ class TransceiverAFTN:
 
     Subscriber IP: 192.168.250.10 255.255.255.0
     """
-    def __init__(self, remoteHost='localhost', portR=56550, portS=5160, logger=None, subscriber=True):
+    #def __init__(self, host='localhost', portR=56550, portS=5160, logger=None, subscriber=True):
+    def __init__(self, sourlient):
         # FIXME: Many of these variable will be accessed directly from Source object (or Client?)
         # when coding will be more advanced.
 
         AFTNPaths.normalPaths()
-        self.subscriber = subscriber                       # Determine if it will act like a subscriber or a provider(MHS)
+        PXPaths.normalPaths()
+        self.sourlient = sourlient                         # Sourlient (Source/Client) object containing configuration infos.
 
-        self.remoteHost = remoteHost                       # Remote host (name or ip)
-        self.portR = portR                                 # Receiving port
-        self.portS = portS                                 # Sending port
-        self.logger = logger                               # Logger object
-        self.mm = MessageManager(logger, subscriber)       # Sending Message (AFTN) Manager
-        self.maxLength = 1000000                           # Maximum length that we can transmit on the link
+        self.logger = sourlient.logger                     # Logger object
+        self.subscriber = sourlient.subscriber             # Determine if it will act like a subscriber or a provider(MHS)
+        self.host = sourlient.host                         # Remote host (name or ip)
+        self.portR = sourlient.portR                       # Receiving port
+        self.portS = sourlient.portS                       # Sending port
+        
+        self.batch = sourlient.batch                       # Number of files we read in a pass (20)
+        self.timeout = sourlient.timeout                   # Timeout time in seconds (20 sec.)
+        self.slow = sourlient.slow                         # Sleeps are added when we want to be able to decrypt log entries
+        self.igniter = None                                # Igniter object (link to pid)
+
+        self.mm = MessageManager(self.logger, self.subscriber, self.sourlient)  # AFTN Protocol is implemented in MessageManager Object
         self.remoteAddress = None                          # Remote address (where we will connect())
-        self.timeout = 20.0                                # Timeout time in seconds
         self.socket = None                                 # Socket object
-        self.batch = 10
         self.dataFromFiles = []
-        if subscriber:
-            self.readPath = AFTNPaths.TO_SEND              # Where we read messages to send
+
+        if self.subscriber:
             self.writePath = AFTNPaths.RECEIVED            # Where we write messages we receive
             self.archivePath = AFTNPaths.SENT              # Where we put sent messages
             self.specialOrdersPath = AFTNPaths.SPECIAL_ORDERS
         else:
-            self.readPath = AFTNPaths.TO_SEND_PRO              # Where we read messages to send
-            self.writePath = AFTNPaths.RECEIVED_PRO            # Where we write messages we receive
-            self.archivePath = AFTNPaths.SENT_PRO              # Where we put sent messages
+            self.writePath = AFTNPaths.RECEIVED_PRO        # Where we write messages we receive
+            self.archivePath = AFTNPaths.SENT_PRO          # Where we put sent messages
             self.specialOrdersPath = AFTNPaths.SPECIAL_ORDERS_PRO
 
-        self.reader = DiskReader(self.readPath, self.batch, False, False, 0, False, self.logger)
-        self.debug = True                                  # Debugging switch
+        self.reader = DiskReader(PXPaths.TXQ + self.sourlient.name, self.sourlient.batch,
+                                 self.sourlient.validation, self.sourlient.patternMatching,
+                                 self.sourlient.mtime, True, self.logger, eval(self.sourlient.sorter), self.sourlient)
+        
+        self.debug = True  # Debugging switch
         
         self.totBytes = 0
 
-        self.printInitInfos()
+        #self.printInitInfos()
         self.makeConnection()
+        #self.run()
 
-        self.run()
+    def setIgniter(self, igniter):
+        self.igniter = igniter
 
     def printInitInfos(self):
         print("********************* Init. Infos ****************************")
-        print("Remote Host: %s" % self.remoteHost)
+        print("Remote Host: %s" % self.host)
         print("Port R: %s" % self.portR)
         print("Port S: %s" % self.portS)
         print("Remote Address: %s" % self.remoteAddress)
-        print("Max. Length: %i" % self.maxLength)
         print("Timeout: %4.1f" % self.timeout)
-        print("Read Path: %s" % self.readPath)
         print("Write Path: %s" % self.writePath)
         print("Subscriber: %s" % self.subscriber)
         print("**************************************************************")
@@ -98,21 +104,21 @@ class TransceiverAFTN:
                 #self.run()
             else:
                 # The Subscriber try to connect to the Provider(MHS)
-                self.remoteAddress = (self.remoteHost, self.portS)
+                self.remoteAddress = (self.host, self.portS)
                 self.logger.info("The subscriber will try to connect to MHS(%s)" % str(self.remoteAddress))
                 self.socket = self._connect(self.remoteAddress, self.logger)
                 #self.run()
 
         else: # Provider(MHS) case
             # The Provider first try to connect to the Subscriber
-            self.remoteAddress = (self.remoteHost, self.portR)
+            self.remoteAddress = (self.host, self.portS)
             self.socket = self._connect(self.remoteAddress, self.logger)
             if self.socket:
                 self.logger.info("Provider has completed the connection")
                 #self.run()
             else:
                 # The Provider(MHS) listens for a connection from Subscriber
-                self.socket = self._listen(self.portS, logger)
+                self.socket = self._listen(self.portR, self.logger)
                 if self.socket:
                     self.logger.info("Provider has been connected by the subscriber")
                     #self.run()
@@ -282,8 +288,9 @@ class TransceiverAFTN:
             self.dataFromFiles = self.reader.getFilenamesAndContent(self.batch) 
         # If it is still empty, we quit
         if not len(self.dataFromFiles):
-            self.logger.warning("No data to read on the disk")
-            time.sleep(2)
+            #self.logger.warning("No data to read on the disk")
+            if self.slow:
+                time.sleep(2)
         else:
             # Break the bulletin in the number of appropriate parts (possibly only one)
             self.mm.partsToSend = TextSplitter(self.dataFromFiles[0][0], MessageAFTN.MAX_TEXT_SIZE, MessageAFTN.ALIGNMENT, MessageAFTN.TEXT_SPECIFIC_OVERHEAD).breakLongText()
@@ -337,19 +344,33 @@ class TransceiverAFTN:
                             # A Service  Message has been read on the socket. 
                             ##############################################################################################
                             suffix = 'SVC'
-                            self.logger.info("SVC Message Received(%s): %s" %(mm.messageIn.getTransmitID() ,MessageParser.names[mp.serviceType]))
-                            self.logger.info("*********************** SERVICE MESSAGE *****************************")
-                            self.logger.info(str(mm.messageIn.getTextLines()))
-                            self.logger.info("********************* END SERVICE MESSAGE ***************************")
-                        else:
+                            self.logger.info("SVC Message Received(%s): %s (%s)" %(mm.messageIn.getTransmitID(), str(mm.messageIn.getTextLines()), MessageParser.names[mp.serviceType]))
+                            #self.logger.info("*********************** SERVICE MESSAGE *****************************")
+                            #self.logger.info(str(mm.messageIn.getTextLines()))
+                            #self.logger.info("********************* END SERVICE MESSAGE ***************************")
+
+                        elif mp.getType() == "AFTN":
                             suffix = ''
+                            if mp.getHeader(): 
+                                # Only one message will be in messages
+                                messages = ['\n'.join(mm.messageIn.textLines)] 
+                            else:
+                                # Create headers before ingesting
+                                messages = mm.addHeaderToMessage(mm.messageIn)
+
+                            # Ingest in met px
+                            for m in messages:
+                                mm.ingest(m)
+
+                        # We keep one copy of all received messages in a special AFTN directory
                         file = open(self.writePath + "/" + mm.messageIn.getName() + suffix, 'w')
                         for line in mm.messageIn.textLines:
                             file.write(line + '\n')
                         file.close()
+
                     # General part of a big message
                     elif status == 1:
-                        self.logger.debug("We are ing section 'General part of a big message'")
+                        self.logger.debug("We are in section 'General part of a big message'")
                         pass
                     # Last part of a big message
                     elif status == -1:
@@ -359,9 +380,12 @@ class TransceiverAFTN:
                         file.close()
                         mm.receivedParts = []
 
+                        # We must ingest the bulletin contained in the message in the px system
+                        mm.ingest(mm.messageIn)
+
                     # FIXME: The number of bytes include the ones associated to the protocol overhead,
                     # maybe a simple substraction should do the job.
-                    self.logger.info("(%i Bytes) Message %s has been received" % (len(message), mm.messageIn.getName()))
+                    self.logger.info("(%i Bytes) Message %s has been received" % (len(mm.messageIn.getTextString()), mm.messageIn.getName()))
                     
                     if mm.ackUsed:
                         self._writeAckToSocket(mm.messageIn.getTransmitID())
@@ -421,11 +445,13 @@ class TransceiverAFTN:
                         mm.setWaitingForAck(None)
                         mm.resetSendingInfos()
                         mm.updatePartsToSend()
-                        self.logger.info("Ack received is the ack we wait for: %s" % strippedMessage)
+                        self.logger.debug("Ack received is the ack we wait for: %s" % strippedMessage)
                     else:
-                        # FIXME
+                        # FIXME: When deconnexion occurs, it is possible that we received an ack for a previously sent message???
                         self.logger.error("Ack received (%s) is not the ack we wait for: %s" % (strippedMessage, mm.getWaitingForAck()))
-                        if int(mm.getWaitingForAck()[3:]) - int(strippedMessage[3:]) == 1:
+                        if mm.getWaitingForAck() == None:
+                            pass
+                        elif int(mm.getWaitingForAck()[3:]) - int(strippedMessage[3:]) == 1:
                             self.logger.error("Difference is 1 => Probably my original message + the one I resend have been hacked (Timing problem)")
 
                 
@@ -468,13 +494,15 @@ class TransceiverAFTN:
 
             for index in range(len(data)):
                 if nextPart == 0:
+                    # We will have access to the first part of the message here (big or not)
                     mp = MessageParser(data[index])
                     mm.header, mm.type = mp.getHeader(), mp.getType()
                     self.logger.debug("Header: %s, Type: %s" % (mm.header, mm.type))
                 if mm.header== None and mm.type==None:
                     self.logger.info(data[index])
                     self.logger.error("Header %s is not in adisrout" % mm.header)
-                    time.sleep(10)
+                    if self.slow:
+                        time.sleep(10)
                     #self.deleteFile(self.reader.sortedFiles[index])
                     continue
                 elif mm.header == None and mm.type=='SVC':
@@ -482,20 +510,34 @@ class TransceiverAFTN:
                     # If so, the CSN must not change!
                     mm.setFilingTime()
                     mm.nextCSN()
-                    messageAFTN = MessageAFTN(self.logger, data[index], mm.stationID, mm.originatorAddress, MessageAFTN.PRIORITIES[2],
+                    messageAFTN = MessageAFTN(self.logger, data[index], mm.stationID, mm.address, MessageAFTN.PRIORITIES[2],
                                               [mm.otherAddress], mm.CSN, mm.filingTime, mm.dateTime)
                     messageAFTN.setLogger(None)
                     mm.archiveObject(self.archivePath + '/' + mm.CSN, messageAFTN)
                 else:
-                    mm.setInfos(mm.header, rewrite)
-                    messageAFTN = MessageAFTN(self.logger, data[index], mm.stationID, mm.originatorAddress, mm.priority,
+                    # True if mm.header is in the routing table with destination addresses
+                    if mm.header == None: mm.header = 'SACN31 CWAO'
+                    if mm.setInfos(mm.header, rewrite):
+                        messageAFTN = MessageAFTN(self.logger, data[index], mm.stationID, mm.address, mm.priority,
                                               mm.destAddress, mm.CSN, mm.filingTime, mm.dateTime)
-                    messageAFTN.setLogger(None)
+                        messageAFTN.setLogger(None)
+                    else:
+                        if mm.isFromDisk():
+                            try:
+                                self.logger.warning("%s has been erased", os.path.basename(self.dataFromFiles[0][1]))
+                                os.unlink(self.dataFromFiles[0][1])
+                            except OSError, e:
+                                (type, value, tb) = sys.exc_info()
+                                self.logger.error("Unable to unlink %s ! Type: %s, Value: %s" % (self.dataFromFiles[0][1], type, value))
+                            del self.dataFromFiles[0]
+                            mm.clearPartsToSend()
 
-                    if not rewrite:
-                        mm.archiveObject(self.archivePath + '/' + mm.CSN, messageAFTN)
-                    #tutu = mm.unarchiveObject(self.archivePath + '/' + mm.CSN)
-                    #print tutu
+                        continue
+
+                if not rewrite:
+                    mm.archiveObject(self.archivePath + '/' + mm.CSN, messageAFTN)
+                #tutu = mm.unarchiveObject(self.archivePath + '/' + mm.CSN)
+                #print tutu
 
                 nbBytesToSend = len(messageAFTN.message)
                 while nbBytesToSend > 0:
@@ -535,8 +577,8 @@ class TransceiverAFTN:
                             (type, value, tb) = sys.exc_info()
                             self.logger.error("Unable to unlink %s ! Type: %s, Value: %s" % (self.dataFromFiles[0][1], type, value))
                         del self.dataFromFiles[0]
-                
-                time.sleep(1)
+                if self.slow: 
+                    time.sleep(1)
         else:
             time.sleep(1)
 
@@ -544,6 +586,7 @@ class TransceiverAFTN:
 if __name__ == "__main__":
     from Logger import Logger
     from MessageAFTN import MessageAFTN
+    from Sourlient import Sourlient
     import curses.ascii
 
     """
@@ -567,9 +610,11 @@ if __name__ == "__main__":
     if sys.argv[1] == "sub":
         logger = Logger('/apps/px/aftn/log/subscriber.log', 'DEBUG', 'Sub')
         logger = logger.getLogger()
+        sourlient = Sourlient('aftn', logger)
         #subscriber = TransceiverAFTN('localhost', 56550, 5160, logger)
         #subscriber = TransceiverAFTN('192.168.250.3', 56550, 5160, logger)
-        subscriber = TransceiverAFTN(logger=logger)
+        subscriber = TransceiverAFTN(sourlient)
+        subscriber.run()
 
 
         #print TransceiverAFTN.getStates(63)
@@ -577,8 +622,11 @@ if __name__ == "__main__":
     elif sys.argv[1] == "pro":
         logger = Logger('/apps/px/aftn/log/provider.log', 'DEBUG', 'Pro')
         logger = logger.getLogger()
+        sourlient = Sourlient('aftnPro', logger)
+
         #provider = TransceiverAFTN('localhost', 5160, 56550, logger, False)
-        provider = TransceiverAFTN(logger=logger, subscriber=False)
+        provider = TransceiverAFTN(sourlient)
+        provider.run()
 
     """
     for i in range(64):

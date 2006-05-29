@@ -11,7 +11,12 @@
 #############################################################################################
 
 """
-import os, commands, re, curses.ascii
+import os, sys, commands, re, curses.ascii
+
+sys.path.insert(1,sys.path[0] + '/../lib')
+sys.path.insert(1,sys.path[0] + '/../etc')
+sys.path.insert(1,sys.path[0] + '/../../lib')
+sys.path.insert(1,sys.path[0] + '/../../lib/importedLibs')
 
 class MessageAFTN:
 
@@ -50,7 +55,7 @@ class MessageAFTN:
                   '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
                   '-', '?', ':', '(', ')', '.', ',', "'", '=', '/', '+', '"']
 
-    def __init__(self, logger, text=None, stationID=None, originatorAddress=None, priority=None, destAddress=[],
+    def __init__(self, logger, text=None, stationID=None, originatorAddress=None, priority=None, destAddress=None,
                  CSN=None, filingTime=None, dateTime=None):
 
         # The logger object
@@ -68,8 +73,8 @@ class MessageAFTN:
         # Parts of Destination address line (ex:GG CYYCYFYX EGLLZRZX<CR><LF>)
         #self.regexDestinationAddressLine = re.compile(
         self.destinationAddressLine = None
-        self.priority = priority            # Priority indicator (SS, DD, FF, GG or KK)
-        self.destAddress = destAddress      # 8-letter group, max. 21 addresses
+        self.priority = priority             # Priority indicator (SS, DD, FF, GG or KK)
+        self.destAddress = destAddress or [] # 8-letter group, max. 21 addresses
 
         # Parts of Origin address line (ex:140335 CYEGYFYX<CR><LF>)
         #self.regexOriginAddressLine = re.compile(r'^
@@ -96,7 +101,10 @@ class MessageAFTN:
         self.messageLines = []
 
         if text is not None:
+            self.textString = text
             self.setText(text)
+        else:
+            self.textString = None
 
         if stationID and CSN is not None:
             self.transmitID = stationID + CSN
@@ -109,6 +117,17 @@ class MessageAFTN:
 
     def getTransmitID(self):
         return self.transmitID
+
+    def getName1(self):
+        words = self.textLines[0].split()
+        if len(words) >= 3:
+            firstWords = words[0] + '_' + words[1] + '_' + words[2]
+        elif len(words) == 2:
+            firstWords = words[0] + '_' + words[1]
+        elif len(words) == 1:
+            firstWords = words[0]
+
+        return "%s_%s_%s" % (self.transmitID, self.dateTime, firstWords) 
 
     def getName(self):
         return "%s_%s_%s" % (self.dateTime, self.stationID, self.CSN)
@@ -195,6 +214,7 @@ Message (repr):
 
         print "Text Block: %s" % self.textBlock
         print "Text lines: %s" % self.textLines
+        print "Text string: %s" % self.textString
 
         print "Message: %s" % self.message
         print "Message Lines: %s" % self.messageLines
@@ -208,6 +228,9 @@ Message (repr):
 
     def setText(self, textString):
         self.textLines = textString.splitlines()
+
+    def getTextString(self):
+        return self.textString
 
     def getTextLines(self):
         return self.textLines
@@ -277,6 +300,7 @@ Message (repr):
         if self.messageLines[3][0] == MessageAFTN.STX and self.messageLines[-1] == MessageAFTN.END_OF_MESSAGE:
             self.textLines = self.messageLines[3:-1]   # Remove END_OF_MESSAGE line
             self.textLines[0] = self.textLines[0][1:]  # Remove <STX> char
+            self.textString = '\n'.join(self.textLines)
             return 1
         else:
             if self.logger:
@@ -290,8 +314,8 @@ Message (repr):
 
     def _createHeader(self):
         self.headingLine = self._createHeadingLine()
-        self.destinationAddressLine = self._createDestinationAddressLine()
-        self.originAddressLine = self._createOriginAddressLine()
+        self.destinationAddressLine = self.createDestinationAddressLine()
+        self.originAddressLine = self.createOriginAddressLine()
 
         return self.headingLine + self.destinationAddressLine + self.originAddressLine
 
@@ -299,11 +323,13 @@ Message (repr):
         #print "HeadingLine: %s %s %s%s" % (MessageAFTN.SOH, self.transmitID, self.dateTime, MessageAFTN.ALIGNMENT)
         return "%s %s %s%s" % (MessageAFTN.SOH, self.transmitID, self.dateTime, MessageAFTN.ALIGNMENT)
 
-    def _createDestinationAddressLine(self):
+    def createDestinationAddressLine(self):
         addressLine = ""
 
         if len(self.destAddress) == 0:
-            print "PROBLEM: No Destination Address"
+
+            if self.logger:
+                self.logger.error("No destination addresses for this AFTN Message")
 
         for address in self.destAddress:
             addressLine += " " + address
@@ -311,7 +337,7 @@ Message (repr):
         addressLine = self.priority + addressLine + MessageAFTN.ALIGNMENT
         return addressLine
 
-    def _createOriginAddressLine(self):
+    def createOriginAddressLine(self):
         #print "Origin Line: %s %s%s" % (self.filingTime, self.originatorAddress, MessageAFTN.ALIGNMENT)
         return "%s %s%s" % (self.filingTime, self.originatorAddress, MessageAFTN.ALIGNMENT)
 
@@ -326,6 +352,7 @@ Message (repr):
 
 if __name__ == "__main__":
 
+    from Logger import Logger
     """
     from DiskReader import DiskReader
 
@@ -348,7 +375,9 @@ if __name__ == "__main__":
     print myMessage.textLines
 
     """
-    myMessage = MessageAFTN()
+    logger = Logger('/apps/px/aftn/log/messageAFTN.log', 'DEBUG', 'message')
+    logger = logger.getLogger()
+    myMessage = MessageAFTN(logger)
 
     myMessage.message = myMessage.SOH + " ABC0044 14033608" + myMessage.ALIGNMENT + "GG CYYCYFYX AAAABBBB CCCCDDDD" + myMessage.ALIGNMENT + \
                      "140335 CYEGYFYX" + myMessage.ALIGNMENT + myMessage.STX + "04227 NOTAMN CYYC CALGARY INTL\r\n" + \
@@ -367,7 +396,7 @@ if __name__ == "__main__":
     print myMessage.destAddress         # 8-letter group, max. 21 addresses
     print myMessage.filingTime          # 6-digits DDHHMM (ex:140335) indicating date and time of filing the message for transmission.
     print myMessage.originatorAddress   # 8-letter group identifying the message originator (CYEGYFYX)
-    print myMessage.textLines                #
+    print "TEXTLINES: %s" % myMessage.textLines                #
 
 
     message = myMessage.createMessage()
