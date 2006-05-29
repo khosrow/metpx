@@ -26,7 +26,6 @@ class MessageParser:
     names[7] = 'AFTN unauthorized station'        # Only the AFTN MHS will generate this message
     names[8] = 'AFTN Incorrect Station Address'   # Only the AFTN MHS will generate this message (Not in the ICD, Ron told me)
 
-
     def __init__(self, text):
         if type(text) == str:
             self.text = text
