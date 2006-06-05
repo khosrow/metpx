@@ -334,7 +334,13 @@ class TransceiverAFTN:
                     mm.messageIn = MessageAFTN(self.logger)
                     mm.messageIn.setMessage(message)
                     if not mm.messageIn.messageToValues():
+                        # Here we have a problem because our parser is unable to parse the message. We print the message,
+                        # get the next message if present and quit the method (no ack sent, no tid verification)
                         self.logger.error("Method MessageAFTN.messageToValues() has not worked correctly (returned 0)")
+                        self.logger.error(mm.messageIn.textLines)
+                        message, type = mm.parseReadBuffer("") # Only to find if it is an AFTN (SVC included) or Ack message
+                        continue
+
                     self.logger.debug(mm.messageIn.textLines)
 
                     status = mm.isItPart(mm.messageIn.textLines)
@@ -382,10 +388,24 @@ class TransceiverAFTN:
                         for line in mm.receivedParts:
                             file.write(line + '\n')
                         file.close()
-                        mm.receivedParts = []
 
                         # We must ingest the bulletin contained in the message in the px system
-                        mm.ingest(mm.messageIn)
+                        lines = [line.strip() for line in mm.receivedParts]
+                        mp = MessageParser(lines)
+
+                        if mp.getHeader(): 
+                            # Only one message will be in messages
+                            messages = ['\n'.join(lines)] 
+                        else:
+                            # Create headers before ingesting
+                            messages = mm.addHeaderToMessage(mm.messageIn, lines)
+
+                        # Ingest in met px
+                        for m in messages:
+                            mm.ingest(m)
+
+                        mm.receivedParts = []
+
 
                     # FIXME: The number of bytes include the ones associated to the protocol overhead,
                     # maybe a simple substraction should do the job.
@@ -464,11 +484,19 @@ class TransceiverAFTN:
                     self.logger.debug("Message (type=%s) uncomplete. It's ok. We will try to complete it in the next pass." % type)
 
         else:
-            # If we are here, it normally means the other side has hangup(not sure in this case, because I use
+            # If we are here, it normally means the other side has hung up(not sure in this case, because I use
             # select. Maybe it simply not block and return 0 bytes? Maybe it's correct to do nothing and act 
             # only when the POLLHUP state is captured?
             # FIXME: POLLHUP is never present, I don't know why?
-            self.logger.error("Zero byte have been read on the socket (Means the other side has HANGED UP?)")
+            self.logger.error("Zero byte have been read on the socket (Means the other side has HUNG UP?)")
+            try:
+                self.socket.close()
+            except:
+                (type, value, tb) = sys.exc_info()
+                self.logger.error("Unable to close the socket! Type: %s, Value: %s" % (type, value))
+
+            # FIXME: Possibly some variable resetting should occur here?
+            self.makeConnection()
             
     def _writeToDisk(self, data):
         pass
@@ -554,7 +582,7 @@ class TransceiverAFTN:
                     self.totBytes += nbBytesSent
 
                 if mm.isFromDisk():
-                    name = os.path.basename(self.reader.sortedFiles[index])
+                    name = os.path.basename(self.dataFromFiles[0][1])
                 else:
                     name = mp.getServiceName(mp.getServiceType())
                     
