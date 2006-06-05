@@ -52,7 +52,10 @@ class MessageManager:
         self.otherAddress = sourlient.otherAddress       # 8-letter group identifying the provider's address (CYHQMHSN)
 
         if self.name == 'aftnPro':
-            PXPaths.ROUTING_TABLE = '/apps/px/aftn/etc/header2client.conf.test.pro'
+            PXPaths.ROUTING_TABLE = '/apps/px/aftn/etc/header2client.conf.test'
+        #elif self.name == 'aftn':
+        #    PXPaths.ROUTING_TABLE = '/apps/px/aftn/etc/header2client.conf.test'
+        
 
         self.bullManager = bulletinManager(PXPaths.RXQ + self.name,
                                       self.logger,
@@ -115,16 +118,20 @@ class MessageManager:
         # Read Buffer management
         self.unusedBuffer = ''        # Part of the buffer that was not used
 
+    
     def ingest(self, bulletin):
         self.bullManager.writeBulletinToDisk(bulletin)
 
-    def addHeaderToMessage(self, message):
+    def addHeaderToMessage(self, message, textLines=None):
         """
         When no WMO header is present in the text part of an AFTN Message, we will create one 
         for each destination address in the message.
         ex: if self.drp.aftnMap['CWAOWXYZ'] == 'SACN32', the header will be 'SACN32 CWAO YYGGgg'
         where YY= day of the month, GG=hours and gg=minutes
         This method is only used at reception.
+
+        textLines is not None for big messages (text is not in the message, but in a supplementary 
+        variable.
         """
         import dateLib
         wmoMessages = []
@@ -144,7 +151,10 @@ class MessageManager:
             headerBlock = [header] + destOriginLines
 
             #self.logger.info("Header in addHeader: %s" % header)
-            wmoMessages.append('\n'.join(headerBlock + message.textLines))
+            if textLines:
+                wmoMessages.append('\n'.join(headerBlock + textLines))
+            else:
+                wmoMessages.append('\n'.join(headerBlock + message.textLines))
         return wmoMessages
 
     def doSpecialOrders(self, path):
