@@ -96,6 +96,19 @@ class TransceiverAFTN:
         print("Subscriber: %s" % self.subscriber)
         print("**************************************************************")
 
+    def reconnect(self):
+        try:
+            #poller.unregister(self.socket.fileno())
+            self.socket.close()
+        except:
+            (type, value, tb) = sys.exc_info()
+            self.logger.error("Unable to close the socket! Type: %s, Value: %s" % (type, value))
+
+        # FIXME: Possibly some variable resetting should occur here?
+        self.logger.error("Sleeping %d seconds ..." % (self.sleepBetweenConnect))
+        time.sleep(self.sleepBetweenConnect)
+        self.makeConnection()
+
     def makeConnection(self):
         if self.subscriber:
             # The Subscriber first listens for a connection from Provider(MHS)
@@ -249,19 +262,18 @@ class TransceiverAFTN:
             pollInfos = poller.poll(100)
             if len(pollInfos):
                 states = TransceiverAFTN.getStates(pollInfos[0][1], True)
-                print states
+                #print states
                 if 'POLLIN' in states:
                     # Here we read data from socket, write it on disk and write on the socket
                     # if necessary
                     self.readFromSocket()
                 if 'POLLHUP' in states:
-                    self.logger.info("Socket has been hang up (POLLHUP)")
-                    sys.exit()
-                    # FIXME: After a POLLHUP, we should try a reconnection
+                    self.logger.info("Socket has been hung up (POLLHUP)")
+                    self.reconnect()
+                    # FIXME: Possibly some variable resetting should occur here?
                 if 'POLLERR' in states:
                     self.logger.info("Socket error (POLLERR)")
-                    sys.exit()
-                    # FIXME: After a POLLERR, we should try a reconnection
+                    self.reconnect()
 
             # Here we read a file from disk (if we're not waiting for an ack) and write it on the socket
             if not mm.getWaitingForAck():
@@ -274,11 +286,10 @@ class TransceiverAFTN:
                 if mm.getNbSending() < mm.getMaxSending():
                     self._writeMessageToSocket([mm.partsToSend[0]], True, mm.nextPart)
                 else:
-                    self.logger.error("Maximum number (%s) of retransmissions have occured without receiving an ack. Contact Navcan."
+                    self.logger.error("Maximum number (%s) of retransmissions have occured without receiving an ack."
                                        % mm.getMaxSending())
                     poller.unregister(self.socket.fileno())
-                    self.socket.close()
-                    sys.exit()
+                    self.reconnect()
 
     def readFromDisk(self):
         # if we have some parts of a big message to send
@@ -489,16 +500,7 @@ class TransceiverAFTN:
             # only when the POLLHUP state is captured?
             # FIXME: POLLHUP is never present, I don't know why?
             self.logger.error("Zero byte have been read on the socket (Means the other side has HUNG UP?)")
-            try:
-                self.socket.close()
-            except:
-                (type, value, tb) = sys.exc_info()
-                self.logger.error("Unable to close the socket! Type: %s, Value: %s" % (type, value))
-
-            # FIXME: Possibly some variable resetting should occur here?
-            self.logger.error("Sleeping %d seconds ..." % (self.sleepBetweenConnect))
-            time.sleep(self.sleepBetweenConnect)
-            self.makeConnection()
+            self.reconnect()
             
     def _writeToDisk(self, data):
         pass
