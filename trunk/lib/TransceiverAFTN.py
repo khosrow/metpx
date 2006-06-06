@@ -189,7 +189,7 @@ class TransceiverAFTN:
 
         while True:
             try:
-                logger.info("Receiver is waiting for a connection (block on accept)")
+                logger.info("Receiver is waiting for a connection (block on accept for %d seconds)" % self.timeout)
                 conn, clientAddress = socketReceiver.accept()
                 socketReceiver.close()
                 socketReceiver = conn
@@ -496,6 +496,8 @@ class TransceiverAFTN:
                 self.logger.error("Unable to close the socket! Type: %s, Value: %s" % (type, value))
 
             # FIXME: Possibly some variable resetting should occur here?
+            self.logger.error("Sleeping %d seconds ..." % (self.sleepBetweenConnect))
+            time.sleep(self.sleepBetweenConnect)
             self.makeConnection()
             
     def _writeToDisk(self, data):
