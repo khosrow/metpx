@@ -17,7 +17,7 @@ from MessageAFTN import MessageAFTN
 from bulletinManager import bulletinManager
 from DirectRoutingParser import DirectRoutingParser
 from DiskReader import DiskReader
-#from StateAFTN import StateAFTN
+from StateAFTN import StateAFTN
 import AFTNPaths, PXPaths
 
 class MessageManager:
@@ -51,10 +51,6 @@ class MessageManager:
         self.address = sourlient.address                 # 8-letter group identifying the message originator (CYHQUSER)
         self.otherAddress = sourlient.otherAddress       # 8-letter group identifying the provider's address (CYHQMHSN)
         self.subscriber = sourlient.subscriber           # Boolean indicating if this is a subscriber or a provider
-        #if self.subscriber:
-        #    self.state = StateAFTN(AFTNPaths.STATE)
-        #else:
-        #    self.state = StateAFTN(AFTNPaths.STATE + 'PRO')
 
         if self.name == 'aftnPro':
             PXPaths.ROUTING_TABLE = '/apps/px/aftn/etc/header2client.conf.test'
@@ -88,7 +84,7 @@ class MessageManager:
         self.priority = None   # Priority indicator (SS, DD, FF, GG or KK)
         self.destAddress = []  # 8-letter group, max. 21 addresses
         try:
-            self.CSN = self.state.mm.CSN
+            self.CSN = self.state.CSN
             self.logger.info("CSN (%s) has been taken from AFTN State" % self.CSN)
         except: 
             self.CSN = '0000'      # Channel sequence number, 4 digits (ex: 0003)
@@ -121,8 +117,7 @@ class MessageManager:
 
         # CSN verification (receiving)
         try:
-            self.waitedTID = self.state.mm.waitedTID
-            self.logger.info("Waited TID (%s) has been taken from AFTN State" % self.waitedTID)
+            self.waitedTID = self.state.waitedTID
         except:
             self.waitedTID = self.otherStationID + '0001'  # Initially (when the program start) we are not sure what TID is expected
             
@@ -133,6 +128,27 @@ class MessageManager:
         # Read Buffer management
         self.unusedBuffer = ''        # Part of the buffer that was not used
 
+        # Persistent state
+        if self.subscriber:
+            try:
+                self.state = self.unarchiveObject(AFTNPaths.STATE)
+                self.updateFromState(self.state)
+            except:
+                self.state = StateAFTN()
+                self.state.fill(self)
+                self.archiveObject(AFTNPaths.STATE, self.state)
+        else:
+            try:
+                self.state = self.unarchiveObject(AFTNPaths.STATE + 'PRO')
+                self.updateFromState(self.state)
+            except:
+                self.state = StateAFTN()
+                self.state.fill(self)
+                self.archiveObject(AFTNPaths.STATE + 'PRO', self.state)
+
+    def updateFromState(self, state):
+        self.CSN = state.CSN
+        self.waitedTID = state.waitedTID
     
     def ingest(self, bulletin):
         self.bullManager.writeBulletinToDisk(bulletin)

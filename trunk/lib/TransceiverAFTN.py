@@ -141,7 +141,7 @@ class TransceiverAFTN:
         if self.subscriber:
             maxTrials = 1000
         else:
-            maxTrials = 5 
+            maxTrials = 3 
 
         while trials < maxTrials:
             if trials == 12:
@@ -488,7 +488,11 @@ class TransceiverAFTN:
                             self.logger.error("Difference is 1 => Probably my original message + the one I resend have been hacked (Timing problem)")
 
                 # Archive State
-                #mm.state.archive(AFTNPaths.STATE, mm)
+                mm.state.fill(mm)
+                if self.subscriber:
+                    mm.archiveObject(AFTNPaths.STATE, mm.state)
+                else:
+                    mm.archiveObject(AFTNPaths.STATE + 'PRO', mm.state)
                 self.logger.debug("State has been archived")
 
                 message, type = mm.parseReadBuffer("") # Only to find if it is an AFTN (SVC included) or Ack message
@@ -588,7 +592,11 @@ class TransceiverAFTN:
                     self.totBytes += nbBytesSent
 
                 # Archive State
-                #mm.state.archive(AFTNPaths.STATE, mm)
+                mm.state.fill(mm)
+                if self.subscriber:
+                    mm.archiveObject(AFTNPaths.STATE, mm.state)
+                else:
+                    mm.archiveObject(AFTNPaths.STATE + 'PRO', mm.state)
                 self.logger.debug("State has been archived")
 
                 
