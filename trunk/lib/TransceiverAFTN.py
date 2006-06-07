@@ -284,8 +284,8 @@ class TransceiverAFTN:
                 if mm.getNbSending() < mm.getMaxSending():
                     self._writeMessageToSocket([mm.partsToSend[0]], True, mm.nextPart)
                 else:
-                    self.logger.error("Maximum number (%s) of retransmissions have occured without receiving an ack."
-                                       % mm.getMaxSending())
+                    #self.logger.error("Maximum number (%s) of retransmissions have occured without receiving an ack." % mm.getMaxSending())
+                    self.logger.error("Maximum waiting time (%s seconds) has passed without receiving an ack. We will try to reconnect!" % mm.getMaxAckTime())
                     poller.unregister(self.socket.fileno())
                     self.reconnect()
 
@@ -591,17 +591,17 @@ class TransceiverAFTN:
                 #mm.state.archive(AFTNPaths.STATE, mm)
                 self.logger.debug("State has been archived")
 
-                if mm.isFromDisk():
-                    name = os.path.basename(self.dataFromFiles[0][1])
-                else:
-                    name = mp.getServiceName(mp.getServiceType())
-                    
+                
                 if not rewrite:
+                    if mm.isFromDisk():
+                        mm.filenameToSend = os.path.basename(self.dataFromFiles[0][1])
+                    else:
+                        mm.filenameToSend = mp.getServiceName(mp.getServiceType())
                     self.logger.info("(%5d Bytes) Message %s %s (%s/%s) has been sent" % (self.totBytes, getWord(mm.type), 
-                                       name, mm.nextPart+1, mm.numberOfParts))
+                                       mm.filenameToSend, mm.nextPart+1, mm.numberOfParts))
                 else:
                     self.logger.info("(%5d Bytes) Message %s %s (%s/%s) has been resent" % (self.totBytes, getWord(mm.type), 
-                                       name, mm.nextPart+1, mm.numberOfParts))
+                                       mm.filenameToSend, mm.nextPart+1, mm.numberOfParts))
 
                 self.totBytes = 0
                 mm.setWaitingForAck(messageAFTN.getTransmitID())

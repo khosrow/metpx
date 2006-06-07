@@ -81,6 +81,7 @@ class MessageManager:
         self.messageIn = None  # Last AFTN message received
         self.messageOut = None # Last AFTN message sent
         self.fromDisk = True   # Changed to False for Service Message created on the fly
+        self.filenameToSend = None # Filename of the we want to send or just sent
 
         self.type = None       # Message type. Value must be in ['AFTN', 'SVC', 'RF', 'RQ', None]
         self.header = None     # Message WMO Header
