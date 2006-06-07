@@ -271,7 +271,9 @@ Message (repr):
         numberOfAddress = (len(line) - 2) / addressLength
 
         if numberOfAddress >= 1:
+            # FIXME: We should validate if the priority is acceptable
             self.priority = line[0:2]
+            
 
             for index in range(numberOfAddress):
                 self.destAddress.append(line[3+index*addressLength:11+index*addressLength])

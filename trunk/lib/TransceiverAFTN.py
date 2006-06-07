@@ -35,10 +35,7 @@ class TransceiverAFTN:
 
     Subscriber IP: 192.168.250.10 255.255.255.0
     """
-    #def __init__(self, host='localhost', portR=56550, portS=5160, logger=None, subscriber=True):
     def __init__(self, sourlient):
-        # FIXME: Many of these variable will be accessed directly from Source object (or Client?)
-        # when coding will be more advanced.
 
         AFTNPaths.normalPaths()
         PXPaths.normalPaths()
@@ -56,7 +53,7 @@ class TransceiverAFTN:
         self.slow = sourlient.slow                         # Sleeps are added when we want to be able to decrypt log entries
         self.igniter = None                                # Igniter object (link to pid)
 
-        self.mm = MessageManager(self.logger, self.subscriber, self.sourlient)  # AFTN Protocol is implemented in MessageManager Object
+        self.mm = MessageManager(self.logger, self.sourlient)  # AFTN Protocol is implemented in MessageManager Object
         self.remoteAddress = None                          # Remote address (where we will connect())
         self.socket = None                                 # Socket object
         self.dataFromFiles = []
@@ -281,6 +278,7 @@ class TransceiverAFTN:
                 # For testing Ack+Mess back to back in the buffer
                 #if self.subscriber:
                 #    time.sleep(7)
+
             # Too long time without receiving an ack, we may have to resend ...
             elif time.time()-mm.getLastSendingTime() > mm.getMaxAckTime():
                 if mm.getNbSending() < mm.getMaxSending():
@@ -489,7 +487,10 @@ class TransceiverAFTN:
                         elif int(mm.getWaitingForAck()[3:]) - int(strippedMessage[3:]) == 1:
                             self.logger.error("Difference is 1 => Probably my original message + the one I resend have been hacked (Timing problem)")
 
-                
+                # Archive State
+                #mm.state.archive(AFTNPaths.STATE, mm)
+                self.logger.debug("State has been archived")
+
                 message, type = mm.parseReadBuffer("") # Only to find if it is an AFTN (SVC included) or Ack message
                 if not message and type:
                     self.logger.debug("Message (type=%s) uncomplete. It's ok. We will try to complete it in the next pass." % type)
@@ -576,6 +577,7 @@ class TransceiverAFTN:
                 #print tutu
 
                 nbBytesToSend = len(messageAFTN.message)
+
                 while nbBytesToSend > 0:
                     nbBytesSent = self.socket.send(messageAFTN.message)
                     # This sleep is machiavelic! It permits to see many potential problems
@@ -584,6 +586,10 @@ class TransceiverAFTN:
                     messageAFTN.message = messageAFTN.message[nbBytesSent:]
                     nbBytesToSend = len(messageAFTN.message)
                     self.totBytes += nbBytesSent
+
+                # Archive State
+                #mm.state.archive(AFTNPaths.STATE, mm)
+                self.logger.debug("State has been archived")
 
                 if mm.isFromDisk():
                     name = os.path.basename(self.dataFromFiles[0][1])
@@ -617,7 +623,6 @@ class TransceiverAFTN:
                     time.sleep(1)
         else:
             time.sleep(1)
-
 
 if __name__ == "__main__":
     from Logger import Logger

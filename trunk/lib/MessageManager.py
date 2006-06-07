@@ -17,6 +17,7 @@ from MessageAFTN import MessageAFTN
 from bulletinManager import bulletinManager
 from DirectRoutingParser import DirectRoutingParser
 from DiskReader import DiskReader
+#from StateAFTN import StateAFTN
 import AFTNPaths, PXPaths
 
 class MessageManager:
@@ -36,13 +37,12 @@ class MessageManager:
 
     """
 
-    def __init__(self, logger=None, subscriber=True, sourlient=None):
+    def __init__(self, logger=None, sourlient=None):
         
         AFTNPaths.normalPaths()
         PXPaths.normalPaths()
 
         self.logger = logger         # Logger object
-        self.subscriber = subscriber # Boolean indicating if this is a subscriber or a provider
         self.sourlient = sourlient   # Sourlient object
 
         self.name = sourlient.name                       # Transceiver's name
@@ -50,11 +50,16 @@ class MessageManager:
         self.otherStationID = sourlient.otherStationID   # Provider (MHS) Station ID
         self.address = sourlient.address                 # 8-letter group identifying the message originator (CYHQUSER)
         self.otherAddress = sourlient.otherAddress       # 8-letter group identifying the provider's address (CYHQMHSN)
+        self.subscriber = sourlient.subscriber           # Boolean indicating if this is a subscriber or a provider
+        #if self.subscriber:
+        #    self.state = StateAFTN(AFTNPaths.STATE)
+        #else:
+        #    self.state = StateAFTN(AFTNPaths.STATE + 'PRO')
 
         if self.name == 'aftnPro':
             PXPaths.ROUTING_TABLE = '/apps/px/aftn/etc/header2client.conf.test'
-        #elif self.name == 'aftn':
-        #    PXPaths.ROUTING_TABLE = '/apps/px/aftn/etc/header2client.conf.test'
+        elif self.name == 'aftn':
+            PXPaths.ROUTING_TABLE = '/apps/px/aftn/etc/header2client.conf.test'
         
 
         self.bullManager = bulletinManager(PXPaths.RXQ + self.name,
@@ -81,7 +86,11 @@ class MessageManager:
         self.header = None     # Message WMO Header
         self.priority = None   # Priority indicator (SS, DD, FF, GG or KK)
         self.destAddress = []  # 8-letter group, max. 21 addresses
-        self.CSN = '0000'      # Channel sequence number, 4 digits (ex: 0003)
+        try:
+            self.CSN = self.state.mm.CSN
+            self.logger.info("CSN (%s) has been taken from AFTN State" % self.CSN)
+        except: 
+            self.CSN = '0000'      # Channel sequence number, 4 digits (ex: 0003)
         self.filingTime = None # 6-digits DDHHMM (ex:140335) indicating date and time of filing the message for transmission.
         self.dateTime = None   # 8-digits DDHHMMSS (ex:14033608)
         self.readBuffer = ''   # Buffer where we put stuff read from the socket
@@ -110,7 +119,12 @@ class MessageManager:
         self.totAck = 0       # Count the number of ack (testing purpose only)
 
         # CSN verification (receiving)
-        self.waitedTID = self.otherStationID + '0000'  # Initially (when the program start) we are not sure what TID is expected
+        try:
+            self.waitedTID = self.state.mm.waitedTID
+            self.logger.info("Waited TID (%s) has been taken from AFTN State" % self.waitedTID)
+        except:
+            self.waitedTID = self.otherStationID + '0001'  # Initially (when the program start) we are not sure what TID is expected
+            
 
         # Functionnality testing switches
         self.resendSameMessage = True
@@ -503,7 +517,7 @@ if __name__ == "__main__":
 
     print "Longueur Max = %d" % MessageAFTN.MAX_TEXT_SIZE
 
-    mm = MessageManager(logger, True, sourlient)
+    mm = MessageManager(logger, sourlient)
 
    
     reader = DiskReader("/apps/px/bulletins", 8)

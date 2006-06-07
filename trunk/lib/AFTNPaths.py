@@ -15,7 +15,7 @@ import os, os.path
 def normalPaths():
 
     global ROOT, BIN, LIB, LOG, ETC, RXQ, TXQ, DB, RX_CONF, TX_CONF, TO_SEND, RECEIVED, SENT, \
-           TO_SEND_PRO, RECEIVED_PRO, SENT_PRO, SPECIAL_ORDERS, SPECIAL_ORDERS_PRO
+           TO_SEND_PRO, RECEIVED_PRO, SENT_PRO, SPECIAL_ORDERS, SPECIAL_ORDERS_PRO, STATE
 
     try:
         envVar = os.path.normpath(os.environ['AFTNROOT'])
@@ -42,6 +42,8 @@ def normalPaths():
     RECEIVED_PRO = ROOT + 'receivedAFTN_pro'
     SENT_PRO = ROOT + 'sentAFTN_pro'
     SPECIAL_ORDERS_PRO = ROOT + 'specialOrders_pro'
+
+    STATE = ROOT + 'state/state.obj'
 
 def drbdPaths(rootPath):
 
