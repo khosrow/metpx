@@ -294,7 +294,7 @@ Message (repr):
             
             if len(line) > 15:
                 if self.logger:
-                self.logger.error("Unknown characters in Origin Address Line (length > 15 chars): %s" % line)
+                    self.logger.error("Unknown characters in Origin Address Line (length > 15 chars): %s" % line)
 
             return 1
 
