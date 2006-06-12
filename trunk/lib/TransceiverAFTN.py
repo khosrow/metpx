@@ -245,49 +245,64 @@ class TransceiverAFTN:
         poller.register(self.socket.fileno(), select.POLLIN | select.POLLERR | select.POLLHUP | select.POLLNVAL)
 
         while True:
-            # If service messages are in queue and we are not waiting for an ack ...
-            if len(mm.serviceQueue) and not mm.getWaitingForAck():
-               mm.partsToSend = [mm.serviceQueue.pop(0)]
-               mm.completePartsToSend(mm.partsToSend)  
-               mm.setFromDisk(False)
-               self._writeMessageToSocket([mm.partsToSend[0]], False, mm.nextPart)
-               mm.setFromDisk(True)
+            try:
+                # If service messages are in queue and we are not waiting for an ack ...
+                if len(mm.serviceQueue) and not mm.getWaitingForAck():
+                   mm.partsToSend = [mm.serviceQueue.pop(0)]
+                   mm.completePartsToSend(mm.partsToSend)  
+                   mm.setFromDisk(False)
+                   self._writeMessageToSocket([mm.partsToSend[0]], False, mm.nextPart)
+                   mm.setFromDisk(True)
+                    
+                # These special orders are useful to simulate problems ...
+                mm.doSpecialOrders(self.specialOrdersPath)
                 
-            # These special orders are useful to simulate problems ...
-            mm.doSpecialOrders(self.specialOrdersPath)
-            
-            pollInfos = poller.poll(100)
-            if len(pollInfos):
-                states = TransceiverAFTN.getStates(pollInfos[0][1], True)
-                #print states
-                if 'POLLIN' in states:
-                    # Here we read data from socket, write it on disk and write on the socket
-                    # if necessary
-                    self.readFromSocket()
-                if 'POLLHUP' in states:
-                    self.logger.info("Socket has been hung up (POLLHUP)")
-                    self.reconnect()
-                    # FIXME: Possibly some variable resetting should occur here?
-                if 'POLLERR' in states:
-                    self.logger.info("Socket error (POLLERR)")
-                    self.reconnect()
-
-            # Here we read a file from disk (if we're not waiting for an ack) and write it on the socket
-            if not mm.getWaitingForAck():
-                self.readFromDisk()
-                # For testing Ack+Mess back to back in the buffer
-                #if self.subscriber:
-                #    time.sleep(7)
-
-            # Too long time without receiving an ack, we may have to resend ...
-            elif time.time()-mm.getLastSendingTime() > mm.getMaxAckTime():
-                if mm.getNbSending() < mm.getMaxSending():
-                    self._writeMessageToSocket([mm.partsToSend[0]], True, mm.nextPart)
-                else:
-                    #self.logger.error("Maximum number (%s) of retransmissions have occured without receiving an ack." % mm.getMaxSending())
-                    self.logger.error("Maximum waiting time (%s seconds) has passed without receiving an ack. We will try to reconnect!" % mm.getMaxAckTime())
-                    poller.unregister(self.socket.fileno())
-                    self.reconnect()
+                pollInfos = poller.poll(100)
+                if len(pollInfos):
+                    states = TransceiverAFTN.getStates(pollInfos[0][1], True)
+                    print states
+                    if 'POLLIN' in states:
+                        # Here we read data from socket, write it on disk and write on the socket
+                        # if necessary
+                        self.readFromSocket()
+                    if 'POLLHUP' in states:
+                        self.logger.info("Socket has been hung up (POLLHUP)")
+                        poller.unregister(self.socket.fileno())
+                        self.reconnect()
+                        poller.register(self.socket.fileno(), select.POLLIN | select.POLLERR | select.POLLHUP | select.POLLNVAL)
+                        continue
+                        # FIXME: Possibly some variable resetting should occur here?
+                    if 'POLLERR' in states:
+                        self.logger.info("Socket error (POLLERR)")
+                        poller.unregister(self.socket.fileno())
+                        self.reconnect()
+                        poller.register(self.socket.fileno(), select.POLLIN | select.POLLERR | select.POLLHUP | select.POLLNVAL)
+                        continue
+    
+                # Here we read a file from disk (if we're not waiting for an ack) and write it on the socket
+                if not mm.getWaitingForAck():
+                    self.readFromDisk()
+                    # For testing Ack+Mess back to back in the buffer
+                    #if self.subscriber:
+                    #    time.sleep(7)
+    
+                # Too long time without receiving an ack, we may have to resend ...
+                elif time.time()-mm.getLastSendingTime() > mm.getMaxAckTime():
+                    if mm.getNbSending() < mm.getMaxSending():
+                        self._writeMessageToSocket([mm.partsToSend[0]], True, mm.nextPart)
+                    else:
+                        #self.logger.error("Maximum number (%s) of retransmissions have occured without receiving an ack." % mm.getMaxSending())
+                        self.logger.error("Maximum waiting time (%s seconds) has passed without receiving an ack. We will try to reconnect!" % mm.getMaxAckTime())
+                        poller.unregister(self.socket.fileno())
+                        self.reconnect()
+                        poller.register(self.socket.fileno(), select.POLLIN | select.POLLERR | select.POLLHUP | select.POLLNVAL)
+                        continue
+            except:
+                (type, value, tb) = sys.exc_info()
+                self.logger.error("Error in TransceiverAFTN.run()! Type: %s, Value: %s" % (type, value))
+                poller.unregister(self.socket.fileno())
+                self.reconnect()
+                poller.register(self.socket.fileno(), select.POLLIN | select.POLLERR | select.POLLHUP | select.POLLNVAL)
 
     def readFromDisk(self):
         # if we have some parts of a big message to send
@@ -320,15 +335,8 @@ class TransceiverAFTN:
 
     def readFromSocket(self):
         mm = self.mm
-        try:
-            buf = self.socket.recv(32768)
-        except socket.error:
-            (type, value, tb) = sys.exc_info()
-            self.logger.error("Problem reading from socket. Type: %s, Value: %s" % (type, value))
-            # FIXME: Here we have a problem. If we are here it means an error occurs and thus
-            # that buf is "referenced before assignment" (if we don't exit). Maybe we should try
-            # to reconnect?
-            sys.exit()
+        
+        buf = self.socket.recv(32768)
 
         if len(buf): 
             self.logger.debug('Raw Buffer: %s' % repr(buf))
@@ -505,7 +513,7 @@ class TransceiverAFTN:
             # only when the POLLHUP state is captured?
             # FIXME: POLLHUP is never present, I don't know why?
             self.logger.error("Zero byte have been read on the socket (Means the other side has HUNG UP?)")
-            self.reconnect()
+            raise Exception("Zero byte have been read on the socket (Means the other side has HUNG UP?)")
             
     def _writeToDisk(self, data):
         pass
@@ -513,6 +521,7 @@ class TransceiverAFTN:
     def _writeAckToSocket(self, transmitID):
         ack = AckAFTN(transmitID)
         ackMessage = ack.getAck()
+
         self.socket.send(ackMessage)
         self.logger.info("(%5d Bytes) Ack: %s sent" % (len(ackMessage), ackMessage))
 
@@ -557,7 +566,7 @@ class TransceiverAFTN:
                     mm.archiveObject(self.archivePath + '/' + mm.CSN, messageAFTN)
                 else:
                     # True if mm.header is in the routing table with destination addresses
-                    if mm.header == None: mm.header = 'SACN31 CWAO'
+                    #if mm.header == None: mm.header = 'SACN31 CWAO'
                     if mm.setInfos(mm.header, rewrite):
                         messageAFTN = MessageAFTN(self.logger, data[index], mm.stationID, mm.address, mm.priority,
                                               mm.destAddress, mm.CSN, mm.filingTime, mm.dateTime)
@@ -619,7 +628,7 @@ class TransceiverAFTN:
                 # We do this even if we have not yet received the ack. At this point, we have already
                 # archive all the parts with their CSN as filename.
                 if mm.isLastPart(): 
-                    if mm.isFromDisk():
+                    if mm.isFromDisk() and not rewrite:
                         try:
                             os.unlink(self.dataFromFiles[0][1])
                             self.logger.debug("%s has been erased", os.path.basename(self.dataFromFiles[0][1]))
