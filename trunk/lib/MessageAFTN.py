@@ -285,18 +285,18 @@ Message (repr):
             return 0
 
     def _parseOriginAddressLine(self, line):
-        if len(line) == 15:
+        if len(line) >= 15:
             self.filingTime = line[0:6]
             self.originatorAddress = line[7:15]
 
             #print self.filingTime
             #print self.originatorAddress
+            
+            if len(line) > 15:
+                if self.logger:
+                self.logger.error("Unknown characters in Origin Address Line (length > 15 chars): %s" % line)
 
             return 1
-        else:
-            if self.logger:
-                self.logger.error("Problem with Origin Address Line, Bad line length (not 15 char)")
-            return 0
 
     def _parseText(self):
         if self.messageLines[3][0] == MessageAFTN.STX and self.messageLines[-1] == MessageAFTN.END_OF_MESSAGE:
