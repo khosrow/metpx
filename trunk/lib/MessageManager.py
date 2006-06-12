@@ -112,7 +112,7 @@ class MessageManager:
         self.sendingInfos = (0, None) # Number of times a message has been sent and the sending time.
         self.maxAckTime = 60  # Maximum time (in seconds) we wait for an ack, before resending.
         self.maxSending = 1   # Maximum number of sendings of a message
-        self.ackUsed = False   # We can use ack or not
+        self.ackUsed = True   # We can use ack or not
         self.totAck = 0       # Count the number of ack (testing purpose only)
 
         # CSN verification (receiving)
