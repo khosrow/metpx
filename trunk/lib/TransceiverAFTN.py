@@ -293,6 +293,8 @@ class TransceiverAFTN:
                     else:
                         #self.logger.error("Maximum number (%s) of retransmissions have occured without receiving an ack." % mm.getMaxSending())
                         self.logger.error("Maximum waiting time (%s seconds) has passed without receiving an ack. We will try to reconnect!" % mm.getMaxAckTime())
+                        mm.setWaitingForAck(None)
+                        mm.resetSendingInfos()
                         poller.unregister(self.socket.fileno())
                         self.reconnect()
                         poller.register(self.socket.fileno(), select.POLLIN | select.POLLERR | select.POLLHUP | select.POLLNVAL)
