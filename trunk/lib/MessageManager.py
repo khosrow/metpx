@@ -110,7 +110,7 @@ class MessageManager:
         self.lastAckReceived = None   # None or the transmitID
         self.waitingForAck = None     # None or the transmitID 
         self.sendingInfos = (0, None) # Number of times a message has been sent and the sending time.
-        self.maxAckTime = 100  # Maximum time (in seconds) we wait for an ack, before resending.
+        self.maxAckTime = 60  # Maximum time (in seconds) we wait for an ack, before resending.
         self.maxSending = 3   # Maximum number of sendings of a message
         self.ackUsed = True   # We can use ack or not
         self.totAck = 0       # Count the number of ack (testing purpose only)
