@@ -267,18 +267,32 @@ Message (repr):
             return 0
 
     def _parseDestinationAddressLine(self, line):
-        addressLength = 9 # Length of one address including the preceding blank
-        numberOfAddress = (len(line) - 2) / addressLength
+        addressLength = 8 # Length of one address
+        parts = line.split()
+        numberOfAddress = len(parts) - 1
 
         if numberOfAddress >= 1:
-            # FIXME: We should validate if the priority is acceptable
-            self.priority = line[0:2]
-            
+            if parts[0] in MessageAFTN.PRIORITIES:
+                self.priority = parts[0]
+            else:
+                if self.logger:
+                    self.logger.error("Priority %s is not acceptable (not in %s)" % (self.priority, MessageAFTN.PRIORITIES))
+                return 0
 
-            for index in range(numberOfAddress):
-                self.destAddress.append(line[3+index*addressLength:11+index*addressLength])
-
-            return 1
+            #for index in range(numberOfAddress):
+            #    self.destAddress.append(line[3+index*addressLength:11+index*addressLength])
+            for address in parts[1:]:
+                if len(address) == addressLength and address.isalpha():
+                    self.destAddress.append(address)
+                else:
+                    if self.logger:
+                        self.logger.error("Address (%s) is not acceptable (Not 8 char, or char other than alpha)" % address)
+            if len(self.destAddress) >= 1:
+                return 1
+            else:
+                if self.logger:
+                    self.logger.error("Zero destination address for this message (after removing the bad ones)")
+                return 0
         else:
             if self.logger:
                 self.logger.error("Problem with Destination Address Line, Zero Address!")
