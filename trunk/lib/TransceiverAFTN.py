@@ -617,7 +617,6 @@ class TransceiverAFTN:
                     nbBytesToSend = len(messageAFTN.message)
                     self.totBytes += nbBytesSent
 
-                self.totBytes = 0
                 mm.setWaitingForAck(messageAFTN.getTransmitID())
                 mm.incrementSendingInfos()
 
@@ -642,6 +641,8 @@ class TransceiverAFTN:
                     self.logger.info("(%5d Bytes) Message %s %s (%s/%s) has been resent" % (self.totBytes, getWord(mm.type), 
                                        mm.filenameToSend, mm.nextPart+1, mm.numberOfParts))
 
+                # Reset byte count
+                self.totBytes = 0
                 
                 # If the last part of a message (big or not) has been sent, erase the file.
                 # We do this even if we have not yet received the ack. At this point, we have already
