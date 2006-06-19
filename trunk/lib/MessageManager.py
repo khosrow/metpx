@@ -53,9 +53,9 @@ class MessageManager:
         self.subscriber = sourlient.subscriber           # Boolean indicating if this is a subscriber or a provider
 
         if self.name == 'aftnPro':
-            PXPaths.ROUTING_TABLE = '/apps/px/aftn/etc/header2client.conf.test'
+            PXPaths.ROUTING_TABLE = '/apps/px/aftn/etc/header2client.conf.aftnPro'
         elif self.name == 'aftn':
-            PXPaths.ROUTING_TABLE = '/apps/px/aftn/etc/header2client.conf.test'
+            PXPaths.ROUTING_TABLE = '/apps/px/aftn/etc/header2client.conf.aftn'
         
 
         self.bullManager = bulletinManager(PXPaths.RXQ + self.name,
@@ -77,7 +77,8 @@ class MessageManager:
         self.messageIn = None  # Last AFTN message received
         self.messageOut = None # Last AFTN message sent
         self.fromDisk = True   # Changed to False for Service Message created on the fly
-        self.filenameToSend = None # Filename of the we want to send or just sent
+        self.filenameToSend = None  # Filename of the file we want to send or just sent
+        self.filenameToErase = None # Path + filename of the file we want to erase (ack just received) 
 
         self.type = None       # Message type. Value must be in ['AFTN', 'SVC', 'RF', 'RQ', None]
         self.header = None     # Message WMO Header
@@ -110,9 +111,9 @@ class MessageManager:
         self.lastAckReceived = None   # None or the transmitID
         self.waitingForAck = None     # None or the transmitID 
         self.sendingInfos = (0, None) # Number of times a message has been sent and the sending time.
-        self.maxAckTime = 60  # Maximum time (in seconds) we wait for an ack, before resending.
+        self.maxAckTime = 20  # Maximum time (in seconds) we wait for an ack, before resending.
         self.maxSending = 1   # Maximum number of sendings of a message
-        self.ackUsed = True   # We can use ack or not
+        self.ackUsed = False   # We can use ack or not
         self.totAck = 0       # Count the number of ack (testing purpose only)
 
         # CSN verification (receiving)
@@ -149,6 +150,9 @@ class MessageManager:
     def updateFromState(self, state):
         self.CSN = state.CSN
         self.waitedTID = state.waitedTID
+
+        self.lastAckReceived = messageManager.lastAckReceived
+        self.waitingForAck = messageManager.waitingForAck
     
     def ingest(self, bulletin):
         self.bullManager.writeBulletinToDisk(bulletin)
@@ -239,7 +243,8 @@ class MessageManager:
                 self.setWaitingForAck(None)
                 self.resetSendingInfos()
                 self.updatePartsToSend()
-
+            elif words[0] == 'ackUsed':
+                self.ackUsed = words[1] == 'True' or words[1] == 'true'
             else:
                 pass
 

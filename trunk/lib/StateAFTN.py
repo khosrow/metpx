@@ -24,13 +24,22 @@ class StateAFTN:
         self.CSN = None
         self.waitedTID = None
 
+        self.lastAckReceived = None
+        self.waitingForAck = None
+
     def fill(self, messageManager):
         self.CSN = messageManager.CSN
         self.waitedTID = messageManager.waitedTID
 
+        self.lastAckReceived = messageManager.lastAckReceived
+        self.waitingForAck = messageManager.waitingForAck
+
     def clear(self):
         self.CSN = None
         self.waitedTID = None
+
+        self.lastAckReceived = None
+        self.waitingForAck = None
 
 if __name__ == "__main__":
     pass

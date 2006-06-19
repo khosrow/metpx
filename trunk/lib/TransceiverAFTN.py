@@ -289,12 +289,23 @@ class TransceiverAFTN:
                 # Too long time without receiving an ack, we may have to resend ...
                 elif time.time()-mm.getLastSendingTime() > mm.getMaxAckTime():
                     if mm.getNbSending() < mm.getMaxSending():
+                        self.logger.info("We will rewrite a message (max ack time over)")
                         self._writeMessageToSocket([mm.partsToSend[0]], True, mm.nextPart)
                     else:
                         #self.logger.error("Maximum number (%s) of retransmissions have occured without receiving an ack." % mm.getMaxSending())
                         self.logger.error("Maximum waiting time (%s seconds) has passed without receiving an ack. We will try to reconnect!" % mm.getMaxAckTime())
                         mm.setWaitingForAck(None)
                         mm.resetSendingInfos()
+                        mm.updatePartsToSend()
+
+                        # Archive State
+                        mm.state.fill(mm)
+                        if self.subscriber:
+                            mm.archiveObject(AFTNPaths.STATE, mm.state)
+                        else:
+                            mm.archiveObject(AFTNPaths.STATE + 'PRO', mm.state)
+                        self.logger.debug("State has been archived")
+
                         poller.unregister(self.socket.fileno())
                         self.reconnect()
                         poller.register(self.socket.fileno(), select.POLLIN | select.POLLERR | select.POLLHUP | select.POLLNVAL)
@@ -425,7 +436,6 @@ class TransceiverAFTN:
 
                         mm.receivedParts = []
 
-
                     # FIXME: The number of bytes include the ones associated to the protocol overhead,
                     # maybe a simple substraction should do the job.
                     self.logger.info("(%i Bytes) Message %s has been received" % (len(mm.messageIn.getTextString()), mm.messageIn.getName()))
@@ -552,11 +562,15 @@ class TransceiverAFTN:
                     self.logger.debug("Header: %s, Type: %s" % (mm.header, mm.type))
                 if mm.header== None and mm.type==None:
                     self.logger.info(data[index])
-                    self.logger.error("Header %s is not in adisrout" % mm.header)
+                    self.logger.error("Header %s is not in %s" % (mm.header, PXPaths.ROUTING_TABLE))
                     if self.slow:
                         time.sleep(10)
-                    #self.deleteFile(self.reader.sortedFiles[index])
+                    os.unlink(self.dataFromFiles[0][1])
+                    self.logger.info("%s has been erased", os.path.basename(self.dataFromFiles[0][1]))
+                    del self.dataFromFiles[0]
+                    mm.clearPartsToSend()
                     continue
+
                 elif mm.header == None and mm.type=='SVC':
                     #FIXME: Is it possible to rewrite Service Message?
                     # If so, the CSN must not change!
@@ -585,7 +599,8 @@ class TransceiverAFTN:
                             mm.clearPartsToSend()
 
                         continue
-
+                        
+                # If it is the first time we sent this message, we archive it.
                 if not rewrite:
                     mm.archiveObject(self.archivePath + '/' + mm.CSN, messageAFTN)
                 #tutu = mm.unarchiveObject(self.archivePath + '/' + mm.CSN)
@@ -610,10 +625,11 @@ class TransceiverAFTN:
                     mm.archiveObject(AFTNPaths.STATE + 'PRO', mm.state)
                 self.logger.debug("State has been archived")
 
-                
+                # Log the fact that the message has been sent 
                 if not rewrite:
                     if mm.isFromDisk():
                         mm.filenameToSend = os.path.basename(self.dataFromFiles[0][1])
+                        mm.filenameToErase = self.dataFromFiles[0][1]
                     else:
                         mm.filenameToSend = mp.getServiceName(mp.getServiceType())
                     self.logger.info("(%5d Bytes) Message %s %s (%s/%s) has been sent" % (self.totBytes, getWord(mm.type), 
@@ -628,7 +644,7 @@ class TransceiverAFTN:
                 
                 # If the last part of a message (big or not) has been sent, erase the file.
                 # We do this even if we have not yet received the ack. At this point, we have already
-                # archive all the parts with their CSN as filename.
+                # archived all the parts with their CSN as filename.
                 if mm.isLastPart(): 
                     if mm.isFromDisk() and not rewrite:
                         try:
@@ -638,6 +654,7 @@ class TransceiverAFTN:
                             (type, value, tb) = sys.exc_info()
                             self.logger.error("Unable to unlink %s ! Type: %s, Value: %s" % (self.dataFromFiles[0][1], type, value))
                         del self.dataFromFiles[0]
+
                 if self.slow: 
                     time.sleep(1)
         else:
