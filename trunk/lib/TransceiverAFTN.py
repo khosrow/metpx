@@ -562,7 +562,7 @@ class TransceiverAFTN:
                     self.logger.debug("Header: %s, Type: %s" % (mm.header, mm.type))
                 if mm.header== None and mm.type==None:
                     self.logger.info(data[index])
-                    self.logger.error("Header %s is not in %s" % (mm.header, PXPaths.ROUTING_TABLE))
+                    self.logger.error("Header %s is not in %s" % (mm.header, mm.routingTable))
                     if self.slow:
                         time.sleep(10)
                     os.unlink(self.dataFromFiles[0][1])

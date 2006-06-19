@@ -50,13 +50,8 @@ class MessageManager:
         self.otherStationID = sourlient.otherStationID   # Provider (MHS) Station ID
         self.address = sourlient.address                 # 8-letter group identifying the message originator (CYHQUSER)
         self.otherAddress = sourlient.otherAddress       # 8-letter group identifying the provider's address (CYHQMHSN)
+        self.routingTable = sourlient.routingTable       # Routing table name
         self.subscriber = sourlient.subscriber           # Boolean indicating if this is a subscriber or a provider
-
-        if self.name == 'aftnPro':
-            PXPaths.ROUTING_TABLE = '/apps/px/aftn/etc/header2client.conf.aftnPro'
-        elif self.name == 'aftn':
-            PXPaths.ROUTING_TABLE = '/apps/px/aftn/etc/header2client.conf.aftn'
-        
 
         self.bullManager = bulletinManager(PXPaths.RXQ + self.name,
                                       self.logger,
@@ -64,13 +59,10 @@ class MessageManager:
                                       9999,
                                       '\n',
                                       self.sourlient.extension,
-                                      PXPaths.ROUTING_TABLE,
+                                      self.routingTable, 
                                       None,
                                       self.sourlient) 
 
-        # Parse routing infos contained in the routing table
-        #self.drp = DirectRoutingParser(PXPaths.ROUTING_TABLE, self.sourlient.ingestor.clientNames, logger)
-        #self.drp.parse()
         self.drp = self.bullManager.drp
         self.priorities = {'1':'FF', '2':'FF', '3':'GG', '4':'GG', '5':'GG'}
 
@@ -116,9 +108,9 @@ class MessageManager:
 
         self.waitingForAck = None     # None or the transmitID 
         self.sendingInfos = (0, None) # Number of times a message has been sent and the sending time.
-        self.maxAckTime = 60  # Maximum time (in seconds) we wait for an ack, before resending.
+        self.maxAckTime =  sourlient.maxAckTime  # Maximum time (in seconds) we wait for an ack, before resending.
         self.maxSending = 1   # Maximum number of sendings of a message
-        self.ackUsed = True   # We can use ack or not
+        self.ackUsed =  sourlient.ackUsed  # We can use ack or not (testing purposes only)
         self.totAck = 0       # Count the number of ack (testing purpose only)
 
         # CSN verification (receiving)
