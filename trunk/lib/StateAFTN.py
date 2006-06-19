@@ -41,5 +41,16 @@ class StateAFTN:
         self.lastAckReceived = None
         self.waitingForAck = None
 
+    def infos(self):
+        return """  
+        CSN = %s
+        waitedTID = %s
+
+        lastAckReceived = %s
+        waitingForAck = %s
+        """ % (self.CSN, self.waitedTID, self.lastAckReceived, self.waitingForAck)
+
+
 if __name__ == "__main__":
-    pass
+    state = StateAFTN()
+    print(state.infos())

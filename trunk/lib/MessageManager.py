@@ -245,6 +245,8 @@ class MessageManager:
                 self.updatePartsToSend()
             elif words[0] == 'ackUsed':
                 self.ackUsed = words[1] == 'True' or words[1] == 'true'
+            elif words[0] == 'printState':
+                self.logger.info(self.state.infos()) 
             else:
                 pass
 
