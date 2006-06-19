@@ -108,12 +108,17 @@ class MessageManager:
         self.lastPartRegex = re.compile(r"//END PART \d\d/\d\d//")
 
         # Ack support (ack we receive because of the message we have sent)
-        self.lastAckReceived = None   # None or the transmitID
+        try:
+            self.lastAckReceived = self.state.lastAckReceived  
+            self.logger.info("lastAckReceived (%s) has been taken from AFTN State" % self.lastAckReceived)
+        except:
+            self.lastAckReceived = None   # None or the transmitID
+
         self.waitingForAck = None     # None or the transmitID 
         self.sendingInfos = (0, None) # Number of times a message has been sent and the sending time.
-        self.maxAckTime = 20  # Maximum time (in seconds) we wait for an ack, before resending.
+        self.maxAckTime = 60  # Maximum time (in seconds) we wait for an ack, before resending.
         self.maxSending = 1   # Maximum number of sendings of a message
-        self.ackUsed = False   # We can use ack or not
+        self.ackUsed = True   # We can use ack or not
         self.totAck = 0       # Count the number of ack (testing purpose only)
 
         # CSN verification (receiving)
