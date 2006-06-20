@@ -33,15 +33,15 @@ def normalPaths():
     RX_CONF = ETC + 'rx/'
     TX_CONF = ETC + 'tx/'
 
-    TO_SEND = ROOT + 'toSendAFTN'
-    RECEIVED = ROOT + 'receivedAFTN'
-    SENT = ROOT + 'sentAFTN'
-    SPECIAL_ORDERS = ROOT + 'specialOrders'
+    TO_SEND = ROOT + 'toSendAFTN/'
+    RECEIVED = ROOT + 'receivedAFTN/'
+    SENT = ROOT + 'sentAFTN/'
+    SPECIAL_ORDERS = ROOT + 'specialOrders/'
 
-    TO_SEND_PRO = ROOT + 'toSendAFTN_pro'
-    RECEIVED_PRO = ROOT + 'receivedAFTN_pro'
-    SENT_PRO = ROOT + 'sentAFTN_pro'
-    SPECIAL_ORDERS_PRO = ROOT + 'specialOrders_pro'
+    TO_SEND_PRO = ROOT + 'toSendAFTN_pro/'
+    RECEIVED_PRO = ROOT + 'receivedAFTN_pro/'
+    SENT_PRO = ROOT + 'sentAFTN_pro/'
+    SPECIAL_ORDERS_PRO = ROOT + 'specialOrders_pro/'
 
     STATE = ROOT + 'state/state.obj'
 
