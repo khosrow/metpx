@@ -56,7 +56,7 @@ class TransceiverAFTN:
         self.mm = MessageManager(self.logger, self.sourlient)  # AFTN Protocol is implemented in MessageManager Object
         self.remoteAddress = None                          # Remote address (where we will connect())
         self.socket = None                                 # Socket object
-        self.dataFromFiles = []
+        self.dataFromFiles = []                            # A list of tuples (content, filename) obtained from a DiskReader 
 
         if self.subscriber:
             self.writePath = AFTNPaths.RECEIVED            # Where we write messages we receive
@@ -279,9 +279,14 @@ class TransceiverAFTN:
                         poller.register(self.socket.fileno(), select.POLLIN | select.POLLERR | select.POLLHUP | select.POLLNVAL)
                         continue
     
-                # Here we read a file from disk (if we're not waiting for an ack) and write it on the socket
+                # Here we read a file from disk (if we're not waiting for an ack and don't have some parts of a
+                # big message to send) and write it on the socket
                 if not mm.getWaitingForAck():
-                    self.readFromDisk()
+                    # Do we have some parts of a big message to send?
+                    if len(mm.partsToSend):
+                        self._writeMessageToSocket([mm.partsToSend[0]], False, mm.nextPart)
+                    else:
+                        self.readFromDisk()
                     # For testing Ack+Mess back to back in the buffer
                     #if self.subscriber:
                     #    time.sleep(7)
@@ -318,10 +323,6 @@ class TransceiverAFTN:
                 poller.register(self.socket.fileno(), select.POLLIN | select.POLLERR | select.POLLHUP | select.POLLNVAL)
 
     def readFromDisk(self):
-        # if we have some parts of a big message to send
-        if len(self.mm.partsToSend):
-            self._writeMessageToSocket([self.mm.partsToSend[0]], False, self.mm.nextPart)
-            return
         # If our buffer is empty, we read data from disk
         if not len(self.dataFromFiles):
             self.reader.read()
@@ -333,18 +334,14 @@ class TransceiverAFTN:
                 time.sleep(2)
         else:
             # Break the bulletin in the number of appropriate parts (possibly only one)
-            self.mm.partsToSend = TextSplitter(self.dataFromFiles[0][0], MessageAFTN.MAX_TEXT_SIZE, MessageAFTN.ALIGNMENT, MessageAFTN.TEXT_SPECIFIC_OVERHEAD).breakLongText()
-            #self.mm.partsToSend = TextSplitter(self.dataFromFiles[0], 2100, MessageAFTN.ALIGNMENT, 300).breakLongText()
+            self.mm.partsToSend = TextSplitter(self.dataFromFiles[0][0], MessageAFTN.MAX_TEXT_SIZE, MessageAFTN.ALIGNMENT, 
+                                               MessageAFTN.TEXT_SPECIFIC_OVERHEAD).breakLongText()
 
             # Will add //END PART 01//\n\r  or //END PART 03/03//\n\r
             self.mm.completePartsToSend(self.mm.partsToSend)
 
-            #print self.mm.partsToSend
-            #sys.exit()
-
             assert self.mm.nextPart == 0, "Next part not equal to zero when sending the first part of a message"
             self._writeMessageToSocket([self.mm.partsToSend[0]], False, self.mm.nextPart)
-            #if len(self.mm.partsToSend):
 
     def readFromSocket(self):
         mm = self.mm
