@@ -337,7 +337,7 @@ Message (repr):
 
     def _createHeadingLine(self):
         #print "HeadingLine: %s %s %s%s" % (MessageAFTN.SOH, self.transmitID, self.dateTime, MessageAFTN.ALIGNMENT)
-        return "%s %s %s%s" % (MessageAFTN.SOH, self.transmitID, self.dateTime, MessageAFTN.ALIGNMENT)
+        return "%s%s %s%s" % (MessageAFTN.SOH, self.transmitID, self.dateTime, MessageAFTN.ALIGNMENT)
 
     def createDestinationAddressLine(self):
         addressLine = ""
