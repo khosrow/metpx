@@ -467,10 +467,10 @@ class MessageManager:
         for address in addresses:
             if len(address) == addressLength and address.isalpha():
                 goodAddresses.append(address)
-            elif len(addres) != addressLength:
+            elif len(address) != addressLength:
                 self.logger.warning("Address %s rejected (Not %d characters)" % (address, addressLength))
             elif not address.isalpha():
-                self.logger.warning("Address %s rejected (Not entirely alpha)" % (address, addressLength))
+                self.logger.warning("Address %s rejected (Not entirely alpha)" % (address))
         return goodAddresses
 
     def setInfos(self, header, rewrite=False):
