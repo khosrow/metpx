@@ -558,9 +558,10 @@ class TransceiverAFTN:
     def _writeAckToSocket(self, transmitID):
         ack = AckAFTN(transmitID)
         ackMessage = ack.getAck()
+        printableAck = ackMessage[2:-1]
 
         self.socket.send(ackMessage)
-        self.logger.info("(%5d Bytes) Ack: %s sent" % (len(ackMessage), ackMessage))
+        self.logger.info("(%5d Bytes) Ack: %s sent" % (len(ackMessage), printableAck))
 
     def _writeMessageToSocket(self, data, rewrite=False, nextPart=0):
 
