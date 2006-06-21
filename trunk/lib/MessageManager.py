@@ -15,7 +15,6 @@ import os, sys, time, commands, re, curses.ascii, re, pickle
 
 from MessageAFTN import MessageAFTN
 from bulletinManager import bulletinManager
-from DirectRoutingParser import DirectRoutingParser
 from DiskReader import DiskReader
 from StateAFTN import StateAFTN
 import AFTNPaths, PXPaths
@@ -103,10 +102,13 @@ class MessageManager:
         try:
             self.lastAckReceived = self.state.lastAckReceived  
             self.logger.info("lastAckReceived (%s) has been taken from AFTN State" % self.lastAckReceived)
+
+            self.waitingForAck = self.state.waitingForAck 
+            self.logger.info("waitingForAck (%s) has been taken from AFTN State" % self.waitingForAck)
         except:
             self.lastAckReceived = None   # None or the transmitID
+            self.waitingForAck = None     # None or the transmitID 
 
-        self.waitingForAck = None     # None or the transmitID 
         self.sendingInfos = (0, None) # Number of times a message has been sent and the sending time.
         self.maxAckTime =  sourlient.maxAckTime  # Maximum time (in seconds) we wait for an ack, before resending.
         self.maxSending = 1   # Maximum number of sendings of a message
@@ -127,10 +129,19 @@ class MessageManager:
         self.unusedBuffer = ''        # Part of the buffer that was not used
 
         # Persistent state
+        min = 60
+        now = time.mktime(time.gmtime())
+
         if self.subscriber:
             try:
-                self.state = self.unarchiveObject(AFTNPaths.STATE)
-                self.updateFromState(self.state)
+                lastUpdate = os.stat(AFTNPaths.STATE)[8]
+                diff = now - lastUpdate
+                if diff < 60 * min:
+                    self.state = self.unarchiveObject(AFTNPaths.STATE)
+                    self.updateFromState(self.state)
+                else: 
+                    self.logger.warning("Archive state not read because too old (%i minutes)" % int(diff/60))
+                    raise
             except:
                 self.state = StateAFTN()
                 self.state.fill(self)
@@ -148,8 +159,8 @@ class MessageManager:
         self.CSN = state.CSN
         self.waitedTID = state.waitedTID
 
-        self.lastAckReceived = messageManager.lastAckReceived
-        self.waitingForAck = messageManager.waitingForAck
+        self.lastAckReceived = state.lastAckReceived
+        self.waitingForAck = state.waitingForAck
     
     def ingest(self, bulletin):
         self.bullManager.writeBulletinToDisk(bulletin)
@@ -461,9 +472,9 @@ class MessageManager:
             if self.destAddress == []:
                 self.logger.warning("No destination address for header %s and client %s" % (header, self.name))
                 return False
-            if not rewrite:
-                self.setFilingTime()
-                self.nextCSN()
+            #if not rewrite:
+            self.setFilingTime()
+            self.nextCSN()
             return True
         elif header == None:
             self.logger.warning("No header found in the message")
