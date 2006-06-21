@@ -461,6 +461,18 @@ class MessageManager:
 
         config.close()
 
+    def validateAddresses(self, addresses):
+        goodAddresses = []
+        addressLength = 8
+        for address in addresses:
+            if len(address) == addressLength and address.isalpha():
+                goodAddresses.append(address)
+            elif len(addres) != addressLength:
+                self.logger.warning("Address %s rejected (Not %d characters)" % (address, addressLength))
+            elif not address.isalpha():
+                self.logger.warning("Address %s rejected (Not entirely alpha)" % (address, addressLength))
+        return goodAddresses
+
     def setInfos(self, header, rewrite=False):
         """
         Informations obtained in the DirectRoutingParser object are assigned to instance variables.
@@ -468,7 +480,7 @@ class MessageManager:
         """
         if header in self.drp.routingInfos:
             self.priority = self.priorities[self.drp.getHeaderPriority(header)]
-            self.destAddress = self.drp.getHeaderSubClients(header).get(self.name, [])
+            self.destAddress = self.validateAddresses(self.drp.getHeaderSubClients(header).get(self.name, []))
             if self.destAddress == []:
                 self.logger.warning("No destination address for header %s and client %s" % (header, self.name))
                 return False
