@@ -236,6 +236,9 @@ Message (repr):
         return self.textLines
 
     def messageToValues(self):
+        """ 
+        Used  only at RECEPTION of an AFTN Message
+        """
         self.messageLines = self.message.splitlines()
         if self._parseHeadingLine(self.messageLines[0]):
             if self._parseDestinationAddressLine(self.messageLines[1]):
@@ -245,6 +248,9 @@ Message (repr):
         return 0
 
     def _parseHeadingLine(self, line):
+        """ 
+        Used  only at RECEPTION of an AFTN Message
+        """
         if line[0] == MessageAFTN.SOH and line[1] == ' ' and len(line) == 18:
             self.stationID = line[2:5]
             self.CSN = line[5:9]
@@ -267,6 +273,9 @@ Message (repr):
             return 0
 
     def _parseDestinationAddressLine(self, line):
+        """ 
+        Used  only at RECEPTION of an AFTN Message
+        """
         addressLength = 8 # Length of one address
         parts = line.split()
         numberOfAddress = len(parts) - 1
@@ -299,6 +308,9 @@ Message (repr):
             return 0
 
     def _parseOriginAddressLine(self, line):
+        """ 
+        Used  only at RECEPTION of an AFTN Message
+        """
         if len(line) >= 15:
             self.filingTime = line[0:6]
             self.originatorAddress = line[7:15]
@@ -313,6 +325,9 @@ Message (repr):
             return 1
 
     def _parseText(self):
+        """ 
+        Used  only at RECEPTION of an AFTN Message
+        """
         if self.messageLines[3][0] == MessageAFTN.STX and self.messageLines[-1] == MessageAFTN.END_OF_MESSAGE:
             self.textLines = self.messageLines[3:-1]   # Remove END_OF_MESSAGE line
             self.textLines[0] = self.textLines[0][1:]  # Remove <STX> char
