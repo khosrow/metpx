@@ -72,6 +72,7 @@ class TransceiverAFTN:
                                  self.sourlient.mtime, True, self.logger, eval(self.sourlient.sorter), self.sourlient)
         
         self.debug = True  # Debugging switch
+        self.justConnect = False  # Boolean that indicates when a connexion just occur
         
         self.totBytes = 0
 
@@ -135,6 +136,8 @@ class TransceiverAFTN:
                     #self.run()
                 else:
                     self.logger.error("No socket (NONE)")
+        self.justConnect = True
+        
 
     def _connect(self, remoteAddress, logger):
         trials = 0
@@ -246,6 +249,31 @@ class TransceiverAFTN:
 
         while True:
             try:
+                if self.justConnect:
+                    # Because we wait for an ack, it means that:
+                    # a) The other party has never received our message and we have to resend
+                    # b) The other party has received our message and sent his ack, ack that we never received
+                    # Conclusion: resend the message
+                    if mm.waitingForAck is not None:
+                        CSN = mm.waitingForAck[3:]
+                        message = mm.unarchiveObject(self.archivePath + CSN)
+
+                        mm.setWaitingForAck(None)
+                        mm.resetSendingInfos()
+                        mm.clearPartsToSend()
+
+                        print message.textString
+
+                        mm.partsToSend = [message.textString]
+                        # Will add //END PART 01//\n\r  or //END PART 03/03//\n\r
+                        self.mm.completePartsToSend(self.mm.partsToSend)
+
+                        mm.setFromDisk(False)
+                        self._writeMessageToSocket([mm.partsToSend[0]], True, mm.nextPart)
+                        mm.setFromDisk(True)
+
+                    self.justConnect = False
+
                 # If service messages are in queue and we are not waiting for an ack ...
                 if len(mm.serviceQueue) and not mm.getWaitingForAck():
                    mm.partsToSend = [mm.serviceQueue.pop(0)]
@@ -400,7 +428,7 @@ class TransceiverAFTN:
                                 mm.ingest(m)
 
                         # We keep one copy of all received messages in a special AFTN directory
-                        file = open(self.writePath + "/" + mm.messageIn.getName() + suffix, 'w')
+                        file = open(self.writePath + mm.messageIn.getName() + suffix, 'w')
                         for line in mm.messageIn.textLines:
                             file.write(line + '\n')
                         file.close()
@@ -411,7 +439,7 @@ class TransceiverAFTN:
                         pass
                     # Last part of a big message
                     elif status == -1:
-                        file = open(self.writePath + "/" + mm.messageIn.getName(), 'w')
+                        file = open(self.writePath + mm.messageIn.getName(), 'w')
                         for line in mm.receivedParts:
                             file.write(line + '\n')
                         file.close()
@@ -549,7 +577,7 @@ class TransceiverAFTN:
             if not rewrite:
                 self.logger.info("%d new bulletin will be sent" % len(data))
             else:
-                self.logger.info("%d new bulletin will be resent (ack not received)" % len(data))
+                self.logger.info("%d new bulletin will be resent (ack not received / reconnexion)" % len(data))
 
             for index in range(len(data)):
                 if nextPart == 0:
@@ -575,14 +603,16 @@ class TransceiverAFTN:
                     mm.nextCSN()
                     messageAFTN = MessageAFTN(self.logger, data[index], mm.stationID, mm.address, MessageAFTN.PRIORITIES[2],
                                               [mm.otherAddress], mm.CSN, mm.filingTime, mm.dateTime)
+                    self.logger.debug('\n' + messageAFTN.message)
                     messageAFTN.setLogger(None)
-                    mm.archiveObject(self.archivePath + '/' + mm.CSN, messageAFTN)
+                    mm.archiveObject(self.archivePath + mm.CSN, messageAFTN)
                 else:
                     # True if mm.header is in the routing table with destination addresses
                     #if mm.header == None: mm.header = 'SACN31 CWAO'
                     if mm.setInfos(mm.header, rewrite):
                         messageAFTN = MessageAFTN(self.logger, data[index], mm.stationID, mm.address, mm.priority,
                                               mm.destAddress, mm.CSN, mm.filingTime, mm.dateTime)
+                        self.logger.debug('\n' + messageAFTN.message)
                         messageAFTN.setLogger(None)
                     else:
                         if mm.isFromDisk():
@@ -598,9 +628,9 @@ class TransceiverAFTN:
                         continue
                         
                 # If it is the first time we sent this message, we archive it.
-                if not rewrite:
-                    mm.archiveObject(self.archivePath + '/' + mm.CSN, messageAFTN)
-                #tutu = mm.unarchiveObject(self.archivePath + '/' + mm.CSN)
+                #if not rewrite:
+                mm.archiveObject(self.archivePath + mm.CSN, messageAFTN)
+                #tutu = mm.unarchiveObject(self.archivePath + mm.CSN)
                 #print tutu
 
                 nbBytesToSend = len(messageAFTN.message)
