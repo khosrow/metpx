@@ -103,7 +103,7 @@ class TransceiverAFTN:
             self.logger.error("Unable to close the socket! Type: %s, Value: %s" % (type, value))
 
         # FIXME: Possibly some variable resetting should occur here?
-        self.logger.error("Sleeping %d seconds ..." % (self.sleepBetweenConnect))
+        self.logger.info("Sleeping %d seconds (just before makeConnection())" % (self.sleepBetweenConnect))
         time.sleep(self.sleepBetweenConnect)
         self.makeConnection()
 
@@ -159,7 +159,7 @@ class TransceiverAFTN:
             trials += 1
             try:
                 socketSender.connect(remoteAddress)
-                logger.info("Sender is now connected to: %s" % str(remoteAddress))
+                logger.info("Sender is now (after %d trial(s)) connected to: %s" % (trials, str(remoteAddress)))
                 break
             except socket.gaierror, e:
                 logger.error("Address related error connecting to receiver: %s" % e)
@@ -202,7 +202,7 @@ class TransceiverAFTN:
 
         while True:
             try:
-                logger.info("Receiver is waiting for a connection (block on accept for %d seconds)" % self.timeout)
+                logger.info("Receiver is waiting for a connection (block on accept() for %d seconds)" % self.timeout)
                 conn, clientAddress = socketReceiver.accept()
                 socketReceiver.close()
                 socketReceiver = conn
@@ -246,6 +246,7 @@ class TransceiverAFTN:
         mm = self.mm
         poller = select.poll()
         poller.register(self.socket.fileno(), select.POLLIN | select.POLLERR | select.POLLHUP | select.POLLNVAL)
+        firstIter = True
 
         while True:
             try:
@@ -255,24 +256,29 @@ class TransceiverAFTN:
                     # b) The other party has received our message and sent his ack, ack that we never received
                     # Conclusion: resend the message
                     if mm.waitingForAck is not None:
-                        CSN = mm.waitingForAck[3:]
-                        message = mm.unarchiveObject(self.archivePath + CSN)
+                        mm.resetSendingInfos()
+                        mm.reduceCSN()
+                        self.logger.debug("CSN has been reduced (%s)" % mm.CSN)
+
+                        if firstIter:
+                            mm.clearPartsToSend()
+                            CSN = mm.waitingForAck[3:]
+                            self.logger.debug("CSN extract from ack is %s" % CSN)
+                            message = mm.unarchiveObject(self.archivePath + CSN)
+                            #print message.textString
+
+                            mm.partsToSend = [message.textString]
+                            # Will add //END PART 01//\n\r  or //END PART 03/03//\n\r
+                            mm.completePartsToSend(mm.partsToSend)
 
                         mm.setWaitingForAck(None)
-                        mm.resetSendingInfos()
-                        mm.clearPartsToSend()
-
-                        print message.textString
-
-                        mm.partsToSend = [message.textString]
-                        # Will add //END PART 01//\n\r  or //END PART 03/03//\n\r
-                        self.mm.completePartsToSend(self.mm.partsToSend)
-
                         mm.setFromDisk(False)
                         self._writeMessageToSocket([mm.partsToSend[0]], True, mm.nextPart)
                         mm.setFromDisk(True)
 
                     self.justConnect = False
+
+                firstIter = False
 
                 # If service messages are in queue and we are not waiting for an ack ...
                 if len(mm.serviceQueue) and not mm.getWaitingForAck():
@@ -322,11 +328,14 @@ class TransceiverAFTN:
                 # Too long time without receiving an ack, we may have to resend ...
                 elif time.time()-mm.getLastSendingTime() > mm.getMaxAckTime():
                     if mm.getNbSending() < mm.getMaxSending():
+                        # Should never be here since maxSending is 1 (No retransmission)
                         self.logger.info("We will rewrite a message (max ack time over)")
                         self._writeMessageToSocket([mm.partsToSend[0]], True, mm.nextPart)
                     else:
                         #self.logger.error("Maximum number (%s) of retransmissions have occured without receiving an ack." % mm.getMaxSending())
                         self.logger.error("Maximum waiting time (%s seconds) has passed without receiving an ack. We will try to reconnect!" % mm.getMaxAckTime())
+
+                        """
                         mm.setWaitingForAck(None)
                         mm.resetSendingInfos()
                         mm.updatePartsToSend()
@@ -338,6 +347,7 @@ class TransceiverAFTN:
                         else:
                             mm.archiveObject(AFTNPaths.STATE + 'PRO', mm.state)
                         self.logger.debug("State has been archived")
+                        """
 
                         poller.unregister(self.socket.fileno())
                         self.reconnect()
