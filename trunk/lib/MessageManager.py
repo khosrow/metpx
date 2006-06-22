@@ -510,6 +510,12 @@ class MessageManager:
         print "********************************** Fin(Manager) ***********************************"
         print "\n"
 
+    def reduceCSN(self):
+        if self.CSN == '0000':
+            self.CSN = '9999'
+        else: 
+            self.CSN = "%04d" % (int(self.CSN.lstrip('0')) - 1)
+
     def calcNextCSNString(self, CSNString):
 
         if CSNString == '0000':
