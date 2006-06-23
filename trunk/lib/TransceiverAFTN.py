@@ -408,6 +408,9 @@ class TransceiverAFTN:
 
                     self.logger.debug(mm.messageIn.textLines)
 
+                    self.logger.degug('Message as it has been received:')
+                    self.logger.debug('\n' + messageIn.message)
+
                     status = mm.isItPart(mm.messageIn.textLines)
 
                     # Not part of a big message, possibly a SVC message
@@ -533,7 +536,7 @@ class TransceiverAFTN:
                         mm.setWaitingForAck(None)
                         mm.resetSendingInfos()
                         mm.updatePartsToSend()
-                        self.logger.debug("Ack received is the ack we wait for: %s" % strippedMessage)
+                        self.logger.info("Ack received is the ack we wait for: %s" % strippedMessage)
                     else:
                         # FIXME: When deconnexion occurs, it is possible that we received an ack for a previously sent message???
                         self.logger.error("Ack received (%s) is not the ack we wait for: %s" % (strippedMessage, mm.getWaitingForAck()))
@@ -623,6 +626,7 @@ class TransceiverAFTN:
                     if mm.setInfos(mm.header, rewrite):
                         messageAFTN = MessageAFTN(self.logger, data[index], mm.stationID, mm.address, mm.priority,
                                               mm.destAddress, mm.CSN, mm.filingTime, mm.dateTime)
+                        self.logger.degug('Message as it will be sent:')
                         self.logger.debug('\n' + messageAFTN.message)
                         messageAFTN.setLogger(None)
                     else:
