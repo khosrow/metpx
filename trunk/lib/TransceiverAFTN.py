@@ -152,6 +152,7 @@ class TransceiverAFTN:
             socketSender = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             socketSender.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
             socketSender.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            socketSender.settimeout(self.timeout)
             #print socketSender.getsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF)
             #socketSender.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF,4096)
             #print socketSender.getsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF)
