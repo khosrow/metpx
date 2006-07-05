@@ -409,7 +409,7 @@ class TransceiverAFTN:
 
                     self.logger.debug(mm.messageIn.textLines)
 
-                    self.logger.degug('Message as it has been received:')
+                    self.logger.debug('Message as it has been received:')
                     self.logger.debug('\n' + messageIn.message)
 
                     status = mm.isItPart(mm.messageIn.textLines)
@@ -627,7 +627,7 @@ class TransceiverAFTN:
                     if mm.setInfos(mm.header, rewrite):
                         messageAFTN = MessageAFTN(self.logger, data[index], mm.stationID, mm.address, mm.priority,
                                               mm.destAddress, mm.CSN, mm.filingTime, mm.dateTime)
-                        self.logger.degug('Message as it will be sent:')
+                        self.logger.debug('Message as it will be sent:')
                         self.logger.debug('\n' + messageAFTN.message)
                         messageAFTN.setLogger(None)
                     else:
