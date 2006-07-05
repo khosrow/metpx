@@ -410,7 +410,7 @@ class TransceiverAFTN:
                     self.logger.debug(mm.messageIn.textLines)
 
                     self.logger.debug('Message as it has been received:')
-                    self.logger.debug('\n' + messageIn.message)
+                    self.logger.debug('\n' + mm.messageIn.message)
 
                     status = mm.isItPart(mm.messageIn.textLines)
 
