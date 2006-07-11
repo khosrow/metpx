@@ -1,0 +1,485 @@
+#!/usr/bin/env python2
+"""
+MetPX Copyright (C) 2004-2006  Environment Canada
+MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+named COPYING in the root of the source directory tree.
+"""
+
+"""
+#############################################################################################
+# Name: Plotter.py
+#
+# Author      : Nicholas Lemay, but the code is highly inspired by previously created file 
+#               named Plotter.py written by Daniel Lemay. This file can be found in the lib
+#               folder of this application. 
+#
+# Date        : 2006-06-06
+#
+# Description : This class contain the data structure and the methods used to plot a graphic 
+#               using previously collected data. The data should have been collected using 
+#               the data collecting class' and methods found in the stats library. 
+# 
+#############################################################################################
+"""
+
+
+#important files 
+import sys 
+import MyDateLib
+from MyDateLib import *
+import DirectoryStatsCollector
+from Numeric import *
+import Gnuplot, Gnuplot.funcutils
+import copy 
+
+
+
+class StatsPlotter:
+
+    def __init__( self, timespan,  stats = None, clientNames = None, type='impulses', interval=1, imageName="gnuplotOutput", title = "Stats",currentTime = "",now = False, statsTypes = None ):
+        """
+            StatsPlotter constructor. 
+            
+        """
+        x = [ [0]*5  for x in range(5) ]
+        
+        self.now         = now                     # False means we round to the top of the hour, True we don't
+        self.stats       = stats or []             # DirectoryStatsCollector instance.
+        self.clientNames = clientNames or []       # Clients for wich we are producing the graphics. 
+        self.timespan    = timespan                # Helpfull to build titles 
+        self.currentTime = currentTime             # Time of call
+        self.type        = type                    # Must be in: ['linespoint', 'lines', 'boxes', 'impulses'].
+        self.imageName   = imageName               # Name of the image file.
+        self.nbFiles     = []                      # Number of files found in the data collected per server.
+        self.nbErrors    = []                      # Number of errors found per server
+        self.xtics       = self.getXTics( )        # Seperarators on the x axis.
+        self.graph       = Gnuplot.Gnuplot()       # The gnuplot graphic object itself. 
+        self.timeOfMax   = [[]]                    # Time where the maximum value occured.  
+        self.machines    = ""                      # List of machine where we collected info.
+        self.clientName  = ""                      # Name of the client we are dealing with 
+        self.maximums    = [[]]                    # List of all maximum values 1 for each graphic.
+        self.minimums    = [[]]                    # Minimum value of all pairs.
+        self.means       = [[]]                    # Mean of all the pairs.
+        self.maxFileNames= [[]]                    # Name of file where value is the highest .
+        self.filesWhereMaxOccured = [[]]           # List of files for wich said maximums occured.  
+        self.statsTypes  = statsTypes or []        # List of data types to plot per client.
+        self.nbFilesOverMaxLatency = []             # Numbers of files for wich the latency was too long.
+        self.ratioOverLatency      = []          # % of files for wich the latency was too long. 
+        self.const = len( self.stats ) -1          # Usefull constant
+        
+        self.initialiseArrays()
+    
+        
+    def initialiseArrays( self ):
+        """
+            Used to set the size of the numerous arrays needed in StatsPlotter
+        """
+        
+        nbClients = len( self.clientNames )
+        nbTypes   = len( self.statsTypes )
+        
+        self.nbFiles = [0] * nbClients
+        self.nbErrors = [0] * nbClients
+        self.nbFilesOverMaxLatency = [0] * nbClients
+        self.ratioOverLatency      = [0.0] * nbClients
+        self.timeOfMax   = [ [0]*nbTypes  for x in range( nbClients ) ]
+        self.maximums    = [ [0.0]*nbTypes  for x in range( nbClients ) ] 
+        self.minimums    = [ [0.0]*nbTypes  for x in range( nbClients ) ]
+        self.means       = [ [0.0]*nbTypes  for x in range( nbClients ) ]
+        self.maxFileNames= [ [0.0]*nbTypes  for x in range( nbClients ) ]
+        self.filesWhereMaxOccured =  [ [0.0]*nbTypes  for x in range( nbClients ) ] 
+            
+        
+    def buildImageName( self ):
+        """
+            Builds and returns the absolute fileName .
+            
+            If folder to file does not exists creates it.
+        
+        """ 
+        
+        clientName = ""
+        
+        if len( self.clientNames ) == 0:
+            clientName = self.clientNames[0]
+        else:
+            for name in self.clientNames :
+                clientName = clientName + name  
+                if name != self.clientNames[ len(self.clientNames) -1 ] :
+                    clientName = clientName + "-"  
+        
+        date = MyDateLib.getIsoFromEpoch( self.currentTime ).replace( " ", "_")
+        
+        fileName = str( os.getcwd() ) #will probably need a better path eventually.... 
+        fileName = fileName +  "/GRAPHS/%s/%s-%s.png" %( clientName, clientName,date ) 
+        
+        splitName = fileName.split( "/" ) 
+        directory = "/"
+        
+        for i in range( 1, len(splitName)-1 ):
+            directory = directory + splitName[i] + "/"
+        
+          
+        if not os.path.isdir( directory ):
+            os.makedirs( directory, mode=0777 )  
+        
+          
+        
+        return fileName 
+    
+    
+    def getXTics(self):
+        """
+           
+           This method builds all the xtics used to seperate data on the x axis.
+            
+           Xtics values will are used in the plot method so they will be drawn on 
+           the graphic. 
+           
+           Note : All xtics will be devided hourly. This means a new xtic everytime 
+                  another hour has passed since the starting point.  
+            
+            
+        """
+        
+        nbBuckets = ( len( self.stats[0].statsCollection.timeSeperators ) )
+        xtics = ''
+       
+        if nbBuckets != 0 :
+            
+            startTime = MyDateLib.getOriginalHour( self.stats[0].statsCollection.startTime )
+            xtics += '"%s" %i, ' % ( startTime, self.stats[0].statsCollection.startTime  )
+            
+            for i in range( 1, nbBuckets ):
+                
+                if ( ( self.stats[0].statsCollection.timeSeperators[i] - self.stats[0].statsCollection.startTime) %(60*60) == 0 ): 
+                    
+                    hour = MyDateLib.getHoursFromIso( MyDateLib.getIsoFromEpoch( self.stats[0].statsCollection.timeSeperators[i] ) )
+                    
+                    xtics += '"%s" %i, '%(  hour ,self.stats[0].statsCollection.timeSeperators[i] ) 
+
+        
+        return xtics[:-2]
+    
+
+        
+    def findStatTypeIndex( self,i , statType ):
+        """
+            Returns the index where a certain statType is stored in statsCollection.
+            
+            Returns >= 0 if found -1 if not.  
+        
+        """
+        
+        index = -1 
+        j = 0         
+        
+        if statType in self.stats[i].statsCollection.statsTypes :
+            while  self.stats[i].statsCollection.statsTypes[j] != statType :
+                j = j + 1            
+            
+            index = j     
+        
+        return index 
+        
+        
+        
+    def getPairs( self, clientCount , statType, typeCount  ):
+        """
+           
+           This method is used to create the data couples used to draw the graphic.
+           Couples are a combination of the data previously gathered and the time
+           at wich data was produced.  
+           
+           Note : One point per pair will generally be drawn on the graphic but
+                  certain graph types might combine a few pairs before drawing only 
+                  one point for the entire combination.
+        
+        """
+        
+        
+        k = 0 
+        pairs            = []
+        nbEntries        = len( self.stats[clientCount].statsCollection.timeSeperators ) 
+        typeIndex        = self.findStatTypeIndex( clientCount , statType )
+        total            = 0
+        self.nbFiles[clientCount]  = 0
+        self.nbErrors[clientCount] = 0
+        self.nbFilesOverMaxLatency[clientCount] = 0
+
+       
+        if nbEntries !=0:
+            
+            #0 is special case since starttime isnt part of the gucket list 
+            if len( self.stats[clientCount].statsCollection.fileEntries[0].means ) >=1 :
+                
+                if statType == "errors":
+                    pairs.append( [self.stats[clientCount].statsCollection.startTime, self.stats[clientCount].statsCollection.fileEntries[0].totals[ typeIndex ] ] )
+                    self.nbFiles[clientCount]  = self.stats[clientCount].statsCollection.fileEntries[0].nbFiles
+                      
+                else:
+                    pairs.append( [self.stats[clientCount].statsCollection.startTime, self.stats[clientCount].statsCollection.fileEntries[0].means[typeIndex]] )
+                    self.nbFiles[clientCount] = self.stats[clientCount].statsCollection.fileEntries[0].nbFiles  
+            
+            else:
+                
+                pairs.append( [self.stats[clientCount].statsCollection.startTime, 0.0] )
+                
+            
+            total = pairs[0][1]
+            
+            self.minimums[clientCount][typeCount] = pairs[0][1]
+            self.maximums[clientCount][typeCount] = pairs[0][1] 
+            self.filesWhereMaxOccured[clientCount][typeCount] =  "" 
+            self.timeOfMax[clientCount][typeCount] = ""
+                       
+            
+            for k in range( 1, nbEntries ):
+                
+                if len( self.stats[clientCount].statsCollection.fileEntries[k].means ) >=1 :
+                    
+                    if statType == "latency":
+                        self.nbFilesOverMaxLatency[clientCount] = self.nbFilesOverMaxLatency[ clientCount ] + self.stats[clientCount].statsCollection.fileEntries[k].filesOverMaxLatency    
+                
+                    if statType == "errors":
+                        pairs.append( [self.stats[clientCount].statsCollection.timeSeperators[k], self.stats[clientCount].statsCollection.fileEntries[k].totals[typeIndex]] )
+                    
+                        #calculate total number of errors
+                        self.nbErrors[clientCount] = self.nbErrors[clientCount] + self.stats[clientCount].statsCollection.fileEntries[k].totals[typeIndex] 
+                        
+                        
+                    else:
+                        pairs.append( [self.stats[clientCount].statsCollection.timeSeperators[k], self.stats[clientCount].statsCollection.fileEntries[k].means[typeIndex]] )
+                     
+                    
+                    if( self.stats[clientCount].statsCollection.fileEntries[k].maximums[typeIndex]  > self.maximums[clientCount][typeCount] ) :
+                        
+                        self.maximums[clientCount][typeCount] =  self.stats[clientCount].statsCollection.fileEntries[k].maximums[typeIndex]
+                        
+                        self.timeOfMax[clientCount][typeCount] = self.stats[clientCount].statsCollection.fileEntries[k].timesWhereMaxOccured[typeIndex]
+                        
+                        self.filesWhereMaxOccured[clientCount][typeCount] = self.stats[clientCount].statsCollection.fileEntries[k].filesWhereMaxOccured[typeIndex]
+                    
+                    elif self.stats[clientCount].statsCollection.fileEntries[k].minimums[typeIndex] < self.minimums[clientCount][typeCount] :         
+                        self.minimums[clientCount][typeCount] = pairs[k][1]
+                    
+                        
+                    self.nbFiles[clientCount]  = self.nbFiles[clientCount]  + self.stats[clientCount].statsCollection.fileEntries[k].nbFiles   
+                    
+
+            
+                    
+                else:
+                    pairs.append( [ self.stats[clientCount].statsCollection.timeSeperators[k], 0.0 ] )
+                    
+                    
+                total = total + pairs[k][1]            
+              
+            self.means[clientCount][typeCount] = (total / (k+1) ) 
+            
+            
+            if self.nbFiles[clientCount] != 0 :
+                self.ratioOverLatency[clientCount]  = float( float(self.nbFilesOverMaxLatency[clientCount]) / float(self.nbFiles[clientCount]) ) *100.0
+        
+        return pairs    
+         
+    
+    
+    def buildTitle( self, i, statType ):
+        """
+            This method is used to build the title we'll print on the graphic.
+            Title is built with the current time and the name of the client where
+            we collected the data. Also contains the mean and absolute min and max found 
+            in the data used to build the graphic. 
+         
+               
+        """
+        
+        typeIndex =  self.findStatTypeIndex( i , statType )
+      
+        title=  "%s for %s queried at %s for a span of %s hours \\n\\nMAX: %3.2f,  MEAN: %3.2f, MIN: %3.2f " %( statType, self.clientNames[i], MyDateLib.getIsoFromEpoch( self.currentTime ), self.timespan,  self.maximums[i][typeIndex], self.means[i][typeIndex], self.minimums[i][typeIndex] )     
+        
+        return title
+        
+    
+    
+    def plot( self ):
+        """
+            Used to plot gnuplot graphics. Settings used are
+            slighly modified but mostly based on Plotter.py's
+            plot function. 
+            
+        """
+        
+        #Set general settings for graphs 
+        
+        color = 1
+        nbGraphs = 0
+         
+        totalSize = ( 0.55 * len( self.stats )  * len( self.statsTypes ) )
+        
+        self.graph( 'set size 2.0, %2.1f' % ( totalSize ) )
+        
+        print 'set size 2.0, %2.1f' % (totalSize)
+        self.graph( 'set linestyle 4 ')
+        
+        self.graph.xlabel( 'time (hours)' ) #, offset = ( "0.0"," -2.5" )
+        
+        self.graph( 'set grid')
+        
+        self.graph( 'set xtics (%s)' % self.xtics)
+        #self.graph( "set xtics rotate" )
+        
+        if self.type == 'lines':
+            self.graph( 'set data style lines' )  
+        elif self.type == 'impulses':
+            self.graph( 'set data style impulses' )  
+        elif self.type == 'boxes':
+            self.graph( 'set data style boxes' )  
+        elif self.type == 'linespoints':
+            self.graph( 'set data style linespoints' )  
+            
+        
+        self.graph( 'set terminal png size 1024 768' )
+        self.imageName = self.buildImageName()
+
+        self.graph( "set autoscale" )
+        self.graph( 'set output "%s"' % (  self.imageName ) )
+        self.graph( 'set multiplot' ) 
+        
+        
+        for i in range( len( self.stats ) ) :
+            
+            print self.statsTypes 
+            
+            for j in range (len (self.statsTypes) ):
+                pairs = self.getPairs( i , self.statsTypes[j], j )
+                
+                if self.statsTypes[j] == "errors" :
+                    self.addErrorsLabelsToGraph(  i , nbGraphs, j )
+                elif self.statsTypes[j] == "latency" :
+                    self.addLatencyLabelsToGraph(  i , nbGraphs, j )
+                elif self.statsTypes[j] == "bytecount" :
+                    self.addBytesLabelsToGraph(  i , nbGraphs, j )
+                    
+                self.graph.title( "%s" %self.buildTitle( i, self.statsTypes[j] ) )
+                
+                self.graph.plot( Gnuplot.Data( pairs , with="%s %s 1" % ( self.type, color) ) )
+                
+                nbGraphs = nbGraphs + 1 
+        
+        
+#         self.graph.reset()
+#         
+#         self.graph = None
+                    
+        
+         
+    def addLatencyLabelsToGraph( self, i , nbGraphs, j ):
+        """
+            Used to set proper labels for a graph relating to latencies. 
+             
+        """            
+        
+        if self.maximums[i][j] !=0:
+            timeOfMax = MyDateLib.getIsoFromEpoch( self.timeOfMax[i][j] )
+        else:
+            timeOfMax = ""
+                
+       
+        self.graph( 'set size .65, .55' )
+        
+        self.graph( 'set origin 0, %3.2f' %( ((nbGraphs)*.55)  ) )
+
+        self.graph.ylabel( 'latency (seconds)' )
+        
+        self.graph( 'set label "Client : %s" at screen .65, screen %3.2f' % ( self.clientNames[i],(.38+(nbGraphs) *.55)  ))
+        self.graph( 'set label "Machines :%s" at screen .65, screen %3.2f' % ( self.machines,(.34+(nbGraphs) *.55)  ) )
+        
+        self.graph( 'set label "Maximum occured at: %s" at screen .65, screen %3.2f' % ( ( timeOfMax, (.30+(nbGraphs) *.55)  )))
+        
+        self.graph( 'set label "On file :%s" at screen .65, screen %3.2f' % ( self.filesWhereMaxOccured[i][j], (.26+(nbGraphs) *.55) ))
+        
+        self.graph( 'set label "Maximum was : %s" at screen .65, screen %3.2f' % ( self.maximums[i][j], (.22+(nbGraphs) *.55) ) )
+        
+        self.graph( 'set label "# of files : %s " at screen .65, screen %3.2f' % ( self.nbFiles[i] , (.18+(nbGraphs) *.55) ) )
+        
+        self.graph( 'set label "# of files over max latency: %s " at screen .65, screen %3.2f' % ( self.nbFilesOverMaxLatency[i], ( .14+(nbGraphs) *.55 ) ) )
+        
+        self.graph( 'set label "%% of files over max latency: %3.2f %%" at screen .65, screen %3.2f' % ( self.ratioOverLatency[i] , ( .10 + (nbGraphs) *.55 ) ) )
+        
+        ###End of method to build  
+        
+        
+    def addBytesLabelsToGraph( self, i , nbGraphs, j ):
+        """
+            Used to set proper labels for a graph relating to bytes. 
+             
+        """            
+        
+        if self.maximums[i][j] !=0:
+            timeOfMax = MyDateLib.getIsoFromEpoch( self.timeOfMax[i][j] )
+        else:
+            timeOfMax = ""
+                
+       
+        self.graph( 'set size .65, .55' )
+        
+        self.graph( 'set origin 0, %3.2f' %( ((nbGraphs)*.55)  ))
+        
+        self.graph.ylabel( 'Bytes' )
+        
+        self.graph( 'set label "Client : %s" at screen .65, screen %3.2f' % ( self.clientNames[i],(.38+(nbGraphs) *.55)  ))
+        
+        self.graph( 'set label "Machines :%s" at screen .65, screen %3.2f' % ( self.machines,(.34+(nbGraphs) *.55)  ) )
+        
+        self.graph( 'set label "Largest file :%s" at screen .65, screen %3.2f' % ( self.filesWhereMaxOccured[i][j], (.30+(nbGraphs) *.55) ))
+        
+        self.graph( 'set label "Time of largest file: %s" at screen .65, screen %3.2f' % ( ( timeOfMax, (.26+(nbGraphs) *.55)  )))
+        
+        self.graph( 'set label "Size of file : %s" at screen .65, screen %3.2f' % ( self.maximums[i][j], (.22+(nbGraphs) *.55) ) )
+        
+        self.graph( 'set label "# of files : %s " at screen .65, screen %3.2f' % ( self.nbFiles[i] , (.18+(nbGraphs) *.55) ) )
+    
+    
+    
+    
+    def addErrorsLabelsToGraph( self, i , nbGraphs, j ):
+        """
+            Used to set proper labels for a graph relating to bytes. 
+             
+        """   
+                 
+        if self.maximums[i][j] !=0:
+            timeOfMax = MyDateLib.getIsoWithRoundedSeconds( MyDateLib.getIsoFromEpoch( self.timeOfMax[i][j] ) )
+        else:
+            timeOfMax = ""
+                
+       
+        self.graph( 'set size .65, .55' )
+        
+        self.graph( 'set origin 0, %3.2f' %( ((nbGraphs)*.55)  ))
+        
+        self.graph.ylabel( 'Errors' )
+        
+        self.graph( 'set label "Client : %s" at screen .65, screen %3.2f' % ( self.clientNames[i],(.38+(nbGraphs) *.55)  ))
+        
+        self.graph( 'set label "Machines :%s" at screen .65, screen %3.2f' % ( self.machines,(.34+(nbGraphs) *.55)  ) )
+        
+        self.graph( 'set label "Max error/bucket : %s" at screen .65, screen %3.2f' % ( self.maximums[i][j], (.30+(nbGraphs) *.55) ))
+        
+        
+        self.graph( 'set label "Time of maximum: %s" at screen .65, screen %3.2f' % ( ( timeOfMax, (.26+(nbGraphs) *.55)  )))
+        
+        self.graph( 'set label "Total of errors : %s" at screen .65, screen %3.2f' % ( self.nbErrors[i], (.22+(nbGraphs) *.55) ) )
+      
+                
+                
+            
+
+
+
+
+    
+    
+    
