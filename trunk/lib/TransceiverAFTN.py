@@ -416,6 +416,7 @@ class TransceiverAFTN:
 
                     # Not part of a big message, possibly a SVC message
                     if status == 0:
+                        suffix = 'NOT_SVC_NOR_AFTN'
                         mp = MessageParser(mm.messageIn.textLines)
                         if mp.getType() == "SVC": 
                             ##############################################################################################
