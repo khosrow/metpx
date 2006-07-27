@@ -172,6 +172,7 @@ class TransceiverAFTN:
                 socketSender = None
                 time.sleep(self.sleepBetweenConnect)
 
+        self.sleepBetweenConnect = 10
         return socketSender
 
     def _listen(self, port, logger):
