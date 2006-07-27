@@ -18,6 +18,7 @@ from bulletinManager import bulletinManager
 from DiskReader import DiskReader
 from StateAFTN import StateAFTN
 import AFTNPaths, PXPaths
+import dateLib
 
 class MessageManager:
 
@@ -75,6 +76,7 @@ class MessageManager:
         self.header = None     # Message WMO Header
         self.priority = None   # Priority indicator (SS, DD, FF, GG or KK)
         self.destAddress = []  # 8-letter group, max. 21 addresses
+        self.CSNJustReset = False 
         try:
             self.CSN = self.state.CSN
             self.logger.info("CSN (%s) has been taken from AFTN State" % self.CSN)
@@ -155,6 +157,18 @@ class MessageManager:
                 self.state.fill(self)
                 self.archiveObject(AFTNPaths.STATE + 'PRO', self.state)
 
+    def resetCSN:
+        hhmm = dateLib.getTodayFormatted('%H%M')
+        hh = hhmm[:2]
+        mm = hhmm[2:]
+
+        if hh == '00' and mm <= '05' and not self.CSNJustReset:
+            self.CSN = '0000'
+            self.CSNJustReset = True
+            self.logger.info('CSN has been reset to 0001')
+        elif mm > '05':
+            self.CSNJustReset = False
+        
     def updateFromState(self, state):
         self.CSN = state.CSN
         self.waitedTID = state.waitedTID
