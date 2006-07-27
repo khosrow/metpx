@@ -157,7 +157,7 @@ class MessageManager:
                 self.state.fill(self)
                 self.archiveObject(AFTNPaths.STATE + 'PRO', self.state)
 
-    def resetCSN:
+    def resetCSN(self):
         hhmm = dateLib.getTodayFormatted('%H%M')
         hh = hhmm[:2]
         mm = hhmm[2:]

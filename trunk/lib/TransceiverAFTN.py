@@ -292,6 +292,9 @@ class TransceiverAFTN:
                     
                 # These special orders are useful to simulate problems ...
                 mm.doSpecialOrders(self.specialOrdersPath)
+
+                # Reset the CSN if it is the time
+                mm.resetCSN()
                 
                 pollInfos = poller.poll(100)
                 if len(pollInfos):
