@@ -63,7 +63,7 @@ class MessageParser:
             self.type = "RQ"
         elif words[0] == "RF":
             self.type = "RF"
-        elif len(words) >= 3:
+        else: 
             self.type = 'AFTN'
             if self._headerIn(words):
                 self.header = words[0] + " " + words[1]
