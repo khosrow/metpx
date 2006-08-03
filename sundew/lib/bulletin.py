@@ -410,7 +410,13 @@ class bulletin:
                     station = premiereLignePleine.split()[1]
 
             elif bulletin[0][0:2] in ["UE","UG","UK","UL","UQ","US"]:
-                station = premiereLignePleine.split()[2]
+                parts = premiereLignePleine.split()
+                if parts[0][:2] in ['EE', 'II', 'QQ', 'UU']:
+                    station = parts[1]
+                elif parts[0][:2] in ['PP', 'TT']:
+                    station = parts[2]
+                else:
+                    station = None
 
             elif bulletin[0][0:2] in ["RA","MA","CA"]:
                 station = premiereLignePleine.split()[0].split('/')[0]
@@ -645,14 +651,6 @@ class bulletin:
             self.setError('Entete vide')
             return
 
-        # Changement qui doit être fait avant de vérifier l'entête,
-        # le tandem enlève le 'z' ou 'Z' à la fin de l'entête
-        # s'il y a lieu.
-        if header[-1]  in ['z','Z'] :
-            if not header[-3:-2] not in ['CC','AA','RR']:
-               header = header[:-1]
-               self.setHeader(header)
-
         tokens = header.split()
 
         if len(tokens) < 3:
@@ -660,8 +658,8 @@ class bulletin:
             return
 
         if len(tokens[2]) > 6: # On enleve les ['z', 'Z'] ou ['utc', 'UTC'] s'ils sont presents dans le groupe JJHHMM
-            tokens[2] = tokens[2][0:5]
-            self.logger.info("Entete corrigee: le groupe JJHHMM a ete tronque (plus de 6 caracteres)")
+            tokens[2] = tokens[2][0:6]
+            self.logger.info("Entete corrigee (%s): le groupe JJHHMM a ete tronque (plus de 6 caracteres)" % str(header))
             self.setHeader(' '.join(tokens))
             tokens = self.getHeader().split()
 
