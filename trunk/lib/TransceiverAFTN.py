@@ -299,7 +299,7 @@ class TransceiverAFTN:
                 pollInfos = poller.poll(100)
                 if len(pollInfos):
                     states = TransceiverAFTN.getStates(pollInfos[0][1], True)
-                    print states
+                    #print states
                     if 'POLLIN' in states:
                         # Here we read data from socket, write it on disk and write on the socket
                         # if necessary
@@ -339,21 +339,6 @@ class TransceiverAFTN:
                     else:
                         #self.logger.error("Maximum number (%s) of retransmissions have occured without receiving an ack." % mm.getMaxSending())
                         self.logger.error("Maximum waiting time (%s seconds) has passed without receiving an ack. We will try to reconnect!" % mm.getMaxAckTime())
-
-                        """
-                        mm.setWaitingForAck(None)
-                        mm.resetSendingInfos()
-                        mm.updatePartsToSend()
-
-                        # Archive State
-                        mm.state.fill(mm)
-                        if self.subscriber:
-                            mm.archiveObject(AFTNPaths.STATE, mm.state)
-                        else:
-                            mm.archiveObject(AFTNPaths.STATE + 'PRO', mm.state)
-                        self.logger.debug("State has been archived")
-                        """
-
                         poller.unregister(self.socket.fileno())
                         self.reconnect()
                         poller.register(self.socket.fileno(), select.POLLIN | select.POLLERR | select.POLLHUP | select.POLLNVAL)
