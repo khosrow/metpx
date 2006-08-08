@@ -284,10 +284,11 @@ class TransceiverAFTN:
 
                 # If service messages are in queue and we are not waiting for an ack ...
                 if len(mm.serviceQueue) and not mm.getWaitingForAck():
-                   mm.partsToSend = [mm.serviceQueue.pop(0)]
+                   data, destAddresses = mm.serviceQueue.pop(0)
+                   mm.partsToSend = [data]
                    mm.completePartsToSend(mm.partsToSend)  
                    mm.setFromDisk(False)
-                   self._writeMessageToSocket([mm.partsToSend[0]], False, mm.nextPart)
+                   self._writeMessageToSocket([mm.partsToSend[0]], False, mm.nextPart, destAddresses)
                    mm.setFromDisk(True)
                     
                 # These special orders are useful to simulate problems ...
@@ -372,6 +373,7 @@ class TransceiverAFTN:
             self._writeMessageToSocket([self.mm.partsToSend[0]], False, self.mm.nextPart)
 
     def readFromSocket(self):
+        replyAFTN = ''
         mm = self.mm
         
         buf = self.socket.recv(32768)
@@ -434,24 +436,26 @@ class TransceiverAFTN:
 
                         elif textType in ['RQ', 'RF']:
                             # request for amis or metser
-                            from RequestManager import RequestManager
+                            from RequestReplyAFTN import RequestReplyAFTN
                             import dateLib
-                            if textType == 'RQ':
-                                addOn = 'AACNO2 ANIK %s\nATTN %s\n\n' % (dateLib.getYYGGgg(), mm.messageIn.originatorAddress)
-                            elif textType == 'RF':
-                                addOn = 'AACN44 CWAO %s\nATTN %s\n\n' % (dateLib.getYYGGgg(), mm.messageIn.originatorAddress)
+                            date = dateLib.getYYGGgg()
+                            if textType == 'RQ': # amis
+                                addOn = 'AACNO2 ANIK %s\nATTN %s\n\n' % (date, mm.messageIn.originatorAddress)
+                                replyAFTN = 'RQM %s\nRQM ' % date
+                            elif textType == 'RF': # metser
+                                addOn = 'AACN44 CWAO %s\nATTN %s\n\n' % (date, mm.messageIn.originatorAddress)
+                                replyAFTN = 'RQF %s\nRQF ' % date
 
-                            # In fact, it should be another object, that use a DBS to put the answer on amis or metser.
-                            # Here, the only thing we are interested is the answer OK or UNK
-                            requ = RequestAFTN(mp.request, addOn, mp.sendOn, self.logger)
+                            # We want to put the answer on amis or metser.
+                            rr = RequestReplyAFTN(mp.request, addOn, mp.sendOn, self.logger)
 
-                            # With the answer, we create an appropriate aftn message and put it on the line, that's it!
-                            if requ.bulletin:
-                                requ.putBulletinInQueue()
-                                # Create OK Message
+                            if rr.bulletin:
+                                # bulletin is not empty, put it in queue and create an "OK" message
+                                rr.putBulletinInQueue()
+                                replyAFTN += 'OK'
                             else:
-                                pass
-                                # Create UNK Message
+                                # bulletin is empty, create an "UNK" message
+                                replyAFTN += 'UNK'
 
                         elif textType in ['RQM_UNK', 'RQM_OK', 'RQF_UNK', 'RQM_OK']:
                         # reply about a request. I think a request never originates from us,
@@ -540,10 +544,25 @@ class TransceiverAFTN:
                         else:
                             # We queue the message to send it after we receive the ack we wait for.
                             self.logger.info("A service message (%s) will be queued" % messageText)
-                            mm.serviceQueue.append(messageText)
+                            mm.serviceQueue.append(messageText, [])
                             
                     mm.calcWaitedTID(tid)
-                        
+
+                    ##############################################################################################
+                    # Do we have to send a reply to a request?
+                    ##############################################################################################
+                    if replyAFTN:
+                        if not mm.getWaitingForAck():
+                            mm.partsToSend = [replyAFTN]
+                            mm.completePartsToSend(mm.partsToSend)  
+                            mm.setFromDisk(False)
+                            self._writeMessageToSocket([mm.partsToSend[0]], False, mm.nextPart, [mm.messageIn.originatorAddress])
+                            mm.setFromDisk(True)
+                        else:
+                            # We queue the message to send it after we receive the ack we wait for.
+                            self.logger.info("A reply to a request (%s) will be queued" % replyAFTN)
+                            mm.serviceQueue.append((replyAFTN, [mm.messageIn.originatorAddress]))
+
                 elif type == 'ACK':
                     ##############################################################################################
                     # An Ack Message has been read on the socket. 
@@ -595,13 +614,21 @@ class TransceiverAFTN:
         self.socket.send(ackMessage)
         self.logger.info("(%5d Bytes) Ack: %s sent" % (len(ackMessage), printableAck))
 
-    def _writeMessageToSocket(self, data, rewrite=False, nextPart=0):
+    def _writeMessageToSocket(self, data, rewrite=False, nextPart=0, destAddresses=None):
 
         def getWord(type):
             if type == 'SVC':
                 return '(type: SVC)'
             elif type == 'AFTN':
                 return '(type: AFTN)'
+            elif type == 'RQM_OK':
+                return '(type: RQM_OK)'
+            elif type == 'RQM_UNK':
+                return '(type: RQM_UNK)'
+            elif type == 'RQF_OK':
+                return '(type: RQF_OK)'
+            elif type == 'RQF_UNK':
+                return '(type: RQF_UNK)'
             elif type == None:
                 return ""
 
@@ -635,7 +662,16 @@ class TransceiverAFTN:
                     mm.setFilingTime()
                     mm.nextCSN()
                     messageAFTN = MessageAFTN(self.logger, data[index], mm.stationID, mm.address, MessageAFTN.PRIORITIES[2],
-                                              [mm.otherAddress], mm.CSN, mm.filingTime, mm.dateTime)
+                                              destAddresses or [mm.otherAddress], mm.CSN, mm.filingTime, mm.dateTime)
+                    self.logger.debug('\n' + messageAFTN.message)
+                    messageAFTN.setLogger(None)
+                    mm.archiveObject(self.archivePath + mm.CSN, messageAFTN)
+
+                elif mm.header == None and mm.type in ['RQM_OK', 'RQM_UNK', 'RQF_OK', 'RQF_UNK']:
+                    mm.setFilingTime()
+                    mm.nextCSN()
+                    messageAFTN = MessageAFTN(self.logger, data[index], mm.stationID, mm.address, MessageAFTN.PRIORITIES[3],
+                                              destAddresses, mm.CSN, mm.filingTime, mm.dateTime)
                     self.logger.debug('\n' + messageAFTN.message)
                     messageAFTN.setLogger(None)
                     mm.archiveObject(self.archivePath + mm.CSN, messageAFTN)
