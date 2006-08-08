@@ -29,14 +29,17 @@ class MessageParser:
     def __init__(self, text):
         if type(text) == str:
             self.text = text
-            self.textLines = text.splitlines()        # Lines of text without linefeed, or any unwanted symbols 
+            self.textLines = text.splitlines()    # Lines of text without linefeed, or any unwanted symbols 
         elif type(text) == list:
             self.textLines = text
             self.text = '\n'.join(text)
-        self.type = None
+        self.type = None                          # In ['SVC', 'RQ', 'RF', 'RQM_UNK', 'RQM_OK', 'RQF_UNK', 'RQF_OK', 'AFTN']
         self.serviceType = None
         self.header = None
         self.findType()
+
+        self.sendOn = None
+        self.request = None
 
     def printInfos(self):
         print """
@@ -47,6 +50,8 @@ class MessageParser:
 
     def findType(self):
         """
+        Types: 'SVC', 'RQ', 'RF', 'RQM_UNK', 'RQM_OK', 'RQF_UNK', 'RQF_OK', 'AFTN'
+        
         If called at transmission and for an AFTN Message, a header
         should always be present in textLines[0]. If not, the message
         will be erased.
@@ -59,10 +64,17 @@ class MessageParser:
         if words[0] == "SVC":
             self.type = "SVC"
             self.findServiceType()
-        elif words[0] == "RQ":
-            self.type = "RQ"
-        elif words[0] == "RF":
-            self.type = "RF"
+        elif words[0] in ['RQ', 'RF']:
+            self.type = words[0]
+            if words[0] == 'RQ':
+                self.sendOn = 'amis'
+            elif words[0] == 'RF':
+                self.sendOn = 'metser'
+            self.request = self.textLines[1].strip()
+        elif words[0] in ['RQM', 'RQF']:
+            parts = self.textLines[1].strip().split()
+            if parts[1] in ['UNK', 'OK']:
+                self.type = parts[0] + '_' parts[1]
         else: 
             self.type = 'AFTN'
             if self._headerIn(words):

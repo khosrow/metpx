@@ -407,7 +407,8 @@ class TransceiverAFTN:
                     if status == 0:
                         suffix = 'NOT_SVC_NOR_AFTN'
                         mp = MessageParser(mm.messageIn.textLines)
-                        if mp.getType() == "SVC": 
+                        textType = mp.getType()
+                        if textType == "SVC": 
                             ##############################################################################################
                             # A Service  Message has been read on the socket. 
                             ##############################################################################################
@@ -418,7 +419,7 @@ class TransceiverAFTN:
                             #self.logger.info(str(mm.messageIn.getTextLines()))
                             #self.logger.info("********************* END SERVICE MESSAGE ***************************")
 
-                        elif mp.getType() == "AFTN":
+                        elif textType == "AFTN":
                             suffix = ''
                             if mp.getHeader(): 
                                 # Only one message will be in messages
@@ -430,6 +431,33 @@ class TransceiverAFTN:
                             # Ingest in met px
                             for m in messages:
                                 mm.ingest(m)
+
+                        elif textType in ['RQ', 'RF']:
+                            # request for amis or metser
+                            from RequestManager import RequestManager
+                            import dateLib
+                            if textType == 'RQ':
+                                addOn = 'AACNO2 ANIK %s\nATTN %s\n\n' % (dateLib.getYYGGgg(), mm.messageIn.originatorAddress)
+                            elif textType == 'RF':
+                                addOn = 'AACN44 CWAO %s\nATTN %s\n\n' % (dateLib.getYYGGgg(), mm.messageIn.originatorAddress)
+
+                            # In fact, it should be another object, that use a DBS to put the answer on amis or metser.
+                            # Here, the only thing we are interested is the answer OK or UNK
+                            requ = RequestAFTN(mp.request, addOn, mp.sendOn, self.logger)
+
+                            # With the answer, we create an appropriate aftn message and put it on the line, that's it!
+                            if requ.bulletin:
+                                requ.putBulletinInQueue()
+                                # Create OK Message
+                            else:
+                                pass
+                                # Create UNK Message
+
+                        elif textType in ['RQM_UNK', 'RQM_OK', 'RQF_UNK', 'RQM_OK']:
+                        # reply about a request. I think a request never originates from us,
+                        # so we should never receive such a reply.
+                            suffix = textType
+                            self.logger.info("Reply received is: %s" % textType)
 
                         # We keep one copy of all received messages in a special AFTN directory
                         file = open(self.writePath + mm.messageIn.getName() + suffix, 'w')
