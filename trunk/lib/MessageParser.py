@@ -26,6 +26,8 @@ class MessageParser:
     names[7] = 'AFTN unauthorized station'        # Only the AFTN MHS will generate this message
     names[8] = 'AFTN Incorrect Station Address'   # Only the AFTN MHS will generate this message (Not in the ICD, Ron told me)
 
+    REPLY_TYPES = ['RQM_OK', 'RQF_OK', 'RQM_UNK', 'RQF_UNK']
+
     def __init__(self, text):
         if type(text) == str:
             self.text = text
@@ -36,10 +38,9 @@ class MessageParser:
         self.type = None                          # In ['SVC', 'RQ', 'RF', 'RQM_UNK', 'RQM_OK', 'RQF_UNK', 'RQF_OK', 'AFTN']
         self.serviceType = None
         self.header = None
-        self.findType()
-
         self.sendOn = None
         self.request = None
+        self.findType()
 
     def printInfos(self):
         print """
@@ -60,6 +61,7 @@ class MessageParser:
         could not be present. If not present, one will be created using
         an aftnMap.
         """
+
         words = self.textLines[0].split()
         if words[0] == "SVC":
             self.type = "SVC"
@@ -74,7 +76,7 @@ class MessageParser:
         elif words[0] in ['RQM', 'RQF']:
             parts = self.textLines[1].strip().split()
             if parts[1] in ['UNK', 'OK']:
-                self.type = parts[0] + '_' parts[1]
+                self.type = parts[0] + '_' + parts[1]
         else: 
             self.type = 'AFTN'
             if self._headerIn(words):

@@ -33,7 +33,7 @@ class RequestReplyAFTN:
         self.drp = DirectRoutingParser(PXPaths.ROUTING_TABLE, [], logger)
         self.drp.printErrors = False
         self.drp.parseAndShowErrors()
-        self.dbs = DBSearcher(request)
+        self.dbs = DBSearcher(request, False)
         self.results = self.dbs.results
         self.receiverName = 'request-reply'
         self.pxManager = PXManager()
@@ -51,7 +51,7 @@ class RequestReplyAFTN:
             file.close()
         except:
             (type, value, tb) = sys.exc_info()
-            self.logger.error('Type: %s, Value: %s' % (type, value))
+            self.logger.error('In putBulletinInQueue: Type = %s, Value = %s' % (type, value))
 
     def constructBulletin(self):
         self.bulletin = ''
@@ -63,7 +63,7 @@ class RequestReplyAFTN:
                 self.bulletin = file.read()
             except:
                 (type, value, tb) = sys.exc_info()
-                self.logger.error('Type: %s, Value: %s' % (type, value))
+                self.logger.error('In constructBulletin(): Type =  %s, Value = %s' % (type, value))
 
         elif self.dbs.requestType == 2:
            for result in self.results:
@@ -103,7 +103,7 @@ class RequestReplyAFTN:
         if self.bulletin:
             self.bulletin = self.addOn + self.bulletin
 
-        print self.bulletin
+        #print self.bulletin
         return self.bulletin
 
 if __name__ == '__main__':

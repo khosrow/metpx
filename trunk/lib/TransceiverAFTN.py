@@ -440,20 +440,24 @@ class TransceiverAFTN:
                             import dateLib
                             date = dateLib.getYYGGgg()
                             if textType == 'RQ': # amis
-                                addOn = 'AACNO2 ANIK %s\nATTN %s\n\n' % (date, mm.messageIn.originatorAddress)
+                                addOn = 'AACN02 ANIK %s\nATTN %s\n\n' % (date, mm.messageIn.originatorAddress)
                                 replyAFTN = 'RQM %s\nRQM ' % date
                             elif textType == 'RF': # metser
                                 addOn = 'AACN44 CWAO %s\nATTN %s\n\n' % (date, mm.messageIn.originatorAddress)
                                 replyAFTN = 'RQF %s\nRQF ' % date
 
+                            self.logger.info('AFTN Request Received: Type = %s, Value = %s' % (textType, mp.request))
+
                             # We want to put the answer on amis or metser.
                             rr = RequestReplyAFTN(mp.request, addOn, mp.sendOn, self.logger)
 
                             if rr.bulletin:
+                                self.logger.info('Request is not empty, we will put bulletin in queue and send an OK message')
                                 # bulletin is not empty, put it in queue and create an "OK" message
                                 rr.putBulletinInQueue()
                                 replyAFTN += 'OK'
                             else:
+                                self.logger.info('Request is empty, we will send an UNK message')
                                 # bulletin is empty, create an "UNK" message
                                 replyAFTN += 'UNK'
 
@@ -621,6 +625,10 @@ class TransceiverAFTN:
                 return '(type: SVC)'
             elif type == 'AFTN':
                 return '(type: AFTN)'
+            elif type == 'RF':
+                return '(type: RF)'
+            elif type == 'RQ':
+                return '(type: RQ)'
             elif type == 'RQM_OK':
                 return '(type: RQM_OK)'
             elif type == 'RQM_UNK':
@@ -629,8 +637,8 @@ class TransceiverAFTN:
                 return '(type: RQF_OK)'
             elif type == 'RQF_UNK':
                 return '(type: RQF_UNK)'
-            elif type == None:
-                return ""
+            else:
+                return '(type: UNKNOWN)'
 
         mm = self.mm
         if len(data) >= 1:
@@ -667,7 +675,18 @@ class TransceiverAFTN:
                     messageAFTN.setLogger(None)
                     mm.archiveObject(self.archivePath + mm.CSN, messageAFTN)
 
-                elif mm.header == None and mm.type in ['RQM_OK', 'RQM_UNK', 'RQF_OK', 'RQF_UNK']:
+                elif mm.header == None and mm.type in ['RQ', 'RF']:
+                    # We will never have to sent such a message, it is only
+                    # there for tests purposes
+                    mm.setFilingTime()
+                    mm.nextCSN()
+                    messageAFTN = MessageAFTN(self.logger, data[index], mm.stationID, mm.address, MessageAFTN.PRIORITIES[2],
+                                              destAddresses or [mm.otherAddress], mm.CSN, mm.filingTime, mm.dateTime)
+                    self.logger.debug('\n' + messageAFTN.message)
+                    messageAFTN.setLogger(None)
+                    mm.archiveObject(self.archivePath + mm.CSN, messageAFTN)
+
+                elif mm.header == None and mm.type in MessageParser.REPLY_TYPES:
                     mm.setFilingTime()
                     mm.nextCSN()
                     messageAFTN = MessageAFTN(self.logger, data[index], mm.stationID, mm.address, MessageAFTN.PRIORITIES[3],
@@ -731,7 +750,14 @@ class TransceiverAFTN:
                         mm.filenameToSend = os.path.basename(self.dataFromFiles[0][1])
                         mm.filenameToErase = self.dataFromFiles[0][1]
                     else:
-                        mm.filenameToSend = mp.getServiceName(mp.getServiceType())
+                        if mp.type == 'SVC':
+                            mm.filenameToSend = mp.getServiceName(mp.getServiceType())
+                        elif mp.type in MessageParser.REPLY_TYPES:
+                            mm.filenameToSend = ''
+                        else:
+                            # We should never go here
+                            self.logger.error("Unknown message type has just been sent. See code!")
+
                     self.logger.info("(%5d Bytes) Message %s %s (%s/%s) has been sent" % (self.totBytes, getWord(mm.type), 
                                        mm.filenameToSend, mm.nextPart+1, mm.numberOfParts))
                 else:
