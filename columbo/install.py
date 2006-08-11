@@ -154,18 +154,18 @@ def makeCGIPaths():
         print("%s directory has been CREATED" % dir)
 
     # Now I have to copy all that is under COLUMBO_HOME/web/ to /web/columbo/
-    command = "cp -pR %s/web/* /web/columbo/" % COLUMBO_HOME
+    command = "cp -fpr %s/web/* /web/columbo/" % COLUMBO_HOME
     status, output = commands.getstatusoutput(command)
     print("Status of %s is: %s, output = %s" % (command, status, output))
 
     # Finally, I have to copy CS and lib directories under /web/columbo/cgi-bin
     target = '/web/columbo/cgi-bin/'
 
-    command = "cp -pR %s %s" % (CS, target)
+    command = "cp -fpr %s %s" % (CS, target)
     status, output = commands.getstatusoutput(command)
     print("Status of %s is: %s, output = %s" % (command, status, output))
 
-    command = "cp -pR %s %s" % (COLUMBO_HOME + '/lib', target)
+    command = "cp -fpr %s %s" % (COLUMBO_HOME + '/lib', target)
     status, output = commands.getstatusoutput(command)
     print("Status of %s is: %s, output = %s" % (command, status, output))
 
