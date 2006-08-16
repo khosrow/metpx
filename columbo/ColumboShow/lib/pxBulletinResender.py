@@ -10,11 +10,11 @@ named COPYING in the root of the source directory tree.
 #############################################################################################
 # Name: BulletinResender.py
 #
-# Author: Dominik Douville-Belanger (CMC Co-op student)
+# Author: Dominik Douville-Belanger
 #
-# Description: Web page for searching bulletin files
+# Description: Web page to search & resend bulletin files
 #
-# Date: 2005-05-10
+# Date: 2006-08-15 (new updated version)
 #
 #############################################################################################
 
@@ -23,56 +23,33 @@ import cgitb; cgitb.enable()
 import sys, os, commands
 sys.path.append(sys.path[0] + "/../../lib");
 sys.path.append("../../lib")
+sys.path.append("/apps/px/lib")
 
 from PDSPath import *
 from ColumboPath import *
 from types import *
 from myTime import *
 from ConfigParser import ConfigParser
-from Logger import Logger
+import PXPaths; PXPaths.normalPaths()
 import template
 
-import SearchUtils
-
-config = ConfigParser()
-config.readfp(open(FULL_MAIN_CONF))
-action_logname = config.get('LOG', 'action_log')
-backends = config.get('CIR', 'backends').split(' ')
-frontend = config.get('CIR', 'frontend').split(' ') # We keep it in a list since it can easily be added to backends
+# Quick way to read from a file, strip each EOL and put it all in a list
+targets = [target.strip() for target in open("%spxSearch.targets" % (PXPaths.ETC), "r").readlines()]
 
 def getLogNames(type):
     """
-    Creates a list of all available logs to search from
+    Gets the name of all logs on the target machines
     Arguments:
         type -> 'tx' or 'rx'
-    Returns: a list of strings
+    Returns: a list of string
     """
-    result = []
-    
-    if len(backends) == 0:
-        return []
-    
-    # Determines if the log is associated to an active client of the right type 
-    possible = SearchUtils.possibleLog(backends[0], type)
-    backendStatus, backendContent = commands.getstatusoutput('sudo -u pds /usr/bin/ssh ' + backends[0] + ' "ls /apps/px/log/' + type + '_*.log"') # Get all tx or rx logs
-    if backendStatus == 0:
-        # Extract only the client name from the log (/apps/px/log/tx_test.log becomes test)
-        backendContent = map(lambda x: x.split('/')[-1].split('_')[-1].replace('.log', ''), backendContent.splitlines())
-        # Add ' (backend) to the log name if the log is a possible choice
-        result += [bc + '(%s)' % (' '.join(backends)) for bc in backendContent if bc in possible]
-   
-    # Same thing for the frontend
-    if len(frontend) == 0:
-        return []
-    else:
-        possible = SearchUtils.possibleLog(frontend[0], type)
-        frontendStatus, frontendContent = commands.getstatusoutput('sudo -u pds /usr/bin/ssh ' + frontend[0] + ' " ls /apps/px/log/' + type + '_*.log"') # Get all tx or rx logs
-        if frontendStatus == 0:
-            frontendContent = map(lambda x: x.split('/')[-1].split('_')[-1].replace('.log', ''), frontendContent.splitlines())
-
-        result += [fc + '(%s)' % (' '.join(frontend)) for fc in frontendContent if fc in possible]
-    
-    return result
+    logNames = []
+    for target in targets:
+        status, output = commands.getstatusoutput('sudo -u pds ssh %s "ls -1 %s%s_*.log"' % (target, PXPaths.LOG, type))
+        if status == 0:
+            lines = output.splitlines()
+            logNames += [line.split("_")[-1].split(".")[0] for line in lines if line.split("_")[-1].split(".")[0] not in logNames] # We take out the tx_ (or _rx) and the .log parts
+    return logNames
 
 def menuContent(type):
     """
@@ -130,91 +107,157 @@ print """
 
 """
 
+# Here begins the main body of the page
 print """
   <tr>
     <td valign="top" bgcolor="#cccccc">
-        <!-- HERE BEGINS THE MAIN BODY OF THE PAGE -->
         <form method=POST action="pxSearchResult.py" target="_blank">
+            <h2><u>Search:</u></h2>
+            <h3>Type:</h3>
             <table bgcolor="#cccccc" border="0" cellpadding="0" cellspacing="5">
                 <tr>
-                    <td><h3><u>Search From:</u></h3></td>
+                    <td valign="top">
+                        <input type="radio" name="type" value="tx" CHECKED>Senders:
+                    </td>
+                    <td>
+                        <select multiple="true" name="senders" size="4">
+                        %s
+                        </select>
+                    </td>
                 </tr>
                 <tr>
-                    <td><input type="radio" name="searchtype" value="rx" CHECKED>pxReceiver logs</td>
-                    <td><select name="rxselect"><!--<option value="all(backend)">all (backend)<option value="all(frontend)">all (frontend)-->%s</select></td>
-                    <br>
-                </tr>
-                <tr>
-                    <td><input type="radio" name="searchtype" value="tx">pxSender logs</td>
-                    <td><select name="txselect"><!--<option value="all(backend)">all (backend)<option value="all(frontend)">all (frontend)-->%s</select></td>
-                    <br>
-                </tr>
-                <tr>
-                    <td><input type="radio" name="searchtype" value="dbfrontend" DISABLED>DB %s</td>
-                </tr>
-                <tr>
-                    <td><input type="radio" name="searchtype" value="dbbackends" DISABLED>DB %s</td>
+                    <td valign="top">
+                        <input type="radio" name="type" value="rx">Receivers:
+                    </td>
+                    <td>
+                        <select multiple="true" name="receivers" size="4">
+                        %s
+                        </select>
+                    </td>
                 </tr>
             </table>
+            
+            <h3>Filter:</h3>
             <table bgcolor="#cccccc" border="0" cellpadding="0" cellspacing="5">
                 <tr>
-                    <td><h3><u>Search critieria:</u></h3></td>
-                </tr>
-                <tr>
-                    <td align=center>TTAAii</td>
-                    <td align=center>CCCCxx</td>
-                    <td align=center>DDHHMM</td>
-                    <td align=center>BBB</td>
-                    <td align=center>STN</td>
-                    <td align=center>SRC (Senders and DB)</td>
-                    <td align=center>DST (Receivers)</td>
-                    <td align=center>SEQ#</td>
-                    <td align=center>PRIO#</td>
-                    <td align=center>From YYYYMMDDHH</td>
-                    <td align=center>To YYYYMMDDHH</td>
-                </tr>
-                <tr>
-                    <td align=center><input type="text" name="ttaaii" size="8" maxlength="8"></td>
-                    <td align=center><input type="text" name="ccccxx" size="8" maxlength="8"></td>
-                    <td align=center><input type="text" name="ddhhmm" size="6" maxlength="6"></td>
-                    <td align=center><input type="text" name="bbb" size="6" maxlength="3"></td>
-                    <td align=center><input type="text" name="stn" size="6" maxlength="5"></td>
-                    <td align=center><input type="text" name="src" size="20" maxlength="20"></td>
-                    <td align=center><input type="text" name="dst" size="20" maxlength="20"></td>
-                    <td align=center><input type="text" name="seq" size="6" maxlength="5"></td>
-                    <td align=center><input type="text" name="prio" size="2" maxlength="2"></td>
-                    <td align=center><input type="text" name="frommdh" size="10" maxlength="10"></td>
-                    <td align=center><input type="text" name="tomdh" size="10" maxlength="10"></td>
-                </tr>
-                <tr>
-                </tr>
-                <tr>
                     <td>
-                        <input type="submit" value="Search">
-                        &nbsp;&nbsp;
-                        <input type="reset" value="Reset">
+                        <input type="radio" name="filter" value="none" CHECKED>None
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <br>
-                        Fields that accept *:
-                        <ul>
-                            <li type="disc">TTAAii
-                            <li type="disc">CCCCxx
-                            <li type="disc">BBB
-                            <li type="disc">STN
-                            <li type="disc">SRC
-                            <li type="disc">SEQ#
-                        </ul>
+                        <input type="radio" name="filter" value="since">Since the last <input type="text" name="sinceinput" size="4" maxlength="4"> hours
                     </td>
                 </tr>
+                <tr>
+                    <td>
+                        <input type="radio" name="filter" value="boundaries">From: <input type="text" name="frominput" size="14" maxlength="14"> To: <input type="text" name="toinput" size="14" maxlength="14"> <i>(YYYYMMDDHHmmSS)</i>
+                    </td>
+                </tr>
+            </table>
+
+            <h3>Criterias:</h3>
+            <i>Example: SACN31_CWAO_151300__CYXX_75340:ncp2:CWAO:SA:3:Direct:20060815130152</i>
+            <table bgcolor="#cccccc" border="0" cellpadding="0" cellspacing="5">
+                <tr>
+                    <td align="center">TTAAii <i>(SACN31)</i></td>
+                    <td align="center">CCCCxx <i>(CWAO)</i></td>
+                    <td align="center">DDHHMM <i>(151300)</i></td>
+                    <td align="center">BBB <i>()</i></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="ttaaii" size="20" maxlength="20">
+                    <td><input type="text" name="ccccxx" size="20" maxlength="20">
+                    <td><input type="text" name="ddhhmm" size="20" maxlength="20">
+                    <td><input type="text" name="bbb" size="20" maxlength="20">
+                </tr>
+                <tr>
+                    <td align="center">STN <i>(CYXX)</i></td>
+                    <td align="center">SEQ # <i>(75340)</i></td>
+                    <td align="center">SRC/DEST <i>(ncp2)</i></td>
+                    <td align="center">PRIORITY <i>(3)</i></td>
+                </tr>
+                <tr>
+                    <td><input type="text" name="stn" size="20" maxlength="20">
+                    <td><input type="text" name="seq" size="20" maxlength="20">
+                    <td><input type="text" name="srcdest" size="20" maxlength="20">
+                    <td><input type="text" name="prio" size="20" maxlength="20">
+                </tr>
+            </table>
+            
+            <br>
+            <input type="checkbox" name="timesort" value="timesort">Sort by timestamps
+            <br>
+            
+            <br>
+            <table bgcolor="#cccccc" border="0" cellpadding="0" cellspacing="5">
+                <tr>
+                    <td>
+                        <input type="submit" value="SEARCH">
+                    </td>
+                    <td>
+                        <input type="reset" value="RESET">
+                    </td>
+                </tr>
+            </table>
+        </form>
+        
+        <form method=POST action="" target="_blank">
+            <h2><u>Resend:</u></h2>
+            <table bgcolor="#cccccc" border="0" cellpadding="0" cellspacing="5">
+                <tr>
+                    <td>
+                        Bulletin:
+                    </td>
+                    <td>
+                        <input type="text" name="bulletin" size="60">
+                    </td>
+                    <td>
+                        <i>(host:logfile:bulletinfile)</i>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        File:
+                    </td>
+                    <td>
+                        <input type="text" name="file" size="60">
+                    </td>
+                    <td>
+                        <i>(with full path)</i>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Flows:
+                    </td>
+                    <td>
+                        <input type="text" name="flows" size="60">
+                    </td>
+                    <td>
+                        <i>(one or comma separated list)</i>
+                    </td>
+                </tr>
+            </table>
+            
+            <br>
+            <table bgcolor="#cccccc" border="0" cellpadding="0" cellspacing="5">
+                <tr>
+                    <td>
+                        <input type="submit" value="RESEND">
+                    </td>
+                    <td>
+                        <input type="reset" value="RESET">
+                    </td>
+                </tr> 
             </table>
         </form>
     </td>
   </tr>
   <!-- end body -->
-""" % (menuContent('rx'), menuContent('tx'), ' '.join(backends), ' '.join(frontend))
+""" % (menuContent("tx"), menuContent("rx"))
+
+# Page footer
 print """
 <table>
   <tr>
