@@ -21,8 +21,9 @@ named COPYING in the root of the source directory tree.
 import cgi
 import cgitb; cgitb.enable()
 import sys, pwd, time, re, commands
-sys.path.append(sys.path[0] + "/../../lib");
+sys.path.append(sys.path[0] + "/../../lib")
 sys.path.append("../../lib")
+sys.path.append("/apps/px/lib/search")
 
 import template
 from PDSPath import *
@@ -30,16 +31,28 @@ from ColumboPath import *
 from types import *
 from myTime import *
 
-import SearchUtils
+import searchResendUtils
 
 form = cgi.FieldStorage()
-header = form["header"].value
-logpath = form["logpath"].value
-host = form["host"].value
-if form.has_key("dbath"):
-    dbpath = form["dbpath"].value
-else:
-    dbpath = ''
+item = form["item"].value
+
+def readFromDB(file, host):
+    """
+    Reads a bulletin file from the database.
+    The output is copied to a temporary file on the local machine.
+    Arguments:
+        host   -> machine that hosts the bulletin file
+        dbPath -> path to the bulletin in the database
+    Returns: path to the bulletin's copy
+    """
+    
+    dbPath = searchResendUtils.headerToLocation(file)
+    command = "sudo -u pds /usr/bin/ssh %s cat %s" % (host, dbPath)
+    status, output = commands.getstatusoutput(command)
+    if not status:
+        return output.replace('\n', '<br>')
+    else:
+        return ''
 
 print "Content-Type: text/html"
 print
@@ -73,16 +86,20 @@ print """
   </tr>
 """
 
-if dbpath == '':
-    dbpath = SearchUtils.accessDB(header)
+itemParts = item.split(":")
+host = itemParts[0]
+file = ":".join(itemParts[2:])
+content = readFromDB(file, host)
 
-content = SearchUtils.readFromDB(host, dbpath)
-if content != '':
-    destinations = SearchUtils.possibleDestination(header, host)
-    if destinations == []:
-        disabled = 'DISABLED'
-    else:
-        disabled = ''
+if content == "":
+    print """
+    <tr>
+        <td>
+            <h3>Could not locate <u>%s</u> in the database.</h3>
+        </td>
+    </tr>
+    """ % (file)
+else:
     print """
     <tr>
         <td valign="top" align="center" bgcolor="#cccccc">
@@ -92,31 +109,12 @@ if content != '':
         </td>
     </tr>
     <tr>
-    <td valign="top" bgcolor="#cccccc">
-        <form method="POST" action="pxResendBulletin.py">
-            &nbsp;<input type="submit" name="submit" value="Send" %s> &nbsp; &nbsp; &nbsp;
-            To: <select name="destination" %s>
-    """ % (header, disabled, disabled)
-    for dest in destinations:
-        print '<option value="%s">%s' % (dest, dest)
-    print """
-        </select><input type="hidden" name="dbpath" value="%s">
-        <input type="hidden" name="host" value="%s"></form>""" % (dbpath, host)
+        <td>
+            <blockquote>%s</blockquote>
+        </td>
+    </tr>
+    """ % (file, content)
     
-    # Printing the bulletin's content
-    print '<blockquote>%s</blockquote>' % content
-    
-else:
-    print """
-        <tr>
-            <td valign="top" align="center" bgcolor="#cccccc">
-                <font color="red"><center><h3>Could not locate <u>%s</u> in the database.<br><br>Please choose another result.</h3>
-                <br>
-                <a href="javascript:window.close();">Close this window</a></center></font>
-            </td>
-        </tr>
-    """ % header
-
 print"""
     </td>
   </tr>

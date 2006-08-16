@@ -49,6 +49,7 @@ def getLogNames(type):
         if status == 0:
             lines = output.splitlines()
             logNames += [line.split("_")[-1].split(".")[0] for line in lines if line.split("_")[-1].split(".")[0] not in logNames] # We take out the tx_ (or _rx) and the .log parts
+    logNames.sort()
     return logNames
 
 def menuContent(type):
@@ -73,11 +74,11 @@ print
 print """<html>
 <head>
 <meta name="Author" content="Dominik Douville-Belanger">
-<meta name="Description" content="Resending Tool">
+<meta name="Description" content="Search and Resend web interface">
 <meta name="Keywords" content="">
 <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META HTTP-EQUIV="Expires" CONTENT="-1">
-<title>Bulletin Search & Send</title>
+<title>Bulletins Search & Resend</title>
 <link rel="stylesheet" type="text/css" href="/css/style.css">
 <style>
 </style>

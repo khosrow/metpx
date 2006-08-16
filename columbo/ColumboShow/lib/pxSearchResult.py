@@ -13,11 +13,12 @@ named COPYING in the root of the source directory tree.
 # Author: Dominik Douville-Belanger
 #
 # Description: Uses info from the search form to call the search program and shows 
-#              the results.
+#              the results. This version is now independent from SearchUtils, it uses
+#              a command-line program to do the dirty work instead.
 #
 # Date: 2006-08-15 (new updated version)
 #
-# TODO: Make the command path independent (the executable must be in the PATH)
+# TODO: Make the command path-independent (the executable must be in the PATH)
 # TODO: Make up a way to deal with errors
 #
 #############################################################################################
@@ -34,17 +35,20 @@ from ColumboPath import *
 from types import *
 from myTime import *
 
-import SearchUtils
-import HeaderInfo
-
 form = cgi.FieldStorage()
 
-def createHeaderTable(headerList):
-    print '<h2><center><b>%s bulletins were found.</b></center></h2>' % len(headerList)
+def createDisplayTable(results):
+    print '<h2><center><b>%s bulletins were found.</b></center></h2>' % len(results)
     print '<table width="80%" border="2" align="center">'
-    print '<tr><td valign="top" align="center" bgcolor="#cccccc"><b>Header File</b></td><td valign="top" align="center" bgcolor="#cccccc"><b>Host</b></td></tr>'
-    for header in headerList:
-        print '<tr><td valign="top" align="center" bgcolor="#cccccc"><a href="pxBulletinDetails.py?header=%s&logpath=%s&host=%s" target="_blank">%s</a></td><td valign="top" align="center" bgcolor="#cccccc">%s</td></tr>' % (header.getHeader(), header.getLogpath(), header.getMachine(), header.getHeader(), header.getMachine())
+    print '<tr><td valign="top" align="center" bgcolor="#cccccc"><b>Header File</b></td></tr>'
+    for result in results:
+        print """
+        <tr>
+            <td valign="top" align="center" bgcolor="#cccccc">
+                <a href="pxBulletinDetails.py?item=%s" target="_blank">%s</a>
+            </td>
+        </tr>
+        """ % (result, result)
     print '</table>'
     
 print "Content-Type: text/html"
@@ -90,15 +94,22 @@ print """</td>
     <td valign="top" bgcolor="#cccccc">
 """
 
-command = "/apps/px/lib/search/pxSearch.py " # TEMPORARY
+command = "sudo -u pds /apps/px/lib/search/pxSearch.py " # TEMPORARY
+#command = "" # Uncomment this when the above solution isn't necessary anymore
 
-type = form["type"].value
-if type == "tx":
+searchType = form["type"].value
+if searchType == "tx":
     command += "--tx "
-    startFlows = [sender.value for sender in form["senders"]]
-elif type == "rx":
+    if type(form["senders"]) is list:
+        startFlows = [sender.value for sender in form["senders"]]
+    else:
+        startFlows = [form["senders"].value]
+elif searchType == "rx":
     command += "--rx "
-    startFlows = [receiver.value for receiver in form["receivers"]]
+    if type(form["receivers"]) is list:
+        startFlows = [receiver.value for receiver in form["receivers"]]
+    else:
+        startFlows = [form["receivers"].value]
 else:
     pass # ERROR
 
@@ -114,22 +125,38 @@ elif filter == "boundaries":
     else:
         pass # ERROR
 
-print command
-sys.exit(0)
+# Setting search criterias
+if form.has_key("ttaaii"):
+    command += "-t %s " % (form["ttaaii"].value)
+if form.has_key("ccccxx"):
+    command += "-c %s " % (form["ccccxx"].value)
+if form.has_key("ddhhmm"):
+    command += "-d %s " % (form["ddhhmm"].value)
+if form.has_key("bbb"):
+    command += "-b %s " % (form["bbb"].value)
+if form.has_key("stn"):
+    command += "-s %s " % (form["stn"].value)
+if form.has_key("seq"):
+    command += "-q %s " % (form["seq"].value)
+if form.has_key("srcdest"):
+    command += "-g %s " % (form["srcdest"].value)
+if form.has_key("prio"):
+    command += "-p %s " % (form["prio"].value)
 
-#if searchtype == 'rx':
-#    logname = 'rx_' + rxselect.split('(')[0] + '.log'
-#    path = '/apps/px/log/' + logname
-#    hosts = rxselect.split('(')[1].strip('()').split(' ')
-#    headerList = SearchUtils.searchLog(path, hosts, searchtype, request, logbegin, logend)
-#    createHeaderTable(headerList)
-#else:
-#    logname = 'tx_' + txselect.split('(')[0] + '.log'
-#    path = '/apps/px/log/' + logname
-#    hosts = txselect.split('(')[1].strip('()').split(' ')
-#    headerList = SearchUtils.searchLog(path, hosts, searchtype, request, logbegin, logend)
-#    createHeaderTable(headerList)
-        
+if form.has_key("timesort"):
+    command += "--timesort "
+
+# Completing the command
+command += " ".join(startFlows)
+print "<b>DEBUG:</b> %s" % (command) # <------------------------------------------ DEBUG
+print "<br><br>"
+
+status, output = commands.getstatusoutput(command)
+if not status:
+    createDisplayTable(output.splitlines())
+else:
+    print status, output # Something went wrong
+
 print """
     </td>
   </tr>
