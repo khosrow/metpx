@@ -202,57 +202,6 @@ print """
                 </tr>
             </table>
         </form>
-        
-        <form method=POST action="" target="_blank">
-            <h2><u>Resend:</u></h2>
-            <table bgcolor="#cccccc" border="0" cellpadding="0" cellspacing="5">
-                <tr>
-                    <td>
-                        Bulletin:
-                    </td>
-                    <td>
-                        <input type="text" name="bulletin" size="60">
-                    </td>
-                    <td>
-                        <i>(host:logfile:bulletinfile)</i>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        File:
-                    </td>
-                    <td>
-                        <input type="text" name="file" size="60">
-                    </td>
-                    <td>
-                        <i>(with full path)</i>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Flows:
-                    </td>
-                    <td>
-                        <input type="text" name="flows" size="60">
-                    </td>
-                    <td>
-                        <i>(one or comma separated list)</i>
-                    </td>
-                </tr>
-            </table>
-            
-            <br>
-            <table bgcolor="#cccccc" border="0" cellpadding="0" cellspacing="5">
-                <tr>
-                    <td>
-                        <input type="submit" value="RESEND">
-                    </td>
-                    <td>
-                        <input type="reset" value="RESET">
-                    </td>
-                </tr> 
-            </table>
-        </form>
     </td>
   </tr>
   <!-- end body -->

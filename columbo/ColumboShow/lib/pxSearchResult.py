@@ -38,18 +38,43 @@ from myTime import *
 form = cgi.FieldStorage()
 
 def createDisplayTable(results):
-    print '<h2><center><b>%s bulletins were found.</b></center></h2>' % len(results)
-    print '<table width="80%" border="2" align="center">'
-    print '<tr><td valign="top" align="center" bgcolor="#cccccc"><b>Header File</b></td></tr>'
+    print """
+    <div align="center">
+    <h2><b>%s bulletins found</b></h2>
+    <form method=POST action="pxResendBulletin.py" target="_blank">
+    <input type="hidden" name="all" value="%s">
+    <input type="submit" name="rschecked" value="Resend Checked">&nbsp;&nbsp;<input type="submit" name="rsall" value="Resend All">&nbsp;&nbsp;<input type="reset" value="Reset">
+    <br><br>
+    Flows: <input type="text" name="flows" size="60"> <i>(comma separated list)</i>
+    </div>
+    <br>
+    <table border="2" align="center">
+        <tr>
+            <td>
+                <b>Resend</b>
+            </td>
+            <td valign="top" align="center" bgcolor="#cccccc">
+                <b>Header File</b>
+            </td>
+        </tr>
+    """ % (len(results), " ".join(results))
+
     for result in results:
         print """
         <tr>
-            <td valign="top" align="center" bgcolor="#cccccc">
+            <td align="center">
+                <input type="checkbox" name="bulletins" value="%s">
+            </td>
+            <td valign="top" align="left" bgcolor="#cccccc">
                 <a href="pxBulletinDetails.py?item=%s" target="_blank">%s</a>
             </td>
         </tr>
-        """ % (result, result)
-    print '</table>'
+        """ % (result, result, result) # Checkbox value, URL, link name
+    
+    print """
+    </table>
+    </form>
+    """
     
 print "Content-Type: text/html"
 print
@@ -148,8 +173,8 @@ if form.has_key("timesort"):
 
 # Completing the command
 command += " ".join(startFlows)
-print "<b>DEBUG:</b> %s" % (command) # <------------------------------------------ DEBUG
-print "<br><br>"
+#print "<b>DEBUG:</b> %s" % (command) # <------------------------------------------ DEBUG
+#print "<br><br>"
 
 status, output = commands.getstatusoutput(command)
 if not status:

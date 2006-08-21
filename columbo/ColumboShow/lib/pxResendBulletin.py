@@ -8,13 +8,13 @@ named COPYING in the root of the source directory tree.
 """
 
 #############################################################################################
-# Name: resendBulletin.py
+# Name: pxResendBulletin.py
 #
-# Author: Dominik Douville-Belanger (CMC Co-op student)
+# Author: Dominik Douville-Belanger
 #
-# Description: Resend a bulletin file
+# Description: Uses pxResend to resend bulletins
 #
-# Date: 2005-07-11
+# Date: 2006-08-21 (new updated version)
 #
 #############################################################################################
 
@@ -24,27 +24,18 @@ import sys, os, pwd, time, re, pickle, commands
 sys.path.append(sys.path[0] + "/../../lib");
 sys.path.append("../../lib")
 
-from PDSPath import *
-from ColumboPath import *
-from types import *
-from myTime import *
-from ConfigParser import ConfigParser
-from Logger import Logger
+sys.path.append("/apps/px/lib/search")
 
-config = ConfigParser()
-config.readfp(open(FULL_MAIN_CONF))
-action_logname = config.get('LOG', 'action_log')
-
-logger = Logger(action_logname, "INFO", "AL")
-logger = logger.getLogger()
+def showAlert(msg):
+    print """
+        <script type="text/javascript">
+            alert(%s)
+            window.close()
+        </script>
+    """ % (msg)
+    sys.exit(1)
 
 form = cgi.FieldStorage()
-destination = form["destination"].value
-dbpath = form["dbpath"].value
-host = form["host"].value
-
-if destination == "amis":
-    status, output = commands.getstatusoutput('sudo -u pds /usr/bin/ssh %s /apps/px/bin/pxSender amis reload' % host)
 
 print "Content-Type: text/html"
 print
@@ -60,24 +51,27 @@ print """<html>
 </head>
 """ 
 
-oldname = dbpath.split('/')[-1]
-tmp = oldname.split(':')
-tmp[1] = "columbopx-retransmit"
-newname = ':'.join(tmp)
-
-currentsec = time.gmtime()
-hour = time.strftime("%Y%m%d%H", currentsec)
-copypath = '/apps/px/txq/%s/2/%s' % (destination, hour)
-# We make sure the queue directory is created.
-mkdircommand = "sudo -u pds /usr/bin/ssh %s mkdir %s" % (host, copypath)
-status, output = commands.getstatusoutput(mkdircommand)
-
-command = 'sudo -u pds /usr/bin/ssh %s cp %s %s' % (host, dbpath, copypath + '/' + newname)
-status, output = commands.getstatusoutput(command)
-if status:
-    logger.info("Bulletin Resender: sending %s to %s on %s -> FAIL" % (oldname, destination, host))
+if form.has_key("flows"):
+    flows = form["flows"].value
+    if " " in flows:
+        showAlert("'Your flow list must not contain spaces.'")
 else:
-    logger.info("Bulletin Resender: sending %s to %s on %s -> OK" % (oldname, destination, host))
+    showAlert("'You must enter one more more destination flows.'")    
+    
+if form.has_key("rsall"):
+    bulletins = form["all"].value.split(" ")
+else:
+    if form.has_key("bulletins"):
+        if type(form["bulletins"]) is list:
+            bulletins = [bulletin.value for bulletin in form["bulletins"]]
+        else:
+            bulletins = [form["bulletins"].value]
+    else:
+        showAlert("'Choose one or more bulletin file to resend.'")
+
+# Dumper les bulletins dans un fichier temporaire.
+
+command = "/apps/px/lib/search/pxResend.py -d %s" % (flows)
 
 print"""
 <script language="JavaScript">
