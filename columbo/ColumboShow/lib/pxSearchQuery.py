@@ -12,7 +12,7 @@ named COPYING in the root of the source directory tree.
 #
 # Author: Dominik Douville-Belanger
 #
-# Description: Web page to search & resend bulletin files
+# Description: Web page to search for bulletin files in the logs
 #
 # Date: 2006-08-15 (new updated version)
 #
@@ -29,7 +29,6 @@ from PDSPath import *
 from ColumboPath import *
 from types import *
 from myTime import *
-from ConfigParser import ConfigParser
 import PXPaths; PXPaths.normalPaths()
 import template
 
@@ -74,11 +73,11 @@ print
 print """<html>
 <head>
 <meta name="Author" content="Dominik Douville-Belanger">
-<meta name="Description" content="Search and Resend web interface">
+<meta name="Description" content="Search web interface">
 <meta name="Keywords" content="">
 <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META HTTP-EQUIV="Expires" CONTENT="-1">
-<title>Bulletins Search & Resend</title>
+<title>Bulletins Search</title>
 <link rel="stylesheet" type="text/css" href="/css/style.css">
 <style>
 </style>
@@ -110,10 +109,17 @@ print """
 
 # Here begins the main body of the page
 print """
+    <tr>
+        <td align="center" bgcolor="#cccccc">
+            <h1>Search:</h1>
+        </td>
+    </tr>
   <tr>
-    <td valign="top" bgcolor="#cccccc">
+    <td valign="top" align="center" bgcolor="#cccccc">
+        <table bgcolor="#cccccc" border="0" cellpadding="0" cellspacing="5">
+        <tr>
+        <td>
         <form method=POST action="pxSearchResult.py" target="_blank">
-            <h2><u>Search:</u></h2>
             <h3>Type:</h3>
             <table bgcolor="#cccccc" border="0" cellpadding="0" cellspacing="5">
                 <tr>
@@ -191,7 +197,7 @@ print """
             <br>
             
             <br>
-            <table bgcolor="#cccccc" border="0" cellpadding="0" cellspacing="5">
+            <table bgcolor="#cccccc" align="center" border="0" cellpadding="0" cellspacing="5">
                 <tr>
                     <td>
                         <input type="submit" value="SEARCH">
@@ -202,6 +208,9 @@ print """
                 </tr>
             </table>
         </form>
+        </td>
+        </tr>
+        </table>
     </td>
   </tr>
   <!-- end body -->

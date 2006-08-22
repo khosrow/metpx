@@ -40,7 +40,8 @@ form = cgi.FieldStorage()
 print "Content-Type: text/html"
 print
  
-print """<html>
+print """
+<html>
 <head>
 <meta name="Author" content="Dominik Douville-Belanger">
 <meta name="Description" content="Resend a bulletin file">
@@ -49,6 +50,8 @@ print """<html>
 <style>
 </style>
 </head>
+<body bgcolor="#cccccc">
+<div align="center">
 """ 
 
 if form.has_key("flows"):
@@ -69,14 +72,22 @@ else:
     else:
         showAlert("'Choose one or more bulletin file to resend.'")
 
-# Dumper les bulletins dans un fichier temporaire.
+# We write all the lines to a temporary file.
+# This way we do not exceed the command-line maximum length
+tmpfilePath = "/tmp/pxResendInput.txt"
+tmpfile = open(tmpfilePath, "w")
+for bulletin in bulletins:
+    tmpfile.write("%s\n" % (bulletin))
+tmpfile.close()
 
-command = "/apps/px/lib/search/pxResend.py -d %s" % (flows)
+command = "sudo -u pds /apps/px/lib/search/pxResend.py -d %s < %s" % (flows, tmpfilePath)
+status, output = commands.getstatusoutput(command)
+os.remove(tmpfilePath)
+
+showAlert('"%s"' % (output))
 
 print"""
-<script language="JavaScript">
-    window.close();
-</script>
-
+</div>
+</body>
 </html>
 """
