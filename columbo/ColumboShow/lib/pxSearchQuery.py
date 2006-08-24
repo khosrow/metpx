@@ -31,9 +31,11 @@ from types import *
 from myTime import *
 import PXPaths; PXPaths.normalPaths()
 import template
+from ConfReader import ConfReader
 
-# Quick way to read from a file, strip each EOL and put it all in a list
-targets = [target.strip() for target in open("%spxSearch.targets" % (PXPaths.ETC), "r").readlines()]
+cr = ConfReader("%spx.conf" % (PXPaths.ETC))
+targets = cr.getConfigValues("backend")
+user = cr.getConfigValues("user")[0]
 
 def getLogNames(type):
     """
@@ -44,7 +46,7 @@ def getLogNames(type):
     """
     logNames = []
     for target in targets:
-        status, output = commands.getstatusoutput('sudo -u pds ssh %s "ls -1 %s%s_*.log"' % (target, PXPaths.LOG, type))
+        status, output = commands.getstatusoutput('sudo -u %s ssh %s "ls -1 %s%s_*.log"' % (user, target, PXPaths.LOG, type))
         if status == 0:
             lines = output.splitlines()
             logNames += [line.split("_")[-1].split(".")[0] for line in lines if line.split("_")[-1].split(".")[0] not in logNames] # We take out the tx_ (or _rx) and the .log parts

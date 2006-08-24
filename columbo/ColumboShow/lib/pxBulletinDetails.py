@@ -23,6 +23,7 @@ import cgitb; cgitb.enable()
 import sys, pwd, time, re, commands
 sys.path.append(sys.path[0] + "/../../lib")
 sys.path.append("../../lib")
+sys.path.append("/apps/px/lib")
 sys.path.append("/apps/px/lib/search")
 
 import template
@@ -32,6 +33,11 @@ from types import *
 from myTime import *
 
 import searchResendUtils
+import PXPaths; PXPaths.normalPaths()
+from ConfReader import ConfReader
+
+cr = ConfReader("%spx.conf" % (PXPaths.ETC))
+user = cr.getConfigValues("user")[0]
 
 form = cgi.FieldStorage()
 item = form["item"].value
@@ -47,7 +53,7 @@ def readFromDB(file, host):
     """
     
     dbPath = searchResendUtils.headerToLocation(file)
-    command = "sudo -u pds /usr/bin/ssh %s cat %s" % (host, dbPath)
+    command = "sudo -u %s /usr/bin/ssh %s cat %s" % (user, host, dbPath)
     status, output = commands.getstatusoutput(command)
     if not status:
         return output.replace('\n', '<br>')

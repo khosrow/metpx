@@ -20,20 +20,23 @@ named COPYING in the root of the source directory tree.
 
 import cgi
 import cgitb; cgitb.enable()
-import sys, os, pwd, time, re, pickle, commands
-sys.path.append(sys.path[0] + "/../../lib");
-sys.path.append("../../lib")
+import sys, os, commands
 
-sys.path.append("/apps/px/lib/search")
+sys.path.append("/apps/px/lib")
+import PXPaths; PXPaths.normalPaths()
+from ConfReader import ConfReader
+
+cr = ConfReader("%spx.conf" % (PXPaths.ETC))
+user = cr.getConfigValues("user")[0]
 
 def showAlert(msg):
+    msg = msg.replace("\n", "\\n") # Javascript needs explicit line breaks
     print """
         <script type="text/javascript">
-            alert(%s)
+            alert('%s')
             window.close()
         </script>
     """ % (msg)
-    sys.exit(1)
 
 form = cgi.FieldStorage()
 
@@ -80,11 +83,12 @@ for bulletin in bulletins:
     tmpfile.write("%s\n" % (bulletin))
 tmpfile.close()
 
-command = "sudo -u pds /apps/px/lib/search/pxResend.py -d %s < %s" % (flows, tmpfilePath)
+scriptPath = "/apps/px/lib/search/pxResend.py -d %s < %s" % (flows, tmpfilePath)
+command = "sudo -u %s %s" % (user, scriptPath)
 status, output = commands.getstatusoutput(command)
 os.remove(tmpfilePath)
 
-showAlert('"%s"' % (output))
+showAlert(output)
 
 print"""
 </div>

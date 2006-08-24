@@ -28,12 +28,18 @@ import cgitb; cgitb.enable()
 import sys, os, pwd, time, re, pickle, commands
 sys.path.append(sys.path[0] + "/../../lib");
 sys.path.append("../../lib")
+sys.path.append("/apps/px/lib")
 
 import template
 from PDSPath import *
 from ColumboPath import *
 from types import *
 from myTime import *
+import PXPaths; PXPaths.normalPaths()
+from ConfReader import ConfReader
+
+cr = ConfReader("%spx.conf" % (PXPaths.ETC))
+user = cr.getConfigValues("user")[0]
 
 form = cgi.FieldStorage()
 
@@ -124,8 +130,8 @@ print """</td>
     <td valign="top" bgcolor="#cccccc">
 """
 
-command = "sudo -u pds /apps/px/lib/search/pxSearch.py " # TEMPORARY
-#command = "" # Uncomment this when the above solution isn't necessary anymore
+scriptPath = "/apps/px/lib/search/pxSearch.py" # Must look with Dan for a better way to do this.
+command = "sudo -u %s %s " % (user, scriptPath)
 
 searchType = form["type"].value
 if searchType == "tx":
@@ -178,8 +184,6 @@ if form.has_key("timesort"):
 
 # Completing the command
 command += " ".join(startFlows)
-#print "<b>DEBUG:</b> %s" % (command) # <------------------------------------------ DEBUG
-#print "<br><br>"
 
 status, output = commands.getstatusoutput(command)
 if not status:
