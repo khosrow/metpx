@@ -44,8 +44,22 @@ class SenderFTP(object):
 
         self.originalDir = ''
 
+        self.ftp = None
         if self.client.protocol == 'ftp':
             self.ftp = self.ftpConnect()
+
+    # close connection... 
+
+    def close(self):
+
+        if self.ftp == None : return
+
+        try    :
+                  self.ftp.quit()
+        except :
+                  (type, value, tb) = sys.exc_info()
+                  self.logger.warning("Could not close connection")
+                  self.logger.warning(" Type: %s, Value: %s" % (type ,value))
 
     def dirPattern(self,file,basename,destDir,destName) :
         """
@@ -215,6 +229,7 @@ class SenderFTP(object):
             if not destName :
                os.unlink(file)
                self.logger.info('No destination name: %s has been erased' % file)
+               continue
 
             # check protocol
             if not self.client.protocol in ['file','ftp'] :
