@@ -143,10 +143,10 @@ def makeCGIPaths():
         os.mkdir(dir, 0755)
         print("%s directory has been CREATED" % dir)
         
-    dir = '/web/columbo/log'
-    if not os.path.exists(dir):
-        os.mkdir(dir, 0775)
-        print("%s directory has been CREATED" % dir)
+    #dir = '/web/columbo/log'
+    #if not os.path.exists(dir):
+    #    os.mkdir(dir, 0775)
+    #    print("%s directory has been CREATED" % dir)
 
     dir = '/web/columbo/cgi-bin'
     if not os.path.exists(dir):
@@ -169,14 +169,18 @@ def makeCGIPaths():
     status, output = commands.getstatusoutput(command)
     print("Status of %s is: %s, output = %s" % (command, status, output))
 
-    command = "ln -s %s %s" % (CS + '/log/PX_Errors.txt', '/web/columbo/log/PX_Errors.txt')
-    status, output = commands.getstatusoutput(command)
-    print("Status of %s is: %s, output = %s" % (command, status, output))
+    #command = "ln -s %s %s" % (CS + '/log/PX_Errors.txt', '/web/columbo/log/PX_Errors.txt')
+    #status, output = commands.getstatusoutput(command)
+    #print("Status of %s is: %s, output = %s" % (command, status, output))
 
     command = "ln -s %s %s" % (CS + '/graphs/' , '/web/columbo/')
     status, output = commands.getstatusoutput(command)
     print("Status of %s is: %s, output = %s" % (command, status, output))
-    
+
+    command = "ln -s %s %s" % (CS + '/log/' , '/web/columbo/')
+    status, output = commands.getstatusoutput(command)
+    print("Status of %s is: %s, output = %s" % (command, status, output))
+
     file  = '/etc/sudoers'
     if os.path.isfile(file):
         print("%s exists, is it correct?" % file)
