@@ -188,8 +188,17 @@ command += " ".join(startFlows)
 status, output = commands.getstatusoutput(command)
 if not status:
     createDisplayTable(output.splitlines())
-else:
-    print status, output # Something went wrong
+else: # Something went wrong
+    print """
+    <div align="center"><font color="red"><b>
+        An error occured during the search process.<br>
+        Pleasure verify that your query is correct.</font></b>
+        <br><br>
+        <small>
+            Command used was: %s
+        </small>
+    </div>
+    """ % (command)
 
 print """
     </td>

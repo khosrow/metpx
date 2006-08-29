@@ -50,8 +50,6 @@ print """
 <meta name="Description" content="Resend a bulletin file">
 <meta name="Keywords" content="">
 <link rel="stylesheet" type="text/css" href="/css/style.css">
-<style>
-</style>
 </head>
 <body bgcolor="#cccccc">
 <div align="center">
@@ -60,35 +58,35 @@ print """
 if form.has_key("flows"):
     flows = form["flows"].value
     if " " in flows:
-        showAlert("'Your flow list must not contain spaces.'")
-else:
-    showAlert("'You must enter one more more destination flows.'")    
-    
-if form.has_key("rsall"):
-    bulletins = form["all"].value.split(" ")
-else:
-    if form.has_key("bulletins"):
-        if type(form["bulletins"]) is list:
-            bulletins = [bulletin.value for bulletin in form["bulletins"]]
-        else:
-            bulletins = [form["bulletins"].value]
+        showAlert("Your flow list must not contain spaces.")
     else:
-        showAlert("'Choose one or more bulletin file to resend.'")
+        if form.has_key("rsall") or form.has_key("bulletins"):
+            if form.has_key("rsall"):
+                bulletins = form["all"].value.split(" ")
+            else:
+                if type(form["bulletins"]) is list:
+                    bulletins = [bulletin.value for bulletin in form["bulletins"]]
+                else:
+                    bulletins = [form["bulletins"].value]
+               
+            # We write all the lines to a temporary file.
+            # This way we do not exceed the command-line maximum length
+            tmpfilePath = "/tmp/pxResendInput.txt"
+            tmpfile = open(tmpfilePath, "w")
+            
+            for bulletin in bulletins:
+                tmpfile.write("%s\n" % (bulletin))
+            tmpfile.close()
 
-# We write all the lines to a temporary file.
-# This way we do not exceed the command-line maximum length
-tmpfilePath = "/tmp/pxResendInput.txt"
-tmpfile = open(tmpfilePath, "w")
-for bulletin in bulletins:
-    tmpfile.write("%s\n" % (bulletin))
-tmpfile.close()
-
-scriptPath = "/apps/px/lib/search/pxResend.py -d %s < %s" % (flows, tmpfilePath)
-command = "sudo -u %s %s" % (user, scriptPath)
-status, output = commands.getstatusoutput(command)
-os.remove(tmpfilePath)
-
-showAlert(output)
+            scriptPath = "/apps/px/lib/search/pxResend.py -d %s < %s" % (flows, tmpfilePath)
+            command = "sudo -u %s %s" % (user, scriptPath)
+            status, output = commands.getstatusoutput(command)
+            os.remove(tmpfilePath)
+            showAlert(output) # This is the good alert.
+        else:
+            showAlert("Choose one or more bulletin file to resend.")
+else:
+    showAlert("You must enter one more more destination flows.")
 
 print"""
 </div>
