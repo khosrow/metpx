@@ -81,8 +81,11 @@ class MessageParser:
             self.type = 'AFTN'
             if self._headerIn(words):
                 self.header = words[0] + " " + words[1]
+            elif words[0] in ['SI', 'SM']:
+                # Complete the header in MessageManager
+                self.header = words[0]
             else:
-                # Construct the header with the aftnMap values in header2client.conf
+                # Construct the header with the aftnMap values in pxRouting.conf
                 # The construction will be done in MessageManager. 
                 self.header = None
 

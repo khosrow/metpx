@@ -18,6 +18,7 @@ from bulletinManager import bulletinManager
 from DiskReader import DiskReader
 from StateAFTN import StateAFTN
 import AFTNPaths, PXPaths
+from  StationParser import StationParser
 import dateLib
 
 class MessageManager:
@@ -64,6 +65,8 @@ class MessageManager:
                                       self.sourlient) 
 
         self.drp = self.bullManager.drp
+        self.sp = StationParser(PXPaths.STATION_TABLE, logger)
+        self.sp.parse()
         self.priorities = {'1':'FF', '2':'FF', '3':'GG', '4':'GG', '5':'GG'}
 
         self.messageIn = None  # Last AFTN message received
@@ -178,6 +181,37 @@ class MessageManager:
     
     def ingest(self, bulletin):
         self.bullManager.writeBulletinToDisk(bulletin)
+
+    def completeHeader(self, message):
+        import dateLib
+        wmoMessage = ''
+        theHeader = ''
+        allLines = []
+        # We remove blank lines
+        for  line in message.textLines:
+            if not line:
+                allLines.append(line)
+        
+        # We don't have enough lines
+        if len(allLines) < 2:
+            return ['\n'.join(message.textLines)]
+
+        messageType = allLines[0][:2]
+        station = allLines[1].split()[0]
+
+        headers = self.sp.headers.get(station, [])
+        for header in headers:
+            if header[:2] == messageType:
+                theHeader = header
+
+        if theHeader:
+            timestamp = allLines[0].split()[2]
+            allLines[0] = theHeader + ' ' + timestamp
+            allLines.insert(1, 'AAXX ' + timestamp[:4] + '4')
+        else:
+            return ['\n'.join(message.textLines)]
+            
+        return ['\n'.join(allLines)]
 
     def addHeaderToMessage(self, message, textLines=None):
         """

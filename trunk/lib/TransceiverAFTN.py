@@ -423,7 +423,11 @@ class TransceiverAFTN:
 
                         elif textType == "AFTN":
                             suffix = ''
-                            if mp.getHeader(): 
+                            if mp.getHeader() in ['SI', 'SM']:
+                                # Only one message will be in messages
+                                messages = mm.completeHeader(mm.messageIn)
+
+                            elif mp.getHeader(): 
                                 # Only one message will be in messages
                                 messages = ['\n'.join(mm.messageIn.textLines)] 
                             else:
