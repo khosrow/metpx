@@ -56,7 +56,11 @@ print """
 """ 
 
 if form.has_key("flows"):
-    flows = form["flows"].value
+    if type(form["flows"]) is list:
+        flows = ",".join([flow.value for flow in form["flows"]])
+    else:
+        flows = form["flows"].value
+    
     if " " in flows:
         showAlert("Your flow list must not contain spaces.")
     else:

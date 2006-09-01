@@ -29,6 +29,7 @@ import sys, os, pwd, time, re, pickle, commands
 sys.path.append(sys.path[0] + "/../../lib");
 sys.path.append("../../lib")
 sys.path.append("/apps/px/lib")
+sys.path.append("/apps/px/lib/importedLibs")
 
 import template
 from PDSPath import *
@@ -40,8 +41,26 @@ from ConfReader import ConfReader
 
 cr = ConfReader("%spx.conf" % (PXPaths.ETC))
 user = cr.getConfigValues("user")[0]
+backends = cr.getConfigValues("backend")
 
 form = cgi.FieldStorage()
+
+def menuContent():
+    """
+    Creates the menu options dynamically
+    Returns: a string
+    """
+    
+    flows = []
+    for backend in backends:
+        status, output = commands.getstatusoutput("sudo -u %s ssh %s python /apps/px/lib/search/getFlowList.py" % (user, backend))
+        if not status:
+            flows += output.split()
+        else:
+            print "Could not receive flow list!"
+            sys.exit(1)
+    
+    return " ".join(['<option value="%s">%s' % (flow, flow) for flow in flows])
 
 def createDisplayTable(results):
     print """
@@ -56,7 +75,8 @@ def createDisplayTable(results):
         <input type="hidden" name="all" value="%s">
         <input type="submit" name="rschecked" value="Resend Checked">&nbsp;&nbsp;<input type="submit" name="rsall" value="Resend All">&nbsp;&nbsp;<input type="reset" value="Reset">
         <br><br>
-        Flows: <input type="text" name="flows" size="60"> <i>(comma separated list)</i>
+        <b>Flows:</b><br>
+        <select multiple="true" name="flows", size="4">%s</select>
         </div>
         <br>
         <table border="2" align="center">
@@ -68,7 +88,7 @@ def createDisplayTable(results):
                     <b>Header File</b>
                 </td>
             </tr>
-        """ % (" ".join(results))
+        """ % (" ".join(results), menuContent())
 
         for result in results:
             print """

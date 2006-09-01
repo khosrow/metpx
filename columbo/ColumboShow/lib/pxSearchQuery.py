@@ -8,7 +8,7 @@ named COPYING in the root of the source directory tree.
 """
 
 #############################################################################################
-# Name: BulletinResender.py
+# Name: pxSearchQuery.py
 #
 # Author: Dominik Douville-Belanger
 #
