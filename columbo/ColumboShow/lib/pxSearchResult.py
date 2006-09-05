@@ -71,9 +71,20 @@ def createDisplayTable(results):
     # This part only shows if the search process found something
     if len(results) > 0:
         print """
+        <script LANGUAGE="JavaScript">
+        function confirmSubmit()
+        {
+            var answer=confirm("Are you sure?");
+            if (answer)
+	            return true;
+            else
+	            return false;
+        }
+        </script>
+        
         <form method=POST action="pxResendBulletin.py" target="_blank">
         <input type="hidden" name="all" value="%s">
-        <input type="submit" name="rschecked" value="Resend Checked">&nbsp;&nbsp;<input type="submit" name="rsall" value="Resend All">&nbsp;&nbsp;<input type="reset" value="Reset">
+        <input type="submit" name="rschecked" value="Resend Checked">&nbsp;&nbsp;<input type="submit" name="rsall" value="Resend All" onClick="return confirmSubmit()">&nbsp;&nbsp;<input type="reset" value="Reset">
         <br><br>
         <b>Flows:</b><br>
         <select multiple="true" name="flows", size="4">%s</select>
