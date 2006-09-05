@@ -189,7 +189,7 @@ class MessageManager:
         allLines = []
         # We remove blank lines
         for  line in message.textLines:
-            if not line:
+            if line:
                 allLines.append(line)
         
         # We don't have enough lines
