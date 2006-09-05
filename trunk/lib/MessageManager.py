@@ -205,7 +205,8 @@ class MessageManager:
                 theHeader = header
 
         if theHeader:
-            timestamp = allLines[0].split()[2]
+            timestamp = allLines[0].split()[1]
+            self.logger.debug("Type: %s, Station: %s, Headers: %s, TheHeader: %s, Timestamp: %s" % (messageType, station, headers, theHeader, timestamp))
             allLines[0] = theHeader + ' ' + timestamp
             allLines.insert(1, 'AAXX ' + timestamp[:4] + '4')
         else:
