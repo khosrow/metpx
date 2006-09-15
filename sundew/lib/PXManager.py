@@ -41,6 +41,68 @@ class PXManager(SystemManager):
         SystemManager.__init__(self)
         self.LOG = PXPaths.LOG          # Will be used by DirCopier
 
+    def getAllFlowNames(self, tuple=False, drp=None):
+        clientNames =  self.getTxNames()
+        sourlientNames = self.getTRxNames()
+        sourceNames = self.getRxNames()
+
+        if drp:
+            aliases = drp.aliasedClients.keys()
+        else:
+            aliases = []
+
+        if tuple:
+            return clientNames, sourlientNames, sourceNames, aliases
+        else:
+            return clientNames + sourlientNames + sourceNames + aliases
+
+    def getFlowQueueName(self, flow, drp=None, filename=None, priority=None):
+        types = {'TX': PXPaths.TXQ, 'RX':PXPaths.RXQ, 'TRX': PXPaths.TXQ}
+        type, flowNames = self.getFlowType(flow, drp)
+
+        # No type or flow is an alias
+        if not type or len(flowNames) != 1: return None
+
+        if filename:
+            parts = filename.split(':')
+            if not priority:
+                priority = parts[4].split('.')[0]
+
+        flowQueueName = types[type] + flow 
+        if filename:
+            if types[type] == PXPaths.TXQ:
+                flowQueueName += '/' + str(priority) + '/' + time.strftime("%Y%m%d%H", time.gmtime()) + '/' + filename
+            elif types[type] == PXPaths.RXQ:
+                flowQueueName += '/' + filename
+
+        return flowQueueName
+
+    def getFlowType(self, name, drp=None):
+        """
+        The search will procede in the following order: clientNames -> sourlientNames -> sourceNames.
+        This can have an impact if a name is in more than one category.
+        """
+        clientNames =  self.getTxNames()
+        sourlientNames = self.getTRxNames()
+        sourceNames = self.getRxNames()
+
+        # clientNames first, sourlientNames second, sourcesNames third and finally, aliases fourth
+        flowType = None
+        flowNames = [name]
+
+        if name in clientNames:
+            flowType = 'TX'
+        elif name in sourlientNames:
+            flowType = 'TRX'
+        elif name in sourceNames:
+            flowType = 'RX'
+        elif drp:
+            flowNames = drp.getAliasClients(name)
+            if flowNames:
+                # For now, only TX aliases exist
+                flowType = 'TX'
+        return  flowType, flowNames
+
     def afterInit(self):
         if not os.path.isdir(PXPaths.ROOT):
             self.logger.error("This directory: %s does not exist!" % (PXPaths.ROOT))

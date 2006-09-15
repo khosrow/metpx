@@ -46,7 +46,8 @@ def readConfig():
 def normalPaths():
 
     global ROOT, BIN, LIB, LOG, ETC, RXQ, TXQ, DB, RX_CONF, TX_CONF, TRX_CONF, LAT, LAT_RESULTS, LAT_TMP, \
-           COLLECTION_DB, COLLECTION_CONTROL, ROUTING_TABLE, STATION_TABLE
+           COLLECTION_DB, COLLECTION_CONTROL, ROUTING_TABLE, STATION_TABLE, STATS, PICKLES, GRAPHS, SEARCH, \
+           REQUEST_REPLY
 
     try:
         envVar = os.path.normpath(os.environ['PXROOT']) + '/'
@@ -55,7 +56,7 @@ def normalPaths():
 
     ROOT = envVar 
     BIN = ROOT + 'bin/'
-    LIB = ROOT + 'lib/'
+    LIB = ROOT + 'lib/' # This path was hardcoded in PXCopy.py, see dominik_db or dlema for details
     LOG = ROOT + 'log/'
     ETC = ROOT + 'etc/'
     RXQ = ROOT + 'rxq/'
@@ -69,11 +70,21 @@ def normalPaths():
     ROUTING_TABLE = ETC + 'pxRouting.conf'
     STATION_TABLE = ETC + 'stations.conf'
 
-    #Paths for pxLatencies
+    # Paths for Request-Reply
+    REQUEST_REPLY = ROOT + 'rr/'
+
+    # Paths for pxLatencies
     LAT = ROOT + 'latencies/'
     LAT_RESULTS = LAT + 'results/'
     LAT_TMP = LAT + 'tmp/'
 
+    # Paths for "stats" and graphics
+    STATS = ROOT + 'stats/'
+    PICKLES = STATS + 'pickles/'
+    GRAPHS = STATS + 'graphs/'
+
+    # Paths to the search directory
+    SEARCH = LIB + 'search/'
 
 def drbdPaths(rootPath):
 

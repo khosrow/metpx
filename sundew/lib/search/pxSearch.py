@@ -8,12 +8,12 @@ named COPYING in the root of the source directory tree.
 
 """
 ###########################################################
-# Name: pxsearch.py
+# Name: pxSearch.py
 #
 # Author: Dominik Douville-Belanger
 #
 # Description: Search in the PX logs for bulletins 
-#              matching certain criterias.
+#              and files matching certain criterias.
 #
 # Date: 2006-05-08
 #
@@ -29,57 +29,47 @@ import time
 from optparse import OptionParser
 
 # Local imports
-sys.path.append("../")
+sys.path.insert(1,sys.path[0] + '/../')
 import PXPaths; PXPaths.normalPaths()
 from SearchObject import SearchObject
+from ConfReader import ConfReader
 
 def filterTime(so, lines):
     HOURINSECONDS = 3600
-
-    if so.getSince() != 0:
-        upperBound = time.time()
-        lowerBound = upperBound - (so.getSince() * HOURINSECONDS)
-    else:
-        upperBound = time.mktime(time.strptime(so.getTo(), "%Y%m%d%H%M%S"))
-        lowerBound = time.mktime(time.strptime(so.getFrom(), "%Y%m%d%H%M%S"))
     
-    result = []
-    for line in lines:
-        stringTime = line.split(":")[-1]
-        timeInSec = time.mktime(time.strptime(stringTime, "%Y%m%d%H%M%S"))
-        if timeInSec >= lowerBound and timeInSec <= upperBound:
-            result.append(line)
-
+    try:
+        if so.getSince() != 0:
+            upperBound = time.time()
+            lowerBound = upperBound - (so.getSince() * HOURINSECONDS)
+        else:
+            upperBound = time.mktime(time.strptime(so.getTo(), "%Y%m%d%H%M%S"))
+            lowerBound = time.mktime(time.strptime(so.getFrom(), "%Y%m%d%H%M%S"))
+        
+        result = []
+        for line in lines:
+            stringTime = line.split(":")[-1]
+            timeInSec = time.mktime(time.strptime(stringTime, "%Y%m%d%H%M%S"))
+            if timeInSec >= lowerBound and timeInSec <= upperBound:
+                result.append(line)
+    except ValueError:
+        sys.exit(1)
     return result
 
 def validateUserInput(options, args):
-    # Validating the search type
-    if options.rxtype == True and options.txtype == True:
-        print "Cannot search both RX and TX at the same time."
-        sys.exit(1)
-    elif options.rxtype == False and options.txtype == False:
-        print "You must specify a search type (--rx or --tx)."
-        sys.exit(1)
-
-    # Validating date arguments
-    if options.since != 0 and (options.todate != "" or options.fromdate != ""):
-        print "You cannot use --since with another date filtering mechanism."
-        sys.exit(1)
-    elif (options.todate != "" and options.fromdate == "") or (options.todate == "" and options.fromdate != ""):
-        print "You must use --from and --to together."
-        sys.exit(1)
-
+    pass # No validations for now
+    
 def updateSearchObject(so, options, args):
     # Setting the search type
-    if options.rxtype == True:
+    if options.type == True:
         so.setSearchType("rx")
     else:
         so.setSearchType("tx")
     
-    # If there is an argument to the program call, it replaces * with args*
-    # By default * means search in everything
+    #so.setFTP(options.ftp)
+    
+    # Search in the specified flows
     if len(args) > 0:
-        so.setSearchName(args[0])
+        so.setSearchNames(args)
     
     so.setHeaderRegex("ttaaii", options.ttaaii) 
     so.setHeaderRegex("ccccxx", options.ccccxx) 
@@ -89,6 +79,7 @@ def updateSearchObject(so, options, args):
     so.setHeaderRegex("seq", options.seq) 
     so.setHeaderRegex("target", options.target) 
     so.setHeaderRegex("prio", options.prio)
+    #so.setHeaderRegex("ftpname", options.ftpname)
    
     so.setSince(options.since)
     
@@ -124,29 +115,22 @@ def timeSort(lineA, lineB):
 def search(so):
     logFileName = so.getLogPath()
     regex = so.getSearchRegex()
-
-    print "Searching in: %s" % (logFileName)
-    print "Using: %s" % (regex)
-  
-    # Temporary machine list storage
-    try:
-        machines = open("%spxsearch.targets" % (PXPaths.ETC), "r").readlines()
-    except IOError:
-        print "A file named pxsearch.targets must be located in %s!" % (PXPaths.ETC)
-        print "Please write one with one machine name per line."
-        sys.exit(1)
     
+    # We get the backends hostname with ConfReader
+    cr = ConfReader("%spx.conf" % (PXPaths.ETC))
+    machines = cr.getConfigValues("backend")
+   
     results = []
     for machine in machines:
         machine = machine.strip()
-        cmd = 'ssh %s "egrep -o %s %s"' % (machine, regex, logFileName)
-        print "Command used: %s" % (cmd)
+        cmd = 'ssh %s "egrep -o -s -H %s %s"' % (machine, regex, logFileName)
         status, output = commands.getstatusoutput(cmd)
-        lines = output.splitlines()
-        results += ["@%s:%s" % (machine, line) for line in lines] # We add the machine name to the start of the line 
-        
-    # Validation was done in validateUserInput()
-    if so.getSince() != 0 or so.getFrom() != "" or so.getTo() != "":
+        if output:
+            lines = output.splitlines()
+            results += ["%s:%s" % (machine, line) for line in lines] # We add the machine name to the start of the line
+        # When grep doesn't find anything, he returns an error code. But this shouldn't be considered and error by our program.
+    
+    if so.getSince() != 0 or (so.getFrom() != "epoch" or so.getTo() != "now"):
         results = filterTime(so, results)
         results.sort(timeSort)
     elif so.getTimesort() == True:
@@ -156,15 +140,14 @@ def search(so):
         
     for result in results:
         print result
-    print "Number of matches: %s" % (len(results)) 
     
 def createParser(so):
-    usagemsg = "%prog [options] <name>\nSearch in the PX unified log for bulletins matching certain criterias."
-    parser = OptionParser(usage=usagemsg, version="%prog 1.0-rc1")
+    usagemsg = "%prog [options] <names>\nSearch in the PX logs for bulletins matching certain criterias."
+    parser = OptionParser(usage=usagemsg, version="%prog 1.0-rc2")
     
     # These two only offer long option names and using one of them is mandatory
-    parser.add_option("--rx", action = "store_true", dest = "rxtype", help = "Perform a search in the RX logs.", default = False)
-    parser.add_option("--tx", action = "store_true", dest = "txtype", help = "Perform a search in the TX logs.", default = False)
+    parser.add_option("--rx", action = "store_true", dest = "type", help = "Perform a search in the RX logs.", default = True)
+    parser.add_option("--tx", action = "store_false", dest = "type", help = "Perform a search in the TX logs (default).", default = False)
     
     # Optional. No short option.
     parser.add_option("--timesort", action = "store_true", dest = "timesort", help = "Sort output by timestamps.", default = False)
@@ -175,14 +158,20 @@ def createParser(so):
     parser.add_option("-d", "--ddhhmm", dest = "ddhhmm", help = "Specify the Day/Hour/Minute", default = so.getHeaderRegex("ddhhmm"))
     parser.add_option("-b", "--bbb", dest = "bbb", help = "Specify the BBB", default = so.getHeaderRegex("bbb"))
     parser.add_option("-s", "--stn", dest = "stn", help = "Specify the station code", default = so.getHeaderRegex("stn"))
+    
+    # File name content specifier
+    #parser.add_option("--ftp", action = "store_true", dest = "ftp", help = "Search for FTP files instead of bulletin file. Cannot be used with the t,c,d,b,s options.", default = False)
+    #parser.add_option("-n", "--ftpname", dest = "ftpname", help = "Specify the name of an FTP file (Use only with --ftp).", default = so.getHeaderRegex("ftpname"))
+    
+    # Those fields are common to both type of file
     parser.add_option("-g", "--target", dest = "target", help = "Specify the source or the destination", default = so.getHeaderRegex("target"))
     parser.add_option("-q", "--seq", dest = "seq", help = "Specify the sequence number", default = so.getHeaderRegex("seq"))
     parser.add_option("-p", "--prio", dest = "prio", help = "Specify the priority number <1|2|3|4|5>", default = so.getHeaderRegex("prio"))
     
     # Let the user sort matches based on their time field
-    parser.add_option("-i", "--since", dest = "since", help = "Only show matches since X hours ago to now", default = so.getSince())
-    parser.add_option("-f", "--from", dest = "fromdate", help = "Specify a start date <YYYYMMDDhhmmss> or <epoch>", default = so.getFrom())
-    parser.add_option("-o", "--to", dest = "todate", help = "Specify a end date <YYYYMMDDhhmmss> or <now>", default = so.getTo())
+    parser.add_option("-i", "--since", dest = "since", help = "Only show matches since X hours ago to now (has priority over --from and --to)", default = so.getSince())
+    parser.add_option("-f", "--from", dest = "fromdate", help = "Specify a start date <YYYYMMDDhhmmss> (defaults to epoch: fartest date away)", default = so.getFrom())
+    parser.add_option("-o", "--to", dest = "todate", help = "Specify a end date <YYYYMMDDhhmmss> (defaults to now)", default = so.getTo())
 
     return parser
     
@@ -207,7 +196,7 @@ def main():
     # 4. Since input is correct, update the SearchObject with user defined values
     ##############################################################################
     updateSearchObject(so, options, args)
-
+     
     ##############################
     # 5. Begin the search process
     ##############################
