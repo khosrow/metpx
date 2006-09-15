@@ -14,7 +14,7 @@ MetPX
 Modules:
 
 sundew - switching component
-Columbo - coming!  monitoring component.
+columbo - monitoring component.
 
 
 There are INSTALL files describing the installation process in 
