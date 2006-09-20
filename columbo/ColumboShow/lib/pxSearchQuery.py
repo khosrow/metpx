@@ -64,7 +64,7 @@ def menuContent(type):
     result = ''
     names = getLogNames(type)
     for name in names:
-        result += '<option value="%s">%s ' % (name, name)
+        result += '<option value="%s" SELECTED>%s ' % (name, name)
     return result
 
 # Beginning the HTML generation code
