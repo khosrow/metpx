@@ -348,41 +348,36 @@ class MessageManager:
         return self.waitedTID
 
     def parseReadBuffer(self, readBuffer):
-        
         buffer =  self.unusedBuffer + readBuffer
         # It's the beginning of a message (AFTN or ACK)
         if len(buffer):
-            try:
-                if buffer[0] == MessageAFTN.SOH:
-                    # This is an ACK message ...
-                    if buffer[1] == MessageAFTN.ACK:
-                        endPos = buffer.find(MessageAFTN.ETX)
-                        # We find the end of the ACK
-                        if endPos != -1:
-                            self.unusedBuffer = buffer[endPos+1:]
-                            return (buffer[:endPos+1], 'ACK')
-                        else:
-                            self.unusedBuffer = buffer
-                            return ("", 'ACK')
-        
-                    # This is an AFTN message ...
+            if buffer[0] == MessageAFTN.SOH:
+                # This is an ACK message ...
+                if buffer[1] == MessageAFTN.ACK:
+                    endPos = buffer.find(MessageAFTN.ETX)
+                    # We find the end of the ACK
+                    if endPos != -1:
+                        self.unusedBuffer = buffer[endPos+1:]
+                        return (buffer[:endPos+1], 'ACK')
                     else:
-                        endPos = buffer.find(MessageAFTN.END_OF_MESSAGE)
-                        # We find the end of the AFTN Message 
-                        if endPos != -1:
-                            self.unusedBuffer = buffer[endPos+2:]
-                            return (buffer[:endPos+2], 'AFTN')
-                        else:
-                            self.unusedBuffer = buffer
-                            return ("", 'AFTN')
-        
-                # We should never go here ...
+                        self.unusedBuffer = buffer
+                        return ("", 'ACK')
+    
+                # This is an AFTN message ...
                 else:
-                    self.unusedBuffer = ""
-                    self.logger.error("Our buffer doest'n begin with <SOH>: %s" % buffer)
-            except:
-                (type, value, tb) = sys.exc_info()
-                self.logger.debug('From mm.parseReadBuffer, Type: %s, Value: %s' % (type, value))
+                    endPos = buffer.find(MessageAFTN.END_OF_MESSAGE)
+                    # We find the end of the AFTN Message 
+                    if endPos != -1:
+                        self.unusedBuffer = buffer[endPos+2:]
+                        return (buffer[:endPos+2], 'AFTN')
+                    else:
+                        self.unusedBuffer = buffer
+                        return ("", 'AFTN')
+    
+            # We should never go here ...
+            else:
+                self.unusedBuffer = ""
+                self.logger.error("Our buffer doest'n begin with <SOH>: %s" % buffer)
         else: 
             self.logger.debug("Our buffer is empty")
             return ("", "")

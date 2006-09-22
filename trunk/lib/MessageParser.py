@@ -35,6 +35,11 @@ class MessageParser:
         elif type(text) == list:
             self.textLines = text
             self.text = '\n'.join(text)
+
+        # Eliminate 'prefix' blank lines
+        while self.textLines[0] == '':
+            del self.textLines[0]
+
         self.type = None                          # In ['SVC', 'RQ', 'RF', 'RQM_UNK', 'RQM_OK', 'RQF_UNK', 'RQF_OK', 'AFTN']
         self.serviceType = None
         self.header = None
@@ -61,7 +66,6 @@ class MessageParser:
         could not be present. If not present, one will be created using
         an aftnMap.
         """
-
         words = self.textLines[0].split()
         if words[0] == "SVC":
             self.type = "SVC"
