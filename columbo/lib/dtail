@@ -1,0 +1,102 @@
+"""
+MetPX Copyright (C) 2004-2006  Environment Canada
+MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+named COPYING in the root of the source directory tree.
+"""
+
+#!/usr/bin/python2
+"""
+#############################################################################################
+# Name: dtail
+#
+# Author: Daniel Lemay
+#
+# Date: 2004-09-24
+#
+#############################################################################################
+to Do:
+
+Be able to receive only one "examplaire" of a file when this file is the same on
+all machines (-o)
+Accept glob or regex as filename
+-f -> continous output
+-p -> No prefixes (no machine names at the beginning of the line)
+- Give appropriate error message when the command is not entered correctly
+
+"""
+import os, os.path, sys, commands, re, logging, getopt
+from PDSPath import *
+from LVSManager import LVSManager
+import sortingUtils
+from PDSParser import PDSParser
+
+def usage():
+   message = """
+Usage: dtail [options] filename
+
+Options are:
+-a -> all lines in the file (don't use -n with this option, for big files, you should use -u with -a)
+-n number -> Only the last "number" lines (default is 5 per machine)
+-u -> unsorted output (default is sorted by time), good idea to use this when you use -a
+"""
+   print message
+
+try:
+   opts, args = getopt.getopt(sys.argv[1:], "an:u")
+except getopt.GetoptError:
+   # print help information and exit:
+   print "Bad option!"
+   usage()
+   sys.exit(2)
+
+if (len(args) != 1):
+   usage()
+   sys.exit(2)
+
+#print opts
+#print args
+
+manager = LVSManager("NULL")
+
+# Determine which machines are in the Cluster
+machines = manager.getMachines()
+
+# File on which we want to apply dtail
+filepath =  args.pop()
+filepath = os.path.abspath(filepath)
+
+#print "FILE is : " + filepath
+
+# Create a string with all the options
+optionString = ""
+for o, a in opts:
+   optionString = optionString + o + " " + a + " "
+#print optionString
+
+sorting = True
+if ("-u", "") in opts:
+  print "No sorting"
+  sorting = False
+
+bigOutput = []
+#machines =  ['pds1', 'pds2']
+for machine in machines:
+   command = "rsh " +  machine + " " + PYTHON2 + " /apps/pds/tools/Columbo/lib/easyTail.py " + optionString + filepath + " " + machine
+   #print command
+
+   if (sorting):
+      (status, output) = commands.getstatusoutput(command)
+      bigOutput.extend(output.splitlines())
+
+   else:
+      (status, output) = commands.getstatusoutput(command)
+      lines = output.splitlines()
+      print "*************************** " +  machine + " ********************************************"
+      for line in lines: print line 
+
+if (sorting):
+   parser = PDSParser()
+   times = parser.getTimeArray(bigOutput)
+   sortingUtils.doubleSelectionSort(times, bigOutput)   
+   for line in bigOutput: print line 
+

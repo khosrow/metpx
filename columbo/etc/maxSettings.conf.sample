@@ -1,0 +1,64 @@
+#####################################################################################################################
+# Fichier configuration servant a definir les differents maximum
+# Location:  /apps/pds/tools/Columbo/etc/maxSettings.conf
+# Contraintes: DEFAULT, PDS_CLIENTS, PDS_INPUT_DIRECTORIES, PX_CIRCUITS et PX_TIMERS sont des noms reserves
+#####################################################################################################################
+PDS_CLIENTS (Definition des maximum de fichiers dans la queue des client PDS)
+#####################################################################################################################
+DEFAULT 50
+wxo*    600
+amdar*  90
+allproducts 600
+conversion 48
+
+#####################################################################################################################
+PDS_INPUT_DIRECTORIES (Definition des maximum de fichiers dans la queue des repertoires sources du PDS) 
+#####################################################################################################################
+DEFAULT 120
+#RAW/urp 300
+
+#####################################################################################################################
+PDS_GRAPHS (Definition des clients PDS pour lesquels un graph des latences est disponible) 
+#####################################################################################################################
+# Default value can be set to 1 a graph should be available or 0, no graph available
+DEFAULT 0
+toto 1
+titi 1
+
+#####################################################################################################################
+PX_GRAPHS (Definition des clients PX pour lesquels un graph des latences est disponible) 
+#####################################################################################################################
+# Default value can be set to 1 (means a graph should be available) or 0 (no graph available)
+DEFAULT 0
+toto 1
+titi 1
+
+#####################################################################################################################
+PX_CIRCUITS (Definition des maximum de fichiers dans la queue des circuits PX)
+#####################################################################################################################
+DEFAULT 200
+amis    2500
+amisFB    4000
+pyr-webfeed   500
+pyr-webfeed3  500
+
+#####################################################################################################################
+PX_TIMERS (Definition des temps maximum sans reception ou transmission sur un circuit PX)
+#####################################################################################################################
+# In minutes
+# 1 DAY =  24 * 60 = 1440 minutes
+# 1 WEEK = 1440 * 7 = 10080 minutes
+DEFAULT 10
+amdar 600
+cmcin 180
+fromPxatx 780
+pds-op    75
+lightning 75
+nwsgrib 1440
+operator 720
+pullwxo 600
+pxBackend 780
+tdm-tx 600
+exp-stud 1440
+meteoMedia1 10080
+meteoMedia2 10080
