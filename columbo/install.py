@@ -113,16 +113,25 @@ def makeCSPaths():
     if not os.path.exists(dir):
         os.mkdir(dir, 0777)
         print("CS log directory (%s) has been CREATED" % dir)
+    else:
+        os.chmod(dir, 0777)
+        print("CS log directory (%s) has been chmod 777 " % dir)
 
     dir = CS + '/results'
     if not os.path.exists(dir):
         os.mkdir(dir, 0777)
         print("CS results directory (%s) has been CREATED" % dir)
+    else:
+        os.chmod(dir, 0777)
+        print("CS results directory (%s) has been chmod 777" % dir)
 
     dir = CS + '/graphs'
     if not os.path.exists(dir):
         os.mkdir(dir, 0777)
         print("CS results directory (%s) has been CREATED" % dir)
+    else:
+        os.chmod(dir, 0777)
+        print("CS results directory (%s) has been chmod 777" % dir)
 
     # Make sure all files are executable
     dir = CS + '/lib'
