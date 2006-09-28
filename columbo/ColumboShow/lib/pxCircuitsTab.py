@@ -33,8 +33,6 @@ from JSMaker import JSMaker
 from Logger import Logger
 import template
 
-import MsgOpUtils
-
 def checkMessages():
     """
     Verifies if there are available message for the operators.
@@ -42,6 +40,7 @@ def checkMessages():
     If all messages left are acknowledge, the indicator will be yellow.
     If there are no messages waiting, it will be green.
     """
+    import MsgOpUtils
     msgs = MsgOpUtils.getMsg()
     new = 0
     acknowledged = 0

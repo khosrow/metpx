@@ -60,7 +60,7 @@ def unarchiveListing(filename):
 
 # Read configuration file
 config = ConfigParser()
-config.readfp(open(FULL_MAIN_CONF))
+config.readfp(template.openFile(FULL_MAIN_CONF))
 results_name = config.get('CIR', 'results_name')   # How the "results" file will be named (path not included)
 logname = config.get('CS', 'logname')              # Full name for the logfile
 log_level = config.get('CS', 'log_level')          # Level of logging

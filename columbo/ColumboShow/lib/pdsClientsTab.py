@@ -67,7 +67,7 @@ def unarchiveResults(filename):
 
 # Read configuration file
 config = ConfigParser()
-config.readfp(open(FULL_MAIN_CONF))
+config.readfp(template.openFile(FULL_MAIN_CONF))
 pdsTab = config.get('PDS', 'tab')
 
 # Server redirection if pdsTab is not ON 

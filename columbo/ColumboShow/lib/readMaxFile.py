@@ -20,6 +20,7 @@ named COPYING in the root of the source directory tree.
 #############################################################################################
 import re
 from ColumboPath import *
+import template
 
 DEBUG = 0
 
@@ -46,7 +47,17 @@ def readQueueMax(filename, system):
     pdsGraphsRegex = {}
     pxGraphsRegex = {}
 
-    file = open(filename, 'r')
+    # PDS Default when no entries is present in the maxSettings.conf file
+    default_client = 200
+    default_inputDir = 400
+    default_pdsGraph = 0
+
+    # PX Default when no enty is present in the maxSettings.conf file
+    default_circuit = 800
+    default_timer = 20 
+    default_pxGraph = 0
+
+    file = template.openFile(filename, 0)
     lines = file.readlines()
 
     # Parsing

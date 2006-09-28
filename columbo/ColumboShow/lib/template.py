@@ -20,15 +20,6 @@ sys.path.append("../../lib")
 from ColumboPath import *
 from ConfigParser import ConfigParser
 
-# Read configuration file
-config = ConfigParser()
-config.readfp(open(FULL_MAIN_CONF))
-
-pdsTab = config.get('PDS', 'tab')
-pxTab = config.get('PX', 'tab')
-generalMonitoringTab = config.get('GM', 'tab')
-adminTab = config.get('ADMIN', 'tab')
-
 tabs = ['pdsClients', 'pdsSources', 'pxCircuits', 'generalMonitoring',  'admin']
 
 links = {}
@@ -40,19 +31,44 @@ links['admin'] = '     <a href="adminTab.py">Administrative Functions</a> |'
 
 states = {}
 
-# Set all tabs to ON
-for tab in tabs:
-    states[tab] = 1
+def openFile(filename, image=1):
+    try:
+        handle = open(filename)
+        return handle
+    except IOError:
+        # Server redirection to error page
+        URL = "missingFile.py?filename=%s&image=%s\n" % (filename, image)
+        print 'Location: ', URL
 
-# Check if configuration file set some tabs to 'OFF'
-if pdsTab != 'ON':
-    states['pdsClients'] = states['pdsSources'] = 0
-if pxTab != 'ON':
-    states['pxCircuits'] = 0
-if generalMonitoringTab != 'ON':
-    states['generalMonitoring'] = 0
-if adminTab != 'ON':
-    states['admin'] = 0
+def initStates():
+    # Read configuration file
+    config = ConfigParser()
+    
+    try:
+        config.readfp(openFile(FULL_MAIN_CONF))
+    except IOError:
+        # Server redirection to error page 
+        URL = "missingFile.py?filename=%s\n" % FULL_MAIN_CONF
+        print 'Location: ', URL
+    
+    pdsTab = config.get('PDS', 'tab')
+    pxTab = config.get('PX', 'tab')
+    generalMonitoringTab = config.get('GM', 'tab')
+    adminTab = config.get('ADMIN', 'tab')
+    
+    # Set all tabs to ON
+    for tab in tabs:
+        states[tab] = 1
+    
+    # Check if configuration file set some tabs to 'OFF'
+    if pdsTab != 'ON':
+        states['pdsClients'] = states['pdsSources'] = 0
+    if pxTab != 'ON':
+        states['pxCircuits'] = 0
+    if generalMonitoringTab != 'ON':
+        states['generalMonitoring'] = 0
+    if adminTab != 'ON':
+        states['admin'] = 0
 
 def pdsClients(color):
     if color == 'grey':
@@ -133,6 +149,7 @@ def admin(color):
         """
 
 def tabsLine(greyTab=None):
+    if states == {}: initStates()
     for tab in tabs:
         if tab == greyTab and states[tab]:
             print eval(tab)('grey')
@@ -140,6 +157,7 @@ def tabsLine(greyTab=None):
             print eval(tab)('blue')
 
 def linksLine():
+    if states == {}: initStates()
     for tab in tabs:
         if states[tab]:
             print links[tab]
