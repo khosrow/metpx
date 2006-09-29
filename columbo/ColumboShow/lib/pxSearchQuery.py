@@ -37,6 +37,9 @@ cr = ConfReader("%spx.conf" % (PXPaths.ETC))
 targets = cr.getConfigValues("backend")
 user = cr.getConfigValues("user")[0]
 
+form = cgi.FieldStorage()
+machines = form["machines"].value
+
 def getLogNames(type):
     """
     Gets the name of all logs on the target machines
@@ -98,8 +101,8 @@ print """
          <tr>
 """
 
-template.tabsLine()
-template.printMainImage()
+#template.tabsLine()
+#template.printMainImage()
 
 print """
          </tr>
@@ -196,6 +199,7 @@ print """
             
             <br>
             <input type="checkbox" name="timesort" value="timesort">Sort by timestamps
+            <input type="hidden" name="machines" value="%s">
             <br>
             
             <br>
@@ -216,7 +220,7 @@ print """
     </td>
   </tr>
   <!-- end body -->
-""" % (menuContent("tx"), menuContent("rx"))
+""" % (menuContent("tx"), menuContent("rx"), machines)
 
 # Page footer
 print """

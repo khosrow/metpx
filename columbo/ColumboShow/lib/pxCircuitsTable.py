@@ -65,10 +65,14 @@ logger.debug("Execution of ColumboShow NCS Apps program")
 
 form = cgi.FieldStorage()
 host = ""
+machines = ""
 if form.has_key("host"):
     host = form["host"].value
     if host == "frontend":
         ncsResults_name += "_local"
+        machines = ",".join(frontend)
+    else:
+        machines = ",".join(backends)
 
 #############################################################################################
 # 1) Read the "results" file sent by CIR host.
@@ -85,30 +89,29 @@ print "Content-Type: text/html"
 print
  
 def printHeader():
-   print """<html>
-<head>
-<meta name="Author" content="Daniel Lemay/Dominik Douville-Belanger">
-<meta name="Description" content="PX Circuits infos">
-<!--<meta http-equiv=refresh content = 65>-->
-<meta name="Keywords" content="">
-<title>PX Circuits</title>
-<link rel="stylesheet" type="text/css" href="/css/style.css">
-<style>
-</style>
-<script type="text/javascript">
-// Put data in a javascript array 
-"""
-   js.createJSArrayNCSCircuits(circuitDict)
+    print """<html>
+    <head>
+    <meta name="Author" content="Daniel Lemay/Dominik Douville-Belanger">
+    <meta name="Description" content="PX Circuits infos">
+    <!--<meta http-equiv=refresh content = 65>-->
+    <meta name="Keywords" content="">
+    <title>PX Circuits</title>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <style>
+    </style>
+    <script type="text/javascript">
+    // Put data in a javascript array 
+    """
+    js.createJSArrayNCSCircuits(circuitDict)
 
-   print """
-</script>
-<script src="/js/SortableTable.js"></script>
-<script src="/js/windowUtils.js"></script>
-</head>
-"""
+    print """
+    </script>
+    <script src="/js/SortableTable.js"></script>
+    <script src="/js/windowUtils.js"></script>
+    </head>
+    """
 
 printHeader()
-
 # Unused, sorting is done via javascript
 keys = circuitDict.keys()
 keys.sort(lambda x,y: cmp(y,x))
@@ -119,16 +122,14 @@ headers = ["""<a href="#" title="Sort by Name" onclick="clientsTable.sort(0); dr
            """<a href="#" title="Sort by transmission time" onclick="clientsTable.sort(3); drawTable(circuits, 'infos_ncs_main'); return false;">Last Transmission</a>""",
            """<a href="#" title="Sort by Quantity" onclick="clientsTable.sort(4); drawTable(circuits, 'infos_ncs_main'); return false;"> Queue </a>""",
            """<a href="#" title="Sort by Socket State" onclick="clientsTable.sort(10); drawTable(circuits, 'infos_ncs_main'); return false;">Socket Established</a>""",
-           """<a href="#" title="Sort by timestamp" onclick="clientsTable.sort(6); drawTable(circuits, 'infos_ncs_main'); return false;" >Last Log Line  </a>""" ]
+           """<a href="#" title="Sort by timestamp" onclick="clientsTable.sort(6); drawTable(circuits, 'infos_ncs_main'); return false;">Last Log Line</a>"""]
 
 print """
-<body text="#000000" bgcolor="#3b87a9" link="#00ff00" vlink="ff00ff" >
-
+<body text="#000000" bgcolor="#3b87a9" link="#00ff00" vlink="ff00ff">
 <center>
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
   <tr>
-    <td valign="top" align="left" bgcolor="#cccccc"> """
-print """
+    <td valign="top" align="left" bgcolor="#cccccc">
     </td></tr>
     <tr>
     <td valign="top" align="center" bgcolor="#cccccc">
@@ -136,7 +137,10 @@ print """
         <tr>
           <td width="10%"><input type="button" value="Sort by PRIORITIES" 
             onClick='clientsTable.sort(13);drawTable(circuits, "infos_ncs_main");'>
-          </td>"""
+          </td>
+          <td width="10%">
+            <input type="button" name="search" value="Search logs" onClick="location='pxSearchQuery.py?machines=""" + machines + """'"></td>"""
+          
 if host == "frontend":
     print '<td align="center" valign="middle"><b><h1>On %s</h1></b></td>' % ' '.join(frontend)
 else:

@@ -19,7 +19,6 @@ named COPYING in the root of the source directory tree.
 # Date: 2006-08-15 (new updated version)
 #
 # TODO: Make the command path-independent (the executable must be in the PATH)
-# TODO: Make up a way to deal with errors
 #
 #############################################################################################
 
@@ -191,6 +190,9 @@ elif filter == "boundaries":
         command += "-f %s -o %s " % (form["frominput"].value, form["toinput"].value)
     else:
         pass # ERROR
+# The host which we want to scan
+if form.has_key("machines"):
+    command += "-m %s " % (form["machines"].value)
 
 # Setting search criterias
 if form.has_key("ttaaii"):
@@ -215,7 +217,6 @@ if form.has_key("timesort"):
 
 # Completing the command
 command += " ".join(startFlows)
-
 status, output = commands.getstatusoutput(command)
 if not status:
     createDisplayTable(output.splitlines())

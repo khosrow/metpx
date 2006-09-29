@@ -114,10 +114,6 @@ print """
 checkMessages()
 
 print """</td>
-
-          <td width="15%" align="left" bgcolor="#cccccc">
-            <input type="button" name="search" value="Search logs" onClick="location='pxSearchQuery.py'">
-          </td>
           <td align="center" bgcolor="#cccccc">
             <input type="button" name="reload" value="RELOAD" onClick="location='forceReload.py?system=PX'">
           </td>
