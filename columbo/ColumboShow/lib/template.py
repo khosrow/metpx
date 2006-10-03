@@ -67,78 +67,78 @@ def initStates():
 def pdsClients(color):
     if color == 'grey':
         return """
-        <td width="13" align="left" valign="bottom"><img src="/images/whiteRect.gif" width="13" height="40"></td>
+        <td width="13" align="left" valign="bottom"><img src="/images/leftGrey.gif" width="13" height="40"></td>
         <td width="40" bgcolor="#CCCCCC"><b>PDS<br>Clients</b></td>
-        <td width="13" valign="bottom" align ="left"><img src="/images/whiteRect.gif" width="13" height="40"></td>
+        <td width="13" valign="bottom" align ="left"><img src="/images/rightGrey.gif" width="13" height="40"></td>
         <td valign="bottom"><img src="/images/spacer.jpg" witdh="15"></td>
         <td bgcolor="#FFFFFF" width="15">&nbsp;</td>
          """
     elif color =='blue':
         return """
-        <td width="13" align="left" valign="bottom"><img src="/images/whiteRect.gif" width="13" height="40"></td>
+        <td width="13" align="left" valign="bottom"><img src="/images/leftBlue.gif" width="13" height="40"></td>
         <td width="40" bgcolor="#006699" align="center"><a href="pdsClientsTab.py" class="snav"><b>PDS<br>Clients</b></a></td>
-        <td width="13" valign="bottom" align ="left"><img src="/images/whiteRect.gif" width="13" height="40"></td>
+        <td width="13" valign="bottom" align ="left"><img src="/images/rightBlue.gif" width="13" height="40"></td>
         <td valign="bottom"><img src="/images/spacer.jpg" witdh="15"></td>
         <td bgcolor="#FFFFFF" width="15">&nbsp;</td>
         """
 def pdsSources(color):
     if color == 'grey':
         return """
-        <td width="13" align="right" valign="bottom"><img src="/images/whiteRect.gif" width="13" height="40"></td>
+        <td width="13" align="right" valign="bottom"><img src="/images/leftGrey.gif" width="13" height="40"></td>
         <td width="60" bgcolor="#CCCCCC" align="center"><b>PDS<br>Sources</b></td>
-        <td width="13" valign="bottom"><img src="/images/whiteRect.gif" width="13" height="40"></td>
+        <td width="13" valign="bottom"><img src="/images/rightGrey.gif" width="13" height="40"></td>
         <td bgcolor="#FFFFFF" width="15">&nbsp;</td>
         """
     elif color =='blue':
         return """
-        <td width="13" align="right" valign="bottom"><img src="/images/whiteRect.gif" width="13" height="40"></td>
+        <td width="13" align="right" valign="bottom"><img src="/images/leftBlue.gif" width="13" height="40"></td>
         <td width="60" bgcolor="#006699" align="center"><a href="pdsSourcesTab.py" class="snav"><b>PDS<br>Sources</b></a></td>
-        <td width="13" valign="bottom"><img src="/images/whiteRect.gif" width="13" height="40"></td>
+        <td width="13" valign="bottom"><img src="/images/rightBlue.gif" width="13" height="40"></td>
         <td bgcolor="#FFFFFF" width="15">&nbsp;</td>
         """
 def pxCircuits(color):
     if color == 'grey':
         return """
-        <td width="13" align="right" valign="bottom"><img src="/images/whiteRect.gif" width="13" height="40"></td>
+        <td width="13" align="right" valign="bottom"><img src="/images/leftGrey.gif" width="13" height="40"></td>
         <td width="60" bgcolor="#CCCCCC" align="center"><b>PX<br>Circuits</b></a></td>
-        <td width="13" valign="bottom"><img src="/images/whiteRect.gif" width="13" height="40"></td>
+        <td width="13" valign="bottom"><img src="/images/rightGrey.gif" width="13" height="40"></td>
         <td bgcolor="#FFFFFF" width="15">&nbsp;</td>
         """
     elif color =='blue':
         return """
-        <td width="13" align="right" valign="bottom"><img src="/images/whiteRect.gif" width="13" height="40"></td>
+        <td width="13" align="right" valign="bottom"><img src="/images/leftBlue.gif" width="13" height="40"></td>
         <td width="60" bgcolor="#006699" align="center"><a href="pxCircuitsTab.py" class="snav"><b>PX<br>Circuits</b></a></td>
-        <td width="13" valign="bottom"><img src="/images/whiteRect.gif" width="13" height="40"></td>
+        <td width="13" valign="bottom"><img src="/images/rightBlue.gif" width="13" height="40"></td>
         <td bgcolor="#FFFFFF" width="15">&nbsp;</td>
         """
 def generalMonitoring(color):
     if color == 'grey':
         return """
-        <td width="13" align="right" valign="bottom"><img src="/images/whiteRect.gif" width="13" height="40"></td>
+        <td width="13" align="right" valign="bottom"><img src="/images/leftGrey.gif" width="13" height="40"></td>
         <td width="64" bgcolor="#CCCCCC" align="center"><b>General<br>Monitoring</b></td>
-        <td width="13" valign="bottom"><img src="/images/whiteRect.gif" width="13" height="40"></td>
+        <td width="13" valign="bottom"><img src="/images/rightGrey.gif" width="13" height="40"></td>
         <td bgcolor="#FFFFFF" width="15">&nbsp;</td>
         """
     elif color =='blue':
         return """
-        <td width="13" align="right" valign="bottom"><img src="/images/whiteRect.gif" width="13" height="40"></td>
+        <td width="13" align="right" valign="bottom"><img src="/images/leftBlue.gif" width="13" height="40"></td>
         <td width="64" bgcolor="#006699" align="center"><a href="generalMonitoringTab.py" class="snav"><b>General<br>Monitoring</b></a></td>
-        <td width="13" valign="bottom"><img src="/images/whiteRect.gif" width="13" height="40"></td>
+        <td width="13" valign="bottom"><img src="/images/rightBlue.gif" width="13" height="40"></td>
         <td bgcolor="#FFFFFF" width="15">&nbsp;</td>
         """
 def admin(color):
     if color == 'grey':
         return """
-        <td width="13" align="right" valign="bottom"><img src="/images/whiteRect.gif" width="13" height="40"></td>
+        <td width="13" align="right" valign="bottom"><img src="/images/leftGrey.gif" width="13" height="40"></td>
         <td width="70" bgcolor="#cccccc" align="center"><b>Administrative<br>Functions</b></td>
-        <td width="13" valign="bottom"><img src="/images/whiteRect.gif" width="13" height="40"></td>
+        <td width="13" valign="bottom"><img src="/images/rightGrey.gif" width="13" height="40"></td>
         <td bgcolor="#FFFFFF" width="15">&nbsp;</td>
         """
     elif color =='blue':
         return """
-        <td width="13" align="right" valign="bottom"><img src="/images/whiteRect.gif" width="13" height="40"></td>
+        <td width="13" align="right" valign="bottom"><img src="/images/leftBlue.gif" width="13" height="40"></td>
         <td width="70" bgcolor="#006699" align="center"><a href="adminTab.py" class="snav"><b>Administrative<br>Functions</b></a></td>
-        <td width="13" valign="bottom"><img src="/images/whiteRect.gif" width="13" height="40"></td>
+        <td width="13" valign="bottom"><img src="/images/rightBlue.gif" width="13" height="40"></td>
         <td bgcolor="#FFFFFF" width="15">&nbsp;</td>
         """
 
