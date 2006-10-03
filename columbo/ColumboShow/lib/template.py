@@ -43,14 +43,8 @@ def openFile(filename, image=1):
 def initStates():
     # Read configuration file
     config = ConfigParser()
-    
-    try:
-        config.readfp(openFile(FULL_MAIN_CONF))
-    except IOError:
-        # Server redirection to error page 
-        URL = "missingFile.py?filename=%s\n" % FULL_MAIN_CONF
-        print 'Location: ', URL
-    
+    config.readfp(openFile(FULL_MAIN_CONF))
+
     pdsTab = config.get('PDS', 'tab')
     pxTab = config.get('PX', 'tab')
     generalMonitoringTab = config.get('GM', 'tab')

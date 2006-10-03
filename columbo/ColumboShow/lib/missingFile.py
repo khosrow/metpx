@@ -32,6 +32,9 @@ form = cgi.FieldStorage()
 filename = form["filename"].value
 image = int(form["image"].value)
 
+keys = os.environ.keys()
+keys.sort()
+
 print "Content-Type: text/html"
 print
  
@@ -53,6 +56,10 @@ print """<html>
 
 if image:
     template.printMainImageCenter()
+
+#print "<br>"
+#for key in keys:
+#    print "%s = %s <br>" % (key, os.environ[key])
 
 print """
 <table width="100%%" border="0" cellpadding="0" cellspacing="0">

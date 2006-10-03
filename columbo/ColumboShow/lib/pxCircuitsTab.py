@@ -59,9 +59,6 @@ def checkMessages():
     print '<tr><td><a href="pxMsgOp.py">Operator Messages</a></td></tr></table>'
     print '</td></tr></table>'
     
-print "Content-Type: text/html"
-print
- 
 def printHeader():
    print """<html>
 <head>
@@ -79,6 +76,11 @@ def printHeader():
 <!--<script src="/js/liveclock.js"></script>-->
 </head>
 """
+
+template.initStates()
+
+print "Content-Type: text/html"
+print
 
 printHeader()
 
