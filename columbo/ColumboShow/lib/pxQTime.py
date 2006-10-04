@@ -64,7 +64,6 @@ print """<html>
 template.printMainImageCenter()
 
 print """
-<img src="/images/head4.jpg" border="0" vspace="0" hspace="0" align="center" valign="top" height="40" width="444">
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
   <tr>
     <td valign="top" align="center" bgcolor="#cccccc">
