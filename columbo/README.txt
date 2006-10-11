@@ -9,9 +9,12 @@ Welcome in Columbo's World
 
 This software has three components:
 
-ColumboCrimeScene (CCS): runs on the machines (backends) where we want to collect information.
-ColumboInvestigationRoom (CIR): analyses information coming from CCS and produces results.
-ColumboShow(CS): presents the results.
+* ColumboCrimeScene (CCS): runs on the machines (backends) where we want 
+  to collect information.
+* ColumboInvestigationRoom (CIR): analyses information coming from CCS 
+  and produces results.
+* ColumboShow(CS): presents the results.
 
-Informations on how to install this software are in INSTALL.txt (only in French, badly formatted an presented in special context).
-Informations in English will be published soon ...
+Information on how to install Columbo are in INSTALL.txt (only in French, 
+badly formatted an presented in special context).
+Information in English will be published soon ...

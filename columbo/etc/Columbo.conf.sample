@@ -1,18 +1,19 @@
-###################################################################################################
-# This configuration file must be put in Columbo/etc/Columbo.conf (only necessary on the 
-# machine from which CIR is run)
+################################################################################
+# This configuration file must be put in Columbo/etc/Columbo.conf (only 
+* necessary on the # machine from which CIR is run)
 # It is the main configuration file for the application
-# NOTE: If a key has no value, one will be set by default in the program, however an
-# equal (=) MUST be present at all times
-###################################################################################################
+# NOTE: If a key has no value, one will be set by default in the program, 
+* however an equal (=) MUST be present at all times
+################################################################################
 [DEFAULT]
 
-###################################################################################################
+################################################################################
 # Columbo Crime Scene (CCS)
-###################################################################################################
+################################################################################
 [CCS]
-# Name of the archive that will be sent to Investigation Room (not the full path; the hostname of
-# the remote host will be append to the name (ex: PDS_Clues_lvs1.pds1)
+# Name of the archive that will be sent to Investigation Room (not the full 
+# path; the hostname of the remote host will be appended to the name 
+# (ex: PDS_Clues_lvs1.pds1)
 clues_name = clues_lvs2-dev
 px_clues_name = px_clues_lvs2-dev
 
@@ -32,15 +33,16 @@ px_logname = /apps/pds/tools/Columbo/ColumboCrimeScene/log/px_ccs_lvs2-dev.log
 #example: log_level = DEBUG
 log_level = DEBUG
 
-###################################################################################################
+#############################################################################
 # Columbo Investigation Room (CIR)
-###################################################################################################
+#############################################################################
 [CIR]
 # Cluster name that we want to match in the ipvsadm output (PDS ONLY)
 #ipvsadm_regex = pds-op
 ipvsadm_regex = pds-dev
 
-# Cluster members (PX ONLY!!!, PDS members are obtained via ipvsadm) separated by a space
+# Cluster members (PX ONLY!!!, PDS members are obtained via ipvsadm) 
+# separated by a space
 backends = pds4-dev
 #backends = pds5 pds6 
 frontend = lvs1-dev                    
@@ -71,9 +73,9 @@ errorLog = /web/columbo/log/PDS_Errors.txt
 # Preferable to be in /apps in case of switchover (only viewed by command-line)
 px_errorLog = /apps/pds/tools/Columbo/ColumboShow/log/PX_Errors.txt
 
-###################################################################################################
+################################################################################
 # Columbo Show (CS)
-###################################################################################################
+################################################################################
 [CS]
 
 # Full path of the logfile
@@ -89,20 +91,20 @@ cir_host = lvs2-dev
 # Number of minutes after which the "results" are considered outdated
 results_timeout = 15
 
-###################################################################################################
+################################################################################
 # PDS Clients Tab
-###################################################################################################
+################################################################################
 [PDS]
 tab = ON
 
-###################################################################################################
+################################################################################
 # Input Queues Tab
-###################################################################################################
+################################################################################
 
 
-###################################################################################################
+################################################################################
 # PX Circuits Tab
-###################################################################################################
+################################################################################
 [PX]
 tab = ON
 
@@ -115,14 +117,14 @@ msg_path = /apps/px/operator
 [LOG]
 action_log = /apps/pds/tools/Columbo/ColumboShow/log/action_pds-dev.log
 
-###################################################################################################
+###############################################################################
 # General Monitoring Tab
-###################################################################################################
+################################################################################
 [GM]
 tab = ON
 
-###################################################################################################
+##############################################################################
 # Administrative Functions Tab
-###################################################################################################
+############################################################################
 [ADMIN]
 tab = ON
