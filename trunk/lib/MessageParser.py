@@ -76,7 +76,12 @@ class MessageParser:
                 self.sendOn = 'amis'
             elif words[0] == 'RF':
                 self.sendOn = 'metser'
-            self.request = self.textLines[1].strip()
+            for line in self.textLines[1:]:
+                if line == '': continue
+                else:
+                    self.request = line.strip()
+                    break
+
         elif words[0] in ['RQM', 'RQF']:
             parts = self.textLines[1].strip().split()
             if parts[1] in ['UNK', 'OK']:
