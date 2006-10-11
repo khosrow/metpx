@@ -553,7 +553,7 @@ class TransceiverAFTN:
                         else:
                             # We queue the message to send it after we receive the ack we wait for.
                             self.logger.info("A service message (%s) will be queued" % messageText)
-                            mm.serviceQueue.append(messageText, [])
+                            mm.serviceQueue.append((messageText, []))
                             
                     mm.calcWaitedTID(tid)
 
