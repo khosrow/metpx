@@ -439,6 +439,7 @@ class TransceiverAFTN:
                                 mm.ingest(m)
 
                         elif textType in ['RQ', 'RF']:
+                            suffix = textType
                             # request for amis or metser
                             from RequestReplyAFTN import RequestReplyAFTN
                             import dateLib
