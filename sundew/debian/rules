@@ -21,9 +21,9 @@ install: build
 	dh_clean -k
 	dh_installdirs
 
-	ls -1 $(CURDIR)/bin/ > $(CURDIR)/debian/metpx-sundew/var/log/px/.bin_dir_metpx_sundew
-	ls -1 $(CURDIR)/tools/ > $(CURDIR)/debian/metpx-sundew/var/log/px/.tools_dir_metpx_sundew
-	ls -1 $(CURDIR)/tools/toolLib/ > $(CURDIR)/debian/metpx-sundew/var/log/px/.tools_lib_dir_metpx_sundew
+	ls -1 $(CURDIR)/bin/ > $(CURDIR)/debian/metpx-sundew/usr/share/doc/px/.bin_dir_metpx_sundew
+	ls -1 $(CURDIR)/tools/ > $(CURDIR)/debian/metpx-sundew/usr/share/doc/px/.tools_dir_metpx_sundew
+	ls -1 $(CURDIR)/tools/toolLib/ > $(CURDIR)/debian/metpx-sundew/usr/share/doc/px/.tools_lib_dir_metpx_sundew
 	
 	# install the binary files in /usr/sbin
 	for file in `find $(CURDIR)/bin/ -type f -maxdepth 1`; \
