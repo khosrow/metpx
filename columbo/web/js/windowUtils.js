@@ -17,7 +17,7 @@ function popIt(url)
 function popItGraph(url)
 {
    counter += 1;
-   newWindow=window.open(url, counter, "dependent=0, status=0, toolbar=0, menubar=0, resizable=1, scrollbars=0, left=190, top=100, width=1280, height=844");
+   newWindow=window.open(url, counter, "dependent=0, status=0, toolbar=0, menubar=0, resizable=1, scrollbars=0, left=190, top=0, width=1280, height=1000");
 
 }
 
