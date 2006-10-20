@@ -13,8 +13,3 @@ usr/lib/px/stats/files
 /etc/px
 /etc/px/rx
 /etc/px/tx
-/var/spool/px
-/var/spool/px/db
-/var/spool/px/rxq
-/var/spool/px/txq
-/var/log/px

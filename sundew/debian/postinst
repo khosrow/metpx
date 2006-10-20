@@ -34,13 +34,6 @@ if [ ! -d $PXHOME/lib ];
 	then ln -sf /usr/lib/px $PXHOME/lib; \
 fi
 
-if [ ! -d $PXHOME/tools ];
-	then install -d $PXHOME/tools; \
-fi
-
-if [ ! -d $PXHOME/tools/toolLib ];
-	then install -d $PXHOME/tools/toolLib; \
-fi
 
 # create the db directory
 if [ ! -d $PXDBLOCATION/db ];
@@ -88,20 +81,6 @@ for file in `cat /usr/share/doc/px/.bin_dir_metpx_sundew`; \
 			then ln -sf /usr/sbin/$file  $PXHOME/bin/; fi ;
 done
 
-# create the sym-link PXHOME/tools
-for file in `cat /usr/share/doc/px/.tools_dir_metpx_sundew`; \
-	do 
-		if [ -f /usr/sbin/$file ] ;  
-			then ln -sf /usr/sbin/$file  $PXHOME/tools/; fi ;
-done
-
-# create the sym-link PXHOME/tools/toolLib
-for file in `cat /usr/share/doc/px/.tools_lib_dir_metpx_sundew`; \
-        do 
-		if [ -f /usr/lib/px/$file ] ; 
-			then ln -sf /usr/lib/px/$file  $PXHOME/tools/toolLib/; fi ;
-done
-	
 # create a sym-link PXLOGLOCATION (debian standard)
 if [ ! -d /var/log/px ];
 	then ln -sf $PXLOGLOCATION /var/log/px; \
