@@ -495,7 +495,10 @@ def main():
     elif  os.uname()[1] == "pds4-dev":
         mirrorMachine = "pds6"
         login         = "pds"    
-      
+    elif  os.uname()[1] == "lvs1-stage":
+        mirrorMachine = "pxatx"
+        login         = "pds"
+                    
     updateConfigurationFiles( machine = mirrorMachine, login = login )
     
     if not os.path.isdir( PXPaths.LOG + localMachine + '/' ):
