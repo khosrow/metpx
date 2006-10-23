@@ -469,10 +469,10 @@ def updateConfigurationFiles( machine, login ):
         os.makedirs(  '/apps/px/stats/trx/', mode=0777 )       
 
         
-    status, output = commands.getstatusoutput( "rsync -avzr --delete-before -e ssh %s@%s:/apps/px/etc/rx/ /apps/px/stats/rx/"  %( login, machine) ) 
+    status, output = commands.getstatusoutput( "rsync -avzr  -e ssh %s@%s:/apps/px/etc/rx/ /apps/px/stats/rx/"  %( login, machine) ) 
     #print output # for debugging only
     
-    status, output = commands.getstatusoutput( "rsync -avzr --delete-before -e ssh %s@%s:/apps/px/etc/tx/ /apps/px/stats/tx/"  %( login, machine) )  
+    status, output = commands.getstatusoutput( "rsync -avzr  -e ssh %s@%s:/apps/px/etc/tx/ /apps/px/stats/tx/"  %( login, machine) )  
     #print output # for debugging only            
 
     
