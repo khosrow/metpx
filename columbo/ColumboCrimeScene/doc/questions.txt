@@ -1,0 +1,8 @@
+COLUMBO QUESTIONS:
+
+1) Vincent me parle de possibilite d'echanges de bons procedes. Notre Columbo contre un programme qu'ils ont concernant
+l'envoi de donnees de modele. Par exemple, il recoit un fichier de modele et est capable d'extraire un sous-modele de ce 
+modele et de le livrer aux cients appropries.
+
+2) Probleme avec le fichier /apps/pds/info/PDSstartupinfo. Plusieurs lignes pour un meme client. Tres problematique. Peut-etre 
+qu'un programme separe pourrait scanner ce file et s'assurer qu'il est dans un format acceptable.
