@@ -48,17 +48,17 @@ class StatsPlotter:
             
         """
         
-        x = [ [0]*5  for x in range(5) ]
-        
+        x = [ [0]*5  for x in range(5) ]       
         for i in range( len(machines) ):#workaround as to get the right names in the fileName and labels.
             if machines[i] == "pds3-dev":
                 machines[i] = "pds5"
             elif machines[i] == "pds4-dev":
                 machines[i] = "pds6"
             elif machines[i] == "lvs1-stage":
-                machines[i] = "pxatx" 
-            
-            
+                machines[i] = "pxatx"
+                                                                                            
+
+    
         #print machines    
         machines = "%s" %machines
         machines = machines.replace( "[","").replace( "]","" ).replace( "'", "" )
@@ -100,9 +100,7 @@ class StatsPlotter:
             self.sourlient = "Source"  
         
         if self.logger == None: # Enable logging
-            if not os.path.isdir( PXPaths.LOG + localMachine + '/' ):
-                os.makedirs( PXPaths.LOG + localMachine + '/', mode=0777 )
-            self.logger = Logger( PXPaths.LOG + localMachine + '/' + 'stats_' + self.loggerName + '.log', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
+            self.logger = Logger( PXPaths.LOG +  'stats_' + self.loggerName + '.log', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
             self.logger = self.logger.getLogger()
             
         self.xtics       = self.getXTics( )        # Seperators on the x axis.
@@ -334,7 +332,7 @@ class StatsPlotter:
         
         """
         
-        maximum = 0 
+        maximum = None
         
         if len( pairs) != 0 :
             
@@ -346,8 +344,25 @@ class StatsPlotter:
         return  maximum 
         
         
+        
+    def getMinPairValue( self, pairs ):
+        """
+            Returns the maximum value of a list of pairs. 
+        """     
+            
+        minimum = None 
+        
+        if len( pairs ) != 0 :
+            minimum = pairs[0][1]
+            for pair in pairs:
+                if pair[1] < minimum:    
+                    minimum = pair[1] 
                     
-    def buildTitle( self, i, statType, typeCount ):
+                    
+        return  minimum         
+    
+            
+    def buildTitle( self, i, statType, typeCount, pairs ):
         """
             This method is used to build the title we'll print on the graphic.
             Title is built with the current time and the name of the client where
@@ -356,19 +371,24 @@ class StatsPlotter:
                
         """  
         
-        if self.maximums[i][typeCount] !=None :
-            maximum =("%s") %self.maximums[i][typeCount]
+        maximum = self.getMaxPairValue( pairs )
+               
+        minimum = self.getMinPairValue( pairs )
         
-        else:
-            maximum = None
-                 
-        if self.minimums[i][typeCount] != None :
-            minimum = ("%s") %self.minimums[i][typeCount]
-        else:
-            minimum = None
-        
-        statType = statType[0].upper() + statType[1:] 
+        if maximum != None :
+            if statType == "latency":
+                maximum = "%.2f" %maximum
+            else:
+                maximum = int(maximum)
             
+        if minimum != None :
+            if statType == "latency":
+                minimum = "%.2f" %minimum
+            else:
+                minimum = int(minimum)
+                
+                
+        statType = statType[0].upper() + statType[1:]             
               
         title =  "%s for %s for a span of %s hours ending at %s\\n\\nMAX: %s  MEAN: %3.2f MIN: %s " %( statType, self.clientNames[i], self.timespan, self.currentTime,  maximum, self.means[i][typeCount], minimum )     
         
@@ -392,10 +412,11 @@ class StatsPlotter:
                     clientName = clientName + "-" 
         
         src         = self.imageName
-        destination = PXPaths.GRAPHS + "/symlinks/%s.png" %clientName 
         
-        if not os.path.isdir( PXPaths.GRAPHS + "/symlinks/" ):
-            os.makedirs( PXPaths.GRAPHS + "/symlinks/", mode=0777 )
+        destination = "/apps/pds/tools/Columbo/ColumboShow/graphs/%s.png" %clientName 
+        
+        if not os.path.isdir( "/apps/pds/tools/Columbo/ColumboShow/graphs/" ):
+            os.makedirs( "/apps/pds/tools/Columbo/ColumboShow/graphs/", mode=0777 )
         
         if os.path.isfile( destination ):
             os.remove( destination )
@@ -473,7 +494,7 @@ class StatsPlotter:
                     color =3 #blue 
                     self.addBytesLabelsToGraph(  i , nbGraphs, j, maxPairValue )
                     
-                self.graph.title( "%s" %self.buildTitle( i, self.statsTypes[j] , j ) )
+                self.graph.title( "%s" %self.buildTitle( i, self.statsTypes[j] , j, pairs) )
                 
                 self.graph.plot( Gnuplot.Data( pairs , with="%s %s 1" % ( self.type, color) ) )
                 
