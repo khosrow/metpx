@@ -413,10 +413,10 @@ class StatsPlotter:
         
         src         = self.imageName
         
-        destination = "/apps/pds/tools/Columbo/ColumboShow/graphs/%s.png" %clientName 
-        
-        if not os.path.isdir( "/apps/pds/tools/Columbo/ColumboShow/graphs/" ):
-            os.makedirs( "/apps/pds/tools/Columbo/ColumboShow/graphs/", mode=0777 )
+        destination = PXPaths.GRAPHS + "/symlinks/%s.png" %clientName
+
+        if not os.path.isdir( PXPaths.GRAPHS + "/symlinks/" ):
+            os.makedirs( PXPaths.GRAPHS + "/symlinks/", mode=0777 )                                                      
         
         if os.path.isfile( destination ):
             os.remove( destination )

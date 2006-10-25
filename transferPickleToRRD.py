@@ -188,12 +188,15 @@ def getOptionsFromParser( parser, logger = None  ):
         for rxName in rxNames:
             fileTypes.append( "rx" )                  
       
+    #small workaround for pickle files        
     for i in range( len( machines ) ):
         if machines[i] == 'pds5':
             machines[i] = 'pds3-dev'
         elif machines[i] == 'pds6' :
             machines[i] = 'pds4-dev'     
-                
+        elif machines[i] == "pxatx":
+            machines[i] == "lvs1-stage" 
+                    
     infos = _Infos( endTime = end, machines = machines, clients = clients, fileTypes = fileTypes )   
     
     return infos     
@@ -293,19 +296,19 @@ def createRoundRobinDatabase( dataType, client, machine, startTime ):
     databaseName = buildRRDFileName( dataType, client, machine )
     startTime = int( startTime )    
       
-    # 1st  rra : keep last 24 hours for daily graphs. Each line contains 1 minute of data. 
-    # 2nd  rra : keep last 7 days for weekly graphs. Each line contains 5 minutes of data. 
+    # 1st  rra : keep last 7 days for daily graphs. Each line contains 1 minute of data. 
+    # 2nd  rra : keep last 365 days for Monthly graphs. Each line contains 4 hours of data. 
     # 3rd  rra : keep last 10 years of data. Each line contains 24 hours of data.
-    rrdtool.create( databaseName, '--start','%s' %( startTime ), '--step', '60', 'DS:latency:GAUGE:60:U:U', 'RRA:AVERAGE:0:1:1440','RRA:MIN:0:1:1440', 'RRA:MAX:0:1:1440', 'RRA:AVERAGE:0:5:2016','RRA:MIN:0:5:2016','RRA:MAX:0:5:2016', 'RRA:AVERAGE:0:1440:3650','RRA:MIN:0:1440:3650','RRA:MAX:0:1440:3650' )   
-    
-       
-    #print rrdtool.info( databaseName )   
+    rrdtool.create( databaseName, '--start','%s' %( startTime ), '--step', '60', 'DS:%s:GAUGE:60:U:U' %dataType, 'RRA:AVERAGE:0:1:10080','RRA:MIN:0:1:10080', 'RRA:MAX:0:1:10080', 'RRA:AVERAGE:0:240:1460','RRA:MIN:0:240:1460','RRA:MAX:0:240:1460', 'RRA:AVERAGE:0:1440:3650','RRA:MIN:0:1440:3650','RRA:MAX:0:1440:3650' )      
+              
+    print "created :%s" %databaseName   
     
 
     
 def getPairsFromMergedData( statType, mergedData, logger = None  ):
     """
         This method is used to create the data couples used to feed an rrd database.
+        
     """
     
     if logger != None :
@@ -380,7 +383,7 @@ def getMergedData( client, fileType,  machines, startTime, endTime, logger = Non
     
     else:#only one machine, only merge different hours together
         
-        statsCollection = pickleMerging.mergePicklesFromDifferentHours( logger = logger , startTime = startTime, endTime = endTime, client = client, fileType = fileType, machine = machines[0] )
+        statsCollection = pickleMerging.mergePicklesFromDifferentHours( logger = logger , startTime = MyDateLib.getIsoFromEpoch(startTime), endTime = MyDateLib.getIsoFromEpoch(endTime), client = client, fileType = fileType, machine = machines[0] )
         
     
     combinedMachineName = ""
@@ -434,7 +437,7 @@ def updateRoundRobinDatabases(  client, machines, fileType, endTime, logger = No
     for key in dataPairs.keys():
         
         rrdFileName = buildRRDFileName( dataType = key, client = client, machine = combinedMachineName )        
-        
+        print rrdFileName
         if not os.path.isfile( rrdFileName ):  
             #print "startTime : %s " %startTime 
             createRoundRobinDatabase( dataType = key, client = client, machine = combinedMachineName, startTime= startTime - 60 )
@@ -471,7 +474,15 @@ def transferPickleToRRD( infos, logger = None ):
         if pid == 0 :#if child 
             updateRoundRobinDatabases( infos.clients[i], infos.machines, infos.fileTypes[i], infos.endTime, logger =logger )                           
             sys.exit()#terminate child immidiatly
-    
+        
+        elif (i%10) == 0:
+            while True:#wait on all non terminated child process'
+                try:   #will raise exception when no child process remain.        
+                    pid, status = os.wait( )
+                except:    
+                    break            
+        
+        
     while True:#wait on all non terminated child process'
         try:   #will raise exception when no child process remain.  
             pid, status = os.wait( )
@@ -518,9 +529,9 @@ def main():
        
     parser = createParser() 
    
-    infos = getOptionsFromParser( parser, logger = logger )
+    infos = getOptionsFromParser( parser, logger = None )
     #print "infos : %s" %infos.clients
-    transferPickleToRRD( infos, logger = logger )
+    transferPickleToRRD( infos, logger = None )
      
 
 

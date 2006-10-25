@@ -47,7 +47,7 @@ class _GraphicsInfos:
         self.types        = types             # Type of graphics to produce. 
         self.clientNames  = clientNames or [] # Client name we need to get the data from.
         self.timespan     = timespan          # Number of hours we want to gather the data from. 
-        self.endDate      = endDate       # Time when stats were queried.
+        self.endDate      = endDate           # Time when stats were queried.
         self.machines     = machines          # Machine from wich we want the data to be calculated.
         
         
@@ -437,7 +437,8 @@ def getOverallMean( databaseName, startTime, endTime, logger = None  ):
     try :
         
         output = rrdtool.fetch( databaseName, 'AVERAGE', '-s', "%s" %startTime, '-e', '%s' %endTime )
-        meanTuples = output[2]
+        print output
+	meanTuples = output[2]
         
         for meanTuple in meanTuples :            
             if meanTuple[0] != 'None' and meanTuple[0] != None :
@@ -486,7 +487,31 @@ def buildImageName(  type, client, machine, infos, logger = None ):
     return fileName 
 
 
+def getDatabaseTimeOfUpdate( client, machine,type ):
+    """
+        Is present in DATABASE-UPDATES file, returns the time of the last 
+        update associated with the databse name.      
+        
+        Otherwise returns None 
+        
+    """ 
+    
 
+    lastUpdate = 0
+    folder   = PXPaths.STATS + "DATABASE-UPDATES/%s/" %type
+    fileName = folder + "%s_%s" %( client, machine )
+    
+    if os.path.isfile( fileName ):
+        
+        fileHandle  = open( fileName, "r" )
+        lastUpdate  = pickle.load( fileHandle )           
+        fileHandle.close()     
+        #print "lastUpdate: %s" %lastUpdate
+            
+    return lastUpdate      
+
+    
+    
 def plotRRDGraph( databaseName, type, client, machine, infos, logger = None ):
     """
         This method is used to produce a rrd graphic.
@@ -512,10 +537,19 @@ def plotRRDGraph( databaseName, type, client, machine, infos, logger = None ):
         innerColor = "54DE4F"
         outerColor = "1C4A1A"
     
+    #set intervals so they match with the parameters used when we created the databases. 
+    lastUpdate = getDatabaseTimeOfUpdate( client, machine, type )    
+    if ( lastUpdate - start ) < (10080 * 60):#less than a week 
+        interval = 1 
+    elif (lastUpdate - start) < (1460*240*60):
+        interval = 240
+    else:
+        interval = 1440
+      
     title = buildTitle( type, client, infos.endDate, infos.timespan, minimum, maximum, mean )
-    
+
 #     try:
-    rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '600','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end), '--vertical-label', '%s' %type,'--title', '%s'%title,'COMMENT: Minimum %s Maximum  %s Mean %.2f\c' %( minimum, maximum, mean), '--lower-limit','0','DEF:latency=%s:latency:AVERAGE'%databaseName, 'AREA:latency#%s:%s' %( innerColor, type ),'LINE1:latency#%s:%s'%( outerColor, type ) )
+    rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '600','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end), '--vertical-label', '%s' %type,'--title', '%s'%title,'COMMENT: Minimum %s Maximum  %s Mean %.2f\c' %( minimum, maximum, mean), '--lower-limit','0','DEF:%s=%s:%s:AVERAGE'%( type,databaseName,type), 'CDEF:realValue=%s,%i,*' %(type,interval), 'AREA:realValue#%s:%s' %( innerColor, type ),'LINE1:realValue#%s:%s'%( outerColor, type ) )
     
     print "Plotted : %s" %imageName
     if logger != None:
