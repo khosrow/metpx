@@ -18,7 +18,7 @@ named COPYING in the root of the source directory tree.
 
 """
 import os, sys, os.path, re, commands, time, fnmatch
-import Client, Source
+import Client, Source, Sourlient
 from MultiKeysStringSorter import MultiKeysStringSorter
 from CacheManager import CacheManager
 from stat import *
@@ -120,7 +120,7 @@ class DiskReader:
         if isinstance(self.flow, Source.Source):
             return (self.flow.fileMatchMask(basename), 'RX')
 
-        elif isinstance(self.flow, Client.Client):
+        elif isinstance(self.flow, Client.Client) or isinstance(self.flow, Sourlient.Sourlient):
            for mask in self.flow.masks:
                if fnmatch.fnmatch(basename, mask[0]):
                   try:
