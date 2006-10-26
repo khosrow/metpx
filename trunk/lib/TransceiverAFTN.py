@@ -68,7 +68,7 @@ class TransceiverAFTN:
             self.specialOrdersPath = AFTNPaths.SPECIAL_ORDERS_PRO
 
         self.reader = DiskReader(PXPaths.TXQ + self.sourlient.name, self.sourlient.batch,
-                                 self.sourlient.validation, self.sourlient.patternMatching,
+                                 self.sourlient.validation, self.sourlient.diskReaderPatternMatching,
                                  self.sourlient.mtime, True, self.logger, eval(self.sourlient.sorter), self.sourlient)
         
         self.debug = True  # Debugging switch
