@@ -54,9 +54,8 @@ class StatsPlotter:
                 machines[i] = "pds5"
             elif machines[i] == "pds4-dev":
                 machines[i] = "pds6"
-            elif machines[i] == "lvs1-stage":
-                machines[i] = "pxatx"
-                                                                                            
+            elif machines[i] == "lvs1-stage" or machines[i] == "logan1" or machines[i] == "logan2" :
+                machines[i] = "pxatx"                                                                                
 
     
         #print machines    

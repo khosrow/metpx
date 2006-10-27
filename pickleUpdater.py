@@ -37,13 +37,27 @@ from PXManager import *
 from PXPaths import *
 
 PXPaths.normalPaths()
-PXPaths.RX_CONF  = '/apps/px/stats/rx/'
-PXPaths.TX_CONF  = '/apps/px/stats/tx/'
-PXPaths.TRX_CONF = '/apps/px/stats/trx/'
+
 localMachine = os.uname()[1]
 
+if localMachine == "pds3-dev" or localMachine == "pds4-dev" or localMachine == "lvs1-stage" :
+    PATH_TO_LOGFILES = PXPaths.LOG + localMachine + "/"
+    PXPaths.RX_CONF  = '/apps/px/stats/rx/'
+    PXPaths.TX_CONF  = '/apps/px/stats/tx/'
+    PXPaths.TRX_CONF = '/apps/px/stats/trx/'
 
+elif localMachine == "logan1" or localMachine == "logan2":
+    PATH_TO_LOGFILES = PXPaths.LOG + localMachine + "/" + localMachine + "/"
+    PXPaths.RX_CONF  = '/apps/px/stats/rx/'
+    PXPaths.TX_CONF  = '/apps/px/stats/tx/'
+    PXPaths.TRX_CONF = '/apps/px/stats/trx/'
 
+else:#pds5 pds5 pxatx etc
+    PATH_TO_LOGFILES = PXPaths.LOG  
+
+    
+    
+    
 class _UpdaterInfos:  
 
     def __init__( self, clients, directories, types, startTimes,collectUpToNow, fileType, currentDate = '2005-06-27 13:15:00', interval = 1, hourlyPickling = True, machine = ""   ):
@@ -270,7 +284,7 @@ def getOptionsFromParser( parser, logger = None  ):
                
         if currentDate > startTime:
             #print " client : %s currentDate : %s   startTime : %s" %( client, currentDate, startTime )
-            directories.append( PXPaths.LOG + localMachine + "/")
+            directories.append( PATH_TO_LOGFILES )
             startTimes.append( startTime )
             usefullClients.append( client )
         else:
@@ -432,7 +446,7 @@ def updateHourlyPickles( infos, logger = None ):
                 
                 cs.pickleName =  ClientStatsPickler.buildThisHoursFileName( client = infos.clients[i], currentTime =  startOfTheHour, machine = infos.machine, fileType = infos.fileType )
                  
-                cs.collectStats( types = infos.types, startTime = startTime , endTime = endTime, interval = infos.interval * MyDateLib.MINUTE,  directory = PXPaths.LOG + localMachine + "/" , fileType = infos.fileType )                     
+                cs.collectStats( types = infos.types, startTime = startTime , endTime = endTime, interval = infos.interval * MyDateLib.MINUTE,  directory = PATH_TO_LOGFILES, fileType = infos.fileType )                     
                            
                     
         else:      
@@ -447,7 +461,7 @@ def updateHourlyPickles( infos, logger = None ):
                 
             cs.pickleName =   ClientStatsPickler.buildThisHoursFileName( client = infos.clients[i], currentTime = startOfTheHour, machine = infos.machine, fileType = infos.fileType )            
               
-            cs.collectStats( infos.types, startTime = startTime, endTime = endTime, interval = infos.interval * MyDateLib.MINUTE, directory = PXPaths.LOG + localMachine + "/", fileType = infos.fileType   )        
+            cs.collectStats( infos.types, startTime = startTime, endTime = endTime, interval = infos.interval * MyDateLib.MINUTE, directory = PATH_TO_LOGFILES, fileType = infos.fileType   )        
        
                          
         setLastCronJob( client = infos.clients[i], fileType = infos.fileType, currentDate = infos.currentDate, collectUpToNow = infos.collectUpToNow )
@@ -495,16 +509,16 @@ def main():
     elif  os.uname()[1] == "pds4-dev":
         mirrorMachine = "pds6"
         login         = "pds"    
-    elif  os.uname()[1] == "lvs1-stage":
+    elif  os.uname()[1] == "lvs1-stage" or os.uname()[1] == "logan1" or os.uname()[1] == "logan2" :
         mirrorMachine = "pxatx"
         login         = "pds"
                     
     updateConfigurationFiles( machine = mirrorMachine, login = login )
     
-    if not os.path.isdir( PXPaths.LOG + localMachine + '/' ):
-        os.makedirs( PXPaths.LOG + localMachine + '/', mode=0777 )
+    if not os.path.isdir( PXPaths.LOG  ):
+        os.makedirs( PXPaths.LOG, mode=0777 )
     
-    logger = Logger( PXPaths.LOG + localMachine + "/" + 'stats_' + 'pickling' + '.log.notb', 'INFO', 'TX' + 'pickling', bytes = True  ) 
+    logger = Logger( PXPaths.LOG + 'stats_' + 'pickling' + '.log.notb', 'INFO', 'TX' + 'pickling', bytes = True  ) 
     logger = logger.getLogger()
    
     parser = createParser( )  #will be used to parse options 

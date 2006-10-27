@@ -154,8 +154,8 @@ def getOptionsFromParser( parser ):
             machines[i] = "pds3-dev"
         elif machines[i] == "pds6" :
             machines[i] = "pds4-dev"
-        elif machines[i] == "pxatx" :
-            machines[i] = "lvs1-stage"
+        elif machines[i] == "pxatx" :#thus far all graphic machines make pickels for pxatx
+            machines[i] = localMachine
         else:
             machines[i] = machines[i]
             

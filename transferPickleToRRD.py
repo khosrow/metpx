@@ -34,7 +34,22 @@ from   Logger    import *
 
 PXPaths.normalPaths()             
 
+if localMachine == "pds3-dev" or localMachine == "pds4-dev" or localMachine == "lvs1-stage" :
+    PATH_TO_LOGFILES = PXPaths.LOG + localMachine + "/"
+    PXPaths.RX_CONF  = '/apps/px/stats/rx/'
+    PXPaths.TX_CONF  = '/apps/px/stats/tx/'
+    PXPaths.TRX_CONF = '/apps/px/stats/trx/'
 
+elif localMachine == "logan1" or localMachine == "logan2":
+    PATH_TO_LOGFILES = PXPaths.LOG + localMachine + "/" + localMachine + "/"
+    PXPaths.RX_CONF  = '/apps/px/stats/rx/'
+    PXPaths.TX_CONF  = '/apps/px/stats/tx/'
+    PXPaths.TRX_CONF = '/apps/px/stats/trx/'
+
+else:#pds5 pds5 pxatx etc
+    PATH_TO_LOGFILES = PXPaths.LOG
+    
+    
 #################################################################
 #                                                               #
 #################PARSER AND OPTIONS SECTION######################
@@ -167,11 +182,11 @@ def getOptionsFromParser( parser, logger = None  ):
         print "Using all clients options."
         pxManager = PXManager()
         
-        # These values need to be set here.Use first machine since 
-        # using multiple machine implies they have all the same clients.
-        PXPaths.RX_CONF  = '/apps/px/stats/rx/%s/'  %machines[0]
-        PXPaths.TX_CONF  = '/apps/px/stats/tx/%s/'  %machines[0]
-        PXPaths.TRX_CONF = '/apps/px/stats/trx/%s/' %machines[0]
+        remoteMachines[ "pds3-dev", "pds4-dev","lvs1-stage", "logan1", "logan2" ]
+        if localMachine in remoteMachines :#These values need to be set here.
+            PXPaths.RX_CONF  = '/apps/px/stats/rx/%s/'  %machine
+            PXPaths.TX_CONF  = '/apps/px/stats/tx/%s/'  %machine
+            PXPaths.TRX_CONF = '/apps/px/stats/trx/%s/' %machine
         pxManager.initNames() # Now you must call this method  
     
         txNames = pxManager.getTxNames()               
@@ -195,7 +210,7 @@ def getOptionsFromParser( parser, logger = None  ):
         elif machines[i] == 'pds6' :
             machines[i] = 'pds4-dev'     
         elif machines[i] == "pxatx":
-            machines[i] == "lvs1-stage" 
+            machines[i] == localMachine
                     
     infos = _Infos( endTime = end, machines = machines, clients = clients, fileTypes = fileTypes )   
     
@@ -446,7 +461,7 @@ def updateRoundRobinDatabases(  client, machines, fileType, endTime, logger = No
         if endTime > startTime :  
             
             for pair in dataPairs[ key ]:     
-                rrdtool.update( rrdFileName, '%s:%s' %( int(pair[0]), int(pair[1]) ) ) 
+                rrdtool.update( rrdFileName, '%s:%s' %( int(pair[0]), pair[1] ) ) 
             
             #print "updated : %s for %s in a file named : %s" %( key,client,rrdFileName )
         
@@ -500,8 +515,8 @@ def createPaths():
     dataTypes = [ "latency", "bytecount", "errors", "filesOverMaxLatency", "filecount" ]
     
     
-    if not os.path.isdir( PXPaths.LOG + localMachine + '/' ):
-        os.makedirs( PXPaths.LOG + localMachine + '/', mode=0777 )
+    if not os.path.isdir( PATH_TO_LOGFILES ):
+        os.makedirs( PATH_TO_LOGFILES, mode=0777 )
         
     for dataType in dataTypes:
         if not os.path.isdir( PXPaths.STATS + "databases/%s/" %dataType ):
@@ -523,7 +538,7 @@ def main():
 
     createPaths()
     
-    logger = Logger( PXPaths.LOG + localMachine + "/" + 'stats_' + 'rrd_transfer' + '.log.notb', 'INFO', 'TX' + 'rrd_transfer', bytes = True  ) 
+    logger = Logger( PXPaths.LOG + 'stats_' + 'rrd_transfer' + '.log.notb', 'INFO', 'TX' + 'rrd_transfer', bytes = True  ) 
     
     logger = logger.getLogger()
        

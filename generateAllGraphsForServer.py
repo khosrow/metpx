@@ -36,7 +36,7 @@ from MyDateLib import *
 
 PXPaths.normalPaths()
 
-
+localMachine = os.uname()[1]
 
 #################################################################
 #                                                               #
@@ -239,10 +239,12 @@ def getRxTxNames( machine ):
                         
     pxManager = PXManager()
     
-    #These values need to be set here.
-    PXPaths.RX_CONF  = '/apps/px/stats/rx/%s/'  %machine
-    PXPaths.TX_CONF  = '/apps/px/stats/tx/%s/'  %machine
-    PXPaths.TRX_CONF = '/apps/px/stats/trx/%s/' %machine
+    
+    remoteMachines= [ "pds3-dev", "pds4-dev","lvs1-stage", "logan1", "logan2" ]
+    if localMachine in remoteMachines :#These values need to be set here.
+        PXPaths.RX_CONF  = '/apps/px/stats/rx/%s/'  %machine
+        PXPaths.TX_CONF  = '/apps/px/stats/tx/%s/'  %machine
+        PXPaths.TRX_CONF = '/apps/px/stats/trx/%s/' %machine
     pxManager.initNames() # Now you must call this method  
     
     txNames = pxManager.getTxNames()               
