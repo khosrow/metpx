@@ -47,6 +47,16 @@ PXPaths.normalPaths()
 
 localMachine = os.uname()[1]
 
+if localMachine == "pds3-dev" or localMachine == "pds4-dev" or localMachine == "lvs1-stage" :
+    PATH_TO_LOGFILES = PXPaths.LOG + localMachine + "/"
+
+elif localMachine == "logan1" or localMachine == "logan2":
+    PATH_TO_LOGFILES = PXPaths.LOG + localMachine + "/" + localMachine + "/"
+
+else:#pds5 pds5 pxatx etc
+    PATH_TO_LOGFILES = PXPaths.LOG  
+    
+    
 
 class ClientStatsPickler:
     """
@@ -60,7 +70,7 @@ class ClientStatsPickler:
             -Builds a ClientStatsPickler with no entries.           
         """
         
-        self.client           = client                 # Name of the lcient for whom were collecting data 
+        self.client           = client                 # Name of the client for whom were collecting data 
         self.pickleName       = ""                     # Pickle 
         self.directory        = directory              # Name of the directory containing stats files.
         self.statsTypes       = statsTypes or []       # Types we'll search for stats. 
@@ -69,7 +79,9 @@ class ClientStatsPickler:
         self.logger           = logger                 # Permits a logging system for this object.
         
         if logger is None: # Enable logging
-            self.logger = Logger( PXPaths.LOG + localMachine + '/' + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName ) 
+            if not os.path.isdir( PXPaths.LOG ):
+                os.makedirs( PXPaths.LOG , mode=0777 )
+            self.logger = Logger( PXPaths.LOG + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
             self.logger = self.logger.getLogger()
            
         self.statsCollection  = statsCollection or FileStatsCollector( logger = self.logger )
@@ -126,11 +138,11 @@ class ClientStatsPickler:
     
     def collectStats( self, types, directory, fileType = "tx", startTime = '2006-05-18 00:00:00', endTime = "", interval = 60*MINUTE, save = True  ):
         """
-            This method is used to collectstats for a directory.
+            This method is used to collect stats for a directory.
             
             Types is the type of dats to be collected. 
             
-            Pickle is th ename of the file to be used. If not specified will be generated
+            Pickle is the name of the file to be used. If not specified will be generated
             according to the other parameters.
             
             FileType specifies what type of files to look for in the directory.
@@ -282,9 +294,9 @@ def main():
         
     types = [ "latency","errors","bytecount" ]    
       
-    cs = ClientStatsPickler( client = "satnet", directory = PXPaths.LOG + localMachine + '/' )
+    cs = ClientStatsPickler( client = "satnet", directory = PATH_TO_LOGFILES )
     
-    cs.collectStats( types, directory = PXPaths.LOG + localMachine + '/' , fileType = "tx", startTime = '2006-07-16 01:00:12', endTime = "2006-07-16 01:59:12", interval = 1*MINUTE )  
+    cs.collectStats( types, directory = PATH_TO_LOGFILES, fileType = "tx", startTime = '2006-07-16 01:00:12', endTime = "2006-07-16 01:59:12", interval = 1*MINUTE )  
             
     cs.printStats()        
     

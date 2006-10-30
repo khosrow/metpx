@@ -88,7 +88,7 @@ def mergePicklesFromDifferentHours( logger = None , startTime = "2006-07-31 13:0
     """
         This method merges entire hourly pickles files. 
         
-        This does not support merging part of the data of pickles yet.   
+        This does not support merging part of the data of pickles.   
     
     """
     
@@ -121,34 +121,21 @@ def mergePicklesFromDifferentHours( logger = None , startTime = "2006-07-31 13:0
             entries.extend( emptyEntries )
      
             
-    statsCollection = FileStatsCollector(  startTime = startTime , endTime = endTime, interval = MyDateLib.MINUTE, totalWidth = width, fileEntries = entries )
-    
-#     statsCollection = statsCollection.setMinMaxMeanMedians( startingBucket = 0 , finishingBucket = statsCollection.nbEntries )      
-    
-#     statsCollection.logger = None
-#     cpickleWrapper.save( object = statsCollection, filename = "/apps/px/stats/mergedData") 
-#     #print "statsCollection.nbEntries %s" %statsCollection.nbEntries
+    statsCollection = FileStatsCollector(  startTime = startTime , endTime = endTime, interval = MyDateLib.MINUTE, totalWidth = width, fileEntries = entries, logger = logger )
     
     return statsCollection        
 
 
 
-
 def mergePicklesFromSameHour( logger = None , pickleNames = None, mergedPickleName = "", clientName = "" , combinedMachineName = "", currentTime = "", fileType = "tx" ):
     """
-            This methods receives a list of filenames referring to /apps/px/lib/o 
-            pickled FileStatsEntries.
-            
-            Saves pickles since they might be reused somewhere else...
-            
-            Pre condition :Pickle should be of the same timespan and bucket width.
-                        If not exception will be raised and program terminated.  
-            
-                        
-            Note : Should test if it would be somewhat faster not to recalculate everything 
-            and just go with proportions 
-            
-    
+        This methods receives a list of filenames referring to pickled FileStatsEntries.
+        
+        After the merger pickles get saved since they might be reused somewhere else.
+        
+        Pre condition : Pickle should be of the same timespan and bucket width.
+                        If not no merging will occur.  
+        
     """
     
     
@@ -167,14 +154,14 @@ def mergePicklesFromSameHour( logger = None , pickleNames = None, mergedPickleNa
         else:#Use empty entry if there is no existing pickle of that name
             
             endTime = MyDateLib.getIsoFromEpoch( MyDateLib.getSecondsSinceEpoch( currentTime ) + MyDateLib.HOUR ) 
-            entryList.append( FileStatsCollector( startTime = currentTime, endTime = endTime  ) )         
+            entryList.append( FileStatsCollector( startTime = currentTime, endTime = endTime,logger =logger  ) )         
             
             if logger != None :
                 logger.warning( "Pickle named %s did not exist. Empty entry was used instead." %pickle )    
     
     
     #start off with a carbon copy of first pickle in list.
-    newFSC = FileStatsCollector( files = entryList[0].files , statsTypes =  entryList[0].statsTypes, startTime = entryList[0].startTime, endTime = entryList[0].endTime, interval=entryList[0].interval, totalWidth = entryList[0].totalWidth, firstFilledEntry = entryList[0].firstFilledEntry, lastFilledEntry = entryList[0].lastFilledEntry, maxLatency = entryList[0].maxLatency, fileEntries = entryList[0].fileEntries )
+    newFSC = FileStatsCollector( files = entryList[0].files , statsTypes =  entryList[0].statsTypes, startTime = entryList[0].startTime, endTime = entryList[0].endTime, interval=entryList[0].interval, totalWidth = entryList[0].totalWidth, firstFilledEntry = entryList[0].firstFilledEntry, lastFilledEntry = entryList[0].lastFilledEntry, maxLatency = entryList[0].maxLatency, fileEntries = entryList[0].fileEntries,logger = logger )
     
      
     if entryListIsValid( entryList ) == True :
@@ -299,27 +286,29 @@ def mergePicklesFromDifferentMachines( logger = None , startTime = "2006-07-31 1
             needToMergeSameHoursPickle = False 
             pickleNames = createNonMergedPicklesList( currentTime = seperators[i], machines = machines, fileType = fileType, client = client )
             
+            #print "pickleNames : %s" %pickleNames
             for pickle in pickleNames : #Verify every pickle implicated in merger.
                 
-                if vc.isDifferentFile( file = pickle, user = combinedMachineName,client = client ) == True : # if for some reason pickle has changed since last time
-                    print "file : %s was found different" %pickle
+                # if for some reason pickle has changed since last time
+                if vc.isDifferentFile( file = pickle, user = combinedMachineName,client = client ) == True : 
+                    #print "file : %s was found different" %pickle
                     needToMergeSameHoursPickle = True 
                     break 
             
             if needToMergeSameHoursPickle == True :#First time or one element has changed   
-                print "problem" 
-                mergePicklesFromSameHour( logger = None , pickleNames = pickleNames , clientName = client, combinedMachineName = combinedMachineName, currentTime = seperators[i], mergedPickleName = mergedPickleNames[i], fileType = fileType  )
+                #print "problem" 
+                mergePicklesFromSameHour( logger = logger , pickleNames = pickleNames , clientName = client, combinedMachineName = combinedMachineName, currentTime = seperators[i], mergedPickleName = mergedPickleNames[i], fileType = fileType  )
                 
                 #print pickleNames
                 for pickle in pickleNames :
-                    vc.updateFileInList( file = pickle, user = combinedMachineName, client = client )
+                    vc.updateFileInList( file = pickle )
             
                 vc.saveList( user = combinedMachineName, client = client)
                 
                         
     # Once all machines have merges the necessary pickles we merge all pickles 
     # into a single file stats entry. 
-    newFSC = mergePicklesFromDifferentHours( logger = None , startTime = startTime, endTime = endTime, client = client, machine = combinedMachineName,fileType = fileType  )
+    newFSC = mergePicklesFromDifferentHours( logger = logger , startTime = startTime, endTime = endTime, client = client, machine = combinedMachineName,fileType = fileType  )
    
     return newFSC
 
