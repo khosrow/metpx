@@ -417,9 +417,11 @@ class TransceiverAFTN:
                             suffix = 'SVC'
                             self.logger.info("SVC Message Received(%s): %s (%s)" % (mm.messageIn.getTransmitID(), str(mm.messageIn.getTextLines()), MessageParser.names.get(mp.serviceType,
                                               "The service type of this message is unknown. Contact Ron Knight")))
-                            #self.logger.info("*********************** SERVICE MESSAGE *****************************")
-                            #self.logger.info(str(mm.messageIn.getTextLines()))
-                            #self.logger.info("********************* END SERVICE MESSAGE ***************************")
+
+                            #if mp.serviceType in [8, 9]:
+                            #    self.logger.info("*********************** SERVICE MESSAGE *****************************")
+                            #    self.logger.info(str(mm.messageIn.getTextLines()))
+                            #    self.logger.info("********************* END SERVICE MESSAGE ***************************")
 
                         elif textType == "AFTN":
                             suffix = ''

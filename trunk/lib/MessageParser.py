@@ -25,6 +25,8 @@ class MessageParser:
     names[6] = 'AFTN unknown addressee'           # Only the AFTN MHS will generate this message
     names[7] = 'AFTN unauthorized station'        # Only the AFTN MHS will generate this message
     names[8] = 'AFTN Incorrect Station Address'   # Only the AFTN MHS will generate this message (Not in the ICD, Ron told me)
+    names[9] = 'AFTN MHS COMSTATE'                # Only the AFTN MHS will generate this message (Not in the ICD, found it when the program crashed)
+    
 
     REPLY_TYPES = ['RQM_OK', 'RQF_OK', 'RQM_UNK', 'RQF_UNK']
 
@@ -37,7 +39,7 @@ class MessageParser:
             self.text = '\n'.join(text)
 
         # Eliminate 'prefix' blank lines
-        while self.textLines[0] == '':
+        while self.textLines[0] == '' or self.textLines[0].isspace():
             del self.textLines[0]
 
         self.type = None                          # In ['SVC', 'RQ', 'RF', 'RQM_UNK', 'RQM_OK', 'RQF_UNK', 'RQF_OK', 'AFTN']
@@ -137,6 +139,8 @@ class MessageParser:
             self.serviceType = 3 
         elif wordsFirstLine[1] == "QTA" and wordsFirstLine[2] == "OGN" and wordsFirstLine[4] == "INCORRECT":
             self.serviceType = 8 
+        elif (wordsFirstLine[1] == "AFTN" and wordsFirstLine[2] == "MHS" and wordsFirstLine[3] == "COMSTATE") or wordsFirstLine[1] == "COMSTATE":
+            self.serviceType = 9 
 
         if len(self.textLines) >= 3:
             wordsThirdLine = self.textLines[2].split()
