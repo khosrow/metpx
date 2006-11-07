@@ -130,7 +130,7 @@ class MessageAFTN:
         return "%s_%s_%s" % (self.transmitID, self.dateTime, firstWords) 
 
     def getName(self):
-        return "%s_%s_%s" % (self.dateTime, self.stationID, self.CSN)
+        return "%s_%s" % (self.stationID, self.CSN)
 
     def positionOfEndOfMessage(text, END_OF_MESSAGE=END_OF_MESSAGE):
         return text.find(END_OF_MESSAGE)
