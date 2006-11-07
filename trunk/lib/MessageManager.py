@@ -38,7 +38,7 @@ class MessageManager:
 
     """
 
-    def __init__(self, logger=None, sourlient=None):
+    def __init__(self, logger=None, sourlient=None, reloadMode=False):
         
         AFTNPaths.normalPaths()
         PXPaths.normalPaths()
@@ -69,6 +69,10 @@ class MessageManager:
         self.sp.parse()
         self.priorities = {'1':'FF', '2':'FF', '3':'GG', '4':'GG', '5':'GG'}
 
+        if not reloadMode:
+            self.afterInit()
+
+    def afterInit(self):
         self.messageIn = None  # Last AFTN message received
         self.messageOut = None # Last AFTN message sent
         self.fromDisk = True   # Changed to False for Service Message created on the fly
@@ -115,9 +119,9 @@ class MessageManager:
             self.waitingForAck = None     # None or the transmitID 
 
         self.sendingInfos = (0, None) # Number of times a message has been sent and the sending time.
-        self.maxAckTime =  sourlient.maxAckTime  # Maximum time (in seconds) we wait for an ack, before resending.
+        self.maxAckTime =  self.sourlient.maxAckTime  # Maximum time (in seconds) we wait for an ack, before resending.
         self.maxSending = 1   # Maximum number of sendings of a message
-        self.ackUsed =  sourlient.ackUsed  # We can use ack or not (testing purposes only)
+        self.ackUsed =  self.sourlient.ackUsed  # We can use ack or not (testing purposes only)
         self.totAck = 0       # Count the number of ack (testing purpose only)
 
         # CSN verification (receiving)
