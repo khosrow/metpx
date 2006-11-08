@@ -448,10 +448,10 @@ class TransceiverAFTN:
                             date = dateLib.getYYGGgg()
                             if textType == 'RQ': # amis
                                 addOn = 'AACN02 ANIK %s\nATTN %s\n\n' % (date, mm.messageIn.originatorAddress)
-                                replyAFTN = 'RQM %s\nRQM ' % date
+                                replyAFTN = 'RQM '
                             elif textType == 'RF': # metser
                                 addOn = 'AACN44 CWAO %s\nATTN %s\n\n' % (date, mm.messageIn.originatorAddress)
-                                replyAFTN = 'RQF %s\nRQF ' % date
+                                replyAFTN = 'RQF '
 
                             self.logger.info('AFTN Request Received: Type = %s, Value = %s' % (textType, mp.request))
 
