@@ -459,7 +459,7 @@ class TransceiverAFTN:
                             rr = RequestReplyAFTN(mp.request, addOn, mp.sendOn, self.logger)
 
                             if rr.bulletin:
-                                self.logger.info('Request is not empty, we will put bulletin in queue and send an OK message')
+                                self.logger.info('Reply is not empty, we will put bulletin in queue and send an OK message')
                                 # bulletin is not empty, put it in queue and create an "OK" message
                                 rr.putBulletinInQueue()
                                 replyAFTN += 'OK'
