@@ -11,7 +11,7 @@
 #############################################################################################
 
 """
-import os, sys, time, commands, socket, select
+import os, sys, time, commands, socket, select, traceback
 
 sys.path.insert(1,sys.path[0] + '/../lib')
 sys.path.insert(1,sys.path[0] + '/../etc')
@@ -347,6 +347,7 @@ class TransceiverAFTN:
             except:
                 (type, value, tb) = sys.exc_info()
                 self.logger.error("Error in TransceiverAFTN.run()! Type: %s, Value: %s" % (type, value))
+                traceback.print_exc()
                 poller.unregister(self.socket.fileno())
                 self.reconnect()
                 poller.register(self.socket.fileno(), select.POLLIN | select.POLLERR | select.POLLHUP | select.POLLNVAL)
@@ -459,7 +460,7 @@ class TransceiverAFTN:
                             rr = RequestReplyAFTN(mp.request, addOn, mp.sendOn, self.logger)
 
                             if rr.bulletin:
-                                self.logger.info('Reply is not empty, we will put bulletin in queue and send an OK message')
+                                self.logger.info('Reply is not empty, we will put bulletin in the queue of receiver %s and send an OK message' % rr.receiverName)
                                 # bulletin is not empty, put it in queue and create an "OK" message
                                 rr.putBulletinInQueue()
                                 replyAFTN += 'OK'
@@ -564,6 +565,7 @@ class TransceiverAFTN:
                     ##############################################################################################
                     if replyAFTN:
                         if not mm.getWaitingForAck():
+                            self.logger.debug("A reply (%s) to a request will be sent immediately" % replyAFTN)
                             mm.partsToSend = [replyAFTN]
                             mm.completePartsToSend(mm.partsToSend)  
                             mm.setFromDisk(False)
@@ -571,7 +573,7 @@ class TransceiverAFTN:
                             mm.setFromDisk(True)
                         else:
                             # We queue the message to send it after we receive the ack we wait for.
-                            self.logger.info("A reply to a request (%s) will be queued" % replyAFTN)
+                            self.logger.info("A reply (%s) to a request will be queued (because we are waiting for an ack)" % replyAFTN)
                             mm.serviceQueue.append((replyAFTN, [mm.messageIn.originatorAddress]))
 
                 elif type == 'ACK':
