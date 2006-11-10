@@ -85,9 +85,8 @@ class MessageParser:
                     break
 
         elif words[0] in ['RQM', 'RQF']:
-            parts = self.textLines[1].strip().split()
-            if parts[1] in ['UNK', 'OK']:
-                self.type = parts[0] + '_' + parts[1]
+            if words[1] in ['UNK', 'OK']:
+                self.type = words[0] + '_' + words[1]
         else: 
             self.type = 'AFTN'
             if self._headerIn(words):
