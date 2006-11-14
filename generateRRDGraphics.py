@@ -47,7 +47,7 @@ else:#pds5 pds5 pxatx etc
 
 class _GraphicsInfos:
 
-    def __init__( self, directory, fileType, types, clientNames = None ,  timespan = 12, endDate = None, machines = ["pdsGG"]  ):
+    def __init__( self, directory, fileType, types, totals, clientNames = None ,  timespan = 12, endDate = None, machines = ["pdsGG"]  ):
 
             
         self.directory    = directory         # Directory where log files are located. 
@@ -57,7 +57,7 @@ class _GraphicsInfos:
         self.timespan     = timespan          # Number of hours we want to gather the data from. 
         self.endDate      = endDate           # Time when stats were queried.
         self.machines     = machines          # Machine from wich we want the data to be calculated.
-        
+        self.totals       = totals            # Make totals of all the specified clients 
         
         
 #################################################################
@@ -87,13 +87,15 @@ def getOptionsFromParser( parser ):
     endDate          = options.endDate.replace('"','').replace("'",'')
     fileType         = options.fileType.replace("'",'')
     individual       = options.individual
+    totals           = options.totals
     daily            = options.daily
     weekly           = options.weekly
+    monthly          = options.monthly
     yearly           = options.yearly    
     
     
     counter = 0  
-    specialParameters = [daily, weekly, yearly]
+    specialParameters = [daily, monthly, weekly, yearly]
     for specialParameter in specialParameters:
         if specialParameter:
             counter = counter + 1 
@@ -113,12 +115,14 @@ def getOptionsFromParser( parser ):
     elif counter == 0 and timespan == None :
         timespan = 12
     
-    if daily == True :
-        timeSpan = 24
-    elif weekly == True:
-        timeSpan = 24 * 7
-    elif yearly == True:
-        timeSpan = 24 * 365        
+    elif daily :
+        timespan = 24
+    elif weekly:
+        timespan = 24 * 7
+    elif monthly:
+        timespan = 24 * 30     
+    elif yearly:
+        timespan = 24 * 365        
          
             
     try: # Makes sure date is of valid format. 
@@ -152,8 +156,7 @@ def getOptionsFromParser( parser ):
         print 'Multiple types are not accepted.' 
         print "Use -h for additional help."
         print "Program terminated."
-        sys.exit()    
-        
+        sys.exit()            
         
         
     if clientNames[0] == "ALL":
@@ -197,17 +200,7 @@ def getOptionsFromParser( parser ):
         print "Use -h for additional help."
         print "Program terminated."
         sys.exit()
-    
-    #workaround because of mirroring
-    for i in range( len( machines ) ):
-        if machines[i] == "pds5":
-            machines[i] = "pds3-dev"
-        elif machines[i] == "pds6":
-            machines[i] = "pds4-dev"
-        elif machines[i] == "pxatx":
-            machines[i] = localMachine        
-        
-        print machines    
+  
             
     if individual != True :        
         combinedMachineName = ""
@@ -215,14 +208,12 @@ def getOptionsFromParser( parser ):
             combinedMachineName = combinedMachineName + machine
                     
         machines = [ combinedMachineName ]              
-    
-
-            
+                
     directory = PATH_TO_LOGFILES
     
     endDate = MyDateLib.getIsoWithRoundedHours( endDate )
     
-    infos = _GraphicsInfos( endDate = endDate, clientNames = clientNames,  directory = directory , types = types, timespan = timespan, machines = machines, fileType = fileType )   
+    infos = _GraphicsInfos( endDate = endDate, clientNames = clientNames,  directory = directory , types = types, timespan = timespan, machines = machines, fileType = fileType, totals = totals )   
             
     return infos 
        
@@ -230,14 +221,14 @@ def getOptionsFromParser( parser ):
                 
 def getNames( fileType, machine ):
     """
-        Returns a tuple containg RXnames or TXnames that we've rsync'ed 
+        Returns a tuple containing RXnames or TXnames that we've rsync'ed 
         using updateConfigurationFiles
          
     """    
                         
     pxManager = PXManager()
     
-    remoteMachines[ "pds3-dev", "pds4-dev","lvs1-stage", "logan1", "logan2" ]
+    remoteMachines = [ "pds3-dev", "pds4-dev","lvs1-stage", "logan1", "logan2" ]
     if localMachine in remoteMachines :#These values need to be set here.
         PXPaths.RX_CONF  = '/apps/px/stats/rx/%s/'  %machine
         PXPaths.TX_CONF  = '/apps/px/stats/tx/%s/'  %machine
@@ -247,7 +238,7 @@ def getNames( fileType, machine ):
     if fileType == "tx":
         names = pxManager.getTxNames()               
     else:
-        rxNames = pxManager.getRxNames()  
+        names = pxManager.getRxNames()  
 
     return names 
         
@@ -287,41 +278,40 @@ def createParser( ):
 ********************************************
 * See doc.txt for more details.            *
 ********************************************
-Notes :
-- Now option not yet implemented.    
 
 Defaults :
 
 - Default Client is the entire tx/rx list that corresponds to the list of machine passed in parameter.
 - Default Date is current system time.  
-- Default Types value is latency.
+- Default Types value is "bytecount", "errors", "filecount" for rx and 
+  "latency", "bytecount", "errors", "filesOverMaxLatency", "filecount"
+  for tx.
 - Default span is 12 hours.
-- Accepted values for types are : errors,latency,bytecount
-  -To use mutiple types, use -t|--types "type1,type2"
-- Whether a date is specified or the default current time is used, 
+- Accepted values for types are the same as default types.
+- To use mutiple types, use -t|--types "type1,type2"
+ 
 
 Options:
  
     - With -c|--clients you can specify the clients names on wich you want to collect data. 
-    - With -d|--date you can specify the time of the request.( Usefull for past days and testing. )
+    - With -d|--daily you can specify you want daily graphics.
+    - With -e|--endDate you can specify the time of the request.( Usefull for past days and testing. )
     - With -f|--fileType you can specify the file type of the log fiels that will be used.  
-    - With -m|--machines you can specify from wich machine the data is to be used.
+    - With -m|--monthly you can specify you want monthly graphics.
+    - With   |--machines you can specify from wich machine the data is to be used.
     - With -s|--span you can specify the time span to be used to create the graphic 
     - With -t|--types you can specify what data types need to be collected
-    
-      
-WARNING: - Client name MUST be specified,no default client exists. 
-          
+    - With -y|--yearly you can specify you want yearly graphics.
             
+    
 Ex1: %prog                                   --> All default values will be used. Not recommended.  
-Ex2: %prog -d "2006-10-10 15:13:00" -s 12 
-     -m "pds1" -f tx                         --> Generate all avaibable graphic types for every tx 
+Ex2: %prog -e "2006-10-10 15:13:00" -s 12 
+     --machines "pds1" -f tx                 --> Generate all avaibable graphic types for every tx 
                                                  client found on the machine named pds1. Graphics will
                                                  be 12 hours wide and will end at 15:00:00.  
-Ex3: %prog -d "2006-10-10 15:13:00" -s 12 
-     -m "pds1" -f tx -t "latency,errors"     --> Generate latency and errors graphics for tx client named 
-     -c "pds"                                    pds with data found on the machine named pds1. Graphics will
-                                                 be 12 hours wide and will end at 15:00:00. 
+Ex3: %prog -e "2006-10-10 15:13:00" -y 
+     --machines "pds1"                       --> Generate all yearly graphics for all tx and rx clients
+                                                 associated with the machine named pds1. 
                                                                                                 
 ********************************************
 * See /doc.txt for more details.           *
@@ -353,23 +343,46 @@ def addOptions( parser ):
     
     parser.add_option("-i", "--individual", action="store_true", dest = "individual", default=False, help="Dont combine data from specified machines. Create graphs for every machine independently")
         
-    parser.add_option( "-m", "--machines", action="store", type="string", dest="machines", default=localMachine, help = "Machines for wich you want to collect data." )   
+    parser.add_option("-m", "--monthly", action="store_true", dest = "monthly", default=False, help="Create monthly graph(s).")
+     
+    parser.add_option( "--machines", action="store", type="string", dest="machines", default=localMachine, help = "Machines for wich you want to collect data." )   
     
     parser.add_option("-s", "--span", action="store",type ="int", dest = "timespan", default=None, help="timespan( in hours) of the graphic.")
        
     parser.add_option("-t", "--types", type="string", dest="types", default="All",help="Types of data to look for.")   
     
+    parser.add_option("--totals", action="store_true", dest = "totals", default=False, help="Create graphics based on the totals of all the values found for all specified clients or for a specific file type( tx, rx ).")
+    
     parser.add_option("-w", "--weekly", action="store_true", dest = "weekly", default=False, help="Create weekly graph(s).")
     
     parser.add_option("-y", "--yearly", action="store_true", dest = "yearly", default=False, help="Create yearly graph(s).")
     
+    
         
 def buildTitle( type, client, endDate, timespan, minimum, maximum, mean  ):
     """
-        Returns the title of the graphic base on infos. 
+        Returns the title of the graphic based on infos. 
+    
     """
     
-    return  "%s for %s queried at %s for a span of %s hours." %( type, client,  endDate , timespan )    
+    span = timespan
+    timeMeasure = "hours"
+    
+    if span%(365*24) == 0 :
+        span = span/(365*24)
+        timeMeasure = "year(s)" 
+    
+    elif span%(30*24) == 0 :
+        span = span/(30*24)
+        timeMeasure = "month(s)" 
+    
+    elif span%24 == 0 :
+        span = span/24
+        timeMeasure = "day(s)" 
+    
+    type = type[0].upper() + type[1:] 
+       
+    return  "%s for %s for a span of %s %s ending at %s." %( type, client, span, timeMeasure, endDate )    
 
     
  
@@ -393,7 +406,7 @@ def getOverallMin( databaseName, startTime, endTime, logger = None ):
                                 
                 if minTuples[i][0] < minimum or minimum == None : 
                     minimum = minTuples[i][0]
-                    print minimum
+                    #print minimum
             i = i + 1 
        
          
@@ -410,6 +423,7 @@ def getOverallMax( databaseName, startTime, endTime, logger = None ):
     """
         This methods returns the max of the entire set of data found between 
         startTime and endTime within the specified database name.
+        
     """  
     
     maximum = None
@@ -424,8 +438,7 @@ def getOverallMax( databaseName, startTime, endTime, logger = None ):
             if maxTuple[0] != 'None' and maxTuple[0] != None :
                 if maxTuple[0] > maximum : 
                     maximum = maxTuple[0]
-                    #print maxTuple
-        #print "maximum : %s " %maximum
+
     
     except :
         if logger != None:
@@ -449,15 +462,16 @@ def getOverallMean( databaseName, startTime, endTime, logger = None  ):
     try :
         
         output = rrdtool.fetch( databaseName, 'AVERAGE', '-s', "%s" %startTime, '-e', '%s' %endTime )
-        print output
-	meanTuples = output[2]
-        
+
+        meanTuples = output[2]
+        i = 0
         for meanTuple in meanTuples :            
             if meanTuple[0] != 'None' and meanTuple[0] != None :
                 sum = sum + meanTuple[0]
-    
+                i = i + 1         
+        
         avg = sum / len( meanTuples )  
-        #print "avg : %s " %avg
+        
     
     except :
         if logger != None:
@@ -465,19 +479,72 @@ def getOverallMean( databaseName, startTime, endTime, logger = None  ):
         pass    
             
     return avg 
+
+
+        
+def getGraphicsMinMaxMean( databaseName, startTime, endTime, interval, logger = None  ):
+    """
+        This methods returns the min max and mean of the entire set of data that is drawn 
+        on the graphic.
+                
+    """
     
+    min = None
+    max = None
+    sum = 0 
+    avg = 0
+    
+    try :
+        
+        output = rrdtool.fetch( databaseName, 'AVERAGE', '-s', "%s" %startTime, '-e', '%s' %endTime )
+        meanTuples = output[2]
 
-
+        for meanTuple in meanTuples :            
+            if meanTuple[0] != 'None' and meanTuple[0] != None :
+                realValue = ( float(meanTuple[0]) * float(interval) ) 
+                if  realValue > max:
+                    max = realValue
+                if realValue < min or min == None :
+                    min = realValue 
+                sum = sum + realValue
+            
+        avg = sum / len( meanTuples )  
+    
+    except :
+        if logger != None:
+            logger.error( "Error in generateRRDGraphics.getOverallMin. Unable to read %s" %databaseName )
+        pass    
+            
+    
+    return min, max, avg
+    
+    
+    
 def buildImageName(  type, client, machine, infos, logger = None ):
     """
         Builds and returns the image name to be created by rrdtool.
         
     """
 
+    span = infos.timespan
+    timeMeasure = "hours"
     
+    if infos.timespan%(365*24) == 0 :
+        span = infos.timespan/(365*24)
+        timeMeasure = "years" 
+    
+    elif infos.timespan%(30*24) == 0 :
+        span = infos.timespan/(30*24)
+        timeMeasure = "months" 
+    
+    elif infos.timespan%24 == 0 :
+        span = infos.timespan/24
+        timeMeasure = "days" 
+       
+                    
     date = infos.endDate.replace( "-","" ).replace( " ", "_")
     
-    fileName = PXPaths.GRAPHS + "%s/rrdgraphs/%s_%s_%s_%s_%shours_on_%s.png" %( client,infos.fileType, client, date, type, infos.timespan, machine )
+    fileName = PXPaths.GRAPHS + "%s/rrdgraphs/%s_%s_%s_%s_%s%s_on_%s.png" %( client,infos.fileType, client, date, type, span, timeMeasure, machine )
     
     
     fileName = fileName.replace( '[', '').replace(']', '').replace(" ", "").replace( "'","" )               
@@ -499,18 +566,18 @@ def buildImageName(  type, client, machine, infos, logger = None ):
     return fileName 
 
 
-def getDatabaseTimeOfUpdate( client, machine,type ):
+    
+def getDatabaseTimeOfUpdate( client, machine, fileType ):
     """
-        Is present in DATABASE-UPDATES file, returns the time of the last 
+        If present in DATABASE-UPDATES file, returns the time of the last 
         update associated with the databse name.      
         
         Otherwise returns None 
         
     """ 
     
-
     lastUpdate = 0
-    folder   = PXPaths.STATS + "DATABASE-UPDATES/%s/" %type
+    folder   = PXPaths.STATS + "DATABASE-UPDATES/%s/" %fileType
     fileName = folder + "%s_%s" %( client, machine )
     
     if os.path.isfile( fileName ):
@@ -518,85 +585,278 @@ def getDatabaseTimeOfUpdate( client, machine,type ):
         fileHandle  = open( fileName, "r" )
         lastUpdate  = pickle.load( fileHandle )           
         fileHandle.close()     
-        #print "lastUpdate: %s" %lastUpdate
+        
             
     return lastUpdate      
 
     
+def formatMinMaxMean( minimum, maximum, mean, type ):
+    """
+        Formats min, max and median so that it can be used 
+        properly as a label on the produced graphic.
+        
+    """    
     
-def plotRRDGraph( databaseName, type, client, machine, infos, logger = None ):
+    values = [ minimum, maximum, mean]
+    
+    if type == "bytecount" :
+        
+        for i in range( len(values) ):
+            
+            if values[i] != None :
+                
+                if values[i] < 1000:#less than a k
+                    values[i] = "%s Bytes" %int( values[i] )
+                    
+                elif values[i] < 1000000:#less than a meg 
+                    values[i] = "%.2f KiloBytes"  %( values[i]/1000.0 )
+                
+                elif values[i] < 1000000000:#less than a gig      
+                    values[i] = "%.2f MegaBytes"  %( values[i]/1000000.0 )
+                
+                else:#larger than a gig
+                    values[i] = "%.2f GigaBytes"  %( values[i]/1000000000.0 )                 
+    
+    else:
+    
+        if minimum != None :
+            minimum = "%.2f" %minimum    
+        if maximum != None :
+            maximum = "%.2f" %maximum
+        if mean != None :
+            mean = "%.2f" %mean 
+        values = [ minimum, maximum, mean]
+            
+    return values[0], values[1], values[2]            
+    
+    
+            
+def getInterval( startTime, timeOfLastUpdate, dataType  ):    
+    """
+        Returns the interval that was used for data consolidation 
+        distance between starTTime being used and the time of the 
+        last update of the database. Usefull when using totals
+        and and not means.
+    
+        Will always return 1 if dataType = "latency" because latencies
+        cannot be used as totals, only as means.
+        
+    """    
+
+    if dataType == "latency" :
+        interval = 1.0 #No need to multiply average by interval. It's the mean we want in the case of latency.
+    elif ( timeOfLastUpdate - startTime ) <= (7200 * 60):#less than a week 
+        interval = 1.0
+    elif ( timeOfLastUpdate - startTime ) <= (20160 * 60):#less than two week
+        interval = 60.0
+    elif (timeOfLastUpdate - startTime) <= (1460*240*60):
+        interval = 240.0 
+    else:
+        interval = 1440.0    
+        
+    return interval
+
+    
+        
+def plotRRDGraph( databaseName, type, fileType, client, machine, infos, lastUpdate = None, logger = None ):
     """
         This method is used to produce a rrd graphic.
         
     """
-
-    imageName = buildImageName( type, client, machine, infos, logger )     
-    end       = int ( MyDateLib.getSecondsSinceEpoch ( infos.endDate ) )  
-    start     = end - ( infos.timespan * 60 * 60) 
-    
-    mean    = getOverallMean( databaseName, start, end )
-    maximum = getOverallMax( databaseName, start, end )   
-    minimum = getOverallMin( databaseName, start, end  ) 
     
     
+    imageName  = buildImageName( type, client, machine, infos, logger )     
+    end        = int ( MyDateLib.getSecondsSinceEpoch ( infos.endDate ) )  
+    start      = end - ( infos.timespan * 60 * 60 ) 
+    
+    if lastUpdate == None :
+        lastUpdate = getDatabaseTimeOfUpdate( client, machine, fileType )
+    
+    interval = getInterval( start, lastUpdate, type  )
+        
+    minimum, maximum, mean = getGraphicsMinMaxMean( databaseName, start, end, interval )
+    minimum, maximum, mean = formatMinMaxMean( minimum, maximum, mean, type )            
+            
     if type == "latency" or type == "filesOverMaxLatency":
         innerColor = "cd5c5c"
         outerColor = "8b0000"
-    elif  type == "bytecount" or type == "filecount" :
+    elif type == "bytecount" or type == "filecount" :
         innerColor = "019EFF"
         outerColor = "4D9AA9"  
     else:
         innerColor = "54DE4F"
-        outerColor = "1C4A1A"
-    
-    totalNumberOfPoints = 24*60
-    maxNumberOfPoints = 600 
-    ratio = (totalNumberOfPoints/maxNumberOfPoints)
-         
-    #set intervals so they match with the parameters used when we created the databases. 
-    if type == "latency" :
-        interval = 1.0 #No need to multiply average by interval. It's the mean we want in the case of latency.
-    lastUpdate = getDatabaseTimeOfUpdate( client, machine, type )    
-    if ( lastUpdate - start ) < (10080 * 60):#less than a week 
-        interval = 1.0 * ratio
-    elif (lastUpdate - start) < (1460*240*60):
-        interval = 240.0 
-    else:
-        interval = 1440.0
-      
+        outerColor = "1C4A1A"     
+                   
     title = buildTitle( type, client, infos.endDate, infos.timespan, minimum, maximum, mean )
 
-#     try:
-    rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '600','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end), '--vertical-label', '%s' %type,'--title', '%s'%title,'COMMENT: Minimum %s Maximum  %s Mean %.2f\c' %( minimum, maximum, mean), '--lower-limit','0',"--step",'%s' %(ratio*60), 'DEF:%s=%s:%s:AVERAGE'%( type,databaseName,type), 'CDEF:realValue=%s,%i,*' %(type,interval), 'AREA:realValue#%s:%s' %( innerColor, type ),'LINE1:realValue#%s:%s'%( outerColor, type ) )
+    try:
+        rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '800','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end), '--vertical-label', '%s' %type,'--title', '%s'%title,'COMMENT: Minimum: %s     Maximum: %s     Mean: %s\c' %( minimum, maximum, mean), '--lower-limit','0','DEF:%s=%s:%s:AVERAGE'%( type,databaseName,type), 'CDEF:realValue=%s,%i,*' %(type,interval), 'AREA:realValue#%s:%s' %( innerColor, type ),'LINE1:realValue#%s:%s'%( outerColor, type ) )
     
-    print "Plotted : %s" %imageName
-    if logger != None:
-        logger.info(  "Plotted : %s" %imageName )
+        print "Plotted : %s" %imageName
+        if logger != None:
+            logger.info(  "Plotted : %s" %imageName )
        
-#     
-#     except :
-#         if logger != None:
-#             logger.error( "Error in generateRRDGraphics.plotRRDGraph. Unable to generate %s" %imageName )
-#         pass     
     
-    
+    except :
+        if logger != None:
+            logger.error( "Error in generateRRDGraphics.plotRRDGraph. Unable to generate %s" %imageName )
+        pass     
 
         
+        
+def createNewDatabase( fileType, type, machine, start, infos, logger ):       
+    """
+        Creates a brand new database bases on fileType,type and machine.
+        
+        If a database with the same name allready exists, it will be removed.
+        
+        Databases are created with rras that are identical to those found in the 
+        transferPickleToRRD.py file. If databases are to change there they must be
+        changed here also.  
     
+    """
+    
+    combinedDatabaseName = PXPaths.STATS + "databases/combined/%s_%s_%s" %( fileType, type, machine )
+     
+        
+    if os.path.isfile( combinedDatabaseName ):
+        status, output = commands.getstatusoutput("rm %s " %combinedDatabaseName )
+        
+    elif not os.path.isdir( PXPaths.STATS + "databases/combined/" ):
+        os.makedirs( PXPaths.STATS + "databases/combined/" )       
+    
+    if infos.timespan <(5*24):# daily :
+        start = start - 60
+        rrdtool.create( combinedDatabaseName, '--start','%s' %( start ), '--step', '60', 'DS:%s:GAUGE:60:U:U' %type,'RRA:AVERAGE:0:1:7200','RRA:MIN:0:1:7200', 'RRA:MAX:0:1:7200' )
+        #print "daily"     
+    elif infos.timespan >(5*24) and infos.timespan <(14*24):# weekly :  
+        start = start - (60*60)
+        rrdtool.create( combinedDatabaseName, '--start','%s' %( start ), '--step', '3600', 'DS:%s:GAUGE:3600:U:U' %type,'RRA:AVERAGE:0:1:336','RRA:MIN:0:1:336', 'RRA:MAX:0:1:336' )               
+        #print "weekly"            
+    elif infos.timespan <(365*24):#monthly
+        start = start - (240*60)
+        rrdtool.create( combinedDatabaseName, '--start','%s' %( start ), '--step', '14400', 'DS:%s:GAUGE:14400:U:U' %type, 'RRA:AVERAGE:0:1:1460','RRA:MIN:0:1:1460','RRA:MAX:0:1:1460' )  
+        #print "monthly"
+    else:#yearly
+        start = start - (1440*60)
+        rrdtool.create( combinedDatabaseName, '--start','%s' %( start ), '--step', '86400', 'DS:%s:GAUGE:86400:U:U' %type, 'RRA:AVERAGE:0:1:3650','RRA:MIN:0:1:3650','RRA:MAX:0:1:3650' ) 
+        #print "yearly"
+    
+    return combinedDatabaseName
+    
+    
+    
+def getPairsFromAllDatabases( type, machine, start, end, infos, logger=None ):
+    """
+        This method gathers all the needed between start and end from all the
+        databases wich are of the specifed type and from the specified machine.
+        
+        It then makes only one entry per timestamp, and returns the 
+        ( timestamp, combinedValue ) pairs.
+        
+    """
+    
+    pairs = []
+    typeData = {}
+    
+    for client in infos.clientNames:#Gather all pairs for that type
+        
+        databaseName = transferPickleToRRD.buildRRDFileName( type, client, machine )
+        status, output = commands.getstatusoutput("rrdtool fetch %s  'AVERAGE' -s %s  -e %s" %( databaseName, start, end) )
+        output = output.split( "\n" )[2:]
+        typeData[client] = output
+    
+                    
+    for i in range( len(typeData[client]) ) :#make total of all clients for every timestamp
+        total = 0 
+        for client in infos.clientNames:
+            try : 
+                data = typeData[client][i].split( ":" )[1].replace(" ", "")
+                if data != None and data != 'None':
+                    total = total + float( data )
+                elif logger != None: 
+                    logger.warning( "Could not find data for %s for present timestamp." %(client) )
+                         
+            except:
+                if logger != None :
+                    #print "Could not find data for %s for present timestamp." %(client)
+                    logger.warning( "Could not find data for %s for present timestamp." %(client) )
+                
+                
+        #print " %s %s : %s " %(client,type,typeData[client][i].split( ":" )[1].replace(" ", ""))
+        if type == "latency":#latency is always an average
+            total = total / ( len( output ) )
+                        
+        pairs.append( [typeData[client][i].split( " " )[0].replace( ":", "" ), total] )   
+    
+    
+    return pairs
+    
+    
+    
+def createMergedDatabases( infos, logger = None ):
+    """
+        Gathers data from all needed databases.
+        
+        Creates new databases to hold merged data.
+        
+        Feeds new databases with merged data. 
+        
+        Returns the list of created databases names.
+         
+    """            
+
+    dataPairs  = {}
+    typeData   = {}
+    end        = int ( MyDateLib.getSecondsSinceEpoch ( infos.endDate ) )  
+    start      = end - ( infos.timespan * 60 * 60 ) 
+    databaseNames = {}
+    
+
+    for machine in infos.machines:
+        
+        for type in infos.types :         
+            typeData[type] = {}
+            pairs = getPairsFromAllDatabases( type, machine, start, end, infos, logger )                        
+            
+            combinedDatabaseName = createNewDatabase( infos.fileType, type, machine, start, infos, logger )
+                                                     
+            databaseNames[type] = combinedDatabaseName                            
+            
+            #update database with pairs 
+            #print "***********%s***********" %type       
+            for pair in pairs:
+            #    print '%s:%s' %( int(pair[0]), pair[1] ) 
+                rrdtool.update( combinedDatabaseName, '%s:%s' %( int(pair[0]), pair[1] ) )
+                 
+                
+    return databaseNames
+                    
+            
+            
 def generateRRDGraphics( infos, logger = None ):
     """
-        This method generate all the graphics. 
+        This method generates all the graphics. 
         
     """    
     
-    for machine in infos.machines:
+    #print "************************************%s" %infos.endDate
+    if infos.totals: #Graphics based on total values from a group of clients.
+        databaseNames = createMergedDatabases( infos, logger )
         
-        for client in infos.clientNames:
+        #Make 2 title filename options either tx/rx...or list of clients
+        for machine in infos.machines:
+            for type in infos.types:
+                plotRRDGraph( databaseNames[type], type, infos.fileType, infos.fileType, machine, infos, lastUpdate =  MyDateLib.getSecondsSinceEpoch(infos.endDate), logger =logger )
+                
+    else:
+        for machine in infos.machines:
             
-            for type in infos.types : 
-                print "***********%s %s %s " %( type, client, machine ) 
-                databaseName = transferPickleToRRD.buildRRDFileName( type, client, machine ) 
-                plotRRDGraph( databaseName, type, client, machine, infos, logger )
+            for client in infos.clientNames:
+                
+                for type in infos.types : 
+                    databaseName = transferPickleToRRD.buildRRDFileName( type, client, machine ) 
+                    plotRRDGraph( databaseName, type, infos.fileType, client, machine, infos, logger )
                 
 
 
