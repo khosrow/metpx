@@ -24,26 +24,41 @@ named COPYING in the root of the source directory tree.
 
 #important files 
 import os,time, pwd, sys,getopt, commands, fnmatch,pickle
-from   Logger import * 
+import PXManager
+import PXPaths 
 
+
+from Logger import * 
 from optparse import OptionParser
 from ConfigParser import ConfigParser
 from MyDateLib import *
 from ClientStatsPickler import ClientStatsPickler
-import PXManager
 from PXManager import *
-import PXPaths 
 from PXPaths import *
+
 PXPaths.normalPaths()
-PXPaths.RX_CONF  = '/apps/px/stats/rx/'
-PXPaths.TX_CONF  = '/apps/px/stats/tx/'
-PXPaths.TRX_CONF = '/apps/px/stats/trx/'
-print PXPaths.TX_CONF
+
 localMachine = os.uname()[1]
 
-class _UpdaterInfos: 
-    
+if localMachine == "pds3-dev" or localMachine == "pds4-dev" or localMachine == "lvs1-stage" :
+    PATH_TO_LOGFILES = PXPaths.LOG + localMachine + "/"
+    PXPaths.RX_CONF  = '/apps/px/stats/rx/'
+    PXPaths.TX_CONF  = '/apps/px/stats/tx/'
+    PXPaths.TRX_CONF = '/apps/px/stats/trx/'
 
+elif localMachine == "logan1" or localMachine == "logan2":
+    PATH_TO_LOGFILES = PXPaths.LOG + localMachine + "/" + localMachine + "/"
+    PXPaths.RX_CONF  = '/apps/px/stats/rx/'
+    PXPaths.TX_CONF  = '/apps/px/stats/tx/'
+    PXPaths.TRX_CONF = '/apps/px/stats/trx/'
+
+else:#pds5 pds5 pxatx etc
+    PATH_TO_LOGFILES = PXPaths.LOG  
+
+    
+    
+    
+class _UpdaterInfos:  
 
     def __init__( self, clients, directories, types, startTimes,collectUpToNow, fileType, currentDate = '2005-06-27 13:15:00', interval = 1, hourlyPickling = True, machine = ""   ):
         
@@ -113,10 +128,8 @@ def setLastCronJob( client, fileType, currentDate, collectUpToNow = False    ):
 def getLastCronJob( client, fileType, currentDate, collectUpToNow = False ):
     """
         This method gets the dictionnary containing all the last cron job list.
-        From that dictionnary it returns the right value. 
-        
-        Note : pickled-times would need a better path..... 
-        
+        From that dictionnary it returns the right value.         
+       
     """ 
     
     times = {}
@@ -259,9 +272,7 @@ def getOptionsFromParser( parser, logger = None  ):
         else:
             clients = pxManager.getRxNames()          
         
-        print PXPaths.TX_CONF     
-        print "clients : %s"   %clients 
-           
+          
     #print clients   
              
     # Verify that each client needs to be updated. 
@@ -273,7 +284,7 @@ def getOptionsFromParser( parser, logger = None  ):
                
         if currentDate > startTime:
             #print " client : %s currentDate : %s   startTime : %s" %( client, currentDate, startTime )
-            directories.append( PXPaths.LOG + localMachine + "/")
+            directories.append( PATH_TO_LOGFILES )
             startTimes.append( startTime )
             usefullClients.append( client )
         else:
@@ -411,8 +422,9 @@ def updateHourlyPickles( infos, logger = None ):
         
         width = MyDateLib.getSecondsSinceEpoch(infos.endTime) - MyDateLib.getSecondsSinceEpoch( MyDateLib.getIsoWithRoundedHours(infos.startTimes[i] ) ) 
         
+        
         if width > MyDateLib.HOUR :#In case pickling didnt happen for a few hours for some reason...   
-            #"pickles for numerous hours"
+            
             hours = [infos.startTimes[i]]
             hours.extend( MyDateLib.getSeparatorsWithStartTime( infos.startTimes[i], interval = MyDateLib.HOUR, width = width ))
             
@@ -434,7 +446,7 @@ def updateHourlyPickles( infos, logger = None ):
                 
                 cs.pickleName =  ClientStatsPickler.buildThisHoursFileName( client = infos.clients[i], currentTime =  startOfTheHour, machine = infos.machine, fileType = infos.fileType )
                  
-                cs.collectStats( types = infos.types, startTime = startTime , endTime = endTime, interval = infos.interval * MyDateLib.MINUTE,  directory = PXPaths.LOG + localMachine + "/" , fileType = infos.fileType )                     
+                cs.collectStats( types = infos.types, startTime = startTime , endTime = endTime, interval = infos.interval * MyDateLib.MINUTE,  directory = PATH_TO_LOGFILES, fileType = infos.fileType )                     
                            
                     
         else:      
@@ -449,22 +461,64 @@ def updateHourlyPickles( infos, logger = None ):
                 
             cs.pickleName =   ClientStatsPickler.buildThisHoursFileName( client = infos.clients[i], currentTime = startOfTheHour, machine = infos.machine, fileType = infos.fileType )            
               
-            cs.collectStats( infos.types, startTime = startTime, endTime = endTime, interval = infos.interval * MyDateLib.MINUTE, directory = PXPaths.LOG + localMachine + "/", fileType = infos.fileType   )        
+            cs.collectStats( infos.types, startTime = startTime, endTime = endTime, interval = infos.interval * MyDateLib.MINUTE, directory = PATH_TO_LOGFILES, fileType = infos.fileType   )        
        
                          
         setLastCronJob( client = infos.clients[i], fileType = infos.fileType, currentDate = infos.currentDate, collectUpToNow = infos.collectUpToNow )
-        
+              
                 
-            
+                
+def updateConfigurationFiles( machine, login ):
+    """
+        rsync .conf files from designated machine to local machine
+        to make sure we're up to date.
+    
+    """  
+    
+    if not os.path.isdir( '/apps/px/stats/rx/' ):
+        os.makedirs(  '/apps/px/stats/rx/' , mode=0777 )
+    if not os.path.isdir( '/apps/px/stats/tx/'  ):
+        os.makedirs( '/apps/px/stats/tx/', mode=0777 )
+    if not os.path.isdir( '/apps/px/stats/trx/' ):
+        os.makedirs(  '/apps/px/stats/trx/', mode=0777 )       
 
+        
+    status, output = commands.getstatusoutput( "rsync -avzr  -e ssh %s@%s:/apps/px/etc/rx/ /apps/px/stats/rx/"  %( login, machine) ) 
+    #print output # for debugging only
+    
+    status, output = commands.getstatusoutput( "rsync -avzr  -e ssh %s@%s:/apps/px/etc/tx/ /apps/px/stats/tx/"  %( login, machine) )  
+    #print output # for debugging only            
+
+    
+    
 def main():
     """
         Gathers options, then makes call to ClientStatsPickler to collect the stats based 
         on parameters received.  
     
     """
-
-    logger = Logger( PXPaths.LOG + localMachine + "/" + 'stats_' + 'pickling' + '.log.notb', 'INFO', 'TX' + 'pickling' ) 
+    
+    if not os.path.isdir( PXPaths.PICKLES ):
+        os.makedirs( PXPaths.PICKLES, mode=0777 )
+    
+    # Workaround for temporary mirror machine   
+    if  os.uname()[1] == "pds3-dev":
+        mirrorMachine = "pds5"
+        login         = "pds"
+        
+    elif  os.uname()[1] == "pds4-dev":
+        mirrorMachine = "pds6"
+        login         = "pds"    
+    elif  os.uname()[1] == "lvs1-stage" or os.uname()[1] == "logan1" or os.uname()[1] == "logan2" :
+        mirrorMachine = "pxatx"
+        login         = "pds"
+                    
+    updateConfigurationFiles( machine = mirrorMachine, login = login )
+    
+    if not os.path.isdir( PXPaths.LOG  ):
+        os.makedirs( PXPaths.LOG, mode=0777 )
+    
+    logger = Logger( PXPaths.LOG + 'stats_' + 'pickling' + '.log.notb', 'INFO', 'TX' + 'pickling', bytes = True  ) 
     logger = logger.getLogger()
    
     parser = createParser( )  #will be used to parse options 

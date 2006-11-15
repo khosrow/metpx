@@ -42,13 +42,23 @@ localMachine = os.uname()[1]
 
 class StatsPlotter:
 
-    def __init__( self, timespan,  stats = None, clientNames = None, type='impulses', interval=1, imageName="gnuplotOutput", title = "Stats",currentTime = "",now = False, statsTypes = None, productType = "All", logger = None, fileType = "tx", machines = "", entryType = "minute", maxLatency = 15 ):
+    def __init__( self, timespan,  stats = None, clientNames = None, type='lines', interval=1, imageName="gnuplotOutput", title = "Stats",currentTime = "",now = False, statsTypes = None, productType = "All", logger = None, fileType = "tx", machines = "", entryType = "minute", maxLatency = 15 ):
         """
             StatsPlotter constructor. 
             
         """
         
-        x = [ [0]*5  for x in range(5) ]
+        x = [ [0]*5  for x in range(5) ]       
+        for i in range( len(machines) ):#workaround as to get the right names in the fileName and labels.
+            if machines[i] == "pds3-dev":
+                machines[i] = "pds5"
+            elif machines[i] == "pds4-dev":
+                machines[i] = "pds6"
+            elif machines[i] == "lvs1-stage" or machines[i] == "logan1" or machines[i] == "logan2" :
+                machines[i] = "pxatx"                                                                                
+
+    
+        #print machines    
         machines = "%s" %machines
         machines = machines.replace( "[","").replace( "]","" ).replace( "'", "" )
         
@@ -57,7 +67,7 @@ class StatsPlotter:
         self.clientNames = clientNames or []       # Clients for wich we are producing the graphics. 
         self.timespan    = timespan                # Helpfull to build titles 
         self.currentTime = currentTime             # Time of call
-        self.type        = type                    # Must be in: ['linespoint', 'lines', 'boxes', 'impulses'].
+        self.type        = 'impulses'                 # Must be in: ['linespoint', 'lines', 'boxes', 'impulses'].
         self.fileType    = fileType                # Type of file for wich the data was collected
         self.imageName   = imageName               # Name of the image file.
         self.nbFiles     = []                      # Number of files found in the data collected per server.
@@ -74,6 +84,7 @@ class StatsPlotter:
         self.maxFileNames= [[]]                    # Name of file where value is the highest .
         self.filesWhereMaxOccured = [[]]           # List of files for wich said maximums occured.  
         self.statsTypes  = statsTypes or []        # List of data types to plot per client.
+        self.totalNumberOfBytes    = []            # Total of bytes for each client 
         self.nbFilesOverMaxLatency = []            # Numbers of files for wich the latency was too long.
         self.ratioOverLatency      = []            # % of files for wich the latency was too long. 
         self.const = len( self.stats ) -1          # Usefull constant
@@ -82,9 +93,13 @@ class StatsPlotter:
         self.loggerName       = 'statsPlotter'
         self.logger           = logger
         
+        if self.fileType == 'tx':
+            self.sourlient = "Client"
+        else:
+            self.sourlient = "Source"  
         
         if self.logger == None: # Enable logging
-            self.logger = Logger( PXPaths.LOG + localMachine + '/' + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName ) 
+            self.logger = Logger( PXPaths.LOG +  'stats_' + self.loggerName + '.log', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
             self.logger = self.logger.getLogger()
             
         self.xtics       = self.getXTics( )        # Seperators on the x axis.
@@ -101,6 +116,7 @@ class StatsPlotter:
         self.nbFiles = [0] * nbClients
         self.nbErrors = [0] * nbClients
         self.nbFilesOverMaxLatency = [0] * nbClients
+        self.totalNumberOfBytes    = [0] * nbClients
         self.ratioOverLatency      = [0.0] * nbClients
         self.timeOfMax   = [ [0]*nbTypes  for x in range( nbClients ) ]
         self.maximums    = [ [0.0]*nbTypes  for x in range( nbClients ) ] 
@@ -130,7 +146,7 @@ class StatsPlotter:
         
         date = self.currentTime.replace( "-","" ).replace( " ", "_")
         
-        fileName = PXPaths.GRAPHS + "%s/%s_%s_%s_%s_%shours_on_%s.png" %( clientName, self.fileType, clientName, date, self.statsTypes, self.timespan, self.machines )
+        fileName = PXPaths.GRAPHS + "%s/%s_%s_%s_%s_%shours_on_%s_for %s products.png" %( clientName, self.fileType, clientName, date, self.statsTypes, self.timespan, self.machines, self.productType )
         
         
         fileName = fileName.replace( '[', '').replace(']', '').replace(" ", "").replace( "'","" )               
@@ -169,7 +185,8 @@ class StatsPlotter:
             
         """
         #print "get x tics"
-        self.logger.debug( "Call to getXtics received" )
+        if self.logger != None :
+            self.logger.debug( "Call to getXtics received" )
         
         nbBuckets = ( len( self.stats[0].statsCollection.timeSeperators ) )
         xtics = ''
@@ -187,7 +204,8 @@ class StatsPlotter:
                     xtics += '"%s" %i, '%(  hour , MyDateLib.getSecondsSinceEpoch(self.stats[0].statsCollection.timeSeperators[i] ) )
 
         
-        
+        #print nbBuckets
+        #print "len xtics %s" %len(xtics) 
         return xtics[:-2]
          
         
@@ -207,7 +225,8 @@ class StatsPlotter:
         
         """
         
-        self.logger.debug( "Call to getPairs received." )
+        if self.logger != None: 
+            self.logger.debug( "Call to getPairs received." )
         
         k = 0 
         pairs = []
@@ -232,23 +251,33 @@ class StatsPlotter:
                 try :
                     
                     if len( self.stats[clientCount].statsCollection.fileEntries[k].means ) >=1 :
-                                                
+                            
+                        #special manipulation for each type                    
                         if statType == "latency":
                             self.nbFilesOverMaxLatency[clientCount] = self.nbFilesOverMaxLatency[ clientCount ] + self.stats[clientCount].statsCollection.fileEntries[k].filesOverMaxLatency    
                     
-                        if statType == "errors":
-                            
-                            pairs.append( [MyDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), self.stats[clientCount].statsCollection.fileEntries[k].totals[statType]] )
+                        elif statType == "bytecount":
+                            self.totalNumberOfBytes[clientCount] =  self.totalNumberOfBytes[clientCount] +    self.stats[clientCount].statsCollection.fileEntries[k].totals[statType]
                         
-                            #calculate total number of errors
+                        
+                        elif statType == "errors":
+                                                    #calculate total number of errors
                             self.nbErrors[clientCount] = self.nbErrors[clientCount] + self.stats[clientCount].statsCollection.fileEntries[k].totals[statType] 
                             
                             
-                        else:
-                            #print "goes to bytecount"
+                        #add to pairs    
+                        if statType == "errors" or statType == "bytecount": #both use totals     
+                            pairs.append( [MyDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), self.stats[clientCount].statsCollection.fileEntries[k].totals[statType]] )
+                                               
+                            #print    MyDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), self.stats[clientCount].statsCollection.fileEntries[k].totals[statType]                        
+                            
+                        else:#latency uses means
+                            
                             pairs.append( [ MyDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), self.stats[clientCount].statsCollection.fileEntries[k].means[statType]] )
-                            #print self.stats[clientCount].statsCollection.fileEntries[k].means
+                            
+                            #print self.stats[clientCount].statsCollection.timeSeperators[k], self.stats[clientCount].statsCollection.fileEntries[k].means[statType]
                         
+                            
                         if( self.stats[clientCount].statsCollection.fileEntries[k].maximums[statType]  > self.maximums[clientCount][typeCount] ) :
                             
                             self.maximums[clientCount][typeCount] =  self.stats[clientCount].statsCollection.fileEntries[k].maximums[statType]
@@ -261,7 +290,7 @@ class StatsPlotter:
                         elif self.stats[clientCount].statsCollection.fileEntries[k].minimums[statType] < self.minimums[clientCount][typeCount] :      
                             
                             if not ( statType == "bytecount" and  self.stats[clientCount].statsCollection.fileEntries[k].minimums[statType] == 0 ):
-                                self.minimums[clientCount][typeCount] = pairs[k][1]
+                                self.minimums[clientCount][typeCount] = self.stats[clientCount].statsCollection.fileEntries[k].minimums[statType]
                                                     
                         self.nbFiles[clientCount]  = self.nbFiles[clientCount]  + self.stats[clientCount].statsCollection.fileEntries[k].nbFiles   
                    
@@ -289,7 +318,9 @@ class StatsPlotter:
             
             if self.minimums[clientCount][typeCount] == 100000000000000000000 :
                 self.minimums[clientCount][typeCount] = None
-                   
+            
+            #print pairs 
+                       
             return pairs    
 
 
@@ -300,7 +331,7 @@ class StatsPlotter:
         
         """
         
-        maximum = 0 
+        maximum = None
         
         if len( pairs) != 0 :
             
@@ -312,8 +343,25 @@ class StatsPlotter:
         return  maximum 
         
         
+        
+    def getMinPairValue( self, pairs ):
+        """
+            Returns the maximum value of a list of pairs. 
+        """     
+            
+        minimum = None 
+        
+        if len( pairs ) != 0 :
+            minimum = pairs[0][1]
+            for pair in pairs:
+                if pair[1] < minimum:    
+                    minimum = pair[1] 
                     
-    def buildTitle( self, i, statType, typeCount ):
+                    
+        return  minimum         
+    
+            
+    def buildTitle( self, i, statType, typeCount, pairs ):
         """
             This method is used to build the title we'll print on the graphic.
             Title is built with the current time and the name of the client where
@@ -322,41 +370,79 @@ class StatsPlotter:
                
         """  
         
-        if self.maximums[i][typeCount] !=None :
-            maximum =("%3.2f") %self.maximums[i][typeCount]
+        maximum = self.getMaxPairValue( pairs )
+               
+        minimum = self.getMinPairValue( pairs )
         
-        else:
-            maximum = None
-                 
-        if self.minimums[i][typeCount] != None :
-            minimum = ("%3.2f") %self.minimums[i][typeCount]
-        else:
-            minimum = None
-        
+        if maximum != None :
+            if statType == "latency":
+                maximum = "%.2f" %maximum
+            else:
+                maximum = int(maximum)
+            
+        if minimum != None :
+            if statType == "latency":
+                minimum = "%.2f" %minimum
+            else:
+                minimum = int(minimum)
+                
+                
+        statType = statType[0].upper() + statType[1:]             
               
-        title =  "%s for %s queried at %s for a span of %s hours \\n\\nMAX: %s,  MEAN: %3.2f, MIN: %s " %( statType, self.clientNames[i],  self.currentTime , self.timespan,  maximum, self.means[i][typeCount], minimum )     
+        title =  "%s for %s for a span of %s hours ending at %s\\n\\nMAX: %s  MEAN: %3.2f MIN: %s " %( statType, self.clientNames[i], self.timespan, self.currentTime,  maximum, self.means[i][typeCount], minimum )     
         
         return title
         
     
-    
-    def plot( self ):
+    def createLink( self ):
+        """
+            Creates a symbolic link between created image file and 
+            an shorter, easier to read name. 
+            
+        """
+        clientName = ""
+        
+        if len( self.clientNames ) == 0:
+            clientName = self.clientNames[0]
+        else:
+            for name in self.clientNames :
+                clientName = clientName + name  
+                if name != self.clientNames[ len(self.clientNames) -1 ] :
+                    clientName = clientName + "-" 
+        
+        src         = self.imageName
+        
+        destination = PXPaths.GRAPHS + "/symlinks/%s.png" %clientName
+
+        if not os.path.isdir( PXPaths.GRAPHS + "/symlinks/" ):
+            os.makedirs( PXPaths.GRAPHS + "/symlinks/", mode=0777 )                                                      
+        
+        if os.path.isfile( destination ):
+            os.remove( destination )
+        
+        os.symlink( src, destination )
+        
+        
+         
+    def plot( self, createLink = False  ):
         """
             Used to plot gnuplot graphics. Settings used are
             slighly modified but mostly based on Plotter.py's
             plot function. 
             
         """
-
-        self.logger.debug( "Call to plot received" )
+        
+        if self.logger != None:
+            self.logger.debug( "Call to plot received" )
         
         #Set general settings for graphs 
         color = 1
         nbGraphs = 0
          
-        totalSize = ( 0.37 * len( self.stats )  * len( self.statsTypes ) )
+        totalSize  = ( 0.40 * len( self.stats )  * len( self.statsTypes ) )
+        totalHeight = ( 342 * len( self.stats )  * len( self.statsTypes ) )
         
-        self.graph('set terminal png size 1280,768')
+        self.graph( 'set terminal png size 1280,768' ) 
         self.graph( 'set size 1.0, %2.1f' % ( totalSize ) )
         
         self.graph( 'set linestyle 4 ')
@@ -387,8 +473,7 @@ class StatsPlotter:
         self.graph( 'set multiplot' ) 
         
         
-        for i in range( len( self.stats ) ) :
-            
+        for i in range( len( self.stats ) ) :            
                        
             for j in range ( len ( self.statsTypes ) ):
                 
@@ -397,27 +482,29 @@ class StatsPlotter:
                 self.maxLatency = self.stats[i].statsCollection.maxLatency
                 
                 if self.statsTypes[j] == "errors" :
-                    color =2 #green
-                    
+                    color =2 #green                    
                     self.addErrorsLabelsToGraph(  i , nbGraphs, j, maxPairValue )
+                
                 elif self.statsTypes[j] == "latency" :
-                    color =1 #red
-                    
+                    color =1 #red                    
                     self.addLatencyLabelsToGraph(  i , nbGraphs, j, maxPairValue )
                 
                 elif self.statsTypes[j] == "bytecount" :
                     color =3 #blue 
                     self.addBytesLabelsToGraph(  i , nbGraphs, j, maxPairValue )
                     
-                self.graph.title( "%s" %self.buildTitle( i, self.statsTypes[j] , j ) )
+                self.graph.title( "%s" %self.buildTitle( i, self.statsTypes[j] , j, pairs) )
                 
                 self.graph.plot( Gnuplot.Data( pairs , with="%s %s 1" % ( self.type, color) ) )
                 
                 nbGraphs = nbGraphs + 1 
-
+                
                     
-        
+        if createLink :
+            self.createLink( )     
          
+            
+            
     def addLatencyLabelsToGraph( self, i , nbGraphs, j, maxPairValue ):
         """
             Used to set proper labels for a graph relating to latencies. 
@@ -442,33 +529,33 @@ class StatsPlotter:
                 
         self.graph( 'set size .545, .37' )
         
-        self.graph( 'set origin 0, %3.2f' %( ((nbGraphs)*.37)  ) )
+        self.graph( 'set origin 0, %3.2f' %( ((nbGraphs)*.40)  ) )
 
         self.graph.ylabel( 'latency (seconds)' )
         
-        self.graph( 'set label "Client : %s" at screen .545, screen %3.2f' % ( self.clientNames[i],(.28+(nbGraphs) *.37)  ))
+        self.graph( 'set label "%s : %s" at screen .545, screen %3.2f' % ( self.sourlient, self.clientNames[i],(.28+(nbGraphs) *.40)  ))
         
-        self.graph( 'set label "Machines : %s" at screen .545, screen %3.2f' % ( self.machines,(.26+(nbGraphs) *.37)  ) )
+        self.graph( 'set label "Machines : %s" at screen .545, screen %3.2f' % ( self.machines,(.26+(nbGraphs) *.40)  ) )
         
-        self.graph( 'set label "Product Type : %s" at screen .545, screen %3.2f' % ( self.productType,(.24+(nbGraphs) *.37)  ) )
+        self.graph( 'set label "Product Type : %s" at screen .545, screen %3.2f' % ( self.productType,(.24+(nbGraphs) *.40)  ) )
         
-        self.graph( 'set label "Maximum latency : %s (Seconds)" at screen .545, screen %3.2f' % ( maximum, (.22+(nbGraphs) *.37) ) )
+        self.graph( 'set label "Max. lat. : %s (Seconds)" at screen .545, screen %3.2f' % ( maximum, (.22+(nbGraphs) *.40) ) )
         
-        self.graph( 'set label "Time of maximum latency : %s" at screen .545, screen %3.2f' % ( ( timeOfMax, (.20+(nbGraphs) *.37)  )))
+        self.graph( 'set label "Time of max. lat. : %s" at screen .545, screen %3.2f' % ( ( timeOfMax, (.20+(nbGraphs) *.40)  )))
         
         if len ( self.filesWhereMaxOccured[i][j] ) <= 50 :
-            self.graph( 'set label "File with maximum latency :%s" at screen .545, screen %3.2f' % ( self.filesWhereMaxOccured[i][j], (.18+(nbGraphs) *.37) ))     
+            self.graph( 'set label "File with max. lat. :%s" at screen .545, screen %3.2f' % ( self.filesWhereMaxOccured[i][j], (.18+(nbGraphs) *.40) ))     
         
         else:
-            self.graph( 'set label "File with maximum latency :" at screen .545, screen %3.2f' % ( (.18+(nbGraphs) *.37) ))  
+            self.graph( 'set label "File with max. lat. :" at screen .545, screen %3.2f' % ( (.18+(nbGraphs) *.40) ))  
             
-            self.graph( 'set label "%s" at screen .545, screen %3.2f' % ( self.filesWhereMaxOccured[i][j], (.16+(nbGraphs) *.37 ) ))          
+            self.graph( 'set label "%s" at screen .545, screen %3.2f' % ( self.filesWhereMaxOccured[i][j], (.16+(nbGraphs) *.40 ) ))          
         
-        self.graph( 'set label "# of files(total) : %s " at screen .545, screen %3.2f' % ( self.nbFiles[i] , (.14+(nbGraphs) *.37) ) )
+        self.graph( 'set label "# of files(total) : %s " at screen .545, screen %3.2f' % ( self.nbFiles[i] , (.14+(nbGraphs) *.40) ) )
         
-        self.graph( 'set label "# of files over %s seconds: %s " at screen .545, screen %3.2f' % ( self.maxLatency, self.nbFilesOverMaxLatency[i], ( .12+(nbGraphs) *.37 ) ) )
+        self.graph( 'set label "# of files over %s seconds: %s " at screen .545, screen %3.2f' % ( self.maxLatency, self.nbFilesOverMaxLatency[i], ( .12+(nbGraphs) *.40 ) ) )
         
-        self.graph( 'set label "%% of files over max latency: %3.2f %%" at screen .545, screen %3.2f' % ( self.ratioOverLatency[i] , ( .10 + (nbGraphs) *.37 ) ) )
+        self.graph( 'set label "%% of files over %s seconds: %3.2f %%" at screen .545, screen %3.2f' % (  self.maxLatency, self.ratioOverLatency[i] , ( .10 + (nbGraphs) *.40 ) ) )
         
                 
     
@@ -493,36 +580,49 @@ class StatsPlotter:
         else:
             timeOfMax = ""
             maximum = ""
-        
-         
        
+        if self.totalNumberOfBytes[i] < 1000:#less than a k
+            totalNumberOfBytes = "%s Bytes" %int( self.totalNumberOfBytes[i] )
+            
+        elif self.totalNumberOfBytes[i] < 1000000:#less than a meg 
+            totalNumberOfBytes = "%.2f KiloBytes"  %( self.totalNumberOfBytes[i]/1000.0 )
+        
+        elif self.totalNumberOfBytes[i] < 1000000000:#less than a gig      
+            totalNumberOfBytes = "%.2f MegaBytes"  %( self.totalNumberOfBytes[i]/1000000.0 )
+        else:#larger than a gig
+            totalNumberOfBytes = "%.2f GigaBytes"  %( self.totalNumberOfBytes[i]/1000000000.0 )
+            
         self.graph( 'set size .545, .37' )
         
-        self.graph( 'set origin 0, %3.2f' %( ((nbGraphs)*.37)  ))
+        self.graph( 'set origin 0, %3.2f' %( ((nbGraphs)*.40)  ))
         
-        self.graph.ylabel( '# of Bytes' )
+        self.graph.ylabel( '# of bytes' )
         
-        self.graph( 'set label "Client : %s" at screen .545, screen %3.2f' % ( self.clientNames[i],(.28+(nbGraphs) *.37)  ))
+        self.graph( 'set label "%s : %s" at screen .545, screen %3.2f' % ( self.sourlient, self.clientNames[i],(.28+(nbGraphs) *.40)  ))
         
-        self.graph( 'set label "Machines : %s" at screen .545, screen %3.2f' % ( self.machines,(.25+(nbGraphs) *.37)  ) )
+        self.graph( 'set label "Machines : %s" at screen .545, screen %3.2f' % ( self.machines,(.26+(nbGraphs) *.40)  ) )
         
-        self.graph( 'set label "Product Type : %s" at screen .545, screen %3.2f' % ( self.productType,(.22+(nbGraphs) *.37)  ) )
+        self.graph( 'set label "Product Type : %s" at screen .545, screen %3.2f' % ( self.productType,(.24+(nbGraphs) *.40)  ) )
         
         
         if len ( self.filesWhereMaxOccured[i][j] ) <= 65 :            
-            self.graph( 'set label "Largest file : %s" at screen .545, screen %3.2f' % ( self.filesWhereMaxOccured[i][j], (.19+(nbGraphs) *.37) ))
+            self.graph( 'set label "Largest file : %s" at screen .545, screen %3.2f' % ( self.filesWhereMaxOccured[i][j], (.22+(nbGraphs) *.40) ))
+            x = .22
         else:
-            self.graph( 'set label "Largest file : " at screen .545, screen %3.2f' % ( ( .19 + ( nbGraphs ) *.37) ) )
+            self.graph( 'set label "Largest file : " at screen .545, screen %3.2f' % ( ( .22 + ( nbGraphs ) *.40) ) )
             
-            self.graph( 'set label "%s" at screen .545, screen %3.2f' % ( self.filesWhereMaxOccured[i][j], (.17+(nbGraphs) *.37) ))
+            self.graph( 'set label "%s" at screen .545, screen %3.2f' % ( self.filesWhereMaxOccured[i][j], (.20+(nbGraphs) *.40) ))
+            x = .20
                     
-        self.graph( 'set label "Size of largest file : %s (Bytes)" at screen .545, screen %3.2f' % ( maximum, (.15+(nbGraphs) *.37) ) )       
+        self.graph( 'set label "Size of largest file : %s (Bytes)" at screen .545, screen %3.2f' % ( maximum, (x -.02+(nbGraphs) *.40) ) )       
                 
-        self.graph( 'set label "Time of largest file : %s" at screen .545, screen %3.2f' % ( ( timeOfMax, (.12+(nbGraphs) *.37)  )))     
+        self.graph( 'set label "Time of largest file : %s" at screen .545, screen %3.2f' % ( ( timeOfMax, (x -.04+(nbGraphs) *.40)  )))     
         
-        self.graph( 'set label "# of files : %s " at screen .545, screen %3.2f' % ( self.nbFiles[i] , (.09+(nbGraphs) *.37) ) )
+        self.graph( 'set label "# of files : %s " at screen .545, screen %3.2f' % ( self.nbFiles[i] , ( x-.06+(nbGraphs) *.40) ) )
     
-    
+        self.graph( 'set label "Total # of bytes: %s " at screen .545, screen %s' % (  totalNumberOfBytes,( x -.08 +(nbGraphs) *.40 ) ) )
+                
+
     
     
     def addErrorsLabelsToGraph( self, i , nbGraphs, j,maxPairValue ):
@@ -534,6 +634,7 @@ class StatsPlotter:
         if self.maximums[i][j] !=None and self.maximums[i][j] != 0 :
             
             timeOfMax =  self.timeOfMax[i][j]
+            timeOfMax =  MyDateLib.getIsoWithRoundedSeconds( timeOfMax )
             
             if maxPairValue < 5 :
                 self.graph( 'set format y "%7.2f"' )
@@ -546,25 +647,26 @@ class StatsPlotter:
             timeOfMax = ""
             maximum = ""
                
-       
+      
+        
         self.graph( 'set size .545, .37' )
         
-        self.graph( 'set origin 0, %3.2f' %( ((nbGraphs)*.37)  ))
+        self.graph( 'set origin 0, %3.2f' %( ((nbGraphs)*.40)  ))
         
-        self.graph.ylabel( '# of Errors' )
+        self.graph.ylabel( '# of errors' )
         
-        self.graph( 'set label "Client : %s" at screen .545, screen %3.2f' % ( self.clientNames[i],(.28+(nbGraphs) *.37)  ))
+        self.graph( 'set label "%s : %s" at screen .545, screen %3.2f' % ( self.sourlient,self.clientNames[i],(.28+(nbGraphs) *.40)  ))
         
-        self.graph( 'set label "Machines : %s" at screen .545, screen %3.2f' % ( self.machines,(.25+(nbGraphs) *.37)  ) )
+        self.graph( 'set label "Machines : %s" at screen .545, screen %3.2f' % ( self.machines,(.26+(nbGraphs) *.40)  ) )
         
-        self.graph( 'set label "Product Type : %s" at screen .545, screen %3.2f' % ( self.productType,(.22+(nbGraphs) *.37)  ) )
+        self.graph( 'set label "Product Type : %s" at screen .545, screen %3.2f' % ( self.productType,(.24+(nbGraphs) *.40)  ) )
         
-        self.graph( 'set label "Max error/%s : %s" at screen .545, screen %3.2f' % ( self.entryType, maximum, (.19+(nbGraphs) *.37) ))
+        self.graph( 'set label "Max error/%s : %s" at screen .545, screen %3.2f' % ( self.entryType, maximum, (.22+(nbGraphs) *.40) ))
         
         
-        self.graph( 'set label "Time of maximum : %s" at screen .545, screen %3.2f' % ( ( timeOfMax, (.16+(nbGraphs) *.37)  )))
+        self.graph( 'set label "Time of max. : %s" at screen .545, screen %3.2f' % ( ( timeOfMax, (.20+(nbGraphs) *.40)  )))
         
-        self.graph( 'set label "# of errors : %s" at screen .545, screen %3.2f' % ( self.nbErrors[i], (.13+(nbGraphs) *.37) ) )
+        self.graph( 'set label "# of errors : %.0f" at screen .545, screen %3.2f' % ( self.nbErrors[i], (.18+(nbGraphs) *.40) ) )
       
                 
                 

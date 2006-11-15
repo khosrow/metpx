@@ -15,7 +15,7 @@ named COPYING in the root of the source directory tree.
 ## Date   : 06-07-2006 
 ##
 ##
-## Description : Contains all usefullclasses and methods to produce a graphic 
+## Description : Contains all the usefull classes and methods to produce a graphic 
 ##               for a certain client. Main use is to build latency graphics
 ##               for one or many clients. Can also produce graphics on
 ##               bytecounts and errors found in log files. 
@@ -32,9 +32,8 @@ import pickleUpdater
 import pickleMerging
 import logging 
 import PXPaths
-from   Logger import *
 
-
+from Logger import *
 from MyDateLib import MyDateLib
 from StatsPlotter import StatsPlotter
 from ClientStatsPickler import *
@@ -44,10 +43,19 @@ PXPaths.normalPaths()
 
 localMachine = os.uname()[1]
 
+if localMachine == "pds3-dev" or localMachine == "pds4-dev" or localMachine == "lvs1-stage" :
+    PATH_TO_LOGFILES = PXPaths.LOG + localMachine + "/"
+
+elif localMachine == "logan1" or localMachine == "logan2":
+    PATH_TO_LOGFILES = PXPaths.LOG + localMachine + "/" + localMachine + "/"
+
+else:#pds5 pds5 pxatx etc
+    PATH_TO_LOGFILES = PXPaths.LOG  
+
+
+
 class ClientGraphicProducer:
-    
-    
-    
+        
     def __init__( self, directory, fileType, clientNames = None ,  timespan = 12, currentTime = None, productType = "All", logger = None, machines = ["pds000"]  ):
         """
             ClientGraphicProducer constructor. 
@@ -56,6 +64,7 @@ class ClientGraphicProducer:
             system time by default.   
             
             CurrentTime is to be used if a different time than sytem time is to be used. 
+            
             Very usefull for testing or to implement graphic request where user can choose start 
             time.  
     
@@ -78,13 +87,13 @@ class ClientGraphicProducer:
         self.logger       = logger            # Enable logging
         
         if self.logger is None: # Enable logging
-            self.logger = Logger( PXPaths.LOG + localMachine + '/' + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName ) 
+            if not os.path.isdir( PXPaths.LOG ):
+                os.makedirs( PXPaths.LOG , mode=0777 )
+            self.logger = Logger( PXPaths.LOG  + 'stats_' + self.loggerName + '.log', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
             self.logger = self.logger.getLogger()
-                 
+                
 
-    
-
-    def produceGraphicWithHourlyPickles( self, types , now = False ):
+    def produceGraphicWithHourlyPickles( self, types , now = False, createLink = False ):
         """
             This higher-level method is used to produce a graphic based on the data found in log files
             concerning a certain client. Data will be searched according to the clientName and timespan
@@ -94,10 +103,9 @@ class ClientGraphicProducer:
         
             Now option not yet implemented.
             
-            Every pickle necessary for graphic production needs to be there. Filling holes with empty data not yet implemented.  
+            Every pickle necessary for graphic production needs to be there. Filling holes with empty data not yet implemented.              
             
-            
-        """ 
+        """         
         
         collectorsList = [] #     
         minutesToAppend = 0 # In case we need to collect up to now 
@@ -144,12 +152,13 @@ class ClientGraphicProducer:
         if self.logger != None :         
             self.logger.debug( "Call to StatsPlotter :Clients:%s, timespan:%s, currentTime:%s, statsTypes:%s, productType:%s :" %( self.clientNames, self.timespan, self.currentTime, types, self.productType ) )
         
-        print "Call to StatsPlotter :Clients:%s, timespan:%s, currentTime:%s, statsTypes:%s, productType:%s :" %( self.clientNames, self.timespan, self.currentTime, types, self.productType )
+        #print "Call to StatsPlotter :Clients:%s, timespan:%s, currentTime:%s, statsTypes:%s, productType:%s :" %( self.clientNames, self.timespan, self.currentTime, types, self.productType )
         
-        plotter = StatsPlotter( stats = collectorsList, clientNames = self.clientNames, timespan = self.timespan, currentTime = endTime, now = False, statsTypes = types, productType = self.productType, logger = None, machines = self.machines  )
+        plotter = StatsPlotter( stats = collectorsList, clientNames = self.clientNames, timespan = self.timespan, currentTime = endTime, now = False, statsTypes = types, productType = self.productType, logger = self.logger, machines = self.machines, fileType = self.fileType  )
         
-        plotter.plot()                          
-        print "Plotted graph"
+        plotter.plot( createLink )
+                                  
+        #print "Plotted graph."
         
         if self.logger != None :
             self.logger.debug( "Returns from StatsPlotter." )
@@ -164,7 +173,7 @@ if __name__ == "__main__":
         
     """
     
-    gp = ClientGraphicProducer( clientNames = [ 'amis' ], timespan = 24, currentTime = "2006-08-01 18:15:00",productType = "All", directory = PXPaths.LOG + localMachine + '/', fileType = "tx" )  
+    gp = ClientGraphicProducer( clientNames = [ 'amis' ], timespan = 24, currentTime = "2006-08-01 18:15:00",productType = "All", directory = PATH_TO_LOGFILES, fileType = "tx" )  
     
     gp.produceGraphicWithHourlyPickles( types = [ "bytecount","latency","errors" ], now = False   )
     

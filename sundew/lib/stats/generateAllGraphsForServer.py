@@ -26,15 +26,17 @@ named COPYING in the root of the source directory tree.
 
 
 
-import os,time, pwd, sys,getopt, commands, fnmatch,pickle
-from optparse import OptionParser
+import os, time, pwd, sys, getopt, commands, fnmatch, pickle
 import PXPaths 
-from PXPaths import * 
+
+from optparse  import OptionParser
+from PXPaths   import * 
 from PXManager import *
-from  MyDateLib import *
+from MyDateLib import *
+
 PXPaths.normalPaths()
 
-
+localMachine = os.uname()[1]
 
 #################################################################
 #                                                               #
@@ -75,14 +77,17 @@ def createParser( ):
 
 Defaults :
 - Default combine value is false.
+- Default individual value is false.
+- If default is used for individual and combine, combine will be set to True.  
 - Default Date is current system time.
 - Default logins is pds.  
 - Default machines value is pxatx.
-- Default span is 12 hours.
+- Default span is 24 hours.
 
 Options:
     - With -c|--combine you specify that graphic produced must also be a combination of numerous machines.  
     - With -d|--date you can specify the time of the request.( Usefull for past days and testing. )
+    - With -i|--individual you can specify to generate graphics for numerous machines without merging their data.
     - With -l|--logins you can specify wich login must be used for each of the enumerated machines.
     - With -m|--machines you can specify the list of machines to be used.
     - With -s|--span you can specify the time span to be used to create the graphic 
@@ -91,10 +96,13 @@ Options:
 WARNING: - Client name MUST be specified,no default client exists. 
           
             
-Ex1: %prog                                   --> All default values will be used. Not recommended.  
-Ex2: %prog -m pds5                           --> All default values, for machine pds5. 
-Ex3: %prog -m pds5 -d '2006-06-30 05:15:00'  --> Machine pds5, Date of call 2006-06-30 05:15:00.
-Ex4: %prog -s 24                             --> Uses current time, default machine and 24 hours span.
+Ex1: %prog                                   --> All default values will be used. Not recommended.
+Ex2: %prog -i -c -m "m1,m2" -l "l1,l2"       --> Generate graphs for all machiens found on m1 and m2.
+                                                 login to m1 using l1 and to m2 using l2. 
+                                                 We will generate graphs for data comiing from m1 exclusively,
+                                                 m2 exclusively, and from the resulting data of a combination 
+                                                 of m1's and m2's data.                                                 
+ 
 ********************************************
 * See /doc.txt for more details.           *
 ********************************************"""   
@@ -122,7 +130,7 @@ def addOptions( parser ):
     
     parser.add_option( "-m", "--machines", action="store", type="string", dest="machines", default="pxatx", help = "Machines for wich you want to collect data." ) 
     
-    parser.add_option("-s", "--span", action="store",type ="int", dest = "timespan", default=12, help="timespan( in hours) of the graphic.")    
+    parser.add_option("-s", "--span", action="store",type ="int", dest = "timespan", default=24, help="timespan( in hours) of the graphic.")    
     
     
   
@@ -147,7 +155,7 @@ def getOptionsFromParser( parser ):
     combine          = options.combine
     individual       = options.individual
     
-    print date 
+    
     
     try: # Makes sure date is of valid format. 
          # Makes sure only one space is kept between date and hour.
@@ -214,10 +222,10 @@ def updateConfigurationFiles( machine, login ):
         os.makedirs(  '/apps/px/stats/trx/%s/' %machine, mode=0777 )       
 
         
-    status, output = commands.getstatusoutput( "rsync -avzr -e ssh %s@%s:/apps/px/etc/rx/* /apps/px/stats/rx/%s/"  %( login, machine, machine) ) 
+    status, output = commands.getstatusoutput( "rsync -avzr --delete-before -e ssh %s@%s:/apps/px/etc/rx/ /apps/px/stats/rx/%s/"  %( login, machine, machine) ) 
     #print output # for debugging only
     
-    status, output = commands.getstatusoutput( "rsync -avzr -e ssh %s@%s:/apps/px/etc/tx/* /apps/px/stats/tx/%s/"  %( login, machine, machine) )  
+    status, output = commands.getstatusoutput( "rsync -avzr --delete-before -e ssh %s@%s:/apps/px/etc/tx/ /apps/px/stats/tx/%s/"  %( login, machine, machine) )  
     #print output # for debugging only
 
 
@@ -231,10 +239,12 @@ def getRxTxNames( machine ):
                         
     pxManager = PXManager()
     
-    #These values need to be set here.
-    PXPaths.RX_CONF  = '/apps/px/stats/rx/%s/'  %machine
-    PXPaths.TX_CONF  = '/apps/px/stats/tx/%s/'  %machine
-    PXPaths.TRX_CONF = '/apps/px/stats/trx/%s/' %machine
+    
+    remoteMachines= [ "pds3-dev", "pds4-dev","lvs1-stage", "logan1", "logan2" ]
+    if localMachine in remoteMachines :#These values need to be set here.
+        PXPaths.RX_CONF  = '/apps/px/stats/rx/%s/'  %machine
+        PXPaths.TX_CONF  = '/apps/px/stats/tx/%s/'  %machine
+        PXPaths.TRX_CONF = '/apps/px/stats/trx/%s/' %machine
     pxManager.initNames() # Now you must call this method  
     
     txNames = pxManager.getTxNames()               
@@ -251,29 +261,26 @@ def generateGraphsForIndividualMachines( infos ) :
           
     """       
              
-    for i in range ( len( infos.machines ) ) :
-        
-        
-        #small workaround for temporary test machines    
-        if infos.machines[i] == "pds5" :
-            machine = "pds3-dev"
-        elif infos.machines[i] == "pds6" :
-            machine = "pds4-dev"
-        else:
-            machine = infos.machines[i]         
-                                             
+    for i in range ( len( infos.machines ) ) :      
+                                                        
         rxNames, txNames = getRxTxNames( infos.machines[i] )  
-                      
-                          
-#         #Create graphs for all         
-#         currentPid = os.getpid()#for testing only         
+        j=0 
         for txName in txNames :    
             pid = os.fork()#create child process
             
             if pid == 0: #child process
-                status, output = commands.getstatusoutput( "python /apps/px/lib/stats/generateGraphics.py -m '%s' -f tx -c '%s' -d '%s' -s %s " %( machine, txName, infos.date, infos.timespan) )
-                print output # for debugging only
+                status, output = commands.getstatusoutput( "python /apps/px/lib/stats/generateGraphics.py -m '%s' -f tx -c '%s' -d '%s' -s %s -l" %( infos.machines[i], txName, infos.date, infos.timespan) )                
                 sys.exit()
+        
+            else:
+                j = j + 1 
+                                      
+                if j %10 == 0:
+                    while True:#wait on all non terminated child process'
+                        try:   #will raise exception when no child process remain.        
+                            pid, status = os.wait( )
+                        except:    
+                            break        
         
         while True:#wait on all non terminated child process'
             try:   #will raise exception when no child process remain.        
@@ -281,84 +288,88 @@ def generateGraphsForIndividualMachines( infos ) :
             except:    
                 break
             
-        
-#         if os.getpid() != currentPid:
-#             print "**************************P r o b l e m e*********************************"
-#               
-#         print "#############################RX#######################################"                               
-        
+                          
+        j=0
         for rxName in rxNames:
             pid = os.fork()#create child process
             
             if pid == 0 :#child process
-                status, output = commands.getstatusoutput( "python /apps/px/lib/stats/generateGraphics.py -m '%s' -f rx -c '%s' -d '%s' -s %s" %( machine , rxName, infos.date,infos.timespan ) )     
-                #print output #for debugging only
+                status, output = commands.getstatusoutput( "python /apps/px/lib/stats/generateGraphics.py -m '%s' -f rx -c '%s' -d '%s' -s %s -l" %( infos.machines[i] , rxName, infos.date,infos.timespan ) )     
                 sys.exit()
         
-        
+            else:
+                j = j + 1
+                if j %10 == 0:
+                    while True:#wait on all non terminated child process'
+                        try:   #will raise exception when no child process remain.
+                            pid, status = os.wait( )
+                        except:
+                            break
         while True:#wait on all non terminated child process'
             try:   #will raise exception when no child process remain.        
                 pid, status = os.wait( )
             except:    
                 break          
         
-#         if os.getpid() != currentPid:
-#             print "**************************P r o b l e m e*********************************"
-           
+          
                 
-
 def generateGraphsForPairedMachines( infos ) :
     """
         Create graphs for all client by merging the data from all the listed machines.    
     
     """        
     
-    #workaround to be removed after its installed on real machines
-    for i in range ( len( infos.machines ) ) :
-    
-        #small workaround for temporary test machines    
-        if infos.machines[i] == "pds5" :
-            infos.machines[i] = "pds3-dev"
-        elif infos.machines[i] == "pds6" :
-            infos.machines[i] = "pds4-dev"
-        else:#case for pxatx?
-            infos.machines[i] = infos.machines[i]
-        #end of workaround
-        
-    infos.combinedName = str(infos.machines).replace( ' ','' ).replace( '[','' ).replace( ']', '' )        
-    print "infos.combinedName : %s" %infos.combinedName         
-            
     rxNames, txNames = getRxTxNames( infos.machines[0] )  
-    
+            
+    infos.combinedName = str(infos.machines).replace( ' ','' ).replace( '[','' ).replace( ']', '' )        
+     
+           
+    j=0
     for txName in txNames :
         
         pid = os.fork()#create child process
         
         if pid == 0 :#child process
-            status, output = commands.getstatusoutput( "python /apps/px/lib/stats/generateGraphics.py -m %s -f tx -c %s -d '%s' -s %s  " %( infos.combinedName, txName, infos.date,infos.timespan ) )
-            print output # for debugging only
+            status, output = commands.getstatusoutput( "python /apps/px/lib/stats/generateGraphics.py -m %s -f tx -c %s -d '%s' -s %s  -l" %( infos.combinedName, txName, infos.date, infos.timespan ) )
             sys.exit()    #terminate child process
-            
     
+        else:
+            j = j + 1
+            if j %10 == 0:
+                while True:#wait on all non terminated child process'
+                    try:   #will raise exception when no child process remain.
+                        pid, status = os.wait( )
+                    except:
+                        break
+                                                                                                                                                                        
     while True:#wait on all non terminated child process'
         try:   #will raise exception when no child process remain.        
             pid, status = os.wait( )
         except:    
             break  
     
-    print "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRXXXXXXXXXXXXXXXXXXXXXXXXXX"
-            
+   
+    j=0        
     for rxName in rxNames:
         pid = os.fork()#create child process
         
-        if pid == 0:#father process            
-            status, output = commands.getstatusoutput( "python /apps/px/lib/stats/generateGraphics.py -m %s -f rx -c %s -d '%s' -s %s  " %( infos.combinedName, rxName, infos.date, infos.timespan ) )     
-            print output #for debugging on  
+        if pid == 0:#child process            
+            status, output = commands.getstatusoutput( "python /apps/px/lib/stats/generateGraphics.py -m %s -f rx -c %s -d '%s' -s %s  -l" %( infos.combinedName, rxName, infos.date, infos.timespan ) )     
+            #print output 
             sys.exit()
-            
+        else:
+            j = j + 1
+            if j %10 == 0:
+                while True:#wait on all non terminated child process'
+                    try:   #will raise exception when no child process remain.
+                        pid, status = os.wait( )
+                    except:
+                        break
+                                                                                                                                                                
     
     while True:#wait on all non terminated child process'
-        try:   #will raise exception when no child process remain.        
+        try:   #will raise exception when no child process remain.    
+            #print "goes to wait"    
             pid, status = os.wait( )
         except:    
             break  
