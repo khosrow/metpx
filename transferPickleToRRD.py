@@ -34,14 +34,11 @@ from   Logger    import *
 
 PXPaths.normalPaths()             
 
-if localMachine == "pds3-dev" or localMachine == "pds4-dev" or localMachine == "lvs1-stage" :
-    PATH_TO_LOGFILES = PXPaths.LOG + localMachine + "/"
-    PXPaths.RX_CONF  = '/apps/px/stats/rx/'
-    PXPaths.TX_CONF  = '/apps/px/stats/tx/'
-    PXPaths.TRX_CONF = '/apps/px/stats/trx/'
+localMachine = os.uname()[1]
 
-elif localMachine == "logan1" or localMachine == "logan2":
-    PATH_TO_LOGFILES = PXPaths.LOG + localMachine + "/" + localMachine + "/"
+if localMachine == "pds3-dev" or localMachine == "pds4-dev" or localMachine == "lvs1-stage" or localMachine == "logan1" or localMachine == "logan2":
+
+    PATH_TO_LOGFILES = PXPaths.LOG + localMachine + "/"
     PXPaths.RX_CONF  = '/apps/px/stats/rx/'
     PXPaths.TX_CONF  = '/apps/px/stats/tx/'
     PXPaths.TRX_CONF = '/apps/px/stats/trx/'
@@ -159,7 +156,7 @@ def getOptionsFromParser( parser, logger = None  ):
         print "Program terminated."
         sys.exit()    
      
-    #round ending hour to match pickleUpdater. 
+    #round ending hour to match pickleUpdater.     
     end   = MyDateLib.getIsoWithRoundedHours( end )
     
     if machines[0] == 'ALL' : 
@@ -182,17 +179,16 @@ def getOptionsFromParser( parser, logger = None  ):
         print "Using all clients options."
         pxManager = PXManager()
         
-        remoteMachines[ "pds3-dev", "pds4-dev","lvs1-stage", "logan1", "logan2" ]
+        remoteMachines = [ "pds3-dev", "pds4-dev","lvs1-stage", "logan1", "logan2" ]
         if localMachine in remoteMachines :#These values need to be set here.
-            PXPaths.RX_CONF  = '/apps/px/stats/rx/%s/'  %machine
-            PXPaths.TX_CONF  = '/apps/px/stats/tx/%s/'  %machine
-            PXPaths.TRX_CONF = '/apps/px/stats/trx/%s/' %machine
+            PXPaths.RX_CONF  = '/apps/px/stats/rx/%s/'  %machines[0]
+            PXPaths.TX_CONF  = '/apps/px/stats/tx/%s/'  %machines[0]
+            PXPaths.TRX_CONF = '/apps/px/stats/trx/%s/' %machines[0]
         pxManager.initNames() # Now you must call this method  
     
         txNames = pxManager.getTxNames()               
         rxNames = pxManager.getRxNames() 
-        txNames = pxManager.getTxNames()
-        rxNames = pxManager.getRxNames()
+
         clients = []
         clients.extend( txNames )
         clients.extend( rxNames )
@@ -210,8 +206,8 @@ def getOptionsFromParser( parser, logger = None  ):
         elif machines[i] == 'pds6' :
             machines[i] = 'pds4-dev'     
         elif machines[i] == "pxatx":
-            machines[i] == localMachine
-                    
+            machines[i] = localMachine
+              
     infos = _Infos( endTime = end, machines = machines, clients = clients, fileTypes = fileTypes )   
     
     return infos     
@@ -226,18 +222,26 @@ def getDatabaseTimeOfUpdate( client, machine, fileType, endTime ):
         Otherwise returns None 
         
     """ 
-    
+    if machine == 'pds3-dev':
+        machine = 'pds5'
+    elif machine == 'pds4-dev':
+        machine = 'pds6'
+    elif machine == 'pds3-devpds4-dev':
+        machine = 'pds5pds6'    
+    elif machine == 'pds4-devpds3-dev':
+        machine = 'pds6pds5'
+    elif machine == localMachine :
+        machine = "pxatx"
 
-    lastUpdate = MyDateLib.getSecondsSinceEpoch( endTime ) - ( 60 * 60 )
+    lastUpdate = MyDateLib.getSecondsSinceEpoch( MyDateLib.getIsoTodaysMidnight( endTime ) ) 
     folder   = PXPaths.STATS + "DATABASE-UPDATES/%s/" %fileType
     fileName = folder + "%s_%s" %( client, machine )
-    #print "fileName : %s" %fileName
+
     if os.path.isfile( fileName ):
         
         fileHandle  = open( fileName, "r" )
         lastUpdate  = pickle.load( fileHandle )           
         fileHandle.close()     
-        #print "lastUpdate: %s" %lastUpdate
             
     return lastUpdate  
  
@@ -252,9 +256,21 @@ def setDatabaseTimeOfUpdate(  client, machine, fileType, timeOfUpdate ):
         
     """   
     
+    if machine == 'pds3-dev':
+        machine = 'pds5'
+    elif machine == 'pds4-dev':
+        machine = 'pds6'
+    elif machine == 'pds3-devpds4-dev':
+        machine = 'pds5pds6'    
+    elif machine == 'pds4-devpds3-dev':
+        machine = 'pds6pds5'
+    elif machine == localMachine :
+        machine = "pxatx"
+    
+     
     folder   = PXPaths.STATS + "DATABASE-UPDATES/%s/" %fileType
     fileName = folder + "%s_%s" %( client, machine )   
-              
+    
     fileHandle  = open( fileName, "w" )
     pickle.dump( timeOfUpdate, fileHandle )
     fileHandle.close()
@@ -292,6 +308,18 @@ def buildRRDFileName( dataType, client, machine ):
         
     """
     
+    if machine == 'pds3-dev':
+        machine = 'pds5'
+    elif machine == 'pds4-dev':
+        machine = 'pds6'
+    elif machine == 'pds3-devpds4-dev':
+        machine = 'pds5pds6'    
+    elif machine == 'pds4-devpds3-dev':
+        machine = 'pds6pds5'
+    elif machine == localMachine :
+        machine = "pxatx"
+           
+        
     return PXPaths.STATS + "databases/%s/%s_%s" %( dataType, client, machine )    
         
 
@@ -311,10 +339,11 @@ def createRoundRobinDatabase( dataType, client, machine, startTime ):
     databaseName = buildRRDFileName( dataType, client, machine )
     startTime = int( startTime )    
       
-    # 1st  rra : keep last 7 days for daily graphs. Each line contains 1 minute of data. 
-    # 2nd  rra : keep last 365 days for Monthly graphs. Each line contains 4 hours of data. 
-    # 3rd  rra : keep last 10 years of data. Each line contains 24 hours of data.
-    rrdtool.create( databaseName, '--start','%s' %( startTime ), '--step', '60', 'DS:%s:GAUGE:60:U:U' %dataType, 'RRA:AVERAGE:0:1:10080','RRA:MIN:0:1:10080', 'RRA:MAX:0:1:10080', 'RRA:AVERAGE:0:240:1460','RRA:MIN:0:240:1460','RRA:MAX:0:240:1460', 'RRA:AVERAGE:0:1440:3650','RRA:MIN:0:1440:3650','RRA:MAX:0:1440:3650' )      
+    # 1st  rra : keep last 5 days for daily graphs. Each line contains 1 minute of data. 
+    # 2nd  rra : keep last 14 days for weekly graphs. Each line contains 1 hours of data.
+    # 3rd  rra : keep last 365 days for Monthly graphs. Each line contains 4 hours of data. 
+    # 4th  rra : keep last 10 years of data. Each line contains 24 hours of data.
+    rrdtool.create( databaseName, '--start','%s' %( startTime ), '--step', '60', 'DS:%s:GAUGE:60:U:U' %dataType, 'RRA:AVERAGE:0:1:7200','RRA:MIN:0:1:7200', 'RRA:MAX:0:1:7200','RRA:AVERAGE:0:60:336','RRA:MIN:0:60:336', 'RRA:MAX:0:60:336','RRA:AVERAGE:0:240:1460','RRA:MIN:0:240:1460','RRA:MAX:0:240:1460', 'RRA:AVERAGE:0:1440:3650','RRA:MIN:0:1440:3650','RRA:MAX:0:1440:3650' )      
               
     print "created :%s" %databaseName   
     
@@ -341,30 +370,29 @@ def getPairsFromMergedData( statType, mergedData, logger = None  ):
                 if len( mergedData.statsCollection.fileEntries[i].means ) >=1 :
                     
                     if statType == "filesOverMaxLatency" :
-                        pairs.append( [MyDateLib.getSecondsSinceEpoch( mergedData.statsCollection.timeSeperators[i]), mergedData.statsCollection.fileEntries[i].filesOverMaxLatency ] )                      
+                        pairs.append( [ int(MyDateLib.getSecondsSinceEpoch( mergedData.statsCollection.timeSeperators[i]))+60, mergedData.statsCollection.fileEntries[i].filesOverMaxLatency ] )                      
                     
                     elif statType == "errors":
                         
-                        pairs.append( [MyDateLib.getSecondsSinceEpoch( mergedData.statsCollection.timeSeperators[i]), mergedData.statsCollection.fileEntries[i].totals[statType]] )
-                    #   print mergedData.statsCollection.fileEntries[i].totals[statType]
+                        pairs.append( [int(MyDateLib.getSecondsSinceEpoch( mergedData.statsCollection.timeSeperators[i])) +60, mergedData.statsCollection.fileEntries[i].totals[statType]] )
+                    
                     elif statType == "bytecount":
                     
-                        pairs.append( [ MyDateLib.getSecondsSinceEpoch(mergedData.statsCollection.timeSeperators[i]), mergedData.statsCollection.fileEntries[i].totals[statType]] )
-                        #print mergedData.statsCollection.fileEntries[i].means[statType]
+                        pairs.append( [ int(MyDateLib.getSecondsSinceEpoch(mergedData.statsCollection.timeSeperators[i])) +60, mergedData.statsCollection.fileEntries[i].totals[statType]] )
+                        
                     elif statType == "latency":
                     
-                        pairs.append( [ MyDateLib.getSecondsSinceEpoch(mergedData.statsCollection.timeSeperators[i]), mergedData.statsCollection.fileEntries[i].means[statType]] )  
-                        
-                    #    print mergedData.statsCollection.fileEntries[i].means[statType]
+                        pairs.append( [ int(MyDateLib.getSecondsSinceEpoch(mergedData.statsCollection.timeSeperators[i])) +60, mergedData.statsCollection.fileEntries[i].means[statType]] )                          
+                    
+                    elif statType == "filecount":
+                        pairs.append( [ int(MyDateLib.getSecondsSinceEpoch(mergedData.statsCollection.timeSeperators[i])) +60, len(mergedData.statsCollection.fileEntries[i].values.productTypes)] )
                     
                     else:
-                        #raise KeyError 
-                        #print "statType was : %s " %statType 
-                        pairs.append( [ MyDateLib.getSecondsSinceEpoch(mergedData.statsCollection.timeSeperators[i]), 0.0 ])                    
-                else:
-                    #print "problem len < 1 "
+
+                        pairs.append( [ int(MyDateLib.getSecondsSinceEpoch(mergedData.statsCollection.timeSeperators[i])) +60, 0.0 ])                    
+                else:      
                     
-                    pairs.append( [ MyDateLib.getSecondsSinceEpoch(mergedData.statsCollection.timeSeperators[i]), 0.0 ] )
+                    pairs.append( [ int(MyDateLib.getSecondsSinceEpoch(mergedData.statsCollection.timeSeperators[i])) +60, 0.0 ] )
             
             
             except KeyError:
@@ -372,10 +400,10 @@ def getPairsFromMergedData( statType, mergedData, logger = None  ):
                     print "keyError statype was : %s" %statType
                     logger.error( "Error in getPairs." )
                     logger.error( "The %s stat type was not found in previously collected data." %statType )    
-                pairs.append( [ MyDateLib.getSecondsSinceEpoch(mergedData.statsCollection.timeSeperators[i]), 0.0 ] )
+                pairs.append( [ int(MyDateLib.getSecondsSinceEpoch(mergedData.statsCollection.timeSeperators[i])) +60, 0.0 ] )
                 sys.exit()    
             
-        #print pairs        
+               
         return pairs 
         
         
@@ -397,7 +425,7 @@ def getMergedData( client, fileType,  machines, startTime, endTime, logger = Non
         statsCollection = pickleMerging.mergePicklesFromDifferentMachines( logger = logger , startTime = MyDateLib.getIsoFromEpoch(startTime), endTime = MyDateLib.getIsoFromEpoch(endTime), client = client, fileType = fileType, machines = machines )                           
     
     else:#only one machine, only merge different hours together
-        
+       
         statsCollection = pickleMerging.mergePicklesFromDifferentHours( logger = logger , startTime = MyDateLib.getIsoFromEpoch(startTime), endTime = MyDateLib.getIsoFromEpoch(endTime), client = client, fileType = fileType, machine = machines[0] )
         
     
@@ -405,7 +433,7 @@ def getMergedData( client, fileType,  machines, startTime, endTime, logger = Non
     for machine in machines:
         combinedMachineName = combinedMachineName + machine
     
-    #Make sure that directory used here is of no importance.   
+       
     dataCollector =  ClientStatsPickler( client = client, statsTypes = types, directory = "", statsCollection = statsCollection, machine = combinedMachineName, logger = logger )
     
     return dataCollector    
@@ -423,12 +451,11 @@ def getPairs( client, machines, fileType, startTime, endTime, logger = None ):
     dataPairs = {}
     dataTypes  = getDataTypesAssociatedWithFileType( fileType ) 
     mergedData = getMergedData( client, fileType, machines, startTime, endTime, logger )
-    
-    #print "dataTypes : %s" %dataTypes
+        
     for dataType in dataTypes :  
         dataPairs[ dataType ]  = getPairsFromMergedData( dataType, mergedData, logger )
     
-    #print dataPairs    
+   
     return dataPairs
     
     
@@ -452,17 +479,17 @@ def updateRoundRobinDatabases(  client, machines, fileType, endTime, logger = No
     for key in dataPairs.keys():
         
         rrdFileName = buildRRDFileName( dataType = key, client = client, machine = combinedMachineName )        
-        print rrdFileName
+        
         if not os.path.isfile( rrdFileName ):  
-            #print "startTime : %s " %startTime 
+            
             createRoundRobinDatabase( dataType = key, client = client, machine = combinedMachineName, startTime= startTime - 60 )
                       
         
         if endTime > startTime :  
             
-            for pair in dataPairs[ key ]:     
+            for pair in dataPairs[ key ]:
                 rrdtool.update( rrdFileName, '%s:%s' %( int(pair[0]), pair[1] ) ) 
-            
+
             #print "updated : %s for %s in a file named : %s" %( key,client,rrdFileName )
         
         else:
@@ -480,6 +507,8 @@ def transferPickleToRRD( infos, logger = None ):
         
         A single process is launched for every client to be transferred.
            
+        Simultaneous number of launched process has been limited to 10 process 
+        
     """    
     
        
@@ -490,10 +519,10 @@ def transferPickleToRRD( infos, logger = None ):
             updateRoundRobinDatabases( infos.clients[i], infos.machines, infos.fileTypes[i], infos.endTime, logger =logger )                           
             sys.exit()#terminate child immidiatly
         
-        elif (i%10) == 0:
+        elif (i%5) == 0:
             while True:#wait on all non terminated child process'
                 try:   #will raise exception when no child process remain.        
-                    pid, status = os.wait( )
+                    pid, status = os.wait()                    
                 except:    
                     break            
         
@@ -504,10 +533,11 @@ def transferPickleToRRD( infos, logger = None ):
         except:    
             break 
 
-            
+
+                        
 def createPaths():
     """
-    
+        Create a series of required paths. 
     """            
        
     localMachine = os.uname()[1] # /apps/px/log/ logs are stored elsewhere at the moment.
@@ -544,11 +574,10 @@ def main():
        
     parser = createParser() 
    
-    infos = getOptionsFromParser( parser, logger = None )
-    #print "infos : %s" %infos.clients
-    transferPickleToRRD( infos, logger = None )
-     
+    infos = getOptionsFromParser( parser, logger = logger )
 
+    transferPickleToRRD( infos, logger = logger )
+   
 
 if __name__ == "__main__":
     main()

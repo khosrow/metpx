@@ -466,7 +466,7 @@ class FileStatsCollector:
         
         """
         
-        print "------------------------------------------------------"
+        #print "------------------------------------------------------"
         
         line                 = ""
         lineType             = None 
@@ -484,13 +484,13 @@ class FileStatsCollector:
             fileHandle.seek( self.lastReadPosition, 0 )
             #position = fileHandle.tell()                        
             firstLine = fileHandle.readline()
-            print "firstLine read : %s" %firstLine
+            #print "firstLine read : %s" %firstLine
             position = fileHandle.tell()
             
             #In case of traceback line
             isInteresting,lineType = FileStatsCollector.isInterestingLine( firstLine, usage = "departure",types = self.statsTypes  )
             while isInteresting == False and firstLine != "":
-                print "enters first while"
+                #print "enters first while"
                 firstLine = fileHandle.readline()
                 position = fileHandle.tell()
                 isInteresting,lineType = FileStatsCollector.isInterestingLine( firstLine, usage = "departure", types = self.statsTypes )
@@ -498,7 +498,7 @@ class FileStatsCollector:
             #print firstLine
         
         else:
-            print "file not previously read!?!?"
+            #print "file not previously read!?!?"
             firstLine      = fileHandle.readline()
             position       = fileHandle.tell()
             
@@ -513,10 +513,10 @@ class FileStatsCollector:
         fileHandle.seek( position, 0 )
         line = firstLine 
         
-        print "before last while : %s" %line 
+        #print "before last while : %s" %line 
    
         while lineFound == False and line != "":     
-            print "enters last while "
+            #print "enters last while "
             isInteresting, lineType = FileStatsCollector.isInterestingLine( line,types = self.statsTypes )
             
             if isInteresting  : #were still can keep on reading range 

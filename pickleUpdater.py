@@ -40,14 +40,8 @@ PXPaths.normalPaths()
 
 localMachine = os.uname()[1]
 
-if localMachine == "pds3-dev" or localMachine == "pds4-dev" or localMachine == "lvs1-stage" :
+if localMachine == "pds3-dev" or localMachine == "pds4-dev" or localMachine == "lvs1-stage" or  localMachine == "logan1" or localMachine == "logan2" :
     PATH_TO_LOGFILES = PXPaths.LOG + localMachine + "/"
-    PXPaths.RX_CONF  = '/apps/px/stats/rx/'
-    PXPaths.TX_CONF  = '/apps/px/stats/tx/'
-    PXPaths.TRX_CONF = '/apps/px/stats/trx/'
-
-elif localMachine == "logan1" or localMachine == "logan2":
-    PATH_TO_LOGFILES = PXPaths.LOG + localMachine + "/" + localMachine + "/"
     PXPaths.RX_CONF  = '/apps/px/stats/rx/'
     PXPaths.TX_CONF  = '/apps/px/stats/tx/'
     PXPaths.TRX_CONF = '/apps/px/stats/trx/'
@@ -384,8 +378,7 @@ def addOptions( parser ):
     
     parser.add_option( "-n", "--now", action="store_true", dest = "collectUpToNow", default=False, help="Collect data up to current second." )
        
-    parser.add_option( "-t", "--types", type="string", dest="types", default="All",
-                        help="Types of data to look for." )          
+    parser.add_option( "-t", "--types", type="string", dest="types", default="All", help="Types of data to look for." )          
 
 
 
@@ -483,10 +476,10 @@ def updateConfigurationFiles( machine, login ):
         os.makedirs(  '/apps/px/stats/trx/', mode=0777 )       
 
         
-    status, output = commands.getstatusoutput( "rsync -avzr  -e ssh %s@%s:/apps/px/etc/rx/ /apps/px/stats/rx/"  %( login, machine) ) 
+    status, output = commands.getstatusoutput( "rsync -avzr --delete-before -e ssh %s@%s:/apps/px/etc/rx/ /apps/px/stats/rx/"  %( login, machine) ) 
     #print output # for debugging only
     
-    status, output = commands.getstatusoutput( "rsync -avzr  -e ssh %s@%s:/apps/px/etc/tx/ /apps/px/stats/tx/"  %( login, machine) )  
+    status, output = commands.getstatusoutput( "rsync -avzr  --delete-before -e ssh %s@%s:/apps/px/etc/tx/ /apps/px/stats/tx/"  %( login, machine) )  
     #print output # for debugging only            
 
     
