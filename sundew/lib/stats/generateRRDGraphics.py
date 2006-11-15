@@ -589,7 +589,8 @@ def getDatabaseTimeOfUpdate( client, machine, fileType ):
             
     return lastUpdate      
 
-    
+
+        
 def formatMinMaxMean( minimum, maximum, mean, type ):
     """
         Formats min, max and median so that it can be used 
@@ -620,9 +621,17 @@ def formatMinMaxMean( minimum, maximum, mean, type ):
     else:
     
         if minimum != None :
-            minimum = "%.2f" %minimum    
+            if type == "latency":
+                minimum = "%.2f" %minimum                
+            else:
+                minimum = "%s" %int(minimum)
+                   
         if maximum != None :
-            maximum = "%.2f" %maximum
+            if type == "latency":    
+                maximum = "%.2f" %maximum
+            else:
+                maximum = "%s" %int(maximum)
+                
         if mean != None :
             mean = "%.2f" %mean 
         values = [ minimum, maximum, mean]
@@ -772,14 +781,14 @@ def getPairsFromAllDatabases( type, machine, start, end, infos, logger=None ):
         for client in infos.clientNames:
             try : 
                 data = typeData[client][i].split( ":" )[1].replace(" ", "")
-                if data != None and data != 'None':
+                
+                if data != None and data != 'None' and data!= 'nan':
                     total = total + float( data )
                 elif logger != None: 
                     logger.warning( "Could not find data for %s for present timestamp." %(client) )
                          
             except:
-                if logger != None :
-                    #print "Could not find data for %s for present timestamp." %(client)
+                if logger != None :                    
                     logger.warning( "Could not find data for %s for present timestamp." %(client) )
                 
                 
