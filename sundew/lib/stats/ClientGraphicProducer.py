@@ -43,11 +43,8 @@ PXPaths.normalPaths()
 
 localMachine = os.uname()[1]
 
-if localMachine == "pds3-dev" or localMachine == "pds4-dev" or localMachine == "lvs1-stage" :
+if localMachine == "pds3-dev" or localMachine == "pds4-dev" or localMachine == "lvs1-stage" or localMachine == "logan1" or localMachine == "logan2":
     PATH_TO_LOGFILES = PXPaths.LOG + localMachine + "/"
-
-elif localMachine == "logan1" or localMachine == "logan2":
-    PATH_TO_LOGFILES = PXPaths.LOG + localMachine + "/" + localMachine + "/"
 
 else:#pds5 pds5 pxatx etc
     PATH_TO_LOGFILES = PXPaths.LOG  
@@ -128,11 +125,11 @@ class ClientGraphicProducer:
                 self.logger.debug( "Parameters used : %s %s %s" %( startTime, endTime, client ) )
             
             if len( self.machines ) > 1 :    
-                statsCollection = pickleMerging.mergePicklesFromDifferentMachines( logger = None , startTime = startTime, endTime = endTime, client = client, fileType = self.fileType, machines = self.machines )
+                statsCollection = pickleMerging.mergePicklesFromDifferentMachines( logger = self.logger , startTime = startTime, endTime = endTime, client = client, fileType = self.fileType, machines = self.machines )
                                     
             else:#only one machine, only merge different hours together
                
-                statsCollection = pickleMerging.mergePicklesFromDifferentHours( logger = None , startTime = startTime, endTime = endTime, client = client, fileType = self.fileType, machine = self.machines[0] )
+                statsCollection = pickleMerging.mergePicklesFromDifferentHours( logger = self.logger , startTime = startTime, endTime = endTime, client = client, fileType = self.fileType, machine = self.machines[0] )
                 
             
             combinedMachineName = ""

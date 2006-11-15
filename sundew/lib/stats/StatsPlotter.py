@@ -146,7 +146,7 @@ class StatsPlotter:
         
         date = self.currentTime.replace( "-","" ).replace( " ", "_")
         
-        fileName = PXPaths.GRAPHS + "%s/%s_%s_%s_%s_%shours_on_%s_for %s products.png" %( clientName, self.fileType, clientName, date, self.statsTypes, self.timespan, self.machines, self.productType )
+        fileName = PXPaths.GRAPHS + "%.50s/%s_%.50s_%s_%s_%shours_on_%s_for %s products.png" %( clientName, self.fileType, clientName, date, self.statsTypes, self.timespan, self.machines, self.productType )
         
         
         fileName = fileName.replace( '[', '').replace(']', '').replace(" ", "").replace( "'","" )               
@@ -666,7 +666,7 @@ class StatsPlotter:
         
         self.graph( 'set label "Time of max. : %s" at screen .545, screen %3.2f' % ( ( timeOfMax, (.20+(nbGraphs) *.40)  )))
         
-        self.graph( 'set label "# of errors : %.0f" at screen .545, screen %3.2f' % ( self.nbErrors[i], (.18+(nbGraphs) *.40) ) )
+        self.graph( 'set label "# of errors : %.f" at screen .545, screen %3.2f' % ( self.nbErrors[i], (.18+(nbGraphs) *.40) ) )
       
                 
                 
