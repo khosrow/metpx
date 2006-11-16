@@ -75,10 +75,11 @@ class RequestReplyAFTN:
                if theFile:
                    parts = os.path.basename(theFile).split('_')
                    header = parts[0] + ' ' + parts[1]
+                   new_header = self.drp.getKeyFromHeader(header)
                    # We verify if we can include the result in the reply (consult the routing table)
                    try:
-                       if self.sendOn not in self.drp.getHeaderClients(header):
-                           self.logger.warning("%s has been excluded of reply for %s" % (header, self.sendOn))
+                       if self.sendOn not in self.drp.getHeaderClients(new_header):
+                           self.logger.warning("%s has been excluded of reply for %s" % (new_header, self.sendOn))
                            continue
                        else:
                            pass
@@ -90,7 +91,7 @@ class RequestReplyAFTN:
                    except:
                        (type, value, tb) = sys.exc_info()
                        self.logger.error("Type: %s, Value: %s" % (type, value))
-                       self.logger.warning("%s has been excluded of reply for %s" % (header, self.sendOn))
+                       self.logger.warning("%s has been excluded of reply for %s" % (new_header, self.sendOn))
                        continue
    
                    self.bulletin =  self.bulletin + header + ' ' + bestHeaderTime + '\n' + theLine.strip() + '\n\n'

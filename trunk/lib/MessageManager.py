@@ -531,6 +531,7 @@ class MessageManager:
         Informations obtained in the DirectRoutingParser object are assigned to instance variables.
         This method is only used when SENDING messages.
         """
+        header = self.drp.getKeyFromHeader(header)
         if header in self.drp.routingInfos:
             self.priority = self.priorities[self.drp.getHeaderPriority(header)]
             self.destAddress = self.validateAddresses(self.drp.getHeaderSubClients(header).get(self.name, []))
