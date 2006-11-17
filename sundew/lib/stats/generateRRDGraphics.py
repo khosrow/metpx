@@ -42,6 +42,8 @@ else:#pds5 pds5 pxatx etc
     PATH_TO_LOGFILES = PXPaths.LOG
 
 
+    
+    
 class _GraphicsInfos:
 
     def __init__( self, directory, fileType, types, totals, clientNames = None ,  timespan = 12, endDate = None, machines = ["pdsGG"]  ):
@@ -160,9 +162,9 @@ def getOptionsFromParser( parser ):
         updateConfigurationFiles( machines[0], "pds" )
         #get rx tx names accordingly.         
         if fileType == "tx":    
-            clientNames = getNames( "tx",machines[0] )  
+            clientNames = getNames( "tx", machines[0] )  
         else:
-            clientNames = getNames( "rx",machines[0] )      
+            clientNames = getNames( "rx", machines[0] )      
             
     
     try :
@@ -383,10 +385,15 @@ def buildTitle( type, client, endDate, timespan, minimum, maximum, mean  ):
 
     
  
-def getOverallMin( databaseName, startTime, endTime, logger = None ):
+def getAbsoluteMin( databaseName, startTime, endTime, logger = None ):
     """
         This methods returns the minimum of the entire set of data found between 
         startTime and endTime within the specified database name.
+        
+        In most case this will be a different min than the visible min found
+        on the graphic since the drawn points usually show the total or average of 
+        numerous data entries.
+        
     
     """
     
@@ -416,10 +423,14 @@ def getOverallMin( databaseName, startTime, endTime, logger = None ):
     
     
     
-def getOverallMax( databaseName, startTime, endTime, logger = None ):
+def getAbsoluteMax( databaseName, startTime, endTime, logger = None ):
     """
         This methods returns the max of the entire set of data found between 
-        startTime and endTime within the specified database name.
+        startTime and endTime within the specified database name.        
+                
+        In most case this will be a different max than the visible max found
+        on the graphic since the drawn points usually show the total or average of 
+        numerous data entries.
         
     """  
     
@@ -446,10 +457,15 @@ def getOverallMax( databaseName, startTime, endTime, logger = None ):
  
     
        
-def getOverallMean( databaseName, startTime, endTime, logger = None  ):
+def getAbsoluteMean( databaseName, startTime, endTime, logger = None  ):
     """
         This methods returns the mean of the entire set of data found between 
         startTime and endTime within the specified database name.
+        
+                
+        In most case this will be a different mean than the visible mean found
+        on the graphic since the drawn points usually show the total or average of 
+        numerous data entries.
         
     """
     
@@ -541,7 +557,7 @@ def buildImageName(  type, client, machine, infos, logger = None ):
                     
     date = infos.endDate.replace( "-","" ).replace( " ", "_")
     
-    fileName = PXPaths.GRAPHS + "%s/rrdgraphs/%s_%s_%s_%s_%s%s_on_%s.png" %( client,infos.fileType, client, date, type, span, timeMeasure, machine )
+    fileName = PXPaths.GRAPHS + "%s/rrdgraphs/%s_%s_%s_%s_%s%s_on_%s.png" %( client, infos.fileType, client, date, type, span, timeMeasure, machine )
     
     
     fileName = fileName.replace( '[', '').replace(']', '').replace(" ", "").replace( "'","" )               
@@ -651,11 +667,11 @@ def getInterval( startTime, timeOfLastUpdate, dataType  ):
 
     if dataType == "latency" :
         interval = 1.0 #No need to multiply average by interval. It's the mean we want in the case of latency.
-    elif ( timeOfLastUpdate - startTime ) <= (7200 * 60):#less than a week 
+    elif ( timeOfLastUpdate - startTime ) < (7200 * 60):#less than a week 
         interval = 1.0
-    elif ( timeOfLastUpdate - startTime ) <= (20160 * 60):#less than two week
+    elif ( timeOfLastUpdate - startTime ) < (20160 * 60):#less than two week
         interval = 60.0
-    elif (timeOfLastUpdate - startTime) <= (1460*240*60):
+    elif (timeOfLastUpdate - startTime) < (1460*240*60):
         interval = 240.0 
     else:
         interval = 1440.0    
@@ -731,22 +747,25 @@ def createNewDatabase( fileType, type, machine, start, infos, logger ):
     elif not os.path.isdir( PXPaths.STATS + "databases/combined/" ):
         os.makedirs( PXPaths.STATS + "databases/combined/" )       
     
-    if infos.timespan <(5*24):# daily :
+    if infos.timespan <(5*24):#daily :
         start = start - 60
         rrdtool.create( combinedDatabaseName, '--start','%s' %( start ), '--step', '60', 'DS:%s:GAUGE:60:U:U' %type,'RRA:AVERAGE:0:1:7200','RRA:MIN:0:1:7200', 'RRA:MAX:0:1:7200' )
-        #print "daily"     
+             
+    
     elif infos.timespan >(5*24) and infos.timespan <(14*24):# weekly :  
         start = start - (60*60)
         rrdtool.create( combinedDatabaseName, '--start','%s' %( start ), '--step', '3600', 'DS:%s:GAUGE:3600:U:U' %type,'RRA:AVERAGE:0:1:336','RRA:MIN:0:1:336', 'RRA:MAX:0:1:336' )               
-        #print "weekly"            
+                   
+    
     elif infos.timespan <(365*24):#monthly
         start = start - (240*60)
         rrdtool.create( combinedDatabaseName, '--start','%s' %( start ), '--step', '14400', 'DS:%s:GAUGE:14400:U:U' %type, 'RRA:AVERAGE:0:1:1460','RRA:MIN:0:1:1460','RRA:MAX:0:1:1460' )  
-        #print "monthly"
+        
+    
     else:#yearly
         start = start - (1440*60)
         rrdtool.create( combinedDatabaseName, '--start','%s' %( start ), '--step', '86400', 'DS:%s:GAUGE:86400:U:U' %type, 'RRA:AVERAGE:0:1:3650','RRA:MIN:0:1:3650','RRA:MAX:0:1:3650' ) 
-        #print "yearly"
+        
     
     return combinedDatabaseName
     
@@ -762,8 +781,12 @@ def getPairsFromAllDatabases( type, machine, start, end, infos, logger=None ):
         
     """
     
+    i = 0
     pairs = []
     typeData = {}
+    nbEntries = 0    
+    lastUpdate =0     
+    
     
     for client in infos.clientNames:#Gather all pairs for that type
         
@@ -772,29 +795,46 @@ def getPairsFromAllDatabases( type, machine, start, end, infos, logger=None ):
         output = output.split( "\n" )[2:]
         typeData[client] = output
     
-                    
-    for i in range( len(typeData[client]) ) :#make total of all clients for every timestamp
-        total = 0 
+ 
+    while lastUpdate ==0 and i < len( infos.clientNames ) : # in case some databases dont exist
+        lastUpdate = getDatabaseTimeOfUpdate( infos.clientNames[i], machine, infos.fileType )        
+        interval  =  getInterval( start, lastUpdate, "other" )           
+        nbEntries = int(( end-start ) / (interval * 60)) + 1 
+        i = i + 1
+        
+        
+    for i in range( nbEntries ) :#make total of all clients for every timestamp
+        
+        total = 0.0
+        
         for client in infos.clientNames:
+            
             try : 
                 data = typeData[client][i].split( ":" )[1].replace(" ", "")
                 
                 if data != None and data != 'None' and data!= 'nan':
                     total = total + float( data )
+                    
+#                     if type == "errors":#for test
+#                        print "%s: %s %s" %( client, MyDateLib.getIsoFromEpoch( start + ( i * interval * 60) ),float(data)*24*60 )
+                
                 elif logger != None: 
                     logger.warning( "Could not find data for %s for present timestamp." %(client) )
                          
             except:
+                
                 if logger != None :                    
                     logger.warning( "Could not find data for %s for present timestamp." %(client) )
-                
-                
-        #print " %s %s : %s " %(client,type,typeData[client][i].split( ":" )[1].replace(" ", ""))
+                             
+        
         if type == "latency":#latency is always an average
             total = total / ( len( output ) )
-                        
+                     
+        
         pairs.append( [typeData[client][i].split( " " )[0].replace( ":", "" ), total] )   
-    
+        
+#         if type == "errors":#for test
+#             print "Will update with : %s    %s" %(typeData[client][i].split( " " )[0].replace( ":", "" ), total)
     
     return pairs
     
@@ -828,11 +868,8 @@ def createMergedDatabases( infos, logger = None ):
             combinedDatabaseName = createNewDatabase( infos.fileType, type, machine, start, infos, logger )
                                                      
             databaseNames[type] = combinedDatabaseName                            
-            
-            #update database with pairs 
-            #print "***********%s***********" %type       
+                
             for pair in pairs:
-            #    print '%s:%s' %( int(pair[0]), pair[1] ) 
                 rrdtool.update( combinedDatabaseName, '%s:%s' %( int(pair[0]), pair[1] ) )
                  
                 
@@ -843,14 +880,14 @@ def createMergedDatabases( infos, logger = None ):
 def generateRRDGraphics( infos, logger = None ):
     """
         This method generates all the graphics. 
-        
+                
     """    
-    
-    #print "************************************%s" %infos.endDate
-    if infos.totals: #Graphics based on total values from a group of clients.
-        databaseNames = createMergedDatabases( infos, logger )
         
-        #Make 2 title filename options either tx/rx...or list of clients
+    if infos.totals: #Graphics based on total values from a group of clients.
+        #todo : Make 2 title options
+        
+        databaseNames = createMergedDatabases( infos, logger )
+                
         for machine in infos.machines:
             for type in infos.types:
                 plotRRDGraph( databaseNames[type], type, infos.fileType, infos.fileType, machine, infos, lastUpdate =  MyDateLib.getSecondsSinceEpoch(infos.endDate), logger =logger )
@@ -877,7 +914,7 @@ def main():
     if not os.path.isdir( PXPaths.LOG  ):
         os.makedirs( PXPaths.LOG , mode=0777 )
     
-    logger = Logger( PXPaths.LOG  + 'stats_' + 'rrd_graphs' + '.log.notb', 'INFO', 'TX' + 'rrd_transfer', bytes = True  ) 
+    logger = Logger( PXPaths.LOG  + 'stats_'+'rrd_graphs' + '.log.notb', 'INFO', 'TX' + 'rrd_transfer', bytes = True  ) 
     
     logger = logger.getLogger()
        
@@ -886,6 +923,7 @@ def main():
     infos = getOptionsFromParser( parser )
 
     generateRRDGraphics( infos, logger = logger )
+    
     
     
 if __name__ == "__main__":

@@ -124,7 +124,7 @@ class ClientGraphicProducer:
                 self.logger.debug( "Call to mergeHourlyPickles." )
                 self.logger.debug( "Parameters used : %s %s %s" %( startTime, endTime, client ) )
             
-            if len( self.machines ) > 1 :    
+            if len( self.machines ) > 1 :  
                 statsCollection = pickleMerging.mergePicklesFromDifferentMachines( logger = self.logger , startTime = startTime, endTime = endTime, client = client, fileType = self.fileType, machines = self.machines )
                                     
             else:#only one machine, only merge different hours together
