@@ -166,6 +166,8 @@ if type == 'pxReceiver':
     directory = 'rx'
 elif type == 'pxSender':
     directory = 'tx'
+elif type == 'pxTransceiver':
+    directory = 'trx'
 else:
     raise ValueError
 
