@@ -63,7 +63,7 @@ def socketInfo(port, dir, nsInfo):
     regex = ''
     if dir == 'pxReceiver':
         regex = localRegex
-    elif dir == 'pxSender':
+    elif dir in ['pxSender', 'pxTransceiver']:
         regex = remoteRegex
     
     info = ''
