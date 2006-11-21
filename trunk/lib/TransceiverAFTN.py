@@ -767,10 +767,10 @@ class TransceiverAFTN:
                             # We should never go here
                             self.logger.error("Unknown message type has just been sent. See code!")
 
-                    self.logger.info("(%5d Bytes) Message %s %s (%s/%s) has been sent" % (self.totBytes, getWord(mm.type), 
+                    self.logger.info("(%5d Bytes) Message %s %s (%s/%s) has been sent => delivered" % (self.totBytes, getWord(mm.type), 
                                        mm.filenameToSend, mm.nextPart+1, mm.numberOfParts))
                 else:
-                    self.logger.info("(%5d Bytes) Message %s %s (%s/%s) has been resent" % (self.totBytes, getWord(mm.type), 
+                    self.logger.info("(%5d Bytes) Message %s %s (%s/%s) has been resent => delivered" % (self.totBytes, getWord(mm.type), 
                                        mm.filenameToSend, mm.nextPart+1, mm.numberOfParts))
 
                 # Reset byte count
