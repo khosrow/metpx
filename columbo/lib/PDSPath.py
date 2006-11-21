@@ -33,11 +33,12 @@ BIN = ROOT + "/bin"
 INFO = ROOT + "/info"
 CLIENTHOME = ROOT + "/home"
 
-# Useful directorties for NCS-PX
+# Useful directorties for PX
 PXROOT = "/apps/px"
 PXETC = PXROOT + "/etc"
 RXETC = PXETC + "/rx"
 TXETC = PXETC + "/tx"
+TRXETC = PXETC + "/trx"
 PXLOG = PXROOT + "/log"
 RXQ = PXROOT + "/rxq"
 TXQ = PXROOT + "/txq"

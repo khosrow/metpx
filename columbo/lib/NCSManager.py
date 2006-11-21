@@ -59,6 +59,8 @@ class NCSManager(Manager):
                 configFile = RXETC + '/' + toggled[1]
             elif dir == 'pxSender':
                 configFile = TXETC + '/' + toggled[1]
+            elif dir == 'pxTransceiver':
+                configFile = TRXETC + '/' + toggled[1]
             
             # Get usefull information from the config file
             (type, port) = NCSUtils.configParse(configFile)
@@ -85,6 +87,13 @@ class NCSManager(Manager):
                 regex = r"\[INFO\].* delivered"
                 lastTrans = NCSUtils.lastSendRcv(log, regex)
                 lastRcv = time.gmtime(0) # Default value
+            elif dir == 'pxTransceiver':
+                log = PXLOG + '/' + 'trx_' + name + '.log'
+                regexT = r"\[INFO\].* delivered"
+                regexR = r"Ingested in DB"
+
+                lastTrans = NCSUtils.lastSendRcv(log, regexT)
+                lastRcv   = NCSUtils.lastSendRcv(log, regexR) 
             
             # Creating the circuit
             circuit = NCSCircuit(self.machine, name, status, configFile, log, sock, type, lastRcv, lastTrans)
@@ -94,8 +103,9 @@ class NCSManager(Manager):
                     circuit.setQueue(NCSUtils.queueLength(RXQ + '/' + name))
                 else:
                     circuit.setQueue(-1)
-            elif dir == 'pxSender':
+            elif dir in ['pxSender', 'pxTransceiver']:
                 circuit.setQueue(NCSUtils.queueLength(TXQ + '/' + name))
+
             try:
                 lastlines = self.easyTail(log, 1) # We want the 1 last line of the logfile
                 if (len(lastlines) == 0):
@@ -110,6 +120,7 @@ class NCSManager(Manager):
     def makeCircuitDict(self):
         rxFiles = os.listdir(RXETC)
         txFiles = os.listdir(TXETC)
+        trxFiles = os.listdir(TRXETC)
              
         # We do not want to execute 'ps' for every file
         procList = commands.getoutput('ps -ax')
@@ -125,6 +136,7 @@ class NCSManager(Manager):
         nsInfo = commands.getoutput('netstat -an').splitlines()
         self.getData(rxFiles, 'pxReceiver', procList, nsInfo)
         self.getData(txFiles, 'pxSender', procList, nsInfo)
+        self.getData(trxFiles, 'pxTransceiver', procList, nsInfo)
         
         print '========== CIRCUITDICT =========='
         print self.circuitDict

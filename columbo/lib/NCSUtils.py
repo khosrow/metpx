@@ -40,7 +40,7 @@ def configParse(file):
             field, value = match.group(1,2)
             if field == 'type':
                 type = value.strip("'").upper()
-            if field == 'port':
+            if field == 'port' or 'portS':
                 port = value
             if field == 'destination':
                 if value.find('ftp://') == -1:
