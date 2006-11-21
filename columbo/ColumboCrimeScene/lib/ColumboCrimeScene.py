@@ -51,8 +51,10 @@ print "Environ vars: ", os.environ.keys()
 print "host: ", os.uname()[1]
 print "path 0: ", sys.path[0]
 
-sys.path.append(sys.path[0] + "/../../lib");
-sys.path.append("../../lib")
+#sys.path.append(sys.path[0] + "/../../lib");
+#sys.path.append("../../lib")
+sys.path.insert(1, sys.path[0] + "/../../lib");
+sys.path.insert(1, "../../lib")
 print "sys.path: ", sys.path
 
 from PDSPath import *
