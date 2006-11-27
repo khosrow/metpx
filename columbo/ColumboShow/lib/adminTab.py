@@ -87,11 +87,16 @@ print """
 </script>
 <script src="/js/windowUtils.js"></script>
 <script src="/js/SortableTable.js"></script>
-<!--<script src="/js/liveclock.js"></script>-->
-</head>
-""" 
+"""
+
+docRoot = os.environ['DOCUMENT_ROOT']
+clock = "/js/liveclock.js"
+
+if os.path.exists(docRoot + clock):
+    print '<script src="%s"></script>' % clock
 
 print """
+</head>
 <body text="#000000" bgcolor="#3b87a9" link="#00ff00" vlink="ff00ff" >
 
 <center>
@@ -114,13 +119,16 @@ print """
   <tr>
     <td valign="top" align="center" bgcolor="#cccccc">
       <br>
-      <!--
+"""
+
+if os.path.exists(docRoot + clock):
+      print """
       <script type="text/javascript"> 
       new LiveClock('arial', '2', '#000000', '#ffffff', 'UTC Time: ', '', '300', '0', '', '', '', 0);
       LC_InitializeClocks();
       </script>
-      -->
-"""
+      """
+
 print """
     </td>
   </tr>
