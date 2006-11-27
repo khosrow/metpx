@@ -370,7 +370,7 @@ function drawTable(jsData, bodyId, host) {
                 }
                 else if (j == 2) // Last Rcv
                 {
-                    if (jsData[i][1].match(/pxReceiver/))
+                    if (jsData[i][1].match(/pxReceiver/) || jsData[i][1].match(/pxTransceiver/))
                     {
                         if (jsData[i][j] == "NOT FOUND")
                         {
@@ -385,7 +385,7 @@ function drawTable(jsData, bodyId, host) {
                 }
                 else if (j == 3) // Last Trans
                 {
-                    if (jsData[i][1].match(/pxSender/))
+                    if (jsData[i][1].match(/pxSender/) || jsData[i][1].match(/pxTransceiver/))
                     {
                         if (jsData[i][j] == "NOT FOUND")
                         {
