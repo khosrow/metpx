@@ -209,9 +209,16 @@ class MessageManager:
                 theHeader = header
 
         if theHeader:
-            timestamp = allLines[0].split()[1]
-            self.logger.debug("Type: %s, Station: %s, Headers: %s, TheHeader: %s, Timestamp: %s" % (messageType, station, headers, theHeader, timestamp))
+            BBB = ''
+            firstLine = allLines[0].split()
+            timestamp = firstLine[1]
+            if len(firstLine) >= 3:
+                BBB = firstLine[2]
+
+            self.logger.debug("Type: %s, Station: %s, Headers: %s, TheHeader: %s, Timestamp: %s, BBB = %s" % (messageType, station, headers, theHeader, timestamp, BBB))
             allLines[0] = theHeader + ' ' + timestamp
+            if BBB:
+                allLines[0] += ' ' + BBB
             allLines.insert(1, 'AAXX ' + timestamp[:4] + '4')
         else:
             return ['\n'.join(message.textLines)]
