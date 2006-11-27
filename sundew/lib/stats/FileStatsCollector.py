@@ -392,7 +392,7 @@ class FileStatsCollector:
                         #elif lineType == "[OTHER]" :               
                 except:                
                     
-                    if logger != none :
+                    if logger != None :
                         logger.error("could not find %s value in line %s." %( statstype,line ) ) 
                         logger.error("value was replaced by 0.")
                     
@@ -466,7 +466,7 @@ class FileStatsCollector:
         
         """
         
-        #print "------------------------------------------------------"
+        print "------------------------------------------------------"
         
         line                 = ""
         lineType             = None 
@@ -484,13 +484,13 @@ class FileStatsCollector:
             fileHandle.seek( self.lastReadPosition, 0 )
             #position = fileHandle.tell()                        
             firstLine = fileHandle.readline()
-            #print "firstLine read : %s" %firstLine
+            print "firstLine read : %s" %firstLine
             position = fileHandle.tell()
             
             #In case of traceback line
             isInteresting,lineType = FileStatsCollector.isInterestingLine( firstLine, usage = "departure",types = self.statsTypes  )
             while isInteresting == False and firstLine != "":
-                #print "enters first while"
+                print "enters first while"
                 firstLine = fileHandle.readline()
                 position = fileHandle.tell()
                 isInteresting,lineType = FileStatsCollector.isInterestingLine( firstLine, usage = "departure", types = self.statsTypes )
@@ -498,7 +498,7 @@ class FileStatsCollector:
             #print firstLine
         
         else:
-            #print "file not previously read!?!?"
+            print "file not previously read!?!?"
             firstLine      = fileHandle.readline()
             position       = fileHandle.tell()
             
@@ -513,7 +513,7 @@ class FileStatsCollector:
         fileHandle.seek( position, 0 )
         line = firstLine 
         
-        #print "before last while : %s" %line 
+        print "before last while : %s" %line 
    
         while lineFound == False and line != "":     
             #print "enters last while "
@@ -604,7 +604,7 @@ class FileStatsCollector:
                     
                 neededValues = self.findValues( neededTypes, line, lineType,fileType = self.fileType,logger= self.logger )    
                 
-                print "neededValues : %s" %neededValues
+                #print "neededValues : %s" %neededValues
                 #print 
                 #add values general to the line we are treating 
                 self.fileEntries[ entryCount ].files.append( neededValues[ "fileName" ] )
@@ -613,7 +613,7 @@ class FileStatsCollector:
                 self.fileEntries[ entryCount ].values.rows = self.fileEntries[ entryCount ].values.rows + 1
                 
                 
-                if filledAnEntry == False :
+                if filledAnEntry == False :#in case of numerous files
                     self.firstFilledEntry = entryCount 
                     filledAnEntry = True 
                 elif entryCount < self.firstFilledEntry:
@@ -648,14 +648,17 @@ class FileStatsCollector:
                 
             if line == "" :
                 #print "read the entire file allready"
-                self.lastFilledEntry  = entryCount                  
+                if entryCount > self.lastFilledEntry:#in case of numerous files
+                    self.lastFilledEntry  = entryCount                  
                 self.lastReadPosition = 0
-
+                previousPosition      = 0
+                
             else:
-                print "last line read : %s " %line
-                self.lastFilledEntry  = entryCount                  
+                if entryCount > self.lastFilledEntry :#in case of numerous files
+                    self.lastFilledEntry  = entryCount                  
+                
                 self.lastReadPosition = previousPosition #If we haven't met eof we don't wana loose an interesting 
-
+                print "last line read : %s position is : %s" %(line,self.lastReadPosition)
             
             fileHandle.close()             
                 

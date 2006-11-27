@@ -261,9 +261,9 @@ def updateDatabases( parameters ):
     """
         
     for machine in parameters.databaseMachines : 
-        status, output = commands.getstatusoutput( "/apps/px/lib/stats/transferPickleToRRD.py -m %s >>/dev/null 2>&1" %machine )
+        status, output = commands.getstatusoutput( "/apps/px/lib/stats/transferPickleToRRD.py -m '%s'" %machine )
         print  "/apps/px/lib/stats/transferPickleToRRD.py -m '%s' >>/dev/null 2>&1" %machine
-
+        print "output:%s" %output
 
 def getGraphicsForWebPages( ):
     """
