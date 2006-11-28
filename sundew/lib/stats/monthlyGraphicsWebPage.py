@@ -119,9 +119,30 @@ def main():
     <html>
         <head>
             <title> PX Graphics </title>
+            
+            <script>             
+                function wopen(url, name, w, h){
+                // This function was taken on www.boutell.com
+                    w += 32;
+                    h += 96;
+                    var win = window.open(url,
+                    name,
+                    'width=' + w + ', height=' + h + ', ' +
+                    'location=no, menubar=no, ' +
+                    'status=no, toolbar=no, scrollbars=no, resizable=no');
+                    win.resizeTo(w, h);
+                    win.focus();
+                }         
+            </script>                
+            
+            
         </head>    
         <body text="#000000" link="#FFFFFF" vlink="000000" bgcolor="#CCCCCC" >
-        
+            <STYLE>
+                <!--
+                A{text-decoration:none}
+                -->
+            </STYLE>
         <br>
         <h2>Monthly graphics for RX sources from MetPx.</h2>
         <br>
@@ -143,18 +164,18 @@ def main():
         """ %(rxName)
     
         print """    
-            <td bgcolor="#66CCFF" width = "25%%" >Months: <a target ="%s" href="%ssymlinks/monthly/bytecount/%s/%s.png">%s </a><a target ="%s" href="%ssymlinks/monthly/bytecount/%s/%s.png">%s </a><a target ="%s" href="%ssymlinks/monthly/bytecount/%s/%s.png">%s </a></td>
+            <td bgcolor="#66CCFF" width = "25%%" >Months&nbsp;:&nbsp;<a target ="popup" href="%s" onClick="wopen('%ssymlinks/monthly/bytecount/%s/%s.png', 'popup', 875, 240); return false;">%s&nbsp;</a><a target ="popup" href="%s" onClick="wopen('%ssymlinks/monthly/bytecount/%s/%s.png', 'popup', 875, 240); return false;">%s&nbsp;</a><a target ="popup" href="%s" onClick="wopen('%ssymlinks/monthly/bytecount/%s/%s.png', 'popup', 875, 240); return false;">%s&nbsp;</a></td>
         """%( rxName,PXPaths.GRAPHS,rxName,months[0],months[0], rxName,PXPaths.GRAPHS,rxName,months[1],months[1], rxName,PXPaths.GRAPHS,rxName,months[2],months[2] )       
     
     
         
         print """    
-            <td bgcolor="#66CCFF" width = "25%%" >Months: <a target ="%s" href="%ssymlinks/monthly/filecount/%s/%s.png">%s </a><a target ="%s" href="%ssymlinks/monthly/filecount/%s/%s.png">%s </a><a target ="%s" href="%ssymlinks/monthly/filecount/%s/%s.png">%s </a></td>
+            <td bgcolor="#66CCFF" width = "25%%" >Months&nbsp;:&nbsp;<a target ="popup" href="%s" onClick="wopen('%ssymlinks/monthly/filecount/%s/%s.png', 'popup', 875, 240); return false;">%s&nbsp;</a><a target ="popup" href="%s" onClick="wopen('%ssymlinks/monthly/filecount/%s/%s.png', 'popup', 875, 240); return false;">%s&nbsp;</a><a target ="popup" href="%s" onClick="wopen('%ssymlinks/monthly/filecount/%s/%s.png', 'popup', 875, 240); return false;">%s&nbsp;</a></td>
         """%( rxName,PXPaths.GRAPHS,rxName,months[0],months[0], rxName,PXPaths.GRAPHS,rxName,months[1],months[1], rxName,PXPaths.GRAPHS,rxName,months[2],months[2] )   
         
         
         print """    
-            <td bgcolor="#66CCFF" width = "25%%" >Months: <a target ="%s" href="%ssymlinks/monthly/errors/%s/%s.png">%s </a><a target ="%s" href="%ssymlinks/monthly/errors/%s/%s.png">%s </a><a target ="%s" href="%ssymlinks/monthly/errors/%s/%s.png">%s </a></td>
+            <td bgcolor="#66CCFF" width = "25%%" >Months&nbsp;:&nbsp;<a target ="popup" href="%s" onClick="wopen('%ssymlinks/monthly/errors/%s/%s.png', 'popup', 875, 240); return false;">%s&nbsp;</a><a target ="popup" href="%s" onClick="wopen('%ssymlinks/monthly/errors/%s/%s.png', 'popup', 875, 240); return false;">%s&nbsp;</a><a target ="popup" href="%s" onClick="wopen('%ssymlinks/monthly/errors/%s/%s.png', 'popup', 875, 240); return false;">%s&nbsp;</a></td>
         """%( rxName,PXPaths.GRAPHS,rxName,months[0],months[0], rxName,PXPaths.GRAPHS,rxName,months[1],months[1], rxName,PXPaths.GRAPHS,rxName,months[2],months[2] )    
               
     
@@ -187,23 +208,23 @@ def main():
         """ %(txName)
         
         print """    
-            <td bgcolor="#66CCFF" width = "16.66%%" >Months: <a target ="%s" href="%ssymlinks/monthly/latency/%s/%s.png">%s  </a><a target ="%s" href="%ssymlinks/monthly/latency/%s/%s.png">%s  </a><a target ="%s" href="%ssymlinks/monthly/latency/%s/%s.png">%s  </a></td>
+            <td bgcolor="#66CCFF" width = "16.66%%" >Months: <a target ="popup" href="%s" onClick="wopen('%ssymlinks/monthly/latency/%s/%s.png', 'popup', 875, 240); return false;">%s&nbsp;</a><a target ="popup" href="%s" onClick="wopen('%ssymlinks/monthly/latency/%s/%s.png', 'popup', 875, 240); return false;">%s&nbsp;</a><a target ="popup" href="%s" onClick="wopen('%ssymlinks/monthly/latency/%s/%s.png', 'popup', 875, 240); return false;">%s</a></td>
         """%( txName,PXPaths.GRAPHS,txName,months[0],months[0], txName,PXPaths.GRAPHS,txName,months[1],months[1], txName,PXPaths.GRAPHS,txName,months[2],months[2] )    
         
         print """    
-            <td bgcolor="#66CCFF" width = "16.66%%" >Months: <a target ="%s" href="%ssymlinks/monthly/filesOverMaxLatency/%s/%s.png">%s  </a><a target ="%s" href="%ssymlinks/monthly/filesOverMaxLatency/%s/%s.png">%s </a><a target ="%s" href="%ssymlinks/monthly/filesOverMaxLatency/%s/%s.png">%s </a></td>
+            <td bgcolor="#66CCFF" width = "16.66%%" >Months: <a target ="popup" href="%s" onClick="wopen('%ssymlinks/monthly/filesOverMaxLatency/%s/%s.png', 'popup', 875, 240); return false;">%s&nbsp;</a><a target ="popup" href="%s" onClick="wopen('%ssymlinks/monthly/filesOverMaxLatency/%s/%s.png', 'popup', 875, 240); return false;">%s&nbsp;</a><a target ="popup" href="%s" onClick="wopen('%ssymlinks/monthly/filesOverMaxLatency/%s/%s.png', 'popup', 875, 240); return false;">%s</a></td>
         """%( txName,PXPaths.GRAPHS,txName,months[0],months[0], txName,PXPaths.GRAPHS,txName,months[1],months[1], txName,PXPaths.GRAPHS,txName,months[2],months[2] )    
         
         print """    
-            <td bgcolor="#66CCFF" width = "16.66%%" >Months: <a target ="%s" href="%ssymlinks/monthly/bytecount/%s/%s.png">%s </a><a target ="%s" href="%ssymlinks/monthly/bytecount/%s/%s.png">%s </a><a target ="%s" href="%ssymlinks/monthly/bytecount/%s/%s.png">%s </a></td>
+            <td bgcolor="#66CCFF" width = "16.66%%" >Months: <a target ="popup" href="%s" onClick="wopen('%ssymlinks/monthly/bytecount/%s/%s.png', 'popup', 875, 240); return false;">%s&nbsp;</a><a target ="popup" href="%s" onClick="wopen('%ssymlinks/monthly/bytecount/%s/%s.png', 'popup', 875, 240); return false;">%s&nbsp;</a><a target ="popup" href="%s" onClick="wopen('%ssymlinks/monthly/bytecount/%s/%s.png', 'popup', 875, 240); return false;">%s</a></td>
         """%( txName,PXPaths.GRAPHS,txName,months[0],months[0], txName,PXPaths.GRAPHS,txName,months[1],months[1], txName,PXPaths.GRAPHS,txName,months[2],months[2] )    
         
         print """    
-            <td bgcolor="#66CCFF" width = "16.66%%" >Months: <a target ="%s" href="%ssymlinks/monthly/filecount/%s/%s.png">%s </a><a target ="%s" href="%ssymlinks/monthly/filecount/%s/%s.png">%s </a><a target ="%s" href="%ssymlinks/monthly/filecount/%s/%s.png">%s </a></td>
+            <td bgcolor="#66CCFF" width = "16.66%%" >Months: <a target ="popup" href="%s" onClick="wopen('%ssymlinks/monthly/filecount/%s/%s.png', 'popup', 875, 240); return false;">%s&nbsp;</a><a target ="popup" href="%s" onClick="wopen('%ssymlinks/monthly/filecount/%s/%s.png', 'popup', 875, 240); return false;">%s&nbsp;</a><a target ="popup" href="%s" onClick="wopen('%ssymlinks/monthly/filecount/%s/%s.png', 'popup', 875, 240); return false;">%s</a></td>
         """%( txName,PXPaths.GRAPHS,txName,months[0],months[0], txName,PXPaths.GRAPHS,txName,months[1],months[1], txName,PXPaths.GRAPHS,txName,months[2],months[2] )    
         
         print """    
-            <td bgcolor="#66CCFF" width = "16.66%%" >Months: <a target ="%s" href="%ssymlinks/monthly/errors/%s/%s.png">%s </a><a target ="%s" href="%ssymlinks/monthly/errors/%s/%s.png">%s </a><a target ="%s" href="%ssymlinks/monthly/errors/%s/%s.png">%s </a></td>
+            <td bgcolor="#66CCFF" width = "16.66%%" >Months: <a target ="popup" href="%s" onClick="wopen('%ssymlinks/monthly/errors/%s/%s.png', 'popup', 875, 240); return false;">%s&nbsp;</a><a target ="popup" href="%s" onClick="wopen('%ssymlinks/monthly/errors/%s/%s.png', 'popup', 875, 240); return false;">%s&nbsp;</a><a target ="popup" href="%s" onClick="wopen('%ssymlinks/monthly/errors/%s/%s.png', 'popup', 875, 240); return false;">%s</a></td>
         """%( txName,PXPaths.GRAPHS,txName,months[0],months[0], txName,PXPaths.GRAPHS,txName,months[1],months[1], txName,PXPaths.GRAPHS,txName,months[2],months[2] )        
 
         
