@@ -282,12 +282,15 @@ def updateWebPages():
         update the different web pages. 
             
     """ 
-       
+    print "updateWebPages"    
     status, output = commands.getstatusoutput( "/apps/px/lib/stats/dailyGraphicsWebPage.py" )
+    print output 
     status, output = commands.getstatusoutput( "/apps/px/lib/stats/weeklyGraphicsWebPage.py" )
+    print output 
     status, output = commands.getstatusoutput( "/apps/px/lib/stats/monthlyGraphicsWebPage.py" )
+    print output 
     status, output = commands.getstatusoutput( "/apps/px/lib/stats/yearlyGraphicsWebPage.py" )
-
+    print output 
     
     
 def main():
