@@ -239,6 +239,7 @@ Message (repr):
         """ 
         Used  only at RECEPTION of an AFTN Message
         """
+        self.message = self.message.replace('\r\r\n', '\r\n')
         self.messageLines = self.message.splitlines()
         if self._parseHeadingLine(self.messageLines[0]):
             if self._parseDestinationAddressLine(self.messageLines[1]):
