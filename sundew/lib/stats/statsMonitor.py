@@ -179,6 +179,7 @@ def getPreviousMonitoringJob( currentTime ):
     return previousMonitoringJob
         
         
+    
 def getTimeOfLastFilledEntry( name, startTime ):
     """
         Returns the time of the last
@@ -188,7 +189,7 @@ def getTimeOfLastFilledEntry( name, startTime ):
     """    
     
     file  = "/apps/px/stats/statsMonitoring/lastEntryFilledTimes"
-    timeOfLastFilledEntry = ""
+    #timeOfLastFilledEntry = ""
     
     if os.path.isfile( file ):
         fileHandle      = open( file, "r" )
@@ -197,12 +198,13 @@ def getTimeOfLastFilledEntry( name, startTime ):
         
         if name not in times.keys():
             timeOfLastFilledEntry = startTime
-            
+        else:
+            timeOfLastFilledEntry = times[name]     
     else:
     
         timeOfLastFilledEntry = startTime 
                 
-    
+    #print "time returned :%s" %timeOfLastFilledEntry
     return timeOfLastFilledEntry
     
     
@@ -216,8 +218,7 @@ def saveTimeOfLastFilledEntry( name, timeOfLastFilledEntry ):
     """    
     
     file  = "/apps/px/stats/statsMonitoring/lastEntryFilledTimes"
-    timeOfLastFilledEntry = ""
-    
+       
     if os.path.isfile( file ):
         fileHandle      = open( file, "r" )
         times = pickle.load( fileHandle )
@@ -227,7 +228,7 @@ def saveTimeOfLastFilledEntry( name, timeOfLastFilledEntry ):
         times= {}
 
     times[ name ]  =  timeOfLastFilledEntry           
-    
+    #print "time to be saved for %s : %s" %( name, timeOfLastFilledEntry)
     fileHandle = open( file, "w" )
     pickle.dump( times, fileHandle )
     fileHandle.close()
@@ -419,7 +420,7 @@ def findHoursBetween( startTime, endTime ):
         A startTime of 2006-11-11 01:00:00 and an endTime of
          
     """
-    
+    #print "startTime %s endtime %s" %(startTime, endTime)
     hours = []
     start = MyDateLib.getSecondsSinceEpoch( MyDateLib.getIsoWithRoundedHours( startTime ) )
     end   = MyDateLib.getSecondsSinceEpoch( MyDateLib.getIsoWithRoundedHours( endTime ) )
@@ -814,11 +815,13 @@ def gapInErrorLog( name, start, end, errorLog )  :
     """
     
     gapFound = False 
+    difference = None 
     gapInErrorLog = False 
     lastTimeThisGapWasfound = ""
     
     for line in errorLog:
         try:
+        
             splitLine = line.split()
             logEntryTime = MyDateLib.getIsoWithRoundedSeconds( splitLine[1] + " " + splitLine[2][:-4] )
             lastEntryTime = MyDateLib.getIsoWithRoundedSeconds( splitLine[9] + " " + splitLine[10] )
@@ -829,41 +832,80 @@ def gapInErrorLog( name, start, end, errorLog )  :
                 if logEntryTime > start:
                     gapFound = True 
                 lastTimeThisGapWasfound =  logEntryTime 
-            
+                
+                if logEntryTime >= end:
+                    break
             
             elif splitLine[3].replace( ":", "" ) == name and lastEntryTime > start :#newer entry was found for same name 
                 break
             
-            elif logEntryTime > end :#in case file is newer than time of end of verification
+            elif logEntryTime >= end :#in case file is newer than time of end of verification
                 break
+                
         except:
-            print line
-    
+            #print line
+            a=1
+    if lastTimeThisGapWasfound  != "":
+        difference = abs( ( MyDateLib.getSecondsSinceEpoch(end) -  MyDateLib.getSecondsSinceEpoch(lastTimeThisGapWasfound) ) / 60 )        
     if gapFound == True and lastTimeThisGapWasfound <= end:
-        if ( ( MyDateLib.getSecondsSinceEpoch(end) -  MyDateLib.getSecondsSinceEpoch(lastTimeThisGapWasfound) ) / 60 ) <= 1 :         
+
+        if abs( ( MyDateLib.getSecondsSinceEpoch(end) -  MyDateLib.getSecondsSinceEpoch(lastTimeThisGapWasfound) ) / 60 ) <= 1 :         
             gapInErrorLog = True 
+        else :
+            difference = abs( ( MyDateLib.getSecondsSinceEpoch(end) -  MyDateLib.getSecondsSinceEpoch(lastTimeThisGapWasfound) ) / 60 )
+            print "gap with too wide a difference was found ***"    
+            print "name start end difference" %(name,start,end,difference)
             
+    elif gapFound == True:
+        print "gap with too wide a difference was found ***"    
+        print "name start end difference" %( name, start, end, difference )        
+    
+    else:
+        print "gap not found at all?!?!?!?" 
+        print "name %s start %s end %s difference %s " %( name, start, end, difference ) 
+        print "lastTimeThisGapWasfound :%s" %lastTimeThisGapWasfound
+        print "last line read : %s" %line
+                  
     return gapInErrorLog
 
 
+def getSortedTextFiles( files ):
+    """
+        Takes a series of size-based rotating 
+        log files and sorts them in chronological 
+        order.
+        
+    """     
+       
+    files.sort()                
+    files.reverse()                      
+            
+    return files
     
-def getOutdatedTransmissionsLog( file ):
+    
+def getOutdatedTransmissionsLog( file, startTime ):
     """
         Takes a standard transmisson error log 
         and retunrs only the lines containing 
         infos about outdated transmissions. 
     
-    """        
+    """  
+          
+    errorLog = []  
+    files = glob.glob( file + "*")
+    files = getSortedTextFiles( files )
+    print "files : %s " %files
+    for file in files :  
+        fileHandle = open( file, "r")
+        lines = fileHandle.readlines()
     
-    errorLog = []    
-    fileHandle = open( file, "r")
-    lines = fileHandle.readlines()
+        for line in lines :
+            splitLine = line.split()
+            entryTime = splitLine[1] + " " + splitLine[2][:-4]
+            if "outdated" in line and entryTime >= startTime :
+                errorLog.append( line )    
     
-    for line in lines :
-        if "outdated" in line:
-            errorLog.append( line )    
-    
-    
+    print errorLog
     return errorLog
     
     
@@ -917,7 +959,7 @@ def getPickleAnalysis( files, name, startTime, maximumGap, errorLog ):
         header = "\n%s.\n" %name
         
     reportLines = header + reportLines
-    
+    #print timeOfLastFilledEntry
     return reportLines, timeOfLastFilledEntry 
     
 
@@ -931,7 +973,7 @@ def verifyPickleContent( parameters, report ):
     """
     
     newReportLines = ""
-    errorLog = getOutdatedTransmissionsLog( parameters.errorsLogFile )          
+    errorLog = getOutdatedTransmissionsLog( parameters.errorsLogFile,parameters.startTime )          
     
     for machine in parameters.machines:
         
@@ -975,7 +1017,7 @@ def getParameters():
          
     """           
     
-    currentTime = MyDateLib.getIsoFromEpoch( time.time() )   
+    currentTime = MyDateLib.getIsoFromEpoch( time.time() )  #"2006-12-07 00:00:00" 
     timeOfLastUpdate = getPreviousMonitoringJob( currentTime )      
     emails, machines, files, folders, maxUsages, errorsLogFile, maxSettingsFile = getParametersFromConfigurationFile()
     maximumGaps = getMaximumGaps( maxSettingsFile )
@@ -1219,7 +1261,7 @@ def updateRequiredfiles():
         
     """    
     
-    status, output = commands.getstatusoutput( "scp pds@lvs1-op:/apps/pds/tools/Columbo/ColumboShow/log/PX_Errors.txt /apps/px/stats/statsMonitoring/PX_Errors.txt >>/dev/null 2>&1" )
+    status, output = commands.getstatusoutput( "scp pds@lvs1-op:/apps/pds/tools/Columbo/ColumboShow/log/PX_Errors.txt* /apps/px/stats/statsMonitoring/ >>/dev/null 2>&1" )
     
     status, output = commands.getstatusoutput( "scp pds@lvs1-op:/apps/pds/tools/Columbo/etc/maxSettings.conf /apps/px/stats/statsMonitoring/maxSettings.conf >>/dev/null 2>&1" ) 
     
