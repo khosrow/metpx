@@ -249,21 +249,44 @@ def uploadGraphicFiles( parameters ):
     
    
     for i in range ( len( parameters.uploadMachines ) ):
-        status, output = commands.getstatusoutput( "scp /apps/px/stats/graphs/symlinks/* %s@%s:/apps/pds/tools/Columbo/ColumboShow/graphs/ >>/dev/null 2>&1" %( parameters.uploadMachinesLogins[i], parameters.uploadMachines[i] ) )
+        status, output = commands.getstatusoutput( "scp /apps/px/stats/graphs/symlinks/columbo/* %s@%s:/apps/pds/tools/Columbo/ColumboShow/graphs/ >>/dev/null 2>&1" %( parameters.uploadMachinesLogins[i], parameters.uploadMachines[i] ) )
         
         print "scp /apps/px/stats/graphs/symlinks/* %s@%s:/apps/pds/tools/Columbo/ColumboShow/graphs/ >>/dev/null 2>&1" %( parameters.uploadMachinesLogins[i], parameters.uploadMachines[i] )
         
 
+        
+def transferToDatabaseAlreadyRunning():
+    """
+        Returns whether or not a transfer from pickle 
+        to rrd databases is allresdy running.
+        
+    """
+    
+    alreadyRuns = False 
+    status, output = commands.getstatusoutput( "ps -ax " ) 
+    lines = output.splitlines()
+    
+    for line in lines:        
+        if "transferPickleToRRD.py" in line and "R" in line.split()[2]:
+            alreadyRuns = True
+            break    
+        
+    return alreadyRuns
+    
+    
+    
 def updateDatabases( parameters ):
     """
         Updates all the required databases by transferring the
         data found in the pickle files into rrd databases files.
     """
+    if transferToDatabaseAlreadyRunning() == False :    
+        for machine in parameters.databaseMachines : 
+            status, output = commands.getstatusoutput( "/apps/px/lib/stats/transferPickleToRRD.py -m '%s'" %machine )
+            print  "/apps/px/lib/stats/transferPickleToRRD.py -m '%s' >>/dev/null 2>&1" %machine
+            print "output:%s" %output
         
-    for machine in parameters.databaseMachines : 
-        status, output = commands.getstatusoutput( "/apps/px/lib/stats/transferPickleToRRD.py -m '%s'" %machine )
-        print  "/apps/px/lib/stats/transferPickleToRRD.py -m '%s' >>/dev/null 2>&1" %machine
-        print "output:%s" %output
+        
 
 def getGraphicsForWebPages( ):
     """
@@ -282,17 +305,26 @@ def updateWebPages():
         update the different web pages. 
             
     """ 
-    print "updateWebPages"    
+       
     status, output = commands.getstatusoutput( "/apps/px/lib/stats/dailyGraphicsWebPage.py" )
-    print output 
     status, output = commands.getstatusoutput( "/apps/px/lib/stats/weeklyGraphicsWebPage.py" )
-    print output 
     status, output = commands.getstatusoutput( "/apps/px/lib/stats/monthlyGraphicsWebPage.py" )
-    print output 
     status, output = commands.getstatusoutput( "/apps/px/lib/stats/yearlyGraphicsWebPage.py" )
-    print output 
+
     
+def monitorActivities():
+    """
+        Monitors all the activities that occured during 
+        the course of this program. Report is sent out by mail
+        to recipients specified in the config file.
+    """    
+    currentHour = int( MyDateLib.getIsoFromEpoch( time.time() ).split()[1].split(":")[0] )
     
+    if currentHour %4 == 0:
+        status, output = commands.getstatusoutput( "/apps/px/lib/stats/statsMonitor.py" )
+
+        
+        
 def main():
     """
         Gets all the parameters from config file.
@@ -311,7 +343,7 @@ def main():
     getGraphicsForWebPages()
     updateWebPages()
     uploadGraphicFiles( parameters )
-            
+    monitorActivities()        
     print "Finished."
     
     

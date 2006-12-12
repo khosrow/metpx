@@ -204,7 +204,7 @@ def getTimeOfLastFilledEntry( name, startTime ):
     
         timeOfLastFilledEntry = startTime 
                 
-    #print "time returned :%s" %timeOfLastFilledEntry
+   
     return timeOfLastFilledEntry
     
     
@@ -245,7 +245,8 @@ def buildReportHeader( parameters ):
     
     reportHeader = "\n\n"
     reportHeader = reportHeader + "Stats monitor results\n----------------------------------------------------------------------------------------------------------------------------------\n"
-    reportHeader = reportHeader + "Time of test      : %s\n" %parameters.endTime
+    reportHeader = reportHeader + "Time of test : %s\n" %parameters.endTime
+    reportHeader = reportHeader + "Time of previous test : %s\n" %parameters.startTime
     reportHeader = reportHeader + "Machine name      : %s\nConfig file  used : %s\n" %( LOCAL_MACHINE, PXPaths.STATS + "statsMonitoring/statsMonitoring.conf" )
     
     return reportHeader
@@ -286,9 +287,7 @@ def verifyFreeDiskSpace( parameters, report ):
         
         status, output = commands.getstatusoutput( "df %s" %foldersToVerify[i] )
         
-        if status == 0 :
-            #print "output : %s" %output
-            #output = output.splitlines()[1]        
+        if status == 0 :     
             diskUsage = output.split()[11].replace( "%", "")
             
             if int(diskUsage) > parameters.maxUsages[i]:    
@@ -387,29 +386,29 @@ def findFirstInterestingLinesPosition( file, startTime, endtime, lastReadPositio
         
         
     """       
-    
+
     lineFound = False
     line      = None
     fileHandle = open( file, 'r') 
     fileHandle.seek( lastReadPosition )
-    
+    foundValidLine = False 
     
     while lineFound == False and line != "":
         
         lastReadPosition = fileHandle.tell()
-        line = fileHandle.readline()            
-            
+        line = fileHandle.readline()                       
+        
         if line != "" :
-            timeOfEntry = line.split( "," )[0]
-            #print "timeOfEntry : %s startTime %s" %(timeOfEntry, startTime)
+            timeOfEntry = line.split( "," )[0]            
             if timeOfEntry >= startTime :
+                foundValidLine = True 
                 lineFound = True 
             if timeOfEntry >= endtime :
-                line      = "" 
-    
+                foundValidLine = False 
+ 
     fileHandle.close()         
     
-    return lastReadPosition, lineFound, line
+    return lastReadPosition, foundValidLine, line
     
     
     
@@ -420,7 +419,7 @@ def findHoursBetween( startTime, endTime ):
         A startTime of 2006-11-11 01:00:00 and an endTime of
          
     """
-    #print "startTime %s endtime %s" %(startTime, endTime)
+    
     hours = []
     start = MyDateLib.getSecondsSinceEpoch( MyDateLib.getIsoWithRoundedHours( startTime ) )
     end   = MyDateLib.getSecondsSinceEpoch( MyDateLib.getIsoWithRoundedHours( endTime ) )
@@ -468,16 +467,20 @@ def findHoursWithNoEntries( logs, startTime, endTime ):
     logs = getSortedLogs( logs )     
     hoursBetweenStartAndEnd = findHoursBetween( startTime, endTime )     
     
-    while i <  len( hoursBetweenStartAndEnd )  and j < len( logs ):
+    while i < ( len( hoursBetweenStartAndEnd )-1)  and j < len( logs ):
+               
+        startTime = hoursBetweenStartAndEnd[i]
+        endTime   = hoursBetweenStartAndEnd[i+1]
         
         lastReadPosition, lineFound, line = findFirstInterestingLinesPosition( logs[j], startTime, endTime, lastReadPosition )        
         
-        if lineFound == True and line == "": #not eof,line found > endtime
+        if lineFound == False and line != "": #not eof,line found > endtime
             hoursWithNoEntries.append( hoursBetweenStartAndEnd[i] )        
-        elif line == "": #file is over
-            j = j +1
         
-        i = i + 1
+        if line == "": #file is over
+            j = j + 1
+        else:
+            i = i + 1
     
         
     if i < ( len( hoursBetweenStartAndEnd ) - 1 ):#if j terminated prior to i.
@@ -507,7 +510,7 @@ def verifyStatsLogs( parameters, report ,logger = None ):
     
     warningsWereFound = False
     newReportLines = ""
-    logTypes = [ "graphs", "pickling", "rrd_graphs","rrd_transfer" ]
+    logTypes = [ "rrd_transfer" ] # "graphs", "pickling", "rrd_graphs",
     verificationTimeSpan =  (MyDateLib.getSecondsSinceEpoch( parameters.endTime ) - MyDateLib.getSecondsSinceEpoch( parameters.startTime )) / (60*60) 
     
     for logType in logTypes:
@@ -520,20 +523,19 @@ def verifyStatsLogs( parameters, report ,logger = None ):
         
         if logs == [] and verificationTimeSpan >= 1:#if at least an hour between start and end 
             
-            warningWereFound = True
+            warningsWereFound = True
             newReportLines = newReportLines + "\nWarning : Not a single log entry within %s log files was found between %s and %s. Please investigate. \n "%( logType, parameters.startTime, parameters.endTime )
          
         elif logs != []:   
-        
             hoursWithNoEntries = findHoursWithNoEntries( logs, parameters.startTime, parameters.endTime )
             
             if hoursWithNoEntries != []:
-               warningWereFound = True
+               warningsWereFound = True
                
                newReportLines = newReportLines + "Warning : Not a single log entry within %s log files was found for these hours : %s. Please investigate. \n " %( logType, str(hoursWithNoEntries).replace( "[", "").replace( "]", "") )
                        
              
-    if warningWereFound :
+    if warningsWereFound :
         report = report + "\n\nThe following stats log files warnings were found : \n"
         report = report + "----------------------------------------------------------------------------------------------------------------------------------\n"            
         report = report + newReportLines 
@@ -582,10 +584,10 @@ def updateConfigurationFiles( machine, login ):
 
 
     status, output = commands.getstatusoutput( "rsync -avzr --delete-before -e ssh %s@%s:/apps/px/etc/rx/ /apps/px/stats/rx/%s/"  %( login, machine, machine) )
-    #print output # for debugging only
+
 
     status, output = commands.getstatusoutput( "rsync -avzr  --delete-before -e ssh %s@%s:/apps/px/etc/tx/ /apps/px/stats/tx/%s/"  %( login, machine, machine ) )
-    #print output # for debugging only
+
    
 
 
@@ -689,11 +691,8 @@ def getFoldersAndFilesAssociatedWith( client, fileType, machines, startTime, end
             if folder not in folders.keys():
                 folders[folder] = []
                 
-            folders[folder].append( fileName )
-            
-            
-    #print folders
-                
+            folders[folder].append( fileName )                      
+               
     
     return folders
     
@@ -745,7 +744,7 @@ def verifyPicklePresence( parameters, report ):
         
         for txName in txNames:
             folders = getFoldersAndFilesAssociatedWith( txName, "tx", machine, startTime , parameters.endTime )
-            #print files
+
             
             for folder in folders.keys():
                 if os.path.isdir( folder ):
@@ -770,7 +769,7 @@ def verifyPicklePresence( parameters, report ):
             
         for rxName in rxNames:
             folders = getFoldersAndFilesAssociatedWith( rxName, "rx", machine, parameters.startTime, parameters.endTime )
-            #print files
+
             
             for folder in folders.keys():
                 if os.path.isdir( folder ):
@@ -842,29 +841,15 @@ def gapInErrorLog( name, start, end, errorLog )  :
             elif logEntryTime >= end :#in case file is newer than time of end of verification
                 break
                 
-        except:
-            #print line
-            a=1
-    if lastTimeThisGapWasfound  != "":
-        difference = abs( ( MyDateLib.getSecondsSinceEpoch(end) -  MyDateLib.getSecondsSinceEpoch(lastTimeThisGapWasfound) ) / 60 )        
+        except:#no date present for last transmission...
+            pass
+            
+
     if gapFound == True and lastTimeThisGapWasfound <= end:
 
         if abs( ( MyDateLib.getSecondsSinceEpoch(end) -  MyDateLib.getSecondsSinceEpoch(lastTimeThisGapWasfound) ) / 60 ) <= 1 :         
             gapInErrorLog = True 
-        else :
-            difference = abs( ( MyDateLib.getSecondsSinceEpoch(end) -  MyDateLib.getSecondsSinceEpoch(lastTimeThisGapWasfound) ) / 60 )
-            print "gap with too wide a difference was found ***"    
-            print "name start end difference" %(name,start,end,difference)
-            
-    elif gapFound == True:
-        print "gap with too wide a difference was found ***"    
-        print "name start end difference" %( name, start, end, difference )        
-    
-    else:
-        print "gap not found at all?!?!?!?" 
-        print "name %s start %s end %s difference %s " %( name, start, end, difference ) 
-        print "lastTimeThisGapWasfound :%s" %lastTimeThisGapWasfound
-        print "last line read : %s" %line
+ 
                   
     return gapInErrorLog
 
@@ -894,7 +879,8 @@ def getOutdatedTransmissionsLog( file, startTime ):
     errorLog = []  
     files = glob.glob( file + "*")
     files = getSortedTextFiles( files )
-    print "files : %s " %files
+    
+    
     for file in files :  
         fileHandle = open( file, "r")
         lines = fileHandle.readlines()
@@ -903,9 +889,8 @@ def getOutdatedTransmissionsLog( file, startTime ):
             splitLine = line.split()
             entryTime = splitLine[1] + " " + splitLine[2][:-4]
             if "outdated" in line and entryTime >= startTime :
-                errorLog.append( line )    
+                errorLog.append( line )           
     
-    print errorLog
     return errorLog
     
     
@@ -959,7 +944,7 @@ def getPickleAnalysis( files, name, startTime, maximumGap, errorLog ):
         header = "\n%s.\n" %name
         
     reportLines = header + reportLines
-    #print timeOfLastFilledEntry
+    
     return reportLines, timeOfLastFilledEntry 
     
 
@@ -1283,20 +1268,18 @@ def main():
     report = buildReportHeader( parameters )
     report = verifyFreeDiskSpace( parameters, report )    
     report = verifyPicklePresence( parameters, report )    
-    #print report
-    report = verifyPickleContent( parameters, report ) 
-       
+    report = verifyPickleContent( parameters, report )        
     report = verifyStatsLogs( parameters, report )    
     report = verifyFileVersions( parameters, report  )    
     report = verifyCrontab(  report  )   
     report = verifyWebPages( parameters, report )
     report = verifyGraphs( parameters, report ) 
+    
     savePreviousMonitoringJob( parameters  )    
     
     sendReportByEmail( parameters, report  )
-    
-    #print parameters
-    
+    #print report 
+        
     
     
 if __name__ == "__main__":

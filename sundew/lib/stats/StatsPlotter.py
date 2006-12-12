@@ -412,10 +412,10 @@ class StatsPlotter:
         
         src         = self.imageName
         
-        destination = PXPaths.GRAPHS + "/symlinks/%s.png" %clientName
+        destination = PXPaths.GRAPHS + "/symlinks/columbo/%s.png" %clientName
 
-        if not os.path.isdir( PXPaths.GRAPHS + "/symlinks/" ):
-            os.makedirs( PXPaths.GRAPHS + "/symlinks/", mode=0777 )                                                      
+        if not os.path.isdir( os.path.dirname( destination ) ):
+            os.makedirs(  os.path.dirname( destination ), mode=0777 )                                                      
         
         if os.path.isfile( destination ):
             os.remove( destination )
