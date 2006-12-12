@@ -16,8 +16,9 @@ named COPYING in the root of the source directory tree.
 
 import os, sys, commands
 import PXPaths
+import MyDateLib
 from ConfigParser import ConfigParser
-
+from MyDateLib import *
 
 PXPaths.normalPaths()
 LOCAL_MACHINE = os.uname()[1]
@@ -322,7 +323,7 @@ def monitorActivities():
     
     if currentHour %4 == 0:
         status, output = commands.getstatusoutput( "/apps/px/lib/stats/statsMonitor.py" )
-
+        print output
         
         
 def main():
@@ -344,7 +345,7 @@ def main():
     updateWebPages()
     uploadGraphicFiles( parameters )
     monitorActivities()        
-    print "Finished."
+    #print "Finished."
     
     
     
