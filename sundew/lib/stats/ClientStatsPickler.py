@@ -16,10 +16,10 @@ named COPYING in the root of the source directory tree.
 ##         
 ##          Stats will be collected for this client using fileStatsCollector.
 ##       
-##          It needs the file DirectoryFileCollector.py to collect all the file entries. 
+##          It needs the file LogFileCollector.py to collect all the file entries. 
 ##          
 ##          It needs the FileStatsCollector.py to collect the stats from each file   
-##          that DirectoryFileCollector.py finds. 
+##          that LogFileCollector.py finds. 
 ## 
 ##          Specified directory needs to contain only valid files.  
 ##
@@ -30,7 +30,7 @@ named COPYING in the root of the source directory tree.
 import os 
 import pickle
 import cPickle
-import DirectoryFileCollector
+import LogFileCollector
 import cpickleWrapper
 import PXPaths
 import Logger
@@ -39,7 +39,7 @@ from   Logger import *
 from   Numeric                import *
 from   FileStatsCollector     import *
 from   random                 import *
-from   DirectoryFileCollector import *
+from   LogFileCollector import *
 from   FileStatsCollector     import *
 from   MyDateLib              import *
 
@@ -82,7 +82,7 @@ class ClientStatsPickler:
             self.logger = self.logger.getLogger()
            
         self.statsCollection  = statsCollection or FileStatsCollector( logger = self.logger )
-        self.fileCollection   = DirectoryFileCollector( directory = directory, logger = self.logger )       
+        self.fileCollection   = LogFileCollector( directory = directory, logger = self.logger )       
         
         
         
@@ -168,7 +168,7 @@ class ClientStatsPickler:
         filePickle = PXPaths.STATS + "PICKLED_FILE_POSITIONS" 
         
         #Find up to date file list. 
-        self.fileCollection =  DirectoryFileCollector( startTime  = startTime , endTime = endTime, directory = directory, lastLineRead = "", fileType = fileType, client = self.client, logger = self.logger )   
+        self.fileCollection =  LogFileCollector( startTime  = startTime , endTime = endTime, directory = directory, lastLineRead = "", logType = fileType, name = self.client, logger = self.logger )   
         
         
         temp  = self.logger#Need to remove current logger temporarily

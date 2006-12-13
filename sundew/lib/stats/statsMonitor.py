@@ -24,13 +24,13 @@ named COPYING in the root of the source directory tree.
 import os, sys, commands, pickle
 import PXPaths, cpickleWrapper
 import smtplib
-import DirectoryFileCollector
+import LogFileCollector
 import mailLib
 import readMaxFile
 from ClientStatsPickler import ClientStatsPickler 
 from PXManager import *
 
-from DirectoryFileCollector import *
+from LogFileCollector import *
 from ConfigParser import ConfigParser
 from MyDateLib import *
 from mailLib import *
@@ -510,21 +510,21 @@ def verifyStatsLogs( parameters, report ,logger = None ):
     
     warningsWereFound = False
     newReportLines = ""
-    logTypes = [ "rrd_transfer" ] # "graphs", "pickling", "rrd_graphs",
+    logFileTypes = [  "graphs", "pickling", "rrd_graphs", "rrd_transfer" ] 
     verificationTimeSpan =  (MyDateLib.getSecondsSinceEpoch( parameters.endTime ) - MyDateLib.getSecondsSinceEpoch( parameters.startTime )) / (60*60) 
     
-    for logType in logTypes:
+    for logFileType in logFileTypes:
         
-        dfc =  DirectoryFileCollector( startTime  = parameters.startTime , endTime = parameters.endTime, directory = PXPaths.LOG, lastLineRead = "", fileType = "stats", client = "%s" %logType, logger = logger )    
+        lfc =  LogFileCollector( startTime  = parameters.startTime , endTime = parameters.endTime, directory = PXPaths.LOG, lastLineRead = "", logType = "stats", name = logFileType, logger = logger )    
         
-        dfc.collectEntries()
-        logs = dfc.entries                
+        lfc.collectEntries()
+        logs = lfc.entries                
         
         
         if logs == [] and verificationTimeSpan >= 1:#if at least an hour between start and end 
             
             warningsWereFound = True
-            newReportLines = newReportLines + "\nWarning : Not a single log entry within %s log files was found between %s and %s. Please investigate. \n "%( logType, parameters.startTime, parameters.endTime )
+            newReportLines = newReportLines + "\nWarning : Not a single log entry within %s log files was found between %s and %s. Please investigate. \n "%( logFileType, parameters.startTime, parameters.endTime )
          
         elif logs != []:   
             hoursWithNoEntries = findHoursWithNoEntries( logs, parameters.startTime, parameters.endTime )
@@ -532,7 +532,7 @@ def verifyStatsLogs( parameters, report ,logger = None ):
             if hoursWithNoEntries != []:
                warningsWereFound = True
                
-               newReportLines = newReportLines + "Warning : Not a single log entry within %s log files was found for these hours : %s. Please investigate. \n " %( logType, str(hoursWithNoEntries).replace( "[", "").replace( "]", "") )
+               newReportLines = newReportLines + "Warning : Not a single log entry within %s log files was found for these hours : %s. Please investigate. \n " %( logFileType, str(hoursWithNoEntries).replace( "[", "").replace( "]", "") )
                        
              
     if warningsWereFound :
@@ -731,10 +731,11 @@ def verifyPicklePresence( parameters, report ):
                   
     """
     
-    missingFiles   = False  
+    missingFiles   = False
+    missingFileList = []  
     clientLines    = ""
     newReportLines = "" 
-    clientIsMissingfiles = False
+    clientIsMissingFiles = False
     startTime =  MyDateLib.getIsoFromEpoch( MyDateLib.getSecondsSinceEpoch( parameters.endTime ) - ( 7*24*60*60 ) )
     
     for machine in parameters.machines:
@@ -751,20 +752,26 @@ def verifyPicklePresence( parameters, report ):
                     for file in folders[folder]:
                         if not os.path.isfile(file):
                             missingFiles = True
-                            clientIsMissingfiles = True
-                            clientLines = clientLines + "%s\n" %file
+                            clientIsMissingFiles = True                            
+                            missingFileList.append( os.path.basename(file) )
+                     
+                    if clientIsMissingFiles:
+                        clientLines = clientLines + folder + "/" + os.path.basename( os.path.dirname( file ) ) + "/" + str( missingFileList ).replace( "[","" ).replace( "]","" ) + "\n"   
+                
                 else:
                     missingFiles = True
-                    clientIsMissingfiles = True
+                    clientIsMissingFiles = True
                     clientLines = clientLines + folder + "/*\n" 
-            
-            if clientIsMissingfiles == True : 
+                
+                missingFileList = []  
+                
+            if clientIsMissingFiles == True : 
                 
                 newReportLines = newReportLines + "\n%s had the following files and folders missing : \n"%txName
                 newReportLines = newReportLines + clientLines
                 
             clientLines = ""
-            clientIsMissingfiles = False
+            clientIsMissingFiles = False
             
             
         for rxName in rxNames:
@@ -776,20 +783,20 @@ def verifyPicklePresence( parameters, report ):
                     for file in folders[folder]:
                         if not os.path.isfile(file):
                             missingFiles = True
-                            clientIsMissingfiles = True
+                            clientIsMissingFiles = True
                             clientLines = clientLines + "Warning: %s is missing.\n" %file
                 else:
                     missingFiles = True
-                    clientIsMissingfiles = True
+                    clientIsMissingFiles = True
                     clientLines = clientLines + folder + "*\n" 
                     
                                     
-            if clientIsMissingfiles == True : 
+            if clientIsMissingFiles == True : 
                 newReportLines = newReportLines + "\n%s had the following files and folders missing : \n" %txName
                 newReportLines = newReportLines + clientLines
                 
             clientLines = ""
-            clientIsMissingfiles = False            
+            clientIsMissingFiles = False            
             
     
     
