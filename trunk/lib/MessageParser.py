@@ -12,6 +12,7 @@
 #############################################################################################
 """
 import  sys
+from MessageAFTN import MessageAFTN
 
 class MessageParser:
 
@@ -30,7 +31,10 @@ class MessageParser:
 
     REPLY_TYPES = ['RQM_OK', 'RQF_OK', 'RQM_UNK', 'RQF_UNK']
 
-    def __init__(self, text):
+    def __init__(self, text, messageManager=None, logger=None):
+        self.mm = messageManager
+        self.logger = logger
+
         if type(text) == str:
             self.text = text
             self.textLines = text.splitlines()    # Lines of text without linefeed, or any unwanted symbols 
@@ -42,11 +46,17 @@ class MessageParser:
         while self.textLines[0] == '' or self.textLines[0].isspace():
             del self.textLines[0]
 
-        self.type = None                          # In ['SVC', 'RQ', 'RF', 'RQM_UNK', 'RQM_OK', 'RQF_UNK', 'RQF_OK', 'AFTN']
+        self.type = None                          # In ['SVC', 'RQ', 'RF', 'RQM_UNK', 'RQM_OK', 'RQF_UNK', 'RQF_OK', 'AFTN', 'PRI_DESTADD_TEXT']
         self.serviceType = None
         self.header = None
+
         self.sendOn = None
         self.request = None
+
+        # For PRI_DESTADD_TEXT type
+        self.priority = None
+        self.destAddress = []
+
         self.findType()
 
     def printInfos(self):
@@ -58,11 +68,11 @@ class MessageParser:
 
     def findType(self):
         """
-        Types: 'SVC', 'RQ', 'RF', 'RQM_UNK', 'RQM_OK', 'RQF_UNK', 'RQF_OK', 'AFTN'
+        Types: 'SVC', 'RQ', 'RF', 'RQM_UNK', 'RQM_OK', 'RQF_UNK', 'RQF_OK', 'AFTN', 'PRI_DESTADD_TEXT'
         
         If called at transmission and for an AFTN Message, a header
-        should always be present in textLines[0]. If not, the message
-        will be erased.
+        should always (except for the type 'PRI_DESTADD_TEXT') be present in textLines[0]. 
+        If not, the message will be erased. 
 
         If called at reception for an AFTN Message, a header could or
         could not be present. If not present, one will be created using
@@ -87,6 +97,23 @@ class MessageParser:
         elif words[0] in ['RQM', 'RQF']:
             if words[1] in ['UNK', 'OK']:
                 self.type = words[0] + '_' + words[1]
+
+        elif words[0] in MessageAFTN.PRIORITIES:
+            self.type = 'PRI_DESTADD_TEXT'
+            self.priority = words[0]
+            addresses = words[1:]
+            goodAddresses =  self.mm.drp.getClientSubClients('aftn')
+            goodAddresses.sort()
+            self.logger.debug(goodAddresses)
+            for address in addresses:
+                if address.isalpha() and address.isupper() and len(address)== 8 and address in self.mm.drp.getClientSubClients('aftn'):
+                    self.destAddress.append(address)
+                else:
+                    if self.logger:
+                        self.logger.warning("Bad address %s has been rejected" % address)
+            self.textLines = self.textLines[1:]
+            self.text = '\n'.join(self.textLines)
+                    
         else: 
             self.type = 'AFTN'
             if self._headerIn(words):

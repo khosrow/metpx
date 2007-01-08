@@ -630,6 +630,13 @@ class TransceiverAFTN:
     def _writeMessageToSocket(self, data, rewrite=False, nextPart=0, destAddresses=None):
 
         def getWord(type):
+            """ Used to create logging text only """
+            if type:
+                return '(type: %s)' % type
+            else:
+                return '(type: UNKNOWN)'
+
+            """
             if type == 'SVC':
                 return '(type: SVC)'
             elif type == 'AFTN':
@@ -648,6 +655,7 @@ class TransceiverAFTN:
                 return '(type: RQF_UNK)'
             else:
                 return '(type: UNKNOWN)'
+            """
 
         mm = self.mm
         if len(data) >= 1:
@@ -659,7 +667,7 @@ class TransceiverAFTN:
             for index in range(len(data)):
                 if nextPart == 0:
                     # We will have access to the first part of the message here (big or not)
-                    mp = MessageParser(data[index])
+                    mp = MessageParser(data[index], mm, self.logger)
                     mm.header, mm.type = mp.getHeader(), mp.getType()
                     self.logger.debug("Header: %s, Type: %s" % (mm.header, mm.type))
                 if mm.header== None and mm.type==None:
@@ -680,9 +688,9 @@ class TransceiverAFTN:
                     mm.nextCSN()
                     messageAFTN = MessageAFTN(self.logger, data[index], mm.stationID, mm.address, MessageAFTN.PRIORITIES[2],
                                               destAddresses or [mm.otherAddress], mm.CSN, mm.filingTime, mm.dateTime)
-                    self.logger.debug('\n' + messageAFTN.message)
-                    messageAFTN.setLogger(None)
-                    mm.archiveObject(self.archivePath + mm.CSN, messageAFTN)
+                    #self.logger.debug('\n' + messageAFTN.message)
+                    #messageAFTN.setLogger(None)
+                    #mm.archiveObject(self.archivePath + mm.CSN, messageAFTN)
 
                 elif mm.header == None and mm.type in ['RQ', 'RF']:
                     # We will never have to sent such a message, it is only
@@ -691,27 +699,44 @@ class TransceiverAFTN:
                     mm.nextCSN()
                     messageAFTN = MessageAFTN(self.logger, data[index], mm.stationID, mm.address, MessageAFTN.PRIORITIES[2],
                                               destAddresses or [mm.otherAddress], mm.CSN, mm.filingTime, mm.dateTime)
-                    self.logger.debug('\n' + messageAFTN.message)
-                    messageAFTN.setLogger(None)
-                    mm.archiveObject(self.archivePath + mm.CSN, messageAFTN)
+                    #self.logger.debug('\n' + messageAFTN.message)
+                    #messageAFTN.setLogger(None)
+                    #mm.archiveObject(self.archivePath + mm.CSN, messageAFTN)
 
                 elif mm.header == None and mm.type in MessageParser.REPLY_TYPES:
                     mm.setFilingTime()
                     mm.nextCSN()
                     messageAFTN = MessageAFTN(self.logger, data[index], mm.stationID, mm.address, MessageAFTN.PRIORITIES[3],
                                               destAddresses, mm.CSN, mm.filingTime, mm.dateTime)
-                    self.logger.debug('\n' + messageAFTN.message)
-                    messageAFTN.setLogger(None)
-                    mm.archiveObject(self.archivePath + mm.CSN, messageAFTN)
+                    #self.logger.debug('\n' + messageAFTN.message)
+                    #messageAFTN.setLogger(None)
+                    #mm.archiveObject(self.archivePath + mm.CSN, messageAFTN)
+
+                elif mm.type == 'PRI_DESTADD_TEXT':
+                    mm.destAddress = mp.destAddress
+                    if mm.destAddress:
+                        mm.priority = mp.priority
+                        mm.setFilingTime()
+                        mm.nextCSN()
+                        messageAFTN = MessageAFTN(self.logger, mp.text, mm.stationID, mm.address, mm.priority, mm.destAddress, mm.CSN, mm.filingTime, mm.dateTime)
+                    else:
+                        if mm.isFromDisk():
+                            try:
+                                self.logger.warning("%s has been erased (no valid destination address)", os.path.basename(self.dataFromFiles[0][1]))
+                                os.unlink(self.dataFromFiles[0][1])
+                            except OSError, e:
+                                (type, value, tb) = sys.exc_info()
+                                self.logger.error("Unable to unlink %s ! Type: %s, Value: %s" % (self.dataFromFiles[0][1], type, value))
+                            del self.dataFromFiles[0]
+                            mm.clearPartsToSend()
+                        continue
+
                 else:
                     # True if mm.header is in the routing table with destination addresses
                     #if mm.header == None: mm.header = 'SACN31 CWAO'
                     if mm.setInfos(mm.header, rewrite):
                         messageAFTN = MessageAFTN(self.logger, data[index], mm.stationID, mm.address, mm.priority,
                                               mm.destAddress, mm.CSN, mm.filingTime, mm.dateTime)
-                        self.logger.debug('Message as it will be sent:')
-                        self.logger.debug('\n' + messageAFTN.message)
-                        messageAFTN.setLogger(None)
                     else:
                         if mm.isFromDisk():
                             try:
@@ -727,9 +752,10 @@ class TransceiverAFTN:
                         
                 # If it is the first time we sent this message, we archive it.
                 #if not rewrite:
+                self.logger.debug('Message as it will be sent:')
+                self.logger.debug('\n' + messageAFTN.message)
+                messageAFTN.setLogger(None)
                 mm.archiveObject(self.archivePath + mm.CSN, messageAFTN)
-                #tutu = mm.unarchiveObject(self.archivePath + mm.CSN)
-                #print tutu
 
                 nbBytesToSend = len(messageAFTN.message)
 

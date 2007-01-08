@@ -79,7 +79,7 @@ class MessageManager:
         self.filenameToSend = None  # Filename of the file we want to send or just sent
         self.filenameToErase = None # Path + filename of the file we want to erase (ack just received) 
 
-        self.type = None       # Message type. Value must be in ['AFTN', 'SVC', 'RF', 'RQ', None]
+        self.type = None       # Message type. Value must be in ['AFTN', 'SVC', 'RF', 'RQ', 'PRI_DESTADD_TEXT', None]
         self.header = None     # Message WMO Header
         self.priority = None   # Priority indicator (SS, DD, FF, GG or KK)
         self.destAddress = []  # 8-letter group, max. 21 addresses

@@ -242,8 +242,8 @@ Message (repr):
         self.message = self.message.replace('\r\r\n', '\r\n')
         self.messageLines = self.message.splitlines()
         if self._parseHeadingLine(self.messageLines[0]):
-            if self._parseDestinationAddressLine(self.messageLines[1]):
-                if self._parseOriginAddressLine(self.messageLines[2]):
+            if self._parseDestinationAddressLine(self.messageLines[1:4]):
+                if self._parseOriginAddressLine(self.messageLines[2:5]):
                     if self._parseText():
                         return 1
         return 0
@@ -252,6 +252,7 @@ Message (repr):
         """ 
         Used  only at RECEPTION of an AFTN Message
         """
+        #print "LINE: %s" % line
         if line[0] == MessageAFTN.SOH and line[1] == ' ' and len(line) == 18:
             self.stationID = line[2:5]
             self.CSN = line[5:9]
@@ -273,13 +274,29 @@ Message (repr):
                 self.logger.error("Problem with HeadingLine, first char is not space or line length not equal 18")
             return 0
 
-    def _parseDestinationAddressLine(self, line):
+    def _parseDestinationAddressLine(self, lines):
         """ 
         Used  only at RECEPTION of an AFTN Message
         """
         addressLength = 8 # Length of one address
-        parts = line.split()
-        numberOfAddress = len(parts) - 1
+        line1 = lines[0]
+        line2 = ''
+        line3 = ''
+
+        if len(lines) == 3:
+            if lines[1][0].isalpha(): line2 = lines[1]
+            if lines[2][0].isalpha(): line3 = lines[2]
+        elif len(lines) == 2:
+            if lines[1][0].isalpha() and lines[1][0]: line2 = lines[1]
+
+        #print "Line1: %s" % line1
+        #print "Line2: %s" % line2
+        #print "Line3: %s" % line3
+
+        parts = line1.split()
+        addOnLine2 = line2.split()
+        addOnLine3 = line3.split()
+        numberOfAddress = len(parts) - 1 + len(addOnLine2) + len(addOnLine3)
 
         if numberOfAddress >= 1:
             if parts[0] in MessageAFTN.PRIORITIES:
@@ -291,8 +308,8 @@ Message (repr):
 
             #for index in range(numberOfAddress):
             #    self.destAddress.append(line[3+index*addressLength:11+index*addressLength])
-            for address in parts[1:]:
-                if len(address) == addressLength and address.isalpha():
+            for address in parts[1:] + addOnLine2 + addOnLine3:
+                if len(address) == addressLength and address.isalpha() and address.isupper():
                     self.destAddress.append(address)
                 else:
                     if self.logger:
@@ -308,18 +325,23 @@ Message (repr):
                 self.logger.error("Problem with Destination Address Line, Zero Address!")
             return 0
 
-    def _parseOriginAddressLine(self, line):
+    def _parseOriginAddressLine(self, lines):
         """ 
         Used  only at RECEPTION of an AFTN Message
         """
-        if len(line) >= 15:
-            self.filingTime = line[0:6]
-            self.originatorAddress = line[7:15]
+        for line in lines:
+            if line[0].isdigit():
+                theLine = line
+                break
+
+        if len(theLine) >= 15:
+            self.filingTime = theLine[0:6]
+            self.originatorAddress = theLine[7:15]
 
             #print self.filingTime
             #print self.originatorAddress
             
-            if len(line) > 15:
+            if len(theLine) > 15:
                 if self.logger:
                     self.logger.error("Unknown characters in Origin Address Line (length > 15 chars): %s" % line)
 
@@ -328,9 +350,20 @@ Message (repr):
     def _parseText(self):
         """ 
         Used  only at RECEPTION of an AFTN Message
+        Text must begin at line 3, 4 or 5
         """
-        if self.messageLines[3][0] == MessageAFTN.STX and self.messageLines[-1] == MessageAFTN.END_OF_MESSAGE:
-            self.textLines = self.messageLines[3:-1]   # Remove END_OF_MESSAGE line
+        for index in [3,4,5]:
+            try:
+                if self.messageLines[index][0] == MessageAFTN.STX:
+                    theIndex = index
+                    break
+            except IndexError:
+                if self.logger:
+                    self.logger.error("Problem with STX")
+                return 0
+        
+        if self.messageLines[-1] == MessageAFTN.END_OF_MESSAGE:
+            self.textLines = self.messageLines[theIndex:-1]   # Remove END_OF_MESSAGE line
             self.textLines[0] = self.textLines[0][1:]  # Remove <STX> char
             self.textString = '\n'.join(self.textLines)
             return 1
@@ -356,18 +389,33 @@ Message (repr):
         return "%s%s %s%s" % (MessageAFTN.SOH, self.transmitID, self.dateTime, MessageAFTN.ALIGNMENT)
 
     def createDestinationAddressLine(self):
-        addressLine = ""
-
+        """
+        Only used when SENDING messages
+        """
         if len(self.destAddress) == 0:
-
             if self.logger:
                 self.logger.error("No destination addresses for this AFTN Message")
 
-        for address in self.destAddress:
-            addressLine += " " + address
+        if len(self.destAddress) > 21:
+            addresses = self.destAddress[:21]
+            cutAddresses = self.destAddress[21:]
+            
+            if self.logger:
+                self.logger.warning("More than 21 addresses! These addresses (%s) have been cut" % cutAddresses)
 
-        addressLine = self.priority + addressLine + MessageAFTN.ALIGNMENT
-        return addressLine
+        else:
+            addresses = self.destAddress[:]
+
+        counter = 0
+        addressLine = " "
+        for address in addresses:
+            counter += 1
+            if counter%7 == 1: addressLine += address
+            elif counter%7 == 0: addressLine +=  " " + address + MessageAFTN.ALIGNMENT
+            else: addressLine += " " + address
+
+        if not addressLine.endswith(MessageAFTN.ALIGNMENT): addressLine += MessageAFTN.ALIGNMENT
+        return self.priority + addressLine
 
     def createOriginAddressLine(self):
         #print "Origin Line: %s %s%s" % (self.filingTime, self.originatorAddress, MessageAFTN.ALIGNMENT)
@@ -385,6 +433,7 @@ Message (repr):
 if __name__ == "__main__":
 
     from Logger import Logger
+    import string
     """
     from DiskReader import DiskReader
 
@@ -418,8 +467,8 @@ if __name__ == "__main__":
 
     print myMessage.message
     myMessage.messageToValues()
-    print len(myMessage.message)
 
+    print "========================================="
     print myMessage.stationID           # 3 Letters assigned by NavCanada for each circuit (ex: ABC)
     print myMessage.CSN                 # Channel sequence number, 4 digits (ex: 0003)
     print myMessage.transmitID          # stationID + CSN (ex: ABC0003)
@@ -428,9 +477,31 @@ if __name__ == "__main__":
     print myMessage.destAddress         # 8-letter group, max. 21 addresses
     print myMessage.filingTime          # 6-digits DDHHMM (ex:140335) indicating date and time of filing the message for transmission.
     print myMessage.originatorAddress   # 8-letter group identifying the message originator (CYEGYFYX)
-    print "TEXTLINES: %s" % myMessage.textLines                #
+    print "========================================="
 
+    myMessage.destAddress = []
+    addresses = [ 8*x for x in string.uppercase]
+    counter = 0
+    nbAdd = 9 
+
+    for address in addresses:
+        counter += 1 
+        if counter > nbAdd:
+            break
+        else:
+            myMessage.destAddress.append(address)
+
+    print myMessage.destAddress
 
     message = myMessage.createMessage()
-    print len(message)
     print message
+
+    newMessage = MessageAFTN(logger)
+    newMessage.setMessage(message)
+    
+    if newMessage.messageToValues():
+        newMessage.createMessage()
+        print newMessage
+    else:
+        print "PROBLEM WITH messageToValues()"
+        
