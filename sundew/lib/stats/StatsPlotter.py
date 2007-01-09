@@ -24,15 +24,13 @@ named COPYING in the root of the source directory tree.
 
 
 #important files 
-import sys 
+import sys, commands, copy, logging, shutil 
 import MyDateLib
 from MyDateLib import *
 import ClientStatsPickler
 from Numeric import *
 import Gnuplot, Gnuplot.funcutils
-import copy 
 import PXPaths
-import logging 
 from   Logger  import *
 
 PXPaths.normalPaths()
@@ -136,7 +134,7 @@ class StatsPlotter:
         
         date = self.currentTime.replace( "-","" ).replace( " ", "_")
         
-        fileName = PXPaths.GRAPHS + "%.50s/%s_%.50s_%s_%s_%shours_on_%s_for %s products.png" %( clientName, self.fileType, clientName, date, self.statsTypes, self.timespan, self.machines, self.productType )
+        fileName = PXPaths.GRAPHS + "others/gnuplot/%.50s/%s_%.50s_%s_%s_%shours_on_%s_for %s products.png" %( clientName, self.fileType, clientName, date, self.statsTypes, self.timespan, self.machines, self.productType )
         
         
         fileName = fileName.replace( '[', '').replace(']', '').replace(" ", "").replace( "'","" )               
@@ -388,12 +386,13 @@ class StatsPlotter:
         return title
         
     
-    def createLink( self ):
+    def createCopy( self ):
         """
-            Creates a symbolic link between created image file and 
-            an shorter, easier to read name. 
+            Creates a copy of the created image file so that it
+            easily be used in columbo. 
             
         """
+        
         clientName = ""
         
         if len( self.clientNames ) == 0:
@@ -404,21 +403,22 @@ class StatsPlotter:
                 if name != self.clientNames[ len(self.clientNames) -1 ] :
                     clientName = clientName + "-" 
         
-        src         = self.imageName
+        src = self.imageName
         
-        destination = PXPaths.GRAPHS + "/symlinks/columbo/%s.png" %clientName
+        destination = PXPaths.GRAPHS + "webGraphics/columbo/%s.png" %clientName
 
         if not os.path.isdir( os.path.dirname( destination ) ):
             os.makedirs(  os.path.dirname( destination ), mode=0777 )                                                      
         
-        if os.path.isfile( destination ):
-            os.remove( destination )
+#         if os.path.isfile( destination ):
+#             os.remove( destination )
         
-        os.symlink( src, destination )
+        shutil.copy( src, destination ) 
         
-        
+        print "cp %s %s  "  %( src, destination )
          
-    def plot( self, createLink = False  ):
+        
+    def plot( self, createCopy = False  ):
         """
             Used to plot gnuplot graphics. Settings used are
             slighly modified but mostly based on Plotter.py's
@@ -494,8 +494,9 @@ class StatsPlotter:
                 nbGraphs = nbGraphs + 1 
                 
                     
-        if createLink :
-            self.createLink( )     
+        if createCopy :
+            del self.graph
+            self.createCopy( )     
          
             
             
@@ -533,7 +534,7 @@ class StatsPlotter:
         
         self.graph( 'set label "Product Type : %s" at screen .545, screen %3.2f' % ( self.productType,(.22+(nbGraphs) *.40)  ) )
         
-        self.graph( 'set label "Absolute Max. lat. : %s (Seconds)" at screen .545, screen %3.2f' % ( maximum, (.20+(nbGraphs) *.40) ) )
+        self.graph( 'set label "Absolute max. lat. : %s seconds" at screen .545, screen %3.2f' % ( maximum, (.20+(nbGraphs) *.40) ) )
         
         self.graph( 'set label "Time of max. lat. : %s" at screen .545, screen %3.2f' % ( ( timeOfMax, (.18+(nbGraphs) *.40)  )))
         
@@ -614,7 +615,7 @@ class StatsPlotter:
         
         self.graph( 'set label "# of files : %s " at screen .545, screen %3.2f' % ( self.nbFiles[i] , ( x-.06+(nbGraphs) *.40) ) )
     
-        self.graph( 'set label "Total # of bytes: %s " at screen .545, screen %s' % (  totalNumberOfBytes,( x -.08 +(nbGraphs) *.40 ) ) )
+        self.graph( 'set label "# of bytes: %s " at screen .545, screen %s' % (  totalNumberOfBytes,( x -.08 +(nbGraphs) *.40 ) ) )
                 
 
     
