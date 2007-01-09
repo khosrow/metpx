@@ -25,15 +25,10 @@ import os,sys,glob #important files
 import backwardReader 
 from   Logger             import * 
 from   FileStatsCollector import *
+from generalStatsLibraryMethods import *
 
-localMachine = os.uname()[1]
 
-if localMachine == "pds3-dev" or localMachine == "pds4-dev" or localMachine == "lvs1-stage" or localMachine == "logan1" or localMachine == "logan2":
-    PATH_TO_LOGFILES = PXPaths.LOG + localMachine + "/"
-
-else:#pds5 pds5 pxatx etc
-    PATH_TO_LOGFILES = PXPaths.LOG
-    
+LOCAL_MACHINE = os.uname()[1]   
 
 class LogFileCollector: 
     """ 
@@ -47,7 +42,7 @@ class LogFileCollector:
                  
     """
     
-    def __init__( self, startTime = "2006-06-06 01:00:00", endTime = "2006-06-06 02:00:00", directory = PATH_TO_LOGFILES, lastLineRead = "", logType = "tx", name = "satnet", logger = None ):
+    def __init__( self, startTime = "2006-06-06 01:00:00", endTime = "2006-06-06 02:00:00", directory = None, lastLineRead = "", logType = "tx", name = "satnet", logger = None ):
         """ 
             Constructor.
             -Builds a directoryFileCollector with no entries.   
@@ -157,8 +152,10 @@ if __name__ == "__main__":
         Small test case. Tests if everything works plus gives an idea on proper usage.
     
     """
-   
-    lfc = LogFileCollector( startTime = "2006-07-20 01:00:00", endTime= "2006-07-20 02:00:00", directory = PATH_TO_LOGFILES, lastLineRead = "", logType = "tx", name = "satnet"  )
+    
+    pathToLogFiles = generalStatsLibraryMethods.getPathToLogFiles( LOCAL_MACHINE, LOCAL_MACHINE )
+
+    lfc = LogFileCollector( startTime = "2006-07-20 01:00:00", endTime= "2006-07-20 02:00:00", directory = pathToLogFiles, lastLineRead = "", logType = "tx", name = "satnet"  )
     lfc.collectEntries() 
     
     print "Files returned : %s " %lfc.entries            
