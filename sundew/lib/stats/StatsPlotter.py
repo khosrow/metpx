@@ -24,20 +24,18 @@ named COPYING in the root of the source directory tree.
 
 
 #important files 
-import sys 
+import sys, commands, copy, logging, shutil 
 import MyDateLib
 from MyDateLib import *
 import ClientStatsPickler
 from Numeric import *
 import Gnuplot, Gnuplot.funcutils
-import copy 
 import PXPaths
-import logging 
 from   Logger  import *
 
 PXPaths.normalPaths()
 
-localMachine = os.uname()[1]
+LOCAL_MACHINE = os.uname()[1]
 
 
 class StatsPlotter:
@@ -46,18 +44,8 @@ class StatsPlotter:
         """
             StatsPlotter constructor. 
             
-        """
-        
-        x = [ [0]*5  for x in range(5) ]       
-        for i in range( len(machines) ):#workaround as to get the right names in the fileName and labels.
-            if machines[i] == "pds3-dev":
-                machines[i] = "pds5"
-            elif machines[i] == "pds4-dev":
-                machines[i] = "pds6"
-            elif machines[i] == "lvs1-stage" or machines[i] == "logan1" or machines[i] == "logan2" :
-                machines[i] = "pxatx"                                                                                
-
-    
+        """                                                                    
+   
         #print machines    
         machines = "%s" %machines
         machines = machines.replace( "[","").replace( "]","" ).replace( "'", "" )
@@ -146,7 +134,7 @@ class StatsPlotter:
         
         date = self.currentTime.replace( "-","" ).replace( " ", "_")
         
-        fileName = PXPaths.GRAPHS + "%.50s/%s_%.50s_%s_%s_%shours_on_%s_for %s products.png" %( clientName, self.fileType, clientName, date, self.statsTypes, self.timespan, self.machines, self.productType )
+        fileName = PXPaths.GRAPHS + "others/gnuplot/%.50s/%s_%.50s_%s_%s_%shours_on_%s_for %s products.png" %( clientName, self.fileType, clientName, date, self.statsTypes, self.timespan, self.machines, self.productType )
         
         
         fileName = fileName.replace( '[', '').replace(']', '').replace(" ", "").replace( "'","" )               
@@ -386,20 +374,25 @@ class StatsPlotter:
             else:
                 minimum = int(minimum)
                 
-                
+        if statType == "latency":
+            explanation = "With values rounded for every minutes."
+        else:
+            explanation = "With the total value of every minutes."
+                        
         statType = statType[0].upper() + statType[1:]             
               
-        title =  "%s for %s for a span of %s hours ending at %s\\n\\nMAX: %s  MEAN: %3.2f MIN: %s " %( statType, self.clientNames[i], self.timespan, self.currentTime,  maximum, self.means[i][typeCount], minimum )     
+        title =  "%s for %s for a span of %s hours ending at %s\\n%s\\n\\nMAX: %s  MEAN: %3.2f MIN: %s " %( statType, self.clientNames[i], self.timespan, self.currentTime, explanation, maximum, self.means[i][typeCount], minimum )     
         
         return title
         
     
-    def createLink( self ):
+    def createCopy( self ):
         """
-            Creates a symbolic link between created image file and 
-            an shorter, easier to read name. 
+            Creates a copy of the created image file so that it
+            easily be used in columbo. 
             
         """
+        
         clientName = ""
         
         if len( self.clientNames ) == 0:
@@ -410,21 +403,22 @@ class StatsPlotter:
                 if name != self.clientNames[ len(self.clientNames) -1 ] :
                     clientName = clientName + "-" 
         
-        src         = self.imageName
+        src = self.imageName
         
-        destination = PXPaths.GRAPHS + "/symlinks/columbo/%s.png" %clientName
+        destination = PXPaths.GRAPHS + "webGraphics/columbo/%s.png" %clientName
 
         if not os.path.isdir( os.path.dirname( destination ) ):
             os.makedirs(  os.path.dirname( destination ), mode=0777 )                                                      
         
-        if os.path.isfile( destination ):
-            os.remove( destination )
+#         if os.path.isfile( destination ):
+#             os.remove( destination )
         
-        os.symlink( src, destination )
+        shutil.copy( src, destination ) 
         
-        
+        print "cp %s %s  "  %( src, destination )
          
-    def plot( self, createLink = False  ):
+        
+    def plot( self, createCopy = False  ):
         """
             Used to plot gnuplot graphics. Settings used are
             slighly modified but mostly based on Plotter.py's
@@ -500,8 +494,9 @@ class StatsPlotter:
                 nbGraphs = nbGraphs + 1 
                 
                     
-        if createLink :
-            self.createLink( )     
+        if createCopy :
+            del self.graph
+            self.createCopy( )     
          
             
             
@@ -533,29 +528,29 @@ class StatsPlotter:
 
         self.graph.ylabel( 'latency (seconds)' )
         
-        self.graph( 'set label "%s : %s" at screen .545, screen %3.2f' % ( self.sourlient, self.clientNames[i],(.28+(nbGraphs) *.40)  ))
+        self.graph( 'set label "%s : %s" at screen .545, screen %3.2f' % ( self.sourlient, self.clientNames[i],(.26+(nbGraphs) *.40)  ))
         
-        self.graph( 'set label "Machines : %s" at screen .545, screen %3.2f' % ( self.machines,(.26+(nbGraphs) *.40)  ) )
+        self.graph( 'set label "Machines : %s" at screen .545, screen %3.2f' % ( self.machines,(.24+(nbGraphs) *.40)  ) )
         
-        self.graph( 'set label "Product Type : %s" at screen .545, screen %3.2f' % ( self.productType,(.24+(nbGraphs) *.40)  ) )
+        self.graph( 'set label "Product Type : %s" at screen .545, screen %3.2f' % ( self.productType,(.22+(nbGraphs) *.40)  ) )
         
-        self.graph( 'set label "Max. lat. : %s (Seconds)" at screen .545, screen %3.2f' % ( maximum, (.22+(nbGraphs) *.40) ) )
+        self.graph( 'set label "Absolute max. lat. : %s seconds" at screen .545, screen %3.2f' % ( maximum, (.20+(nbGraphs) *.40) ) )
         
-        self.graph( 'set label "Time of max. lat. : %s" at screen .545, screen %3.2f' % ( ( timeOfMax, (.20+(nbGraphs) *.40)  )))
+        self.graph( 'set label "Time of max. lat. : %s" at screen .545, screen %3.2f' % ( ( timeOfMax, (.18+(nbGraphs) *.40)  )))
         
         if len ( self.filesWhereMaxOccured[i][j] ) <= 50 :
-            self.graph( 'set label "File with max. lat. :%s" at screen .545, screen %3.2f' % ( self.filesWhereMaxOccured[i][j], (.18+(nbGraphs) *.40) ))     
+            self.graph( 'set label "File with max. lat. :%s" at screen .545, screen %3.2f' % ( self.filesWhereMaxOccured[i][j], (.16+(nbGraphs) *.40) ))     
         
         else:
-            self.graph( 'set label "File with max. lat. :" at screen .545, screen %3.2f' % ( (.18+(nbGraphs) *.40) ))  
+            self.graph( 'set label "File with max. lat. :" at screen .545, screen %3.2f' % ( (.16+(nbGraphs) *.40) ))  
             
-            self.graph( 'set label "%s" at screen .545, screen %3.2f' % ( self.filesWhereMaxOccured[i][j], (.16+(nbGraphs) *.40 ) ))          
+            self.graph( 'set label "%s" at screen .545, screen %3.2f' % ( self.filesWhereMaxOccured[i][j], (.14+(nbGraphs) *.40 ) ))          
         
-        self.graph( 'set label "# of files(total) : %s " at screen .545, screen %3.2f' % ( self.nbFiles[i] , (.14+(nbGraphs) *.40) ) )
+        self.graph( 'set label "# of files : %s " at screen .545, screen %3.2f' % ( self.nbFiles[i] , (.12+(nbGraphs) *.40) ) )
         
-        self.graph( 'set label "# of files over %s seconds: %s " at screen .545, screen %3.2f' % ( self.maxLatency, self.nbFilesOverMaxLatency[i], ( .12+(nbGraphs) *.40 ) ) )
+        self.graph( 'set label "# of files over %s seconds: %s " at screen .545, screen %3.2f' % ( self.maxLatency, self.nbFilesOverMaxLatency[i], ( .10+(nbGraphs) *.40 ) ) )
         
-        self.graph( 'set label "%% of files over %s seconds: %3.2f %%" at screen .545, screen %3.2f' % (  self.maxLatency, self.ratioOverLatency[i] , ( .10 + (nbGraphs) *.40 ) ) )
+        self.graph( 'set label "%% of files over %s seconds: %3.2f %%" at screen .545, screen %3.2f' % (  self.maxLatency, self.ratioOverLatency[i] , ( .08 + (nbGraphs) *.40 ) ) )
         
                 
     
@@ -598,21 +593,21 @@ class StatsPlotter:
         
         self.graph.ylabel( '# of bytes' )
         
-        self.graph( 'set label "%s : %s" at screen .545, screen %3.2f' % ( self.sourlient, self.clientNames[i],(.28+(nbGraphs) *.40)  ))
+        self.graph( 'set label "%s : %s" at screen .545, screen %3.2f' % ( self.sourlient, self.clientNames[i],(.26+(nbGraphs) *.40)  ))
         
-        self.graph( 'set label "Machines : %s" at screen .545, screen %3.2f' % ( self.machines,(.26+(nbGraphs) *.40)  ) )
+        self.graph( 'set label "Machines : %s" at screen .545, screen %3.2f' % ( self.machines,(.24+(nbGraphs) *.40)  ) )
         
-        self.graph( 'set label "Product Type : %s" at screen .545, screen %3.2f' % ( self.productType,(.24+(nbGraphs) *.40)  ) )
+        self.graph( 'set label "Product Type : %s" at screen .545, screen %3.2f' % ( self.productType,(.22+(nbGraphs) *.40)  ) )
         
         
         if len ( self.filesWhereMaxOccured[i][j] ) <= 65 :            
-            self.graph( 'set label "Largest file : %s" at screen .545, screen %3.2f' % ( self.filesWhereMaxOccured[i][j], (.22+(nbGraphs) *.40) ))
-            x = .22
-        else:
-            self.graph( 'set label "Largest file : " at screen .545, screen %3.2f' % ( ( .22 + ( nbGraphs ) *.40) ) )
-            
-            self.graph( 'set label "%s" at screen .545, screen %3.2f' % ( self.filesWhereMaxOccured[i][j], (.20+(nbGraphs) *.40) ))
+            self.graph( 'set label "Largest file : %s" at screen .545, screen %3.2f' % ( self.filesWhereMaxOccured[i][j], (.20+(nbGraphs) *.40) ))
             x = .20
+        else:
+            self.graph( 'set label "Largest file : " at screen .545, screen %3.2f' % ( ( .20 + ( nbGraphs ) *.40) ) )
+            
+            self.graph( 'set label "%s" at screen .545, screen %3.2f' % ( self.filesWhereMaxOccured[i][j], (.18+(nbGraphs) *.40) ))
+            x = .18
                     
         self.graph( 'set label "Size of largest file : %s (Bytes)" at screen .545, screen %3.2f' % ( maximum, (x -.02+(nbGraphs) *.40) ) )       
                 
@@ -620,7 +615,7 @@ class StatsPlotter:
         
         self.graph( 'set label "# of files : %s " at screen .545, screen %3.2f' % ( self.nbFiles[i] , ( x-.06+(nbGraphs) *.40) ) )
     
-        self.graph( 'set label "Total # of bytes: %s " at screen .545, screen %s' % (  totalNumberOfBytes,( x -.08 +(nbGraphs) *.40 ) ) )
+        self.graph( 'set label "# of bytes: %s " at screen .545, screen %s' % (  totalNumberOfBytes,( x -.08 +(nbGraphs) *.40 ) ) )
                 
 
     
@@ -655,18 +650,18 @@ class StatsPlotter:
         
         self.graph.ylabel( '# of errors' )
         
-        self.graph( 'set label "%s : %s" at screen .545, screen %3.2f' % ( self.sourlient,self.clientNames[i],(.28+(nbGraphs) *.40)  ))
+        self.graph( 'set label "%s : %s" at screen .545, screen %3.2f' % ( self.sourlient,self.clientNames[i],(.26+(nbGraphs) *.40)  ))
         
-        self.graph( 'set label "Machines : %s" at screen .545, screen %3.2f' % ( self.machines,(.26+(nbGraphs) *.40)  ) )
+        self.graph( 'set label "Machines : %s" at screen .545, screen %3.2f' % ( self.machines,(.24+(nbGraphs) *.40)  ) )
         
-        self.graph( 'set label "Product Type : %s" at screen .545, screen %3.2f' % ( self.productType,(.24+(nbGraphs) *.40)  ) )
+        self.graph( 'set label "Product Type : %s" at screen .545, screen %3.2f' % ( self.productType,(.22+(nbGraphs) *.40)  ) )
         
-        self.graph( 'set label "Max error/%s : %s" at screen .545, screen %3.2f' % ( self.entryType, maximum, (.22+(nbGraphs) *.40) ))
+        self.graph( 'set label "Max error/%s : %s" at screen .545, screen %3.2f' % ( self.entryType, maximum, (.20+(nbGraphs) *.40) ))
         
         
-        self.graph( 'set label "Time of max. : %s" at screen .545, screen %3.2f' % ( ( timeOfMax, (.20+(nbGraphs) *.40)  )))
+        self.graph( 'set label "Time of max. : %s" at screen .545, screen %3.2f' % ( ( timeOfMax, (.18+(nbGraphs) *.40)  )))
         
-        self.graph( 'set label "# of errors : %.f" at screen .545, screen %3.2f' % ( self.nbErrors[i], (.18+(nbGraphs) *.40) ) )
+        self.graph( 'set label "# of errors : %.f" at screen .545, screen %3.2f' % ( self.nbErrors[i], (.16+(nbGraphs) *.40) ) )
       
                 
                 
