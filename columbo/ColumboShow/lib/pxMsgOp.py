@@ -116,30 +116,46 @@ msgs = MsgOpUtils.getMsg()
 # We want the new messages to be displayed first
 acknowledged = []
 new = []
+aftn = []
 for msg in msgs:
-    if msg[0].find('.ack') != -1:
+    if msg[0].find('Nuclear') != -1:
+        aftn.append(msg) 
+    elif msg[0].find('.ack') != -1:
         acknowledged.append(msg)
     else:
         new.append(msg)
+
 acknowledged.sort()
 new.sort()
-msgs = new + acknowledged
+aftn.sort()
+msgs = aftn + new + acknowledged 
+
+goto = "pxSendOnAFTN.py?machine=%s&filename=%s"
 
 print '<form method="post" action="pxMsgOp.py">'
 for msg in msgs:
     displayHeader = header = msg[0]
     machine = msg[1]
+        
     if header.find('.ack') != -1:
         displayHeader = header[:-4]
         print """
         <input type="checkbox" name="delCheck" value=%s>
-        <a href="pxMsgDetails.py?msg=%s&machine=%s">%s</a><br><br>
+        <a href="pxMsgDetails.py?msg=%s&machine=%s">%s</a>
         """ % (header + '|' + machine, header, machine, displayHeader)
+        if msg in aftn:
+            print """<input type="button" name="sendOnAFTN" value="Send On AFTN" onClick="location='%s'"><br><br>""" % (goto % (machine, header))
+        else: print '<br><br>'
+
     else:
         print """
         <input type="checkbox" name="delCheck" value=%s DISABLED>
-        <a href="pxMsgDetails.py?msg=%s&machine=%s"><b>%s</b></a><br><br>
+        <a href="pxMsgDetails.py?msg=%s&machine=%s"><b>%s</b></a>
         """ % (header + '|' + machine, header, machine, header)
+        if msg in aftn:
+            print """<input type="button" name="sendOnAFTN" value="Send On AFTN" onClick="location='%s'"><br><br>""" % (goto % (machine, header))
+        else: print '<br><br>'
+
 
 print """
       <br>
@@ -149,12 +165,22 @@ print """
     <script LANGUAGE="JavaScript">
         function confirmSubmit()
         {
-            var answer=confirm("Are you sure?");
+            var answer=confirm("Are you sure you want to delete?");
             if (answer)
 	            return true;
             else
 	            return false;
         }
+
+        function confirmSend()
+        {
+            var answer=confirm("Are you sure you want to send it on AFTN?");
+            if (answer)
+                return true;
+            else
+                return false;
+        }
+
     </script>
     <td valign="top" bgcolor="#cccccc">
         <input type="submit" name="delete" value="Delete" onClick="return confirmSubmit()">
