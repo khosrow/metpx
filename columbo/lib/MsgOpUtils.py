@@ -36,6 +36,10 @@ def getMsg():
     """
     
     machines = backends[:] + frontend[:]
+    uniqueMachines = {}
+    for machine in machines: uniqueMachines[machine] = 1 
+    machines = uniqueMachines.keys()
+
     result = []
     for machine in machines:
         status, items = commands.getstatusoutput('sudo -u pds /usr/bin/ssh ' + machine + ' ls -1F ' + msgPath)
