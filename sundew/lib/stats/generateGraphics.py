@@ -24,18 +24,20 @@ named COPYING in the root of the source directory tree.
 
 
 import os, time, sys
+import generalStatsLibraryMethods
 from optparse import OptionParser
 from ConfigParser import ConfigParser
 from ClientGraphicProducer import *
+from generalStatsLibraryMethods import *
 import PXPaths
 
 PXPaths.normalPaths()
 
-localMachine = os.uname()[1]
+LOCAL_MACHINE = os.uname()[1]
 
 class _GraphicsInfos:
 
-    def __init__( self, directory, fileType, types, collectUpToNow,  clientNames = None ,  timespan = 12, currentTime = None, productType = "All", machines = ["pdsGG"], link = False   ):
+    def __init__( self, directory, fileType, types, collectUpToNow,  clientNames = None ,  timespan = 12, currentTime = None, productType = "All", machines = ["pdsGG"], copy = False   ):
 
             
         self.directory    = directory         # Directory where log files are located. 
@@ -47,7 +49,7 @@ class _GraphicsInfos:
         self.currentTime  = currentTime       # Time when stats were queried.
         self.productType  = productType       # Specific data type on wich we'll collect the data.
         self.machines     = machines          # Machine from wich we want the data to be calculated.
-        self.link         = link              #Wheteher or not we create a link file.
+        self.copy         = copy              # Whether or not we create a copy file.
         
 #################################################################
 #                                                               #
@@ -77,7 +79,7 @@ def getOptionsFromParser( parser ):
     currentTime      = options.currentTime.replace('"','').replace("'",'')
     fileType         = options.fileType.replace("'",'')
     collectUpToNow   = options.collectUpToNow
-    link             = options.link
+    copy             = options.copy
     productType      = options.productType.replace( ' ', '' )     
      
     
@@ -143,26 +145,9 @@ def getOptionsFromParser( parser ):
         print "Program terminated."
         sys.exit()
     
-    directory = PXPaths.LOG + localMachine + "/"
+    directory =  generalStatsLibraryMethods.getPathToLogFiles( LOCAL_MACHINE, machines[0] )
     
-    
-    #workaround to be removed after its installed on real machines
-    for i in range ( len( machines ) ) :
-    
-        #small workaround for temporary test machines    
-        if machines[i] == "pds5" :
-            machines[i] = "pds3-dev"
-        elif machines[i] == "pds6" :
-            machines[i] = "pds4-dev"
-        elif machines[i] == "pxatx" :#thus far all graphic machines make pickels for pxatx
-            machines[i] = localMachine
-        else:
-            machines[i] = machines[i]
-            
-        #end of workaround
-       
-    
-    infos = _GraphicsInfos( collectUpToNow = collectUpToNow, currentTime = currentTime, clientNames = clientNames,  directory = directory , types = types, fileType = fileType, timespan = timespan, productType = productType, machines = machines, link = link )
+    infos = _GraphicsInfos( collectUpToNow = collectUpToNow, currentTime = currentTime, clientNames = clientNames,  directory = directory , types = types, fileType = fileType, timespan = timespan, productType = productType, machines = machines, copy = copy )
     
     if collectUpToNow == False:
         infos.endTime = MyDateLib.getIsoWithRoundedHours( infos.currentTime ) 
@@ -201,9 +186,12 @@ Defaults :
 Options:
  
     - With -c|--clients you can specify the clients names on wich you want to collect data. 
+    - With -copy you can specify that you want a copy of the file to be move in the daily
+      section of the client's webGraphics.
     - With -d|--date you can specify the time of the request.( Usefull for past days and testing. )
     - With -f|--fileType you can specify the file type of the log fiels that will be used.  
     - With -n|--collectUpToNow you can specify that data must be collected right up to the minute of the call. 
+    - With -p|--product you can specify the product for wich the data is to come from.
     - With -s|--span you can specify the time span to be used to create the graphic 
     - With -t|--types you can specify what data types need to be collected
     
@@ -230,9 +218,7 @@ def addOptions( parser ):
     """
         This method is used to add all available options to the option parser.
         
-    """
-    
-    localMachine = os.uname()[1]
+    """      
     
     parser.add_option("-c", "--clients", action="store", type="string", dest="clients", default="satnet",
                         help="Clients' names")
@@ -241,9 +227,9 @@ def addOptions( parser ):
     
     parser.add_option("-f", "--fileType", action="store", type="string", dest="fileType", default='tx', help="Type of log files wanted.")                     
    
-    parser.add_option("-l", "--link", action="store_true", dest = "link", default=False, help="Create a link file for the generated image.")
+    parser.add_option( "--copy", action="store_true", dest = "copy", default=False, help="Create a copy file for the generated image.")
     
-    parser.add_option( "-m", "--machines", action="store", type="string", dest="machines", default=localMachine, help = "Machines for wich you want to collect data." ) 
+    parser.add_option( "-m", "--machines", action="store", type="string", dest="machines", default=LOCAL_MACHINE, help = "Machines for wich you want to collect data." ) 
     
     parser.add_option("-n", "--collectUpToNow", action="store_true", dest = "collectUpToNow", default=False, help="Collect data up to current second.")
     
@@ -272,7 +258,7 @@ def main():
     
     gp = ClientGraphicProducer( clientNames = infos.clientNames, timespan = infos.timespan, currentTime = infos.currentTime, productType = infos.productType, directory = infos.directory , fileType = infos.fileType, machines = infos.machines )  
     
-    gp.produceGraphicWithHourlyPickles( types = infos.types, now = infos.collectUpToNow, createLink = infos.link   )
+    gp.produceGraphicWithHourlyPickles( types = infos.types, now = infos.collectUpToNow, createCopy = infos.copy   )
     
     #print "Done." # replace by logging later.
 

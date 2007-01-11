@@ -21,9 +21,10 @@ named COPYING in the root of the source directory tree.
 #######################################################################################
 
 
-import os, time, getopt, rrdtool  
+import os, time, getopt, rrdtool, shutil  
 import ClientStatsPickler, MyDateLib, pickleMerging, PXManager, PXPaths, transferPickleToRRD
-
+import generalStatsLibraryMethods
+from   generalStatsLibraryMethods import *
 from   ClientStatsPickler import *
 from   optparse  import OptionParser
 from   PXPaths   import *
@@ -33,31 +34,24 @@ from   Logger    import *
 from   Logger    import *       
 
 
-PXPaths.normalPaths()   
+PXPaths.normalPaths()
 
-if localMachine == "pds3-dev" or localMachine == "pds4-dev" or localMachine == "lvs1-stage" or localMachine == "logan1" or localMachine == "logan2":
-    PATH_TO_LOGFILES = PXPaths.LOG + localMachine + "/"
-
-else:#pds5 pds5 pxatx etc
-    PATH_TO_LOGFILES = PXPaths.LOG
-
-
+LOCAL_MACHINE = os.uname()[1]
     
     
 class _GraphicsInfos:
 
-    def __init__( self, directory, fileType, types, totals, clientNames = None ,  timespan = 12, endDate = None, machines = ["pdsGG"], link = False  ):
-
-            
-        self.directory    = directory         # Directory where log files are located. 
+    def __init__( self, fileType, types, totals, clientNames = None ,  timespan = 12, startTime = None, endTime = None, machines = ["pdsGG"], copy = False  ):            
+        
         self.fileType     = fileType          # Type of log files to be used.    
         self.types        = types             # Type of graphics to produce. 
         self.clientNames  = clientNames or [] # Client name we need to get the data from.
-        self.timespan     = timespan          # Number of hours we want to gather the data from. 
-        self.endDate      = endDate           # Time when stats were queried.
+        self.timespan     = timespan          # Number of hours we want to gather the data from.
+        self.startTime    = startTime         # Time where graphic(s) starts 
+        self.endTime      = endTime           # Time where graphic(s) ends.
         self.machines     = machines          # Machine from wich we want the data to be calculated.
         self.totals       = totals            # Make totals of all the specified clients 
-        self.link         = link              # Whether or not to create symlinks for images. 
+        self.copy         = copy              # Whether or not to create copies of the images. 
         
         
         
@@ -66,6 +60,199 @@ class _GraphicsInfos:
 #############################PARSER##############################
 #                                                               #
 #################################################################   
+def getStartEndFromPreviousDay( currentTime, nbDays = 1  ):
+    """
+        Returns the start and end time of
+        the day prior to the currentTime. 
+        
+        currentTime must be in iso format.       
+        start and end are returned in iso format. 
+        
+    """
+    
+    end       = MyDateLib.getIsoTodaysMidnight( currentTime )
+    yesterday = MyDateLib.getIsoFromEpoch( MyDateLib.getSecondsSinceEpoch( currentTime ) - (24*60*60)  ) 
+    start     = MyDateLib.getIsoTodaysMidnight( yesterday ) 
+    
+    return start, end 
+
+    
+    
+def getStartEndFromPreviousWeek( currentTime, nbWeeks = 1 ):
+    """
+        Returns the start and end time of
+        the week prior to the currentTime. 
+        
+        currentTime must be in iso format.       
+        start and end are returned in iso format. 
+        
+    """
+    
+    currentTimeInSecs = MyDateLib.getSecondsSinceEpoch( currentTime )
+    weekDay     = int(time.strftime( "%w", time.gmtime( currentTimeInSecs ) ))
+    endInSecs   = currentTimeInSecs - ( weekDay*24*60*60 )
+    startInSecs = endInSecs - ( 7*24*60*60 )
+    start       = MyDateLib.getIsoTodaysMidnight( MyDateLib.getIsoFromEpoch( startInSecs ) ) 
+    end         = MyDateLib.getIsoTodaysMidnight( MyDateLib.getIsoFromEpoch( endInSecs ) )   
+    
+    return start, end 
+
+
+    
+def getStartEndFromPreviousMonth( currentTime ):
+    """
+        Returns the start and end time of
+        the month prior to the currentTime. 
+        
+        currentTime must be in iso format.       
+        start and end are returned in iso format. 
+        
+    """
+    
+    
+    date    = currentTime.split()[0]
+    splitDate = date.split("-")
+    end   = splitDate[0] + "-" + splitDate[1] + "-" + "01 00:00:00"       
+    
+    splitTime   = currentTime.split()
+    date        = splitTime[0]
+    splitDate   = date.split("-")
+    if int( splitDate[1] ) != 1 :
+        month = int( splitDate[1] ) - 1
+        if month < 10 :
+            month = "0" + str( month ) 
+        splitDate[1] = month
+    
+    else:
+        year = int( splitDate[0] ) - 1
+        splitDate[0] = str(year)      
+        splitDate[1] = "01"
+    
+    firstDayOfPreviousMonth = str( splitDate[0] ) + "-" + str( splitDate[1] ) + "-01" 
+    start = firstDayOfPreviousMonth + " 00:00:00"   
+          
+   
+    
+    return start, end 
+    
+    
+def getStartEndFromPreviousYear( currentTime ):
+    """
+        Returns the start and end time of
+        the day prior to the currentTime. 
+        
+        currentTime must be in iso format.       
+        start and end are returned in iso format. 
+        
+    """      
+    
+    year = currentTime.split("-")[0]
+    year = str( int(year)-1 )
+    start = year + "-01-01 00:00:00"    
+    
+    year = currentTime.split("-")[0]
+    end  = year + "-01-01 00:00:00"    
+    
+    return start, end         
+    
+    
+    
+def getStartEndFromCurrentDay( currentTime ):
+    """
+        Returns the start and end time of
+        the current day. 
+        
+        currentTime must be in iso format.       
+        start and end are returned in iso format. 
+        
+    """       
+    
+    start    = MyDateLib.getIsoTodaysMidnight( currentTime )
+    tomorrow = MyDateLib.getIsoFromEpoch( MyDateLib.getSecondsSinceEpoch( currentTime ) + 24*60*60 )
+    end      = MyDateLib.getIsoTodaysMidnight( tomorrow )
+    
+    return start, end 
+        
+        
+def getStartEndFromCurrentWeek( currentTime ):
+    """
+        Returns the start and end time of
+        the currentweek. 
+        
+        currentTime must be in iso format.       
+        start and end are returned in iso format. 
+        
+    """       
+    
+    currentTimeInSecs = MyDateLib.getSecondsSinceEpoch( currentTime )
+    weekDay     = int(time.strftime( "%w", time.gmtime( currentTimeInSecs ) ))
+    
+    endInSecs   = currentTimeInSecs + ( ( 7 - weekDay)*24*60*60 )
+    end         = MyDateLib.getIsoTodaysMidnight( MyDateLib.getIsoFromEpoch( endInSecs ) )   
+    
+    
+    startInSecs = currentTimeInSecs - ( weekDay*24*60*60 )
+    start       = MyDateLib.getIsoTodaysMidnight( MyDateLib.getIsoFromEpoch( startInSecs ) ) 
+    
+    
+    return start, end         
+        
+        
+def getStartEndFromCurrentMonth( currentTime ):
+    """
+        Returns the start and end time of
+        the currentDay. 
+        
+        currentTime must be in iso format.       
+        start and end are returned in iso format. 
+        
+    """       
+       
+    splitTime   = currentTime.split()
+    date        = splitTime[0]
+    splitDate   = date.split( "-" )
+    start       = splitDate[0] + "-" + splitDate[1] + "-01 00:00:00"
+    
+    if int( splitDate[1] ) != 12 :
+        month = int( splitDate[1] ) + 1
+        if month < 10: 
+            month = "0" + str( month ) 
+        splitDate[1] = month
+    
+    else:
+        year = int( splitDate[0] ) + 1
+        splitDate[0] = str(year)      
+        splitDate[1] = "01"
+        
+        
+    firstDayOfMonth = str( splitDate[0] ) + "-" + str( splitDate[1] ) + "-01" 
+    end = firstDayOfMonth + " 00:00:00" 
+        
+    return start, end         
+        
+        
+    
+def getStartEndFromCurrentYear( currentTime ):
+    """
+        Returns the start and end time of
+        the currentDay. 
+        
+        currentTime must be in iso format.       
+        start and end are returned in iso format. 
+        
+    """       
+    
+    year = currentTime.split("-")[0]
+    start  = year + "-01-01 00:00:00" 
+    
+    year = currentTime.split("-")[0]
+    year = str( int(year)+1 )
+    end = year + "-01-01 00:00:00"    
+        
+    return start, end                              
+    
+    
+    
 def getOptionsFromParser( parser ):
     """
         
@@ -78,14 +265,14 @@ def getOptionsFromParser( parser ):
     
     """ 
     
-    endDate   = []
+    date   = []
     
     ( options, args )= parser.parse_args()        
     timespan         = options.timespan
     machines         = options.machines.replace( ' ','').split(',')
     clientNames      = options.clients.replace( ' ','' ).split(',')
     types            = options.types.replace( ' ', '').split(',')
-    endDate          = options.endDate.replace('"','').replace("'",'')
+    date             = options.date.replace('"','').replace("'",'')
     fileType         = options.fileType.replace("'",'')
     individual       = options.individual
     totals           = options.totals
@@ -93,7 +280,9 @@ def getOptionsFromParser( parser ):
     weekly           = options.weekly
     monthly          = options.monthly
     yearly           = options.yearly    
-    link             = options.link
+    fixedCurrent     = options.fixedCurrent
+    fixedPrevious    = options.fixedPrevious
+    copy             = options.copy
     
     counter = 0  
     specialParameters = [daily, monthly, weekly, yearly]
@@ -112,33 +301,77 @@ def getOptionsFromParser( parser ):
         print "Use -h for help."
         print "Program terminated."
         sys.exit()
-    
-    elif counter == 0 and timespan == None :
+        
+    elif counter == 0:    
+        if fixedPrevious or fixedCurrent:
+            print "Error. When using one of the fixed options, please use either the -d -m -w or -y options. " 
+            print "Use -h for help."
+            print "Program terminated."
+            sys.exit()
+        
+        if copy :
+            if daily or not( weekly or monthly or yearly ):
+                print "Error. Copying can only be used with the -m -w or -y options. " 
+                print "Use -h for help."
+                print "Program terminated."        
+            
+                
+    if counter == 0 and timespan == None :
         timespan = 12
+    if fixedPrevious and fixedCurrent:
+        print "Error. Please use only one of the fixed options,either fixedPrevious or . " 
+        print "Use -h for help."
+        print "Program terminated."
+        sys.exit()  
     
-    elif daily :
+    try: # Makes sure date is of valid format. 
+         # Makes sure only one space is kept between date and hour.
+        t =  time.strptime( date, '%Y-%m-%d %H:%M:%S' )
+        split = date.split()
+        date = "%s %s" %( split[0], split[1] )
+
+    except:    
+        print "Error. The date format must be YYYY-MM-DD HH:MM:SS" 
+        print "Use -h for help."
+        print "Program terminated."
+        sys.exit()    
+        
+     
+    #fix timeSpan method???   
+    if daily :
         timespan = 24
     elif weekly:
         timespan = 24 * 7
     elif monthly:
         timespan = 24 * 30     
     elif yearly:
-        timespan = 24 * 365        
-         
+        timespan = 24 * 365   
+    
+    #fix start and end method???    
+    if fixedPrevious :
+        if daily :
+            start, end = getStartEndFromPreviousDay( date )  
+        elif weekly:
+            start, end = getStartEndFromPreviousWeek( date )
+        elif monthly:
+            start, end = getStartEndFromPreviousMonth( date )
+        elif yearly:
+            start, end = getStartEndFromPreviousYear( date )
             
-    try: # Makes sure date is of valid format. 
-         # Makes sure only one space is kept between date and hour.
-        t =  time.strptime( endDate, '%Y-%m-%d %H:%M:%S' )
-        split = endDate.split()
-        endDate = "%s %s" %( split[0], split[1] )
-
-    except:    
-        print "Error. The date format must be YYYY-MM-DD HH:MM:SS" 
-        print "Use -h for help."
-        print "Program terminated."
-        sys.exit()
+    elif fixedCurrent:
+        if daily :
+            start, end = getStartEndFromCurrentDay( date )   
+        elif weekly:
+            start, end = getStartEndFromCurrentWeek( date )
+        elif monthly:
+            start, end = getStartEndFromCurrentMonth( date )    
+        elif yearly:
+            start, end = getStartEndFromCurrentYear( date ) 
     
-    
+    else:        
+        start = MyDateLib.getIsoFromEpoch( MyDateLib.getSecondsSinceEpoch( date ) - timespan*60*60 ) 
+        end   = date                        
+                               
     try:    
         if int( timespan ) < 1 :
             raise 
@@ -161,12 +394,12 @@ def getOptionsFromParser( parser ):
         
         
     if clientNames[0] == "ALL":
-        updateConfigurationFiles( machines[0], "pds" )
+        rxNames, txNames = generalStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machines[0] )
         #get rx tx names accordingly.         
         if fileType == "tx":    
-            clientNames = getNames( "tx", machines[0] )  
+            clientNames = txNames  
         else:
-            clientNames = getNames( "rx", machines[0] )      
+            clientNames = rxNames    
             
     
     try :
@@ -196,7 +429,7 @@ def getOptionsFromParser( parser ):
 
     except:    
 
-        print "Error. With %s fileType, possible data types values are : %s." %( fileType,validTypes )
+        print "Error. With %s fileType, possible data types values are : %s." %( fileType, validTypes )
         print 'For multiple types use this syntax : -t "type1,type2"' 
         print "Use -h for additional help."
         print "Program terminated."
@@ -210,83 +443,13 @@ def getOptionsFromParser( parser ):
                     
         machines = [ combinedMachineName ]              
                 
-    directory = PATH_TO_LOGFILES
     
-    endDate = MyDateLib.getIsoWithRoundedHours( endDate )
     
-    infos = _GraphicsInfos( endDate = endDate, clientNames = clientNames,  directory = directory , types = types, timespan = timespan, machines = machines, fileType = fileType, totals = totals, link = link  )   
+    end = MyDateLib.getIsoWithRoundedHours( end )
+    
+    infos = _GraphicsInfos( startTime = start, endTime = end, clientNames = clientNames, types = types, timespan = timespan, machines = machines, fileType = fileType, totals = totals, copy = copy  )   
             
-    return infos 
-       
-def updateConfigurationFiles( machine, login ):
-    """
-        rsync .conf files from designated machine to local machine
-        to make sure we're up to date.
-
-    """
-
-    if not os.path.isdir( '/apps/px/stats/rx/' ):
-        os.makedirs(  '/apps/px/stats/rx/' , mode=0777 )
-    if not os.path.isdir( '/apps/px/stats/tx/'  ):
-        os.makedirs( '/apps/px/stats/tx/', mode=0777 )
-    if not os.path.isdir( '/apps/px/stats/trx/' ):
-        os.makedirs(  '/apps/px/stats/trx/', mode=0777 )
-
-
-    status, output = commands.getstatusoutput( "rsync -avzr --delete-before -e ssh %s@%s:/apps/px/etc/rx/ /apps/px/stats/rx/%s/"  %( login, machine, machine ) )
-    #print output # for debugging only
-
-    status, output = commands.getstatusoutput( "rsync -avzr  --delete-before -e ssh %s@%s:/apps/px/etc/tx/ /apps/px/stats/tx/%s/"  %( login, machine, machine ) )
-    #print output # for debugging only
-    
-        
-                
-def getNames( fileType, machine ):
-    """
-        Returns a tuple containing RXnames or TXnames that we've rsync'ed 
-        using updateConfigurationFiles
-         
-    """    
-                        
-    pxManager = PXManager()
-    
-    remoteMachines = [ "pds3-dev", "pds4-dev","lvs1-stage", "logan1", "logan2" ]
-    if localMachine in remoteMachines :#These values need to be set here.
-        updateConfigurationFiles( machine, "pds" )  
-        PXPaths.RX_CONF  = '/apps/px/stats/rx/%s/'  %machine
-        PXPaths.TX_CONF  = '/apps/px/stats/tx/%s/'  %machine
-        PXPaths.TRX_CONF = '/apps/px/stats/trx/%s/' %machine
-    pxManager.initNames() # Now you must call this method  
-    
-    if fileType == "tx":
-        names = pxManager.getTxNames()               
-    else:
-        names = pxManager.getRxNames()  
-
-    return names 
-        
-    
-    
-def updateConfigurationFiles( machine, login ):
-    """
-        rsync .conf files from designated machine to local machine
-        to make sure we're up to date.
-    
-    """  
-    
-    if not os.path.isdir( '/apps/px/stats/rx/%s/' %machine):
-        os.makedirs(  '/apps/px/stats/rx/%s/' %machine, mode=0777 )
-    if not os.path.isdir( '/apps/px/stats/tx/%s' %machine ):
-        os.makedirs( '/apps/px/stats/tx/%s/' %machine , mode=0777 )
-    if not os.path.isdir( '/apps/px/stats/trx/%s/' %machine ):
-        os.makedirs(  '/apps/px/stats/trx/%s/' %machine, mode=0777 )       
-
-        
-    status, output = commands.getstatusoutput( "rsync -avzr --delete-before -e ssh %s@%s:/apps/px/etc/rx/ /apps/px/stats/rx/%s/"  %( login, machine, machine) ) 
-
-    
-    status, output = commands.getstatusoutput( "rsync -avzr --delete-before -e ssh %s@%s:/apps/px/etc/tx/ /apps/px/stats/tx/%s/"  %( login, machine, machine) )  
-
+    return infos                       
 
 
 def createParser( ):
@@ -316,14 +479,26 @@ Defaults :
 
 Options:
  
-    - With -c|--clients you can specify the clients names on wich you want to collect data. 
+    - With -c|--clients you can specify the clients names on wich you want to collect data.
+    - With --copy you can specify that you want to create a copy of the image file that will 
+      be stored in the webGraphics folder in either the weekly, motnhly or yearly section.
     - With -d|--daily you can specify you want daily graphics.
-    - With -e|--endDate you can specify the time of the request.( Usefull for past days and testing. )
+    - With --date you can specify the time of the request.( Usefull for past days and testing. )
     - With -f|--fileType you can specify the file type of the log fiels that will be used.  
+    - With --fixedPrevious you can specify that you want a graphic based on the previous( week, month year)
+      based on the fixed dates of the calendar.
+    - With --fixedPrevious you can specify that you want a graphic based on the current( week, month year)
+      based on the fixed dates of the calendar.
+    - With --individual you can specify that you want to genrate graphics for each machine 
+      and not the combined data of two machines when numerous machiens are specified.
     - With -m|--monthly you can specify you want monthly graphics.
     - With   |--machines you can specify from wich machine the data is to be used.
     - With -s|--span you can specify the time span to be used to create the graphic 
     - With -t|--types you can specify what data types need to be collected
+    - With --totals you can specify that you want a single grpahics for every datatype that
+      uses the cmbined data of all the client or sources of a machien or collection of machines instead 
+      of creating a graphic per client/source. 
+    - With -w|--weekly you can specify you want monthly graphics. 
     - With -y|--yearly you can specify you want yearly graphics.
             
     
@@ -353,24 +528,28 @@ def addOptions( parser ):
         
     """
     
-    localMachine = os.uname()[1]
+    
     
     parser.add_option("-c", "--clients", action="store", type="string", dest="clients", default="ALL",
                         help="Clients' names")
     
     parser.add_option("-d", "--daily", action="store_true", dest = "daily", default=False, help="Create daily graph(s).")
     
-    parser.add_option("-e", "--endDate", action="store", type="string", dest="endDate", default=MyDateLib.getIsoFromEpoch( time.time() ), help="Decide end time of graphics. Usefull for testing.")
+    parser.add_option( "--date", action="store", type="string", dest="date", default=MyDateLib.getIsoFromEpoch( time.time() ), help="Decide end time of graphics. Usefull for testing.")
     
     parser.add_option("-f", "--fileType", action="store", type="string", dest="fileType", default='tx', help="Type of log files wanted.")                     
     
+    parser.add_option( "--fixedPrevious", action="store_true", dest="fixedPrevious", default=False, help="Do not use floating weeks|days|months|years. Use previous fixed interval found.")
+   
+    parser.add_option( "--fixedCurrent", action="store_true", dest="fixedCurrent", default=False, help="Do not use floating weeks|days|months|years. Use current fixed interval found.")
+    
     parser.add_option("-i", "--individual", action="store_true", dest = "individual", default=False, help="Dont combine data from specified machines. Create graphs for every machine independently")
     
-    parser.add_option("-l", "--link", action="store_true", dest = "link", default=False, help="Create a link file for the generated image.")
+    parser.add_option( "--copy", action="store_true", dest = "copy", default=False, help="Create a copy file for the generated image.")
         
     parser.add_option("-m", "--monthly", action="store_true", dest = "monthly", default=False, help="Create monthly graph(s).")
      
-    parser.add_option( "--machines", action="store", type="string", dest="machines", default=localMachine, help = "Machines for wich you want to collect data." )   
+    parser.add_option( "--machines", action="store", type="string", dest="machines", default=LOCAL_MACHINE, help = "Machines for wich you want to collect data." )   
     
     parser.add_option("-s", "--span", action="store",type ="int", dest = "timespan", default=None, help="timespan( in hours) of the graphic.")
        
@@ -384,7 +563,7 @@ def addOptions( parser ):
     
     
         
-def buildTitle( type, client, endDate, timespan, minimum, maximum, mean  ):
+def buildTitle( type, client, endTime, timespan, minimum, maximum, mean  ):
     """
         Returns the title of the graphic based on infos. 
     
@@ -407,7 +586,7 @@ def buildTitle( type, client, endDate, timespan, minimum, maximum, mean  ):
     
     type = type[0].upper() + type[1:] 
        
-    return  "%s for %s for a span of %s %s ending at %s." %( type, client, span, timeMeasure, endDate )    
+    return  "%s for %s for a span of %s %s ending at %s." %( type, client, span, timeMeasure, endTime )    
 
     
  
@@ -581,9 +760,9 @@ def buildImageName(  type, client, machine, infos, logger = None ):
         timeMeasure = "days" 
        
                     
-    date = infos.endDate.replace( "-","" ).replace( " ", "_")
+    date = infos.endTime.replace( "-","" ).replace( " ", "_")
     
-    fileName = PXPaths.GRAPHS + "%s/rrdgraphs/%s_%s_%s_%s_%s%s_on_%s.png" %( client, infos.fileType, client, date, type, span, timeMeasure, machine )
+    fileName = PXPaths.GRAPHS + "others/rrd/%s/%s_%s_%s_%s_%s%s_on_%s.png" %( client, infos.fileType, client, date, type, span, timeMeasure, machine )
     
     
     fileName = fileName.replace( '[', '').replace(']', '').replace(" ", "").replace( "'","" )               
@@ -706,15 +885,19 @@ def getInterval( startTime, timeOfLastUpdate, dataType  ):
 
 
     
-def getLinkDestination( type, client, infos ):
+def getCopyDestination( type, client, infos ):
     """
-       This method returns the absolute path to the symbolic 
-       link to create based on the time of creation of the 
+       This method returns the absolute path to the copy 
+       to create based on the time of creation of the 
        graphic and the span of the graphic.
+       
+       Precondition : graphic type must be either weekly, monthly or yearly. 
     
     """
+    
+    oneDay = 24*60*60
     graphicType = "weekly"
-    endDateInSeconds = MyDateLib.getSecondsSinceEpoch( infos.endDate )
+    endTimeInSeconds = MyDateLib.getSecondsSinceEpoch( infos.endTime )
     
     
     if infos.timespan >= 365*24:
@@ -723,38 +906,37 @@ def getLinkDestination( type, client, infos ):
         graphicType = "monthly"    
 
     if graphicType == "weekly":
-        fileName =  time.strftime( "%W", time.gmtime( endDateInSeconds ) )
+        fileName =  time.strftime( "%W", time.gmtime( endTimeInSeconds - oneDay ) )
     elif graphicType == "monthly":
-        fileName =  time.strftime( "%b", time.gmtime( endDateInSeconds ) )
+        fileName =  time.strftime( "%b", time.gmtime( endTimeInSeconds - oneDay ) )
     elif graphicType == "yearly":
-        fileName =  time.strftime( "%Y", time.gmtime( endDateInSeconds ) )
+        fileName =  time.strftime( "%Y", time.gmtime( endTimeInSeconds - oneDay ) )
     
     
-    destination = PXPaths.GRAPHS + "symlinks/%s/%s/%s/%.50s.png" %( graphicType, type , client, fileName )
+    destination = PXPaths.GRAPHS + "webGraphics/%s/%s/%s/%.50s.png" %( graphicType, type , client, fileName )
     
     return destination    
     
          
     
-def createLink( client, type, imageName, infos ):
+def createCopy( client, type, imageName, infos ):
     """
-        Create a symbolic link in the appropriate 
+        Create a copy in the appropriate 
         folder to the file named imageName.
         
     """ 
    
     src         = imageName
-    destination = getLinkDestination( type, client, infos )
+    destination = getCopyDestination( type, client, infos )
 
     if not os.path.isdir( os.path.dirname( destination ) ):
         os.makedirs( os.path.dirname( destination ), mode=0777 )                                                      
     
     if os.path.isfile( destination ):
-        os.remove( destination )
-    
-    print "src : %s dest : %s" %(src,destination)    
-    os.symlink( src, destination )    
-    
+        os.remove( destination )  
+          
+    shutil.copy( src, destination ) 
+     
     
     
 def plotRRDGraph( databaseName, type, fileType, client, machine, infos, lastUpdate = None, logger = None ):
@@ -765,13 +947,14 @@ def plotRRDGraph( databaseName, type, fileType, client, machine, infos, lastUpda
     
     
     imageName  = buildImageName( type, client, machine, infos, logger )     
-    end        = int ( MyDateLib.getSecondsSinceEpoch ( infos.endDate ) )  
-    start      = end - ( infos.timespan * 60 * 60 ) 
+    start      = int ( MyDateLib.getSecondsSinceEpoch ( infos.startTime ) ) 
+    end        = int ( MyDateLib.getSecondsSinceEpoch ( infos.endTime ) )  
+   
     
     if lastUpdate == None :
         lastUpdate = getDatabaseTimeOfUpdate( client, machine, fileType )
     
-    print "lastUpdate : %s" %lastUpdate
+    
     interval = getInterval( start, lastUpdate, type  )
         
     minimum, maximum, mean = getGraphicsMinMaxMean( databaseName, start, end, interval )
@@ -787,13 +970,13 @@ def plotRRDGraph( databaseName, type, fileType, client, machine, infos, lastUpda
         innerColor = "54DE4F"
         outerColor = "1C4A1A"     
                    
-    title = buildTitle( type, client, infos.endDate, infos.timespan, minimum, maximum, mean )
+    title = buildTitle( type, client, infos.endTime, infos.timespan, minimum, maximum, mean )
 
 #     try:
-    rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '800','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end), '--vertical-label', '%s' %type,'--title', '%s'%title,'COMMENT: Minimum: %s     Maximum: %s     Mean: %s\c' %( minimum, maximum, mean), '--lower-limit','0','DEF:%s=%s:%s:AVERAGE'%( type,databaseName,type), 'CDEF:realValue=%s,%i,*' %(type,interval), 'AREA:realValue#%s:%s' %( innerColor, type ),'LINE1:realValue#%s:%s'%( outerColor, type ) )
+    rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '800','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end), '--vertical-label', '%s' %type,'--title', '%s'%title,'COMMENT: Minimum: %s     Maximum: %s     Mean: %s\c' %( minimum, maximum, mean), '--lower-limit','0','DEF:%s=%s:%s:AVERAGE'%( type, databaseName, type), 'CDEF:realValue=%s,%i,*' %( type, interval), 'AREA:realValue#%s:%s' %( innerColor, type ),'LINE1:realValue#%s:%s'%( outerColor, type ) )
 
-    if infos.link == True:
-        createLink( client, type, imageName, infos )
+    if infos.copy == True:
+        createCopy( client, type, imageName, infos )
     
     print "Plotted : %s" %imageName
     if logger != None:
@@ -894,10 +1077,7 @@ def getPairsFromAllDatabases( type, machine, start, end, infos, logger=None ):
                 data = typeData[client][i].split( ":" )[1].replace(" ", "")
                 
                 if data != None and data != 'None' and data!= 'nan':
-                    total = total + float( data )
-                    
-#                     if type == "errors":#for test
-#                        print "%s: %s %s" %( client, MyDateLib.getIsoFromEpoch( start + ( i * interval * 60) ),float(data)*24*60 )
+                    total = total + float( data )                   
                 
                 elif logger != None: 
                     logger.warning( "Could not find data for %s for present timestamp." %(client) )
@@ -912,10 +1092,8 @@ def getPairsFromAllDatabases( type, machine, start, end, infos, logger=None ):
             total = total / ( len( output ) )
                      
         
-        pairs.append( [typeData[client][i].split( " " )[0].replace( ":", "" ), total] )   
-        
-#         if type == "errors":#for test
-#             print "Will update with : %s    %s" %(typeData[client][i].split( " " )[0].replace( ":", "" ), total)
+        pairs.append( [typeData[client][i].split( " " )[0].replace( ":", "" ), total] )        
+
     
     return pairs
     
@@ -935,8 +1113,8 @@ def createMergedDatabases( infos, logger = None ):
 
     dataPairs  = {}
     typeData   = {}
-    end        = int ( MyDateLib.getSecondsSinceEpoch ( infos.endDate ) )  
-    start      = end - ( infos.timespan * 60 * 60 ) 
+    start      = MyDateLib.getSecondsSinceEpoch ( infos.starTime )  
+    end        = MyDateLib.getSecondsSinceEpoch ( infos.endTime )     
     databaseNames = {}
     
 
@@ -971,7 +1149,7 @@ def generateRRDGraphics( infos, logger = None ):
                 
         for machine in infos.machines:
             for type in infos.types:
-                plotRRDGraph( databaseNames[type], type, infos.fileType, infos.fileType, machine, infos, lastUpdate =  MyDateLib.getSecondsSinceEpoch(infos.endDate), logger =logger )
+                plotRRDGraph( databaseNames[type], type, infos.fileType, infos.fileType, machine, infos, lastUpdate =  MyDateLib.getSecondsSinceEpoch( infos.endTime ), logger =logger )
                 
     else:
         for machine in infos.machines:
@@ -980,7 +1158,7 @@ def generateRRDGraphics( infos, logger = None ):
                 
                 for type in infos.types : 
                     databaseName = transferPickleToRRD.buildRRDFileName( type, client, machine ) 
-                    plotRRDGraph( databaseName, type, infos.fileType, client, machine, infos,lastUpdate =  MyDateLib.getSecondsSinceEpoch(infos.endDate), logger = logger )
+                    plotRRDGraph( databaseName, type, infos.fileType, client, machine, infos,lastUpdate =  MyDateLib.getSecondsSinceEpoch(infos.endTime), logger = logger )
                 
 
 
@@ -988,14 +1166,12 @@ def main():
     """
         Gathers options, then makes call to generateRRDGraphics   
     
-    """    
-    
-    localMachine = os.uname()[1] # /apps/px/log/ logs are stored elsewhere at the moment.
-    
+    """        
+        
     if not os.path.isdir( PXPaths.LOG  ):
         os.makedirs( PXPaths.LOG , mode=0777 )
     
-    logger = Logger( PXPaths.LOG  + 'stats_'+'rrd_graphs' + '.log.notb', 'INFO', 'TX' + 'rrd_transfer', bytes = True  ) 
+    logger = Logger( PXPaths.LOG  + 'stats_'+'rrd_graphs' + '.log.notb', 'INFO', 'TX' + 'rrd_graphs', bytes = True  ) 
     
     logger = logger.getLogger()
        

@@ -24,13 +24,14 @@ named COPYING in the root of the source directory tree.
 import os, sys, commands, pickle
 import PXPaths, cpickleWrapper
 import smtplib
-import DirectoryFileCollector
+import LogFileCollector
 import mailLib
 import readMaxFile
+import generalStatsLibraryMethods
+from generalStatsLibraryMethods import *
 from ClientStatsPickler import ClientStatsPickler 
 from PXManager import *
-
-from DirectoryFileCollector import *
+from LogFileCollector import *
 from ConfigParser import ConfigParser
 from MyDateLib import *
 from mailLib import *
@@ -38,15 +39,6 @@ from mailLib import *
 PXPaths.normalPaths()
 
 LOCAL_MACHINE = os.uname()[1]
-
-
-
-if LOCAL_MACHINE == "pds3-dev" or LOCAL_MACHINE == "pds4-dev" or LOCAL_MACHINE == "lvs1-stage" or LOCAL_MACHINE == "logan1" or LOCAL_MACHINE == "logan2":
-    PATH_TO_LOGFILES = PXPaths.LOG + LOCAL_MACHINE + "/"
-
-else:#pds5 pds5 pxatx etc
-    PATH_TO_LOGFILES = PXPaths.LOG
-
 
         
 class _Parameters:
@@ -57,20 +49,22 @@ class _Parameters:
     
     """
     
-    def __init__( self, emails, machines, files, folders, maxUsages, maximumGaps, startTime, endTime  ):
+    def __init__( self, emails, machines, files, folders, maxUsages, maximumGaps, errorsLogFile, maxSettingsFile, startTime, endTime  ):
         """
-            Constructor.        
+            Constructor.   
+                 
         """    
         
-        self.emails      = emails
-        self.machines    = machines 
-        self.files       = files 
-        self.folders     = folders
-        self.maxUsages   = maxUsages
-        self.maximumGaps = maximumGaps
-        self.startTime   = startTime 
-        self.endTime     = endTime 
-          
+        self.emails          = emails
+        self.machines        = machines 
+        self.files           = files 
+        self.folders         = folders
+        self.maxUsages       = maxUsages
+        self.maximumGaps     = maximumGaps
+        self.startTime       = startTime 
+        self.endTime         = endTime 
+        self.errorsLogFile   = errorsLogFile
+        self.maxSettingsFile = maxSettingsFile 
     
         
 def getParametersFromConfigurationFile():
@@ -85,42 +79,47 @@ def getParametersFromConfigurationFile():
     config = ConfigParser()
     
     if os.path.isfile( CONFIG ):
+    
         config.readfp( open( CONFIG ) ) 
         
-        emails   = config.get( 'statsMonitoring', 'emails' ).split( ";" )
-        machines = config.get( 'statsMonitoring', 'machines' ).split( ";" )
-        files    = config.get( 'statsMonitoring', 'files' ).split( ";" )
-        folders   = config.get( 'statsMonitoring', 'folders' ).split( ";" )
-        maxUsages= config.get( 'statsMonitoring', 'maxUsages' ).split( ";" )
+        emails        = config.get( 'statsMonitoring', 'emails' ).split( ";" )
+        machines      = config.get( 'statsMonitoring', 'machines' ).split( ";" )
+        files         = config.get( 'statsMonitoring', 'files' ).split( ";" )
+        folders       = config.get( 'statsMonitoring', 'folders' ).split( ";" )
+        maxUsages     = config.get( 'statsMonitoring', 'maxUsages' ).split( ";" )
+        errorsLogFile = config.get( 'statsMonitoring', 'errorsLogFile' )
+        maxSettingsFile=config.get( 'statsMonitoring', 'maxSettingsFile' )
     
     else:
         print "%s configuration file not present. Please restore file prior to running" %CONFIG
         sys.exit()   
         
         
-    return emails, machines, files, folders, maxUsages   
+    return emails, machines, files, folders, maxUsages, errorsLogFile, maxSettingsFile  
 
 
         
-def getMaximumGapsFromConfig():
+def getMaximumGaps( maxSettingsFile ):
     """
         lire /apps/pds/tools/Columbo/etc/maxSettings.conf
         
     """
     
     maximumGaps = {} 
+    
     allNames = []
-    allNames.extend( getAllTxNames( "pds5,pds6" ) )    
-    allNames.extend( getAllRxNames( "pds5,pds6" ) )
+    rxNames, txNames = generalStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, "pds5")
+    allNames.extend( rxNames )    
+    allNames.extend( txNames )
+    rxNames, txNames = generalStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, "pxatx")
+    allNames.extend( rxNames )
+    allNames.extend( txNames )
     
-    allNames.extend( getAllRxNames( "pxatx" ) )
-    allNames.extend( getAllTxNames( "pxatx" ) )
-    
-    circuitsRegex, default_circuit, timersRegex, default_timer, pxGraphsRegex, default_pxGraph =    readMaxFile.readQueueMax( "/apps/px/lib/stats/maxSettings.conf", "PX" )
+    circuitsRegex, default_circuit, timersRegex, default_timer, pxGraphsRegex, default_pxGraph =    readMaxFile.readQueueMax( maxSettingsFile, "PX" )
      
     for key in timersRegex.keys(): 
         values = timersRegex[key]
-        newKey = key.replace( "^", "" )
+        newKey = key.replace( "^", "" ).replace( "$","")
         maximumGaps[newKey] = values
     
     for name in allNames:#add all clients/sources for wich no value was set
@@ -138,7 +137,7 @@ def savePreviousMonitoringJob( parameters ) :
     
     """
     
-    file  = "/apps/px/stats/statMonitoring/previousMonitoringJob"
+    file  = "/apps/px/stats/statsMonitoring/previousMonitoringJob"
      
     if not os.path.isdir( os.path.dirname( file ) ):
         os.makedirs(  os.path.dirname( file ) )
@@ -159,7 +158,7 @@ def getPreviousMonitoringJob( currentTime ):
         
     """     
     
-    file  = "/apps/px/stats/statMonitoring/previousMonitoringJob"
+    file  = "/apps/px/stats/statsMonitoring/previousMonitoringJob"
     previousMonitoringJob = ""
     
     if os.path.isfile( file ):
@@ -175,6 +174,61 @@ def getPreviousMonitoringJob( currentTime ):
         
         
     
+def getTimeOfLastFilledEntry( name, startTime ):
+    """
+        Returns the time of the last
+        entry that was filled with data 
+        for a client/source name.
+        
+    """    
+    
+    file  = "/apps/px/stats/statsMonitoring/lastEntryFilledTimes"
+    #timeOfLastFilledEntry = ""
+    
+    if os.path.isfile( file ):
+        fileHandle      = open( file, "r" )
+        times = pickle.load( fileHandle )
+        fileHandle.close()
+        
+        if name not in times.keys():
+            timeOfLastFilledEntry = startTime
+        else:
+            timeOfLastFilledEntry = times[name]     
+    else:
+    
+        timeOfLastFilledEntry = startTime 
+                
+   
+    return timeOfLastFilledEntry
+    
+    
+    
+def saveTimeOfLastFilledEntry( name, timeOfLastFilledEntry ):
+    """
+        Returns the time of the last
+        entry that was filled with data 
+        for a client/source name.
+        
+    """    
+    
+    file  = "/apps/px/stats/statsMonitoring/lastEntryFilledTimes"
+       
+    if os.path.isfile( file ):
+        fileHandle      = open( file, "r" )
+        times = pickle.load( fileHandle )
+        fileHandle.close()
+            
+    else:
+        times= {}
+
+    times[ name ]  =  timeOfLastFilledEntry           
+    
+    fileHandle = open( file, "w" )
+    pickle.dump( times, fileHandle )
+    fileHandle.close()
+    
+    
+    
 def buildReportHeader( parameters ):
     """
         
@@ -185,7 +239,8 @@ def buildReportHeader( parameters ):
     
     reportHeader = "\n\n"
     reportHeader = reportHeader + "Stats monitor results\n----------------------------------------------------------------------------------------------------------------------------------\n"
-    reportHeader = reportHeader + "Time of test      : %s\n" %parameters.endTime
+    reportHeader = reportHeader + "Time of test : %s\n" %parameters.endTime
+    reportHeader = reportHeader + "Time of previous test : %s\n" %parameters.startTime
     reportHeader = reportHeader + "Machine name      : %s\nConfig file  used : %s\n" %( LOCAL_MACHINE, PXPaths.STATS + "statsMonitoring/statsMonitoring.conf" )
     
     return reportHeader
@@ -226,9 +281,7 @@ def verifyFreeDiskSpace( parameters, report ):
         
         status, output = commands.getstatusoutput( "df %s" %foldersToVerify[i] )
         
-        if status == 0 :
-            #print "output : %s" %output
-            #output = output.splitlines()[1]        
+        if status == 0 :     
             diskUsage = output.split()[11].replace( "%", "")
             
             if int(diskUsage) > parameters.maxUsages[i]:    
@@ -257,7 +310,7 @@ def saveCurrentCrontab( currentCrontab ) :
         Set current crontab as the previous crontab.
     """
     
-    file  = "/apps/px/stats/statMonitoring/previousCrontab"
+    file  = "/apps/px/stats/statsMonitoring/previousCrontab"
      
     if not os.path.isdir( os.path.dirname( file ) ):
         os.makedirs(  os.path.dirname( file ) )
@@ -278,7 +331,7 @@ def getPreviousCrontab():
         
     """     
     
-    file  = "/apps/px/stats/statMonitoring/previousCrontab"
+    file  = "/apps/px/stats/statsMonitoring/previousCrontab"
     previousCrontab = ""
     
     if os.path.isfile( file ):
@@ -300,9 +353,10 @@ def verifyCrontab( report ):
     status, currentCrontab = commands.getstatusoutput( "crontab -l" )
     
     if currentCrontab != previousCrontab :
-        report = report + "\nCrontab entries were modified since last report.\n"
+        report = report + "\nCrontab entries were modified since last monitoring job.\n"
     else:
-        report = report + "\n\n"
+        report = report + "\nCrontab entries were not modified since last monitoring job.\n"
+    report = report + "----------------------------------------------------------------------------------------------------------------------------------"    
     
     saveCurrentCrontab( currentCrontab )       
     
@@ -328,27 +382,27 @@ def findFirstInterestingLinesPosition( file, startTime, endtime, lastReadPositio
     """       
     
     lineFound = False
-    line = None
+    line      = None
     fileHandle = open( file, 'r') 
     fileHandle.seek( lastReadPosition )
-    
-    
+    foundValidLine = False     
+   
     while lineFound == False and line != "":
         
         lastReadPosition = fileHandle.tell()
-        line = fileHandle.readline()            
-            
+        line = fileHandle.readline()                       
+        
         if line != "" :
-            timeOfEntry = line.split( "," )[0]
-            #print "timeOfEntry : %s startTime %s" %(timeOfEntry, startTime)
+            timeOfEntry = line.split( "," )[0]            
             if timeOfEntry >= startTime :
+                foundValidLine = True 
                 lineFound = True 
             if timeOfEntry >= endtime :
-                line      = "" 
-    
+                foundValidLine = False 
+ 
     fileHandle.close()         
     
-    return lastReadPosition, lineFound, line
+    return lastReadPosition, foundValidLine, line
     
     
     
@@ -404,19 +458,26 @@ def findHoursWithNoEntries( logs, startTime, endTime ):
     j = 0
     hoursWithNoEntries = [] 
     lastReadPosition =0 
+    
     logs = getSortedLogs( logs )     
     hoursBetweenStartAndEnd = findHoursBetween( startTime, endTime )     
     
-    while i <  len( hoursBetweenStartAndEnd )  and j < len( logs ):
+    while i < ( len( hoursBetweenStartAndEnd )-1)  and j < len( logs ):
+               
+        startTime = hoursBetweenStartAndEnd[i]
+        endTime   = hoursBetweenStartAndEnd[i+1]
         
         lastReadPosition, lineFound, line = findFirstInterestingLinesPosition( logs[j], startTime, endTime, lastReadPosition )        
         
-        if lineFound == True and line == "": #not eof,line found > endtime
-            hoursWithNoEntries.append( hoursBetweenStartAndEnd[i] )        
-        elif line == "": #file is over
-            j = j +1
         
-        i = i + 1
+        if lineFound == False and line != "": #not eof,line found > endtime
+            hoursWithNoEntries.append( hoursBetweenStartAndEnd[i] )        
+        
+        if line == "": #file is over
+            j = j + 1
+            lastReadPosition = 0
+        else:
+            i = i + 1
     
         
     if i < ( len( hoursBetweenStartAndEnd ) - 1 ):#if j terminated prior to i.
@@ -446,40 +507,43 @@ def verifyStatsLogs( parameters, report ,logger = None ):
     
     warningsWereFound = False
     newReportLines = ""
-    logTypes = [ "graphs", "pickling", "rrd_graphs","rrd_transfer" ]
+    logFileTypes = [  "graphs", "pickling", "rrd_graphs", "rrd_transfer" ] 
+    verificationTimeSpan =  (MyDateLib.getSecondsSinceEpoch( parameters.endTime ) - MyDateLib.getSecondsSinceEpoch( parameters.startTime )) / (60*60) 
     
-    for logType in logTypes:
+    for logFileType in logFileTypes:
         
-        dfc =  DirectoryFileCollector( startTime  = parameters.startTime , endTime = parameters.endTime, directory = PXPaths.LOG, lastLineRead = "", fileType = "stats", client = "%s" %logType, logger = logger )    
-        dfc.collectEntries()
-        logs = dfc.entries         
-        #print "logs:%s" %logs
+        lfc =  LogFileCollector( startTime  = parameters.startTime , endTime = parameters.endTime, directory = PXPaths.LOG, lastLineRead = "", logType = "stats", name = logFileType, logger = logger )    
         
-        if logs == []:
-            warningWereFound = True
-            newReportLines = newReportLines + "\nWarning : Not a single log entry within %s log files was found between %s and %s. Please investigate. \n "%( logType, parameters.startTime, parameters.endTime )
+        lfc.collectEntries()
+        logs = lfc.entries                
+        
+        
+        if logs == [] and verificationTimeSpan >= 1:#if at least an hour between start and end 
+            
+            warningsWereFound = True
+            newReportLines = newReportLines + "\nWarning : Not a single log entry within %s log files was found between %s and %s. Please investigate.\n "%( logFileType, parameters.startTime, parameters.endTime )
          
-        else:   
-        
+        elif logs != []:   
             hoursWithNoEntries = findHoursWithNoEntries( logs, parameters.startTime, parameters.endTime )
             
             if hoursWithNoEntries != []:
-               warningWereFound = True
+               warningsWereFound = True
                
-               newReportLines = newReportLines + "Warning : Not a single log entry within %s log files was found for these hours : %s. Please investigate. \n " %( logType, str(hoursWithNoEntries).replace( "[", "").replace( "]", "") )
+               newReportLines = newReportLines + "\nWarning : Not a single log entry within %s log files was found for these hours : %s. Please investigate.\n " %( logFileType, str(hoursWithNoEntries).replace( "[", "").replace( "]", "") )
                        
              
-    if warningWereFound :
+    if warningsWereFound :
         report = report + "\n\nThe following stats log files warnings were found : \n"
         report = report + "----------------------------------------------------------------------------------------------------------------------------------\n"            
         report = report + newReportLines 
     else:
         report = report + "\n\nNo stats log files warnings were found.\n"
-                
+        report = report + "----------------------------------------------------------------------------------------------------------------------------------\n"          
     
     return report
 
- 
+
+     
 def sendReportByEmail( parameters, report  ) :
     """
         Takes the report and sends it to the specified 
@@ -493,93 +557,15 @@ def sendReportByEmail( parameters, report  ) :
     subject = getEmailSubject( parameters.endTime )
     message = mailLib.createhtmlmail(html, text, subject)
     server = smtplib.SMTP("smtp.cmc.ec.gc.ca")
-    server.set_debuglevel(1)
+    server.set_debuglevel(0)
 
     receivers = parameters.emails
     server.sendmail('nicholas.lemay@ec.gc.ca', receivers, message)
-    server.quit()
-
-    
-def updateConfigurationFiles( machine, login ):
-    """
-        rsync .conf files from designated machine to local machine
-        to make sure we're up to date.
-
-    """
-
-    if not os.path.isdir( '/apps/px/stats/rx/' ):
-        os.makedirs(  '/apps/px/stats/rx/' , mode=0777 )
-    if not os.path.isdir( '/apps/px/stats/tx/'  ):
-        os.makedirs( '/apps/px/stats/tx/', mode=0777 )
-    if not os.path.isdir( '/apps/px/stats/trx/' ):
-        os.makedirs(  '/apps/px/stats/trx/', mode=0777 )
-
-
-    status, output = commands.getstatusoutput( "rsync -avzr --delete-before -e ssh %s@%s:/apps/px/etc/rx/ /apps/px/stats/rx/%s/"  %( login, machine, machine) )
-    #print output # for debugging only
-
-    status, output = commands.getstatusoutput( "rsync -avzr  --delete-before -e ssh %s@%s:/apps/px/etc/tx/ /apps/px/stats/tx/%s/"  %( login, machine, machine ) )
-    #print output # for debugging only
-   
-
-
-def getAllTxNames( machines ):
-    """
-        Gets all the active tx names
-        for all the specified machines.
-        
-    """  
-    
-    pxManager = PXManager()
-    
-    if "," in machines:
-        machine = machines.split(',')[0]
-    else:
-        machine = machines    
-
-    remoteMachines= [ "pds3-dev", "pds4-dev","lvs1-stage", "logan1", "logan2" ]
-    if localMachine in remoteMachines :#These values need to be set here.
-        updateConfigurationFiles( machine, "pds" )
-        PXPaths.RX_CONF  = '/apps/px/stats/rx/%s/'  %machine
-        PXPaths.TX_CONF  = '/apps/px/stats/tx/%s/'  %machine
-        PXPaths.TRX_CONF = '/apps/px/stats/trx/%s/' %machine
-    pxManager.initNames() # Now you must call this method
-
-    txNames = pxManager.getTxNames()
-    
-    return txNames
+    server.quit() 
     
     
     
-def getAllRxNames( machines ):
-    """
-        Gets all the active tx names
-        for all the specified machines.
-        
-    """  
-    
-    pxManager = PXManager()
-    
-    if "," in machines:
-        machine = machines.split(',')[0]
-    else:
-        machine = machines    
-
-    remoteMachines= [ "pds3-dev", "pds4-dev","lvs1-stage", "logan1", "logan2" ]
-    if localMachine in remoteMachines :#These values need to be set here.
-        updateConfigurationFiles( machine, "pds" )
-        PXPaths.RX_CONF  = '/apps/px/stats/rx/%s/'  %machine
-        PXPaths.TX_CONF  = '/apps/px/stats/tx/%s/'  %machine
-        PXPaths.TRX_CONF = '/apps/px/stats/trx/%s/' %machine
-    pxManager.initNames() # Now you must call this method
-
-    rxNames = pxManager.getRxNames()
-    
-    return rxNames
-    
-    
-    
-def getFilesAssociatedWith( client, fileType, machines, startTime, endtime ):
+def getFoldersAndFilesAssociatedWith( client, fileType, machines, startTime, endtime ):
     """
         This function verifies whether all the
         expected pickles for all the specified machiens
@@ -587,22 +573,21 @@ def getFilesAssociatedWith( client, fileType, machines, startTime, endtime ):
     
     """
     
-    files = []
+    folders = {}
     hours = findHoursBetween( startTime, endtime )
     
     splitMachines = machines.split(",")
     
     for machine in splitMachines:
-    
-        if machine == "pxatx":
-            machine = LOCAL_MACHINE
-        elif machine == "pds5":
-            machine = "pds3-dev"
-        elif machine == "pds6":
-            machine = "pds4-dev"
             
         for hour in hours:
-            files.append( ClientStatsPickler.buildThisHoursFileName( client = client, currentTime = hour, fileType = fileType,machine = machine  ) )
+            fileName = ClientStatsPickler.buildThisHoursFileName( client = client, currentTime = hour, fileType = fileType,machine = machine  )
+            
+            folder = os.path.dirname( os.path.dirname( fileName ) )
+            if folder not in folders.keys():
+                folders[folder] = []
+                
+            folders[folder].append( fileName )
     
             
     if len( splitMachines )  > 1:
@@ -610,17 +595,24 @@ def getFilesAssociatedWith( client, fileType, machines, startTime, endtime ):
         combinedMachineName = getCombinedMachineName( machines )
             
         for hour in hours:            
-            files.append( ClientStatsPickler.buildThisHoursFileName( client = client, currentTime = hour, fileType = fileType,machine = combinedMachineName  ) )
-     
-                   
-    return files
+            fileName = ClientStatsPickler.buildThisHoursFileName( client = client, currentTime = hour, fileType = fileType,machine = combinedMachineName  ) 
+            
+            folder = os.path.dirname( os.path.dirname( fileName ) )
+            
+            if folder not in folders.keys():
+                folders[folder] = []
+                
+            folders[folder].append( fileName )                      
+               
+    
+    return folders
     
 
     
 def getCombinedMachineName( machines ):
     """
         Gets all the specified machine names 
-        and combines the mso they can be used
+        and combines them so they can be used
         to find pickles.
         
     """        
@@ -629,13 +621,7 @@ def getCombinedMachineName( machines ):
     splitMachines = machines.split(",")
     
     for machine in splitMachines:
-        if machine == "pxatx":
-            machine = LOCAL_MACHINE
-        elif machine == "pds5":
-            machine = "pds3-dev"
-        elif machine == "pds6":
-            machine = "pds4-dev"
-        
+       
         combinedMachineName += machine
     
     return combinedMachineName                    
@@ -650,51 +636,91 @@ def verifyPicklePresence( parameters, report ):
                   
     """
     
-    missingFiles   = False  
+    missingFiles   = False
+    missingFileList = []  
     clientLines    = ""
     newReportLines = "" 
-    clientIsMissingfiles = False
+    clientIsMissingFiles = False
+    folderIsMissingFiles = False
     startTime =  MyDateLib.getIsoFromEpoch( MyDateLib.getSecondsSinceEpoch( parameters.endTime ) - ( 7*24*60*60 ) )
     
     for machine in parameters.machines:
-        
-        txNames = getAllTxNames( machine )
-        rxNames = getAllRxNames( machine ) 
+        if "," in machine:
+            machine = machine.split(",")[0]
+            
+        rxNames, txNames = generalStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machine  )
         
         for txName in txNames:
-            files = getFilesAssociatedWith( txName, "tx", machine, startTime , parameters.endTime )
-            #print files
-            for file in files:
-                if not os.path.isfile(file):
-                    missingFiles = True
-                    clientIsMissingfiles = True
-                    clientLines = clientLines + "%s\n" %file
+            folders = getFoldersAndFilesAssociatedWith( txName, "tx", machine, startTime , parameters.endTime )
+
             
-            if clientIsMissingfiles == True : 
-                newReportLines = newReportLines + "\n%s had the following file(s) missing : \n"%txName
+            for folder in folders.keys():
+                if os.path.isdir( folder ):
+                    for file in folders[folder]:
+                        if not os.path.isfile(file):
+                            missingFiles = True
+                            clientIsMissingFiles = True  
+                            folderIsMissingFiles = True                          
+                            missingFileList.append( os.path.basename(file) )
+                     
+                    
+                    if folderIsMissingFiles:
+                        clientLines = clientLines + folder + "/" + os.path.basename( os.path.dirname( file ) ) + "/" + str( missingFileList ).replace( "[","" ).replace( "]","" ) + "\n"   
+                    
+                     
+                
+                else:
+                    missingFiles = True
+                    clientIsMissingFiles = True
+                    clientLines = clientLines + folder + "/*\n" 
+                
+                missingFileList = []  
+                folderIsMissingFiles = False
+                
+            if clientIsMissingFiles == True : 
+                
+                newReportLines = newReportLines + "\n%s had the following files and folders missing : \n"%txName
                 newReportLines = newReportLines + clientLines
                 
             clientLines = ""
-            clientIsMissingfiles = False
+            clientIsMissingFiles = False
             
             
+        
+        
         for rxName in rxNames:
-            files = getFilesAssociatedWith( rxName, "rx", machine, parameters.startTime, parameters.endTime )
-            #print files
-            for file in files:
-                if not os.path.isfile(file):
-                    missingFiles = True
-                    clientIsMissingfiles = True
-                    clientLines = clientLines + "Warning: %s is missing.\n" %file
+            folders = getFoldersAndFilesAssociatedWith( rxName, "rx", machine,parameters.startTime, parameters.endTime )
             
-            if clientIsMissingfiles == True : 
-                newReportLines = newReportLines + "\n%s had the following file(s) missing : \n"%txName
+            for folder in folders.keys():
+                if os.path.isdir( folder ):
+                    for file in folders[folder]:
+                        if not os.path.isfile(file):
+                            missingFiles = True
+                            clientIsMissingFiles = True
+                            folderIsMissingFiles = True  
+                            missingFileList.append( os.path.basename(file) )
+                    
+                    if folderIsMissingFiles:
+                        clientLines = clientLines + folder + "/" + os.path.basename( os.path.dirname( file ) ) + "/" + str( missingFileList ).replace( "[","" ).replace( "]","" ) + "\n"   
+                
+                else:
+                    missingFiles = True
+                    clientIsMissingFiles = True
+                    clientLines = clientLines + folder + "*\n" 
+                
+                missingFileList = []  
+                folderIsMissingFiles = False       
+                                    
+            if clientIsMissingFiles == True : 
+                newReportLines = newReportLines + "\n%s had the following files and folders missing : \n" %txName
                 newReportLines = newReportLines + clientLines
                 
             clientLines = ""
-            clientIsMissingfiles = False            
+            clientIsMissingFiles = False            
             
     
+            
+            
     
     if missingFiles :
         
@@ -707,9 +733,97 @@ def verifyPicklePresence( parameters, report ):
     
     return report 
 
+
+        
+def gapInErrorLog( name, start, end, errorLog )  :  
+    """
+        Returns wheter or not the gap described within the 
+        parameters is found in a certain log file.
+        
+    """
+    
+    gapFound = False 
+    difference = None 
+    gapInErrorLog = False 
+    lastTimeThisGapWasfound = ""
+    
+    for line in errorLog:
+        try:
+        
+            splitLine = line.split()
+            logEntryTime = MyDateLib.getIsoWithRoundedSeconds( splitLine[1] + " " + splitLine[2][:-4] )
+            lastEntryTime = MyDateLib.getIsoWithRoundedSeconds( splitLine[9] + " " + splitLine[10] )
+            
+            
+            if splitLine[3].replace( ":", "" ) == name and lastEntryTime == start :            
+                
+                if logEntryTime > start:
+                    gapFound = True 
+                lastTimeThisGapWasfound =  logEntryTime 
+                
+                if logEntryTime >= end:
+                    break
+            
+            elif splitLine[3].replace( ":", "" ) == name and lastEntryTime > start :#newer entry was found for same name 
+                break
+            
+            elif logEntryTime >= end :#in case file is newer than time of end of verification
+                break
+                
+        except:#no date present for last transmission...
+            pass
+            
+
+    if gapFound == True and lastTimeThisGapWasfound <= end:
+
+        if abs( ( MyDateLib.getSecondsSinceEpoch(end) -  MyDateLib.getSecondsSinceEpoch(lastTimeThisGapWasfound) ) / 60 ) <= 1 :         
+            gapInErrorLog = True 
+                      
+    return gapInErrorLog
+
+
+def getSortedTextFiles( files ):
+    """
+        Takes a series of size-based rotating 
+        log files and sorts them in chronological 
+        order.
+        
+    """     
+       
+    files.sort()                
+    files.reverse()                      
+            
+    return files
     
     
-def getPickleAnalysis( files, name, timeOfLastUpdate, maximumGap = 10 ):
+def getOutdatedTransmissionsLog( file, startTime ):
+    """
+        Takes a standard transmisson error log 
+        and retunrs only the lines containing 
+        infos about outdated transmissions. 
+    
+    """  
+          
+    errorLog = []  
+    files = glob.glob( file + "*")
+    files = getSortedTextFiles( files )
+    
+    
+    for file in files :  
+        fileHandle = open( file, "r")
+        lines = fileHandle.readlines()
+    
+        for line in lines :
+            splitLine = line.split()
+            entryTime = splitLine[1] + " " + splitLine[2][:-4]
+            if "outdated" in line and entryTime >= startTime :
+                errorLog.append( line )           
+    
+    return errorLog
+    
+    
+    
+def getPickleAnalysis( files, name, startTime, maximumGap, errorLog ):
     """
         This function is used to browse all the pickle files
         in chronological order. 
@@ -721,31 +835,51 @@ def getPickleAnalysis( files, name, timeOfLastUpdate, maximumGap = 10 ):
         
     """
     
-    report = ""
-    files.sort()
-    gapTooWidePresent = False 
-    
-    for file in files:
-        if os.path.isfile(file):
-            fcs =  cpickleWrapper.load ( file )
-            for entry in fcs.fileEntries:
-                if len( entry.values.productTypes ) != 0 or ( file == files[ len( files ) - 1 ] and entry==fcs.fileEntries[ fcs.nbEntries-1 ] ): 
-                    entryTime = MyDateLib.getSecondsSinceEpoch( entry.startTime )   
-                    lastUpdateInSeconds = MyDateLib.getSecondsSinceEpoch( timeOfLastUpdate )  
-                    
-                    if ( ( entryTime - lastUpdateInSeconds ) / 60 ) > maximumGap:
-                        gapTooWidePresent = True                         
-                        report = report + "No data was found between %s and %s.\n" %(timeOfLastUpdate,entry.startTime)    
-                        timeOfLastUpdate = entry.startTime                   
-                  
-                                                    
-    if gapTooWidePresent:
-        header = "\n%s.\n" %name
-        report = header + report
-    
-    return report 
-    
+    header = ""
+    reportLines = ""    
+    gapTooWidePresent = False
+    timeOfLastFilledEntry =  getTimeOfLastFilledEntry( name, startTime )
+    files.sort()    
         
+    for file in files:                 
+        
+        if os.path.isfile(file):
+            
+            fcs =  cpickleWrapper.load ( file )
+            
+            for entry in fcs.fileEntries:
+                nbEntries = len( entry.values.productTypes )
+                nbErrors  = entry.values.dictionary["errors"].count(1)
+                
+                if (  nbEntries != 0 and nbEntries != nbErrors ) or ( file == files[ len( files ) - 1 ] and entry==fcs.fileEntries[ fcs.nbEntries-1 ] ): 
+                    
+                    entryTime = MyDateLib.getSecondsSinceEpoch( entry.startTime )
+                    
+                    lastUpdateInSeconds = MyDateLib.getSecondsSinceEpoch( timeOfLastFilledEntry )  
+                    differenceInMinutes = ( entryTime - lastUpdateInSeconds ) / 60                   
+                                            
+                    if  int(differenceInMinutes) > int(maximumGap) :
+                                                
+                        if gapInErrorLog( name, timeOfLastFilledEntry, entry.startTime, errorLog ) == False:
+                            gapTooWidePresent = True  
+                                                
+                            reportLines = reportLines + "No data was found between %s and %s.\n" %( timeOfLastFilledEntry, entry.startTime )
+                    
+                    if nbEntries != 0 and nbEntries != nbErrors :
+                        
+                        timeOfLastFilledEntry = entry.startTime                                                        
+                           
+                    
+                        
+    if reportLines != "":     
+        header = "\n%s.\n" %name
+        
+    reportLines = header + reportLines
+    
+    return reportLines, timeOfLastFilledEntry 
+    
+
+            
     
 def verifyPickleContent( parameters, report ):        
     """
@@ -754,28 +888,43 @@ def verifyPickleContent( parameters, report ):
                 
     """
     
-    # get infos from /pds/tools/Columbo/ColumboShow/lib$ vi readMaxFile.py
-    # wich get its infos from  pds/tools/Columbo/etc$ vi maxSettings.conf
-            
+    newReportLines = ""
+    errorLog = getOutdatedTransmissionsLog( parameters.errorsLogFile,parameters.startTime )          
+    
     for machine in parameters.machines:
         
-        txNames = getAllTxNames( machine )
-        rxNames = getAllRxNames( machine ) 
+        if "," in machine:
+            splitMachine = machine.split(",")[0]
+        else:
+            splitMachine = machine
+            
+        rxNames, txNames = generalStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, splitMachine )
         
         if "," in machine:   
             machine = getCombinedMachineName( machine )     
         
         for txName in txNames:
-            files = getFilesAssociatedWith( txName, "tx", machine, parameters.startTime, parameters.endTime )
-            newReportLines = getPickleAnalysis( files, txName, parameters.startTime, parameters.maximumGaps[txName] )
-        
-        report = report + newReportLines 
-         
-        for rxName in rxNames:            
-            files = getFilesAssociatedWith( rxName, "rx", machine, parameters.startTime, parameters.endTime )
-            newReportLines = getPickleAnalysis( files, rxName, parameters.startTime,parameters.maximumGaps[rxName] )
-        
-        report = report + newReportLines        
+            files = []           
+            
+            folders = getFoldersAndFilesAssociatedWith( txName,"tx", machine, parameters.startTime, parameters.endTime )
+            
+            for folder in folders.keys(): 
+                files.extend( folders[folder] )            
+
+            brandNewReportLines, timeOfLastFilledEntry =  getPickleAnalysis( files, txName, parameters.startTime, parameters.maximumGaps[txName], errorLog )  
+               
+            newReportLines = newReportLines + brandNewReportLines
+            
+            saveTimeOfLastFilledEntry( txName, timeOfLastFilledEntry )
+    
+    if newReportLines != "":
+        header = "\n\nThe following data gaps were not found in error log file :\n" 
+    else:
+        header = "\n\nAll the data gaps were found within the error log file.\n" 
+    
+    header = header + "----------------------------------------------------------------------------------------------------------------------------------\n"       
+    
+    report = report + header + newReportLines        
 
     return report               
 
@@ -789,11 +938,11 @@ def getParameters():
          
     """           
     
-    currentTime = MyDateLib.getIsoFromEpoch( time.time() )   
-    timeOfLastUpdate = getPreviousMonitoringJob( currentTime ) 
-    emails, machines, files, folders, maxUsages = getParametersFromConfigurationFile()
-    maximumGaps = getMaximumGapsFromConfig()
-    parameters = _Parameters( emails, machines, files, folders, maxUsages, maximumGaps, timeOfLastUpdate, currentTime )
+    currentTime = MyDateLib.getIsoFromEpoch( time.time() )  #"2006-12-07 00:00:00" 
+    timeOfLastUpdate = getPreviousMonitoringJob( currentTime )      
+    emails, machines, files, folders, maxUsages, errorsLogFile, maxSettingsFile = getParametersFromConfigurationFile()
+    maximumGaps = getMaximumGaps( maxSettingsFile )
+    parameters = _Parameters( emails, machines, files, folders, maxUsages, maximumGaps,errorsLogFile, maxSettingsFile, timeOfLastUpdate, currentTime )
     
     return parameters 
     
@@ -813,6 +962,7 @@ def getFileChecksum( file ):
         md5sum,fileName = md5Output.split()
     
     return  md5sum    
+    
     
     
 def getPresentAndAbsentFilesFromParameters( parameters ):
@@ -858,7 +1008,7 @@ def getSavedFileChecksums():
         
     """    
     
-    file = "/apps/px/stats/statMonitoring/previousFileChecksums"
+    file = "/apps/px/stats/statsMonitoring/previousFileChecksums"
     checksums = {}
         
     if os.path.isfile( file ):
@@ -870,15 +1020,16 @@ def getSavedFileChecksums():
     return checksums 
     
     
+    
 def saveCurrentChecksums( currentChecksums ) :
     """
         Takes the current checksums and set them 
         as the previous checksums in a pickle file named 
-        /apps/px/stats/statMonitoring/previousFileChecksums
+        /apps/px/stats/statsMonitoring/previousFileChecksums
         
     """   
     
-    file  = "/apps/px/stats/statMonitoring/previousFileChecksums"
+    file  = "/apps/px/stats/statsMonitoring/previousFileChecksums"
      
     if not os.path.isdir( os.path.dirname( file ) ):
         os.makedirs(  os.path.dirname( file ) )
@@ -926,10 +1077,10 @@ def verifyFileVersions( parameters, report  ):
     
      
     if unequalChecksumsFound :        
-        header = "\n\n\n-The following warning(s) were found while monitoring file cheksums : \n"   
+        header = "\n\n\nThe following warning(s) were found while monitoring file cheksums : \n"   
                
     else:        
-        header = "\n\n\n-No warnings were found while monitoring file checksums.\n"        
+        header = "\n\n\nNo warnings were found while monitoring file checksums.\n"        
     
     header = header + "----------------------------------------------------------------------------------------------------------------------------------\n"           
     
@@ -979,36 +1130,35 @@ def verifyGraphs( parameters, report ):
     """
         Verifies whether or not all daily 
         graphics seem up to date. 
+        
     """    
     
     newReportLines = ""
     outdatedGraphsFound = False 
-    folder = ( "/apps/px/stats/graphs/symlinks/daily/" )  
+    folder = ( "/apps/px/stats/graphs/webGraphics/columbo/" )  
     currentTime = MyDateLib.getSecondsSinceEpoch( parameters.endTime )
     
     allNames = []
-    allNames.extend( getAllTxNames( "pds5,pds6" ) )    
-    allNames.extend( getAllRxNames( "pds5,pds6" ) )    
-    allNames.extend( getAllRxNames( "pxatx" ) )
-    allNames.extend( getAllTxNames( "pxatx" ) )
+    rxNames, txNames = generalStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, "pds5")
+    allNames.extend( rxNames )    
+    allNames.extend( txNames )
+    rxNames, txNames = generalStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, "pxatx")
+    allNames.extend( rxNames )
+    allNames.extend( txNames )
     
-    for name in allNames :
-        completeFolder = folder + name 
+    for name in allNames :         
         
-        if os.path.isdir( completeFolder ):
-            images = glob.glob( completeFolder + "/*" )
-            newestImage = images[0]
+        image = folder + name + ".png"
+        
+        if os.path.isfile( image ):          
             
-            for image in images:
-                if os.path.getmtime( image ) > os.path.getmtime( newestImage ):
-                    newestImage = image    
-            
-            if ( currentTime - os.path.getmtime( newestImage ) ) / ( 60*60 ) >1 :
+            if ( currentTime - os.path.getmtime( image ) ) / ( 60*60 ) >1 :
                 outdatedGraphsFound = True 
-                newReportLines = newReportLines + "%s's daily image was not updated since %s" %( name, timeOfUpdate ) 
+                newReportLines = newReportLines + "%s's daily image was not updated since %s\n" %( name, MyDateLib.getIsoFromEpoch(os.path.getmtime( image ) ) )
+        
         else:
             outdatedGraphsFound = True 
-            newReportLines = newReportLines + "%s was not found." %( file )   
+            newReportLines = newReportLines + "%s was not found." %( image )   
         
     if outdatedGraphsFound :
         header = "\n\nThe following daily graphics warnings were found :\n"
@@ -1021,7 +1171,20 @@ def verifyGraphs( parameters, report ):
                 
     return report
     
+
+def updateRequiredfiles():
+    """
+        This method is used to download 
+        the latest version of all the required
+        files.
+        
+    """    
     
+    status, output = commands.getstatusoutput( "scp pds@lvs1-op:/apps/pds/tools/Columbo/ColumboShow/log/PX_Errors.txt* /apps/px/stats/statsMonitoring/ >>/dev/null 2>&1" )
+    
+    status, output = commands.getstatusoutput( "scp pds@lvs1-op:/apps/pds/tools/Columbo/etc/maxSettings.conf /apps/px/stats/statsMonitoring/maxSettings.conf >>/dev/null 2>&1" ) 
+    
+   
           
 def main():
     """
@@ -1031,25 +1194,26 @@ def main():
         Sends the report by email to the designed recipients.
         
     """ 
-            
+    
+    updateRequiredfiles()        
     report = ""       
     parameters = getParameters( )     
     
     report = buildReportHeader( parameters )
     report = verifyFreeDiskSpace( parameters, report )    
     report = verifyPicklePresence( parameters, report )    
-    report = verifyPickleContent( parameters, report )    
+    report = verifyPickleContent( parameters, report )        
     report = verifyStatsLogs( parameters, report )    
     report = verifyFileVersions( parameters, report  )    
     report = verifyCrontab(  report  )   
     report = verifyWebPages( parameters, report )
     report = verifyGraphs( parameters, report ) 
+    
     savePreviousMonitoringJob( parameters  )    
     
     sendReportByEmail( parameters, report  )
-    
-    #print parameters
-    
+    #print report 
+        
     
     
 if __name__ == "__main__":
