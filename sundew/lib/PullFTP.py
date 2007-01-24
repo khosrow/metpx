@@ -235,7 +235,7 @@ class PullFTP(object):
 
         try : 
                 # open/read..
-                file=open(path,'wb')
+                file=open(path,'rb')
                 lines=file.readlines()
                 file.close()
 
