@@ -419,7 +419,6 @@ class PullFTP(object):
                  return True
 
         except :
-                 timex.cancel()
                  (type, value, tb) = sys.exc_info()
                  self.logger.error("Unable write remote file %s in local file %s. Type: %s, Value: %s" % \
                                   (remote_file,local_file,type,value))
