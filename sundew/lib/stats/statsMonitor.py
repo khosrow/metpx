@@ -246,15 +246,52 @@ def buildReportHeader( parameters ):
     return reportHeader
 
     
+
+def getPresenceOfWarningsOrErrorsWithinReport( report ):
+    """
+        Returns whether or not important warnings or errors were found within
+        the specified report.
+    """     
     
-def getEmailSubject( currentTime):
+    results = ""
+    
+    if "The following disk usage warnings have been found" in report :
+        results = "disk usage errors"
+    
+    if "The following data gaps were not found in error log file" in report:
+        if results == "":
+            results = "data gaps errors"    
+        else:
+            results = results + ",data gaps errors"
+    
+    if results == "":
+        
+        if "Crontab entries were modified since" in report:
+            results = "warnings"
+
+        elif "Missing files were found" in report :
+            results = "warnings"
+        
+        elif "The following" in report:
+            results = "warnings"
+        
+        else:
+            results = "no warnings."
+    
+    return results
+    
+    
+    
+def getEmailSubject( currentTime, report ):
     """
         Returns the subject of the
         email to be sent.
     
     """       
     
-    subject = "[Stats Library Monitoring] %s %s" %( LOCAL_MACHINE, currentTime )
+    
+    warningsOrErrorsPresent = getPresenceOfWarningsOrErrorsWithinReport( report )
+    subject = "[Stats Library Monitoring] %s with %s" %( LOCAL_MACHINE, warningsOrErrorsPresent )
     
     return subject    
     
@@ -554,7 +591,7 @@ def sendReportByEmail( parameters, report  ) :
     html = " <html> %s </html>" %(report).replace( "\n", "<br>" )
     text = report
     
-    subject = getEmailSubject( parameters.endTime )
+    subject = getEmailSubject( parameters.endTime, report )
     message = mailLib.createhtmlmail(html, text, subject)
     server = smtplib.SMTP("smtp.cmc.ec.gc.ca")
     server.set_debuglevel(0)
@@ -652,9 +689,10 @@ def verifyPicklePresence( parameters, report ):
         
         for txName in txNames:
             folders = getFoldersAndFilesAssociatedWith( txName, "tx", machine, startTime , parameters.endTime )
-
+            sortedFolders = folders.keys()
+            sortedFolders.sort()
             
-            for folder in folders.keys():
+            for folder in sortedFolders:
                 if os.path.isdir( folder ):
                     for file in folders[folder]:
                         if not os.path.isfile(file):
@@ -689,9 +727,12 @@ def verifyPicklePresence( parameters, report ):
         
         
         for rxName in rxNames:
-            folders = getFoldersAndFilesAssociatedWith( rxName, "rx", machine,parameters.startTime, parameters.endTime )
             
-            for folder in folders.keys():
+            folders = getFoldersAndFilesAssociatedWith( rxName, "rx", machine,parameters.startTime, parameters.endTime )
+            sortedFolders = folders.keys()
+            sortedFolders.sort()
+            
+            for folder in sortedFolders:
                 if os.path.isdir( folder ):
                     for file in folders[folder]:
                         if not os.path.isfile(file):
@@ -823,7 +864,7 @@ def getOutdatedTransmissionsLog( file, startTime ):
     
     
     
-def getPickleAnalysis( files, name, startTime, maximumGap, errorLog ):
+def getPickleAnalysis( files, name, timeOfLastFilledEntry, maximumGap, errorLog ):
     """
         This function is used to browse all the pickle files
         in chronological order. 
@@ -837,8 +878,7 @@ def getPickleAnalysis( files, name, startTime, maximumGap, errorLog ):
     
     header = ""
     reportLines = ""    
-    gapTooWidePresent = False
-    timeOfLastFilledEntry =  getTimeOfLastFilledEntry( name, startTime )
+    gapTooWidePresent = False    
     files.sort()    
         
     for file in files:                 
@@ -903,15 +943,17 @@ def verifyPickleContent( parameters, report ):
         if "," in machine:   
             machine = getCombinedMachineName( machine )     
         
+        
         for txName in txNames:
-            files = []           
             
-            folders = getFoldersAndFilesAssociatedWith( txName,"tx", machine, parameters.startTime, parameters.endTime )
+            files = []           
+            timeOfLastFilledEntry = getTimeOfLastFilledEntry( txName, parameters.startTime )
+            folders = getFoldersAndFilesAssociatedWith(txName,"tx", machine, timeOfLastFilledEntry, parameters.endTime )
             
             for folder in folders.keys(): 
                 files.extend( folders[folder] )            
 
-            brandNewReportLines, timeOfLastFilledEntry =  getPickleAnalysis( files, txName, parameters.startTime, parameters.maximumGaps[txName], errorLog )  
+            brandNewReportLines, timeOfLastFilledEntry =  getPickleAnalysis( files, txName, timeOfLastFilledEntry, parameters.maximumGaps[txName], errorLog )  
                
             newReportLines = newReportLines + brandNewReportLines
             
@@ -1102,7 +1144,7 @@ def verifyWebPages( parameters, report ):
     
     newReportLines = ""
     outdatedPageFound = False 
-    files = glob.glob( "/apps/px/stats/webPages/*.html" )  
+    files = glob.glob( "/apps/px/stats/webPages/*Graphs*.html" )  
     currentTime = MyDateLib.getSecondsSinceEpoch( parameters.endTime )
     
     
@@ -1111,7 +1153,7 @@ def verifyWebPages( parameters, report ):
         
         if ( currentTime - timeOfUpdate ) / ( 60*60 ) >1 :
             outdatedPageFound = True 
-            newReportLines = newReportLines + "%s was not updated since %s" %( file, timeOfUpdate ) 
+            newReportLines = newReportLines + "%s was not updated since %s.\n" %( file, MyDateLib.getIsoFromEpoch( timeOfUpdate )) 
     
     if outdatedPageFound :
         header = "\n\nThe following web page warning were found :\n"
