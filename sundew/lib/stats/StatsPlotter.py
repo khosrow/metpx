@@ -46,7 +46,7 @@ class StatsPlotter:
             
         """                                                                    
    
-        #print machines    
+        #TODO Verify if all theses fileds are really necessary.    
         machines = "%s" %machines
         machines = machines.replace( "[","").replace( "]","" ).replace( "'", "" )
         
@@ -55,7 +55,7 @@ class StatsPlotter:
         self.clientNames = clientNames or []       # Clients for wich we are producing the graphics. 
         self.timespan    = timespan                # Helpfull to build titles 
         self.currentTime = currentTime             # Time of call
-        self.type        = 'impulses'                 # Must be in: ['linespoint', 'lines', 'boxes', 'impulses'].
+        self.type        = 'impulses'              # Must be in: ['linespoint', 'lines', 'boxes', 'impulses'].
         self.fileType    = fileType                # Type of file for wich the data was collected
         self.imageName   = imageName               # Name of the image file.
         self.nbFiles     = []                      # Number of files found in the data collected per server.
@@ -97,7 +97,7 @@ class StatsPlotter:
         """
             Used to set the size of the numerous arrays needed in StatsPlotter
         """
-        
+        #TODO Verify if really necessary
         nbClients = len( self.clientNames )
         nbTypes   = len( self.statsTypes )
         
@@ -138,7 +138,7 @@ class StatsPlotter:
         
         
         fileName = fileName.replace( '[', '').replace(']', '').replace(" ", "").replace( "'","" )               
-        
+        #TODO make other method out of this
         splitName = fileName.split( "/" ) 
         
         if fileName[0] == "/":
@@ -210,7 +210,9 @@ class StatsPlotter:
                   one point for the entire combination.
                   
            Warning : If illegal statype is found program will be terminated here.       
-        
+           
+           #TODO Using dictionaries instead of arrays might speed thinga up a bit.
+            
         """
         
         if self.logger != None: 
@@ -415,7 +417,7 @@ class StatsPlotter:
         
         shutil.copy( src, destination ) 
         
-        print "cp %s %s  "  %( src, destination )
+        #print "cp %s %s  "  %( src, destination )
          
         
     def plot( self, createCopy = False  ):
@@ -577,21 +579,21 @@ class StatsPlotter:
             maximum = ""
        
         if self.totalNumberOfBytes[i] < 1000:#less than a k
-            totalNumberOfBytes = "%s bytes" %int( self.totalNumberOfBytes[i] )
+            totalNumberOfBytes = "%s Bytes" %int( self.totalNumberOfBytes[i] )
             
         elif self.totalNumberOfBytes[i] < 1000000:#less than a meg 
             totalNumberOfBytes = "%.2f kiloBytes"  %( self.totalNumberOfBytes[i]/1000.0 )
         
         elif self.totalNumberOfBytes[i] < 1000000000:#less than a gig      
-            totalNumberOfBytes = "%.2f megaBytes"  %( self.totalNumberOfBytes[i]/1000000.0 )
+            totalNumberOfBytes = "%.2f MegaBytes"  %( self.totalNumberOfBytes[i]/1000000.0 )
         else:#larger than a gig
-            totalNumberOfBytes = "%.2f gigaBytes"  %( self.totalNumberOfBytes[i]/1000000000.0 )
+            totalNumberOfBytes = "%.2f GigaBytes"  %( self.totalNumberOfBytes[i]/1000000000.0 )
             
         self.graph( 'set size .545, .37' )
         
         self.graph( 'set origin 0, %3.2f' %( ((nbGraphs)*.40)  ))
         
-        self.graph.ylabel( '# of bytes' )
+        self.graph.ylabel( 'Bytes/Minute' )
         
         self.graph( 'set label "%s : %s" at screen .545, screen %3.2f' % ( self.sourlient, self.clientNames[i],(.26+(nbGraphs) *.40)  ))
         
@@ -609,13 +611,13 @@ class StatsPlotter:
             self.graph( 'set label "%s" at screen .545, screen %3.2f' % ( self.filesWhereMaxOccured[i][j], (.18+(nbGraphs) *.40) ))
             x = .18
                     
-        self.graph( 'set label "Size of largest file : %s bytes" at screen .545, screen %3.2f' % ( maximum, (x -.02+(nbGraphs) *.40) ) )       
+        self.graph( 'set label "Size of largest file : %s Bytes" at screen .545, screen %3.2f' % ( maximum, (x -.02+(nbGraphs) *.40) ) )       
                 
         self.graph( 'set label "Time of largest file : %s" at screen .545, screen %3.2f' % ( ( timeOfMax, (x -.04+(nbGraphs) *.40)  )))     
         
         self.graph( 'set label "# of files : %s " at screen .545, screen %3.2f' % ( self.nbFiles[i] , ( x-.06+(nbGraphs) *.40) ) )
     
-        self.graph( 'set label "# of bytes: %s " at screen .545, screen %s' % (  totalNumberOfBytes,( x -.08 +(nbGraphs) *.40 ) ) )
+        self.graph( 'set label "# of Bytes: %s " at screen .545, screen %s' % (  totalNumberOfBytes,( x -.08 +(nbGraphs) *.40 ) ) )
                 
 
     
@@ -648,7 +650,7 @@ class StatsPlotter:
         
         self.graph( 'set origin 0, %3.2f' %( ((nbGraphs)*.40)  ))
         
-        self.graph.ylabel( '# of errors' )
+        self.graph.ylabel( 'Errors/Minute' )
         
         self.graph( 'set label "%s : %s" at screen .545, screen %3.2f' % ( self.sourlient,self.clientNames[i],(.26+(nbGraphs) *.40)  ))
         
