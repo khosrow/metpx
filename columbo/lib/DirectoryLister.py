@@ -40,7 +40,7 @@ named COPYING in the root of the source directory tree.
 #############################################################################################
 """
 import sys, os, commands, re, pickle, time
-from PDSPath import *
+from PDSPaths import *
 from ColumboPath import *
 from PDSClient import PDSClient
 from PDSInputDir import PDSInputDir

@@ -29,7 +29,7 @@ print sys.path
 HOSTNAME = os.environ['HOSTNAME']
 print "HOSTNAME = " + HOSTNAME
 
-from PDSPath import *
+from PDSPaths import *
 from PDSManager import PDSManager
 from PDSClient import PDSClient
 

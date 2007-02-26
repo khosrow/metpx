@@ -18,7 +18,7 @@ named COPYING in the root of the source directory tree.
 #############################################################################
 """
 
-from PDSPath import *
+from PDSPaths import *
 #import logging #Trouble de Python 2.2
 from PDSClient import PDSClient
 

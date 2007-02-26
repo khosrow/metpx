@@ -15,7 +15,7 @@ named COPYING in the root of the source directory tree.
 #############################################################################################
 
 """
-import PDSPath
+import PDSPaths
 import logging
 
 class CompositePDSInputDir: 

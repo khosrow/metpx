@@ -24,7 +24,7 @@ import cgitb; cgitb.enable()
 import sys, commands, pickle, re, os
 sys.path.append(sys.path[0] + "/../../lib");
 sys.path.append("../../lib");
-from PDSPath import *
+from PXPaths import *
 from ColumboPath import *
 
 from ConfigParser import ConfigParser

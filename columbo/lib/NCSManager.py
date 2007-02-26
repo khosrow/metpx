@@ -23,7 +23,7 @@ import NCSUtils
 import os
 import pickle
 import time
-from PDSPath import *
+from PDSPaths import *
 from Manager import Manager
 from NCSCircuit import NCSCircuit
 

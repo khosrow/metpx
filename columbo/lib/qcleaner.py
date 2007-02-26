@@ -27,7 +27,7 @@ import getopt
 import time
 import os
 
-from PDSPath import *
+from PXPaths import *
 
 class EmptyList(Exception): pass
 

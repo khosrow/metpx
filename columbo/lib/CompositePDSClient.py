@@ -15,7 +15,7 @@ named COPYING in the root of the source directory tree.
 #############################################################################################
 
 """
-import PDSPath, re
+import PDSPaths, re
 
 class CompositePDSClient: 
 
