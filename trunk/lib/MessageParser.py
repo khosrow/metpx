@@ -94,9 +94,8 @@ class MessageParser:
                     self.request = line.strip()
                     break
 
-        elif words[0] in ['RQM', 'RQF']:
-            if words[1] in ['UNK', 'OK']:
-                self.type = words[0] + '_' + words[1]
+        elif words[0] in ['RQM', 'RQF'] and len(words) >= 2 and words[1] in ['UNK', 'OK']:
+            self.type = words[0] + '_' + words[1]
 
         elif words[0] in MessageAFTN.PRIORITIES:
             self.type = 'PRI_DESTADD_TEXT'
