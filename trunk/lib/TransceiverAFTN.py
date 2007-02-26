@@ -457,7 +457,11 @@ class TransceiverAFTN:
                             self.logger.info('AFTN Request Received: Type = %s, Value = %s' % (textType, mp.request))
 
                             # We want to put the answer on amis or metser.
-                            rr = RequestReplyAFTN(mp.request, addOn, mp.sendOn, self.logger)
+                            try:
+                                rr = RequestReplyAFTN(mp.request, addOn, mp.sendOn, self.logger)
+                            except:
+                                (type, value, tb) = sys.exc_info()
+                                self.logger.error("In RequestReplyAFTN: Type = %s, Value = %s" % (type, value))
 
                             if rr.bulletin:
                                 self.logger.info('Reply is not empty, we will put bulletin in the queue of receiver %s and send an OK message' % rr.receiverName)
