@@ -115,7 +115,7 @@ if (__name__ == '__main__'):
    logger = logger.getLogger()
    logger.info("Beginning of DirectoryLister program on " + str(localhost))
 
-   pathname = CLIENTHOME + "/" + clientName
+   pathname = TXQ + clientName
 
    # Not used when called by CS host, may be useful when call manually and debugging
    if (regex == '0'):

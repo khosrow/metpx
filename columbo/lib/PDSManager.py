@@ -73,7 +73,7 @@ class PDSManager(Manager):
 
             lastlines = self.easyTail(logfile, 1)  # we want the 1 last lines of the logfile
             client = PDSClient(self.machine, name, pid, status, date, config, logfile)
-            client.setQueue(len(os.listdir(CLIENTHOME + "/" + name + "/incoming")))
+            client.setQueue(len(os.listdir(TXQ + name + "/incoming")))
             if (len(lastlines) == 0):
                client.setLastLog(["EMPTY LOG"])
             else:
