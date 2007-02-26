@@ -40,7 +40,7 @@ named COPYING in the root of the source directory tree.
 #############################################################################################
 
 """
-import sys, os, pwd, time, re, commands
+import sys, os, pwd, time, re, commands, itertools
 sys.path.append(sys.path[0] + "/../../lib");
 sys.path.append("../../lib");
 
@@ -107,6 +107,8 @@ elif system == 'PX':
     backends = config.get('CIR', 'backends').split(' ')     # Unlike PDS system which use ipvsadm, we have to define backends in conf. file
     frontend = config.get('CIR', 'frontend')                # Unlike PDS system which use ipvsadm, we have to define frontend in conf. file
 
+    #px_groups = [tuple(group.split(',')) for group in config.get('CIR', 'px_groups').split()]  # px1,px2 px3,px4,px5 => [(px1, px2), (px3, px4, px5)]
+
 
 # If not defined in configuration file, set defaults
 if (not logname ):
@@ -129,6 +131,7 @@ if system == 'PDS':
     machines = LVSManager('CIR').getMachines(ipvsadm_regex)  # Get all PDS that are included in the cluster
 elif system == 'PX':
     machines = backends[:]
+    #machines = list(itertools.chain(*px_groups))
     if frontend:
         machines.append(frontend)
 
