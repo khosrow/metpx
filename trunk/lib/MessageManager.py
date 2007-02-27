@@ -255,9 +255,9 @@ class MessageManager:
 
             #self.logger.info("Header in addHeader: %s" % header)
             if textLines:
-                wmoMessages.append('\n'.join(headerBlock + textLines))
+                wmoMessages.append('\n'.join(headerBlock + textLines) + '\n')
             else:
-                wmoMessages.append('\n'.join(headerBlock + message.textLines))
+                wmoMessages.append('\n'.join(headerBlock + message.textLines) + '\n')
         return wmoMessages
 
     def doSpecialOrders(self, path):

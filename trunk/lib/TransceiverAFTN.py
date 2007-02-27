@@ -432,7 +432,7 @@ class TransceiverAFTN:
 
                             elif mp.getHeader(): 
                                 # Only one message will be in messages
-                                messages = ['\n'.join(mm.messageIn.textLines)] 
+                                messages = ['\n'.join(mm.messageIn.textLines) + '\n'] 
                             else:
                                 # Create headers before ingesting
                                 messages = mm.addHeaderToMessage(mm.messageIn)
@@ -502,7 +502,7 @@ class TransceiverAFTN:
 
                         if mp.getHeader(): 
                             # Only one message will be in messages
-                            messages = ['\n'.join(lines)] 
+                            messages = ['\n'.join(lines) + '\n'] 
                         else:
                             # Create headers before ingesting
                             messages = mm.addHeaderToMessage(mm.messageIn, lines)
