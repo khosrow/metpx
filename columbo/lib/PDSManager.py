@@ -16,7 +16,7 @@ named COPYING in the root of the source directory tree.
 """
 import os, os.path, commands, re, pickle, time, logging
 from PDSPaths import *
-from ColumboPath import *
+from ColumboPaths import *
 from PDSClient import PDSClient
 from PDSInputDir import PDSInputDir
 from Manager import Manager

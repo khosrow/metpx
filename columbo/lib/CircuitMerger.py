@@ -20,7 +20,7 @@ named COPYING in the root of the source directory tree.
 """
 
 import pickle
-from ColumboPath import *
+from ColumboPaths import *
 from CompositeNCSCircuit import CompositeNCSCircuit
 import errorLog
 

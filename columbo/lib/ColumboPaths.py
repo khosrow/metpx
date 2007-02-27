@@ -6,7 +6,7 @@ named COPYING in the root of the source directory tree.
 
 """
 #############################################################################################
-# Name: ColumboPath.py
+# Name: ColumboPaths.py
 #
 # Author: Daniel Lemay
 #

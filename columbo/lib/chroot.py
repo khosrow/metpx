@@ -5,7 +5,7 @@ named COPYING in the root of the source directory tree.
 """
 
 import os, sys
-from ColumboPath import *
+from ColumboPaths import *
 
 print os.getcwd()
 os.chdir(CLUES)

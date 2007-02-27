@@ -16,7 +16,7 @@ named COPYING in the root of the source directory tree.
 #####################################################################
 
 from PXPaths import *
-from ColumboPath import *
+from ColumboPaths import *
 from Logger import Logger
 from ConfigParser import ConfigParser
 import sys

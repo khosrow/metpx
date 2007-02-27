@@ -16,7 +16,7 @@ named COPYING in the root of the source directory tree.
 
 """
 import os, logging, commands
-from ColumboPath import *
+from ColumboPaths import *
 
 class Sender:
 

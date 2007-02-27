@@ -25,7 +25,7 @@ import sys, commands, pickle, re, os
 sys.path.append(sys.path[0] + "/../../lib");
 sys.path.append("../../lib");
 from PXPaths import *
-from ColumboPath import *
+from ColumboPaths import *
 
 from ConfigParser import ConfigParser
 config = ConfigParser()

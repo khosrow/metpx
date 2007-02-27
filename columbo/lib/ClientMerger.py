@@ -17,7 +17,7 @@ named COPYING in the root of the source directory tree.
 """
 import pickle, re
 from PDSPaths import * 
-from ColumboPath import *
+from ColumboPaths import *
 from CompositePDSClient import CompositePDSClient
 from CompositePDSInputDir import CompositePDSInputDir 
 import readMaxFile
