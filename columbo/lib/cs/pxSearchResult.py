@@ -32,7 +32,7 @@ sys.path.append("/apps/px/lib/importedLibs")
 
 import template
 from PDSPath import *
-from ColumboPath import *
+from ColumboPaths import *
 from types import *
 from myTime import *
 import PXPaths; PXPaths.normalPaths()

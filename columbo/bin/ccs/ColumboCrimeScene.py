@@ -12,17 +12,19 @@ named COPYING in the root of the source directory tree.
 #
 # Date: 2004-09-01
 #
-# CCS = Columbo Crime Scene (Each Individual PDS is a crime scene)
-# CIR = Columbo Investigation Room (Investigation Room is on a LVS, clues are merged in results)
-# CS  = Columbo Show (The Show is on a LVS)
+# CCS = Columbo Crime Scene (Each Individual System (PDS/PX) is a crime scene)
+# CIR = Columbo Investigation Room (Investigation Room is on a machine where clues are merged in results)
+# CS  = Columbo Show (The Show is on a machine of your choice)
 #
 # Description: Main file for the ColumboCrimeScene (CCS) software. This piece of software
-# is used to collect information (about PDS clients and input directories) on a PDS machine.
-# It is runned on the PDSs. The call come from the CIR host on an LVS and the clues are 
-# sent to the CIR host that made the call. The main tasks are:
+# is used to collect information (about sources/clients of a PDS/PX system).
+# It is run on all the individual machines composing the system (PDS/PX). 
+# The call come from the CIR host and the clues are sent to it (the CIR host that made the call).
 #
-# 1) Obtain infos about the PDS on which it is running (infos about clients and input directories)
-# 2) Send these infos ("clues") to CIR Host (as received in parameter)
+# The main tasks are:
+#
+# 1) Obtain infos about the sources/clients that are being part of the system (PDS/PX)
+# 2) Send these infos ("clues") to the CIR Host that made the call (as received in parameter)
 #
 # Input parameters
 #  
@@ -71,7 +73,6 @@ DEBUG = 0
 localhost = os.uname()[1]
 
 system = sys.argv.pop(1)  # 'PDS' or 'PX'
-
 
 def main(system):
     # Filename of the "clues", full path and filename for the log, logging level, 

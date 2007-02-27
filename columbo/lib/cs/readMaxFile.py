@@ -19,7 +19,7 @@ named COPYING in the root of the source directory tree.
 #              to "wave a flag" indicating something is wrong
 #############################################################################################
 import re
-from ColumboPath import *
+from ColumboPaths import *
 import template
 
 DEBUG = 0

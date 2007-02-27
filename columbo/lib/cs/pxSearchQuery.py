@@ -26,7 +26,7 @@ sys.path.append("../../lib")
 sys.path.append("/apps/px/lib")
 
 from PDSPath import *
-from ColumboPath import *
+from ColumboPaths import *
 from types import *
 from myTime import *
 import PXPaths; PXPaths.normalPaths()

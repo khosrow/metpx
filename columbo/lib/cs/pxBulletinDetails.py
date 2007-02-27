@@ -28,7 +28,7 @@ sys.path.append("/apps/px/lib/search")
 
 import template
 from PDSPath import *
-from ColumboPath import *
+from ColumboPaths import *
 from types import *
 from myTime import *
 

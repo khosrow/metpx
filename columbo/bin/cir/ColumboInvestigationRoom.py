@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python
 
 """
 MetPX Copyright (C) 2004-2006  Environment Canada
@@ -14,15 +14,15 @@ named COPYING in the root of the source directory tree.
 #
 # Date: 2004-09-13
 #
-# CCS = Columbo Crime Scene (Each Individual PDS is a crime scene)
-# CIR = Columbo Investigation Room (Investigation Room is on a LVS, clues are merged in results)
-# CS  = Columbo Show (The Show is on a LVS)
+# CCS = Columbo Crime Scene (Each Individual System (PDS/PX) is a crime scene)
+# CIR = Columbo Investigation Room (Investigation Room is on a machine where clues are merged in results)
+# CS  = Columbo Show (The Show is on a machine of your choice)
 #
-# Description: Main file for the Columbo Project (LVS side). This program is started each 
-# minute by a cron job (user pds on CIR host). Three tasks are done by this program:
+# Description: Main file for the Columbo Project. This program is started each 
+# minute by a cron job. Three tasks are done by this program:
 # 
-# 1) Obtain infos about all running PDSs (infos about clients and input directories)
-# 2) Merging infos received from the PDSs
+# 1) Obtain infos about all running PX/PDSs (infos about sources and clients)
+# 2) Merging infos received from the PX/PDSs
 # 3) Send the merged infos to ColumboShow Host (as defined in the config. file)
 #
 # TO DO:
@@ -59,7 +59,7 @@ from CircuitMerger import CircuitMerger
 from CompositeNCSCircuit import CompositeNCSCircuit
 import NCSUtils
 
-# We need to know if the CIR program will investigate about PDS or PX 
+# We need to know which system (PDS/PX) the CIR program want to investigate 
 # If you want investigation about the two, start two cron jobs (one for PDS and one for PX)
 system = sys.argv[1]
 

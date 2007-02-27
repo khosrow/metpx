@@ -26,7 +26,7 @@ sys.path.append(sys.path[0] + "/../../lib");
 sys.path.append("../../lib")
 
 from PDSPath import *
-from ColumboPath import *
+from ColumboPaths import *
 from CompositeNCSCircuit import CompositeNCSCircuit
 from ConfigParser import ConfigParser
 from Logger import Logger

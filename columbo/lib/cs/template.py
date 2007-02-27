@@ -17,7 +17,7 @@ import sys
 sys.path.append(sys.path[0] + "/../../lib");
 sys.path.append("../../lib")
 
-from ColumboPath import *
+from ColumboPaths import *
 from ConfigParser import ConfigParser
 
 tabs = ['pdsClients', 'pdsSources', 'pxCircuits', 'generalMonitoring',  'admin']

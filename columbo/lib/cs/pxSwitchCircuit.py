@@ -25,7 +25,7 @@ sys.path.append(sys.path[0] + "/../../lib");
 sys.path.append("../../lib")
 
 from PDSPath import *
-from ColumboPath import *
+from ColumboPaths import *
 from types import *
 from myTime import *
 from ConfigParser import ConfigParser

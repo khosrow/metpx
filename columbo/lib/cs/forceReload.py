@@ -23,7 +23,7 @@ import sys, commands
 sys.path.append(sys.path[0] + "/../../lib");
 sys.path.append("../../lib")
 
-from ColumboPath import *
+from ColumboPaths import *
 
 form = cgi.FieldStorage()
 system = form["system"].value

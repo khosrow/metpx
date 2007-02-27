@@ -12,31 +12,44 @@ named COPYING in the root of the source directory tree.
 #
 # Date: 2004-09-08
 #
-# Description: Useful path under the Columbo hierarchy.
+# Description: Useful paths under the Columbo hierarchy.
 #
 #############################################################################################
-
 """
+
+import os.path
+
+try:
+    envVar = os.path.normpath(os.environ['COLROOT']) + '/'
+except KeyError:
+    envVar = '/apps/pds/tools/columbo/'
+
+
 # Useful directories
-COLUMBO_HOME = "/apps/pds/tools/Columbo"                   # This line must be set correctly for any new installation
-CCS = COLUMBO_HOME + "/ColumboCrimeScene"                  # Each node is a "crime scene" where clues are gathered
-CIR = COLUMBO_HOME + "/ColumboInvestigationRoom"           # Here, conclusions are draw (from all the amassed clues)
-CS =  COLUMBO_HOME + "/ColumboShow"                        # Presentation of results occur here
-ETC = COLUMBO_HOME + "/etc"                                # General configuration
-CLUES = CCS + "/clues"                                     # Clues are put there
-INPUT_CLUES = CIR + "/clues"                               # Investigation receive their clues there
-RESULTS = CIR + "/results"                                 # Results are put there before being sent to ColumboShow
-INPUT_RESULTS = CS + "/results"                            # Show receive their results there
+ROOT = envVar
+BIN = ROOT + 'bin/'                                        # executables are here
+CCS = BIN +  'ccs/'                                        # ccs executable
+CIR = BIN +  'cir/'                                        # cir executable
+LIB = ROOT + 'lib/'                                        # main library
+CS_LIB = LIB + 'cs/'                                       # cs lib
+ETC = ROOT + 'etc/'                                        # config files are here
+WEB = ROOT + 'web/'                                        # web stuff
+
+#CLUES = CCS + "/clues"                                     # Clues are put there
+#INPUT_CLUES = CIR + "/clues"                               # Investigation receive their clues there
+#RESULTS = CIR + "/results"                                 # Results are put there before being sent to ColumboShow
+#INPUT_RESULTS = CS + "/results"                            # Show receive their results there
 
 # Useful files
-MAIN_CONF = "Columbo.conf"                                 # Main general configuration file
+MAIN_CONF = "columbo.conf"                                 # Main general configuration file
 MAX_CONF = "maxSettings.conf"                              # Maximum and default values for clients, sources and circuits
+CIR_CONF = 'cir.conf'                                
 
 # Useful path (directory + file)
-FULL_MAIN_CONF = ETC + "/" + MAIN_CONF
-FULL_MAX_CONF = ETC + "/" + MAX_CONF
-CCS_PROG = CCS + "/lib/ColumboCrimeScene.py"               # Main program for CCS
-CIR_PROG = CIR + "/lib/ColumboInvestigationRoom.py"        # Main program for CIR
-LISTING_PROG = COLUMBO_HOME + "/lib/DirectoryLister.py"    # Used to obtain a listing used by resending tool in CS
-LISTING_PROG_STARTER = CIR + "/lib/MakeMergedListing.py"   # Used to start LISTING_PROG on each appropriate machine
-Q_PROG = COLUMBO_HOME + "/lib/q_gatherer.py"
+FULL_MAIN_CONF = ETC + MAIN_CONF
+FULL_MAX_CONF = ETC + MAX_CONF
+FULL_CIR_CONF = ETC + CIR_CONF
+CCS_PROG = CCS + 'ColumboCrimeScene.py'                    # Main program for CCS
+CIR_PROG = CIR + 'ColumboInvestigationRoom.py'             # Main program for CIR
+LISTING_PROG = LIB + 'DirectoryLister.py'                  # Used to obtain a listing used by resending tool in CS
+LISTING_PROG_STARTER = CIR + 'MakeMergedListing.py'        # Used to start LISTING_PROG on each appropriate machine

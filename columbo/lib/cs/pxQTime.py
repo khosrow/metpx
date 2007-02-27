@@ -27,7 +27,7 @@ sys.path.append("../../lib")
 
 import template
 from PDSPath import *
-from ColumboPath import *
+from ColumboPaths import *
 from types import *
 from myTime import *
 from QObject import QObject

@@ -30,7 +30,7 @@ sys.path.append(sys.path[0] + "/../../lib");
 sys.path.append("../../lib");
 
 from PDSPath import *
-from ColumboPath import *
+from ColumboPaths import *
 from Logger import Logger
 from ConfigParser import ConfigParser
 
