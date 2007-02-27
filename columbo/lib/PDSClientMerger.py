@@ -6,7 +6,7 @@ named COPYING in the root of the source directory tree.
 
 """
 #############################################################################################
-# Name: ClientMerger.py
+# Name: PDSClientMerger.py
 #
 # Author: Daniel Lemay
 #
@@ -22,7 +22,7 @@ from CompositePDSClient import CompositePDSClient
 from CompositePDSInputDir import CompositePDSInputDir 
 import readMaxFile
 
-class ClientMerger:
+class PDSClientMerger:
 
    """
    #############################################################################################
@@ -33,7 +33,7 @@ class ClientMerger:
    def __init__(self, logger, errorLogger, machines):
       """
       #############################################################################################
-      # Constructor of a ClientMerger object
+      # Constructor of a PDSClientMerger object
       #############################################################################################
       """
       self.logger = logger                          # logger object

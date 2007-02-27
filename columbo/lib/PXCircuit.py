@@ -6,13 +6,13 @@ named COPYING in the root of the source directory tree.
 
 """
 #################################################################
-# Name: CompositeNCSCircuit.py
+# Name: PXCircuit.py
 #
 # Author: Dominik Douville-Belanger (CMC Co-op student)
 #
 # Date: 2005-01-26
 #
-# Description: Merge the infos of all the NCSCircuit into one.
+# Description: Merge the infos of all the PX Circuit into one.
 #              Does some additional checks before sending to CS.
 #
 #################################################################
@@ -21,7 +21,7 @@ named COPYING in the root of the source directory tree.
 import time
 from CompositePDSClient import CompositePDSClient
 
-class CompositeNCSCircuit(CompositePDSClient):
+class PXCircuit(CompositePDSClient):
 
     def __init__(self, name):
         CompositePDSClient.__init__(self, name)
