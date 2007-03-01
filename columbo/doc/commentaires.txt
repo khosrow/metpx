@@ -1,0 +1,27 @@
+- Deux facons d'obtenir le hostname:
+
+a) import os
+os.environ['HOSTNAME']
+
+Cette methode est moins bonne que la suivante parce que si on fait une connexion ssh, la
+variable d'environnement HOSTNAME n'existe pas.
+
+b) import os
+os.uname().[1]
+
+Cette methode fonctionne toujours (a date !!)
+
+=================================================================================================
+
+Lorsque l'on veut que certains mots declenchent une erreur, il faut les ecrire
+dans:
+
+1) /apps/pds/tools/Columbo/lib/ClientMerger.py          => Afin de creer un log de toutes les erreurs ayant ete affichees par Columbo
+2) /apps/pds/tools/Columbo/lib/CompositePDSClient.py    => Afin de choisir la "Best log line"
+3) /apps/pds/tools/Columbo/ColumboShow/lib/JSMaker.py   => Afin de fixer un code (0, 1) pour chaque entree du tableau javascript. Ce code est choisi selon que l'on est en erreur ou non
+4) /apps/pds/tools/Columbo/web/js/SortableTable.js      => Afin de determiner la couleur de l'entree (rouge si en erreur)
+
+Il serait plus approprie que ces mots ne soient ecrits qu'une seule fois a un
+endroit donne et reutilise par tous ces fichiers. 
+
+Idem pour les liens de fin de page: [ PDS Client | PDS Sources | PX Circuits ]

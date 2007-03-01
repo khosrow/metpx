@@ -1,0 +1,55 @@
+#!/usr/bin/python2
+#!/software/pub/python-2.3.3/bin/python
+"""
+MetPX Copyright (C) 2004-2006  Environment Canada
+MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+named COPYING in the root of the source directory tree.
+"""
+
+################################################################
+# Name: mr-clean.py
+#
+# Author: Dominik Douville-Belanger
+#
+# Date: 2005-04-06
+#
+# Description: Removes empty directories from pxSender queues
+#
+# 20070223 MG : bug fix for file treated as directory at any levels
+#
+################################################################
+
+import os
+import time
+import commands
+import sys
+
+TXQ = '/apps/px/txq'
+# RXQ = '/apps/px/rxq' # Maybe eventually for FTP receivers
+
+currentTime = time.strftime('%Y%m%d%H')
+
+sys.stdout  = sys.stderr
+
+circuits = os.listdir(TXQ)
+for circuit in circuits:
+    minimalPath = TXQ + '/' + circuit
+    prioDirs = commands.getoutput('ls -1 --ignore=PROBLEM %s' % (minimalPath))
+    prioDirs = prioDirs.splitlines() # Type changed
+    for prio in prioDirs:
+        partialPath = minimalPath + '/' + prio
+        if len(prio) > 1:
+            print(" error mr-clean : %s is incorrect, remove ?" % partialPath )
+            continue
+        if os.path.isfile(partialPath) :
+            print(" error mr-clean : file %s should be removed" % partialPath )
+            continue
+        dateDirs = commands.getoutput('ls -1 --ignore=%s %s' % (currentTime, partialPath))
+        dateDirs = dateDirs.splitlines() # Type changed
+        for date in dateDirs:
+            fullPath = partialPath + '/' + date
+            if os.path.isfile(fullPath) :
+               print(" error mr-clean : file %s should be removed" % fullPath)
+               continue
+            if os.listdir(fullPath) == []:
+               result = commands.getoutput('rmdir %s' % (fullPath))
