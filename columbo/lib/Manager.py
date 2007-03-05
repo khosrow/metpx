@@ -15,8 +15,6 @@ named COPYING in the root of the source directory tree.
 #############################################################################################
 """
 import os, commands, re, logging
-from PDSPaths import *
-from ColumboPaths import *
 
 class Manager:
    """
