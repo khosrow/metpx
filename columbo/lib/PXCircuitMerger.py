@@ -6,14 +6,14 @@ named COPYING in the root of the source directory tree.
 
 """
 #################################################################
-# Name: NCSClientMerger.py
+# Name: PXCircuitMerger.py
 #
 # Author: Dominik Douville-Belanger
 #
 # Date: 2005-01-26
 #
-# Description: Merges informations from all the PDS about the
-#              circuits. Very similar to ClientMerger.py 
+# Description: Merges informations from all the PX about the
+#              circuits. Very similar to PDSClientMerger.py 
 #              but the methods are changed a bit.
 #
 #################################################################
@@ -21,10 +21,10 @@ named COPYING in the root of the source directory tree.
 
 import pickle
 from ColumboPaths import *
-from CompositeNCSCircuit import CompositeNCSCircuit
+from CompositePXCircuit import CompositePXCircuit
 import errorLog
 
-class CircuitMerger:
+class PXCircuitMerger:
     
     def __init__(self, logger, machines):
         self.logger = logger
@@ -46,7 +46,7 @@ class CircuitMerger:
         circuits = self.circuitDictDict[self.machines[0]].keys()
         circuits.sort()
         for circuit in circuits:
-            compositeCircuit = CompositeNCSCircuit(circuit)
+            compositeCircuit = CompositePXCircuit(circuit)
             for machine in self.machines:
                 # Add informations from each PDSs to the composite circuit
                 compositeCircuit.addHost(machine)

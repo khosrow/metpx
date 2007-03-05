@@ -6,7 +6,7 @@ named COPYING in the root of the source directory tree.
 
 """
 #################################################################
-# Name: PXCircuit.py
+# Name: CompositePXCircuit.py
 #
 # Author: Dominik Douville-Belanger (CMC Co-op student)
 #
@@ -21,7 +21,7 @@ named COPYING in the root of the source directory tree.
 import time
 from CompositePDSClient import CompositePDSClient
 
-class PXCircuit(CompositePDSClient):
+class CompositePXCircuit(CompositePDSClient):
 
     def __init__(self, name):
         CompositePDSClient.__init__(self, name)
