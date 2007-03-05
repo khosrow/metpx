@@ -24,8 +24,13 @@ def normalPaths():
     global PROD, SWITCH, STARTUP, TOGGLE, RESEND
     global FULLPROD, FULLSWITCH, FULLSTARTUP, FULLTOGGLE
 
+    try:
+        envVar = os.path.normpath(os.environ['PDSROOT']) + '/'
+    except KeyError:
+        envVar = '/apps/pds/'
+
     # Useful directories
-    ROOT = '/apps/pds/'
+    ROOT = envVar
     BIN = ROOT + 'bin/'
     LOG = ROOT + 'log/'
     ETC = ROOT + 'etc/'
