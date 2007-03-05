@@ -18,7 +18,7 @@ named COPYING in the root of the source directory tree.
 """
 
 import os, time, re, commands, pickle
-import NCSUtils
+import PXUtils
 import PXPaths
 from Manager import Manager
 from PXCircuit import PXCircuit
@@ -52,55 +52,55 @@ class PXManager(Manager):
             
             # Where is the configuration file?
             if dir == 'pxReceiver':
-                configFile = RXETC + '/' + toggled[1]
+                configFile = PXPaths.RX_CONF + toggled[1]
             elif dir == 'pxSender':
-                configFile = TXETC + '/' + toggled[1]
+                configFile = PXPaths.TX_CONF + toggled[1]
             elif dir == 'pxTransceiver':
-                configFile = TRXETC + '/' + toggled[1]
+                configFile = PXPaths.TRX_CONF + toggled[1]
             
             # Get usefull information from the config file
-            (type, port) = NCSUtils.configParse(configFile)
+            (type, port) = PXUtils.configParse(configFile)
             type = dir + ' ' + type
             
             #How is the socket doing?
             sock = '' # Default value
             if port != 0:
-                sock = NCSUtils.socketInfo(port, dir, nsInfo)
+                sock = PXUtils.socketInfo(port, dir, nsInfo)
             
             # Get the last reception or transmission
             if dir == 'pxReceiver':
-                log = PXLOG + '/' + 'rx_' + name + '.log'
+                log = PXPaths.LOG + 'rx_' + name + '.log'
                 #regex = r"\[INFO\] ingest"
                 regex = r"Ingested in DB"
-                lastRcv = NCSUtils.lastSendRcv(log, regex)
+                lastRcv = PXUtils.lastSendRcv(log, regex)
                 lastTrans = time.gmtime(0) # Default value
             elif dir == 'pxSender':
-                log = PXLOG + '/' + 'tx_' + name + '.log'
+                log = PXPaths.LOG + 'tx_' + name + '.log'
                 #if port != 0:
                 #    regex = r"\[INFO\] sent"
                 #else:
                 #regex = r"\[INFO\].* livr"
                 regex = r"\[INFO\].* delivered"
-                lastTrans = NCSUtils.lastSendRcv(log, regex)
+                lastTrans = PXUtils.lastSendRcv(log, regex)
                 lastRcv = time.gmtime(0) # Default value
             elif dir == 'pxTransceiver':
-                log = PXLOG + '/' + 'trx_' + name + '.log'
+                log = PXPaths.LOG + 'trx_' + name + '.log'
                 regexT = r"\[INFO\].* delivered"
                 regexR = r"Ingested in DB"
 
-                lastTrans = NCSUtils.lastSendRcv(log, regexT)
-                lastRcv   = NCSUtils.lastSendRcv(log, regexR) 
+                lastTrans = PXUtils.lastSendRcv(log, regexT)
+                lastRcv   = PXUtils.lastSendRcv(log, regexR) 
             
             # Creating the circuit
-            circuit = NCSCircuit(self.machine, name, status, configFile, log, sock, type, lastRcv, lastTrans)
+            circuit = PXCircuit(self.machine, name, status, configFile, log, sock, type, lastRcv, lastTrans)
             # The finishing touches: queue + log line
             if dir == 'pxReceiver':
                 if type.lower().find('file') != -1:
-                    circuit.setQueue(NCSUtils.queueLength(RXQ + '/' + name))
+                    circuit.setQueue(PXUtils.queueLength(PXPaths.RXQ + '/' + name))
                 else:
                     circuit.setQueue(-1)
             elif dir in ['pxSender', 'pxTransceiver']:
-                circuit.setQueue(NCSUtils.queueLength(TXQ + '/' + name))
+                circuit.setQueue(PXUtils.queueLength(PXPaths.TXQ + '/' + name))
 
             try:
                 lastlines = self.easyTail(log, 1) # We want the 1 last line of the logfile
@@ -114,9 +114,9 @@ class PXManager(Manager):
             self.circuitDict[name] = circuit
             
     def makeCircuitDict(self):
-        rxFiles = os.listdir(RXETC)
-        txFiles = os.listdir(TXETC)
-        trxFiles = os.listdir(TRXETC)
+        rxFiles = os.listdir(PXPaths.RX_CONF)
+        txFiles = os.listdir(PXPaths.TX_CONF)
+        trxFiles = os.listdir(PXPaths.TRX_CONF)
              
         # We do not want to execute 'ps' for every file
         procList = commands.getoutput('ps -ax')
