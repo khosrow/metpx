@@ -3,7 +3,7 @@ MetPX Copyright (C) 2004-2006  Environment Canada
 MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
 named COPYING in the root of the source directory tree.
 """
-
+"""
 #####################################################################
 # Name: errorLog.py
 #
@@ -14,23 +14,27 @@ named COPYING in the root of the source directory tree.
 # Description: Functions and utilities to log error situations 
 #
 #####################################################################
+#
+# Contributor: Daniel Lemay
+#
+# Date: 2007-03-05
+#
+# Description: Class renaming, new config. file, structure changed
+#
+#####################################################################
+"""
 
-from PXPaths import *
-from ColumboPaths import *
+import sys, re, time
+import ColumboPaths
 from Logger import Logger
 from ConfigParser import ConfigParser
-import sys
 import readMaxFile
-import CompositeNCSCircuit
-import errorLog
-import re
-import time
 
 class EmptyFileError(Exception): pass
 
 def logPx(logger, logname, wamsLog, name, type, lastRcv, lastTrans, totalQueue, socket, bestLog, statusCCT, statusLog, limitQueue, statusSocket, statusRx, statusTx):
     """
-    Use the info parsed for the website to detect any errors for NCS/px.
+    Use the info parsed for the website to detect any errors for PX.
     """
     print name
     # Circuit Error
@@ -87,9 +91,6 @@ def logPx(logger, logname, wamsLog, name, type, lastRcv, lastTrans, totalQueue, 
     elif statusTx != 0:
         logger.critical("%s: invalid last transmission status code found -> %d" % (name, statusTx))
 
-# Coming soon...
-def logPDS():
-    pass
 
 def checkOccurences(logname, level, message, ammount, delay):
     """
@@ -130,9 +131,9 @@ def checkOccurences(logname, level, message, ammount, delay):
 # When they start being used by the webserver, some functions will have to #
 # move... again.                                                           #
 ############################################################################
-def getNCSMax(circuitDict):
+def getPXMax(circuitDict):
     theCircuits = circuitDict.keys()
-    circuitRegex, defaultCircuit, timerRegex, defaultTimer, DUMMY, DUMMY = readMaxFile.readQueueMax(FULL_MAX_CONF, "PX")
+    circuitRegex, defaultCircuit, timerRegex, defaultTimer, DUMMY, DUMMY = readMaxFile.readQueueMax(ColumboPaths.FULL_MAX_CONF, "PX")
     circuitMax = readMaxFile.setValueMax(theCircuits, circuitRegex, defaultCircuit)
     timerMax = readMaxFile.setValueMax(theCircuits, timerRegex, defaultTimer)
     return circuitMax, timerMax
@@ -170,9 +171,9 @@ def tooLong(lastCom, limit):
 
 def errorCheck(logger, logname, wamsLog, circuitDict):
     config = ConfigParser()
-    config.readfp(open(FULL_MAIN_CONF))
+    config.readfp(open(ColumboPaths.FULL_MAIN_CONF))
     keys = circuitDict.keys()
-    circuitMax, timerMax = getNCSMax(circuitDict) 
+    circuitMax, timerMax = getPXMax(circuitDict) 
     for key in keys:
         circuit = circuitDict[key]
         stopped = circuit.getGlobalStatus() # 1 if stopped partially, 2 if completely stopped, 0 if OK
