@@ -6,7 +6,7 @@ named COPYING in the root of the source directory tree.
 
 """
 ###########################################################
-# Name: NCSUtils.py
+# Name: PXUtils.py
 #
 # Author: Dominik Douville-Belanger
 # 
@@ -14,7 +14,7 @@ named COPYING in the root of the source directory tree.
 #
 # Description: Various utility functions and tests
 #              not supported directly by the 
-#              ColumboCrimeScene since NCS verifications 
+#              ColumboCrimeScene since PX verifications 
 #              need to support more tests.
 #
 ###########################################################

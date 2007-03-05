@@ -6,23 +6,20 @@ named COPYING in the root of the source directory tree.
 
 """
 #############################################################################
-# Name: NCSCircuit.py
+# Name: PXCircuit.py
 #
 # Author: Dominik Douville-Belanger (CMC Co-op Student)
 #
 # Date: 2005-01-21
 #
-# Description: Struct-like class which holds the data for a NCSCircuit.
+# Description: Struct-like class which holds the data for a PXCircuit.
 #              Inherits from PDSClient for its basic methods and fields.
 #
 #############################################################################
 """
-
-from PDSPaths import *
-#import logging #Trouble de Python 2.2
 from PDSClient import PDSClient
 
-class NCSCircuit(PDSClient):
+class PXCircuit(PDSClient):
 
     def __init__(self, machine, name, status, config, logfile, socket, type, lastRcv, lastTrans):
         PDSClient.__init__(self,machine, name, 0, status, '', config, logfile)

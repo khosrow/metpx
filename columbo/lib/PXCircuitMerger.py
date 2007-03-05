@@ -30,7 +30,7 @@ class PXCircuitMerger:
         self.logger = logger
         self.machines = machines
         self.circuitDictDict = {}
-        self.compositeNCSCircuitDict = {}
+        self.compositePXCircuitDict = {}
 
     def unarchiveInfos(self, filename, machine):
         file = open(filename, "rb")
@@ -39,7 +39,7 @@ class PXCircuitMerger:
 
     def archiveResults(self, filename):
         file = open(filename, "wb")
-        pickle.dump(self.compositeNCSCircuitDict, file)
+        pickle.dump(self.compositePXCircuitDict, file)
         file.close()
     
     def mergeCircuit(self):
@@ -65,10 +65,10 @@ class PXCircuitMerger:
             compositeCircuit.setGlobalLastRcv()
             compositeCircuit.setGlobalLastTrans()
             # Add the composite circuit to the main dictionnary
-            self.compositeNCSCircuitDict[circuit] = compositeCircuit
+            self.compositePXCircuitDict[circuit] = compositeCircuit
     
     def auditCircuit(self, logger, logname, wams):
-        errorLog.errorCheck(logger, logname, wams, self.compositeNCSCircuitDict)
+        errorLog.errorCheck(logger, logname, wams, self.compositePXCircuitDict)
     
     # Only used when debugging
     def printCircuitDict(self, machine):
