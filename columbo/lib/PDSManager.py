@@ -15,8 +15,7 @@ named COPYING in the root of the source directory tree.
 #############################################################################################
 """
 import os, os.path, commands, re, pickle, time, logging
-from PDSPaths import *
-from ColumboPaths import *
+import ColumboPaths, PDSPaths
 from PDSClient import PDSClient
 from PDSInputDir import PDSInputDir
 from Manager import Manager
@@ -52,7 +51,7 @@ class PDSManager(Manager):
        return self.dirList
 
    def makeClientDict(self): 
-      startup = open(FULLSTARTUP, "r")
+      startup = open(PDSPaths.FULLSTARTUP, "r")
 
       lines = startup.readlines()
 
@@ -62,9 +61,9 @@ class PDSManager(Manager):
             (pid, name, status, date, config, logfile) =  match.group(1, 2, 3, 4, 5, 6)
             monthlyTimestamp = time.strftime("%Y%m")
             dailyTimestamp = time.strftime("%Y%m%d")
-            config = ETC + "/" + config
-            daily_logfile = LOG + "/" + logfile + "." + dailyTimestamp
-            monthly_logfile = LOG + "/" + logfile + "." + monthlyTimestamp
+            config = PDSPaths.ETC + config
+            daily_logfile = PDSPaths.LOG + logfile + "." + dailyTimestamp
+            monthly_logfile = PDSPaths.LOG + logfile + "." + monthlyTimestamp
 
             if os.path.isfile(daily_logfile):
                logfile = daily_logfile
@@ -73,7 +72,7 @@ class PDSManager(Manager):
 
             lastlines = self.easyTail(logfile, 1)  # we want the 1 last lines of the logfile
             client = PDSClient(self.machine, name, pid, status, date, config, logfile)
-            client.setQueue(len(os.listdir(TXQ + name + "/incoming")))
+            client.setQueue(len(os.listdir(PDSPaths.TXQ + name + "/incoming")))
             if (len(lastlines) == 0):
                client.setLastLog(["EMPTY LOG"])
             else:
@@ -83,7 +82,7 @@ class PDSManager(Manager):
       startup.close()
    
    def makeInputDirDict(self):
-      prodfile = open (FULLPROD, "r")
+      prodfile = open (PDSPaths.FULLPROD, "r")
       lines = prodfile.readlines()
 
       for line in lines:
@@ -92,7 +91,7 @@ class PDSManager(Manager):
             input_dir = match.group(1)
             dir = PDSInputDir(self.machine, input_dir)
             # We don't want to count file begining with a dot
-            dir.setQueue(reduce(lambda x,y: x+y, map(lambda x: not x[0] == '.', os.listdir(ROOT + "/" + input_dir)), 0))
+            dir.setQueue(reduce(lambda x,y: x+y, map(lambda x: not x[0] == '.', os.listdir(PDSPaths.ROOT + input_dir)), 0))
             #dir.setQueue(len(os.listdir(ROOT + "/" + input_dir)))
             self.inputDirDict[input_dir] = dir
 
