@@ -70,10 +70,35 @@ class PullFTP(object):
         if self.source.protocol == 'ftp':
             self.ftp = self.ftpConnect()
 
-    # callback to save the output from ls of directory
+
+    # ls line stripper
+
+    def ls_line_stripper(self,iline):
+        oline  = iline
+        oline  = oline.strip()
+        oline  = oline.strip(' ')
+        oline  = oline.replace('\t',' ')
+        oline  = oline.replace('  ',' ')
+        oline  = oline.replace('  ',' ')
+        oline  = oline.replace('  ',' ')
+        oline  = oline.replace('  ',' ')
+        oline  = oline.replace('  ',' ')
+        oline  = oline.replace('  ',' ')
+        oline  = oline.replace('  ',' ')
+        oline  = oline.replace('  ',' ')
+        oparts = oline.split(' ')
+        oline  = oparts[0] + ' ' + ' '.join(oparts[-5:]) + '\n'
+        return oline
+
+    # callback to strip and save the output from ls of directory
 
     def callback_line(self,block):
-        self.file.write(block+'\n')
+
+        # strip ls line to its most important info
+        oline = self.ls_line_stripper(block)
+
+        # write resulting line
+        self.file.write(oline)
 
     # going to a certain directory
 
