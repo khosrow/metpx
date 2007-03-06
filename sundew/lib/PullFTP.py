@@ -220,7 +220,28 @@ class PullFTP(object):
         Matching keyword with different patterns
         """
 
-        if keywd[:10] == "{YYYYMMDD}" : return time.strftime("%Y%m%d", time.gmtime())
+        if keywd[:10] == "{YYYYMMDD}"    : 
+                                           return   time.strftime("%Y%m%d", time.gmtime())
+
+        if keywd[:13] == "{YYYYMMDD-1D}" :
+                                           epoch  = time.mktime(time.gmtime()) - 24*60*60
+                                           return   time.strftime("%Y%m%d", time.localtime(epoch)  )
+
+        if keywd[:13] == "{YYYYMMDD-2D}" :
+                                           epoch  = time.mktime(time.gmtime()) - 48*60*60
+                                           return   time.strftime("%Y%m%d", time.localtime(epoch)  )
+
+        if keywd[:13] == "{YYYYMMDD-3D}" :
+                                           epoch  = time.mktime(time.gmtime()) - 72*60*60
+                                           return   time.strftime("%Y%m%d", time.localtime(epoch)  )
+
+        if keywd[:13] == "{YYYYMMDD-4D}" :
+                                           epoch  = time.mktime(time.gmtime()) - 96*60*60
+                                           return   time.strftime("%Y%m%d", time.localtime(epoch)  )
+
+        if keywd[:13] == "{YYYYMMDD-5D}" : 
+                                           epoch  = time.mktime(time.gmtime()) - 120*60*60
+                                           return   time.strftime("%Y%m%d", time.localtime(epoch)  )
 
         return defval
 
