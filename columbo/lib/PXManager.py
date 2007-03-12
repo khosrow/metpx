@@ -23,6 +23,8 @@ import PXPaths
 from Manager import Manager
 from PXCircuit import PXCircuit
 
+PXPaths.normalPaths()
+
 class PXManager(Manager):
     def __init__(self, loggername):
         """

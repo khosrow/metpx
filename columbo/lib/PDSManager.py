@@ -20,6 +20,8 @@ from PDSClient import PDSClient
 from PDSInputDir import PDSInputDir
 from Manager import Manager
 
+PDSPaths.normalPaths()
+
 DEBUG = 0
 
 class PDSManager(Manager):
