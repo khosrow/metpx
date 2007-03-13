@@ -38,20 +38,6 @@ class PDSManager(Manager):
       self.clientDict = {}
       self.inputDirDict = {}
 
-   def setClientList(self):
-      # UNFINISHED
-      self.makeClientDict()
-
-   def getClientList(self):
-       return self.clientList
-
-   def setDirList(self):
-      # UNFINISHED
-      self.makeInputDirDict()
-
-   def getDirList(self):
-       return self.dirList
-
    def makeClientDict(self): 
       startup = open(PDSPaths.FULLSTARTUP, "r")
 
