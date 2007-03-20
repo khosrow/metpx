@@ -1,0 +1,335 @@
+#! /usr/bin/env python
+"""
+MetPX Copyright (C) 2004-2006  Environment Canada
+MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+named COPYING in the root of the source directory tree.
+"""
+##############################################################################
+##
+##
+## Name   : totalGraphicsWebPages.py 
+##
+##
+## Author : Nicholas Lemay
+##
+## Date   : 25-01-2007 
+##
+##
+## Description : Generates the web pages that gives access to users
+##               to the graphics based on the data totals of all the 
+##               rx sources or tx clients combined. Daily, weekly, monthly,
+##               and yearly graphics will be made available through these
+##               pages.
+##
+##############################################################################
+import os, time, sys, datetime
+import generalStatsLibraryMethods,MyDateLib
+
+
+import string 
+
+from PXPaths   import * 
+from PXManager import *
+from MyDateLib import *
+from generalStatsLibraryMethods import *
+   
+LOCAL_MACHINE = os.uname()[1]   
+
+
+def getDays():
+    """
+        Returns the last 5 days numbers including the current year.
+    
+    """
+    
+    days = []
+    
+    startTime = (time.time() - (5*24*60*60))
+    for i in range(1,6):
+        days.append( time.strftime("%a",time.gmtime(startTime + ( i*24*60*60 ) )) )
+   
+       
+    return days
+    
+    
+        
+def getWeekNumbers():
+    """
+        Returns the 5 week numbers including current week number.
+    
+    """
+    
+    weekNumbers = []
+    
+    startTime = (time.time() - (5*7*24*60*60))
+    for i in range(1,6):
+        weekNumbers.append( time.strftime("%W",time.gmtime(startTime + (i*7*24*60*60))) )
+   
+    return weekNumbers
+    
+    
+    
+def getMonths():
+    """
+        Returns the 3 months including current month.
+    
+    """
+    currentTime = time.time()
+    currentTime = MyDateLib.getIsoFromEpoch( currentTime )
+    currentDate = datetime.date( int(currentTime[0:4]), int(currentTime[5:7]), int(currentTime[8:10]) )     
+       
+    months = []
+    
+       
+    for i in range(0,5):
+        
+        if currentDate.month -i < 1 :
+            month = currentDate.month -i + 12
+            year  = currentDate.year -i 
+        else :     
+            month = currentDate.month -i 
+            year = currentDate.year
+            
+        if currentDate.day > 28:
+            day = currentDate.day -5
+        else: 
+            day = currentDate.day          
+        
+        newdate = datetime.date( year,month,day )
+        months.append( newdate.strftime("%b") )
+        #print year,month,day
+    
+    months.reverse()
+        
+    return months
+  
+    
+      
+def getYears():
+    """
+        Returns the last 3 year numbers including the current year.
+    
+    """
+    
+    currentTime = time.time()
+    currentTime = MyDateLib.getIsoFromEpoch( currentTime )
+    currentDate = datetime.date( int(currentTime[0:4]), int(currentTime[5:7]), int(currentTime[8:10]) )     
+    
+    years = []    
+    
+    #prevent errors from bisextile years
+    if currentDate.month == 2 and currentDate.day == 29:
+        currentDate.day = 28
+    for i in range(0,3):
+        year = currentDate.year - i
+        newDate = datetime.date( year, currentDate.month, currentDate.day )
+        years.append( newDate.strftime("%Y") )
+        
+    years.reverse()
+       
+    return years   
+
+    
+        
+def getCombinedMachineName( machines ):
+    """
+        Gets all the specified machine names
+        and combines them so they can be used
+        to find pickles.
+
+    """
+
+    combinedMachineName = ""
+    splitMachines = machines.split(",")
+
+    for machine in splitMachines:
+
+        combinedMachineName += machine
+
+    return combinedMachineName
+
+        
+    
+def main():
+    """
+    """
+    
+    machineNames = [ "pds5,pds6", "pxatx"]
+    rxTypes      = [ "bytecount", "filecount", "errors"]
+    txTypes      = [ "latency", "filesOverMaxLatency", "bytecount", "filecount", "errors"]
+    timeTypes    = [ "daily","weekly","monthly","yearly"]
+    updateFrequency= {"daily":"(upd. hourly)","weekly":"(upd. hourly)","monthly":"(upd. weekly)","yearly":"(upd. monthly)"}   
+    days   = getDays() 
+    weeks  = getWeekNumbers()
+    months = getMonths()
+    years  = getYears()
+    
+    for machineName in machineNames:
+        if not os.path.isdir("/apps/px/stats/webPages/"):
+            os.makedirs( "/apps/px/stats/webPages/" )
+        machineName = getCombinedMachineName( machineName )
+        file = "/apps/px/stats/webPages/%s.html" %machineName
+        fileHandle = open( file , 'w' )
+        #print "/apps/px/stats/webPages/%s.html" %machineName
+        
+        fileHandle.write( """ <html>         
+            <head>
+                <title> PX Graphics </title>
+            </head>
+            
+            <script>             
+                function wopen(url, name, w, h){
+                // This function was taken on www.boutell.com
+                    w += 32;
+                    h += 96;
+                    var win = window.open(url,
+                    name,
+                    'width=' + w + ', height=' + h + ', ' +
+                    'location=no, menubar=no, ' +
+                    'status=no, toolbar=no, scrollbars=no, resizable=no');
+                    win.resizeTo(w, h);
+                    win.focus();
+                }         
+            </script>    
+            
+            <STYLE>
+
+            </STYLE>
+            
+            <style type="text/css">
+                div.left { float: left;word-wrap:break-word; }
+                div.right {float: right;word-wrap:break-word; }
+                <!--
+                A{text-decoration:none}
+                -->
+                <!--
+                td {
+                    word-wrap:break-word
+                }
+                // -->
+            </style>    
+            
+            <body text="#000000" link="#FFFFFF" vlink="000000" bgcolor="#CCCCCC" >
+                        
+                <h2>RX totals for %s.</h2>
+            
+    
+            <table style="table-layout: fixed; width: 1250px; border-left: 0px gray solid; border-bottom: 0px gray solid; padding:0px; margin: 0px" cellspacing=10 cellpadding=8 >
+            
+            <tr>    
+                <td bgcolor="#006699" ><font color = "white"><div class="left">Type</font></td>   
+                
+                <td bgcolor="#006699"  title = "Display the total of bytes received by all sources."><font color = "white"><div class="left">ByteCount</div><a target ="popup" href="help" onClick="wopen('helpPages/byteCount.html', 'popup', 875, 100); return false;"><div class="right">?</div></a></font></td>
+                
+                <td bgcolor="#006699"  title = "Display the total of files received by all sources."><font color = "white"><div class="left">FileCount</div><a target ="popup" href="help" onClick="wopen('helpPages/fileCount.html', 'popup', 875, 100); return false;"><div class="right">?</div></a></font></td>
+                
+                <td bgcolor="#006699"  title = "Display the total of errors that occured during all the receptions."><font color = "white"><div class="left">Errors</div><a target ="popup"  href="help" onClick="wopen('helpPages/errors.html', 'popup', 875, 100); return false;"><div class="right">?</div></a></font></td>
+                
+            </tr>
+               
+            """ %( string.upper( machineName ) ) ) 
+        
+        
+        
+        for timeType in timeTypes:    
+            fileHandle.write( """ 
+            <tr> 
+                <td bgcolor="#99FF99" > %s %s</td>                  
+        
+            """ %(( timeType[0].upper() + timeType[1:] ), updateFrequency[timeType] ) )
+            if timeType == "daily" :
+                timeContainer = days     
+            elif timeType == "weekly":
+                timeContainer = weeks
+            elif timeType == "monthly":
+                timeContainer = months
+            elif timeType == "yearly":
+                timeContainer = years
+                         
+            for type in rxTypes:
+                fileHandle.write( """<td bgcolor="#66CCFF"  > <div style= wordwrap: break-word;"> """ )
+                
+                for x in timeContainer:
+                    file = "%s/webGraphics/totals/%s/rx/%s/%s/%s.png" %( PXPaths.GRAPHS, machineName, type, timeType, x ) 
+                    if os.path.isfile(file):    
+                        fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>""" %( x, file, x ) )
+                    
+                fileHandle.write( """</div></td>""" )
+            
+            fileHandle.write( """</tr>""" )       
+                
+        fileHandle.write( """</table>""" )      
+        
+        ####################################txPart
+        
+        fileHandle.write("""                
+            <br>
+                <h2>TX totals for %s.</h2>
+            
+            <table style="table-layout: fixed; width: 1250px; border-left: 0px gray solid; border-bottom: 0px gray solid; padding:0px; margin: 0px" cellspacing=10 cellpadding=8 >
+                <tr>
+                    
+                    <td bgcolor="#006699"   title = >Type</font></td> 
+                    
+                    <td bgcolor="#006699"  "Display the average latency of file transfers for all clients."><font color = "white"><font color = "white"><div class="left">Latency</div><a target ="popup" href="help" onClick="wopen('helpPages/latency.html', 'popup', 875, 100); return false;"><div class="right">?</div></a></font></td>
+                    
+                    <td bgcolor="#006699"  title = "Display the number of files for wich the latency was over 15 seconds for all clients."><font color = "white"><div class="left">Files Over Max. Lat.</div><a target ="popup" href="help" onClick="wopen('helpPages/filesOverMaxLatency.html', 'popup', 875, 100); return false;"><div class="right">?</div></a></font></td> 
+                    
+                    <td bgcolor="#006699"  title = "Display number of bytes transfered to all clients." ><font color = "white"><div class="left">ByteCount</div><a target ="popup" href="help" onClick="wopen('helpPages/byteCount.html', 'popup', 875, 100); return false;"><div class="right">?</div></a></font></td>
+                    
+                    <td bgcolor="#006699" title = "Display the number of files transferred every day to all clients."><font color = "white"><div class="left">FileCount</div><a target ="popup" href="help" onClick="wopen('helpPages/fileCount.html', 'popup', 875, 100); return false;"><div class="right">?</div></a></font></td>
+                    
+                    <td bgcolor="#006699"  title = "Display the total of errors that occured during the file transfers to allclients."><font color = "white"><div class="left">Errors</div><a target ="popup" href="help" onClick="wopen('helpPages/errors.html', 'popup', 875, 100); return false;"><div class="right">?</div></a></font></td>
+                
+                </tr>   
+               
+            """ %( string.upper( machineName ) ) )
+        
+        
+        
+        for timeType in timeTypes:    
+            fileHandle.write( """ 
+            <tr> 
+                <td bgcolor="#99FF99" ><div style="width:10pt; word-wrap: break-word;">%s%s</div> </td>                  
+        
+            """ %(( timeType[0].upper() + timeType[1:] ), updateFrequency[timeType] ) ) 
+            if timeType == "daily" :
+                timeContainer = days     
+            elif timeType == "weekly":
+                timeContainer = weeks
+            elif timeType == "monthly":
+                timeContainer = months
+            elif timeType == "yearly":
+                timeContainer = years
+                         
+            for type in txTypes:
+                fileHandle.write( """<td bgcolor="#66CCFF"><div style= wordwrap: break-word;"> """) 
+                
+                for x in timeContainer:
+                    file = "%swebGraphics/totals/%s/tx/%s/%s/%s.png" %( PXPaths.GRAPHS, machineName, type, timeType,x ) 
+                    if os.path.isfile(file):    
+                        fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s </a>""" %( x,file, x ) )
+                    else:
+                        #print file
+                        allo =2  
+                fileHandle.write( """</div></td>""" )
+            
+            fileHandle.write( """</tr>""" )       
+                
+        fileHandle.write( """</table>""")             
+        
+        #End of tx part.             
+        
+        fileHandle.close()         
+                                
+                        
+if __name__ == "__main__":
+    main()            
+            
+            
+            
+            
+            
+            
+    
+             

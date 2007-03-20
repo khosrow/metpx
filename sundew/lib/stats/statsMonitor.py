@@ -1,0 +1,1250 @@
+#! /usr/bin/env python
+"""
+MetPX Copyright (C) 2004-2006  Environment Canada
+MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+named COPYING in the root of the source directory tree.
+"""
+##########################################################################
+##
+## Name   : statsMonitoring.py 
+##  
+## Author : Nicholas Lemay  
+##
+## Description : This file is to be used to monitor the different activities
+##               that are done with the the stats library. 
+##
+##               The report build throughout the different monitoring methods
+##               will be mailed to the chosen recipients.
+##
+##  
+## Date   : November 29th 2006
+##
+#############################################################################
+
+import os, sys, commands, pickle
+import PXPaths, cpickleWrapper
+import smtplib
+import LogFileCollector
+import mailLib
+import readMaxFile
+import configFileManager
+import generalStatsLibraryMethods
+from generalStatsLibraryMethods import *
+from ClientStatsPickler import ClientStatsPickler 
+from PXManager import *
+from LogFileCollector import *
+from ConfigParser import ConfigParser
+from MyDateLib import *
+from mailLib import *
+
+PXPaths.normalPaths()
+
+LOCAL_MACHINE = os.uname()[1]
+
+        
+class _Parameters:
+    """
+        This class is usefull to store all the values
+        collected from the config file into a single 
+        object. 
+    
+    """
+    
+    def __init__( self, emails, machines, files, folders, maxUsages, maximumGaps, errorsLogFile, maxSettingsFile, startTime, endTime  ):
+        """
+            Constructor.   
+                 
+        """    
+        
+        self.emails          = emails
+        self.machines        = machines 
+        self.files           = files 
+        self.folders         = folders
+        self.maxUsages       = maxUsages
+        self.maximumGaps     = maximumGaps
+        self.startTime       = startTime 
+        self.endTime         = endTime 
+        self.errorsLogFile   = errorsLogFile
+        self.maxSettingsFile = maxSettingsFile 
+
+
+
+def getMaximumGaps( maxSettingsFile ):
+    """
+        lire /apps/pds/tools/Columbo/etc/maxSettings.conf
+        
+    """
+    
+    maximumGaps = {} 
+    
+    allNames = []
+    rxNames, txNames = generalStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, "pds5")
+    allNames.extend( rxNames )    
+    allNames.extend( txNames )
+    rxNames, txNames = generalStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, "pxatx")
+    allNames.extend( rxNames )
+    allNames.extend( txNames )
+    
+    circuitsRegex, default_circuit, timersRegex, default_timer, pxGraphsRegex, default_pxGraph =    readMaxFile.readQueueMax( maxSettingsFile, "PX" )
+     
+    for key in timersRegex.keys(): 
+        values = timersRegex[key]
+        newKey = key.replace( "^", "" ).replace( "$","")
+        maximumGaps[newKey] = values
+    
+    for name in allNames:#add all clients/sources for wich no value was set
+        if name not in maximumGaps.keys():
+            maximumGaps[name] = default_timer    
+        
+    return maximumGaps 
+    
+            
+    
+def savePreviousMonitoringJob( parameters ) :
+    """
+        
+        Set current crontab as the previous crontab.
+    
+    """
+    
+    file  = "/apps/px/stats/statsMonitoring/previousMonitoringJob"
+     
+    if not os.path.isdir( os.path.dirname( file ) ):
+        os.makedirs(  os.path.dirname( file ) )
+    
+    fileHandle  = open( file, "w" )
+
+    pickle.dump( parameters.endTime, fileHandle )
+     
+    fileHandle.close()
+    
+    
+    
+def getPreviousMonitoringJob( currentTime ):
+    """
+        Gets the previous crontab from the pickle file.
+        
+        Returns "" if file does not exist.
+        
+    """     
+    
+    file  = "/apps/px/stats/statsMonitoring/previousMonitoringJob"
+    previousMonitoringJob = ""
+    
+    if os.path.isfile( file ):
+        fileHandle      = open( file, "r" )
+        previousMonitoringJob = pickle.load( fileHandle )
+        fileHandle.close()
+    
+    else:
+        previousMonitoringJob = MyDateLib.getIsoTodaysMidnight( currentTime )
+        
+        
+    return previousMonitoringJob
+        
+        
+    
+def getTimeOfLastFilledEntry( name, startTime ):
+    """
+        Returns the time of the last
+        entry that was filled with data 
+        for a client/source name.
+        
+    """    
+    
+    file  = "/apps/px/stats/statsMonitoring/lastEntryFilledTimes"
+    #timeOfLastFilledEntry = ""
+    
+    if os.path.isfile( file ):
+        fileHandle      = open( file, "r" )
+        times = pickle.load( fileHandle )
+        fileHandle.close()
+        
+        if name not in times.keys():
+            timeOfLastFilledEntry = startTime
+        else:
+            timeOfLastFilledEntry = times[name]     
+    else:
+    
+        timeOfLastFilledEntry = startTime 
+                
+   
+    return timeOfLastFilledEntry
+    
+    
+    
+def saveTimeOfLastFilledEntry( name, timeOfLastFilledEntry ):
+    """
+        Returns the time of the last
+        entry that was filled with data 
+        for a client/source name.
+        
+    """    
+    
+    file  = "/apps/px/stats/statsMonitoring/lastEntryFilledTimes"
+       
+    if os.path.isfile( file ):
+        fileHandle      = open( file, "r" )
+        times = pickle.load( fileHandle )
+        fileHandle.close()
+            
+    else:
+        times= {}
+
+    times[ name ]  =  timeOfLastFilledEntry           
+    
+    fileHandle = open( file, "w" )
+    pickle.dump( times, fileHandle )
+    fileHandle.close()
+    
+    
+    
+def buildReportHeader( parameters ):
+    """
+        
+        Returns the header to eb used 
+        within the content of the email.
+    
+    """
+    
+    reportHeader = "\n\n"
+    reportHeader = reportHeader + "Stats monitor results\n----------------------------------------------------------------------------------------------------------------------------------\n"
+    reportHeader = reportHeader + "Time of test : %s\n" %parameters.endTime
+    reportHeader = reportHeader + "Time of previous test : %s\n" %parameters.startTime
+    reportHeader = reportHeader + "Machine name      : %s\n" %(LOCAL_MACHINE)
+    reportHeader = reportHeader + "Config file  used : %s\n" %( PXPaths.STATS + "statsMonitoring/statsMonitoring.conf" )
+    reportHeader = reportHeader + "Stats monitor help file can be found here : %s" %( PXPaths.STATS + "doc/monitoring.txt")
+    
+    
+    return reportHeader
+
+    
+
+def getPresenceOfWarningsOrErrorsWithinReport( report ):
+    """
+        Returns whether or not important warnings or errors were found within
+        the specified report.
+    """     
+    
+    results = ""
+    
+    if "The following disk usage warnings have been found" in report :
+        results = "disk usage errors"
+    
+    if "The following data gaps were not found in error log file" in report:
+        if results == "":
+            results = "data gaps errors"    
+        else:
+            results = results + ",data gaps errors"
+    
+    if results == "":
+        
+        if "Crontab entries were modified since" in report:
+            results = "warnings"
+
+        elif "Missing files were found" in report :
+            results = "warnings"
+        
+        elif "The following" in report:
+            results = "warnings"
+        
+        else:
+            results = "no warnings."
+    
+    return results
+    
+    
+    
+def getEmailSubject( currentTime, report ):
+    """
+        Returns the subject of the
+        email to be sent.
+    
+    """       
+    
+    
+    warningsOrErrorsPresent = getPresenceOfWarningsOrErrorsWithinReport( report )
+    subject = "[Stats Library Monitoring] %s with %s." %( LOCAL_MACHINE, warningsOrErrorsPresent )
+    
+    return subject    
+    
+    
+    
+def verifyFreeDiskSpace( parameters, report ):
+    """
+        This method verifies all the free disk 
+        space for all the folders where the stats library. 
+        
+        A disk usage wich is too hight might be a symptom
+        of the cleaning systems not working or not being 
+        installed properly. 
+        
+        Adds a warning to the report when the usage is over x%.             
+        
+    """
+    
+    reportLines = ""
+    onediskUsageIsAboveMax = False    
+    foldersToVerify = parameters.folders
+   
+    
+    for i in range( len( foldersToVerify ) ):
+        
+        status, output = commands.getstatusoutput( "df %s" %foldersToVerify[i] )
+        
+        if status == 0 :     
+            diskUsage = output.split()[11].replace( "%", "")
+            
+            if int(diskUsage) > parameters.maxUsages[i]:    
+                onediskUsageIsAboveMax = True
+                reportLines = reportLines +  "Error : Disk usage for %s is %s %%.Please investigate cause.\n" %(foldersToVerify[i],diskUsage)   
+        else:
+            onediskUsageIsAboveMax = True
+            reportLines = reportLines +  "Error : Disk usage for %s was unavailable.Please investigate cause.\n"       %(foldersToVerify[i])
+    
+    
+    if onediskUsageIsAboveMax == True:
+        header = "\n\nThe following disk usage warnings have been found : \n"         
+        helpLines = "\nDisk usage errors can either be cause by missing folders or disk usage percentage \nabove allowed percentage.\n If folder is missing verify if it is requiered.\n If it is not remove it from the folders section of the config file.\n If disk usage is too high verify if %s is configured properly.\n" %(PXPaths.ETC + "clean.conf")  
+        
+    else:
+        header = "\n\nNo disk usage warning has been found.\n"
+        helpLines = ""
+         
+    header = header + "----------------------------------------------------------------------------------------------------------------------------------\n"    
+                        
+    report = report + header + reportLines + helpLines
+        
+    return report    
+
+        
+
+def saveCurrentCrontab( currentCrontab ) :
+    """
+        Set current crontab as the previous crontab.
+    """
+    
+    file  = "/apps/px/stats/statsMonitoring/previousCrontab"
+     
+    if not os.path.isdir( os.path.dirname( file ) ):
+        os.makedirs(  os.path.dirname( file ) )
+    
+    fileHandle  = open( file, "w" )
+
+    pickle.dump( currentCrontab, fileHandle )
+     
+    fileHandle.close()
+    
+    
+    
+def getPreviousCrontab():
+    """
+        Gets the previous crontab from the pickle file.
+        
+        Returns "" if file does not exist.
+        
+    """     
+    
+    file  = "/apps/px/stats/statsMonitoring/previousCrontab"
+    previousCrontab = ""
+    
+    if os.path.isfile( file ):
+        fileHandle      = open( file, "r" )
+        previousCrontab = pickle.load( fileHandle )
+        fileHandle.close()
+        
+    return previousCrontab
+
+    
+    
+def verifyCrontab( report ):
+    """
+        Verifies if crontab has been modified since last update. 
+        
+    """
+    
+    previousCrontab = getPreviousCrontab()
+    status, currentCrontab = commands.getstatusoutput( "crontab -l" )
+    
+    if currentCrontab != previousCrontab :
+        report = report + "\nCrontab entries were modified since last monitoring job.\n"
+        report = report + "\nModified crontab entries should not be viewed as a problem per se.\nIt can be usefull to spot problems wich could stem from someone modifying the crontab.\nSee help file for details\n"
+    else:
+        report = report + "\nCrontab entries were not modified since last monitoring job.\n"
+    report = report + "----------------------------------------------------------------------------------------------------------------------------------"    
+    
+    saveCurrentCrontab( currentCrontab )       
+    
+    return report
+    
+
+    
+def findFirstInterestingLinesPosition( file, startTime, endtime, lastReadPosition = 0 ):
+    """
+        This method browses a file from the specified lastReadPosition.
+        
+        From there it tries to find the position of the first interesting line 
+        based on specified startTime and endtime. 
+        
+        Returns last readposition so it can be seeked to read the line found.
+        
+        Returns the first interesting line line wich will equal "" if end of file was met.
+        
+        Returns linefound and a line different than "" when a line >= then endtime
+        was found without finid a line between startTime and endTime.  
+        
+        
+    """       
+    
+    lineFound = False
+    line      = None
+    fileHandle = open( file, 'r') 
+    fileHandle.seek( lastReadPosition )
+    foundValidLine = False     
+   
+    while lineFound == False and line != "":
+        
+        lastReadPosition = fileHandle.tell()
+        line = fileHandle.readline()                       
+        
+        if line != "" :
+            timeOfEntry = line.split( "," )[0]            
+            if timeOfEntry >= startTime :
+                foundValidLine = True 
+                lineFound = True 
+            if timeOfEntry >= endtime :
+                foundValidLine = False 
+ 
+    fileHandle.close()         
+    
+    return lastReadPosition, foundValidLine, line
+    
+    
+    
+def findHoursBetween( startTime, endTime ):
+    """
+        Returns all hours between start time and end time.
+        
+        A startTime of 2006-11-11 01:00:00 and an endTime of
+         
+    """
+    
+    hours = []
+    start = MyDateLib.getSecondsSinceEpoch( MyDateLib.getIsoWithRoundedHours( startTime ) )
+    end   = MyDateLib.getSecondsSinceEpoch( MyDateLib.getIsoWithRoundedHours( endTime ) )
+    
+    for time in range( int(start), int(end), 3600 ):
+        hours.append( MyDateLib.getIsoWithRoundedHours( MyDateLib.getIsoFromEpoch( time )  ))        
+    
+    return hours
+    
+    
+    
+def getSortedLogs( logs ):
+    """
+        Takes a series of size-based rotating 
+        log files and sorts them in chronological 
+        order.
+        
+    """     
+       
+    logs.sort()                
+    logs.reverse()
+    
+    if len( logs) > 1 and logs[0].endswith("log"):#.log file is always newest.
+            
+        firstItem     = logs[ 0 ]
+        remainingList = logs[ 1: ]
+        logs          = remainingList
+        logs.append( firstItem )                            
+            
+    return logs
+    
+    
+         
+def findHoursWithNoEntries( logs, startTime, endTime ):
+    """
+        Returns all the hours for wich no entries were 
+        found within specified 
+        
+    """
+    
+    i = 0
+    j = 0
+    hoursWithNoEntries = [] 
+    lastReadPosition =0 
+    
+    logs = getSortedLogs( logs )     
+    hoursBetweenStartAndEnd = findHoursBetween( startTime, endTime )     
+    
+    while i < ( len( hoursBetweenStartAndEnd )-1)  and j < len( logs ):
+               
+        startTime = hoursBetweenStartAndEnd[i]
+        endTime   = hoursBetweenStartAndEnd[i+1]
+        
+        lastReadPosition, lineFound, line = findFirstInterestingLinesPosition( logs[j], startTime, endTime, lastReadPosition )        
+        
+        
+        if lineFound == False and line != "": #not eof,line found > endtime
+            hoursWithNoEntries.append( hoursBetweenStartAndEnd[i] )        
+        
+        if line == "": #file is over
+            j = j + 1
+            lastReadPosition = 0
+        else:
+            i = i + 1
+    
+        
+    if i < ( len( hoursBetweenStartAndEnd ) - 1 ):#if j terminated prior to i.
+    
+        for k in range( i, len( hoursBetweenStartAndEnd ) - 1 ):
+            hoursWithNoEntries.append( hoursBetweenStartAndEnd[ k ])
+            
+    
+    return hoursWithNoEntries
+    
+
+
+def verifyStatsLogs( parameters, report ,logger = None ):    
+    """
+    
+        Verifies if any entries exists within all
+        4 types of stats log files between the time 
+        of the last monitoring job and current time.
+        
+        Adds to the report the log types for 
+        wich there was no entry during specified
+        amount of time. 
+        
+        Returns the report with the added lines
+        
+    """    
+    
+    warningsWereFound = False
+    newReportLines = ""
+    logFileTypes = [  "graphs", "pickling", "rrd_graphs", "rrd_transfer" ] 
+    verificationTimeSpan =  (MyDateLib.getSecondsSinceEpoch( parameters.endTime ) - MyDateLib.getSecondsSinceEpoch( parameters.startTime )) / (60*60) 
+    
+    for logFileType in logFileTypes:
+        
+        lfc =  LogFileCollector( startTime  = parameters.startTime , endTime = parameters.endTime, directory = PXPaths.LOG, lastLineRead = "", logType = "stats", name = logFileType, logger = logger )    
+        
+        lfc.collectEntries()
+        logs = lfc.entries                
+        
+        
+        if logs == [] and verificationTimeSpan >= 1:#if at least an hour between start and end 
+            
+            warningsWereFound = True
+            newReportLines = newReportLines + "\nWarning : Not a single log entry within %s log files was found between %s and %s. Please investigate.\n "%( logFileType, parameters.startTime, parameters.endTime )
+         
+        elif logs != []:   
+            hoursWithNoEntries = findHoursWithNoEntries( logs, parameters.startTime, parameters.endTime )
+            
+            if hoursWithNoEntries != []:
+               warningsWereFound = True
+               
+               newReportLines = newReportLines + "\nWarning : Not a single log entry within %s log files was found for these hours : %s. Please investigate.\n " %( logFileType, str(hoursWithNoEntries).replace( "[", "").replace( "]", "") )
+                       
+             
+    if warningsWereFound :
+        report = report + "\n\nThe following stats log files warnings were found : \n"
+        report = report + "----------------------------------------------------------------------------------------------------------------------------------\n"            
+        report = report + newReportLines 
+        report = report + "\nMissing log files can be attributed to the following causes : log files too small, stopped cron or program errors.\nInvestigate cause. See help files for details."
+    else:
+        report = report + "\n\nNo stats log files warnings were found.\n"
+        report = report + "----------------------------------------------------------------------------------------------------------------------------------\n"          
+    
+    return report
+
+
+     
+def sendReportByEmail( parameters, report  ) :
+    """
+        Takes the report and sends it to the specified 
+        recipients using cmc's server.
+        
+    """
+
+    html = " <html> %s </html>" %(report).replace( "\n", "<br>" )
+    text = report
+    
+    subject = getEmailSubject( parameters.endTime, report )
+    message = mailLib.createhtmlmail(html, text, subject)
+    server = smtplib.SMTP("smtp.cmc.ec.gc.ca")
+    server.set_debuglevel(0)
+
+    receivers = parameters.emails
+    server.sendmail('nicholas.lemay@ec.gc.ca', receivers, message)
+    server.quit() 
+    
+    
+    
+def getFoldersAndFilesAssociatedWith( client, fileType, machines, startTime, endtime ):
+    """
+        This function verifies whether all the
+        expected pickles for all the specified machiens
+        between a certain interval are present.  
+    
+    """
+    
+    folders = {}
+    hours = findHoursBetween( startTime, endtime )
+    
+    splitMachines = machines.split(",")
+    
+    for machine in splitMachines:
+            
+        for hour in hours:
+            fileName = ClientStatsPickler.buildThisHoursFileName( client = client, currentTime = hour, fileType = fileType,machine = machine  )
+            
+            folder = os.path.dirname( os.path.dirname( fileName ) )
+            if folder not in folders.keys():
+                folders[folder] = []
+                
+            folders[folder].append( fileName )
+    
+            
+    if len( splitMachines )  > 1:
+        
+        combinedMachineName = getCombinedMachineName( machines )
+            
+        for hour in hours:            
+            fileName = ClientStatsPickler.buildThisHoursFileName( client = client, currentTime = hour, fileType = fileType,machine = combinedMachineName  ) 
+            
+            folder = os.path.dirname( os.path.dirname( fileName ) )
+            
+            if folder not in folders.keys():
+                folders[folder] = []
+                
+            folders[folder].append( fileName )                      
+               
+    
+    return folders
+    
+
+    
+def getCombinedMachineName( machines ):
+    """
+        Gets all the specified machine names 
+        and combines them so they can be used
+        to find pickles.
+        
+    """        
+    
+    combinedMachineName = ""
+    splitMachines = machines.split(",")
+    
+    for machine in splitMachines:
+       
+        combinedMachineName += machine
+    
+    return combinedMachineName                    
+            
+            
+    
+def verifyPicklePresence( parameters, report ):
+    """
+        This fucntion verifies wheteher all the
+        expected pickles for all the specified machiens
+        between a certain interval are present.   
+                  
+    """
+    
+    missingFiles   = False
+    missingFileList = []  
+    clientLines    = ""
+    newReportLines = "" 
+    clientIsMissingFiles = False
+    folderIsMissingFiles = False
+    startTime =  MyDateLib.getIsoFromEpoch( MyDateLib.getSecondsSinceEpoch( parameters.endTime ) - ( 7*24*60*60 ) )
+    
+    for machine in parameters.machines:
+        if "," in machine:
+            machine = machine.split(",")[0]
+            
+        rxNames, txNames = generalStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machine  )
+        
+        for txName in txNames:
+            folders = getFoldersAndFilesAssociatedWith( txName, "tx", machine, startTime , parameters.endTime )
+            sortedFolders = folders.keys()
+            sortedFolders.sort()
+            
+            for folder in sortedFolders:
+                if os.path.isdir( folder ):
+                    for file in folders[folder]:
+                        if not os.path.isfile(file):
+                            missingFiles = True
+                            clientIsMissingFiles = True  
+                            folderIsMissingFiles = True                          
+                            missingFileList.append( os.path.basename(file) )
+                     
+                    
+                    if folderIsMissingFiles:
+                        clientLines = clientLines + folder + "/" + os.path.basename( os.path.dirname( file ) ) + "/" + str( missingFileList ).replace( "[","" ).replace( "]","" ) + "\n"   
+                    
+                     
+                
+                else:
+                    missingFiles = True
+                    clientIsMissingFiles = True
+                    clientLines = clientLines + folder + "/*\n" 
+                
+                missingFileList = []  
+                folderIsMissingFiles = False
+                
+            if clientIsMissingFiles == True : 
+                
+                newReportLines = newReportLines + "\n%s had the following files and folders missing : \n"%txName
+                newReportLines = newReportLines + clientLines
+                
+            clientLines = ""
+            clientIsMissingFiles = False
+            
+            
+        
+        
+        for rxName in rxNames:
+            
+            folders = getFoldersAndFilesAssociatedWith( rxName, "rx", machine,parameters.startTime, parameters.endTime )
+            sortedFolders = folders.keys()
+            sortedFolders.sort()
+            
+            for folder in sortedFolders:
+                if os.path.isdir( folder ):
+                    for file in folders[folder]:
+                        if not os.path.isfile(file):
+                            missingFiles = True
+                            clientIsMissingFiles = True
+                            folderIsMissingFiles = True  
+                            missingFileList.append( os.path.basename(file) )
+                    
+                    if folderIsMissingFiles:
+                        clientLines = clientLines + folder + "/" + os.path.basename( os.path.dirname( file ) ) + "/" + str( missingFileList ).replace( "[","" ).replace( "]","" ) + "\n"   
+                
+                else:
+                    missingFiles = True
+                    clientIsMissingFiles = True
+                    clientLines = clientLines + folder + "*\n" 
+                
+                missingFileList = []  
+                folderIsMissingFiles = False       
+                                    
+            if clientIsMissingFiles == True : 
+                newReportLines = newReportLines + "\n%s had the following files and folders missing : \n" %txName
+                newReportLines = newReportLines + clientLines
+                
+            clientLines = ""
+            clientIsMissingFiles = False            
+            
+    
+            
+            
+    
+    if missingFiles :
+        
+        report = report + "\n\nMissing files were found on this machine.\n"
+        report = report + "----------------------------------------------------------------------------------------------------------------------------------\n"
+        report = report + newReportLines
+        report = report + "\n\nIf pickle files are missing verify if source/client is new.\n If it's new, some missing files are to be expected.\nIf source/client is not new, verify if %s is configured properly.\nOtherwise investigate cause.( Examples : stopped cron, deleted by user, program bug, etc...)\nSee help file for details.\n" %(PXPaths.ETC + "clean.conf")
+        
+        
+        
+    else:
+        report = report + "\n\nThere were no missing pickle files found on this machine.\n"  
+        report = report + "----------------------------------------------------------------------------------------------------------------------------------\n"          
+    
+    return report 
+
+
+        
+def gapInErrorLog( name, start, end, errorLog )  :  
+    """
+        Returns wheter or not the gap described within the 
+        parameters is found in a certain log file.
+        
+    """
+    
+    gapFound = False 
+    difference = None 
+    gapInErrorLog = False 
+    lastTimeThisGapWasfound = ""
+    
+    for line in errorLog:
+        try:
+        
+            splitLine = line.split()
+            logEntryTime = MyDateLib.getIsoWithRoundedSeconds( splitLine[1] + " " + splitLine[2][:-4] )
+            lastEntryTime = MyDateLib.getIsoWithRoundedSeconds( splitLine[9] + " " + splitLine[10] )
+            
+            
+            if splitLine[3].replace( ":", "" ) == name and lastEntryTime == start :            
+                
+                if logEntryTime > start:
+                    gapFound = True 
+                lastTimeThisGapWasfound =  logEntryTime 
+                
+                if logEntryTime >= end:
+                    break
+            
+            elif splitLine[3].replace( ":", "" ) == name and lastEntryTime > start :#newer entry was found for same name 
+                break
+            
+            elif logEntryTime >= end :#in case file is newer than time of end of verification
+                break
+                
+        except:#no date present for last transmission...
+            pass
+            
+
+    if gapFound == True and lastTimeThisGapWasfound <= end:
+
+        if abs( ( MyDateLib.getSecondsSinceEpoch(end) -  MyDateLib.getSecondsSinceEpoch(lastTimeThisGapWasfound) ) / 60 ) <= 1 :         
+            gapInErrorLog = True 
+                      
+    return gapInErrorLog
+
+
+def getSortedTextFiles( files ):
+    """
+        Takes a series of size-based rotating 
+        log files and sorts them in chronological 
+        order.
+        
+    """     
+       
+    files.sort()                
+    files.reverse()                      
+            
+    return files
+    
+    
+def getOutdatedTransmissionsLog( file, startTime ):
+    """
+        Takes a standard transmisson error log 
+        and retunrs only the lines containing 
+        infos about outdated transmissions. 
+    
+    """  
+          
+    errorLog = []  
+    files = glob.glob( file + "*")
+    files = getSortedTextFiles( files )
+    
+    
+    for file in files :  
+        fileHandle = open( file, "r")
+        lines = fileHandle.readlines()
+    
+        for line in lines :
+            splitLine = line.split()
+            entryTime = splitLine[1] + " " + splitLine[2][:-4]
+            if "outdated" in line and entryTime >= startTime :
+                errorLog.append( line )           
+    
+    return errorLog
+    
+    
+    
+def getPickleAnalysis( files, name, timeOfLastFilledEntry, maximumGap, errorLog ):
+    """
+        This function is used to browse all the pickle files
+        in chronological order. 
+        
+        If any gap longer than maximumGap are found between
+        entries they will be added to report. 
+        
+        Report is returned at the end. 
+        
+    """
+    
+    header = ""
+    reportLines = ""    
+    gapTooWidePresent = False    
+    files.sort()    
+        
+    for file in files:                 
+        
+        if os.path.isfile(file):
+            
+            fcs =  cpickleWrapper.load ( file )
+            
+            for entry in fcs.fileEntries:
+                nbEntries = len( entry.values.productTypes )
+                nbErrors  = entry.values.dictionary["errors"].count(1)
+                
+                if (  nbEntries != 0 and nbEntries != nbErrors ) or ( file == files[ len( files ) - 1 ] and entry==fcs.fileEntries[ fcs.nbEntries-1 ] ): 
+                    
+                    entryTime = MyDateLib.getSecondsSinceEpoch( entry.startTime )
+                    
+                    lastUpdateInSeconds = MyDateLib.getSecondsSinceEpoch( timeOfLastFilledEntry )  
+                    differenceInMinutes = ( entryTime - lastUpdateInSeconds ) / 60                   
+                                            
+                    if  int(differenceInMinutes) > ( int(maximumGap) + 3 ) :#give a 3 minute margin
+                                                
+                        if gapInErrorLog( name, timeOfLastFilledEntry, entry.startTime, errorLog ) == False:
+                            gapTooWidePresent = True  
+                                                
+                            reportLines = reportLines + "No data was found between %s and %s.\n" %( timeOfLastFilledEntry, entry.startTime )
+                    
+                    if nbEntries != 0 and nbEntries != nbErrors :
+                        
+                        timeOfLastFilledEntry = entry.startTime                                                        
+                           
+                    
+                        
+    if reportLines != "":     
+        header = "\n%s.\n" %name
+        
+    reportLines = header + reportLines
+    
+    return reportLines, timeOfLastFilledEntry 
+    
+
+            
+    
+def verifyPickleContent( parameters, report ):        
+    """
+        Browses the content of the pickle files 
+        associated with specified clients and sources.       
+                
+    """
+    
+    newReportLines = ""
+    errorLog = getOutdatedTransmissionsLog( parameters.errorsLogFile,parameters.startTime )          
+    
+    for machine in parameters.machines:
+        
+        if "," in machine:
+            splitMachine = machine.split(",")[0]
+        else:
+            splitMachine = machine
+            
+        rxNames, txNames = generalStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, splitMachine )
+        
+        if "," in machine:   
+            machine = getCombinedMachineName( machine )     
+        
+        
+        for txName in txNames:
+            
+            files = []           
+            timeOfLastFilledEntry = getTimeOfLastFilledEntry( txName, parameters.startTime )
+            folders = getFoldersAndFilesAssociatedWith(txName,"tx", machine, timeOfLastFilledEntry, parameters.endTime )
+            
+            for folder in folders.keys(): 
+                files.extend( folders[folder] )            
+
+            brandNewReportLines, timeOfLastFilledEntry =  getPickleAnalysis( files, txName, timeOfLastFilledEntry, parameters.maximumGaps[txName], errorLog )  
+               
+            newReportLines = newReportLines + brandNewReportLines
+            
+            saveTimeOfLastFilledEntry( txName, timeOfLastFilledEntry )
+    
+    if newReportLines != "":
+        header = "\n\nThe following data gaps were not found in error log file :\n" 
+        helpLines = "\nErrors found here are probably caused by the program.\n Check out the help file for the detailed procedure on how to fix this error.\n"
+    else:
+        header = "\n\nAll the data gaps were found within the error log file.\n" 
+        helpLines = ""
+        
+    header = header + "----------------------------------------------------------------------------------------------------------------------------------\n"       
+    
+    report = report + header + newReportLines + helpLines        
+
+    return report               
+
+    
+        
+def getParameters():
+    """
+        Get all the required parameters from 
+        the pickled files and from the config 
+        files. 
+         
+    """           
+    
+    currentTime = MyDateLib.getIsoFromEpoch( time.time() )  #"2006-12-07 00:00:00" 
+    timeOfLastUpdate = getPreviousMonitoringJob( currentTime )      
+    emails, machines, files, folders, maxUsages, errorsLogFile, maxSettingsFile = configFileManager.getParametersFromConfigurationFile( fileType = "monitoringConfig" )
+    maximumGaps = getMaximumGaps( maxSettingsFile )
+    parameters = _Parameters( emails, machines, files, folders, maxUsages, maximumGaps,errorsLogFile, maxSettingsFile, timeOfLastUpdate, currentTime )
+    
+    return parameters 
+    
+    
+    
+def getFileChecksum( file ):
+    """
+        Returns the current file checksum of the 
+        file.
+         
+    """
+    
+    md5sum = 0 
+    status, md5Output = commands.getstatusoutput( "md5sum %s " %file )
+    
+    if status == 0:
+        md5sum,fileName = md5Output.split()
+    
+    return  md5sum    
+    
+    
+    
+def getPresentAndAbsentFilesFromParameters( parameters ):
+    """
+        This method is to be used to get all the filenames
+        associated with the parameters received. 
+        
+        When a folder is used, all the .py files within this 
+        directory will be returned.
+        
+        Note : search of files within a directory is NOT recursive.
+    
+    """
+    
+    presentFiles = []
+    absentFiles  = [] 
+    
+    for file in parameters.files:
+        
+        if os.path.isdir( file ):
+            if file[ len(file) -1 ] != '/':
+                filePattern = file + '/*.py'
+            else :
+                filePattern = file + '*.py'    
+                
+            presentFiles.extend( glob.glob( filePattern ) )
+            
+        elif os.path.isfile( file ) :
+            files.append( file )
+        
+        else :
+           absentFiles.append( file )
+            
+               
+    return presentFiles, absentFiles
+    
+    
+    
+def getSavedFileChecksums():
+    """
+        Returns the checksums saved 
+        from the last monitoring job.
+        
+    """    
+    
+    file = "/apps/px/stats/statsMonitoring/previousFileChecksums"
+    checksums = {}
+        
+    if os.path.isfile( file ):
+        fileHandle      = open( file, "r" )
+        checksums = pickle.load( fileHandle )
+        fileHandle.close()
+        
+        
+    return checksums 
+    
+    
+    
+def saveCurrentChecksums( currentChecksums ) :
+    """
+        Takes the current checksums and set them 
+        as the previous checksums in a pickle file named 
+        /apps/px/stats/statsMonitoring/previousFileChecksums
+        
+    """   
+    
+    file  = "/apps/px/stats/statsMonitoring/previousFileChecksums"
+     
+    if not os.path.isdir( os.path.dirname( file ) ):
+        os.makedirs(  os.path.dirname( file ) )
+    
+    fileHandle  = open( file, "w" )
+
+    pickle.dump( currentChecksums, fileHandle )
+     
+    fileHandle.close()
+
+
+
+def verifyFileVersions( parameters, report  ):
+    """
+        This method is to be used to add the checksums warning 
+        found to the report. 
+        
+        This will set the current checksums found as the previous 
+        checksums.
+    
+    """   
+    
+    newReportLines = ""
+    currentChecksums = {}
+    unequalChecksumsFound = False         
+        
+    presentFiles, absentFiles = getPresentAndAbsentFilesFromParameters( parameters )
+    previousFileChecksums = getSavedFileChecksums()
+    
+    
+    for file in absentFiles:
+        unequalChecksumsFound = True
+        newReportLines = newReportLines + "%s could not be found." %file
+    
+    for file in presentFiles:
+        
+        currentChecksums[file] = getFileChecksum( file ) 
+        
+        if file not in previousFileChecksums.keys():
+            unequalChecksumsFound = True
+            newReportLines = newReportLines + "%s has been added.\n" %file
+        elif currentChecksums[file] != previousFileChecksums[ file ]:
+            unequalChecksumsFound = True
+            newReportLines = newReportLines + "Checksum for %s has changed since last monitoring job.\n" %file    
+    
+     
+    if unequalChecksumsFound :        
+        header = "\n\n\nThe following warning(s) were found while monitoring file cheksums : \n"   
+        helpLines = "\nModified checksums should not be viewed as a problem per se.\nIt can be usefull to spot problems wich could stem from someone modifying a file used by the program.\n"       
+    else:        
+        header = "\n\n\nNo warnings were found while monitoring file checksums.\n"        
+        helpLines = ""
+        
+    header = header + "----------------------------------------------------------------------------------------------------------------------------------\n"           
+    
+    report = report + header + newReportLines + helpLines
+    
+    saveCurrentChecksums( currentChecksums )
+    
+    return report         
+    
+    
+    
+def verifyWebPages( parameters, report ):
+    """
+        This method verifies whether or not
+        the different web pages and images are 
+        up to date.  
+        
+    """
+    
+    newReportLines = ""
+    outdatedPageFound = False 
+    files = glob.glob( "/apps/px/stats/webPages/*Graphs*.html" )  
+    currentTime = MyDateLib.getSecondsSinceEpoch( parameters.endTime )
+    
+    
+    for file in files :
+        timeOfUpdate = os.path.getmtime( file )
+        
+        if ( currentTime - timeOfUpdate ) / ( 60*60 ) >1 :
+            outdatedPageFound = True 
+            newReportLines = newReportLines + "%s was not updated since %s.\n" %( file, MyDateLib.getIsoFromEpoch( timeOfUpdate )) 
+    
+    if outdatedPageFound :
+        header = "\n\nThe following web page warning were found :\n"
+        helpLines = "\nWeb pages should be updated every hour.\nInvestigate why they are outdated.(Ex:stopped cron)\nSee help file for detail.\n"
+    else:        
+        header = "\n\nAll web pages were found to be up to date.\n"    
+        helpLines = ""
+    header = header + "----------------------------------------------------------------------------------------------------------------------------------\n"
+    
+    report = report + header + newReportLines + helpLines
+                
+    return report 
+        
+    
+    
+def verifyGraphs( parameters, report ):
+    """
+        Verifies whether or not all daily 
+        graphics seem up to date. 
+        
+    """    
+    
+    newReportLines = ""
+    outdatedGraphsFound = False 
+    folder = ( "/apps/px/stats/graphs/webGraphics/columbo/" )  
+    currentTime = MyDateLib.getSecondsSinceEpoch( parameters.endTime )
+    
+    allNames = []
+    rxNames, txNames = generalStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, "pds5")
+    allNames.extend( rxNames )    
+    allNames.extend( txNames )
+    rxNames, txNames = generalStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, "pxatx")
+    allNames.extend( rxNames )
+    allNames.extend( txNames )
+    
+    for name in allNames :         
+        
+        image = folder + name + ".png"
+        
+        if os.path.isfile( image ):          
+            
+            if ( currentTime - os.path.getmtime( image ) ) / ( 60*60 ) >1 :
+                outdatedGraphsFound = True 
+                newReportLines = newReportLines + "%s's daily image was not updated since %s\n" %( name, MyDateLib.getIsoFromEpoch(os.path.getmtime( image ) ) )
+        
+        else:
+            outdatedGraphsFound = True 
+            newReportLines = newReportLines + "%s was not found." %( image )   
+        
+    if outdatedGraphsFound :
+        header = "\n\nThe following daily graphics warnings were found :\n"
+        helpLines = "\nDaily graphics should be updated every hour.\nInvestigate why they are outdated.(Ex:stopped cron)\nSee help file for detail.\n"
+    else:        
+        header = "\n\nAll daily graphics were found to be up to date.\n"    
+        helpLines = ""
+    header = header + "----------------------------------------------------------------------------------------------------------------------------------\n"
+    
+    report = report + header + newReportLines + helpLines
+                
+    return report
+    
+
+def updateRequiredfiles():
+    """
+        This method is used to download 
+        the latest version of all the required
+        files.
+        
+    """    
+    
+    status, output = commands.getstatusoutput( "scp pds@lvs1-op:/apps/pds/tools/Columbo/ColumboShow/log/PX_Errors.txt* /apps/px/stats/statsMonitoring/ >>/dev/null 2>&1" )
+    
+    status, output = commands.getstatusoutput( "scp pds@lvs1-op:/apps/pds/tools/Columbo/etc/maxSettings.conf /apps/px/stats/statsMonitoring/maxSettings.conf >>/dev/null 2>&1" ) 
+    
+   
+          
+def main():
+    """
+        Builds the entire report by 
+        runnign all the different monitoring functions.
+        
+        Sends the report by email to the designed recipients.
+        
+    """ 
+    
+    updateRequiredfiles()        
+    report = ""       
+    parameters = getParameters( )     
+    
+    report = buildReportHeader( parameters )
+    report = verifyFreeDiskSpace( parameters, report )    
+    report = verifyPicklePresence( parameters, report )    
+    report = verifyPickleContent( parameters, report )        
+    report = verifyStatsLogs( parameters, report )    
+    report = verifyFileVersions( parameters, report  )    
+    report = verifyCrontab(  report  )   
+    report = verifyWebPages( parameters, report )
+    report = verifyGraphs( parameters, report ) 
+    
+    savePreviousMonitoringJob( parameters  )    
+    
+    sendReportByEmail( parameters, report  )
+    #print report 
+        
+    
+    
+if __name__ == "__main__":
+    main()        
