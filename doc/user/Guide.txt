@@ -605,7 +605,7 @@ unidirectional channels, AFTN requires bi-directional channels.   Instead of usi
 WMO headers, there are AFTN envelopes to remove, and inside are WMO messages., 
 there are mappings, and WMO bulletins are encapsulated within AFTN messages.  
 
-I think Daniel must write this part... 
+I really think Daniel must write this part... 
 
 
 Product eXchange Array
