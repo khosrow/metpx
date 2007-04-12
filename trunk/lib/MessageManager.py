@@ -198,7 +198,7 @@ class MessageManager:
         
         # We don't have enough lines
         if len(allLines) < 2:
-            return ['\n'.join(message.textLines)]
+            return ['\n'.join(message.textLines) + '\n']
 
         messageType = allLines[0][:2]
         station = allLines[1].split()[0]
@@ -221,9 +221,9 @@ class MessageManager:
                 allLines[0] += ' ' + BBB
             allLines.insert(1, 'AAXX ' + timestamp[:4] + '4')
         else:
-            return ['\n'.join(message.textLines)]
+            return ['\n'.join(message.textLines) + '\n']
             
-        return ['\n'.join(allLines)]
+        return ['\n'.join(allLines) + '\n']
 
     def addHeaderToMessage(self, message, textLines=None):
         """
