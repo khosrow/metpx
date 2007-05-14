@@ -12,7 +12,7 @@ Guide.latex:  Guide.txt
 .dia.png:
 	dia -t png $*.dia
 
-Guide.html: Guide.txt BigPicture.png
+Guide.html: Guide.txt BigPicture.png PXA.png
 	rst2html Guide.txt Guide.html
 
 Guide.pdf:   Guide.latex

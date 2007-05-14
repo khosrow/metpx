@@ -7,9 +7,7 @@ A Guide to Using MetPX
     and many more to come...:-)
 
 :Version: 
-     PRE-DRAFT, not even ready for revision yet!
-     Missing:
-
+     PRE-DRAFT, not even ready for revision yet! Missing:
      * explanation of file naming convention & extension.
      * explanation of DESTFN stuff in general terms (details for man page.)
      * several recipes: WMO monitoring feed, LDM reception, choosing among WMO feeds.
@@ -161,9 +159,9 @@ Sample information from an AHL:
  * CWAO bulletin originated at the Canadian Meteorological centre,
  * 091300 - on the ninth day of the month, 13h00 (1:00 pm) in UTC timezone.
 
-The above is a very brief introduction the topic of AHL's. For a proper 
-discussion, please consult WMO386.  For Metpx, the fundamental point
-is it extracts TTAAii_CCCC to create a routing key.
+The above is a very brief introduction the topic of AHL's. For a proper discussion, 
+please consult WMO386.  For Metpx, the fundamental point is that it extracts 
+TTAAii_CCCC to create a routing key.
 
 The second category of data which metpx understands is files. A file is a stream
 of bytes, with a name.  Metpx extracts a key from the name of a file and
@@ -394,7 +392,7 @@ Configuring VSFTPD for File Reception
 
 If you are careful, you can likely use any FTP server you want.  However,
 VSFTPD usually makes configuration much simpler.  It is available from 
-standard repositories via *apt-get install vsftpd*.  
+standard Debian repositories via *apt-get install vsftpd*.  
 
 Here is a complete /etc/vsftpd.conf: 
 
@@ -462,7 +460,7 @@ the 'file' receiver defined in the first run above, just do the following:
 |    # assume it is ILuvData
 
 Send username and password to the technical contact at your data source, 
-and you work is done!
+and your work is done!
 
 
 Setup FTP Sender
@@ -541,7 +539,7 @@ Use separate reception directories to clarify sources of data.
 Use key directive (in preference over key_accept) and comments copiously in pxRouting.conf
   MetPX provides the ability to use broad patterns to perform very simple routing.
   In an NMC, or other environment where delivering the wrong data to the wrong 
-  client can have important consequences, one does uses such patterns very 
+  client can have important consequences, one uses such patterns very 
   sparingly.  Instead, very detailed, specific routing tables are common.  
   CMC uses approximately 30,000 bulletin data routing entries and 60,000 
   entries for file data in their routing tables.  A major goal in MetPX's 
@@ -610,7 +608,70 @@ I really think Daniel must write this part...
 
 Product eXchange Array
 ----------------------
-Peter? 
+
+Sundew is an application which runs on a single computer.  This is an express 
+decision to ensure focus in application development, and to maximally leverage 
+existing technologies.  Sundew is not limited to running on a single system, and
+at the Canadian Meteorological Centre, it is deployed across at least four 
+servers, fronted by load balancers, to increase processing capacity, and provide 
+reliability beyond what is possible to do with a single server.  Because the approach 
+is to leverage existing technologies, those technologies are treated as 
+interchangeable components, to be substituted when it makes sense to do so.
+
+To provide higher reliability than a single server, one configures servers in pairs, 
+with a sort of shared storage (where the application stores data in transit.)  
+Usually, one server has access to the storage at a time, when the primary server 
+fails, the secondary server has to notice, and then take over the shared
+storage, and continue operations.  To scale beyond a single server, one requires
+a technology which accepts requests for service, and distributes them across
+an array of identically configured servers.
+
+So there are the three commodity technologies required:  failover monitoring, 
+shared storage, and load balancing.  There is a wide variety of different products 
+which accomplish some or all of the functions above.  We have not attempted to 
+do a formal survey and evaluation of all of them, and the field is rapidly 
+evolving in any event.  The technologies were chosen in 2004 and have served us 
+well.  For more information on high availability and clustering products with 
+linux, there is: http://lcic.org.  Besides Free Software solutions, there are
+many other solutions such as proprietary software, and hardware (load balancers, 
+and fibre channel SAN equipment.)  It is simplest to say, YMMV.
+
+With that said, At the CMC, all systems are deployed in pairs (twins).  Each twin
+has large internal disks and two data partitions.  One partition is for local 
+storage, the other partition mirrors the local storage of the twin.  Such a solution
+is adequate when one can consider retaining only the information that fits on 
+internal disks.  http://www.drbd.org does the mirroring , and failure of the other 
+twin, is recognized using heartbeat (http://www.linux-ha.org/.)  For load balancing,
+ldirectord ( http://www.vergenet.net/linux/ldirectord) controls the linux virtual 
+server load balancer twins.
+
+.. image:: PXA.png
+
+In terms of configuration, an address published for the load balancer is used by all incoming connections (socket or file based.)  An array of processing nodes 
+sits behind the load balancer, each taking a portion of the incoming requests as 
+assigned by the load balancer.  The processing nodes also perform transformations 
+as configured. There are some operations which are necessarily "global" in that a single system needs to have an understanding of all relevant data.  examples of such 
+systems are 
+
+collected observations 
+   for forwarding to the WMO.  To determine the revision level of a collected 
+   bulletin, or indeed collect all reports for a given bulletin, the contituent 
+   reports may have been received on any number of array processing nodes.  
+   
+socket senders.  
+   Peer organizations typically do not look kindly on opening a large number of 
+   identical sockets (1 from each array processors), so the appropriate data is 
+   concentrated on a single node, and then the single node can open a single 
+   socket and transmit all requisite data.
+
+pull receivers.
+   Pull receivers which do not delete files on the source need to maintain a global
+   state of files already pulled, to prevent multiple retrivals of the same data.
+
+Besides the actual data routing, processing, and delivery, there is another pair
+of servers dedicated to monitoring.  This pair of servers runs the columbo module
+and a web server, as well as the statistics module.  This minimizes the load for
+statistics and monitoring on nodes which need to do processing.
 
 
 Columbo
