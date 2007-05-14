@@ -62,7 +62,8 @@ class MessageManager:
                                       self.sourlient.extension,
                                       self.routingTable, 
                                       None,
-                                      self.sourlient) 
+                                      self.sourlient,
+                                      True) 
 
         self.drp = self.bullManager.drp
         self.sp = StationParser(PXPaths.STATION_TABLE, logger)
