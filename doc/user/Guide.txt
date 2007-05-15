@@ -656,7 +656,9 @@ systems are
 collected observations 
    for forwarding to the WMO.  To determine the revision level of a collected 
    bulletin, or indeed collect all reports for a given bulletin, the contituent 
-   reports may have been received on any number of array processing nodes.  
+   reports may have been received on any number of array processing nodes.  To
+   produce a colelcted bulletins all the individual reports need to be forwarded to
+   a single server.
    
 socket senders.  
    Peer organizations typically do not look kindly on opening a large number of 
