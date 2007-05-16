@@ -1,12 +1,13 @@
-======================
-A Guide to Using MetPX
-======================
+============================
+A Guide to Using MetPX $Rev$
+============================
 
 :Authors: 
     Peter Silva
     and many more to come...:-)
 
 :Version: 
+     $Date$
      PRE-DRAFT, not even ready for revision yet! Missing:
      * explanation of file naming convention & extension.
      * explanation of DESTFN stuff in general terms (details for man page.)
