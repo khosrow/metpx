@@ -3,25 +3,31 @@
 MetPX Contributors Guide
 ==========================
 
-:Authors:
-    Peter Silva,
-    Daniel Lemay
-
-:Version: 
-     $Rev$ $Date$
-     Drafty Draft...
-     What is missing:
-     sample projects?
-     additional sorters?
-     sample fx_script ?
-
-:Copyright: 
-    MetPX Copyright (C) 2004-2006  Environment Canada.
-    MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-    named COPYING in the root of the source directory tree.
-    or the *Licensing* section of this document.    
-
 .. contents::
+
+
+Front Matter
+------------
+
+:Authors::
+  Peter Silva,
+  Daniel Lemay
+
+:Version::
+  $Rev$ 
+  $Date$
+  Drafty Draft...
+  What is missing:
+  sample projects?
+  additional sorters?
+  sample fx_script ?
+
+:Copyright::
+  MetPX Copyright (C) 2004-2006  Environment Canada.
+  MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+  named COPYING in the root of the source directory tree.
+  or the *Licensing* section of this document.    
+
 
 
 Making Better Software Together
@@ -242,7 +248,7 @@ additional features for the user community to share.  The goal is
 
 		# process the bulletin
                 self.processBulletin()
-
+ 
  * to become a project member email, one of the project admins. 
    FIXME: Cathedral vs. Bazaar... We are cathedral, striving for Bazaar :-)
    * please subscribe to metpx-commit and metpx-devel first.
@@ -298,26 +304,27 @@ most often a good idea to follow them, and deviating without a good reason
 will most often lead to unwanted outcomes.
 
 
- 1. Principle: Each message is stored in one file
+1. Principle: Each message is stored in one file
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-   The first application design principle is to use files as an application 
-   storage method.  The contention is that storing messages in files 
-   provides sufficient performance, and will make the application 
-   simpler to implement, and generally applicable to a unification of
-   traditionally short messages and larger items as RADAR or satellite data 
-   for switching purposes.  
+The first application design principle is to use files as an application 
+storage method.  The contention is that storing messages in files 
+provides sufficient performance, and will make the application 
+simpler to implement, and generally applicable to a unification of
+traditionally short messages and larger items as RADAR or satellite data 
+for switching purposes.  
 
 
- 2. Principle: Avoid IPC
+2. Principle: Avoid IPC
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+combined with the above principle is to a principle of eliminating 
+other forms of inter-process communications (IPC) relying only on the inherent 
+locking provided by the file system.  If there is a lock in an algorithm, 
+then that indicates where there are race conditions or potential 
+contention.  The application is to be designed such that no such 
+conditions arise, and avoid the need for performance altering synchronization.
 
-   combined with the above principle is to a principle of eliminating 
-   other forms of inter-process communications (IPC) relying only on the inherent 
-   locking provided by the file system.  If there is a lock in an algorithm, 
-   then that indicates where there are race conditions or potential 
-   contention.  The application is to be designed such that no such 
-   conditions arise, and avoid the need for performance altering synchronization.
-
-   for example:  
+for example:  
      * a message is received, all messages/files received are to have unique
        names such that there are no name clashes.
      * Since there are no name clashes, all processes can place files
@@ -329,19 +336,22 @@ will most often lead to unwanted outcomes.
        operating system mechanisms, no code is required to support them.
        As these mechanisms are already heavily used, their reliability is assumed.   
 
-    (This is not a generalized slur against IPC, merely an statement that it is
-     a very complex tool and is often used when thought given to the algorithm
-     would avoid the necessity for locking & IPC.  This application is simple
-     enough, that we do not need it.  Let us keep it that way.
+Note::
+  This is not a generalized slur against IPC, merely a statement that it is
+  a very complex tool and is often used when thought given to the algorithm
+  would avoid the necessity for locking & IPC.  In it's proper context, IPC
+  are invaluable mechanisms.  This application is simple
+  enough, however, that we do not need it.  We should keep it that way.
 
 
- 3. Principle: Minimize File System Interactions
+3. Principle: Minimize File System Interactions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-   Even if file system performance has been deemed adequate, it is still 
-   the element which limits  application performance, so optimization 
-   of interactions with the file system may provide significant benefits.
+Even if file system performance has been deemed adequate, it is still 
+the element which limits  application performance, so optimization 
+of interactions with the file system may provide significant benefits.
 
-   examples:
+examples:
 
    * If we can pack all the routing information in the name, 
      we are better off. (avoid a stat call per file to route.)
@@ -365,7 +375,8 @@ will most often lead to unwanted outcomes.
      entries. (FIXME: figure out the test data to back this up.)
 
 
- 4. Principle:  No Performance critical coding without experimental data.
+4. Principle:  No Performance critical coding without experimental data.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     Whenever adding features one should start by evaluating how often the 
     feature will be called in the normal course of execution.
@@ -385,8 +396,8 @@ will most often lead to unwanted outcomes.
     Consult the Efficiency Tests Chapter for examples.
 
 
- 5. Principle: Minimize Configuration Options
-    
+5. Principle: Minimize Configuration Options
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^    
     A configuration setting should be created when there are multiple cases
     which are reasonably common.  When the same configuration string is present
     many times, that indicates a need for review.
@@ -398,7 +409,8 @@ will most often lead to unwanted outcomes.
     manual settings.  It would be nice to eliminate batch eventually.
     
 
- 6. Principle: Try not to decode the data (aka: We don't want to know.)
+6. Principle: Try not to decode the data (aka: We don't want to know.)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     Sometimes it is un-avoidable, but normally, for metpx itself, we make
     a reasonable effort never to decode data when we have no need to.
@@ -423,6 +435,7 @@ will most often lead to unwanted outcomes.
 
 
 7. Principle: There is no Cluster (metpx)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     This application will typically be deployed in a cluster.  Don't
     worry about it.  Pretend it isn't true.  The cluster architecture
@@ -432,6 +445,7 @@ will most often lead to unwanted outcomes.
 
 
 8. Principle: Language is Important.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     If you find us using ornate phraseology in order to convey a concept,
     call us on it.  We will re-ify our definitions and phrasing methodology
@@ -442,15 +456,16 @@ will most often lead to unwanted outcomes.
 
 
 Efficiency Tests
-----------------------------
+----------------
 
     FIXME: have not looked at system overhead of these calls.
 
 
- 1. Efficiency of date calls. PS
+Efficiency of date calls. PS
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     I was worried calls to format strings of the time would be 
-    expensive, because on some systems, they are (stupidly acquire a lock
+    expensive, because on some systems, they are (unfortunately acquire a lock
     to read the time, makes stuff slow.) wrote a loop below to try it out:
 
     |
@@ -475,7 +490,8 @@ Efficiency Tests
     likely the case), then this call will account for only 0.1 % of execution time.  
     Not worth optimizing.  Avoids having to wonder when to check if the date changed.  
 
-  2. Disk Reader tests 
+Disk Reader Tests 
+^^^^^^^^^^^^^^^^^
 
     tests wanted:
     For whatever priority schemes we come up with, need to have methods
@@ -492,49 +508,52 @@ Efficiency Tests
 
 
 
-  3. File Name Verification 
+File Name Verification 
+^^^^^^^^^^^^^^^^^^^^^^
 
-    2005-02-09 (DL)
+2005-02-09 (DL)
 
-    Note: These tests have been done on my personal computer, not a server.
+Note: These tests have been done on my personal computer, not a server.
 
-    A filename verification function has been added to the directory sorting
-    ingestor. The pattern to verify is written as a regex.
+A filename verification function has been added to the directory sorting
+ingestor. The pattern to verify is written as a regex.
 
-    The verification is not included directly in the class that extracts the "keys"
-    from a filename. It implies that a first pass has to be done to eliminate the
-    "bad" files. It's better for the design and the overhead is negligible.
+The verification is not included directly in the class that extracts the "keys"
+from a filename. It implies that a first pass has to be done to eliminate the
+"bad" files. It's better for the design and the overhead is negligible.
 
-    Testing has been done on ingestion of 12000 filenames. Here are the results:
+Testing has been done on ingestion of 12000 filenames. Here are the results:
 
     Time to ingest the 12000 filenames: ~16 seconds
     Time to verify the correctness of each filename: ~ 1 second
     Time to sort the good filenames (12000): ~ 1 second
 
-    Conclusion: The time spent for name verification is negligible in comparison
-    to the time passed to ingest.
+Conclusion: The time spent for name verification is negligible in comparison
+to the time passed to ingest.
 
-    => We choose design over performance on this item.
-
-
-  4. File Creation Speed.
-
-    2005-03-01 (DL)
-
-    Tests have been done on pds5.
-
-    We were able to create 20000 links in 0.75 second. This observation has
-    for consequence that we have let down worklists.
+We choose design over performance on this item.
 
 
-  5. Validate and Sort File Names.
+File Creation Speed.
+^^^^^^^^^^^^^^^^^^^^
 
-    2005-03-01 (DL)
+2005-03-01 (DL)
 
-    Tests have been done on pds5.
+Tests have been done on pds5.
 
-    The tests consist in reading and validating filenames contained in a
-    directory and sorting the filenames (according to priority and timestamp). 
+We were able to create 20000 links in 0.75 second. This observation has
+for consequence that we have let down worklists.
+
+
+Validate and Sort File Names.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+2005-03-01 (DL)
+
+Tests have been done on pds5.
+
+The tests consist in reading and validating filenames contained in a
+directory and sorting the filenames (according to priority and timestamp). 
 
 
     ======= ============ =========
@@ -559,11 +578,11 @@ Efficiency Tests
     ======= ============ =========
     
     
-    Conclusion: There is a linear relathionship in both reading and sorting.
-    The sort times are very consistent (25000 files/second).  The read
-    times vary with system load,  even when the load was not percetible via
-    the 'uptime' command.  In all the above tests, system load was below 1.
-    The overall read rate varies from 3333 to 13333 files/second.
+Conclusion: There is a linear relathionship in both reading and sorting.
+The sort times are very consistent (25000 files/second).  The read
+times vary with system load,  even when the load was not percetible via
+the 'uptime' command.  In all the above tests, system load was below 1.
+The overall read rate varies from 3333 to 13333 files/second.
 
 
 
