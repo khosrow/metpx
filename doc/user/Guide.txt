@@ -2,6 +2,11 @@
 A Guide to Using MetPX 
 ======================
 
+
+.. contents::
+
+Front Matter
+-------------
 :Authors: 
     Peter Silva
     and many more to come...:-)
@@ -16,9 +21,6 @@ A Guide to Using MetPX
      * AFTN.
 
 :Copyright: MetPX Copyright (C) 2004-2006  Environment Canada
-
-
-.. contents::
 
 
 
