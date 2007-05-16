@@ -8,7 +8,7 @@ MetPX Contributors Guide
     Daniel Lemay
 
 :Version: 
-     $Rev$ $date$
+     $Rev$ $Date$
      Drafty Draft...
      What is missing:
      sample projects?
