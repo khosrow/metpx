@@ -9,11 +9,11 @@ MetPX Contributors Guide
 Front Matter
 ------------
 
-:Authors::
+:Authors:
   Peter Silva,
   Daniel Lemay
 
-:Version::
+:Version: 
   $Rev$ 
   $Date$
   Drafty Draft...
@@ -588,8 +588,8 @@ The overall read rate varies from 3333 to 13333 files/second.
 
 
 
-A Map
-------
+A Map of Files and Modules
+---------------------------
 
 This section gives a brief overview of the many pathnames in the running
 tree, and breaks down the source code into functional groups of files.
@@ -718,6 +718,7 @@ AFTN                          MessageAFTN.py
 
 
 
+
 Terminology/Glossary
 ----------------------------------
 
@@ -793,12 +794,13 @@ Derived Products, Filters, Transformations, post_ingest_processing
 
 Licensing
 ----------
-The primary license for distribution of this software is the General Public License, Version 2.  For individuals or groups wishing to license the application under other
-terms, they may approach the copyright holders and negotiate a different license
-more appropriate for their needs.
+The primary license for distribution of this software is the General Public 
+License, Version 2.  For individuals or groups wishing to license the application 
+under other terms, they may approach the copyright holders and negotiate a different 
+license more appropriate for their needs.
 
 For now, the only rights holder on the application is the Government of Canada.
-However, contributors retain their rights to their contributions.  So when major
+However, contributors retain the rights to their contributions.  So when major
 contributions arrive, any potential licensee will have to negotiate with all 
 appropriate rights holders.
 
