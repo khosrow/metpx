@@ -8,11 +8,12 @@ MetPX Contributors Guide
     Daniel Lemay
 
 :Version: 
+     $Rev$ $date$
      Drafty Draft...
      What is missing:
-        sample projects?
-        additional sorters?
-        sample fx_script ?
+     sample projects?
+     additional sorters?
+     sample fx_script ?
 
 :Copyright: 
     MetPX Copyright (C) 2004-2006  Environment Canada.
@@ -77,7 +78,7 @@ of open source projects as observed over the past decade.
     `Novell <http://www.novell.com>`_, `Ubuntu <http://www.canonical.com>`_, 
     `MySQL <http://www.mysql.com>`_, 
     `JBOSS <http://www.jboss.com>`_ (now a division of RedHat), 
-    `SugarCRM <http://www.sugarCRM.com`_.
+    `SugarCRM <http://www.sugarCRM.com>`_.
     Well established integrators also profitably perform support roles without 
     being necessarily associated with the product itself, such as 
     `IBM <http://www.ibm.com>`_.  
