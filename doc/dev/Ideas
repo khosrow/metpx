@@ -20,13 +20,6 @@ named COPYING in the root of the source directory tree.
 	-- see if there is bandwidth control in curl, and if not
 	   see if we can add it.
 
-  -- full ftp sender.   DL!
-	-- record byte count on send in log.
-	-- supports multiple protocols (http,https, sftp  etc...)
-	-- based on curl?
-        -- add naming strategies on delivery (ie. permission vs. no-rename, etc...)
-        -- add passive/active?
-
   -- performance improvement, worklists...
      drop off worklists in the q directories, rather than linking files...
      reduces overhead... ie... receiver builds a list of files to q for each
