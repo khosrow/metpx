@@ -1,12 +1,13 @@
-===================================
-A Guide to Using MetPX $Rev$
-===================================
+======================
+A Guide to Using MetPX 
+======================
 
 :Authors: 
     Peter Silva
     and many more to come...:-)
 
 :Version: 
+     $Rev$
      $Date$
      PRE-DRAFT, not even ready for revision yet! Missing:
      * explanation of file naming convention & extension.
@@ -35,16 +36,18 @@ rest of the document.   The various aspects of routing and special effects
 single switching system has been covered, the document will move on to 
 describe some provide an overview of a typical clustering/HA configuration.
 
-There are two components to the package: metpx-sundew, the switching 
-package itself, and metpx-columbo, the web-based monitoring GUI. 
-this Guide assumes that both components are already installed, 
-but the GUI will not be discussed at first, as all settings 
-are controlled via text configuration files.  
+There are two components of metpx: sundew, the switching 
+package itself, and columbo, the web-based monitoring GUI. 
+This guide concerns itself with configuration of the sundew
+module.  It will start with simple loopback tests, then
+add methods to accomplish more complicated tasks. 
 
 After presenting the possibilities for clustering configurations, the stage 
 is set for metpx-columbo.  Columbo monitors an entire cluster from a 
 single screen, and allows operators to perform certain interactions such
-as re-sending of data on client request.
+as re-sending of data on client request.  For now there is not much about
+columbo in this guide.  When packaging and documentation of Columbo is ready, 
+we will add more information about it to complete this guide.
 
 `MetPX <http://metpx.sourceforge.net/>`_ is a high speed, high reliability, 
 low-latency meteorological message switching application.  Another term in
@@ -189,6 +192,11 @@ A philosophical note:
 
 
 
+Installation
+------------
+
+Assuming Debian packages are available, then dpkg -i metpx-sundew-xx-yy.dpkg; apt-get install -f;
+FIXME
 
 A First Run
 -----------
@@ -391,8 +399,8 @@ experiments:
 Configuring VSFTPD for File Reception
 -------------------------------------
 
-If you are careful, you can likely use any FTP server you want.  However,
-VSFTPD usually makes configuration much simpler.  It is available from 
+Being careful, one can likely use any FTP server.  However,
+use of VSFTPD makes configuration quite simple.  It is available from 
 standard Debian repositories via *apt-get install vsftpd*.  
 
 Here is a complete /etc/vsftpd.conf: 
@@ -430,7 +438,7 @@ Here is a complete /etc/vsftpd.conf:
 |
 
 NOTE:
-   vsftpd has a very picky parser:
+   vsftpd has a very picky parser for it's configuration files:
 
    * it cares about capital letters versus lower case, and spaces.
    * Do not put spaces before or after directives, or around the = sign.
