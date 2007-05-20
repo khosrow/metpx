@@ -483,14 +483,13 @@ examples:
 Adding Keyword Substitution
 ------------------------------
 Often, it is desirable to have the revision date or tag included in files
-under revision control.  In subversion this sort of function is accomplished
+under revision control.  In subversion, this sort of function is accomplished
 by:
 
-<UL>
    svn propset svn:keywords ´date id rev´ <file>
-</UL>
 
-Then enter $Date:$, $Revision:$, $id:$ ... See the
+
+Then enter \$\Date:$, \$\Revision:\$,  ... See the
 `subversion red book <http://svnbook.red-bean.com/nightly/en/svn-book.html>`_ for more details. 
 
 Efficiency Tests
