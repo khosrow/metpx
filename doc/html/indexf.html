@@ -6,44 +6,34 @@
     <style></style>
   </head>
   <body>
-<H1>MetPX approuvé pour dévéloppement mutualisé 2006/04/11</H1>
+<H1>MetPX - Logiciel libre d'aiguillage de données du STM</H1>
+<P>
+Date: $Date$
 <P>
 [<A HREF="indexe.html">English</a>]
 <P>
-MetPX est un système de commutation de messages sur les circuits TCP/IP 
-du Système mondial de télécommunications (STM) de l'organisation mondial 
-de la météorologie (l'<A HREF="http://www.wmo.int">OMM</a>).  Développé 
-pour combler des besoins internes d´<A HREF="www.ec.gc.ca">Environnement Canada</a>], le logiciel est dans un état embryonnaire et en subit le 
-dévéloppement continue.  En utilisant la dévéloppement mutualisé, on 
-espère bâtir une communauté au tour d'un système de commutation 
-que nous pouvons partager et améliorer ensemble.  Pour une quantité 
-limitée de fonctionnalités, le système est déjà d'une qualité 
-opérationelle et est utilisé au CMC en tant que noyau nationale de 
-commutation de bulletins.  Le logiciel est actuellement en dévéloppement 
-méticuleux à une cadence naturelle.
+MetPX est un système de commutation de messages sur les circuits TCP/IP du Système de télécommunications 
+mondiales (STM) de l'organisation mondial de la météorologie (l'<A HREF="http://www.wmo.int">OMM</a>).  
+Développé pour combler des besoins internes d´<A HREF="www.ec.gc.ca">Environnement Canada</a>]
+En utilisant la dévéloppement mutualisé, on espère bâtir une communauté au tour d'un système de commutation 
+que nous pouvons le partager et l´améliorer ensemble.  Pour une quantité limitée de fonctionnalités, le 
+système est déjà d'une qualité opérationelle et est utilisé au CMC en tant que noyau nationale 
+de commutation de bulletins.  Le logiciel est actuellement en dévéloppement méticuleux à une cadence paisible
+et naturelle.
 <P>
-[ liste-de-couriel (Anglais-Français): <A HREF="http://lists.sourceforge.net/lists/listinfo/metpx-devel"> metpx-devel.</a> ] 
+[ liste de couriel (Anglais-Français): <A HREF="http://lists.sourceforge.net/lists/listinfo/metpx-devel"> metpx-devel.</a> ] 
 [ projet:  <A HREF="http://www.sourceforge.net/projects/metpx"> Sourceforge </a> ]
 <P>
-CAVÉAT:  La documentation pour ce logiciel est minime et ce logiciel 
-peut seulement être installé par un administrateur linux expériementé.  
 
-Une des conditions au lancement du logiciel était d´éliminer les examples de 
-configuration de la logithèque de référence, par ce qu´ils étaient basées sur 
-des informations sensibles.  Donc, une des tâches à ajouter sur la liste tâches à accomplir
-est d'ajouter des examples configuration.   Téléchargé tel quel sans 
-configuration considérable, le code ne fonctionnera pas de 
-façon utile.   Le placement de ce code sur sourceforge ne représente 
-aucunement la publication d'un produit fini, mais plutôt le lancement d´un processus
-de dévéloppement mutuel.
 <P>
-Le module de commutation est géré par ligne de commande.  Par contre,
-un interface web éxiste pour des fins de surveillance.  Une connaissance de 
-la langue  française est utile à ce stade-ci car le logiciel est partiellement
-dévéloppé dans la langue de molière,  ainsi que plusieurs messages d´érreurs.
-Quand le temps le permettra, la localisation devrait être éffectuer en bonne est 
-due forme.
+[<A HREF="#Documentation">Documentation</A>]
+[<A HREF="#Download">Téléchargement</A>]
+[<A HREF="#Source">Accès au code source</A>]
+<br>
+[ listes de courier:   <A HREF="http://lists.sourceforge.net/lists/listinfo/metpx-devel"> metpx-devel.</a>  ]
+[ Page principale de dévéloppement:   <A HREF="http://www.sourceforge.net/projects/metpx"> Sourceforge </a> ]
 <P>
+
 Types de connections TCP/IP:
 <UL>
 <LI>AM (socket prorietaire au systèmes canadiens)
@@ -61,30 +51,10 @@ affecter la vitesse.  Il serait nécessaire de re-vérifier cet aspect.
 <LI>Aucune limite de taille des messages.
 <LI>Segmentation de messages (pour protocoles tel que AM &amp; OMM qui ont de tels limites)
 <LI>Supression des duplicata (à l'envoie)
-<LI>Prochainement (au niveau du développement)
-<UL>
 <LI>AFTN/IP canadien.
 <LI>collecte de bulletins
-</UL>
-</UL>
-
-Ajouts planifié:
-
-<UL>
-<LI>utilisation de <A HREF="http://curl.haxx.se/">curl</a> ou quelque chose de semblable ou l'envoyeur pourra se servier d´une variété de protocoles de 
-transferts de fichiers.
 <LI> mécanisme de filtrage général (les collections seront adaptées à ce mécanisme) 
 </UL>
-<P>
-Une version stable pour usage externe n´a pas encore été mis au point.  
-Lorsque une version sera prête, ça sera claire.  Nous nous attendons à un 
-délais de quelques mois au 
-moins!  Si quelqu'un demeure intéressé, référez à l'information ci-bas.    
-Veuillez-vous inscrire à liste de distribution et nous informer de la 
-raison qui vous empêche d'en faire l'essaie.  Ceci pourrait être une 
-source d'information pour accélérer le travail ainsi que pour obtenir de 
-la collaboration.   Des anciennes versions sont disponibles.  Par contre, 
-ils ont des bogues connues non-documentées (sur le système de suivi de sourceforge.)
 <P>
 Il y a actuelment deux modules dans ce projet et un troisième est à l'étude.    Les modules de 
 MetPX sont nommés selon des noms d'espèces de plantes en voie de disparition au 
@@ -102,7 +72,46 @@ license:    GPLv2
 le code source en dévéloppement est disponible en utilisant subversion via:  svn co https://svn.sourceforge.net/svnroot/metpx/trunk
 ( accès anonyme pour fins de lecture. )
 
- 
-  
+<A NAME="Documentation"><H3>Documentation</H3></a>
+La documentation en français n´est pas disponible pour le moment.
+Ca va être traduite une fois qu´on aura stabilisé une première édition en anglais.
+Après la traduction initiale, l´espoir sera de les garder en unison.
+<P>
+Veuillez consulter la documentation anglaise pour l´instant
+
+<A HREF="index.html#Documentation">Documentation anglaise.</a>
+
+<A NAME="Download">
+<H3>Téléchargement</H3>
+
+Une version stable n´a pas encore été mis au point.  
+Lorsque une version sera prête, ça sera claire.  La module sundew est
+relativement stable, on travail actuelment à completer sa documentation et
+son paquet Debian (.deb).  On espère avoir complèter ça pour le fin de l´année 2007.  
+Ensuite, l´exercise se poursuivra avec le module Columbo en 2008.
+<P>
+Pour l´instant, vous devez vous contenter de télécharger la code source.
+</a>
+
+<H3><A NAME="#Source">Accès au code source</A></H3>
+
+Présentement, les installations sont faite une à la fois, à partir du code source.
+La Dévéloppement se fait dans le branche ´trunk´ (terminologie de subversion.) Quand
+on installe, on créé une branche de maintenance pour l´installation.  Il y a des fichiers
+README et INSTALL qui peuvent donner des indices pour arriver a une installation initiale.
+<P>
+Il faut noter que c´est assez critique d´installer des ´jobs cron´ (mr-clean en particulier)
+parce que le cas écheant, le serveur va tranquillement rouler de plus en plus lentement jusqu´au
+moment ou il arrête carrément.  Ça serait optimale de vous inscrire au liste de couriel (français,
+bienvenu, peut-être même préféré...) ce qui nous donnera des indices pour des tâches futurs, 
+et potentiel de collaboration.
+<P>
+Sentez vous libre de prendre une copie de la version à jour du code source via:
+<UL>
+        svn co https://svn.sourceforge.net/svnroot/metpx/trunk
+</UL>
+
+(disponible anonymement en lecture seulement.)
+
   </body>
 </html>
