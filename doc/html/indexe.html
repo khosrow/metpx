@@ -1,0 +1,77 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html"; charset="iso8859-1">
+<title>MetPX welcome</title>
+</head>
+<body>
+<H1>MetPX Licensed for Collaborative Development 2006/04/11</H1>
+<P>
+[<A HREF="indexf.html">français</a>]
+<P>
+MetPX is a message switching system for use with <a href="http://www.wmo.int"> Wmo </a> Global Telecommunications System circuits based on TCP/IP.   Developed at the Canadian Meteorological Centre of <a href="http://www.ec.gc.ca">Environment Canada</a> for our own use.  MetPX is a work in progress, the development process is being externalized in the hopes of fostering a community around a switching system which all can share and improve together.  The system is already production quality for a limited set of features and is in production use at the CMC as the core of our national bulletin switching infrastructure.   The software is under continuous, but low-intensity development.  Features are carefully being layered on top of existing stable functions.
+<P>
+[ mailing-list:   <A HREF="http://lists.sourceforge.net/lists/listinfo/metpx-devel"> metpx-devel.</a>  ]
+[ Main Project page:   <A HREF="http://www.sourceforge.net/projects/metpx"> Sourceforge </a> ]
+<P>
+<B>WARNING:</B>
+This software has minimal documentation, and can only be installed by a seasoned linux administrator.   
+A portion of the work done as a condition of the release was to strip the repository of 
+configuration examples, since they, being real, indicated sensitive information.  So, one of the items 
+on the TODO list is to add real sample configuration files.   As downloaded, without a great deal of 
+configuration, this code will not run in a useful way.    The placing of this code on sourceforge does not represent the publication of a finished product, but a work-in-progress.  
+<P>
+The switch component is command-line driven, but has a web GUI for monitoring purposes.   A knowledge of
+French is helpful currently, as the socket protocol drivers are written in French (as are their log
+messages.)  Proper localization is a goal, but we don't have time yet.
+<P>
+Protocol support:
+<UL>
+<LI>AM (Canadian proprietary socket protocol) 
+<LI>WMO (see manual 386 for the WMO TCP/IP socket protocol.)
+<LI>FTP (for transport, no support for WMO naming yet (but trivial to add.))
+</UL>
+<P>
+features:
+<UL>
+<LI>detailed routing (in production with 30,000 distinct entries in the routing table.)
+<LI>sub-second latency (with 28,000 routing entries.)
+<LI>high speed routing and delivery. (was &gt;300 messages per second, but that was a year ago, and many features which might slow it down have been added, a re-test is in order.)
+<LI>no message size limit.
+<LI>message segmentation (for protocols such as AM &amp; WMO which have message length limits.)
+<LI>duplicate suppression (on send.)
+<LI>Near Future (in development):
+<UL>
+<LI>AFTN support?
+<LI>bulletin collections. 
+</UL>
+<LI>planned:
+<UL>
+<LI>use of <A HREF="http://curl.haxx.se/">curl</a> or some such in sender to be able to drive a wide number of file transfer protocols.
+<LI>generalized filter mechanism.  (collections will be modified to fit this general mechanism.)
+</UL>
+</UL>
+Release of stable versions has not yet been worked out.  We will tag a release when it is ready, it will not be ready for a number of months at least!  If you are still interested, read on.  Best bet is to subscribe to the mailing list and let us know what is stopping you from trying it out, it could inspire us to work on that bit faster to get some collaboration going.  There are old tagged releases, but they all have known but undocumented (on the sf.net bug tracking system) bugs. 
+<P>
+There are two modules in the project right now, and a third under consideration.  Modules of MetPX
+are named after species of plant which are endangered in Canada (see <A HREF="http://www.speciesatrisk.gc.ca"> Species at Risk </a> for more details.)
+<UL>
+<LI>sundew: the WMO switching component.
+<LI>columbo: the web based monitoring component, for both sundew, and the older (not released) PDS.
+</UL>
+<P>
+<P>
+Platform: Debian Linux (Sarge).  Any modern Linux should do. (stock 2.6 or 2.4 with many patches.)   Python &gt;2.3
+<P>
+Licensing: GPLv2
+<P>
+A bleeding edge snapshot can be obtained using subversion via:
+<UL>
+    svn co https://svn.sourceforge.net/svnroot/metpx/trunk
+</UL>
+
+available for anonymous read-only access. 
+
+<P>
+
+</body>
+</html>

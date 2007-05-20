@@ -17,10 +17,6 @@ Front Matter
   $Rev$ 
   $Date$
   Drafty Draft...
-  What is missing:
-  sample projects?
-  additional sorters?
-  sample fx_script ?
 
 :Copyright::
   MetPX Copyright (C) 2004-2006  Environment Canada.
@@ -117,8 +113,8 @@ contributors:
   which mails out the change descriptions created by developers as they
   commit changes to the repository.
 
-Taking the time to read and comment on the documentation and 
-commenting on bugs, participating on the mailing list submitting feature requests
+Taking the time to read and comment on the documentation and commenting on 
+bugs, participating on the mailing list submitting feature requests
 are all very helpful activities to guide us in future development.
 The kinds of skills What you might want to know to be able to help:
 
@@ -215,6 +211,9 @@ search your development path ahead of the default versions of metpx.
 Changing the Documentation
 -----------------------------
 
+Editing Documentation Source
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 To edit the documentation, checkout the source code normally. then change
 directory into the one containing the source of the manual you with
 to modify. ie.. doc/dev.  Once there, you can use a text editor
@@ -230,6 +229,17 @@ Debian packages needed:
   * dia (for editing diagrams & creating png's from .dia)
   * groff (for processing man pages.)  systems include groff-base by default, need full groff for html output.
 
+
+Updating the Web Site
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+The website content is generated from the doc/html directory.  There is a 
+Makefile there, type make, and it will pull in HTML documentation from 
+the rest of the project.  There is also master indexe.html and indexf.html 
+(English and French) after all the HTML is produced, one updates the web 
+site itself by using shell account access:
+
+  % scp * <user>@shell.sourceforge.net:/home/groups/m/me/metpx/htdocs
 
 
 General Information About Contributions
