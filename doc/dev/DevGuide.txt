@@ -248,6 +248,18 @@ account access:
 
   % scp * <user>@shell.sourceforge.net:/home/groups/m/me/metpx/htdocs
 
+Adding Keyword Substitution
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Often, it is desirable to have the revision date or tag included in files
+under revision control.  In subversion, this sort of function is accomplished
+by:
+
+   svn propset svn:keywords ´date id rev´ <file>
+
+
+Then enter \$\Date:$, \$\Revision:\$,  ... See the
+`subversion red book <http://svnbook.red-bean.com/nightly/en/svn-book.html>`_ for more details. 
+
 
 General Information About Contributions
 -----------------------------------------
@@ -479,18 +491,6 @@ examples:
     of directives, log messages, and displays are self-evident.  We value
     clarity and brevity. (if you prefer: we like things short and clear!)
 
-
-Adding Keyword Substitution
-------------------------------
-Often, it is desirable to have the revision date or tag included in files
-under revision control.  In subversion, this sort of function is accomplished
-by:
-
-   svn propset svn:keywords ´date id rev´ <file>
-
-
-Then enter \$\Date:$, \$\Revision:\$,  ... See the
-`subversion red book <http://svnbook.red-bean.com/nightly/en/svn-book.html>`_ for more details. 
 
 Efficiency Tests
 ----------------
