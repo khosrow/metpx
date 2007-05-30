@@ -4,7 +4,7 @@ MetPX Copyright (C) 2004-2006  Environment Canada
 MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
 named COPYING in the root of the source directory tree.
 
-"""
+
 #############################################################################################
 #
 #
@@ -23,10 +23,27 @@ named COPYING in the root of the source directory tree.
 #
 #
 ##############################################################################################
+"""
 
+
+"""
+    Small function that adds pxlib to the environment path.  
+"""
+try:
+    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
+except KeyError:
+    pxlib = '/apps/px/lib/'
+sys.path.append(pxlib)
+
+
+"""
+    Imports
+    Logger requires pxlib 
+"""
 import os
 import commands
-import StatsPaths
+
+from   pxStats.lib.StatsPaths import StatsPaths
 from   optparse import OptionParser 
 from   Logger import *
 
@@ -194,9 +211,9 @@ def buildLogger( output ):
     logger = None 
     
     if output != "":     
-        if not os.path.isdir( StatsPaths.PXLOG  ):
-            os.makedirs( StatsPaths.PXLOG  , mode=0777 )  
-        logger = Logger( StatsPaths.PXLOG  + 'stats_' + output + '.log.notb', 'INFO', 'TX' + output, bytes = True  ) 
+        if not os.path.isdir( StatsPaths.STATSLOGGING  ):
+            os.makedirs( StatsPaths.STATSLOGGING  , mode=0777 )  
+        logger = Logger( StatsPaths.STATSLOGGING  + 'stats_' + output + '.log.notb', 'INFO', 'TX' + output, bytes = True  ) 
         logger = logger.getLogger()    
     
     return logger 

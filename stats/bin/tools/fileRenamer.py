@@ -31,10 +31,11 @@ named COPYING in the root of the source directory tree.
 import os  
 import commands 
 import fnmatch
-import StatsPaths
 import pickle
 from   optparse import OptionParser  
 from fnmatch import fnmatch  
+
+from pxStats.lib.StatsPaths import StatsPaths
 
 LOCAL_MACHINE = os.uname()[1]
 
@@ -127,11 +128,11 @@ def renameCurrentDatabasesTimesOfUpdates( oldMachineName, newMachineName ):
     
     """
     
-    fileTypeDirs = os.listdir( StatsPaths.STATSDBUPDATES )
+    fileTypeDirs = os.listdir( StatsPaths.STATSCURRENTDBUPDATES )
     
     for fileTypeDir in fileTypeDirs:     
-        path = StatsPaths.STATSDBUPDATES + fileTypeDir + '/'       
-        files = os.listdir(StatsPaths.STATSDBUPDATES  + fileTypeDir )        
+        path = StatsPaths.STATSCURRENTDBUPDATES + fileTypeDir + '/'       
+        files = os.listdir(StatsPaths.STATSCURRENTDBUPDATES  + fileTypeDir )        
         for file in files:            
             if fnmatch(file, '*_' + oldMachineName ) :
                 source = path + file                
@@ -154,11 +155,11 @@ def renameCurrentDatabases( oldMachineName, newMachineName ):
     
     """
     
-    dataTypeDirs = os.listdir( StatsPaths.STATSDB )
+    dataTypeDirs = os.listdir( StatsPaths.STATSCURRENTDB )
     
     for dataTypeDir in dataTypeDirs:     
-        path = StatsPaths.STATSDB + dataTypeDir + '/'       
-        files = os.listdir( StatsPaths.STATSDB  + dataTypeDir )        
+        path = StatsPaths.STATSCURRENTDB + dataTypeDir + '/'       
+        files = os.listdir( StatsPaths.STATSCURRENTDB  + dataTypeDir )        
         for file in files:            
             if fnmatch(file, '*_' + oldMachineName ) :
                 source = path + file                
@@ -403,7 +404,6 @@ def main():
     else:
         print "Program terminated." 
         
-    
-    
+os.path.getsize(filename)
 if __name__ == "__main__":
     main()                

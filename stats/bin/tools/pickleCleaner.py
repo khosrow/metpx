@@ -22,10 +22,9 @@ named COPYING in the root of the source directory tree.
 """
 
 import os, commands, time, sys
-import MyDateLib 
-import StatsPaths
-from   MyDateLib import * 
 
+from pxStats.lib.StatsPaths import StatsPaths    
+from pxStats.lib.StatsDateLib import StatsDateLib
 
 
 def getDirListToKeep( daysToKeep = 7 ):
@@ -37,7 +36,7 @@ def getDirListToKeep( daysToKeep = 7 ):
     secondsSinceEpoch = time.time()
     
     for i in range( daysToKeep ):
-        dirlist.append( MyDateLib.getIsoFromEpoch( secondsSinceEpoch - ( i*60*60*24) ).split()[0].replace( '-','') )
+        dirlist.append( StatsDateLib.getIsoFromEpoch( secondsSinceEpoch - ( i*60*60*24) ).split()[0].replace( '-','') )
          
     return dirlist
     
@@ -48,8 +47,7 @@ def cleanPickles( dirsToKeep ):
         Deletes every pickle directory that is not within the list to keep.
     """
     
-    clientdirs = os.listdir( StatsPaths.STATSPICKLES )
-    
+    clientdirs = os.listdir( StatsPaths.STATSPICKLES )    
     
     for clientDir in clientdirs :
         upperDir = StatsPaths.STATSPICKLES  + clientDir 
