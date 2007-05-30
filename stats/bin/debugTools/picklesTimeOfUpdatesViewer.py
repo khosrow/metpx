@@ -5,18 +5,18 @@ MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
 named COPYING in the root of the source directory tree.
 
 #############################################################################################
-# Name  : pickledTimesViewer.py
+# Name  : picklesTimeOfUpdatesViewer.py
 #
 # Author: Nicholas Lemay
 #
 # Date  : 2006-06-19
 #
-# Description: This method allows user to quicly see all the update times stroed in the 
-#              pickledtimes file.
+# Description: This method allows user to quicly see all the update times stored in the 
+#              time of updates file.
 #
 #   Usage:   This program can be called from command-line. 
 #
-#   For informations about command-line:  PickleTimesViewer.py -h | --help
+#   For informations about command-line:  picklesTimeOfUpdatesViewer.py -h | --help
 #
 #
 ##############################################################################################
@@ -26,6 +26,7 @@ import os, sys, pickle
 sys.path.insert(1, sys.path[0] + '/../../../')
 
 from pxStats.lib.StatsPaths import StatsPaths
+
 
 def printPickledTimes( pickledTimes, fileName ):
     """
@@ -89,7 +90,7 @@ def main():
     
     #standard use.
     os.system( 'clear' )
-    fileName = StatsPaths.STATSROOT +"PICKLED-TIMES"
+    fileName = StatsPaths.STATSPICKLESTIMEOFUPDATES
     pickledTimes = loadPickledTimes( fileName )
     printPickledTimes( pickledTimes, fileName  )
 
