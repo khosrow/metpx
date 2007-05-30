@@ -21,22 +21,31 @@ named COPYING in the root of the source directory tree.
 ##############################################################################################
 """
 
+"""
+    Small function that adds pxlib to the environment path.  
+"""
+try:
+    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
+except KeyError:
+    pxlib = '/apps/px/lib/'
+sys.path.append(pxlib)
 
-#important files 
-import os,time, pwd, sys,getopt, commands, fnmatch,pickle
-import PXManager
-import StatsPaths 
-import generalStatsLibraryMethods
+
+"""
+    Imports
+    PXManager, Logger both require pxlib 
+"""
+import os,time, pwd, sys, getopt, commands, fnmatch, pickle
 
 from Logger import * 
 from optparse import OptionParser
 from ConfigParser import ConfigParser
-from MyDateLib import *
-from ClientStatsPickler import ClientStatsPickler
-from PXManager import *
-from generalStatsLibraryMethods import * 
-   
 
+from PXManager import * 
+from pxStats.lib.StatsDateLib import StatsDateLib
+from pxStats.lib.ClientStatsPickler import ClientStatsPickler
+from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+   
 
 LOCAL_MACHINE = os.uname()[1]   
     
@@ -50,7 +59,7 @@ class _UpdaterInfos:
             
         """ 
         
-        systemsCurrentDate  = MyDateLib.getIsoFromEpoch( time.time() )
+        systemsCurrentDate  = StatsDateLib.getIsoFromEpoch( time.time() )
         self.clients        = clients                            # Client for wich the job is done.
         self.machine        = machine                            # Machine on wich update is made. 
         self.types          = types                              # Data types to collect ex:latency 
@@ -80,7 +89,7 @@ def setLastCronJob( machine, client, fileType, currentDate, collectUpToNow = Fal
     fileName = StatsPaths.STATSROOT + "PICKLED-TIMES"  
     
     if collectUpToNow == False :
-        currentDate = MyDateLib.getIsoWithRoundedHours( currentDate ) 
+        currentDate = StatsDateLib.getIsoWithRoundedHours( currentDate ) 
     
     
     if os.path.isfile( fileName ):
@@ -127,7 +136,7 @@ def getLastCronJob( machine, client, fileType, currentDate, collectUpToNow = Fal
         try :
             lastCronJob = times[ machine + "_" + fileType + "_" + client ]
         except:
-            lastCronJob = MyDateLib.getIsoWithRoundedHours( MyDateLib.getIsoFromEpoch( MyDateLib.getSecondsSinceEpoch(currentDate ) - MyDateLib.HOUR) )
+            lastCronJob = StatsDateLib.getIsoWithRoundedHours( StatsDateLib.getIsoFromEpoch( StatsDateLib.getSecondsSinceEpoch(currentDate ) - StatsDateLib.HOUR) )
             pass
             
         fileHandle.close()      
@@ -138,7 +147,7 @@ def getLastCronJob( machine, client, fileType, currentDate, collectUpToNow = Fal
         fileHandle  = open( fileName, "w" )
         
     
-        lastCronJob = MyDateLib.getIsoWithRoundedHours( MyDateLib.getIsoFromEpoch( MyDateLib.getSecondsSinceEpoch(currentDate ) - MyDateLib.HOUR) )
+        lastCronJob = StatsDateLib.getIsoWithRoundedHours( StatsDateLib.getIsoFromEpoch( StatsDateLib.getSecondsSinceEpoch(currentDate ) - StatsDateLib.HOUR) )
 
 
         times[ fileType + "_" + client ] = lastCronJob    
@@ -176,12 +185,12 @@ def getOptionsFromParser( parser, logger = None  ):
     interval       = options.interval
     collectUpToNow = options.collectUpToNow 
     currentDate    = options.currentDate.replace( '"','' ).replace( "'",'' )
-    currentDate    = MyDateLib.getIsoWithRoundedHours( currentDate ) 
+    currentDate    = StatsDateLib.getIsoWithRoundedHours( currentDate ) 
     fileType       = options.fileType.replace( "'",'' )
     machine        = options.machine.replace( " ","" )
     clients        = options.clients.replace(' ','' ).split( ',' )
     types          = options.types.replace( ' ', '' ).split( ',' )
-    pathToLogFiles = generalStatsLibraryMethods.getPathToLogFiles( LOCAL_MACHINE, machine )
+    pathToLogFiles = GeneralStatsLibraryMethods.getPathToLogFiles( LOCAL_MACHINE, machine )
     
     #print "*****pathToLogFiles %s" %pathToLogFiles
     
@@ -244,7 +253,7 @@ def getOptionsFromParser( parser, logger = None  ):
     
     
     if clients[0] == "All" :
-        rxNames, txNames = generalStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machine )
+        rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machine )
        
         if fileType == "tx": 
             clients = txNames                     
@@ -275,7 +284,7 @@ def getOptionsFromParser( parser, logger = None  ):
     infos = _UpdaterInfos( currentDate = currentDate, clients = usefullClients, startTimes = startTimes, directories = directories ,types = types, collectUpToNow = collectUpToNow, fileType = fileType, machine = machine )
     
     if collectUpToNow == False:
-        infos.endTime = MyDateLib.getIsoWithRoundedHours( infos.currentDate ) 
+        infos.endTime = StatsDateLib.getIsoWithRoundedHours( infos.currentDate ) 
     
     
         
@@ -351,7 +360,7 @@ def addOptions( parser ):
     parser.add_option( "-c", "--clients", action="store", type="string", dest="clients", default="All",
                         help="Clients' names" )
 
-    parser.add_option( "-d", "--date", action="store", type="string", dest="currentDate", default=MyDateLib.getIsoFromEpoch( time.time() ), help="Decide current time. Usefull for testing." ) 
+    parser.add_option( "-d", "--date", action="store", type="string", dest="currentDate", default=StatsDateLib.getIsoFromEpoch( time.time() ), help="Decide current time. Usefull for testing." ) 
                                             
     parser.add_option( "-i", "--interval", type="int", dest="interval", default=1,
                         help="Interval (in minutes) for which a point will be calculated. Will 'smooth' the graph" )
@@ -392,26 +401,26 @@ def updateHourlyPickles( infos, logger = None ):
     
     cs = ClientStatsPickler( logger = logger )
     
-    pathToLogFiles = generalStatsLibraryMethods.getPathToLogFiles( LOCAL_MACHINE, infos.machine )
+    pathToLogFiles = GeneralStatsLibraryMethods.getPathToLogFiles( LOCAL_MACHINE, infos.machine )
     
     for i in range( len (infos.clients) ) :
         
         cs.client = infos.clients[i]
         
-        width = MyDateLib.getSecondsSinceEpoch(infos.endTime) - MyDateLib.getSecondsSinceEpoch( MyDateLib.getIsoWithRoundedHours(infos.startTimes[i] ) ) 
+        width = StatsDateLib.getSecondsSinceEpoch(infos.endTime) - StatsDateLib.getSecondsSinceEpoch( StatsDateLib.getIsoWithRoundedHours(infos.startTimes[i] ) ) 
         
         
-        if width > MyDateLib.HOUR :#In case pickling didnt happen for a few hours for some reason...   
+        if width > StatsDateLib.HOUR :#In case pickling didnt happen for a few hours for some reason...   
             
             hours = [infos.startTimes[i]]
-            hours.extend( MyDateLib.getSeparatorsWithStartTime( infos.startTimes[i], interval = MyDateLib.HOUR, width = width ))
+            hours.extend( StatsDateLib.getSeparatorsWithStartTime( infos.startTimes[i], interval = StatsDateLib.HOUR, width = width ))
             
             for j in range( len(hours)-1 ): #Covers hours where no pickling was done.                               
                 
-                startOfTheHour = MyDateLib.getIsoWithRoundedHours( hours[j] )
+                startOfTheHour = StatsDateLib.getIsoWithRoundedHours( hours[j] )
                 startTime = startOfTheHour        
                                                    
-                endTime = MyDateLib.getIsoFromEpoch( MyDateLib.getSecondsSinceEpoch( MyDateLib.getIsoWithRoundedHours(hours[j+1] ) ))
+                endTime = StatsDateLib.getIsoFromEpoch( StatsDateLib.getSecondsSinceEpoch( StatsDateLib.getIsoWithRoundedHours(hours[j+1] ) ))
                 #print " client : %s startTime : %s endTime : %s" %(infos.clients[i], startTime, endTime )
                 
                 if startTime >= endTime and logger != None :                                
@@ -420,14 +429,14 @@ def updateHourlyPickles( infos, logger = None ):
                 
                 cs.pickleName =  ClientStatsPickler.buildThisHoursFileName( client = infos.clients[i], currentTime =  startOfTheHour, machine = infos.machine, fileType = infos.fileType )
                  
-                cs.collectStats( types = infos.types, startTime = startTime , endTime = endTime, interval = infos.interval * MyDateLib.MINUTE,  directory = pathToLogFiles, fileType = infos.fileType )                     
+                cs.collectStats( types = infos.types, startTime = startTime , endTime = endTime, interval = infos.interval * StatsDateLib.MINUTE,  directory = pathToLogFiles, fileType = infos.fileType )                     
                            
                     
         else:      
            
             startTime = infos.startTimes[i]
             endTime   = infos.endTime             
-            startOfTheHour = MyDateLib.getIsoWithRoundedHours( infos.startTimes[i] )
+            startOfTheHour = StatsDateLib.getIsoWithRoundedHours( infos.startTimes[i] )
             #print " client : %s startTime : %s endTime : %s" %(infos.clients[i], startTime, endTime )               
             if startTime >= endTime and logger != None :#to be removed                
                 logger.warning( "Startime used in updateHourlyPickles was greater or equal to end time." )    
@@ -435,7 +444,7 @@ def updateHourlyPickles( infos, logger = None ):
                 
             cs.pickleName =   ClientStatsPickler.buildThisHoursFileName( client = infos.clients[i], currentTime = startOfTheHour, machine = infos.machine, fileType = infos.fileType )            
               
-            cs.collectStats( infos.types, startTime = startTime, endTime = endTime, interval = infos.interval * MyDateLib.MINUTE, directory = pathToLogFiles, fileType = infos.fileType   )        
+            cs.collectStats( infos.types, startTime = startTime, endTime = endTime, interval = infos.interval * StatsDateLib.MINUTE, directory = pathToLogFiles, fileType = infos.fileType   )        
        
                          
         setLastCronJob( machine = infos.machine, client = infos.clients[i], fileType = infos.fileType, currentDate = infos.currentDate, collectUpToNow = infos.collectUpToNow )
@@ -452,10 +461,10 @@ def main():
     if not os.path.isdir( StatsPaths.STATSPICKLES ):
         os.makedirs( StatsPaths.STATSPICKLES, mode=0777 )    
     
-    if not os.path.isdir( StatsPaths.PXLOG ):
-        os.makedirs( StatsPaths.PXLOG, mode=0777 )
+    if not os.path.isdir( StatsPaths.STATSLOGGING ):
+        os.makedirs( StatsPaths.STATSLOGGING, mode=0777 )
     
-    logger = Logger( StatsPaths.PXLOG + 'stats_' + 'pickling' + '.log.notb', 'INFO', 'TX' + 'pickling', bytes = True  ) 
+    logger = Logger( StatsPaths.STATSLOGGING + 'stats_' + 'pickling' + '.log.notb', 'INFO', 'TX' + 'pickling', bytes = True  ) 
     logger = logger.getLogger()
    
     parser = createParser( )  #will be used to parse options 
