@@ -2,7 +2,6 @@
 MetPX Copyright (C) 2004-2006  Environment Canada
 MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
 named COPYING in the root of the source directory tree.
-"""
 
 ##############################################################################
 ##
@@ -29,8 +28,13 @@ named COPYING in the root of the source directory tree.
 ## 
 ##
 ##############################################################################
+"""
 
-import os, commands, pwd, sys, StatsPaths, cpickleWrapper,glob
+
+import os, commands, pwd, sys, glob
+
+from StatsPaths import StatsPaths
+from CpickleWrapper import CpickleWrapper
 
 
 class PickleVersionChecker :
@@ -93,7 +97,7 @@ class PickleVersionChecker :
             
         try :
             
-            self.savedFileList = cpickleWrapper.load( directory + fileName )
+            self.savedFileList = CpickleWrapper.load( directory + fileName )
             
             if savedFileList == None :
                 self.savedFileList = {}
@@ -180,7 +184,7 @@ class PickleVersionChecker :
             os.makedirs( directory, mode=0777 )
             #create directory
         
-        cpickleWrapper.save( object = self.savedFileList, filename = directory + fileName )
+        CpickleWrapper.save( object = self.savedFileList, filename = directory + fileName )
 
  
            

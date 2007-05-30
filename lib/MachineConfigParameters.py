@@ -17,7 +17,9 @@
 # 
 #############################################################################################
 '''
-import os, StatsPaths
+import os
+
+from StatsPaths import StatsPaths
 
 
 class MachineConfigParameters:

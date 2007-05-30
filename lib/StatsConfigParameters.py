@@ -18,15 +18,13 @@
 #############################################################################################
 '''
 
-import StatsPaths
-import ConfigParser
-import TimeParameters
-from MachineConfigParameters import MachineConfigParameters
+
+from ConfigParser            import ConfigParser
 from DetailedStatsParameters import DetailedStatsParameters
 from GroupConfigParameters   import GroupConfigParameters
-from TimeParameters import TimeConfigParameters
-from ConfigParser import ConfigParser
-
+from MachineConfigParameters import MachineConfigParameters
+from StatsPaths              import StatsPaths
+from TimeParameters          import TimeConfigParameters
 
 
 

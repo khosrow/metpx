@@ -2,7 +2,7 @@
 MetPX Copyright (C) 2004-2006  Environment Canada
 MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
 named COPYING in the root of the source directory tree.
-"""
+
 #######################################################################################
 ##
 ## Name   : ClientStatsPickler.py 
@@ -24,24 +24,30 @@ named COPYING in the root of the source directory tree.
 ##          Specified directory needs to contain only valid files.  
 ##
 #######################################################################################
+"""
+import os , sys
+"""
+    Small function that adds pxlib to the environment path.  
+"""
+try:
+    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
+except KeyError:
+    pxlib = '/apps/px/lib/'
+sys.path.append(pxlib)
 
 
-#important files
-import os 
-import pickle
-import cPickle
-import LogFileCollector
-import cpickleWrapper
-import StatsPaths
-import Logger
+"""
+    Imports
+    Logger requires pxlib 
+"""
 from   Logger                 import Logger
-from   Logger                 import *
-from   Numeric                import *
-from   FileStatsCollector     import *
-from   random                 import *
-from   LogFileCollector       import *
-from   MyDateLib              import *
-from   generalStatsLibraryMethods import *
+from StatsPaths import StatsPaths
+from LogFileCollector import LogFileCollector
+from StatsDateLib import StatsDateLib
+from CpickleWrapper import CpickleWrapper
+from FileStatsCollector import FileStatsCollector
+from GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+
 
 LOCAL_MACHINE = os.uname()[1]   
     
@@ -67,9 +73,9 @@ class ClientStatsPickler:
         self.logger           = logger                 # Permits a logging system for this object.
         
         if logger is None: # Enable logging
-            if not os.path.isdir( StatsPaths.PXLOG ):
-                os.makedirs( StatsPaths.PXLOG , mode=0777 )
-            self.logger = Logger( StatsPaths.PXLOG + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
+            if not os.path.isdir( StatsPaths.STATSLOGGING ):
+                os.makedirs( StatsPaths.STATSLOGGING , mode=0777 )
+            self.logger = Logger( StatsPaths.STATSLOGGING + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
             self.logger = self.logger.getLogger()
            
         self.statsCollection  = statsCollection or FileStatsCollector( logger = self.logger )
@@ -101,9 +107,9 @@ class ClientStatsPickler:
         if currentTime == "":
             currentTime = time.time()
         else:
-            currentTime = MyDateLib.getSecondsSinceEpoch( currentTime )    
+            currentTime = StatsDateLib.getSecondsSinceEpoch( currentTime )    
         
-        currentTime = currentTime + ( offset * MyDateLib.HOUR )
+        currentTime = currentTime + ( offset * StatsDateLib.HOUR )
         splitTime = time.gmtime( currentTime )    
         
         for i in range( 3 ):
@@ -114,7 +120,7 @@ class ClientStatsPickler:
                 fileName = fileName + str( splitTime[i] )          
         
                 
-        hour = MyDateLib.getHoursFromIso( MyDateLib.getIsoFromEpoch( currentTime ) )
+        hour = StatsDateLib.getHoursFromIso( StatsDateLib.getIsoFromEpoch( currentTime ) )
         
         fileName = fileName + "/" + fileType + "/" + machine + "_" + hour
         
@@ -125,7 +131,7 @@ class ClientStatsPickler:
     
     
     
-    def collectStats( self, types, directory, fileType = "tx", startTime = '2006-05-18 00:00:00', endTime = "", interval = 60*MINUTE, save = True  ):
+    def collectStats( self, types, directory, fileType = "tx", startTime = '2006-05-18 00:00:00', endTime = "", interval = 60*StatsDateLib.MINUTE, save = True  ):
         """
             This method is used to collect stats for a directory.
             
@@ -186,7 +192,7 @@ class ClientStatsPickler:
             self.pickleName = ClientStatsPickler.buildThisHoursFileName( client = self.client, currentTime = startTime, machine = self.machine, fileType = fileType )
     
             
-        self.statsCollection = FileStatsCollector( files = self.fileCollection.entries, fileType = fileType, statsTypes = types, startTime = MyDateLib.getIsoWithRoundedHours( startTime ), endTime = endTime, interval = interval, totalWidth = 1*HOUR, logger = self.logger )
+        self.statsCollection = FileStatsCollector( files = self.fileCollection.entries, fileType = fileType, statsTypes = types, startTime = StatsDateLib.getIsoWithRoundedHours( startTime ), endTime = endTime, interval = interval, totalWidth = 1*HOUR, logger = self.logger )
         
         #Temporarily delete logger to make sure no duplicated lines appears in log file.
         temp  = self.logger
@@ -203,7 +209,7 @@ class ClientStatsPickler:
                 del self.statsCollection.logger
                 loggerNeedsToBeReplaced = True 
             
-            cpickleWrapper.save ( object = self.statsCollection, filename = self.pickleName ) 
+            CpickleWrapper.save ( object = self.statsCollection, filename = self.pickleName ) 
             
             
             if loggerNeedsToBeReplaced :  
@@ -261,13 +267,13 @@ def main():
     """
             small test case. Tests if everything works plus gives an idea on proper usage.
     """
-    pathToLogFiles =  generalStatsLibraryMethods.getPathToLogFiles( LOCAL_MACHINE, LOCAL_MACHINE )
+    pathToLogFiles =  GeneralStatsLibraryMethods.getPathToLogFiles( LOCAL_MACHINE, LOCAL_MACHINE )
    
     types = [ "latency","errors","bytecount" ]    
       
     cs = ClientStatsPickler( client = "satnet", directory = pathToLogFiles )
     
-    cs.collectStats( types, directory = pathToLogFiles, fileType = "tx", startTime = '2006-07-16 01:00:12', endTime = "2006-07-16 01:59:12", interval = 1*MINUTE )  
+    cs.collectStats( types, directory = pathToLogFiles, fileType = "tx", startTime = '2006-07-16 01:00:12', endTime = "2006-07-16 01:59:12", interval = 1*StatsDateLib.MINUTE )  
             
     cs.printStats()        
     

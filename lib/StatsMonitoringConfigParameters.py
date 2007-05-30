@@ -3,7 +3,7 @@
 MetPX Copyright (C) 2004-2006  Environment Canada
 MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
 named COPYING in the root of the source directory tree.
-"""
+
 ##########################################################################
 ##
 ## Name   : StatsMonitoringConfigParameters.py 
@@ -18,19 +18,22 @@ named COPYING in the root of the source directory tree.
 ##
 #############################################################################
 
+"""
+
 import os, sys, commands, time, pickle , fnmatch
-import StatsPaths, MyDateLib, generalStatsLibraryMethods 
 import readMaxFile
 
 from ConfigParser import ConfigParser
-from StatsConfigParameters import *
-from MachineConfigParameters import MachineConfigParameters
-from MyDateLib import *
+
+from StatsPaths import StatsPaths
+from StatsDateLib import StatsDateLib
 from FileStatsCollector import FileStatsCollector
-from generalStatsLibraryMethods import  *
+from GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+from MachineConfigParameters import MachineConfigParameters 
+from StatsConfigParameters import *
+
 
 LOCAL_MACHINE = os.uname()[1]
-
 
          
          
@@ -110,7 +113,7 @@ class StatsMonitoringConfigParameters:
             self.maxUsages     = config.get( 'statsMonitoring', 'maxUsages' ).split( ";" )
             self.errorsLogFile = config.get( 'statsMonitoring', 'errorsLogFile' )
             self.maxSettingsFile=config.get( 'statsMonitoring', 'maxSettingsFile' )
-            self.endTime = MyDateLib.getIsoWithRoundedHours( MyDateLib.getIsoFromEpoch( time.time() ) )            
+            self.endTime = StatsDateLib.getIsoWithRoundedHours( StatsDateLib.getIsoFromEpoch( time.time() ) )            
             self.startTime = self.getPreviousMonitoringJob(self.endTime)
             self.maximumGaps = self.getMaximumGaps( )
             self.updateMachineNamesBasedOnExistingMachineTags()
@@ -154,7 +157,7 @@ class StatsMonitoringConfigParameters:
             except:
                 raise Exception("Invalid tag found in main configuration file.")
                     
-            newRxNames, newTxNames = generalStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machine )
+            newRxNames, newTxNames = GeneralStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machine )
             rxNames.extend(newRxNames)
             txNames.extend(newTxNames)
             allNames.extend( rxNames )    
@@ -206,7 +209,7 @@ class StatsMonitoringConfigParameters:
             fileHandle.close()
         
         else:
-            previousMonitoringJob = MyDateLib.getIsoTodaysMidnight( currentTime )
+            previousMonitoringJob = StatsDateLib.getIsoTodaysMidnight( currentTime )
             
             
         return previousMonitoringJob        
