@@ -3,7 +3,7 @@
 MetPX Copyright (C) 2004-2006  Environment Canada
 MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
 named COPYING in the root of the source directory tree.
-"""
+
 
 #######################################################################################
 ##
@@ -20,24 +20,34 @@ named COPYING in the root of the source directory tree.
 ##          in the transferPickleToRRD program. 
 ##          
 #######################################################################################
+"""
+
+import os, time, getopt, rrdtool, shutil, sys
+
+"""
+    Small function that adds pxlib to the environment path.  
+"""
+sys.path.insert(1, sys.path[0] + '/../')
+try:
+    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
+except KeyError:
+    pxlib = '/apps/px/lib/'
+sys.path.append(pxlib)
 
 
-import os, time, getopt, rrdtool, shutil  
-import ClientStatsPickler, MyDateLib, pickleMerging, PXManager, StatsPaths, transferPickleToRRD
-import generalStatsLibraryMethods
-import rrdUtilities
-
-from   transferPickleToRRD import *
-from   generalStatsLibraryMethods import *
-from   rrdUtilities import *
-
-from   sys import *
-from   ClientStatsPickler import *
-from   optparse  import OptionParser
+"""
+    Imports
+    PXManager requires pxlib 
+"""
 from   PXManager import *
-from   MyDateLib import *
-from   Logger    import *     
-from   Logger    import *       
+from   Logger import *
+
+from   optparse  import OptionParser
+
+from pxStats.lib.StatsDateLib import StatsDateLib
+from pxStats.lib.RrdUtilities import RrdUtilities
+from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+from pxStats.lib.StatsPaths import StatsPaths      
 
 LOCAL_MACHINE = os.uname()[1]
     
@@ -162,32 +172,32 @@ def getOptionsFromParser( parser ):
     if fixedPrevious :
         if daily :
             graphicType = "daily"
-            start, end = MyDateLib.getStartEndFromPreviousDay( date )             
+            start, end = StatsDateLib.getStartEndFromPreviousDay( date )             
         elif weekly:
             graphicType = "weekly"
-            start, end = MyDateLib.getStartEndFromPreviousWeek( date )
+            start, end = StatsDateLib.getStartEndFromPreviousWeek( date )
         elif monthly:
             graphicType = "monthly"
-            start, end = MyDateLib.getStartEndFromPreviousMonth( date )
+            start, end = StatsDateLib.getStartEndFromPreviousMonth( date )
         elif yearly:
             graphicType = "yearly" 
-            start, end = MyDateLib.getStartEndFromPreviousYear( date )
-        timespan = int( MyDateLib.getSecondsSinceEpoch( end ) - MyDateLib.getSecondsSinceEpoch( start ) ) / 3600
+            start, end = StatsDateLib.getStartEndFromPreviousYear( date )
+        timespan = int( StatsDateLib.getSecondsSinceEpoch( end ) - StatsDateLib.getSecondsSinceEpoch( start ) ) / 3600
              
     elif fixedCurrent:
         if daily :
             graphicType = "daily"
-            start, end = MyDateLib.getStartEndFromCurrentDay( date )   
+            start, end = StatsDateLib.getStartEndFromCurrentDay( date )   
         elif weekly:
             graphicType = "weekly"
-            start, end = MyDateLib.getStartEndFromCurrentWeek( date )
+            start, end = StatsDateLib.getStartEndFromCurrentWeek( date )
         elif monthly:
             graphicType = "monthly"
-            start, end = MyDateLib.getStartEndFromCurrentMonth( date )    
+            start, end = StatsDateLib.getStartEndFromCurrentMonth( date )    
         elif yearly:
             graphicType = "yearly" 
-            start, end = MyDateLib.getStartEndFromCurrentYear( date ) 
-        timespan = int( MyDateLib.getSecondsSinceEpoch( end ) - MyDateLib.getSecondsSinceEpoch( start ) ) / 3600
+            start, end = StatsDateLib.getStartEndFromCurrentYear( date ) 
+        timespan = int( StatsDateLib.getSecondsSinceEpoch( end ) - StatsDateLib.getSecondsSinceEpoch( start ) ) / 3600
         
     else:       
         #TODO fix timeSpan method???   
@@ -204,7 +214,7 @@ def getOptionsFromParser( parser ):
             timespan = 24 * 365
             graphicType = "yearly"  
             
-        start = MyDateLib.getIsoFromEpoch( MyDateLib.getSecondsSinceEpoch( date ) - timespan*60*60 ) 
+        start = StatsDateLib.getIsoFromEpoch( StatsDateLib.getSecondsSinceEpoch( date ) - timespan*60*60 ) 
         end   = date                       
             
     #print "timespan %s" %timespan                           
@@ -237,10 +247,10 @@ def getOptionsFromParser( parser ):
     if clientNames[0] == "ALL":
         # Get all of the client/sources that have run between graph's start and end. 
         if totals == True or havingRun == True :                  
-            rxNames, txNames = generalStatsLibraryMethods.getRxTxNamesHavingRunDuringPeriod( start, end, machines )
+            rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNamesHavingRunDuringPeriod( start, end, machines )
             mergerType = "totalForMachine"
         else:#Build graphs only for currently runningclient/sources.      
-            rxNames, txNames = generalStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machines[0] )
+            rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machines[0] )
             mergerType = "group"
                      
         if fileType == "tx":    
@@ -292,7 +302,7 @@ def getOptionsFromParser( parser ):
                 
     
     
-    end = MyDateLib.getIsoWithRoundedHours( end )
+    end = StatsDateLib.getIsoWithRoundedHours( end )
     
     infos = _GraphicsInfos( startTime = start, endTime = end, graphicType = graphicType, clientNames = clientNames, types = types, timespan = timespan, machines = machines, fileType = fileType, totals = totals, copy = copy, mergerType = mergerType  )   
             
@@ -382,7 +392,7 @@ def addOptions( parser ):
     
     parser.add_option("-d", "--daily", action="store_true", dest = "daily", default=False, help="Create daily graph(s).")
     
-    parser.add_option( "--date", action="store", type="string", dest="date", default=MyDateLib.getIsoFromEpoch( time.time() ), help="Decide end time of graphics. Usefull for testing.")
+    parser.add_option( "--date", action="store", type="string", dest="date", default=StatsDateLib.getIsoFromEpoch( time.time() ), help="Decide end time of graphics. Usefull for testing.")
     
     parser.add_option("-f", "--fileType", action="store", type="string", dest="fileType", default='tx', help="Type of log files wanted.")                     
     
@@ -953,7 +963,7 @@ def getCopyDestination( type, client, machine, infos ):
     """
     
     oneDay = 24*60*60
-    endTimeInSeconds = MyDateLib.getSecondsSinceEpoch( infos.endTime )
+    endTimeInSeconds = StatsDateLib.getSecondsSinceEpoch( infos.endTime )
     
     if infos.totals != True:
         
@@ -1049,11 +1059,11 @@ def plotRRDGraph( databaseName, type, fileType, client, machine, infos, logger =
     """
     
     imageName    = buildImageName( type, client, machine, infos, logger )        
-    start        = int ( MyDateLib.getSecondsSinceEpoch ( infos.startTime ) ) 
-    end          = int ( MyDateLib.getSecondsSinceEpoch ( infos.endTime ) )  
+    start        = int ( StatsDateLib.getSecondsSinceEpoch ( infos.startTime ) ) 
+    end          = int ( StatsDateLib.getSecondsSinceEpoch ( infos.endTime ) )  
     formatedTitleType, formatedYLabelType = formatedTypesForLables( type )          
 
-    lastUpdate = rrdUtilities.getDatabaseTimeOfUpdate( databaseName, fileType )        
+    lastUpdate = RrdUtilities.getDatabaseTimeOfUpdate( databaseName, fileType )        
                   
     fetchedInterval = getInterval( start, lastUpdate, infos.graphicType, goal = "fetchData"  )  
     desiredInterval = getInterval( start, lastUpdate, infos.graphicType, goal = "plotGraphic"  )
@@ -1136,7 +1146,7 @@ def createNewMergedDatabase( infos, dataType,  machine, start, interval    ) :
     
     """
        
-    rrdFilename = rrdUtilities.buildRRDFileName( dataType = dataType, clients = infos.clientNames, machines =[machine], fileType = infos.fileType, usage =infos.mergerType)
+    rrdFilename = RrdUtilities.buildRRDFileName( dataType = dataType, clients = infos.clientNames, machines =[machine], fileType = infos.fileType, usage =infos.mergerType)
     
     
     
@@ -1186,8 +1196,8 @@ def getInfosFromDatabases( dataOutputs, names, machine, fileType, startTime, end
         
     while lastUpdate == 0 and i < len( names) : # in case some databases dont exist
         
-        rrdFileName = rrdUtilities.buildRRDFileName( "errors", clients = [ names[i] ], machines = [machine], fileType = fileType, usage = "regular" )
-        lastUpdate  = rrdUtilities.getDatabaseTimeOfUpdate( rrdFileName, fileType )    
+        rrdFileName = RrdUtilities.buildRRDFileName( "errors", clients = [ names[i] ], machines = [machine], fileType = fileType, usage = "regular" )
+        lastUpdate  = RrdUtilities.getDatabaseTimeOfUpdate( rrdFileName, fileType )    
         nbEntries   = len( dataOutputs[ names[i] ] )
         i = i + 1        
          
@@ -1213,7 +1223,7 @@ def getPairsFromAllDatabases( type, machine, start, end, infos, logger=None ):
     
     for client in infos.clientNames:#Gather all pairs for that type
         
-        databaseName = rrdUtilities.buildRRDFileName( dataType = type , clients = [client], machines = machine, fileType = infos.fileType) 
+        databaseName = RrdUtilities.buildRRDFileName( dataType = type , clients = [client], machines = machine, fileType = infos.fileType) 
 
         status, output = commands.getstatusoutput("rrdtool fetch %s  'AVERAGE' -s %s  -e %s" %( databaseName, (start), end) )
 
@@ -1271,8 +1281,8 @@ def createMergedDatabases( infos, logger = None ):
     lastUpdate = 0
     dataPairs  = {}
     typeData   = {}
-    start      = int( MyDateLib.getSecondsSinceEpoch ( infos.startTime )  )
-    end        = int( MyDateLib.getSecondsSinceEpoch ( infos.endTime )    ) 
+    start      = int( StatsDateLib.getSecondsSinceEpoch ( infos.startTime )  )
+    end        = int( StatsDateLib.getSecondsSinceEpoch ( infos.endTime )    ) 
     databaseNames = {}
     
 
@@ -1283,8 +1293,8 @@ def createMergedDatabases( infos, logger = None ):
             typeData[type] = {}
             i = 0 
             while i < len(infos.clientNames) and lastUpdate == 0 :
-                databaseName = rrdUtilities.buildRRDFileName( dataType = type, clients = [infos.clientNames[i]] , machines = [machine],  fileType = infos.fileType, usage = "regular"  )
-                lastUpdate  =  rrdUtilities.getDatabaseTimeOfUpdate( databaseName, infos.fileType )
+                databaseName = RrdUtilities.buildRRDFileName( dataType = type, clients = [infos.clientNames[i]] , machines = [machine],  fileType = infos.fileType, usage = "regular"  )
+                lastUpdate  =  RrdUtilities.getDatabaseTimeOfUpdate( databaseName, infos.fileType )
             
             interval = getInterval( start, lastUpdate, infos.graphicType, goal = "fetchData"  )    
             
@@ -1298,7 +1308,7 @@ def createMergedDatabases( infos, logger = None ):
                 if pair[1] != None :
                     rrdtool.update( combinedDatabaseName, '%s:%s' %( int(pair[0]), pair[1] ) )
                         
-            rrdUtilities.setDatabaseTimeOfUpdate(combinedDatabaseName, infos.fileType, lastUpdate)
+            RrdUtilities.setDatabaseTimeOfUpdate(combinedDatabaseName, infos.fileType, lastUpdate)
             
                 
     return databaseNames
@@ -1328,7 +1338,7 @@ def generateRRDGraphics( infos, logger = None ):
                 
                 for type in infos.types : 
                    
-                    databaseName = rrdUtilities.buildRRDFileName( dataType = type, clients = [client], machines = [machine], fileType = infos.fileType )
+                    databaseName = RrdUtilities.buildRRDFileName( dataType = type, clients = [client], machines = [machine], fileType = infos.fileType )
                     plotRRDGraph( databaseName, type, infos.fileType, client, machine, infos,logger = logger )
                 
 
@@ -1342,7 +1352,7 @@ def main():
     if not os.path.isdir( StatsPaths.PXLOG  ):
         os.makedirs( StatsPaths.PXLOG  , mode=0777 )
     
-    logger = Logger( StatsPaths.PXLOG   + 'stats_'+'rrd_graphs' + '.log.notb', 'INFO', 'TX' + 'rrd_graphs', bytes = True  ) 
+    logger = Logger( StatsPaths.STATSLOGGING   + 'stats_'+'rrd_graphs' + '.log.notb', 'INFO', 'TX' + 'rrd_graphs', bytes = True  ) 
     
     logger = logger.getLogger()
        

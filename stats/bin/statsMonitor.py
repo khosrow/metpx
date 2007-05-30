@@ -3,7 +3,7 @@
 MetPX Copyright (C) 2004-2006  Environment Canada
 MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
 named COPYING in the root of the source directory tree.
-"""
+
 ##########################################################################
 ##
 ## Name   : statsMonitoring.py 
@@ -20,25 +20,41 @@ named COPYING in the root of the source directory tree.
 ## Date   : November 29th 2006, last updated May 09th 2007
 ##
 #############################################################################
+"""
 
+"""
+    Small function that adds pxlib to the environment path.  
+"""
 import os, sys, commands, pickle, fnmatch
-import StatsPaths, cpickleWrapper
-import smtplib
-import LogFileCollector
-import mailLib
-import readMaxFile
-import generalStatsLibraryMethods
+sys.path.insert(1, sys.path[0] + '/../')
+try:
+    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
+except KeyError:
+    pxlib = '/apps/px/lib/'
+sys.path.append(pxlib)
 
-from StatsConfigParameters import StatsConfigParameters
-from StatsMonitoringConfigParameters import StatsMonitoringConfigParameters
-from generalStatsLibraryMethods import *
-from ClientStatsPickler import ClientStatsPickler 
-from PXManager import *
-from LogFileCollector import *
+"""
+    Imports
+    PXManager requires pxlib 
+"""
+import smtplib
+import mailLib
+
+
 from ConfigParser import ConfigParser
-from MyDateLib import *
 from mailLib import *
-from MachineConfigParameters import MachineConfigParameters
+from PXManager import *
+
+from lib.ClientStatsPickler import ClientStatsPickler
+from lib.CpickleWrapper import CpickleWrapper
+from lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+from lib.LogFileCollector import LogFileCollector
+from lib.StatsPaths import StatsPaths
+from lib.MachineConfigParameters import MachineConfigParameters
+from lib.StatsDateLib import StatsDateLib
+from lib.StatsMonitoringConfigParameters import StatsMonitoringConfigParameters
+from lib.StatsConfigParameters import StatsConfigParameters
+
 
 LOCAL_MACHINE = os.uname()[1]
    
@@ -601,7 +617,7 @@ def verifyPicklePresence( parameters, report ):
         if "," in machine:
             machine = machine.split(",")[0]
             
-        rxNames, txNames = generalStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machine  )
+        rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machine  )
         
         for txName in txNames:
             folders = getFoldersAndFilesAssociatedWith( txName, "tx", machine, startTime , parameters.endTime )
@@ -810,7 +826,7 @@ def getPickleAnalysis( files, name, lastValidEntry, maximumGap, errorLog ):
         
         if os.path.isfile(file):
             
-            fcs =  cpickleWrapper.load ( file )
+            fcs =  CpickleWrapper.load ( file )
             if fcs != None :
                 for entry in fcs.fileEntries:
                     nbEntries = len( entry.values.productTypes )
@@ -866,7 +882,7 @@ def verifyPickleContent( parameters, report ):
         else:
             splitMachine = machine
             
-        rxNames, txNames = generalStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, splitMachine )
+        rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, splitMachine )
         
         if "," in machine:   
             machine = getCombinedMachineName( machine )     
@@ -1099,7 +1115,7 @@ def verifyGraphs( parameters, report ):
     for machine in parameters.machines:
         if "," in machine:
             machine = machine.split(",")[0]
-        rxNames, txNames = generalStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machine )
+        rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machine )
         allNames.extend( rxNames )    
         allNames.extend( txNames )
        
@@ -1111,7 +1127,7 @@ def verifyGraphs( parameters, report ):
             
             if ( currentTime - os.path.getmtime( image ) ) / ( 60*60 ) >1 :
                 outdatedGraphsFound = True 
-                newReportLines = newReportLines + "%s's daily image was not updated since %s\n" %( name, MyDateLib.getIsoFromEpoch(os.path.getmtime( image ) ) )
+                newReportLines = newReportLines + "%s's daily image was not updated since %s\n" %( name, StatsDateLib.getIsoFromEpoch(os.path.getmtime( image ) ) )
         
         else:
             outdatedGraphsFound = True 

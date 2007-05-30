@@ -25,15 +25,14 @@ named COPYING in the root of the source directory tree.
 ##############################################################################################
 
 
-import commands, os, sys 
-import ConfigParser
-import StatsPaths
-from StatsConfigParameters import StatsConfigParameters   
-from MachineConfigParameters import MachineConfigParameters
+import commands, os, sys, ConfigParser 
+sys.path.insert(1, sys.path[0] + '/../')
 
+from lib.StatsPaths import StatsPaths
+from lib.StatsConfigParameters import StatsConfigParameters   
+from lib.MachineConfigParameters import MachineConfigParameters
 
 LOCAL_MACHINE = os.uname()[1]
-
 
 
 def transferLogFiles():
@@ -79,49 +78,26 @@ def transfer( login, machine ):
         
     """    
     
-    paths = [ StatsPaths.STATSMONITORING , StatsPaths.STATSGRAPHS , StatsPaths.STATSPICKLES, StatsPaths.STATSDB, StatsPaths.STATSDBBACKUPS , StatsPaths.STATSDBUPDATES, StatsPaths.STATSDBUPDATESBACKUPS ]
+    paths = [ StatsPaths.STATSMONITORING , StatsPaths.STATSGRAPHS , StatsPaths.STATSPICKLES, StatsPaths.STATSCURRENTDB, StatsPaths.STATSDBBACKUPS , StatsPaths.STATSCURRENTDBUPDATES, StatsPaths.STATSDBUPDATESBACKUPS ]
     
     for path in paths:
         if not os.path.isdir( path ) :            
                 print path
                 os.makedirs( path )
             
-           
+    paths.append( StatsPaths.STATSMONITORING + 'maxSettings.conf' )
+    paths.append( StatsPaths.STATSMONITORING + 'previousCrontab' )      
+    paths.append( StatsPaths.STATSMONITORING + 'previousFileChecksums')
+    
             
     for i in range(5):
                 
         transferLogFiles()
         
-        status, output = commands.getstatusoutput( "rsync -avzr  --delete-before -e ssh %s@%s:%smaxSettings.conf %smaxSettings.conf"  %( login, machine, StatsPaths.STATSMONITORING, StatsPaths.STATSMONITORING ) )
-        print output
-        
-        status, output = commands.getstatusoutput( "rsync -avzr  --delete-before -e ssh %s@%s:%spreviousCrontab %spreviousCrontab"  %( login, machine, StatsPaths.STATSMONITORING, StatsPaths.STATSMONITORING ))
-        print output
-        
-        status, output = commands.getstatusoutput( "rsync -avzr  --delete-before -e ssh %s@%s:%spreviousFileChecksums %spreviousFileChecksums"  %( login, machine, StatsPaths.STATSMONITORING, StatsPaths.STATSMONITORING ))
-        print output
-        
-        status, output = commands.getstatusoutput( "rsync -avzr  --delete-before -e ssh %s@%s:%s %s"  %( login, machine, StatsPaths.STATSGRAPHS,  StatsPaths.STATSGRAPHS  ) )
-        print output
-        
-        status, output = commands.getstatusoutput( "rsync -avzr  --delete-before -e ssh %s@%s:%s %s"  %( login, machine, StatsPaths.STATSPICKLES, StatsPaths.STATSPICKLES  ) )
-        print output
-        
-        status, output = commands.getstatusoutput( "rsync -avzr  --delete-before -e ssh %s@%s:%s %s"  %( login, machine, StatsPaths.STATSDB, StatsPaths.STATSDB ) )
-        print output
-        
-        status, output = commands.getstatusoutput( "rsync -avzr  --delete-before -e ssh %s@%s:%s %s"  %( login, machine, StatsPaths.STATSDBBACKUPS, StatsPaths.STATSDBBACKUPS  ) )
-        print output
-                
-        status, output = commands.getstatusoutput( "rsync -avzr  --delete-before -e ssh %s@%s:%s %s"  %( login, machine, StatsPaths.STATSDBUPDATES, StatsPaths.STATSDBUPDATES ) )
-        print output
-        
-        status, output = commands.getstatusoutput( "rsync -avzr  --delete-before -e ssh %s@%s:%s %s"  %( login, machine, StatsPaths.STATSDBUPDATESBACKUPS, StatsPaths.STATSDBUPDATESBACKUPS ) )
-        print output        
-        
-        status, output = commands.getstatusoutput( "rsync -avzr  --delete-before -e ssh %s@%s:%sPICKLED-TIMES %sPICKLED-TIMES "  %( login, machine, StatsPaths.STATSROOT, StatsPaths.STATSROOT ) )
-        print output 
-  
+        for path in paths :
+            status, output = commands.getstatusoutput( "rsync -avzr  --delete-before -e ssh %s@%s:%s %s"  %( login, machine, path, path ) )
+            print output        
+         
     
 def main():
     """

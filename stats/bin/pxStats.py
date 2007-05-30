@@ -15,11 +15,14 @@ named COPYING in the root of the source directory tree.
 #############################################################################
 
 import os, sys, commands, time
-import StatsPaths, MyDateLib
+sys.path.insert(1, sys.path[0] + '/../')
 
-from MachineConfigParameters import MachineConfigParameters
-from StatsConfigParameters import StatsConfigParameters
-from MyDateLib import *
+from lib.StatsPaths import StatsPaths
+from lib.StatsDateLib import StatsDateLib
+
+from lib.MachineConfigParameters import MachineConfigParameters
+from lib.StatsConfigParameters import StatsConfigParameters
+
 
 LOCAL_MACHINE = os.uname()[1]
             

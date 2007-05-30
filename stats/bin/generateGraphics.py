@@ -3,7 +3,6 @@
 MetPX Copyright (C) 2004-2006  Environment Canada
 MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
 named COPYING in the root of the source directory tree.
-"""
 
 ##############################################################################
 ##
@@ -20,19 +19,18 @@ named COPYING in the root of the source directory tree.
 ##
 ##
 ##############################################################################
-
-
+"""
 
 import os, time, sys
-import generalStatsLibraryMethods
-import MyDateLib
+sys.path.insert(1, sys.path[0] + '/../')
 
-from MyDateLib import  *
 from optparse import OptionParser
 from ConfigParser import ConfigParser
-from ClientGraphicProducer import *
-from generalStatsLibraryMethods import *
 from fnmatch import fnmatch
+from lib.StatsDateLib import StatsDateLib
+from lib.StatsPaths import StatsPaths
+from lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+from lib.ClientGraphicProducer import ClientGraphicProducer
 
 LOCAL_MACHINE = os.uname()[1]
 
@@ -164,14 +162,14 @@ def getOptionsFromParser( parser ):
         sys.exit()
     
     
-    clientNames = generalStatsLibraryMethods.filterClientsNamesUsingWilcardFilters( currentTime, timespan, clientNames, machines, [fileType])
+    clientNames = GeneralStatsLibraryMethods.filterClientsNamesUsingWilcardFilters( currentTime, timespan, clientNames, machines, [fileType])
     
-    directory =  generalStatsLibraryMethods.getPathToLogFiles( LOCAL_MACHINE, machines[0] )
+    directory =  GeneralStatsLibraryMethods.getPathToLogFiles( LOCAL_MACHINE, machines[0] )
     
     infos = _GraphicsInfos( collectUpToNow = collectUpToNow, currentTime = currentTime, clientNames = clientNames, groupName = groupName,  directory = directory , types = types, fileType = fileType, timespan = timespan, productTypes = productTypes, machines = machines, copy = copy, combineClients = combineClients )
     
     if collectUpToNow == False:
-        infos.endTime = MyDateLib.getIsoWithRoundedHours( infos.currentTime ) 
+        infos.endTime = StatsDateLib.getIsoWithRoundedHours( infos.currentTime ) 
     
     
     return infos 
@@ -251,7 +249,7 @@ def addOptions( parser ):
    
     parser.add_option( "--combineClients", action="store_true", dest = "combineClients", default=False, help="Combine the data of all client into a single graphics for each graphic type.")
     
-    parser.add_option("-d", "--date", action="store", type="string", dest="currentTime", default=MyDateLib.getIsoFromEpoch( time.time() ), help="Decide current time. Usefull for testing.")
+    parser.add_option("-d", "--date", action="store", type="string", dest="currentTime", default=StatsDateLib.getIsoFromEpoch( time.time() ), help="Decide current time. Usefull for testing.")
     
     parser.add_option("-f", "--fileType", action="store", type="string", dest="fileType", default='tx', help="Type of log files wanted.")                     
     
