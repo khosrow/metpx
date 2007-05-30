@@ -19,9 +19,11 @@ named COPYING in the root of the source directory tree.
 """
 
 import os, sys
+
 """
     Small function that adds pxlib to the environment path.  
 """
+sys.path.insert(1, sys.path[0] + '/../../')
 try:
     pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
 except KeyError:
@@ -34,7 +36,7 @@ sys.path.append(pxlib)
     PxManager requires pxlib 
 """
 from   PXManager    import *        
-from   StatsPaths   import StatsPaths
+from   pxStats.lib.StatsPaths   import StatsPaths
           
 
 LOCAL_MACHINE = os.uname()[1]  

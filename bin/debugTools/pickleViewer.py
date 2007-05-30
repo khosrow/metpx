@@ -30,9 +30,10 @@ named COPYING in the root of the source directory tree.
 
 
 import os,sys
-sys.path.insert(1, sys.path[0] + '/../../')
-from lib.CpickleWrapper import CpickleWrapper
-from lib.FileStatsCollector import FileStatsCollector
+sys.path.insert(1, sys.path[0] + '/../../../')
+
+from pxStats.lib.CpickleWrapper import CpickleWrapper
+from pxStats.lib.FileStatsCollector import FileStatsCollector
 
  
 def printPickle( pickle, outputFile = "" ):

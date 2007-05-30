@@ -17,9 +17,10 @@
 # 
 #############################################################################################
 '''
-import os
+import os, sys 
+sys.path.insert(1, sys.path[0] + '/../../')
 
-from StatsPaths import StatsPaths
+from pxStats.lib.StatsPaths import StatsPaths
 
 
 class MachineConfigParameters:
@@ -226,7 +227,7 @@ class MachineConfigParameters:
         
         '''
                   
-        CONFIG = StatsPaths.STATSROOT + "configForMachines"     
+        CONFIG = StatsPaths.STATSETC + "configForMachines"     
         
         if os.path.isfile( CONFIG ):
             

@@ -24,9 +24,11 @@ named COPYING in the root of the source directory tree.
 """
 
 import os, time, sys
+sys.path.insert(1, sys.path[0] + '/../../')
 """
     Small function that adds pxlib to the environment path.  
 """
+sys.path.insert(1, sys.path[0] + '/../')
 try:
     pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
 except KeyError:
@@ -42,12 +44,13 @@ import logging
 
 from Logger import *
 
-from ClientStatsPickler import ClientStatsPickler
-from FileStatsCollector import FileStatsCollector
-from StatsDateLib import StatsDateLib
-from PickleMerging import PickleMerging
-from StatsPlotter import StatsPlotter
-from GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+from pxStats.lib.ClientStatsPickler import ClientStatsPickler
+from pxStats.lib.FileStatsCollector import FileStatsCollector
+from pxStats.lib.StatsDateLib import StatsDateLib
+from pxStats.lib.PickleMerging import PickleMerging
+from pxStats.lib.StatsPlotter import StatsPlotter
+from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+
 
 LOCAL_MACHINE = os.uname()[1]
 

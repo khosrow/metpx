@@ -18,13 +18,15 @@
 #############################################################################################
 '''
 
+import sys
+sys.path.insert(1, sys.path[0] + '/../../')
 
-from ConfigParser            import ConfigParser
-from DetailedStatsParameters import DetailedStatsParameters
-from GroupConfigParameters   import GroupConfigParameters
-from MachineConfigParameters import MachineConfigParameters
-from StatsPaths              import StatsPaths
-from TimeParameters          import TimeConfigParameters
+from ConfigParser                        import ConfigParser
+from pxStats.lib.DetailedStatsParameters import DetailedStatsParameters
+from pxStats.lib.GroupConfigParameters   import GroupConfigParameters
+from pxStats.lib.MachineConfigParameters import MachineConfigParameters
+from pxStats.lib.StatsPaths              import StatsPaths
+from pxStats.lib.TimeParameters          import TimeConfigParameters
 
 
 
@@ -131,13 +133,13 @@ class StatsConfigParameters:
  
     def getGeneralParametersFromStatsConfigurationFile(self):
         """
-            Gather all the parameters from the  StatsPath.STATSROOT/config file.
+            Gather all the parameters from the  StatsPath.STATSETC/config file.
             
             Returns all collected values in a  _StatsConfigParameters instance.
         
         """   
     
-        CONFIG = StatsPaths.STATSROOT + "config" 
+        CONFIG = StatsPaths.STATSETC + "config" 
         config = ConfigParser()
         file = open( CONFIG )
         config.readfp( file ) 
@@ -183,7 +185,7 @@ class StatsConfigParameters:
         machineParameters.getParametersFromMachineConfigurationFile()
         
         
-        config = StatsPaths.STATSROOT  + "config"
+        config = StatsPaths.STATSETC  + "config"
         fileHandle = open( config, "r" )
         
         line = fileHandle.readline()#read until groups section, or EOF

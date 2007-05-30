@@ -32,9 +32,11 @@ named COPYING in the root of the source directory tree.
 
 
 import os, commands, pwd, sys, glob
+sys.path.insert(1, sys.path[0] + '/../../')
 
-from StatsPaths import StatsPaths
-from CpickleWrapper import CpickleWrapper
+
+from pxStats.lib.StatsPaths import StatsPaths
+from pxStats.lib.CpickleWrapper import CpickleWrapper
 
 
 class PickleVersionChecker :
@@ -87,7 +89,7 @@ class PickleVersionChecker :
         """
         
         self.savedFileList         = {}
-        directory = StatsPaths.STATSROOT + "file_versions/"              
+        directory = StatsPaths.STATSDATA + "fileAcessVersions/"              
                 
         combinedName = ""
         for client in clients:
@@ -171,7 +173,7 @@ class PickleVersionChecker :
         
         """
         
-        directory = StatsPaths.STATSROOT + "file_versions/"
+        directory = StatsPaths.STATSETC + "fileAcessVersions/"
          
         
         combinedName = ""

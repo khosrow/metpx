@@ -254,7 +254,7 @@ def renameDatabases( oldMachineName, newMachineName ):
     
 def renamePickledTimes( oldMachineName, newMachineName ):  
     """
-        @summary: Renames all the pickledtimes sporting a certain machine name's( oldMachineName ) 
+        @summary: Renames all the update times sporting a certain machine name's( oldMachineName ) 
                   so that they now sport the name of another machine(newMachineName). 
         
         @param oldMachineName: Name of the old machine wich needs to be renamed
@@ -263,7 +263,7 @@ def renamePickledTimes( oldMachineName, newMachineName ):
     
     """
     
-    fileName = StatsPaths.STATSROOT + "PICKLED-TIMES"
+    fileName = StatsPaths.STATSPICKLESTIMEOFUPDATES
     
     if os.path.isfile( fileName ):
         fileHandle   = open( fileName, "r" )
@@ -404,6 +404,6 @@ def main():
     else:
         print "Program terminated." 
         
-os.path.getsize(filename)
+
 if __name__ == "__main__":
     main()                

@@ -25,6 +25,7 @@ import os, sys
 """
     Small function that adds pxlib to the environment path.  
 """
+sys.path.insert(1, sys.path[0] + '/../../')
 try:
     pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
 except KeyError:
@@ -41,9 +42,9 @@ import Gnuplot, Gnuplot.funcutils
 
 from   Logger  import *
 
-from StatsDateLib import StatsDateLib
-from ClientStatsPickler import ClientStatsPickler
-from StatsPaths import StatsPaths
+from pxStats.lib.StatsDateLib import StatsDateLib
+from pxStats.lib.ClientStatsPickler import ClientStatsPickler
+from pxStats.lib.StatsPaths import StatsPaths
 
 
 LOCAL_MACHINE = os.uname()[1]

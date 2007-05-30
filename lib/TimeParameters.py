@@ -18,10 +18,11 @@
 #############################################################################################
 '''
 import random, ConfigParser
+import sys 
 
 from ConfigParser import *
 
-from StatsPaths import StatsPaths
+from pxStats.lib.StatsPaths import StatsPaths
 
 class TimeConfigParameters:
     

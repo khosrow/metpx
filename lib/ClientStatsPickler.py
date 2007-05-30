@@ -25,7 +25,10 @@ named COPYING in the root of the source directory tree.
 ##
 #######################################################################################
 """
-import os , sys
+
+
+import os , sys, time
+sys.path.insert(1, sys.path[0] + '/../../')
 """
     Small function that adds pxlib to the environment path.  
 """
@@ -41,12 +44,13 @@ sys.path.append(pxlib)
     Logger requires pxlib 
 """
 from   Logger                 import Logger
-from StatsPaths import StatsPaths
-from LogFileCollector import LogFileCollector
-from StatsDateLib import StatsDateLib
-from CpickleWrapper import CpickleWrapper
-from FileStatsCollector import FileStatsCollector
-from GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+
+from pxStats.lib.StatsPaths import StatsPaths
+from pxStats.lib.LogFileCollector import LogFileCollector
+from pxStats.lib.StatsDateLib import StatsDateLib
+from pxStats.lib.CpickleWrapper import CpickleWrapper
+from pxStats.lib.FileStatsCollector import FileStatsCollector
+from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 
 
 LOCAL_MACHINE = os.uname()[1]   
@@ -161,9 +165,7 @@ class ClientStatsPickler:
         
             If pre-conditions aren't met, application will fail.
             
-        """
-
-        filePickle = StatsPaths.STATSROOT + "PICKLED_FILE_POSITIONS" 
+        """     
         
         #Find up to date file list. 
         self.fileCollection =  LogFileCollector( startTime  = startTime , endTime = endTime, directory = directory, lastLineRead = "", logType = fileType, name = self.client, logger = self.logger )   
@@ -192,7 +194,7 @@ class ClientStatsPickler:
             self.pickleName = ClientStatsPickler.buildThisHoursFileName( client = self.client, currentTime = startTime, machine = self.machine, fileType = fileType )
     
             
-        self.statsCollection = FileStatsCollector( files = self.fileCollection.entries, fileType = fileType, statsTypes = types, startTime = StatsDateLib.getIsoWithRoundedHours( startTime ), endTime = endTime, interval = interval, totalWidth = 1*HOUR, logger = self.logger )
+        self.statsCollection = FileStatsCollector( files = self.fileCollection.entries, fileType = fileType, statsTypes = types, startTime = StatsDateLib.getIsoWithRoundedHours( startTime ), endTime = endTime, interval = interval, totalWidth = 1*StatsDateLib.HOUR, logger = self.logger )
         
         #Temporarily delete logger to make sure no duplicated lines appears in log file.
         temp  = self.logger
@@ -228,7 +230,7 @@ class ClientStatsPickler:
                      
         """    
         
-        absoluteFilename = str( StatsPaths.STATSROOT ) + "CSP_output_file "
+        absoluteFilename = str( StatsPaths.STATSDATA ) + "CSP_output_file "
         print "Output filename used : %s" %absoluteFilename
         fileHandle = open( absoluteFilename , 'w' )
         old_stdout = sys.stdout 

@@ -29,10 +29,10 @@ named COPYING in the root of the source directory tree.
 """
 
 import os, commands, time, sys, pickle, glob
-sys.path.insert(1, sys.path[0] + '/../')
+sys.path.insert(1, sys.path[0] + '/../../')
 
-from lib.StatsPaths import StatsPaths
-from lib.StatsDateLib import StatsDateLib
+from pxStats.lib.StatsPaths import StatsPaths
+from pxStats.lib.StatsDateLib import StatsDateLib
 
 
 def backupDatabases( timeOfBackup, backupsToKeep ):

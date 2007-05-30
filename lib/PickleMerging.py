@@ -25,11 +25,14 @@ named COPYING in the root of the source directory tree.
 ##
 ##############################################################################
 """
+import os,sys
 
-from   CpickleWrapper       import CpickleWrapper
-from   ClientStatsPickler   import ClientStatsPickler
-from   FileStatsCollector   import _FileStatsEntry, FileStatsCollector
-from   PickleVersionChecker import PickleVersionChecker
+sys.path.insert(1, sys.path[0] + '/../../')
+
+from   pxStats.lib.CpickleWrapper       import CpickleWrapper
+from   pxStats.lib.ClientStatsPickler   import ClientStatsPickler
+from   pxStats.lib.FileStatsCollector   import _FileStatsEntry, FileStatsCollector
+from   pxStats.lib.PickleVersionChecker import PickleVersionChecker
 
 class PickleMerging: 
      
