@@ -3,7 +3,7 @@
 MetPX Copyright (C) 2004-2006  Environment Canada
 MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
 named COPYING in the root of the source directory tree.
-"""
+
 
 ##############################################################################
 ##
@@ -22,14 +22,31 @@ named COPYING in the root of the source directory tree.
 ##
 ##
 ##############################################################################
+"""
 
+
+"""
+    Small function that adds pxlib to the environment path.  
+"""
 import os, time, sys
-import generalStatsLibraryMethods, MyDateLib
-import StatsPaths
+sys.path.insert(1, sys.path[0] + '/../../../')
+try:
+    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
+except KeyError:
+    pxlib = '/apps/px/lib/'
+sys.path.append(pxlib)
 
-from MyDateLib import *
+
+"""
+    Imports
+    PXManager requires pxlib 
+"""
+import os, time, sys
+
 from PXManager import *
-from generalStatsLibraryMethods import *
+from pxStats.lib.StatsPaths import StatsPaths
+from pxStats.lib.StatsDateLib import StatsDateLib
+from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 
 
 # Constants
@@ -62,12 +79,12 @@ def getStartEndOfWebPage():
         
     """
     
-    currentTime = MyDateLib.getIsoFromEpoch( time.time() )  
+    currentTime = StatsDateLib.getIsoFromEpoch( time.time() )  
     
-    start = MyDateLib.rewindXDays( currentTime, NB_DAYS_DISPLAYED - 1 )
-    start = MyDateLib.getIsoTodaysMidnight( start )
+    start = StatsDateLib.rewindXDays( currentTime, NB_DAYS_DISPLAYED - 1 )
+    start = StatsDateLib.getIsoTodaysMidnight( start )
          
-    end   = MyDateLib.getIsoTodaysMidnight( currentTime )
+    end   = StatsDateLib.getIsoTodaysMidnight( currentTime )
         
     return start, end 
     
@@ -308,7 +325,7 @@ def main():
     
     start, end = getStartEndOfWebPage()     
     
-    rxNames, txNames = generalStatsLibraryMethods.getRxTxNamesForWebPages(start, end)
+    rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNamesForWebPages(start, end)
              
     generateWebPage( rxNames, txNames, days)
     

@@ -3,7 +3,7 @@
 MetPX Copyright (C) 2004-2006  Environment Canada
 MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
 named COPYING in the root of the source directory tree.
-"""
+
 
 ##############################################################################
 ##
@@ -22,14 +22,30 @@ named COPYING in the root of the source directory tree.
 ##
 ##
 ##############################################################################
+"""
 
-import math, os, time, sys, MyDateLib, datetime, StatsPaths
-import generalStatsLibraryMethods
+"""
+    Small function that adds pxlib to the environment path.  
+"""
+import math, os, time, sys, datetime
+sys.path.insert(1, sys.path[0] + '/../../../')
+try:
+    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
+except KeyError:
+    pxlib = '/apps/px/lib/'
+sys.path.append(pxlib)
 
+
+"""
+    Imports
+    PXManager requires pxlib 
+"""
 from math import *
-from MyDateLib import *
-from generalStatsLibraryMethods import *
 from PXManager import *
+from pxStats.lib.StatsPaths import StatsPaths
+from pxStats.lib.StatsDateLib import StatsDateLib
+from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+
 
 LOCAL_MACHINE  = os.uname()[1]    
 NB_MONTHS_DISPLAYED = 3 
@@ -42,7 +58,7 @@ def getMonths():
     """
     
     currentTime = time.time()
-    currentTime = MyDateLib.getIsoFromEpoch( currentTime )
+    currentTime = StatsDateLib.getIsoFromEpoch( currentTime )
     currentDate = datetime.date( int(currentTime[0:4]), int(currentTime[5:7]), int(currentTime[8:10]) )     
        
     months = []   
@@ -82,7 +98,7 @@ def getStartEndOfWebPage():
         
     """
     
-    currentTime = MyDateLib.getIsoFromEpoch( time.time() )  
+    currentTime = StatsDateLib.getIsoFromEpoch( time.time() )  
     
     currentDate = datetime.date( int(currentTime[0:4]), int(currentTime[5:7]), int(currentTime[8:10]) )     
           
@@ -106,7 +122,7 @@ def getStartEndOfWebPage():
             
         
     start  = "%s-%s-%s 00:00:00" %( year,month,day )      
-    end   = MyDateLib.getIsoTodaysMidnight( currentTime )
+    end   = StatsDateLib.getIsoTodaysMidnight( currentTime )
     
         
     return start, end 
@@ -500,7 +516,7 @@ def main():
     
     start, end = getStartEndOfWebPage()     
     
-    rxNames, txNames = generalStatsLibraryMethods.getRxTxNamesForWebPages(start, end)
+    rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNamesForWebPages(start, end)
              
     generateWebPage( rxNames, txNames, months)
     

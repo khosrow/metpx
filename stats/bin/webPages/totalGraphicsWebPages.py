@@ -3,7 +3,6 @@
 MetPX Copyright (C) 2004-2006  Environment Canada
 MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
 named COPYING in the root of the source directory tree.
-"""
 ##############################################################################
 ##
 ##
@@ -22,16 +21,30 @@ named COPYING in the root of the source directory tree.
 ##               pages.
 ##
 ##############################################################################
-import os, time, sys, datetime
-import generalStatsLibraryMethods, MyDateLib
-import StatsPaths
-import string 
+"""
 
+"""
+    Small function that adds pxlib to the environment path.  
+"""
+import os, time, sys, datetime, string
+sys.path.insert(1, sys.path[0] + '/../../../')
+try:
+    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
+except KeyError:
+    pxlib = '/apps/px/lib/'
+sys.path.append(pxlib)
+
+
+"""
+    Imports
+    PXManager requires pxlib 
+"""
 from PXManager import *
-from MyDateLib import *
-from generalStatsLibraryMethods import *
-from StatsConfigParameters import StatsConfigParameters
-from MachineConfigParameters import MachineConfigParameters
+from pxStats.lib.StatsPaths import StatsPaths
+from pxStats.lib.StatsDateLib import StatsDateLib
+from pxStats.lib.StatsConfigParameters import StatsConfigParameters
+from pxStats.lib.MachineConfigParameters import MachineConfigParameters
+
    
 LOCAL_MACHINE = os.uname()[1]   
 
@@ -75,7 +88,7 @@ def getMonths():
     
     """
     currentTime = time.time()
-    currentTime = MyDateLib.getIsoFromEpoch( currentTime )
+    currentTime = StatsDateLib.getIsoFromEpoch( currentTime )
     currentDate = datetime.date( int(currentTime[0:4]), int(currentTime[5:7]), int(currentTime[8:10]) )     
        
     months = []
@@ -112,7 +125,7 @@ def getYears():
     """
     
     currentTime = time.time()
-    currentTime = MyDateLib.getIsoFromEpoch( currentTime )
+    currentTime = StatsDateLib.getIsoFromEpoch( currentTime )
     currentDate = datetime.date( int(currentTime[0:4]), int(currentTime[5:7]), int(currentTime[8:10]) )     
     
     years = []    
