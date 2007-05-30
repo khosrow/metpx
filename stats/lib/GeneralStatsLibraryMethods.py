@@ -21,6 +21,7 @@ import os, sys
 """
     Small function that adds pxlib to the environment path.  
 """
+sys.path.insert(1, sys.path[0] + '/../../')
 try:
     pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
 except KeyError:
@@ -39,11 +40,11 @@ import PXPaths
 from fnmatch import fnmatch
 from PXManager import *
 
-from StatsPaths import StatsPaths
-from StatsDateLib import StatsDateLib
-from MachineConfigParameters import  MachineConfigParameters
-from RrdUtilities import RrdUtilities
-from StatsConfigParameters import StatsConfigParameters
+from pxStats.lib.StatsPaths import StatsPaths
+from pxStats.lib.StatsDateLib import StatsDateLib
+from pxStats.lib.MachineConfigParameters import  MachineConfigParameters
+from pxStats.lib.RrdUtilities import RrdUtilities
+from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 
 
 

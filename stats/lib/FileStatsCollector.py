@@ -26,9 +26,11 @@ named COPYING in the root of the source directory tree.
 """
 
 import os, sys
+
 """
     Small function that adds pxlib to the environment path.  
 """
+sys.path.insert(1, sys.path[0] + '/../../')
 try:
     pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
 except KeyError:
@@ -45,10 +47,10 @@ import commands, logging, time, sys, os, pickle, datetime, fnmatch #important fi
 from fnmatch import  fnmatch
 from Logger  import *
 
-from CpickleWrapper import CpickleWrapper
-from StatsDateLib import StatsDateLib
-from StatsPaths import StatsPaths 
-from GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+from pxStats.lib.CpickleWrapper import CpickleWrapper
+from pxStats.lib.StatsDateLib import StatsDateLib
+from pxStats.lib.StatsPaths import StatsPaths 
+from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 
 
 LOCAL_MACHINE = os.uname()[1]
@@ -741,7 +743,7 @@ if __name__ == "__main__":
               
         stats = FileStatsCollector( files = [ filename ], statsTypes = types , startTime = '2006-08-01 %s' %startingHours[i], endTime = '2006-08-01 %s' %endingHours[i], interval = 1*MINUTE  )
         stats.collectStats()
-        saveFile = StatsPaths.STATSROOT + "test/%s" %startingHours[i]
+        saveFile = StatsPaths.STATSDATA + "test/%s" %startingHours[i]
         del stats.logger
         CpickleWrapper.save( object = stats, filename = saveFile )
        

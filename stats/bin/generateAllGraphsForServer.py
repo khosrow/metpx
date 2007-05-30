@@ -26,7 +26,7 @@ import os, time, pwd, sys, getopt, commands, fnmatch, pickle
 """
     Small function that adds pxlib to the environment path.  
 """
-sys.path.insert(1, sys.path[0] + '/../')
+sys.path.insert(1, sys.path[0] + '/../../')
 try:
     pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
 except KeyError:

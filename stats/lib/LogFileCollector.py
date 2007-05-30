@@ -24,6 +24,7 @@ import os, sys
 """
     Small function that adds pxlib to the environment path.  
 """
+sys.path.insert(1, sys.path[0] + '/../../')
 try:
     pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
 except KeyError:
@@ -36,12 +37,12 @@ sys.path.append(pxlib)
     Logger requires pxlib 
 """
 import glob #important files 
-
-from   BackwardReader             import  BackwardReader 
 from   Logger                     import * 
-from   FileStatsCollector         import FileStatsCollector
-from   GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
-from   StatsPaths                 import StatsPaths
+
+from   pxStats.lib.BackwardReader             import BackwardReader 
+from   pxStats.lib.FileStatsCollector         import FileStatsCollector
+from   pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+from   pxStats.lib.StatsPaths                 import StatsPaths
 
 
 LOCAL_MACHINE = os.uname()[1]   

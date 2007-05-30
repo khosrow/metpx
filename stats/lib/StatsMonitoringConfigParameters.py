@@ -21,16 +21,18 @@ named COPYING in the root of the source directory tree.
 """
 
 import os, sys, commands, time, pickle , fnmatch
+sys.path.insert(1, sys.path[0] + '/../../')
+
 import readMaxFile
 
 from ConfigParser import ConfigParser
 
-from StatsPaths import StatsPaths
-from StatsDateLib import StatsDateLib
-from FileStatsCollector import FileStatsCollector
-from GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
-from MachineConfigParameters import MachineConfigParameters 
-from StatsConfigParameters import *
+from pxStats.lib.StatsPaths import StatsPaths
+from pxStats.lib.StatsDateLib import StatsDateLib
+from pxStats.lib.FileStatsCollector import FileStatsCollector
+from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+from pxStats.lib.MachineConfigParameters import MachineConfigParameters 
+from pxStats.lib.StatsConfigParameters import *
 
 
 LOCAL_MACHINE = os.uname()[1]
@@ -92,14 +94,14 @@ class StatsMonitoringConfigParameters:
     
     def getParametersFromMonitoringConfigurationFile( self ):
         """
-            Gather all the parameters from the StatsPaths.STATSROOT/config file.
+            Gather all the parameters from the StatsPaths.STATSETC/config file.
             
             Returns all collected values in this order emails, machines,
             files, folders, maxUsages, errorsLogFile, maxSettingsFile.
         
         """   
     
-        CONFIG = StatsPaths.STATSMONITORING +"statsMonitoring.conf" 
+        CONFIG = StatsPaths.STATSETC +"monitoringConf" 
         config = ConfigParser()
         
         if os.path.isfile( CONFIG ):

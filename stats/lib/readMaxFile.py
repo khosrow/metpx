@@ -185,8 +185,8 @@ def glob_to_regex (glob):
 """
 theClients = ['toto', 'www', 'wxo-ww', 'tata-wxo', 'wxo-b2', 'testDaniel', 'testDan', 'testdan', 'allo-www-sal']
 theDirs = ['/apps/pds/RAW/urp', '/apps/pds/RAW/urpd', '/apps/pds/RAW/chart']
-clientsRegex, inputDirsRegex, defaultClient, defaultInputDir = readQueueMax("/home/ib/dads/dan/devBranch/Columbo/etc.sample/queueMax", "PDS")
-clientsRegex, inputDirsRegex, defaultClient, defaultInputDir = readQueueMax("/home/ib/dads/dan/devBranch/Columbo/etc.sample/queueMax", "PX")
+clientsRegex, inputDirsRegex, defaultClient, defaultInputDir = readQueueMax("path/Columbo/etc.sample/queueMax", "PDS")
+clientsRegex, inputDirsRegex, defaultClient, defaultInputDir = readQueueMax("path/Columbo/etc.sample/queueMax", "PX")
 clientsMax =  setValueMax(theClients, clientsRegex, defaultClient)
 dirsMax = setValueMax(theDirs, inputDirsRegex, defaultInputDir) 
 print defaultClient

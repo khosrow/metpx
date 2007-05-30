@@ -26,7 +26,7 @@ named COPYING in the root of the source directory tree.
     Small function that adds pxlib to the environment path.  
 """
 import os, sys, commands, pickle, fnmatch
-sys.path.insert(1, sys.path[0] + '/../')
+sys.path.insert(1, sys.path[0] + '/../../')
 try:
     pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
 except KeyError:
@@ -45,15 +45,15 @@ from ConfigParser import ConfigParser
 from mailLib import *
 from PXManager import *
 
-from lib.ClientStatsPickler import ClientStatsPickler
-from lib.CpickleWrapper import CpickleWrapper
-from lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
-from lib.LogFileCollector import LogFileCollector
-from lib.StatsPaths import StatsPaths
-from lib.MachineConfigParameters import MachineConfigParameters
-from lib.StatsDateLib import StatsDateLib
-from lib.StatsMonitoringConfigParameters import StatsMonitoringConfigParameters
-from lib.StatsConfigParameters import StatsConfigParameters
+from pxStats.lib.ClientStatsPickler import ClientStatsPickler
+from pxStats.lib.CpickleWrapper import CpickleWrapper
+from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+from pxStats.lib.LogFileCollector import LogFileCollector
+from pxStats.lib.StatsPaths import StatsPaths
+from pxStats.lib.MachineConfigParameters import MachineConfigParameters
+from pxStats.lib.StatsDateLib import StatsDateLib
+from pxStats.lib.StatsMonitoringConfigParameters import StatsMonitoringConfigParameters
+from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 
 
 LOCAL_MACHINE = os.uname()[1]
@@ -165,8 +165,8 @@ def buildReportHeader( parameters ):
     reportHeader = reportHeader + "Time of test : %s\n" %parameters.endTime
     reportHeader = reportHeader + "Time of previous test : %s\n" %parameters.startTime
     reportHeader = reportHeader + "Machine name      : %s\n" %(LOCAL_MACHINE)
-    reportHeader = reportHeader + "Config file  used : %s\n" %( StatsPaths.STATSROOT + "statsMonitoring/statsMonitoring.conf" )
-    reportHeader = reportHeader + "Stats monitor help file can be found here : %s" %( StatsPaths.STATSROOT + "doc/monitoring.txt")
+    reportHeader = reportHeader + "Config file  used : %s\n" %( StatsPaths.STATSETC + "monitoringConf" )
+    reportHeader = reportHeader + "Stats monitor help file can be found here : %s" %( StatsPaths.STATSDOC )
     
     
     return reportHeader

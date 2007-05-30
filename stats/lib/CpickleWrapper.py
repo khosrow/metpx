@@ -27,8 +27,9 @@ named COPYING in the root of the source directory tree.
 
 
 import os, sys, cPickle
+sys.path.insert(1, sys.path[0] + '/../../')
 
-from StatsPaths import  StatsPaths
+from pxStats.lib.StatsPaths import  StatsPaths
 
 
 class CpickleWrapper :
@@ -115,12 +116,12 @@ if __name__ == "__main__":
     
     #standard test case 
     x = "Hello world!"
-    CpickleWrapper.save( x, StatsPaths.STATSROOT +"x" )
-    x = CpickleWrapper.load ( StatsPaths.STATSROOT +"x" ) 
+    CpickleWrapper.save( x, StatsPaths.STATSDATA +"x" )
+    x = CpickleWrapper.load ( StatsPaths.STATSDATA +"x" ) 
     print x
     
     #trouble cases 
     CpickleWrapper.save (x,"y")#non absolute file name not yet implemented.... 
-    y = load( StatsPaths.STATSROOT + "nonexistingfile" )
+    y = load( StatsPaths.STATSDATA + "nonexistingfile" )
         
         

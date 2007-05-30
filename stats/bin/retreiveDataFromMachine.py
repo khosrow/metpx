@@ -26,11 +26,11 @@ named COPYING in the root of the source directory tree.
 
 
 import commands, os, sys, ConfigParser 
-sys.path.insert(1, sys.path[0] + '/../')
+sys.path.insert(1, sys.path[0] + '/../../')
 
-from lib.StatsPaths import StatsPaths
-from lib.StatsConfigParameters import StatsConfigParameters   
-from lib.MachineConfigParameters import MachineConfigParameters
+from pxStats.lib.StatsPaths import StatsPaths
+from pxStats.lib.StatsConfigParameters import StatsConfigParameters   
+from pxStats.lib.MachineConfigParameters import MachineConfigParameters
 
 LOCAL_MACHINE = os.uname()[1]
 

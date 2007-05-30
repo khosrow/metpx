@@ -27,7 +27,7 @@ import os, time, getopt, rrdtool, shutil, sys
 """
     Small function that adds pxlib to the environment path.  
 """
-sys.path.insert(1, sys.path[0] + '/../')
+sys.path.insert(1, sys.path[0] + '/../../')
 try:
     pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
 except KeyError:

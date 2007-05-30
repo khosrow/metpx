@@ -42,6 +42,7 @@ from optparse import OptionParser
 from ConfigParser import ConfigParser
 
 from PXManager import * 
+from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.ClientStatsPickler import ClientStatsPickler
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
@@ -66,17 +67,17 @@ class _UpdaterInfos:
         self.fileType       = fileType                           # File type to use ex :tx,rx etc  
         self.directories    = directories                        # Get the directory containing files  
         self.interval       = interval                           # Interval.
-        self.startTimes     = startTimes                         # Time of last crontab job.... 
-        self.currentDate    = currentDate or  systemsCurrentDate # Time of the cron job.
+        self.startTimes     = startTimes                         # Time of last update.... 
+        self.currentDate    = currentDate or  systemsCurrentDate # Time of the update.
         self.collectUpToNow = collectUpToNow                     # Wheter or not we collect up to now or 
         self.hourlyPickling = hourlyPickling                     # whether or not we create hourly pickles.
         self.endTime        = self.currentDate                   # Will be currentDate if collectUpTo                                                                             now is true, start of the current                                                                               hour if not 
 
 
 
-def setLastCronJob( machine, client, fileType, currentDate, collectUpToNow = False    ):
+def setLastUpdate( machine, client, fileType, currentDate, collectUpToNow = False    ):
     """
-        This method set the clients lastcronjob to the date received in parameter. 
+        This method set the clients last update to the date received in parameter. 
         Creates new key if key doesn't exist.
         Creates new PICKLED-TIMES file if it doesn't allready exist.   
         
@@ -85,8 +86,8 @@ def setLastCronJob( machine, client, fileType, currentDate, collectUpToNow = Fal
     """
     
     times = {}
-    lastCronJob = {}
-    fileName = StatsPaths.STATSROOT + "PICKLED-TIMES"  
+    lastUpdate = {}
+    fileName = StatsPaths.STATSPICKLESTIMEOFUPDATES
     
     if collectUpToNow == False :
         currentDate = StatsDateLib.getIsoWithRoundedHours( currentDate ) 
@@ -117,16 +118,16 @@ def setLastCronJob( machine, client, fileType, currentDate, collectUpToNow = Fal
 
 
 
-def getLastCronJob( machine, client, fileType, currentDate, collectUpToNow = False ):
+def getLastUpdate( machine, client, fileType, currentDate, collectUpToNow = False ):
     """
-        This method gets the dictionnary containing all the last cron job list.
+        This method gets the dictionnary containing all the last updates list.
         From that dictionnary it returns the right value.         
        
     """ 
     
     times = {}
-    lastCronJob = {}
-    fileName = StatsPaths.STATSROOT +  "PICKLED-TIMES"  
+    lastUpdate = {}
+    fileName = StatsPaths.STATSPICKLESTIMEOFUPDATES  
     
     if os.path.isfile( fileName ):
         
@@ -134,29 +135,29 @@ def getLastCronJob( machine, client, fileType, currentDate, collectUpToNow = Fal
         times       = pickle.load( fileHandle )
         
         try :
-            lastCronJob = times[ machine + "_" + fileType + "_" + client ]
+            lastUpdate = times[ machine + "_" + fileType + "_" + client ]
         except:
-            lastCronJob = StatsDateLib.getIsoWithRoundedHours( StatsDateLib.getIsoFromEpoch( StatsDateLib.getSecondsSinceEpoch(currentDate ) - StatsDateLib.HOUR) )
+            lastUpdate = StatsDateLib.getIsoWithRoundedHours( StatsDateLib.getIsoFromEpoch( StatsDateLib.getSecondsSinceEpoch(currentDate ) - StatsDateLib.HOUR) )
             pass
             
         fileHandle.close()      
             
     
-    else:#create a new pickle file.Set start of the pickle as last cron job.   
+    else:#create a new pickle file.Set start of the pickle as last update.   
          
         fileHandle  = open( fileName, "w" )
         
     
-        lastCronJob = StatsDateLib.getIsoWithRoundedHours( StatsDateLib.getIsoFromEpoch( StatsDateLib.getSecondsSinceEpoch(currentDate ) - StatsDateLib.HOUR) )
+        lastUpdate = StatsDateLib.getIsoWithRoundedHours( StatsDateLib.getIsoFromEpoch( StatsDateLib.getSecondsSinceEpoch(currentDate ) - StatsDateLib.HOUR) )
 
 
-        times[ fileType + "_" + client ] = lastCronJob    
+        times[ fileType + "_" + client ] = lastUpdate    
          
         pickle.dump( times, fileHandle )
         fileHandle.close()
        
 
-    return lastCronJob
+    return lastUpdate
 
     
             
@@ -268,7 +269,7 @@ def getOptionsFromParser( parser, logger = None  ):
     # since it's not needed, but other clients might be.
     usefullClients = []
     for client in clients :
-        startTime = getLastCronJob( machine = machine, client = client, fileType= fileType, currentDate =  currentDate , collectUpToNow = collectUpToNow )
+        startTime = getLastUpdate( machine = machine, client = client, fileType= fileType, currentDate =  currentDate , collectUpToNow = collectUpToNow )
                
         if currentDate > startTime:
             #print " client : %s currentDate : %s   startTime : %s" %( client, currentDate, startTime )
@@ -447,7 +448,7 @@ def updateHourlyPickles( infos, logger = None ):
             cs.collectStats( infos.types, startTime = startTime, endTime = endTime, interval = infos.interval * StatsDateLib.MINUTE, directory = pathToLogFiles, fileType = infos.fileType   )        
        
                          
-        setLastCronJob( machine = infos.machine, client = infos.clients[i], fileType = infos.fileType, currentDate = infos.currentDate, collectUpToNow = infos.collectUpToNow )
+        setLastUpdate( machine = infos.machine, client = infos.clients[i], fileType = infos.fileType, currentDate = infos.currentDate, collectUpToNow = infos.collectUpToNow )
               
    
     

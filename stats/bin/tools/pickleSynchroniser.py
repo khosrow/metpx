@@ -25,7 +25,7 @@ named COPYING in the root of the source directory tree.
 ##############################################################################################
 """
 
-
+import os, sys
 """
     Small function that adds pxlib to the environment path.  
 """
@@ -40,7 +40,7 @@ sys.path.append(pxlib)
     Imports
     Logger requires pxlib 
 """
-import os
+
 import commands
 
 from   pxStats.lib.StatsPaths import StatsPaths

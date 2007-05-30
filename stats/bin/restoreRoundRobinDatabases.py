@@ -23,14 +23,12 @@ named COPYING in the root of the source directory tree.
 """
 
 import os, commands, time, sys, pickle, glob
-sys.path.insert(1, sys.path[0] + '/../')
+sys.path.insert(1, sys.path[0] + '/../../')
 
 from backupRRDDatabases import *
 
-from lib.StatsPaths import StatsPaths
-from lib.StatsDateLib import StatsDateLib
-
-
+from pxStats.lib.StatsPaths import StatsPaths
+from pxStats.lib.StatsDateLib import StatsDateLib
 
 
 def restoreDatabases( timeToRestore, currentTime ):
@@ -44,8 +42,8 @@ def restoreDatabases( timeToRestore, currentTime ):
     backupRRDDatabases.backupDatabases( currentTime )
         
     #restore desired 
-    source = StatsPaths.STATSROOT + "databases_backups/%s" %timeToRestore
-    destination = StatsPaths.STATSROOT+ "databases"
+    source = StatsPaths.STATSDBBACKUPS + "/%s" %timeToRestore
+    destination = StatsPaths.STATSCURRENTDB
     status, output = commands.getstatusoutput( "rm -r %s" %( destination ) )
     os.makedirs(destination)
     status, output = commands.getstatusoutput( "cp -r %s/* %s" %( source, destination ) )
@@ -63,8 +61,8 @@ def restoreDatabaseUpdateTimes( timeToRestore, currentTime ):
     backupRRDDatabases.backupDatabaseUpdateTimes( currentTime )
     
     #restore desired 
-    source = StatsPaths.STATSROOT + "DATABASE-UPDATES_BACKUPS/%s" %timeToRestore
-    destination = StatsPaths.STATSROOT + "DATABASE-UPDATES" 
+    source = StatsPaths.STATSDBUPDATESBACKUPS + "/%s" %timeToRestore
+    destination = StatsPaths.STATSCURRENTDBUPDATES
     status, output = commands.getstatusoutput( "rm -r %s" %( destination ) )
     os.makedirs(destination)
     status, output = commands.getstatusoutput( "cp -rf %s/* %s" %( source, destination ) )

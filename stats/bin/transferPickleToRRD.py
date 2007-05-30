@@ -26,7 +26,7 @@ named COPYING in the root of the source directory tree.
     Small function that adds pxlib to the environment path.  
 """
 import os, time, getopt, pickle, rrdtool
-sys.path.insert(1, sys.path[0] + '/../')
+sys.path.insert(1, sys.path[0] + '/../../')
 try:
     pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
 except KeyError:

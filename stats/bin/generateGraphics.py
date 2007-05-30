@@ -22,15 +22,15 @@ named COPYING in the root of the source directory tree.
 """
 
 import os, time, sys
-sys.path.insert(1, sys.path[0] + '/../')
+sys.path.insert(1, sys.path[0] + '/../../')
 
 from optparse import OptionParser
 from ConfigParser import ConfigParser
 from fnmatch import fnmatch
-from lib.StatsDateLib import StatsDateLib
-from lib.StatsPaths import StatsPaths
-from lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
-from lib.ClientGraphicProducer import ClientGraphicProducer
+from pxStats.lib.StatsDateLib import StatsDateLib
+from pxStats.lib.StatsPaths import StatsPaths
+from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+from pxStats.lib.ClientGraphicProducer import ClientGraphicProducer
 
 LOCAL_MACHINE = os.uname()[1]
 
