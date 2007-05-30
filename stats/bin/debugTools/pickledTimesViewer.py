@@ -22,10 +22,10 @@ named COPYING in the root of the source directory tree.
 ##############################################################################################
 """
 
-import os,sys,pickle 
-import StatsPaths
+import os, sys, pickle 
+sys.path.insert(1, sys.path[0] + '/../../')
 
-
+from lib.StatsPaths import StatsPaths
 
 def printPickledTimes( pickledTimes, fileName ):
     """

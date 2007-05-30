@@ -25,9 +25,10 @@ named COPYING in the root of the source directory tree.
 """
 
 import os, commands, time, sys, pickle
-import MyDateLib, StatsPaths 
-from   MyDateLib import * 
+sys.path.insert(1, sys.path[0] + '/../../')
 
+from lib.StatsPaths import StatsPaths
+from lib.StatsDateLib import StatsDateLib
 
 
 

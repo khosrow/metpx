@@ -28,9 +28,12 @@ named COPYING in the root of the source directory tree.
 ##############################################################################################
 
 
+
 import os,sys
-import cpickleWrapper
-from MyDateLib import *
+sys.path.insert(1, sys.path[0] + '/../../')
+from lib.CpickleWrapper import CpickleWrapper
+from lib.FileStatsCollector import FileStatsCollector
+
  
 def printPickle( pickle, outputFile = "" ):
     """
@@ -49,7 +52,7 @@ def printPickle( pickle, outputFile = "" ):
         old_stdout = sys.stdout 
         sys.stdout = fileHandle 
     
-    statsCollection = cpickleWrapper.load( pickle )
+    statsCollection = CpickleWrapper.load( pickle )
     
     print "Pickle used : %s" %pickle
     print "\n\nFiles used : %s" %statsCollection.files
