@@ -29,8 +29,10 @@ named COPYING in the root of the source directory tree.
 """
 
 import os, commands, time, sys, pickle, glob
-import MyDateLib, StatsPaths 
-from   MyDateLib import * 
+sys.path.insert(1, sys.path[0] + '/../')
+
+from lib.StatsPaths import StatsPaths
+from lib.StatsDateLib import StatsDateLib
 
 
 def backupDatabases( timeOfBackup, backupsToKeep ):
@@ -44,8 +46,8 @@ def backupDatabases( timeOfBackup, backupsToKeep ):
     """
     
     
-    source = StatsPaths.STATSDB
-    destination = StatsPaths.STATSDBBACKUPS + "%s" %timeOfBackup
+    source = StatsPaths.STATSCURRENTDB
+    #destination = StatsPaths.STATSDBBACKUPS + "%s" %timeOfBackup
     
     if not os.path.isdir( destination ):
         os.makedirs( destination )
@@ -81,7 +83,7 @@ def backupDatabaseUpdateTimes( timeOfBackup, backupsToKeep ):
     
     """
     
-    source = StatsPaths.STATSDBUPDATES
+    source = StatsPaths.STATSCURRENTDBUPDATES
     destination = StatsPaths.STATSDBUPDATESBACKUPS + "%s" %timeOfBackup
     
     if not os.path.isdir( destination ):
@@ -115,8 +117,8 @@ def main():
     """
     
     currentTime = time.time()        
-    currentTime = MyDateLib.getIsoFromEpoch( currentTime )
-    currentTime = MyDateLib.getIsoWithRoundedSeconds( currentTime )
+    currentTime = StatsDateLib.getIsoFromEpoch( currentTime )
+    currentTime = StatsDateLib.getIsoWithRoundedSeconds( currentTime )
     currentTime = currentTime.replace(" ", "_")
     
     backupsToKeep = 20

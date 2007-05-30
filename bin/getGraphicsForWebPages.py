@@ -19,24 +19,24 @@ named COPYING in the root of the source directory tree.
 ##
 #############################################################################
 """
-import os, sys, time, shutil, glob, commands, configFileManager
-import StatsPaths, MyDateLib
+import os, sys, time, shutil, glob, commands
+sys.path.insert(1, sys.path[0] + '/../')
 
-from MyDateLib import *
-from StatsConfigParameters import StatsConfigParameters
-from MachineConfigParameters import MachineConfigParameters
-
-
+from lib.StatsDateLib import StatsDateLib
+from lib.StatsConfigParameters import StatsConfigParameters
+from lib.MachineConfigParameters import MachineConfigParameters
 
 
-def updateThisYearsGraphs( currentTime, machinePairs ):
+
+
+def updateThisYearsGraphs( currentTime, machinePairs, groupParameters ):
     """
         This method generates new yearly graphs
         for all the rx and tx names.       
        
     """   
     
-    currentTime = MyDateLib.getIsoFromEpoch(currentTime)    
+    currentTime = StatsDateLib.getIsoFromEpoch(currentTime)    
     
     for machinePair in machinePairs:
         
@@ -56,13 +56,13 @@ def updateThisYearsGraphs( currentTime, machinePairs ):
         
     
     
-def setLastYearsGraphs( currentTime, machinePairs ):
+def setLastYearsGraphs( currentTime, machinePairs, groupParameters ):
     """
         This method generates all the yearly graphs
         of the previous year.        
     """
     
-    currentTime = MyDateLib.getIsoFromEpoch(currentTime)
+    currentTime = StatsDateLib.getIsoFromEpoch(currentTime)
     
     for machinePairs in machinePairs:
         
@@ -82,7 +82,7 @@ def setLastYearsGraphs( currentTime, machinePairs ):
         
       
       
-def updateThisMonthsGraphs( currentTime, machinePairs ):
+def updateThisMonthsGraphs( currentTime, machinePairs, groupParameters ):
     """
     
         This method generates new monthly graphs
@@ -90,7 +90,7 @@ def updateThisMonthsGraphs( currentTime, machinePairs ):
         
     """
 
-    currentTime = MyDateLib.getIsoFromEpoch( currentTime )
+    currentTime = StatsDateLib.getIsoFromEpoch( currentTime )
 
     for machinePair in machinePairs:
     
@@ -117,7 +117,7 @@ def setLastMonthsGraphs( currentTime, machinePairs, groupParameters ):
         
     """
     
-    currentTime = MyDateLib.getIsoFromEpoch(currentTime)
+    currentTime = StatsDateLib.getIsoFromEpoch(currentTime)
     
     for machinePair in machinePairs:
         
@@ -144,7 +144,7 @@ def setLastWeeksGraphs( currentTime, machinePairs, groupParameters ):
                 
     """
     
-    currentTime = MyDateLib.getIsoFromEpoch( currentTime )
+    currentTime = StatsDateLib.getIsoFromEpoch( currentTime )
     
     for machinePair in machinePairs:
     
@@ -172,7 +172,7 @@ def updateThisWeeksGraphs( currentTime, machinePairs, groupParameters ):
             
     """
 
-    currentTime = MyDateLib.getIsoFromEpoch(currentTime)
+    currentTime = StatsDateLib.getIsoFromEpoch(currentTime)
     
     for machinePair in machinePairs:
         #individual graphics 
@@ -223,7 +223,7 @@ def setYesterdaysGraphs( currentTime, machinePairs ):
         print "copy %s to %s" %( graph, dest )          
      
     #Totals 
-    currentTime = MyDateLib.getIsoFromEpoch(currentTime)
+    currentTime = StatsDateLib.getIsoFromEpoch(currentTime)
     for machinePair in machinePairs:   
         status, output = commands.getstatusoutput( '%sgenerateRRDGraphics.py --copy --totals -f "rx" --machines "%s" --havingRun -d --fixedPrevious --date "%s"' %( StatsPaths.STATSLIBRARY, machinePair, currentTime ) )
         print output
@@ -326,7 +326,7 @@ def setDailyGraphs( currentTime, machinePairs, machineParameters, configParamete
     """          
     
     currentTimeSSE = currentTime
-    currentTime = MyDateLib.getIsoFromEpoch(currentTime)     
+    currentTime = StatsDateLib.getIsoFromEpoch(currentTime)     
     
     generateColumboGraphics( configParameters, machineParameters )              
     updateDailyGroupsGraphics( currentTime, configParameters.groupParameters )  

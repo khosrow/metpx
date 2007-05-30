@@ -23,9 +23,13 @@ named COPYING in the root of the source directory tree.
 """
 
 import os, commands, time, sys, pickle, glob
-import MyDateLib, StatsPaths, backupRRDDatabases 
-from   MyDateLib import * 
-from   backupRRDDatabases import *
+sys.path.insert(1, sys.path[0] + '/../')
+
+from backupRRDDatabases import *
+
+from lib.StatsPaths import StatsPaths
+from lib.StatsDateLib import StatsDateLib
+
 
 
 
@@ -78,8 +82,8 @@ def main():
     timeToRestore = "2006-10-23 09:00:00"
     
     currentTime = time.time()        
-    currentTime = MyDateLib.getIsoFromEpoch( currentTime )
-    currentTime = MyDateLib.getIsoWithRoundedSeconds( currentTime )
+    currentTime = StatsDateLib.getIsoFromEpoch( currentTime )
+    currentTime = StatsDateLib.getIsoWithRoundedSeconds( currentTime )
     currentTime = currentTime.replace(" ", "_")
     
     if len( sys.argv ) == 2:

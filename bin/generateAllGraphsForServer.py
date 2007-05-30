@@ -3,9 +3,6 @@
 MetPX Copyright (C) 2004-2006  Environment Canada
 MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
 named COPYING in the root of the source directory tree.
-"""
-
-
 #############################################################################################
 #
 # Name  : generateAllGraphsForServer.py
@@ -23,15 +20,34 @@ named COPYING in the root of the source directory tree.
 #
 #
 ##############################################################################################
-
-
+"""
 
 import os, time, pwd, sys, getopt, commands, fnmatch, pickle
-import generalStatsLibraryMethods, StatsPaths
-from generalStatsLibraryMethods import *
+"""
+    Small function that adds pxlib to the environment path.  
+"""
+sys.path.insert(1, sys.path[0] + '/../')
+try:
+    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
+except KeyError:
+    pxlib = '/apps/px/lib/'
+sys.path.append(pxlib)
+
+
+
+
+"""
+    Imports
+    PXManager requires pxlib 
+"""
 from optparse  import OptionParser
 from PXManager import *
-from MyDateLib import *
+
+from pxStats.lib.StatsPaths import StatsPaths
+from pxStats.lib.StatsDateLib import StatsDateLib
+from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+
+
 
 LOCAL_MACHINE  = os.uname()[1]
 
@@ -117,7 +133,7 @@ def addOptions( parser ):
     
     parser.add_option("-c", "--combine", action="store_true", dest = "combine", default=False, help="Combine data from all specified machines.")
     
-    parser.add_option("-d", "--date", action="store", type="string", dest="date", default=MyDateLib.getIsoFromEpoch( time.time() ), help="Decide current time. Usefull for testing.") 
+    parser.add_option("-d", "--date", action="store", type="string", dest="date", default=StatsDateLib.getIsoFromEpoch( time.time() ), help="Decide current time. Usefull for testing.") 
     
     parser.add_option("-i", "--individual", action="store_true", dest = "individual", default=False, help="Create individual graphics for all specified machines.")                    
     
@@ -211,7 +227,7 @@ def generateGraphsForIndividualMachines( infos ) :
              
     for i in range ( len( infos.machines ) ) :      
                                                        
-        rxNames, txNames = generalStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, infos.machines[i] )  
+        rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, infos.machines[i] )  
         j=0 
         for txName in txNames :    
             pid = os.fork()#create child process
@@ -269,7 +285,7 @@ def generateGraphsForPairedMachines( infos ) :
     
     """        
     
-    rxNames, txNames = generalStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, infos.machines[0] )  
+    rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, infos.machines[0] )  
     #print infos.machines    
     #print txNames    
     infos.combinedName = str(infos.machines).replace( ' ','' ).replace( '[','' ).replace( ']', '' )        
