@@ -2,7 +2,6 @@
 MetPX Copyright (C) 2004-2006  Environment Canada
 MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
 named COPYING in the root of the source directory tree.
-"""
 
 ##############################################################################
 ##
@@ -22,25 +21,33 @@ named COPYING in the root of the source directory tree.
 ##
 ##
 ##############################################################################
+"""
 
-
-#important files 
 import os, time, sys
-import cpickleWrapper
-import MyDateLib
-import pickleUpdater
-import pickleMerging
+"""
+    Small function that adds pxlib to the environment path.  
+"""
+try:
+    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
+except KeyError:
+    pxlib = '/apps/px/lib/'
+sys.path.append(pxlib)
+
+
+"""
+    Imports
+    Logger requires pxlib 
+"""
 import logging 
-import StatsPaths
-import generalStatsLibraryMethods
 
 from Logger import *
-from MyDateLib import MyDateLib
-from StatsPlotter import StatsPlotter
-from ClientStatsPickler import *
-from FileStatsCollector import FileStatsCollector, _FileStatsEntry
-from generalStatsLibraryMethods import *
 
+from ClientStatsPickler import ClientStatsPickler
+from FileStatsCollector import FileStatsCollector
+from StatsDateLib import StatsDateLib
+from PickleMerging import PickleMerging
+from StatsPlotter import StatsPlotter
+from GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 
 LOCAL_MACHINE = os.uname()[1]
 
@@ -79,9 +86,9 @@ class ClientGraphicProducer:
         self.logger       = logger             # Enable logging
         
         if self.logger is None: # Enable logging
-            if not os.path.isdir( StatsPaths.PXLOG ):
-                os.makedirs( StatsPaths.PXLOG , mode=0777 )
-            self.logger = Logger( StatsPaths.PXLOG  + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
+            if not os.path.isdir( StatsPaths.STATSLOGGING ):
+                os.makedirs( StatsPaths.STATSLOGGING , mode=0777 )
+            self.logger = Logger( StatsPaths.STATSLOGGING  + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
             self.logger = self.logger.getLogger()
                 
             
@@ -98,9 +105,9 @@ class ClientGraphicProducer:
             endTime = self.currentTime
             
         else :
-            endTime = MyDateLib.getIsoWithRoundedHours( self.currentTime )
+            endTime = StatsDateLib.getIsoWithRoundedHours( self.currentTime )
             
-        startTime = MyDateLib.getIsoFromEpoch( MyDateLib.getSecondsSinceEpoch( endTime ) - (self.timespan * MyDateLib.HOUR) )  
+        startTime = StatsDateLib.getIsoFromEpoch( StatsDateLib.getSecondsSinceEpoch( endTime ) - (self.timespan * StatsDateLib.HOUR) )  
          
         return startTime, endTime
     
@@ -130,11 +137,11 @@ class ClientGraphicProducer:
             if len( self.machines ) > 1 :   
                 clientArray = []
                 clientArray.append(client) 
-                statsCollection = pickleMerging.mergePicklesFromDifferentSources( logger = self.logger , startTime = startTime, endTime = endTime, clients = clientArray, fileType = self.fileType, machines = self.machines, groupName = self.groupName  )
+                statsCollection = PickleMerging.mergePicklesFromDifferentSources( logger = self.logger , startTime = startTime, endTime = endTime, clients = clientArray, fileType = self.fileType, machines = self.machines, groupName = self.groupName  )
                                     
             else:#only one machine, only merge different hours together
                
-                statsCollection = pickleMerging.mergePicklesFromDifferentHours( logger = self.logger , startTime = startTime, endTime = endTime, client = client, fileType = self.fileType, machine = self.machines[0] )
+                statsCollection = PickleMerging.mergePicklesFromDifferentHours( logger = self.logger , startTime = startTime, endTime = endTime, client = client, fileType = self.fileType, machine = self.machines[0] )
                 
             
             combinedMachineName = ""
@@ -160,7 +167,7 @@ class ClientGraphicProducer:
         
         dataCollection = []        
        
-        statsCollection = pickleMerging.mergePicklesFromDifferentSources( logger = None , startTime = startTime, endTime = endTime, clients = self.clientNames, fileType = self.fileType, machines =  self.machines, groupName = self.groupName )
+        statsCollection = PickleMerging.mergePicklesFromDifferentSources( logger = None , startTime = startTime, endTime = endTime, clients = self.clientNames, fileType = self.fileType, machines =  self.machines, groupName = self.groupName )
         
         combinedMachineName = ""
         for machine in self.machines:
@@ -241,7 +248,7 @@ if __name__ == "__main__":
         
     """
     
-    pathToLogFiles = generalStatsLibraryMethods.getPathToLogFiles( LOCAL_MACHINE, LOCAL_MACHINE )
+    pathToLogFiles = GeneralStatsLibraryMethods.getPathToLogFiles( LOCAL_MACHINE, LOCAL_MACHINE )
     
     gp = ClientGraphicProducer( clientNames = [ 'amis' ], timespan = 24, currentTime = "2006-08-01 18:15:00",productTypes = ["All"], directory = pathToLogFiles, fileType = "tx" )  
     

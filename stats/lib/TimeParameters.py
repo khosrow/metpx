@@ -17,8 +17,11 @@
 # 
 #############################################################################################
 '''
-import random, StatsPaths, ConfigParser
+import random, ConfigParser
+
 from ConfigParser import *
+
+from StatsPaths import StatsPaths
 
 class TimeConfigParameters:
     

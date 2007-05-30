@@ -2,17 +2,38 @@
 MetPX Copyright (C) 2004-2006  Environment Canada
 MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
 named COPYING in the root of the source directory tree.
+
+##############################################################################
+##
+##
+## Name   : StatsDateLib.py 
+##
+##
+## Author : Nicholas Lemay
+##
+## Date   : 29-05-2006 
+##
+##
+## Description : Contains many usefull date manipulation methods wich are 
+##               to be used throughout the stats library. 
+##
+##############################################################################
+
 """
 
-
-import time,sys,os
+import time, sys, os
     
+    
+"""   
+    Globals
+"""
 MINUTE = 60
 HOUR   = 60 * MINUTE
 DAY    = 24 * HOUR
 MINUTES_PER_DAY = 24*60
 
-class MyDateLib:
+
+class StatsDateLib:
     
     #Constants can be removed once we add methods to the datelibrary and include it 
     MINUTE = 60
@@ -20,11 +41,6 @@ class MyDateLib:
     DAY    = 24 * HOUR
     MINUTES_PER_DAY = 24*60
 
-    
-    """
-        This section should be put in date library upon approval. 
-    
-    """
        
     def getStartEndFromPreviousDay( currentTime, nbDays = 1  ):
         """
@@ -36,9 +52,9 @@ class MyDateLib:
             
         """
         
-        end       = MyDateLib.getIsoTodaysMidnight( currentTime )
-        yesterday = MyDateLib.getIsoFromEpoch( MyDateLib.getSecondsSinceEpoch( currentTime ) - (24*60*60)  ) 
-        start     = MyDateLib.getIsoTodaysMidnight( yesterday ) 
+        end       = StatsDateLib.getIsoTodaysMidnight( currentTime )
+        yesterday = StatsDateLib.getIsoFromEpoch( StatsDateLib.getSecondsSinceEpoch( currentTime ) - (24*60*60)  ) 
+        start     = StatsDateLib.getIsoTodaysMidnight( yesterday ) 
         
         return start, end 
     
@@ -56,12 +72,12 @@ class MyDateLib:
             
         """
         
-        currentTimeInSecs = MyDateLib.getSecondsSinceEpoch( currentTime )
+        currentTimeInSecs = StatsDateLib.getSecondsSinceEpoch( currentTime )
         weekDay     = int(time.strftime( "%w", time.gmtime( currentTimeInSecs ) ))
         endInSecs   = currentTimeInSecs - ( weekDay*24*60*60 )
         startInSecs = endInSecs - ( 7*24*60*60 )
-        start       = MyDateLib.getIsoTodaysMidnight( MyDateLib.getIsoFromEpoch( startInSecs ) ) 
-        end         = MyDateLib.getIsoTodaysMidnight( MyDateLib.getIsoFromEpoch( endInSecs ) )   
+        start       = StatsDateLib.getIsoTodaysMidnight( StatsDateLib.getIsoFromEpoch( startInSecs ) ) 
+        end         = StatsDateLib.getIsoTodaysMidnight( StatsDateLib.getIsoFromEpoch( endInSecs ) )   
         
         return start, end 
     
@@ -141,9 +157,9 @@ class MyDateLib:
             
         """       
         
-        start    = MyDateLib.getIsoTodaysMidnight( currentTime )
-        tomorrow = MyDateLib.getIsoFromEpoch( MyDateLib.getSecondsSinceEpoch( currentTime ) + 24*60*60 )
-        end      = MyDateLib.getIsoTodaysMidnight( tomorrow )
+        start    = StatsDateLib.getIsoTodaysMidnight( currentTime )
+        tomorrow = StatsDateLib.getIsoFromEpoch( StatsDateLib.getSecondsSinceEpoch( currentTime ) + 24*60*60 )
+        end      = StatsDateLib.getIsoTodaysMidnight( tomorrow )
         
         return start, end 
             
@@ -161,15 +177,15 @@ class MyDateLib:
             
         """       
         
-        currentTimeInSecs = MyDateLib.getSecondsSinceEpoch( currentTime )
+        currentTimeInSecs = StatsDateLib.getSecondsSinceEpoch( currentTime )
         weekDay     = int(time.strftime( "%w", time.gmtime( currentTimeInSecs ) ))
         
         endInSecs   = currentTimeInSecs + ( ( 7 - weekDay)*24*60*60 )
-        end         = MyDateLib.getIsoTodaysMidnight( MyDateLib.getIsoFromEpoch( endInSecs ) )   
+        end         = StatsDateLib.getIsoTodaysMidnight( StatsDateLib.getIsoFromEpoch( endInSecs ) )   
         
         
         startInSecs = currentTimeInSecs - ( weekDay*24*60*60 )
-        start       = MyDateLib.getIsoTodaysMidnight( MyDateLib.getIsoFromEpoch( startInSecs ) ) 
+        start       = StatsDateLib.getIsoTodaysMidnight( StatsDateLib.getIsoFromEpoch( startInSecs ) ) 
         
         
         return start, end         
@@ -273,10 +289,10 @@ class MyDateLib:
             
         """
         
-        seconds = MyDateLib.getSecondsSinceEpoch( date )  
+        seconds = StatsDateLib.getSecondsSinceEpoch( date )  
         seconds = seconds - ( x * 24*60*60 )
         
-        rewindedDate = MyDateLib.getIsoFromEpoch( seconds )    
+        rewindedDate = StatsDateLib.getIsoFromEpoch( seconds )    
           
         return rewindedDate
         
@@ -293,8 +309,8 @@ class MyDateLib:
         
         """
     
-        seconds1 = MyDateLib.getSecondsSinceEpoch( date1 ) - MyDateLib.getSecondsSinceStartOfDay( date1 )
-        seconds2 = MyDateLib.getSecondsSinceEpoch( date2 ) - MyDateLib.getSecondsSinceStartOfDay( date2 )
+        seconds1 = StatsDateLib.getSecondsSinceEpoch( date1 ) - StatsDateLib.getSecondsSinceStartOfDay( date1 )
+        seconds2 = StatsDateLib.getSecondsSinceEpoch( date2 ) - StatsDateLib.getSecondsSinceStartOfDay( date2 )
         
         numberOfDays = abs( float( (seconds1-seconds2) /( 24*60*60 ) ) )
         
@@ -565,7 +581,7 @@ class MyDateLib:
         if int(splitTimeString[2]) < 10 :
             splitTimeString[2] = "0" + splitTimeString[2]     
          
-        originalDate = splitTimeString[4] + '-' + MyDateLib.getNumericMonthFromString ( splitTimeString[1] ) + '-' + splitTimeString[2] + ' ' + splitTimeString[3]   
+        originalDate = splitTimeString[4] + '-' + StatsDateLib.getNumericMonthFromString ( splitTimeString[1] ) + '-' + splitTimeString[2] + ' ' + splitTimeString[3]   
         
         return originalDate
     
@@ -617,29 +633,25 @@ class MyDateLib:
         
         separators = []
         
-        startTime = MyDateLib.getSecondsSinceEpoch(startTime)
+        startTime = StatsDateLib.getSecondsSinceEpoch(startTime)
         
         if interval <= width :
             
             for value in range( int(interval+startTime), int( width+interval+startTime ), int( interval ) ):
-                separators.append( MyDateLib.getIsoFromEpoch(value) )
+                separators.append( StatsDateLib.getIsoFromEpoch(value) )
             
             if separators[ len(separators)-1 ] > width+startTime :
-                separators[ len(separators)-1 ] = MyDateLib.getIsoFromEpoch(width+startTime)
+                separators[ len(separators)-1 ] = StatsDateLib.getIsoFromEpoch(width+startTime)
             
         return separators 
         
     getSeparatorsWithStartTime = staticmethod( getSeparatorsWithStartTime )
-    
-    
-    """ 
-        End of section that needs to be in date library 
-    """
-    
+
+
 if __name__ == "__main__":
 
-    print "MyDateLib.getIsoFromEpoch() : %s" %MyDateLib.getIsoFromEpoch()
-    print "MyDateLib.getNumberOfDaysBetween( ) : %s" %MyDateLib.getNumberOfDaysBetween( '2005-08-31 00:00:01','2005-08-30 23:59:59' )
+    print "StatsDateLib.getIsoFromEpoch() : %s" %StatsDateLib.getIsoFromEpoch( 0)
+    print "StatsDateLib.getNumberOfDaysBetween( ) : %s" %StatsDateLib.getNumberOfDaysBetween( '2005-08-31 00:00:01','2005-08-30 23:59:59' )
     
     
     

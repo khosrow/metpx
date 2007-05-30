@@ -21,16 +21,29 @@ named COPYING in the root of the source directory tree.
 
 """
 
+import os, sys
+"""
+    Small function that adds pxlib to the environment path.  
+"""
+try:
+    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
+except KeyError:
+    pxlib = '/apps/px/lib/'
+sys.path.append(pxlib)
 
-#important files 
+
+"""
+    Imports
+    Logger requires pxlib 
+""" 
 import sys, commands, copy, logging, shutil 
-import MyDateLib
-from MyDateLib import *
-import ClientStatsPickler
-from Numeric import *
 import Gnuplot, Gnuplot.funcutils
-import StatsPaths
+
 from   Logger  import *
+
+from StatsDateLib import StatsDateLib
+from ClientStatsPickler import ClientStatsPickler
+from StatsPaths import StatsPaths
 
 
 LOCAL_MACHINE = os.uname()[1]
@@ -87,7 +100,7 @@ class StatsPlotter:
             self.sourlient = "Source"  
         
         if self.logger == None: # Enable logging
-            self.logger = Logger( StatsPaths.PXLOG +  'stats_' + self.loggerName + '.log', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
+            self.logger = Logger( StatsPaths.STATSLOGGING +  'stats_' + self.loggerName + '.log', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
             self.logger = self.logger.getLogger()
             
         self.xtics       = self.getXTics( )        # Seperators on the x axis.
@@ -187,18 +200,18 @@ class StatsPlotter:
         
         nbBuckets = ( len( self.stats[0].statsCollection.timeSeperators ) )
         xtics = ''
-        startTime = MyDateLib.getSecondsSinceEpoch( self.stats[0].statsCollection.timeSeperators[0] )
+        startTime = StatsDateLib.getSecondsSinceEpoch( self.stats[0].statsCollection.timeSeperators[0] )
         
         if nbBuckets != 0 :
             
             for i in range(0, nbBuckets ):
                  
                    
-                if ( (  MyDateLib.getSecondsSinceEpoch(self.stats[0].statsCollection.timeSeperators[i]) - ( startTime  ) ) %(60*60)  == 0.0 ): 
+                if ( (  StatsDateLib.getSecondsSinceEpoch(self.stats[0].statsCollection.timeSeperators[i]) - ( startTime  ) ) %(60*60)  == 0.0 ): 
                     
-                    hour = MyDateLib.getHoursFromIso( self.stats[0].statsCollection.timeSeperators[i] )
+                    hour = StatsDateLib.getHoursFromIso( self.stats[0].statsCollection.timeSeperators[i] )
                     
-                    xtics += '"%s" %i, '%(  hour , MyDateLib.getSecondsSinceEpoch(self.stats[0].statsCollection.timeSeperators[i] ) )
+                    xtics += '"%s" %i, '%(  hour , StatsDateLib.getSecondsSinceEpoch(self.stats[0].statsCollection.timeSeperators[i] ) )
 
         
         #print nbBuckets
@@ -266,13 +279,13 @@ class StatsPlotter:
                             
                         #add to pairs    
                         if statType == "errors" or statType == "bytecount": #both use totals     
-                            pairs.append( [MyDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), self.stats[clientCount].statsCollection.fileEntries[k].totals[statType]] )
+                            pairs.append( [StatsDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), self.stats[clientCount].statsCollection.fileEntries[k].totals[statType]] )
                                                
-                            #print    MyDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), self.stats[clientCount].statsCollection.fileEntries[k].totals[statType]                        
+                            #print    StatsDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), self.stats[clientCount].statsCollection.fileEntries[k].totals[statType]                        
                             
                         else:#latency uses means
                             
-                            pairs.append( [ MyDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), self.stats[clientCount].statsCollection.fileEntries[k].means[statType]] )
+                            pairs.append( [ StatsDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), self.stats[clientCount].statsCollection.fileEntries[k].means[statType]] )
                             
                             #print self.stats[clientCount].statsCollection.timeSeperators[k], self.stats[clientCount].statsCollection.fileEntries[k].means[statType]
                         
@@ -296,14 +309,14 @@ class StatsPlotter:
                               
                     else:
                    
-                        pairs.append( [ MyDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), 0.0 ] )
+                        pairs.append( [ StatsDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), 0.0 ] )
                 
                 
                 except KeyError:
                     
                     self.logger.error( "Error in getPairs." )
                     self.logger.error( "The %s stat type was not found in previously collected data." %statType )    
-                    pairs.append( [ MyDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), 0.0 ] )
+                    pairs.append( [ StatsDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), 0.0 ] )
                     pass    
                 
                 
@@ -672,7 +685,7 @@ class StatsPlotter:
         if self.maximums[clientIndex][statsTypeIndex] !=None and self.maximums[clientIndex][statsTypeIndex] != 0 :
             
             timeOfMax =  self.timeOfMax[clientIndex][statsTypeIndex]
-            timeOfMax =  MyDateLib.getIsoWithRoundedSeconds( timeOfMax )
+            timeOfMax =  StatsDateLib.getIsoWithRoundedSeconds( timeOfMax )
             
             if maxPairValue < 5 :
                 self.graph( 'set format y "%7.2f"' )

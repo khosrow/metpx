@@ -2,7 +2,7 @@
 MetPX Copyright (C) 2004-2006  Environment Canada
 MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
 named COPYING in the root of the source directory tree.
-"""
+
 ##########################################################################
 ##
 ## Name   : LogFileCollector.py ( formely DirectoryFileCollector.py ) 
@@ -19,14 +19,29 @@ named COPYING in the root of the source directory tree.
 ##
 ##
 #############################################################################
+"""
+import os, sys
+"""
+    Small function that adds pxlib to the environment path.  
+"""
+try:
+    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
+except KeyError:
+    pxlib = '/apps/px/lib/'
+sys.path.append(pxlib)
 
 
-import os,sys,glob #important files 
-import backwardReader 
-import StatsPaths
-from   Logger             import * 
-from   FileStatsCollector import *
-from   generalStatsLibraryMethods import *
+"""
+    Imports
+    Logger requires pxlib 
+"""
+import glob #important files 
+
+from   BackwardReader             import  BackwardReader 
+from   Logger                     import * 
+from   FileStatsCollector         import FileStatsCollector
+from   GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+from   StatsPaths                 import StatsPaths
 
 
 LOCAL_MACHINE = os.uname()[1]   
@@ -62,9 +77,9 @@ class LogFileCollector:
        
         
         if logger is None: # Enable logging
-            if not os.path.isdir( StatsPaths.PXLOG  ):
-                os.makedirs( StatsPaths.PXLOG , mode=0777 )
-            self.logger = Logger( StatsPaths.PXLOG + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
+            if not os.path.isdir( StatsPaths.STATSLOGGING  ):
+                os.makedirs( StatsPaths.STATSLOGGING , mode=0777 )
+            self.logger = Logger( StatsPaths.STATSLOGGING + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
             self.logger = self.logger.getLogger()
             
             
@@ -96,12 +111,12 @@ class LogFileCollector:
                 line == ""
                 fileSize = os.stat( fileName )[6]
                 
-                line,offset  = backwardReader.readLineBackwards( fileHandle, offset = -1, fileSize = fileSize  )
+                line,offset  = BackwardReader.readLineBackwards( fileHandle, offset = -1, fileSize = fileSize  )
                 
                 isInteresting, lineType = FileStatsCollector.isInterestingLine( line, usage = "departure" ) 
                 
                 while isInteresting == False and line != "" : #in case of traceback found in file
-                    line, offset  = backwardReader.readLineBackwards( fileHandle, offset = offset, fileSize = fileSize )
+                    line, offset  = BackwardReader.readLineBackwards( fileHandle, offset = offset, fileSize = fileSize )
                     isInteresting, lineType = FileStatsCollector.isInterestingLine( line, usage = "departure" ) 
                 
                 lastDeparture = FileStatsCollector.findValues( ["departure"] , line )["departure"]
@@ -154,7 +169,7 @@ if __name__ == "__main__":
     
     """
     
-    pathToLogFiles = generalStatsLibraryMethods.getPathToLogFiles( LOCAL_MACHINE, LOCAL_MACHINE )
+    pathToLogFiles = GeneralStatsLibraryMethods.getPathToLogFiles( LOCAL_MACHINE, LOCAL_MACHINE )
 
     lfc = LogFileCollector( startTime = "2006-07-20 01:00:00", endTime= "2006-07-20 02:00:00", directory = pathToLogFiles, lastLineRead = "", logType = "tx", name = "satnet"  )
     lfc.collectEntries() 

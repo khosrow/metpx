@@ -2,7 +2,7 @@
 MetPX Copyright (C) 2004-2006  Environment Canada
 MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
 named COPYING in the root of the source directory tree.
-"""
+
 
 #######################################################################################
 ##
@@ -23,22 +23,32 @@ named COPYING in the root of the source directory tree.
 ##          
 ##          
 #######################################################################################
+"""
+
+import os, sys
+"""
+    Small function that adds pxlib to the environment path.  
+"""
+try:
+    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
+except KeyError:
+    pxlib = '/apps/px/lib/'
+sys.path.append(pxlib)
 
 
-import generalStatsLibraryMethods
-import array,time,sys,os,pickle,datetime, fnmatch #important files 
-from   array     import *
-import MyDateLib
-from   MyDateLib import *
-import commands
-import backwardReader
-import cpickleWrapper
-import logging 
-import StatsPaths
+"""
+    Imports
+    Logger requires pxlib 
+"""
+import commands, logging, time, sys, os, pickle, datetime, fnmatch #important files 
 
-from Logger  import *
 from fnmatch import  fnmatch
-from generalStatsLibraryMethods import *
+from Logger  import *
+
+from CpickleWrapper import CpickleWrapper
+from StatsDateLib import StatsDateLib
+from StatsPaths import StatsPaths 
+from GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 
 
 LOCAL_MACHINE = os.uname()[1]
@@ -137,12 +147,12 @@ class FileStatsCollector:
         self.logger           = logger                    # Logger
         
         timeSeperators = [ startTime ]
-        timeSeperators.extend( MyDateLib.getSeparatorsWithStartTime( startTime, self.totalWidth, self.interval ) ) 
+        timeSeperators.extend( StatsDateLib.getSeparatorsWithStartTime( startTime, self.totalWidth, self.interval ) ) 
         self.timeSeperators = timeSeperators
         self.nbEntries        = len ( self.timeSeperators ) -1 # Nb of entries or "buckets" 
         
         if self.logger == None: # Enable logging
-            self.logger = Logger( StatsPaths.PXLOG + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
+            self.logger = Logger( StatsPaths.STATSLOGGING + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
             self.logger = self.logger.getLogger()
             
         
@@ -182,7 +192,7 @@ class FileStatsCollector:
             if productType == "All":
                 pattern = '*'
             else:    
-                pattern = generalStatsLibraryMethods.buildPattern(productType)
+                pattern = GeneralStatsLibraryMethods.buildPattern(productType)
             
 
             if fnmatch( product, pattern):
@@ -376,7 +386,7 @@ class FileStatsCollector:
                                 
                         elif statsType == "arrival":                  
                         
-                            arrival = MyDateLib.isoDateDashed( splitLine[6].split( ":" )[6] )    
+                            arrival = StatsDateLib.isoDateDashed( splitLine[6].split( ":" )[6] )    
     
                                 
                         elif statsType == "bytecount":
@@ -733,7 +743,7 @@ if __name__ == "__main__":
         stats.collectStats()
         saveFile = StatsPaths.STATSROOT + "test/%s" %startingHours[i]
         del stats.logger
-        cpickleWrapper.save( object = stats, filename = saveFile )
+        CpickleWrapper.save( object = stats, filename = saveFile )
        
 
      

@@ -47,7 +47,8 @@ class DetailedStatsParameters:
         
     def restoreDefaults(self):
         """
-        
+            @summary: restore default values for all values. 
+                      Either an empty array or an empty dictionary. 
         """
         
         self.sourceMachinesForTag = {}
