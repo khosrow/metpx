@@ -77,7 +77,7 @@ class GeneralStatsLibraryMethods:
                     
                     pattern =clientName
                    
-                    rxHavingRun,txHavingRun = getRxTxNamesHavingRunDuringPeriod(start, end, machines, pattern)
+                    rxHavingRun,txHavingRun = GeneralStatsLibraryMethods.getRxTxNamesHavingRunDuringPeriod(start, end, machines, pattern)
                     
                     if fileType == "rx":
                         namesHavingrun = rxHavingRun
@@ -144,8 +144,8 @@ class GeneralStatsLibraryMethods:
             elif confType == 'trx':
                 pathToConfigFiles =  StatsPaths.STATSPXTRXCONFIGS + desiredMachine             
         
-            pathToConfigFiles =   pathToConfigFiles.replace( '"',"").replace( "'",""
-                                                                              )   
+            pathToConfigFiles =   pathToConfigFiles.replace( '"',"").replace( "'","" )
+               
         return pathToConfigFiles       
         
         
@@ -243,8 +243,8 @@ class GeneralStatsLibraryMethods:
         
         
         combinedMachineName = ""
-        start = MyDateLib.getSecondsSinceEpoch(start)
-        end = MyDateLib.getSecondsSinceEpoch(end)
+        start = StatsDateLib.getSecondsSinceEpoch(start)
+        end = StatsDateLib.getSecondsSinceEpoch(end)
         
         for machine in machines:
             combinedMachineName = combinedMachineName + machine
@@ -378,7 +378,7 @@ class GeneralStatsLibraryMethods:
         for sourceMachinesTag in configParameters.sourceMachinesTags:
             machines = machineParameters.getMachinesAssociatedWith( sourceMachinesTag )
     
-            newRxNames, newTxNames  = getRxTxNamesHavingRunDuringPeriod( start, end, machines )
+            newRxNames, newTxNames  = GeneralStatsLibraryMethods.getRxTxNamesHavingRunDuringPeriod( start, end, machines )
              
             for rxName in newRxNames :
                 rxNames[rxName] = ""
