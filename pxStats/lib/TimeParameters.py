@@ -60,7 +60,7 @@ class TimeConfigParameters:
    
         readTimeUnits = []
         
-        CONFIG = StatsPaths.STATSROOT + "config" 
+        CONFIG = StatsPaths.STATSETC + "config" 
         config = ConfigParser()
         file = open( CONFIG )
         config.readfp( file ) 

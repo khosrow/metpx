@@ -33,7 +33,7 @@ sys.path.append(pxlib)
     Imports
     PXManager requires pxlib 
 """
-import commands, StatsPaths, PXManager, commands, glob 
+import commands, PXManager, commands, glob 
 
 import PXPaths
 
@@ -107,7 +107,7 @@ class GeneralStatsLibraryMethods:
         if localMachine == desiredMachine:
             pathToLogFiles = StatsPaths.PXLOG 
         else:      
-            pathToLogFiles = StatsPaths.PXLOG + desiredMachine + "/"        
+            pathToLogFiles = StatsPaths.STATSLOGS + desiredMachine + "/"        
             
         return pathToLogFiles    
             
