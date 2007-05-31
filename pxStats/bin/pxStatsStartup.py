@@ -15,13 +15,13 @@ named COPYING in the root of the source directory tree.
 #############################################################################
 
 import os, sys, commands, time
-sys.path.insert(1, sys.path[0] + '/../')
+sys.path.insert(1, sys.path[0] + '/../../')
 
-from lib.StatsPaths import StatsPaths
-from lib.StatsDateLib import StatsDateLib
+from pxStats.lib.StatsPaths import StatsPaths
+from pxStats.lib.StatsDateLib import StatsDateLib
 
-from lib.MachineConfigParameters import MachineConfigParameters
-from lib.StatsConfigParameters import StatsConfigParameters
+from pxStats.lib.MachineConfigParameters import MachineConfigParameters
+from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 
 
 LOCAL_MACHINE = os.uname()[1]
@@ -88,40 +88,40 @@ def updatePickles( parameters, machineParameters ):
                 
                 if parameters.detailedParameters.picklingMachines[tag][i] != LOCAL_MACHINE :#pickling to be done elsewhere
                     for j in range(3):#do 3 times in case of currently turning log files.
-                        status, output = commands.getstatusoutput( "ssh %s@%s 'rsync -avzr --delete-before -e ssh  %s@%s:%s/ %s%s/' "  %( machineParameters.getUserNameForMachine( picklingMachine), picklingMachine,machineParameters.getUserNameForMachine( sourceMachines[i] ) , sourceMachines[i] , StatsPaths.PXLOG, StatsPaths.PXLOG, sourceMachines[i] ) )
-                        #print "ssh %s@%s 'rsync -avzr --delete-before -e ssh  %s@%s:%s %s%s/' "%( machineParameters.getUserNameForMachine( picklingMachine), picklingMachine,machineParameters.getUserNameForMachine( sourceMachines[i] ) , sourceMachines[i] , StatsPaths.PXLOG, StatsPaths.PXLOG, sourceMachines[i] ) 
+                        status, output = commands.getstatusoutput( "ssh %s@%s 'rsync -avzr --delete-before -e ssh  %s@%s:%s/ %s%s/' "  %( machineParameters.getUserNameForMachine( picklingMachine), picklingMachine,machineParameters.getUserNameForMachine( sourceMachines[i] ) , sourceMachines[i] , StatsPaths.PXLOG, StatsPaths.STATSLOGS, sourceMachines[i] ) )
+                        #print "ssh %s@%s 'rsync -avzr --delete-before -e ssh  %s@%s:%s %s%s/' "%( machineParameters.getUserNameForMachine( picklingMachine), picklingMachine,machineParameters.getUserNameForMachine( sourceMachines[i] ) , sourceMachines[i] , StatsPaths.PXLOG, StatsPaths.STATSLOGS, sourceMachines[i] ) 
                         #print output
                 else:
                     
                     for j in range(3):#do 3 times in case of currently turning log files.
-                        status, output = commands.getstatusoutput( "rsync -avzr --delete-before -e ssh %s@%s:%s   %s%s/ " %( machineParameters.getUserNameForMachine( sourceMachines[i] ), sourceMachines[i] , StatsPaths.PXLOG, StatsPaths.PXLOG, sourceMachines[i] ) )
-                        #print "rsync -avzr --delete-before -e ssh %s@%s:%s   %s%s/ " %( machineParameters.getUserNameForMachine( sourceMachines[i] ), sourceMachines[i] , StatsPaths.PXLOG, StatsPaths.PXLOG, sourceMachines[i] )
+                        status, output = commands.getstatusoutput( "rsync -avzr --delete-before -e ssh %s@%s:%s   %s%s/ " %( machineParameters.getUserNameForMachine( sourceMachines[i] ), sourceMachines[i] , StatsPaths.PXLOG, StatsPaths.STATSLOGS, sourceMachines[i] ) )
+                        #print "rsync -avzr --delete-before -e ssh %s@%s:%s   %s%s/ " %( machineParameters.getUserNameForMachine( sourceMachines[i] ), sourceMachines[i] , StatsPaths.PXLOG, StatsPaths.STATSLOGS, sourceMachines[i] )
                         #print output   
                                 
                
             if picklingMachine != LOCAL_MACHINE :#pickling to be done elsewhere,needs ssh             
                           
-                status, output = commands.getstatusoutput( "ssh %s@%s 'python %spickleUpdater.py  -m %s -f rx'   " %( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine, StatsPaths.STATSLIBRARY,  sourceMachines[i] ) ) 
-                #print "ssh %s@%s 'python %spickleUpdater.py  -m %s -f rx'   "  %( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine, StatsPaths.STATSLIBRARY, sourceMachines[i] )
+                status, output = commands.getstatusoutput( "ssh %s@%s 'python %spickleUpdater.py  -m %s -f rx'   " %( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine, StatsPaths.STATSBIN,  sourceMachines[i] ) ) 
+                #print "ssh %s@%s 'python %spickleUpdater.py  -m %s -f rx'   "  %( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine, StatsPaths.STATSBIN, sourceMachines[i] )
                 #print output
                 
-                status, output = commands.getstatusoutput( "ssh %s@%s 'python %spickleUpdater.py -m %s -f tx'  "( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine , StatsPaths.STATSLIBRARY, sourceMachines[i] ) )
-                #print "ssh %s@%s 'python %spickleUpdater.py -m %s -f tx'  "%( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine , StatsPaths.STATSLIBRARY, sourceMachines[i] )
+                status, output = commands.getstatusoutput( "ssh %s@%s 'python %spickleUpdater.py -m %s -f tx'  "( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine , StatsPaths.STATSBIN, sourceMachines[i] ) )
+                #print "ssh %s@%s 'python %spickleUpdater.py -m %s -f tx'  "%( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine , StatsPaths.STATSBIN, sourceMachines[i] )
                 #print output
                 
-                status, output = commands.getstatusoutput( "%spickleSynchroniser.py -l %s -m %s  "%( StatsPaths.STATSLIBRARY, machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine ) )      
-                #print "%spickleSynchroniser.py -l %s -m %s  " %( StatsPaths.STATSLIBRARY, machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine )
+                status, output = commands.getstatusoutput( "%spickleSynchroniser.py -l %s -m %s  "%( StatsPaths.STATSTOOLS, machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine ) )      
+                #print "%spickleSynchroniser.py -l %s -m %s  " %( StatsPaths.STATSTOOLS, machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine )
                 #print output
             
                 
             else: # pickling is to be done locally. Log files may or may not reside elsewhere.
                 
-                status, output = commands.getstatusoutput( "python %spickleUpdater.py -f rx -m %s "%( StatsPaths.STATSLIBRARY, sourceMachines[i] ) )
+                status, output = commands.getstatusoutput( "python %spickleUpdater.py -f rx -m %s "%( StatsPaths.STATSBIN, sourceMachines[i] ) )
                 #print output
-                #print "python %spickleUpdater.py -f rx -m %s " %( StatsPaths.STATSLIBRARY, sourceMachines[i] )
+                #print "python %spickleUpdater.py -f rx -m %s " %( StatsPaths.STATSBIN, sourceMachines[i] )
                 
-                status, output = commands.getstatusoutput( "python %spickleUpdater.py -f tx -m %s "  %(  StatsPaths.STATSLIBRARY, sourceMachines[i]) )
-                #print "python %spickleUpdater.py -f tx -m %s " %( StatsPaths.STATSLIBRARY, sourceMachines[i] )
+                status, output = commands.getstatusoutput( "python %spickleUpdater.py -f tx -m %s "  %(  StatsPaths.STATSBIN, sourceMachines[i]) )
+                #print "python %spickleUpdater.py -f tx -m %s " %( StatsPaths.STATSBIN, sourceMachines[i] )
                 #print output
                 
                 
@@ -174,8 +174,8 @@ def updateDatabases( parameters, machineParameters ):
         for tag in parameters.machinesToBackupInDb :
              machines = machineParameters.getMachinesAssociatedWith(tag)             
              machines = str( machines ).replace( "[", "" ).replace( "]", "" ).replace( " ", "" )
-             status, output = commands.getstatusoutput( "%stransferPickleToRRD.py -m '%s'" %(StatsPaths.STATSLIBRARY, machines )  )
-             #print  "%stransferPickleToRRD.py -m '%s' " %( StatsPaths.STATSLIBRARY, machines )
+             status, output = commands.getstatusoutput( "%stransferPickleToRRD.py -m '%s'" %(StatsPaths.STATSBIN, machines )  )
+             #print  "%stransferPickleToRRD.py -m '%s' " %( StatsPaths.STATSBIN, machines )
              #print "output:%s" %output
         
         if parameters.groupParameters.groups != []:
@@ -187,8 +187,8 @@ def updateDatabases( parameters, machineParameters ):
                 groupProducts = str( parameters.groupParameters.groupsProducts[group] ).replace( "[", "" ).replace( "]", "" ).replace( " ", "" )
                 groupFileTypes = str(parameters.groupParameters.groupFileTypes[group]).replace( "[", "" ).replace( "]", "" ).replace( " ", "" )
                
-                status, output = commands.getstatusoutput( "%stransferPickleToRRD.py -c '%s' -m '%s' -g '%s' -f %s -p '%s' " %( StatsPaths.STATSLIBRARY, groupMembers, groupMachines, group, groupFileTypes, groupProducts  ) )
-                #print   "%stransferPickleToRRD.py -c '%s' -m '%s' -g '%s' -f %s -p '%s' " %( StatsPaths.STATSLIBRARY, groupMembers, groupMachines, group, groupFileTypes, groupProducts  )
+                status, output = commands.getstatusoutput( "%stransferPickleToRRD.py -c '%s' -m '%s' -g '%s' -f %s -p '%s' " %( StatsPaths.STATSBIN, groupMembers, groupMachines, group, groupFileTypes, groupProducts  ) )
+                #print   "%stransferPickleToRRD.py -c '%s' -m '%s' -g '%s' -f %s -p '%s' " %( StatsPaths.STATSBIN, groupMembers, groupMachines, group, groupFileTypes, groupProducts  )
                 #print output
  
  
@@ -200,7 +200,7 @@ def getGraphicsForWebPages( ):
         
     """
     
-    status, output = commands.getstatusoutput( StatsPaths.STATSLIBRARY + "getGraphicsForWebPages.py" )
+    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGES + "getGraphicsForWebPages.py" )
     #print output                    
 
 
@@ -212,12 +212,12 @@ def updateWebPages():
             
     """ 
        
-    status, output = commands.getstatusoutput( StatsPaths.STATSLIBRARY + "dailyGraphicsWebPage.py" )  
-    status, output = commands.getstatusoutput( StatsPaths.STATSLIBRARY + "weeklyGraphicsWebPage.py" )    
-    status, output = commands.getstatusoutput( StatsPaths.STATSLIBRARY + "monthlyGraphicsWebPage.py" )    
-    status, output = commands.getstatusoutput( StatsPaths.STATSLIBRARY + "yearlyGraphicsWebPage.py" )    
-    status, output = commands.getstatusoutput( StatsPaths.STATSLIBRARY + "totalGraphicsWebPages.py" )    
-    status, output = commands.getstatusoutput( StatsPaths.STATSLIBRARY + "generateTopWebPage.py" )
+    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGES + "dailyGraphicsWebPage.py" )  
+    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGES + "weeklyGraphicsWebPage.py" )    
+    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGES + "monthlyGraphicsWebPage.py" )    
+    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGES + "yearlyGraphicsWebPage.py" )    
+    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGES + "totalGraphicsWebPages.py" )    
+    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGES + "generateTopWebPage.py" )
        
     
     
@@ -236,8 +236,8 @@ def monitorActivities( timeParameters, currentTime ):
    
     
     if needsToBeRun(timeParameters.monitoringFrequency, currentTime ):        
-        status, output = commands.getstatusoutput( StatsPaths.STATSLIBRARY + "statsMonitor.py" )
-        #print StatsPaths.STATSLIBRARY + "statsMonitor.py"
+        status, output = commands.getstatusoutput( StatsPaths.STATSBIN + "statsMonitor.py" )
+        #print StatsPaths.STATSBIN + "statsMonitor.py"
         #print output
         
  
@@ -319,12 +319,12 @@ def cleanUp( timeParameters, currentTime, daysOfPicklesToKeep ):
     """     
     
     if needsToBeRun( timeParameters.pickleCleanerFrequency, currentTime ):
-        commands.getstatusoutput( StatsPaths.PXLIB + "pickleCleaner.py")
-        #print StatsPaths.PXLIB + "pickleCleaner.py" + " " + str( daysOfPicklesToKeep )
+        #commands.getstatusoutput( StatsPaths.STATSTOOLS + "pickleCleaner.py %s" daysOfPicklesToKeep )
+        print StatsPaths.STATSTOOLS + "pickleCleaner.py" + " " + str( daysOfPicklesToKeep )
         
     if needsToBeRun( timeParameters.generalCleanerFrequency, currentTime ):
-        commands.getstatusoutput( StatsPaths.PXLIB + "clean_dir.plx" + " " + StatsPaths.PXETC + "clean.conf"   )
-        #print StatsPaths.PXLIB + "clean_dir.plx" + " " + StatsPaths.PXETC + "clean.conf" 
+        #commands.getstatusoutput( StatsPaths.STATSTOOLS + "clean_dir.plx" + " " + StatsPaths.PXETC + "clean.conf"   )
+        print StatsPaths.STATSTOOLS + "clean_dir.plx" + " " + StatsPaths.PXETC + "clean.conf" 
         
     
     
@@ -343,8 +343,8 @@ def backupRRDDatabases( timeParameters, currentTime, nbBackupsToKeep ):
     """  
         
     if needsToBeRun( timeParameters.dbBackupsFrequency, currentTime ):
-        commands.getstatusoutput( StatsPaths.PXLIB + "backupRRDDatabases.py" + " " + str(nbBackupsToKeep) )             
-        #print StatsPaths.PXLIB + "backupRRDDatabases.py" + " " + str(nbBackupsToKeep)
+        commands.getstatusoutput( StatsPaths.STATSTOOLS + "backupRRDDatabases.py" + " " + str(nbBackupsToKeep) )             
+        #print StatsPaths.STATSTOOLS + "backupRRDDatabases.py" + " " + str(nbBackupsToKeep)
 
 
 
