@@ -84,7 +84,8 @@ class StatsPaths:
     STATSLIB     = STATSROOT + 'lib/'
     STATSLOGGING = STATSROOT + 'logs/'
     STATSMAN     = STATSROOT + 'man/'
-     
+    STATSTOOLS   = STATSBIN  + 'tools/'
+    STATSDEBUGTOOLS = STATSBIN + 'debugTools/' 
     
     STATSPXCONFIGS    = STATSETC + 'pxConfigFiles/' 
     STATSPXRXCONFIGS  = STATSPXCONFIGS + 'rx/'
@@ -103,7 +104,7 @@ class StatsPaths:
     STATSFILEVERSIONS     = STATSDATA + 'fileAcessVersions/'
     STATSMONITORING       = STATSDATA + 'monitoring/'
     STATSPICKLES          = STATSDATA + 'pickles/'
-    STATSLOGS             = STATSDATA + 'logs/'
+    STATSLOGS             = STATSDATA + 'logFiles/'
     STATSWEBPAGES         = STATSDATA + 'webPages/'
     STATSGRAPHS           = STATSDATA + 'graphics/'
     STATSWEBGRAPHS        = STATSGRAPHS + 'webGraphics/'
