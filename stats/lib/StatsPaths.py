@@ -67,12 +67,16 @@ class StatsPaths:
     
     """
         Stats specific paths.
-    """
+        pxStats must be checked-out in a pxStats folder.
+    """ 
     
-    STATSROOT   =  os.path.dirname( sys.argv[0] )
-    STATSROOT   =  os.path.dirname(os.path.abspath( STATSROOT )) +  '/'
-
+    STATSROOT   =  os.path.dirname( sys.argv[0] )   
+    while(os.path.basename(STATSROOT) != "pxStats" ):
+        STATSROOT = os.path.dirname(STATSROOT)
     
+    STATSROOT = STATSROOT + "/"   
+       
+     
     STATSBIN     = STATSROOT + 'bin/'
     STATSDATA    = STATSROOT + 'data/'
     STATSDOC     = STATSROOT + 'doc/'
@@ -107,6 +111,8 @@ class StatsPaths:
     
     STATSPICKLESTIMEOFUPDATES    = STATSDATA + 'picklesTimeOfUpdates'
     STATSFILEACCESSVERSIONS      = STATSDATA + 'fileAccessVersions'
+    
+    
     
 def main():
     """
