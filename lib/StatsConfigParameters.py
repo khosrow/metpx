@@ -161,6 +161,7 @@ class StatsConfigParameters:
             pass    
     
     
+    
     def getTimeParametersFromConfigurationFile(self):
         """
             @summary : Reads all the time related parameters of the 
@@ -171,6 +172,7 @@ class StatsConfigParameters:
         
         self.timeParameters = TimeConfigParameters()
         self.timeParameters.getTimeParametersFromConfigurationFile()
+              
               
                 
     def getGroupSettingsFromConfigurationFile( self ):
@@ -286,7 +288,7 @@ def main():
     print "self.picklingMachinesLogins %s" %test.detailedParameters.picklingMachinesLogins
     print "self.databaseMachines %s" %test.detailedParameters.databaseMachines
     print "self.uploadMachines %s" %test.detailedParameters.uploadMachines
-    print " self.uploadMachinesLogins %s" %test.detailedParameters.uploadMachinesLogins
+    print "self.uploadMachinesLogins %s" %test.detailedParameters.uploadMachinesLogins
     
 
 if __name__ == "__main__":
