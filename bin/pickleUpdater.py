@@ -21,10 +21,14 @@ named COPYING in the root of the source directory tree.
 ##############################################################################################
 """
 
+import os,time, pwd, sys, getopt, commands, fnmatch, pickle
+
+
 """
     Small function that adds pxlib to the environment path.  
 """
-try:
+sys.path.insert(1, sys.path[0] + '/../../')
+try:    
     pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
 except KeyError:
     pxlib = '/apps/px/lib/'
@@ -35,8 +39,6 @@ sys.path.append(pxlib)
     Imports
     PXManager, Logger both require pxlib 
 """
-import os,time, pwd, sys, getopt, commands, fnmatch, pickle
-
 from Logger import * 
 from optparse import OptionParser
 from ConfigParser import ConfigParser

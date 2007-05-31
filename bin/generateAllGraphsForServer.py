@@ -233,7 +233,7 @@ def generateGraphsForIndividualMachines( infos ) :
             pid = os.fork()#create child process
             
             if pid == 0: #child process
-                status, output = commands.getstatusoutput( "python %sgenerateGraphics.py -m '%s' -f tx -c '%s' -d '%s' -s %s --copy" %( StatsPaths.STATSLIBRARY, infos.machines[i], txName, infos.date, infos.timespan) )               
+                status, output = commands.getstatusoutput( "python %sgenerateGraphics.py -m '%s' -f tx -c '%s' -d '%s' -s %s --copy" %( StatsPaths.STATSBIN, infos.machines[i], txName, infos.date, infos.timespan) )               
                 print output 
                 sys.exit()
         
@@ -259,7 +259,7 @@ def generateGraphsForIndividualMachines( infos ) :
             pid = os.fork()#create child process
             
             if pid == 0 :#child process
-                status, output = commands.getstatusoutput( "python %sgenerateGraphics.py -m '%s' -f rx -c '%s' -d '%s' -s %s --copy" %( StatsPaths.STATSLIBRARY, infos.machines[i] , rxName, infos.date,infos.timespan ) )     
+                status, output = commands.getstatusoutput( "python %sgenerateGraphics.py -m '%s' -f rx -c '%s' -d '%s' -s %s --copy" %( StatsPaths.STATSBIN, infos.machines[i] , rxName, infos.date,infos.timespan ) )     
                 print output
                 sys.exit()
         
@@ -298,7 +298,7 @@ def generateGraphsForPairedMachines( infos ) :
         
         if pid == 0 :#child process
             
-            status, output = commands.getstatusoutput( "python %sgenerateGraphics.py -m %s -f tx -c %s -d '%s' -s %s  --copy" %( StatsPaths.STATSLIBRARY, infos.combinedName, txName, infos.date, infos.timespan ) )
+            status, output = commands.getstatusoutput( "python %sgenerateGraphics.py -m %s -f tx -c %s -d '%s' -s %s  --copy" %( StatsPaths.STATSBIN, infos.combinedName, txName, infos.date, infos.timespan ) )
             print output
             sys.exit()    #terminate child process
     
@@ -324,7 +324,7 @@ def generateGraphsForPairedMachines( infos ) :
         pid = os.fork()#create child process
         
         if pid == 0:#child process            
-            status, output = commands.getstatusoutput( "python %sgenerateGraphics.py -m %s -f rx -c %s -d '%s' -s %s  --copy" %( StatsPaths.STATSLIBRARY, infos.combinedName, rxName, infos.date, infos.timespan ) )     
+            status, output = commands.getstatusoutput( "python %sgenerateGraphics.py -m %s -f rx -c %s -d '%s' -s %s  --copy" %( StatsPaths.STATSBIN, infos.combinedName, rxName, infos.date, infos.timespan ) )     
             print output 
             sys.exit()
         else:

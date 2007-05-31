@@ -1349,8 +1349,8 @@ def main():
     
     """        
         
-    if not os.path.isdir( StatsPaths.PXLOG  ):
-        os.makedirs( StatsPaths.PXLOG  , mode=0777 )
+    if not os.path.isdir( StatsPaths.STATSLOGGING  ):
+        os.makedirs( StatsPaths.STATSLOGGING  , mode=0777 )
     
     logger = Logger( StatsPaths.STATSLOGGING   + 'stats_'+'rrd_graphs' + '.log.notb', 'INFO', 'TX' + 'rrd_graphs', bytes = True  ) 
     

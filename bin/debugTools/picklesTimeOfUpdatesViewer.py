@@ -89,6 +89,7 @@ def main():
     """
     
     #standard use.
+    print "StatsPaths.STATSETC %s" %StatsPaths.STATSETC
     os.system( 'clear' )
     fileName = StatsPaths.STATSPICKLESTIMEOFUPDATES
     pickledTimes = loadPickledTimes( fileName )

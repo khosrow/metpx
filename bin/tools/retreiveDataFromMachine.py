@@ -54,8 +54,8 @@ def transferLogFiles():
                
         if picklingMachine == LOCAL_MACHINE :#pickling to be done here  
             userName = machineParameters.getUserNameForMachine(sourceMachine)
-            print  "rsync -avzr --delete-before -e ssh %s@%s:/%s %s%s/ " %( userName , sourceMachine, StatsPaths.PXLOG, StatsPaths.PXLOG, sourceMachine  )
-            status, output = commands.getstatusoutput( "rsync -avzr --delete-before -e ssh %s@%s:%s %s%s/ " %( userName , sourceMachine, StatsPaths.PXLOG, StatsPaths.PXLOG, sourceMachine  ) )
+            print  "rsync -avzr --delete-before -e ssh %s@%s:/%s %s%s/ " %( userName , sourceMachine, StatsPaths.PXLOG, StatsPaths.STATSLOGS, sourceMachine  )
+            status, output = commands.getstatusoutput( "rsync -avzr --delete-before -e ssh %s@%s:%s %s%s/ " %( userName , sourceMachine, StatsPaths.PXLOG, StatsPaths.STATSLOGS, sourceMachine  ) )
             print output
     
     
