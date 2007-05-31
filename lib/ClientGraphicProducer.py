@@ -43,7 +43,7 @@ sys.path.append(pxlib)
 import logging 
 
 from Logger import *
-
+from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.ClientStatsPickler import ClientStatsPickler
 from pxStats.lib.FileStatsCollector import FileStatsCollector
 from pxStats.lib.StatsDateLib import StatsDateLib

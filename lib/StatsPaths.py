@@ -70,7 +70,7 @@ class StatsPaths:
         pxStats must be checked-out in a pxStats folder.
     """ 
     
-    STATSROOT   =  os.path.dirname( sys.argv[0] )   
+    STATSROOT   =  os.path.dirname( sys.path[0] )   
     while(os.path.basename(STATSROOT) != "pxStats" ):
         STATSROOT = os.path.dirname(STATSROOT)
     

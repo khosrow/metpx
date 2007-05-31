@@ -29,10 +29,14 @@ import os,sys
 
 sys.path.insert(1, sys.path[0] + '/../../')
 
+
 from   pxStats.lib.CpickleWrapper       import CpickleWrapper
 from   pxStats.lib.ClientStatsPickler   import ClientStatsPickler
 from   pxStats.lib.FileStatsCollector   import _FileStatsEntry, FileStatsCollector
 from   pxStats.lib.PickleVersionChecker import PickleVersionChecker
+from   pxStats.lib.StatsDateLib         import StatsDateLib
+
+
 
 class PickleMerging: 
      
@@ -104,11 +108,11 @@ class PickleMerging:
         
         pickles = []
         entries = []
-        width = MyDateLib.getSecondsSinceEpoch( endTime ) - MyDateLib.getSecondsSinceEpoch( startTime )
-        startTime = MyDateLib.getIsoWithRoundedHours( startTime )
+        width = StatsDateLib.getSecondsSinceEpoch( endTime ) - StatsDateLib.getSecondsSinceEpoch( startTime )
+        startTime = StatsDateLib.getIsoWithRoundedHours( startTime )
         
         seperators = [startTime]
-        seperators.extend( MyDateLib.getSeparatorsWithStartTime( startTime = startTime , width=width, interval=60*MINUTE )[:-1])
+        seperators.extend( StatsDateLib.getSeparatorsWithStartTime( startTime = startTime , width=width, interval=60*StatsDateLib.MINUTE )[:-1])
             
         for seperator in seperators :
             pickles.append( ClientStatsPickler.buildThisHoursFileName(  client = client, offset = 0, currentTime = seperator, machine = machine, fileType = fileType ) )        
@@ -126,11 +130,11 @@ class PickleMerging:
                     sys.exit()
             else:
                             
-                emptyEntries = fillWithEmptyEntries( nbEmptyEntries = 60, entries = [] )
+                emptyEntries =  PickleMerging.fillWithEmptyEntries( nbEmptyEntries = 60, entries = [] )
                 entries.extend( emptyEntries )
          
                 
-        statsCollection = FileStatsCollector(  startTime = startTime , endTime = endTime, interval = MyDateLib.MINUTE, totalWidth = width, fileEntries = entries, logger = logger )
+        statsCollection = FileStatsCollector(  startTime = startTime , endTime = endTime, interval = StatsDateLib.MINUTE, totalWidth = width, fileEntries = entries, logger = logger )
            
         
         return statsCollection        
@@ -166,7 +170,7 @@ class PickleMerging:
                             
             else:#Use empty entry if there is no existing pickle of that name
                 
-                endTime = MyDateLib.getIsoFromEpoch( MyDateLib.getSecondsSinceEpoch( currentTime ) + MyDateLib.HOUR ) 
+                endTime = StatsDateLib.getIsoFromEpoch( StatsDateLib.getSecondsSinceEpoch( currentTime ) + StatsDateLib.HOUR ) 
                 entryList.append( FileStatsCollector( startTime = currentTime, endTime = endTime,logger =logger  ) )         
                 
                 if logger != None :
@@ -214,7 +218,7 @@ class PickleMerging:
                 logger.warning( "Did not merge pickles named : %s. Pickle list was not valid." %pickleNames )
                 logger.warning( "Filled with empty entries instead." %pickleNames )
                 
-            newFSC.fileEntries = fillWithEmptyEntries( nbEmptyEntries = 60 , entries = [] )    
+            newFSC.fileEntries = PickleMerging.fillWithEmptyEntries( nbEmptyEntries = 60 , entries = [] )    
         
         
         #prevents us from having ro remerge file later on.    
@@ -272,8 +276,7 @@ class PickleMerging:
             
         for seperator in seperators:
             pickleList.append( ClientStatsPickler.buildThisHoursFileName(  client = groupName, currentTime = seperator, fileType = fileType, machine = combinedMachineName ) )
-    
-     
+         
         return pickleList
         
     createMergedPicklesList = staticmethod( createMergedPicklesList )    
@@ -309,13 +312,13 @@ class PickleMerging:
             
         vc.getSavedList( user = combinedMachineName, clients = clientsForVersionManagement )           
        
-        width = MyDateLib.getSecondsSinceEpoch( endTime ) - MyDateLib.getSecondsSinceEpoch( startTime )
-        startTime = MyDateLib.getIsoWithRoundedHours( startTime )
+        width = StatsDateLib.getSecondsSinceEpoch( endTime ) - StatsDateLib.getSecondsSinceEpoch( startTime )
+        startTime = StatsDateLib.getIsoWithRoundedHours( startTime )
         
         seperators = [startTime]
-        seperators.extend( MyDateLib.getSeparatorsWithStartTime( startTime = startTime , width=width, interval=60*MINUTE )[:-1])
+        seperators.extend( StatsDateLib.getSeparatorsWithStartTime( startTime = startTime , width=width, interval=60*StatsDateLib.MINUTE )[:-1])
             
-        mergedPickleNames = createMergedPicklesList(  startTime = startTime, endTime = endTime, machines = machines, fileType = fileType, clients = clients, groupName = groupName, seperators = seperators ) #Resulting list of the merger.
+        mergedPickleNames =  PickleMerging.createMergedPicklesList(  startTime = startTime, endTime = endTime, machines = machines, fileType = fileType, clients = clients, groupName = groupName, seperators = seperators ) #Resulting list of the merger.
             
        
         for i in range( len( mergedPickleNames ) ) : #for every merger needed
@@ -337,7 +340,7 @@ class PickleMerging:
                 
                 if needToMergeSameHoursPickle == True :#First time or one element has changed   
                     
-                    mergePicklesFromSameHour( logger = logger , pickleNames = pickleNames , clientName = combinedClientName, combinedMachineName = combinedMachineName, currentTime = seperators[i], mergedPickleName = mergedPickleNames[i], fileType = fileType  )
+                    PickleMerging.mergePicklesFromSameHour( logger = logger , pickleNames = pickleNames , clientName = combinedClientName, combinedMachineName = combinedMachineName, currentTime = seperators[i], mergedPickleName = mergedPickleNames[i], fileType = fileType  )
                     
                     
                     for pickle in pickleNames :
@@ -357,7 +360,7 @@ class PickleMerging:
             for client in clients:
                 nameToUseForMerger = nameToUseForMerger + client
         
-        newFSC = mergePicklesFromDifferentHours( logger = logger , startTime = startTime, endTime = endTime, client = nameToUseForMerger, machine = combinedMachineName,fileType = fileType  )
+        newFSC =  PickleMerging.mergePicklesFromDifferentHours( logger = logger , startTime = startTime, endTime = endTime, client = nameToUseForMerger, machine = combinedMachineName,fileType = fileType  )
        
         return newFSC
     
