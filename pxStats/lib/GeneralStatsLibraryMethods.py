@@ -33,7 +33,7 @@ sys.path.append(pxlib)
     Imports
     PXManager requires pxlib 
 """
-import commands, PXManager, commands, glob 
+import commands, PXManager, commands, glob , fnmatch
 
 import PXPaths
 
@@ -45,6 +45,7 @@ from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.MachineConfigParameters import  MachineConfigParameters
 from pxStats.lib.RrdUtilities import RrdUtilities
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
+
 
 
 
@@ -249,6 +250,7 @@ class GeneralStatsLibraryMethods:
         for machine in machines:
             combinedMachineName = combinedMachineName + machine
         
+        print "%sbytecount/*_%s*" %( StatsPaths.STATSCURRENTDB, combinedMachineName )
         rxTxDatabasesLongNames = glob.glob( "%sbytecount/*_%s*" %( StatsPaths.STATSCURRENTDB, combinedMachineName ) )
         txOnlyDatabasesLongNames = glob.glob( "%slatency/*_%s*" %( StatsPaths.STATSCURRENTDB, combinedMachineName )   )
         
@@ -259,7 +261,7 @@ class GeneralStatsLibraryMethods:
             if pattern == None:
                 rxTxDatabases.append( rxtxLongName )
             else:
-                if fnmatch(os.path.basename(rxtxLongName), pattern ):
+                if fnmatch.fnmatch(os.path.basename(rxtxLongName), pattern ):
                     rxTxDatabases.append( rxtxLongName )
              
                 
@@ -268,11 +270,11 @@ class GeneralStatsLibraryMethods:
                 txOnlyDatabases.append( txLongName )    
             else:
                 #print "trying to match : %s to %s" %( os.path.basename(txLongName), pattern)
-                if fnmatch(os.path.basename(txLongName), pattern):
+                if fnmatch.fnmatch(os.path.basename(txLongName), pattern):
                  #   print "and it succeeded"
                     txOnlyDatabases.append( txLongName )
        
-        #print "@@@@@ %s" %txOnlyDatabases
+        print "@@@@@ %s" %txOnlyDatabases
         #Filter tx names from rxTxNames
         rxOnlyDatabases = filter( lambda x: x not in txOnlyDatabases, rxTxDatabases )    
         
@@ -286,10 +288,10 @@ class GeneralStatsLibraryMethods:
                 rxDatabase = rxDatabase.split("_%s"%combinedMachineName)[0]       
                 rxNames.append( rxDatabase  )
             
-        for txDatabase in txOnlyDatabases:  
-               
-            
-            #print "lastUpdate: %s" %lastUpdate
+        for txDatabase in txOnlyDatabases:                
+            lastUpdate = RrdUtilities.getDatabaseTimeOfUpdate( txDatabase, "tx" )
+            print txDatabase
+            print "lastUpdate: %s start : %s" %(lastUpdate,start)
             if lastUpdate >= start:
                 
                 txDatabase = os.path.basename( txDatabase )    
@@ -309,8 +311,8 @@ class GeneralStatsLibraryMethods:
         
         rxNames.sort()
         txNames.sort()
-        #print "******%s" %rxNames 
-        #print "******%s" %txNames        
+        print "******%s" %rxNames 
+        print "******%s" %txNames        
         return rxNames, txNames               
         
     getRxTxNamesHavingRunDuringPeriod = staticmethod( getRxTxNamesHavingRunDuringPeriod )    
@@ -332,7 +334,7 @@ class GeneralStatsLibraryMethods:
         pxManager.initNames() # Now you must call this method  
         
         if localMachine != machine :
-            updateConfigurationFiles( machine, "pds" )
+            GeneralStatsLibraryMethods.updateConfigurationFiles( machine, "pds" )
         
         txNames = pxManager.getTxNames()               
         rxNames = pxManager.getRxNames()  

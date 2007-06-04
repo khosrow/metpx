@@ -86,6 +86,7 @@ class StatsPaths:
     STATSMAN     = STATSROOT + 'man/'
     STATSTOOLS   = STATSBIN  + 'tools/'
     STATSDEBUGTOOLS = STATSBIN + 'debugTools/' 
+    STATSWEBPAGESGENERATORS = STATSBIN + "webPages/"
     
     STATSPXCONFIGS    = STATSETC + 'pxConfigFiles/' 
     STATSPXRXCONFIGS  = STATSPXCONFIGS + 'rx/'
