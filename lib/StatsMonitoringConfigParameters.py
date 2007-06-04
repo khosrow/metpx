@@ -182,7 +182,7 @@ class StatsMonitoringConfigParameters:
                     
                     cleanKey = key.replace( "^", "" ).replace( "$","").replace(".","")
                     
-                    if fnmatch( name, cleanKey ):                    
+                    if fnmatch.fnmatch( name, cleanKey ):                    
                         maximumGaps[name] = timersRegex[key]
                         nameFoundWithWildcard = True 
                 if nameFoundWithWildcard == False :            
