@@ -40,6 +40,7 @@ from   pxStats.lib.StatsDateLib         import StatsDateLib
 
 class PickleMerging: 
      
+     
     def entryListIsValid( entryList ):
         """
             Returns whether or not an entry list of pickles contains 
@@ -84,10 +85,9 @@ class PickleMerging:
         """
             Append certain number of empty entries to the entry list. 
         
-        """    
+        """            
         
-        for i in range( nbEmptyEntries ):
-            entries.append( _FileStatsEntry() )       
+        entries.extend( [_FileStatsEntry() for i in xrange( nbEmptyEntries )] )   
         
         return entries
     
@@ -179,9 +179,8 @@ class PickleMerging:
         
         #start off with a carbon copy of first pickle in list.
         newFSC = FileStatsCollector( files = entryList[0].files , statsTypes =  entryList[0].statsTypes, startTime = entryList[0].startTime, endTime = entryList[0].endTime, interval=entryList[0].interval, totalWidth = entryList[0].totalWidth, firstFilledEntry = entryList[0].firstFilledEntry, lastFilledEntry = entryList[0].lastFilledEntry, maxLatency = entryList[0].maxLatency, fileEntries = entryList[0].fileEntries,logger = logger )
-        
-         
-        if entryListIsValid( entryList ) == True :
+                 
+        if PickleMerging.entryListIsValid( entryList ) == True :
             
             for i in range ( 1 , len( entryList ) ): #add other entries 
                 
@@ -189,26 +188,18 @@ class PickleMerging:
                     if file not in newFSC.files :
                         newFSC.files.append( file ) 
                 
-                for j in range( len( newFSC.fileEntries ) ) : # add all entries
-                        
-                
-                    for k in range( entryList[i].fileEntries[j].values.rows ):#Add all new value for each entry
-                        
-                        newFSC.fileEntries[j].values.productTypes.append( entryList[i].fileEntries[j].values.productTypes[k] ) 
-                        
-                        newFSC.fileEntries[j].files.append( entryList[i].fileEntries[j].files[k] ) 
-                        newFSC.fileEntries[j].times.append( entryList[i].fileEntries[j].times[k] )          
-                                            
-                        if entryList[i].fileEntries[j].values.productTypes[k] != "[ERROR]" :
-                            newFSC.fileEntries[ j ].nbFiles = newFSC.fileEntries[ j ].nbFiles + 1
-                        
-                        for type in newFSC.statsTypes :
-                             
-                            newFSC.fileEntries[j].values.dictionary[type].append( entryList[i].fileEntries[j].values.dictionary[type][k] ) 
+                for j in range( len( newFSC.fileEntries ) ) : # add all entries                        
+                    
+                    newFSC.fileEntries[j].values.productTypes.extend( entryList[i].fileEntries[j].values.productTypes )
+                    newFSC.fileEntries[j].files.extend( entryList[i].fileEntries[j].files )
+                    newFSC.fileEntries[j].times.extend( entryList[i].fileEntries[j].times )  
+                    newFSC.fileEntries[j].nbFiles = newFSC.fileEntries[j].nbFiles + ( newFSC.fileEntries[ j ].nbFiles)                    
+                    
+                    for type in newFSC.statsTypes :
+                        newFSC.fileEntries[j].values.dictionary[type].extend( entryList[i].fileEntries[j].values.dictionary[type] ) 
                                                
-                        newFSC.fileEntries[j].values.rows = newFSC.fileEntries[j].values.rows + 1
-    
-            
+                    newFSC.fileEntries[j].values.rows = newFSC.fileEntries[j].values.rows + entryList[i].fileEntries[j].values.rows
+                
             newFSC = newFSC.setMinMaxMeanMedians( startingBucket = 0 , finishingBucket = newFSC.nbEntries -1 )
                  
                
@@ -245,9 +236,7 @@ class PickleMerging:
         for machine in machines:
             for client in clients: 
                 pickleList.append( ClientStatsPickler.buildThisHoursFileName(  client = client, currentTime = currentTime, fileType = fileType, machine = machine ) )
-        
-           
-        
+                          
         return pickleList
     
     createNonMergedPicklesList = staticmethod( createNonMergedPicklesList )
@@ -264,16 +253,11 @@ class PickleMerging:
        
         pickleList = [] 
         combinedMachineName = ""
-        combinedClientName  = ""
+        groupName  = ""
         
-        for machine in machines:
-            combinedMachineName = combinedMachineName + machine     
-        
-           
-        if groupName == "":        
-            for client in clients: 
-                groupName = groupName + client
-            
+        combinedMachineName.join( [machine for machine in machines] )
+        groupName.join( [client for client in clients]) 
+                       
         for seperator in seperators:
             pickleList.append( ClientStatsPickler.buildThisHoursFileName(  client = groupName, currentTime = seperator, fileType = fileType, machine = combinedMachineName ) )
          
@@ -292,14 +276,13 @@ class PickleMerging:
             remote locations.
             
         """          
-             
+   
         combinedMachineName = ""
         combinedClientName  = ""
         
-        for machine in machines:
-            combinedMachineName = combinedMachineName + machine
-        for client in clients: 
-            combinedClientName = combinedClientName + client
+        
+        combinedMachineName.join( [machine for machine in machines ] )
+        combinedClientName.join( [client for client in clients] )
         
         if groupName !="":
             clientsForVersionManagement = groupName 
@@ -321,10 +304,10 @@ class PickleMerging:
         mergedPickleNames =  PickleMerging.createMergedPicklesList(  startTime = startTime, endTime = endTime, machines = machines, fileType = fileType, clients = clients, groupName = groupName, seperators = seperators ) #Resulting list of the merger.
             
        
-        for i in range( len( mergedPickleNames ) ) : #for every merger needed
+        for i in xrange( len( mergedPickleNames ) ) : #for every merger needed
                 
                 needToMergeSameHoursPickle = False 
-                pickleNames = createNonMergedPicklesList( currentTime = seperators[i], machines = machines, fileType = fileType, clients = clients )
+                pickleNames = PickleMerging.createNonMergedPicklesList( currentTime = seperators[i], machines = machines, fileType = fileType, clients = clients )
                 
                 if not os.path.isfile( mergedPickleNames[i] ):                
                     needToMergeSameHoursPickle = True 
@@ -357,8 +340,7 @@ class PickleMerging:
             nameToUseForMerger = groupName 
         else:
             nameToUseForMerger = ""
-            for client in clients:
-                nameToUseForMerger = nameToUseForMerger + client
+            nameToUseForMerger.join( [ client for client in clients] )
         
         newFSC =  PickleMerging.mergePicklesFromDifferentHours( logger = logger , startTime = startTime, endTime = endTime, client = nameToUseForMerger, machine = combinedMachineName,fileType = fileType  )
        
@@ -366,17 +348,20 @@ class PickleMerging:
     
     mergePicklesFromDifferentSources = staticmethod( mergePicklesFromDifferentSources )
         
-        
-        
-    def main():
-        """
-            Small test case. Tests if everything works plus gives an idea on proper usage.
-        """
-    
-    
-    
-    if __name__ == "__main__":
-        main()
+       
+     
+def main():
+    """
+        Small test case. Tests if everything works plus gives an idea on proper usage.
+    """    
+    import time
+    timea = time.time()
+    PickleMerging.mergePicklesFromSameHour(logger = None, pickleNames=["/apps/px/pxStats/data/pickles/1", "/apps/px/pxStats/data/pickles/2","/apps/px/pxStats/data/pickles/1", "/apps/px/pxStats/data/pickles/2","/apps/px/pxStats/data/pickles/1", "/apps/px/pxStats/data/pickles/2"], mergedPickleName = "/apps/px/data/pickles/testResultatsNew", clientName="myTest", combinedMachineName="someMachine", currentTime = "2007-06-04 18:00:00", fileType = 'tx')
+    timeb = time.time()
+    print timeb-timea
+
+if __name__ == "__main__":
+    main()
     
     
     
