@@ -23,13 +23,15 @@ named COPYING in the root of the source directory tree.
 """
 
 
-import os, commands, pickleMerging
-import time
-import generalStatsLibraryMethods
+import os, commands, time
+sys.path.insert(1, sys.path[0] + '/../../')
 
-from MyDateLib import MyDateLib
-from MachineConfigParameters import MachineConfigParameters
-from StatsConfigParameters import StatsConfigParameters
+from pxStats.lib.PickleMerging import PickleMerging
+ 
+from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+from pxStats.lib.StatsDateLib import StatsDateLib
+from pxStats.lib.MachineConfigParameters import MachineConfigParameters
+from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 
 
 
