@@ -422,7 +422,7 @@ def generateWebPage( rxNames, txNames, years ):
         
         fileHandle.write( "</div></td>" )
         
-        fileHandle.write(  """ <td bgcolor="#66CCFF"><div class = "txTableEntry">""" )
+        fileHandle.write(  """ <td bgcolor="#66CCFF"><div class = "txTableEntry">Years&nbsp;:&nbsp;""" )
         
         for year in years:
             file = "%swebGraphics/yearly/errors/%s/%s.png" % ( StatsPaths.STATSGRAPHS, txName, year )
