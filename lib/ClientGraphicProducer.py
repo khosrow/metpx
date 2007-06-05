@@ -115,6 +115,7 @@ class ClientGraphicProducer:
         return startTime, endTime
     
     
+    
     def collectDataForIndividualGraphics( self, startTime, endTime, types ):
         #find parameters
         
@@ -148,8 +149,7 @@ class ClientGraphicProducer:
                 
             
             combinedMachineName = ""
-            for machine in self.machines:
-                combinedMachineName = combinedMachineName + machine
+            combinedMachineName.join( [ machine for machine in self.machines] )
                 
             dataCollection.append( ClientStatsPickler( client = self.clientNames, statsTypes = types, directory = self.directory, statsCollection = statsCollection, machine = combinedMachineName ) )
                             
@@ -173,8 +173,7 @@ class ClientGraphicProducer:
         statsCollection = PickleMerging.mergePicklesFromDifferentSources( logger = None , startTime = startTime, endTime = endTime, clients = self.clientNames, fileType = self.fileType, machines =  self.machines, groupName = self.groupName )
         
         combinedMachineName = ""
-        for machine in self.machines:
-            combinedMachineName = combinedMachineName + machine
+        combinedMachineName.join( [machine for machine in self.machines])
                 
         #Verifier params utiliser par cette ligne
         dataCollection.append( ClientStatsPickler( client = self.clientNames, statsTypes = types, directory = self.directory, statsCollection = statsCollection, machine = combinedMachineName ) )
