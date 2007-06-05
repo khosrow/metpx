@@ -23,6 +23,8 @@ named COPYING in the root of the source directory tree.
 
 import os, commands, time, sys
 
+sys.path.insert(1, sys.path[0] + '/../../../')
+
 from pxStats.lib.StatsPaths import StatsPaths    
 from pxStats.lib.StatsDateLib import StatsDateLib
 
@@ -56,7 +58,7 @@ def cleanPickles( dirsToKeep ):
             completePath = upperDir + "/" + innerFolder
             
             if innerFolder not in dirsToKeep:
-                status, output = commands.getstatusoutput("rm -rf %s " %completePath )
+                #status, output = commands.getstatusoutput("rm -rf %s " %completePath )
                 print "deleted : %s " %completePath
                 
     

@@ -33,8 +33,10 @@ import os,sys
 sys.path.insert(1, sys.path[0] + '/../../../')
 
 from pxStats.lib.CpickleWrapper import CpickleWrapper
-from pxStats.lib.FileStatsCollector import FileStatsCollector
-
+from pxStats.lib.NewFileStatsCollector import FileStatsCollector
+from pxStats.lib.NewFileStatsCollector import _FileStatsEntry
+from pxStats.lib.NewFileStatsCollector import _ValuesDictionary 
+ 
  
 def printPickle( pickle, outputFile = "" ):
     """
