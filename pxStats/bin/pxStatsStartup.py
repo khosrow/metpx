@@ -75,57 +75,76 @@ def updatePickles( parameters, machineParameters ):
     
     """      
         
+    nbChildProcess = 0    
+    
     for tag in parameters.sourceMachinesTags:
         
-        sourceMachines = machineParameters.getMachinesAssociatedWith(tag)            
+        nbChildProcess = nbChildProcess = + 1
         
-        for i in range( len( sourceMachines  ) ):
+        pid = os.fork()        
+        
+        if pid == 0: #if child
+        
+            sourceMachines = machineParameters.getMachinesAssociatedWith(tag)            
             
-            picklingMachine  = parameters.detailedParameters.picklingMachines[tag][i]
-                        
-            # If pickling and source machines differ, download log files frm source to pickling machine.            
-            if  sourceMachines[i] != picklingMachine: 
+            for i in range( len( sourceMachines  ) ):
                 
-                if parameters.detailedParameters.picklingMachines[tag][i] != LOCAL_MACHINE :#pickling to be done elsewhere
-                    for j in range(3):#do 3 times in case of currently turning log files.
-                        status, output = commands.getstatusoutput( "ssh %s@%s 'rsync -avzr --delete-before -e ssh  %s@%s:%s/ %s%s/' "  %( machineParameters.getUserNameForMachine( picklingMachine), picklingMachine,machineParameters.getUserNameForMachine( sourceMachines[i] ) , sourceMachines[i] , StatsPaths.PXLOG, StatsPaths.STATSLOGS, sourceMachines[i] ) )
-                        #print "ssh %s@%s 'rsync -avzr --delete-before -e ssh  %s@%s:%s %s%s/' "%( machineParameters.getUserNameForMachine( picklingMachine), picklingMachine,machineParameters.getUserNameForMachine( sourceMachines[i] ) , sourceMachines[i] , StatsPaths.PXLOG, StatsPaths.STATSLOGS, sourceMachines[i] ) 
-                        #print output
-                else:
+                picklingMachine  = parameters.detailedParameters.picklingMachines[tag][i]
+                            
+                # If pickling and source machines differ, download log files frm source to pickling machine.            
+                if  sourceMachines[i] != picklingMachine: 
                     
-                    for j in range(3):#do 3 times in case of currently turning log files.
-                        status, output = commands.getstatusoutput( "rsync -avzr --delete-before -e ssh %s@%s:%s   %s%s/ " %( machineParameters.getUserNameForMachine( sourceMachines[i] ), sourceMachines[i] , StatsPaths.PXLOG, StatsPaths.STATSLOGS, sourceMachines[i] ) )
-                        #print "rsync -avzr --delete-before -e ssh %s@%s:%s   %s%s/ " %( machineParameters.getUserNameForMachine( sourceMachines[i] ), sourceMachines[i] , StatsPaths.PXLOG, StatsPaths.STATSLOGS, sourceMachines[i] )
-                        #print output   
-                                
-               
-            if picklingMachine != LOCAL_MACHINE :#pickling to be done elsewhere,needs ssh             
-                          
-                status, output = commands.getstatusoutput( "ssh %s@%s 'python %spickleUpdater.py  -m %s -f rx'   " %( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine, StatsPaths.STATSBIN,  sourceMachines[i] ) ) 
-                #print "ssh %s@%s 'python %spickleUpdater.py  -m %s -f rx'   "  %( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine, StatsPaths.STATSBIN, sourceMachines[i] )
-                #print output
+                    if parameters.detailedParameters.picklingMachines[tag][i] != LOCAL_MACHINE :#pickling to be done elsewhere
+                        for j in range(3):#do 3 times in case of currently turning log files.
+                            status, output = commands.getstatusoutput( "ssh %s@%s 'rsync -avzr --delete-before -e ssh  %s@%s:%s/ %s%s/' "  %( machineParameters.getUserNameForMachine( picklingMachine), picklingMachine,machineParameters.getUserNameForMachine( sourceMachines[i] ) , sourceMachines[i] , StatsPaths.PXLOG, StatsPaths.STATSLOGS, sourceMachines[i] ) )
+                            #print "ssh %s@%s 'rsync -avzr --delete-before -e ssh  %s@%s:%s %s%s/' "%( machineParameters.getUserNameForMachine( picklingMachine), picklingMachine,machineParameters.getUserNameForMachine( sourceMachines[i] ) , sourceMachines[i] , StatsPaths.PXLOG, StatsPaths.STATSLOGS, sourceMachines[i] ) 
+                            #print output
+                    else:
+                        
+                        for j in range(3):#do 3 times in case of currently turning log files.
+                            status, output = commands.getstatusoutput( "rsync -avzr --delete-before -e ssh %s@%s:%s   %s%s/ " %( machineParameters.getUserNameForMachine( sourceMachines[i] ), sourceMachines[i] , StatsPaths.PXLOG, StatsPaths.STATSLOGS, sourceMachines[i] ) )
+                            #print "rsync -avzr --delete-before -e ssh %s@%s:%s   %s%s/ " %( machineParameters.getUserNameForMachine( sourceMachines[i] ), sourceMachines[i] , StatsPaths.PXLOG, StatsPaths.STATSLOGS, sourceMachines[i] )
+                            #print output   
+                                    
+                   
+                if picklingMachine != LOCAL_MACHINE :#pickling to be done elsewhere,needs ssh             
+                              
+                    status, output = commands.getstatusoutput( "ssh %s@%s 'python %spickleUpdater.py  -m %s -f rx'   " %( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine, StatsPaths.STATSBIN,  sourceMachines[i] ) ) 
+                    #print "ssh %s@%s 'python %spickleUpdater.py  -m %s -f rx'   "  %( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine, StatsPaths.STATSBIN, sourceMachines[i] )
+                    #print output
+                    
+                    status, output = commands.getstatusoutput( "ssh %s@%s 'python %spickleUpdater.py -m %s -f tx'  "( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine , StatsPaths.STATSBIN, sourceMachines[i] ) )
+                    #print "ssh %s@%s 'python %spickleUpdater.py -m %s -f tx'  "%( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine , StatsPaths.STATSBIN, sourceMachines[i] )
+                    #print output
+                    
+                    status, output = commands.getstatusoutput( "%spickleSynchroniser.py -l %s -m %s  "%( StatsPaths.STATSTOOLS, machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine ) )      
+                    #print "%spickleSynchroniser.py -l %s -m %s  " %( StatsPaths.STATSTOOLS, machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine )
+                    #print output
                 
-                status, output = commands.getstatusoutput( "ssh %s@%s 'python %spickleUpdater.py -m %s -f tx'  "( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine , StatsPaths.STATSBIN, sourceMachines[i] ) )
-                #print "ssh %s@%s 'python %spickleUpdater.py -m %s -f tx'  "%( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine , StatsPaths.STATSBIN, sourceMachines[i] )
-                #print output
+                    
+                else: # pickling is to be done locally. Log files may or may not reside elsewhere.
+                    
+                    status, output = commands.getstatusoutput( "python %spickleUpdater.py -f rx -m %s "%( StatsPaths.STATSBIN, sourceMachines[i] ) )
+                    #print output
+                    #print "python %spickleUpdater.py -f rx -m %s " %( StatsPaths.STATSBIN, sourceMachines[i] )
+                    
+                    status, output = commands.getstatusoutput( "python %spickleUpdater.py -f tx -m %s "  %(  StatsPaths.STATSBIN, sourceMachines[i]) )
+                    #print "python %spickleUpdater.py -f tx -m %s " %( StatsPaths.STATSBIN, sourceMachines[i] )
+                    #print output
+                    
+        elif (i%3) == 0:
+            while True:#wait on all non terminated child process'
+                try:   #will raise exception when no child process remain.
+                    pid, status = os.wait()
+                except:
+                    break
                 
-                status, output = commands.getstatusoutput( "%spickleSynchroniser.py -l %s -m %s  "%( StatsPaths.STATSTOOLS, machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine ) )      
-                #print "%spickleSynchroniser.py -l %s -m %s  " %( StatsPaths.STATSTOOLS, machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine )
-                #print output
-            
+    while True:#wait on all non terminated child process'
+        try:   #will raise exception when no child process remain.
+            pid, status = os.wait( )
+        except:
+            break
                 
-            else: # pickling is to be done locally. Log files may or may not reside elsewhere.
-                
-                status, output = commands.getstatusoutput( "python %spickleUpdater.py -f rx -m %s "%( StatsPaths.STATSBIN, sourceMachines[i] ) )
-                #print output
-                #print "python %spickleUpdater.py -f rx -m %s " %( StatsPaths.STATSBIN, sourceMachines[i] )
-                
-                status, output = commands.getstatusoutput( "python %spickleUpdater.py -f tx -m %s "  %(  StatsPaths.STATSBIN, sourceMachines[i]) )
-                #print "python %spickleUpdater.py -f tx -m %s " %( StatsPaths.STATSBIN, sourceMachines[i] )
-                #print output
-                
-                
-            
 
         
 def uploadGraphicFiles( parameters, machineParameters ):
@@ -212,12 +231,12 @@ def updateWebPages():
             
     """ 
        
-    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGES + "dailyGraphicsWebPage.py" )  
-    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGES + "weeklyGraphicsWebPage.py" )    
-    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGES + "monthlyGraphicsWebPage.py" )    
-    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGES + "yearlyGraphicsWebPage.py" )    
-    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGES + "totalGraphicsWebPages.py" )    
-    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGES + "generateTopWebPage.py" )
+    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGESGENERATORS + "dailyGraphicsWebPage.py" )  
+    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGESGENERATORS + "weeklyGraphicsWebPage.py" )    
+    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGESGENERATORS + "monthlyGraphicsWebPage.py" )    
+    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGESGENERATORS + "yearlyGraphicsWebPage.py" )    
+    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGESGENERATORS + "totalGraphicsWebPages.py" )    
+    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGESGENERATORS + "generateTopWebPage.py" )
        
     
     

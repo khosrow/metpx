@@ -25,7 +25,7 @@ named COPYING in the root of the source directory tree.
 """
     Small function that adds pxlib to the environment path.  
 """
-import os, sys, commands, pickle, fnmatch
+import os, sys, commands, fnmatch, glob, pickle 
 sys.path.insert(1, sys.path[0] + '/../../')
 try:
     pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
@@ -383,11 +383,11 @@ def findHoursBetween( startTime, endTime ):
     """
     
     hours = []
-    start = MyDateLib.getSecondsSinceEpoch( MyDateLib.getIsoWithRoundedHours( startTime ) )
-    end   = MyDateLib.getSecondsSinceEpoch( MyDateLib.getIsoWithRoundedHours( endTime ) )
+    start = StatsDateLib.getSecondsSinceEpoch( StatsDateLib.getIsoWithRoundedHours( startTime ) )
+    end   = StatsDateLib.getSecondsSinceEpoch( StatsDateLib.getIsoWithRoundedHours( endTime ) )
     
     for time in range( int(start), int(end), 3600 ):
-        hours.append( MyDateLib.getIsoWithRoundedHours( MyDateLib.getIsoFromEpoch( time )  ))        
+        hours.append( StatsDateLib.getIsoWithRoundedHours( StatsDateLib.getIsoFromEpoch( time )  ))        
     
     return hours
     
@@ -476,7 +476,7 @@ def verifyStatsLogs( parameters, report ,logger = None ):
     warningsWereFound = False
     newReportLines = ""
     logFileTypes = [  "graphs", "pickling", "rrd_graphs", "rrd_transfer" ] 
-    verificationTimeSpan =  (MyDateLib.getSecondsSinceEpoch( parameters.endTime ) - MyDateLib.getSecondsSinceEpoch( parameters.startTime )) / (60*60) 
+    verificationTimeSpan =  (StatsDateLib.getSecondsSinceEpoch( parameters.endTime ) - StatsDateLib.getSecondsSinceEpoch( parameters.startTime )) / (60*60) 
     
     for logFileType in logFileTypes:
         
@@ -611,7 +611,7 @@ def verifyPicklePresence( parameters, report ):
     newReportLines = "" 
     clientIsMissingFiles = False
     folderIsMissingFiles = False
-    startTime =  MyDateLib.getIsoFromEpoch( MyDateLib.getSecondsSinceEpoch( parameters.endTime ) - ( 7*24*60*60 ) )
+    startTime =  StatsDateLib.getIsoFromEpoch( StatsDateLib.getSecondsSinceEpoch( parameters.endTime ) - ( 7*24*60*60 ) )
     
     for machine in parameters.machines:
         if "," in machine:
@@ -728,29 +728,29 @@ def gapInErrorLog( name, start, end, errorLog )  :
 #         try:
         
         splitLine = line.split()
-        logEntryTime = MyDateLib.getIsoWithRoundedSeconds( splitLine[1] + " " + splitLine[2][:-4] )                                  
+        logEntryTime = StatsDateLib.getIsoWithRoundedSeconds( splitLine[1] + " " + splitLine[2][:-4] )                                  
         #if entry is for the client we're interested in ...
         if splitLine[3].replace( ":", "" ) == name :
             
             #allows 5 minutes range prior of after start of problem for an entry to appear.
-            if abs(MyDateLib.getSecondsSinceEpoch( logEntryTime ) - MyDateLib.getSecondsSinceEpoch(start)) <= 300:                 
+            if abs(StatsDateLib.getSecondsSinceEpoch( logEntryTime ) - StatsDateLib.getSecondsSinceEpoch(start)) <= 300:                 
                 startFound = True
                 
             #allow 5 minutes range prior or after the end of the problem forthe last entry to appear. 
-            if abs(MyDateLib.getSecondsSinceEpoch( logEntryTime ) - MyDateLib.getSecondsSinceEpoch(end)) <= 300:       
+            if abs(StatsDateLib.getSecondsSinceEpoch( logEntryTime ) - StatsDateLib.getSecondsSinceEpoch(end)) <= 300:       
                 
                 if "outdated" in splitLine:
                     if "NOT FOUND" in line: # No choice but to suppose we'ere refering to the same span.                        
                         startFound = True 
                         
-                    elif abs(MyDateLib.getSecondsSinceEpoch(splitLine[9] + " " + splitLine[10])- MyDateLib.getSecondsSinceEpoch(start)) <= 300:                        
+                    elif abs(StatsDateLib.getSecondsSinceEpoch(splitLine[9] + " " + splitLine[10])- StatsDateLib.getSecondsSinceEpoch(start)) <= 300:                        
                         startFound = True
                                                  
                 endFound = True                     
             
                 
         #if we're 5 minutes past end of problem stop looking
-        if MyDateLib.getSecondsSinceEpoch( logEntryTime ) - MyDateLib.getSecondsSinceEpoch(end) > 300:
+        if StatsDateLib.getSecondsSinceEpoch( logEntryTime ) - StatsDateLib.getSecondsSinceEpoch(end) > 300:
             break  
                 
 #         except:#no date present for last transmission...
@@ -834,9 +834,9 @@ def getPickleAnalysis( files, name, lastValidEntry, maximumGap, errorLog ):
                     
                     if (  nbEntries != 0 and nbEntries != nbErrors ) or ( file == files[ len( files ) - 1 ] and entry==fcs.fileEntries[ fcs.nbEntries-1 ] ): 
                         
-                        entryTime = MyDateLib.getSecondsSinceEpoch( entry.startTime )
+                        entryTime = StatsDateLib.getSecondsSinceEpoch( entry.startTime )
                         
-                        lastUpdateInSeconds = MyDateLib.getSecondsSinceEpoch( lastValidEntry )  
+                        lastUpdateInSeconds = StatsDateLib.getSecondsSinceEpoch( lastValidEntry )  
                         differenceInMinutes = ( entryTime - lastUpdateInSeconds ) / 60                   
                                                 
                         if  int(differenceInMinutes) > ( int(maximumGap) + 5 ) :#give a 5 minute margin
@@ -1074,7 +1074,7 @@ def verifyWebPages( parameters, report ):
     newReportLines = ""
     outdatedPageFound = False 
     files = glob.glob( "%s*Graphs*.html" %StatsPaths.STATSWEBPAGES )  
-    currentTime = MyDateLib.getSecondsSinceEpoch( parameters.endTime )
+    currentTime = StatsDateLib.getSecondsSinceEpoch( parameters.endTime )
     
     
     for file in files :
@@ -1082,7 +1082,7 @@ def verifyWebPages( parameters, report ):
         
         if ( currentTime - timeOfUpdate ) / ( 60*60 ) >1 :
             outdatedPageFound = True 
-            newReportLines = newReportLines + "%s was not updated since %s.\n" %( file, MyDateLib.getIsoFromEpoch( timeOfUpdate )) 
+            newReportLines = newReportLines + "%s was not updated since %s.\n" %( file, StatsDateLib.getIsoFromEpoch( timeOfUpdate )) 
     
     if outdatedPageFound :
         header = "\n\nThe following web page warning were found :\n"
@@ -1108,7 +1108,7 @@ def verifyGraphs( parameters, report ):
     newReportLines = ""
     outdatedGraphsFound = False 
     folder = ( "%swebGraphics/columbo/" %StatsPaths.STATSGRAPHS )  
-    currentTime = MyDateLib.getSecondsSinceEpoch( parameters.endTime )
+    currentTime = StatsDateLib.getSecondsSinceEpoch( parameters.endTime )
     
     
     allNames = []
