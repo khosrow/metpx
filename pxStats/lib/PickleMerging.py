@@ -87,8 +87,10 @@ class PickleMerging:
         
         """            
         
-        entries.extend( [_FileStatsEntry() for i in xrange( nbEmptyEntries )] )   
-        
+        for i in xrange( nbEmptyEntries ): 
+            entries[i] = _FileStatsEntry() 
+               
+       
         return entries
     
     fillWithEmptyEntries = staticmethod( fillWithEmptyEntries  )
@@ -107,7 +109,7 @@ class PickleMerging:
             logger.debug( "Call to mergeHourlyPickles received." )
         
         pickles = []
-        entries = []
+        entries = {}
         width = StatsDateLib.getSecondsSinceEpoch( endTime ) - StatsDateLib.getSecondsSinceEpoch( startTime )
         startTime = StatsDateLib.getIsoWithRoundedHours( startTime )
         
@@ -118,24 +120,28 @@ class PickleMerging:
             pickles.append( ClientStatsPickler.buildThisHoursFileName(  client = client, offset = 0, currentTime = seperator, machine = machine, fileType = fileType ) )        
         
         
+        startingNumberOfEntries = 0
         for pickle in pickles : 
             
             if os.path.isfile( pickle ) :
                      
                 tempCollection = CpickleWrapper.load( pickle )
                 if tempCollection != None :
-                    entries.extend( tempCollection.fileEntries )
-                else:
-                    
+                    for i in xrange( len( tempCollection.fileEntries.keys() )  ):
+                        entries[startingNumberOfEntries + i] = tempCollection.fileEntries[i]
+                    startingNumberOfEntries = startingNumberOfEntries + len( tempCollection.fileEntries.keys() ) 
+                else:                    
                     sys.exit()
             else:
-                            
-                emptyEntries =  PickleMerging.fillWithEmptyEntries( nbEmptyEntries = 60, entries = [] )
-                entries.extend( emptyEntries )
-         
+                print "filling with empty entries"            
+                emptyEntries =  PickleMerging.fillWithEmptyEntries( nbEmptyEntries = 60, entries = {} )
+                for i in xrange( 60 ):
+                    entries[i + startingNumberOfEntries ] = emptyEntries [i]
+                startingNumberOfEntries = startingNumberOfEntries + 60
                 
         statsCollection = FileStatsCollector(  startTime = startTime , endTime = endTime, interval = StatsDateLib.MINUTE, totalWidth = width, fileEntries = entries, logger = logger )
            
+        print "statsCollection.fileEntries :%s" %statsCollection.fileEntries
         
         return statsCollection        
     
@@ -209,7 +215,7 @@ class PickleMerging:
                 logger.warning( "Did not merge pickles named : %s. Pickle list was not valid." %pickleNames )
                 logger.warning( "Filled with empty entries instead." %pickleNames )
                 
-            newFSC.fileEntries = PickleMerging.fillWithEmptyEntries( nbEmptyEntries = 60 , entries = [] )    
+            newFSC.fileEntries = PickleMerging.fillWithEmptyEntries( nbEmptyEntries = 60 , entries = {} )    
         
         
         #prevents us from having ro remerge file later on.    
@@ -327,7 +333,7 @@ class PickleMerging:
                     
                     
                     for pickle in pickleNames :
-                        print pickle
+                        print "printing pickle : %s" %pickle
                         vc.updateFileInList( file = pickle )                                               
                     
                     vc.saveList( user = combinedMachineName, clients = clientsForVersionManagement )

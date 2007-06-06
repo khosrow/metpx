@@ -368,7 +368,7 @@ class FileStatsCollector:
                             
                         elif statsType == "fileName":
                             
-                            if fileType is "tx" :
+                            if fileType == "tx" :
                                 values[statsType] = os.path.basename(splitLine[6])#.split( ":" )[0]
                             else:
                                 split     = line.split( "/" )
@@ -488,7 +488,7 @@ class FileStatsCollector:
         #In case of traceback line
         isInteresting, linetype = FileStatsCollector.isInterestingLine( firstLine, usage = "departure", types = self.statsTypes ) 
         #print isInteresting
-        while isInteresting is False and firstLine is not "" :  
+        while isInteresting is False and firstLine != "" :  
             #print firstLine
             firstLine = fileHandle.readline()
             position  = fileHandle.tell()
@@ -502,7 +502,7 @@ class FileStatsCollector:
         #print self.endTime + "  " + self.startTime
         
         #print lineFound,line
-        while lineFound is False and line is not "":     
+        while lineFound is False and line != "":     
             #print "line :%s" %line 
             isInteresting, lineType = FileStatsCollector.isInterestingLine( line, types = self.statsTypes )
             
@@ -565,18 +565,18 @@ class FileStatsCollector:
                
                        
         for file in self.files :#read everyfile and append data found to dictionaries                               
-            print file 
+            #print file 
             entryCount            = 0      #Entry we are currently handling.
             
             fileHandle = open( file, "r" )
             
             line, lineType, position  = self.findFirstInterestingLine( fileHandle, fileSize = os.stat(file)[6] )
             
-            if line is not "" :                                        
+            if line != "" :                                        
                 fileHandle.seek( position )
                 departure   = self.findValues( ["departure"] ,  line, lineType, fileType = self.fileType,logger= self.logger )["departure"]
                         
-            while line  is not "" and str(departure)[:-2] < str(endTime)[:-2]: #while in proper range 
+            while line  != "" and str(departure)[:-2] < str(endTime)[:-2]: #while in proper range 
                 #print line                
                 while departure[:-2] > self.timeSeperators[ entryCount ][:-2]:#find appropriate bucket
                     entryCount = entryCount + 1                         
@@ -597,7 +597,7 @@ class FileStatsCollector:
                 
                 for statType in self.statsTypes : #append values for each specific data type needed                     
                     
-                    if statType is  "latency":
+                    if statType ==  "latency":
                     
                         if neededValues[ statType ] > self.maxLatency :      
                             fileEntries[ entryCount ].filesOverMaxLatency = fileEntries[entryCount ].filesOverMaxLatency + 1                          
@@ -605,14 +605,14 @@ class FileStatsCollector:
                     fileEntries[ entryCount ].values.dictionary[statType].append( neededValues[ statType ] )
                     #print fileEntries[ entryCount ].values.dictionary                             
                 
-                if lineType is not "[ERROR]" :
+                if lineType != "[ERROR]" :
                     fileEntries[ entryCount ].nbFiles = fileEntries[ entryCount ].nbFiles + 1        
                  
                 #Find next interesting line     
                 line    = fileHandle.readline()
                 isInteresting,lineType = FileStatsCollector.isInterestingLine( line, types = self.statsTypes )
                 
-                while isInteresting is False and line is not "":
+                while isInteresting is False and line != "":
                     previousPosition = fileHandle.tell() #save it or else we might loose a line.    
                     line = fileHandle.readline()# we read again 
                     isInteresting,lineType = FileStatsCollector.isInterestingLine( line, types = self.statsTypes )
@@ -621,7 +621,7 @@ class FileStatsCollector:
                 departure   = self.findValues( ["departure"] , line, lineType, fileType = self.fileType,logger= self.logger )["departure"]               
                 
                 
-            if line is "" :
+            if line == "" :
                 #print "read the entire file allready"
                 if entryCount > self.lastFilledEntry:#in case of numerous files
                     self.lastFilledEntry  = entryCount                  
@@ -642,12 +642,12 @@ class FileStatsCollector:
             We fill up fileEntries with empty entries with proper time labels 
         
         """
-        print "creates empty entries"
+        #print "creates empty entries"
         if self.logger is not  None :
             self.logger.debug( "Call to createEmptyEntries received." )
         
         if len ( self.timeSeperators ) > 1 : 
-            print 0, (len ( self.timeSeperators )-1)
+            #print 0, (len ( self.timeSeperators )-1)
             for i in xrange(0, len ( self.timeSeperators )-1 ):
                 self.fileEntries[i] =  _FileStatsEntry()      
                 self.fileEntries[i].startTime =  self.timeSeperators[ i ] 
@@ -683,7 +683,7 @@ if __name__ == "__main__" :
     timeA= time.time()
     types = [ "latency", "errors","bytecount" ]
     
-    filename = StatsPaths.STATSLOGS + 'machine/tx_client.log'
+    filename = StatsPaths.STATSLOGS + 'pxatx/tx_satnet-ice.log'
     
     startingHours=["00:00:00","01:00:00","02:00:00","03:00:00","04:00:00","05:00:00","06:00:00","07:00:00","08:00:00","09:00:00","10:00:00","11:00:00","12:00:00","13:00:00","14:00:00","15:00:00","16:00:00","17:00:00","18:00:00","19:00:00","20:00:00","21:00:00","22:00:00","23:00:00" ]
     
