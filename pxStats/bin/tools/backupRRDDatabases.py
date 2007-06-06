@@ -47,7 +47,7 @@ def backupDatabases( timeOfBackup, backupsToKeep ):
     
     
     source = StatsPaths.STATSCURRENTDB
-    #destination = StatsPaths.STATSDBBACKUPS + "%s" %timeOfBackup
+    destination = StatsPaths.STATSDBBACKUPS + "%s" %timeOfBackup
     
     if not os.path.isdir( destination ):
         os.makedirs( destination )
