@@ -41,12 +41,13 @@ from   Logger    import *
 from   optparse  import OptionParser
 from   PXManager import *
 
+from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.PickleMerging import PickleMerging
 from pxStats.lib.ClientStatsPickler import ClientStatsPickler
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.RrdUtilities import RrdUtilities
-
+from pxStats.lib.MemoryManagement import MemoryManagement
    
 LOCAL_MACHINE = os.uname()[1]   
 
@@ -324,13 +325,13 @@ def getMergedData( clients, fileType,  machines, startTime, endTime, groupName =
         types = [ "errors","bytecount" ]
     
    
-    if len( machines ) > 1 or len( clients) > 1:    
-       
-        statsCollection = pickleMerging.mergePicklesFromDifferentSources( logger = logger , startTime = StatsDateLib.getIsoFromEpoch(startTime), endTime = StatsDateLib.getIsoFromEpoch(endTime), clients = clients, fileType = fileType, machines = machines, groupName = groupName )                           
+    if len( machines ) > 1 or len( clients) > 1:   
+        
+        statsCollection = PickleMerging.mergePicklesFromDifferentSources( logger = logger , startTime = StatsDateLib.getIsoFromEpoch(startTime), endTime = StatsDateLib.getIsoFromEpoch(endTime), clients = clients, fileType = fileType, machines = machines, groupName = groupName )                           
     
     else:#only one machine, only merge different hours together
        
-        statsCollection = pickleMerging.mergePicklesFromDifferentHours( logger = logger , startTime = StatsDateLib.getIsoFromEpoch(startTime), endTime = StatsDateLib.getIsoFromEpoch(endTime), client = clients[0], fileType = fileType, machine = machines[0] )
+        statsCollection = PickleMerging.mergePicklesFromDifferentHours( logger = logger , startTime = StatsDateLib.getIsoFromEpoch(startTime), endTime = StatsDateLib.getIsoFromEpoch(endTime), client = clients[0], fileType = fileType, machine = machines[0] )
         
     
     combinedMachineName = ""
@@ -374,8 +375,7 @@ def updateRoundRobinDatabases(  client, machines, fileType, endTime, logger = No
     """
             
     combinedMachineName = ""
-    for machine in machines:
-        combinedMachineName = combinedMachineName + machine
+    combinedMachineName.join( [machine for machine in machines ] )
     
     tempRRDFileName = RrdUtilities.buildRRDFileName( dataType = "errors", clients = [client], machines = machines, fileType = fileType)
     startTime   = RrdUtilities.getDatabaseTimeOfUpdate(  tempRRDFileName, fileType ) 
@@ -383,32 +383,87 @@ def updateRoundRobinDatabases(  client, machines, fileType, endTime, logger = No
     if  startTime == 0 :
         startTime = StatsDateLib.getSecondsSinceEpoch( StatsDateLib.getIsoTodaysMidnight( endTime ) )
     endTime     = StatsDateLib.getSecondsSinceEpoch( endTime )           
-    dataPairs   = getPairs( [client], machines, fileType, startTime, endTime, groupName = "", logger = logger )   
+    startTime   = endTime- (StatsDateLib.DAY*19 )
+    
+    timeSeperators = getTimeSeperatorsBasedOnAvailableMemory(StatsDateLib.getIsoFromEpoch( startTime ), StatsDateLib.getIsoFromEpoch( endTime ), [client], fileType, machines ) 
+    
+    
+    for i in xrange( len(timeSeperators) -1 ) :
         
-    for key in dataPairs.keys():
-                               
-        rrdFileName = RrdUtilities.buildRRDFileName( dataType = key, clients = [client], machines = machines, fileType = fileType )        
-        
-        if not os.path.isfile( rrdFileName ):             
-            createRoundRobinDatabase(  databaseName = rrdFileName , startTime= startTime, dataType = key )
-                      
-        
-        if endTime > startTime :  
-            
-            for pair in dataPairs[ key ]:
-                rrdtool.update( rrdFileName, '%s:%s' %( int(pair[0]), pair[1] ) ) 
+        dataPairs   = getPairs( [client], machines, fileType, timeSeperators[i], timeSeperators[i+1] , groupName = "", logger = logger )
 
-            if logger != None :
-                logger.info( "Updated  %s db for %s in db named : %s" %( key, client, rrdFileName ) )
-        
-        else:
-            if logger != None :
-                logger.warning( "This database was not updated since it's last update was more recent than specified date : %s" %rrdFileName )
+        for key in dataPairs.keys():
+
+            rrdFileName = RrdUtilities.buildRRDFileName( dataType = key, clients = [client], machines = machines, fileType = fileType )
+
+            if not os.path.isfile( rrdFileName ):
+                 createRoundRobinDatabase(  databaseName = rrdFileName , startTime= startTime, dataType = key )
+
+
+            if endTime > startTime :
+
+                for pair in dataPairs[ key ]:
+                     rrdtool.update( rrdFileName, '%s:%s' %( int(pair[0]), pair[1] ) )
+
+                if logger != None :
+                     logger.info( "Updated  %s db for %s in db named : %s" %( key, client, rrdFileName ) )
+
+            else:
+                if logger != None :
+                     logger.warning( "This database was not updated since it's last update was more recent than specified date : %s" %rrdFileName )
         
                 
     RrdUtilities.setDatabaseTimeOfUpdate(  rrdFileName, fileType, endTime )  
 
 
+ 
+def getTimeSeperatorsBasedOnAvailableMemory( startTime, endTime, clients, fileType, machines ):
+    """    
+        @summary: returns the time seperators to be used for the transfer 
+                  in a way that should prevent overloading memory. 
+        
+        @param startTime: start time  of the transfer to be attempted.
+        @param endTime:   end time of the transfer to be attempted.
+        @param clients:   lists of clients/sources to be transferred.
+        @param fileType:  tx or rx.
+        @param machines:  machines on wich the clients/sources reside.
+        
+        @return: the time seperators.
+        
+    """
+    
+    width = 0        # Width in seconds of the transfer to be attempted
+    seperators = []  # Time sperators representing every hour to be transferred.
+    allFiles =[]     # List of all pickle files that will be involved
+    hourlyFiles = [] # List of all files to be handled for a certain hour.
+    hourlyFileSizes = [] # Total file size of all the files to be handled at a certain hour.  
+    
+    
+    totalSizeToloadInMemory = 0.0  # Total size of all the pickle files to load in memory
+    currentlyAvailableMemory = 0.0 # Total currently available memory on the present machine.
+    seperatorsBasedOnAvailableMemory = [startTime, endTime] # Suppose we have all the momory we need.    
+
+    width = ( StatsDateLib.getSecondsSinceEpoch( endTime ) -  StatsDateLib.getSecondsSinceEpoch( startTime ) ) / StatsDateLib.HOUR    
+    
+    seperators = [ startTime ]
+    seperators.extend( StatsDateLib.getSeparatorsWithStartTime( startTime =  startTime , width= width*StatsDateLib.HOUR, interval=StatsDateLib.HOUR )[:-1])
+    
+    for seperator in seperators:      
+        hourlyFiles = PickleMerging.createNonMergedPicklesList( seperator, machines, fileType, clients )
+        allFiles.extend( hourlyFiles )        
+        hourlyFileSizes.append( MemoryManagement.getTotalSizeListOfFiles( hourlyFiles )    )
+    
+    
+    totalSizeToloadInMemory = MemoryManagement.getTotalSizeListOfFiles( allFiles )
+    currentlyAvailableMemory = MemoryManagement.getCurrentFreeMemory( marginOfError = 25 )    
+    
+    if totalSizeToloadInMemory >= currentlyAvailableMemory:
+        seperatorsBasedOnAvailableMemory = MemoryManagement.getSeperatorsForHourlyTreatments( startTime, endTime, currentlyAvailableMemory, hourlyFileSizes  )
+    
+            
+    return seperatorsBasedOnAvailableMemory
+              
+    
         
 def updateGroupedRoundRobinDatabases( infos, logger = None ):    
     """
@@ -417,45 +472,36 @@ def updateGroupedRoundRobinDatabases( infos, logger = None ):
          
     """
     
-    endTime     = StatsDateLib.getSecondsSinceEpoch( infos.endTime ) 
-    
+    endTime     = StatsDateLib.getSecondsSinceEpoch( infos.endTime )     
     
     tempRRDFileName = RrdUtilities.buildRRDFileName( "errors", clients = infos.group, machines = infos.machines, fileType = infos.fileTypes[0]  )  
     startTime       = RrdUtilities.getDatabaseTimeOfUpdate(  tempRRDFileName, infos.fileTypes[0] )
     
    
-    if startTime == 0 :
-        
+    if startTime == 0 :        
         startTime = StatsDateLib.getSecondsSinceEpoch( StatsDateLib.getIsoTodaysMidnight( infos.endTime ) )
-              
-    dataPairs   = getPairs( infos.clients, infos.machines, infos.fileTypes[0], startTime, endTime, infos.group, logger )     
-          
-     
-    for key in dataPairs.keys():
-        
-        rrdFileName = RrdUtilities.buildRRDFileName( dataType = key, clients = infos.group, groupName = infos.group, machines =  infos.machines,fileType = infos.fileTypes[0], usage = "group" )  
-        
-        if not os.path.isfile( rrdFileName ):  
-            
-            createRoundRobinDatabase( rrdFileName, startTime, key)
-            
-        
-        if endTime > startTime :  
-            
-            for pair in dataPairs[ key ]:       
-                         
-                rrdtool.update( rrdFileName, '%s:%s' %( int(pair[0]), pair[1] ) ) 
-
-            if logger != None :
-                logger.info( "Updated  %s db for %s in db named : %s" %( key, infos.clients, rrdFileName ) )
-        
-        else:
-            if logger != None :
-                logger.warning( "This database was not updated since it's last update was more recent than specified date : %s" %rrdFileName )        
     
         
+    timeSeperators = getTimeSeperatorsBasedOnAvailableMemory( StatsDateLib.getIsoFromEpoch( startTime ), StatsDateLib.getIsoFromEpoch( endTime ), infos.clients, infos.fileTypes[0], infos.machines )
+    
+    
+    for i in xrange( len( timeSeperators )-1 ):        
+               
+        dataPairs   = getPairs( infos.clients, infos.machines, infos.fileTypes[0], timeSeperators[i], timeSeperators[i+1], infos.group, logger )
+        for key in dataPairs.keys():
+            rrdFileName = RrdUtilities.buildRRDFileName( dataType = key, clients = infos.group, groupName = infos.group, machines =  infos.machines,fileType = infos.fileTypes[0], usage = "group" )
+            if not os.path.isfile( rrdFileName ):
+                createRoundRobinDatabase( rrdFileName, startTime, key)
+            if endTime > startTime :
+                for pair in dataPairs[ key ]:
+                    rrdtool.update( rrdFileName, '%s:%s' %( int(pair[0]), pair[1] ) )
+                    if logger != None :
+                       logger.info( "Updated  %s db for %s in db named : %s" %( key, infos.clients, rrdFileName ) )
+            else:
+                if logger != None :
+                    logger.warning( "This database was not updated since it's last update was more recent than specified date : %s" %rrdFileName )
         
-    setDatabaseTimeOfUpdate( tempRRDFileName, infos.fileTypes[0], endTime )         
+    RrdUtilities.setDatabaseTimeOfUpdate( tempRRDFileName, infos.fileTypes[0], endTime )         
     
     
         
@@ -541,6 +587,7 @@ def main():
    
     transferPickleToRRD( infos, logger = logger )
    
+
 
 if __name__ == "__main__":
     
