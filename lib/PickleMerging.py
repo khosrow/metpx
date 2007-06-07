@@ -133,7 +133,7 @@ class PickleMerging:
                 else:                    
                     sys.exit()
             else:
-                print "filling with empty entries"            
+                           
                 emptyEntries =  PickleMerging.fillWithEmptyEntries( nbEmptyEntries = 60, entries = {} )
                 for i in xrange( 60 ):
                     entries[i + startingNumberOfEntries ] = emptyEntries [i]
@@ -141,8 +141,7 @@ class PickleMerging:
                 
         statsCollection = FileStatsCollector(  startTime = startTime , endTime = endTime, interval = StatsDateLib.MINUTE, totalWidth = width, fileEntries = entries, logger = logger )
            
-        print "statsCollection.fileEntries :%s" %statsCollection.fileEntries
-        
+                
         return statsCollection        
     
     
@@ -222,7 +221,7 @@ class PickleMerging:
         temp = newFSC.logger
         del newFSC.logger
         CpickleWrapper.save( newFSC, mergedPickleName )
-        
+        print "saved :%s" %mergedPickleName
         newFSC.logger = temp
         
         return newFSC
@@ -252,17 +251,18 @@ class PickleMerging:
     def createMergedPicklesList( startTime, endTime, clients, groupName, fileType, machines, seperators ):
         """
             
-            Pre-condition : Machines must be an array containing the list of machines to use. 
+            @param machines: Machines must be an array containing the list of machines to use. 
                             If only one machine is to be used still use an array containing a single item. 
         
         """   
        
         pickleList = [] 
         combinedMachineName = ""
-        groupName  = ""
         
-        combinedMachineName.join( [machine for machine in machines] )
-        groupName.join( [client for client in clients]) 
+        
+        combinedMachineName = combinedMachineName.join( [machine for machine in machines] )
+        if groupName == "" or groupName is None:            
+            groupName = groupName.join( [client for client in clients]) 
                        
         for seperator in seperators:
             pickleList.append( ClientStatsPickler.buildThisHoursFileName(  client = groupName, currentTime = seperator, fileType = fileType, machine = combinedMachineName ) )
@@ -283,12 +283,13 @@ class PickleMerging:
             
         """          
    
+        print "//////////////////////////GroupName : %s" %groupName
         combinedMachineName = ""
         combinedClientName  = ""
         
         
-        combinedMachineName.join( [machine for machine in machines ] )
-        combinedClientName.join( [client for client in clients] )
+        combinedMachineName = combinedMachineName.join( [machine for machine in machines ] )
+        combinedClientName  = combinedClientName.join( [client for client in clients] )
         
         if groupName !="":
             clientsForVersionManagement = groupName 
@@ -309,7 +310,7 @@ class PickleMerging:
             
         mergedPickleNames =  PickleMerging.createMergedPicklesList(  startTime = startTime, endTime = endTime, machines = machines, fileType = fileType, clients = clients, groupName = groupName, seperators = seperators ) #Resulting list of the merger.
             
-       
+        print mergedPickleNames
         for i in xrange( len( mergedPickleNames ) ) : #for every merger needed
                 
                 needToMergeSameHoursPickle = False 
@@ -332,8 +333,7 @@ class PickleMerging:
                     PickleMerging.mergePicklesFromSameHour( logger = logger , pickleNames = pickleNames , clientName = combinedClientName, combinedMachineName = combinedMachineName, currentTime = seperators[i], mergedPickleName = mergedPickleNames[i], fileType = fileType  )
                     
                     
-                    for pickle in pickleNames :
-                        print "printing pickle : %s" %pickle
+                    for pickle in pickleNames :                        
                         vc.updateFileInList( file = pickle )                                               
                     
                     vc.saveList( user = combinedMachineName, clients = clientsForVersionManagement )
@@ -346,7 +346,7 @@ class PickleMerging:
             nameToUseForMerger = groupName 
         else:
             nameToUseForMerger = ""
-            nameToUseForMerger.join( [ client for client in clients] )
+            nameToUseForMerger = nameToUseForMerger.join( [ client for client in clients] )
         
         newFSC =  PickleMerging.mergePicklesFromDifferentHours( logger = logger , startTime = startTime, endTime = endTime, client = nameToUseForMerger, machine = combinedMachineName,fileType = fileType  )
        
