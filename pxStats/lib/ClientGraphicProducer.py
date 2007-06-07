@@ -149,7 +149,7 @@ class ClientGraphicProducer:
                 
             
             combinedMachineName = ""
-            combinedMachineName.join( [ machine for machine in self.machines] )
+            combinedMachineName = combinedMachineName.join( [ machine for machine in self.machines] )
                 
             dataCollection.append( ClientStatsPickler( client = self.clientNames, statsTypes = types, directory = self.directory, statsCollection = statsCollection, machine = combinedMachineName ) )
                             
@@ -169,11 +169,12 @@ class ClientGraphicProducer:
         
         
         dataCollection = []        
-       
+        
+        print "mergepicklesform differentsource in combined graphics" , None , startTime,  endTime, self.clientNames, self.fileType, self.machines, self.groupName
         statsCollection = PickleMerging.mergePicklesFromDifferentSources( logger = None , startTime = startTime, endTime = endTime, clients = self.clientNames, fileType = self.fileType, machines =  self.machines, groupName = self.groupName )
         
         combinedMachineName = ""
-        combinedMachineName.join( [machine for machine in self.machines])
+        combinedMachineName = combinedMachineName.join( [machine for machine in self.machines])
                 
         #Verifier params utiliser par cette ligne
         dataCollection.append( ClientStatsPickler( client = self.clientNames, statsTypes = types, directory = self.directory, statsCollection = statsCollection, machine = combinedMachineName ) )
