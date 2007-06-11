@@ -103,6 +103,7 @@ class StatsPaths:
     
     
     STATSFILEVERSIONS     = STATSDATA + 'fileAcessVersions/'
+    STATSLOGACCESS        = STATSDATA + 'logFileAccess'
     STATSMONITORING       = STATSDATA + 'monitoring/'
     STATSPICKLES          = STATSDATA + 'pickles/'
     STATSLOGS             = STATSDATA + 'logFiles/'
@@ -111,7 +112,7 @@ class StatsPaths:
     STATSWEBGRAPHS        = STATSGRAPHS + 'webGraphics/'
     STATSCOLGRAPHS        = STATSWEBGRAPHS + 'columbo/'
     
-    STATSPICKLESTIMEOFUPDATES    = STATSDATA + 'picklesTimeOfUpdates'
+    STATSPICKLESTIMEOFUPDATES    = STATSDATA + 'picklesTimeOfUpdates/'
     STATSFILEACCESSVERSIONS      = STATSDATA + 'fileAccessVersions'
     
     
