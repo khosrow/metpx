@@ -89,7 +89,9 @@ def setLastUpdate( machine, client, fileType, currentDate, collectUpToNow = Fals
     
     times = {}
     lastUpdate = {}
-    fileName = StatsPaths.STATSPICKLESTIMEOFUPDATES
+    needToCreateNewFile = False 
+    fileName = fileName = "%s%s_%s_%s" %( StatsPaths.STATSPICKLESTIMEOFUPDATES, fileType, client, machine )   
+    
     
     if collectUpToNow == False :
         currentDate = StatsDateLib.getIsoWithRoundedHours( currentDate ) 
@@ -97,25 +99,26 @@ def setLastUpdate( machine, client, fileType, currentDate, collectUpToNow = Fals
     
     if os.path.isfile( fileName ):
         
-        fileHandle  = open( fileName, "r" )
-        times       = pickle.load( fileHandle )
-        fileHandle.close()
+        try:     
+            fileHandle  = open( fileName, "w" )
+            pickle.dump( currentDate, fileHandle )
+            fileHandle.close()
         
-        times[ machine + "_" + fileType + "_" + client ] = currentDate
-        
-        fileHandle  = open( fileName, "w" )
-        pickle.dump( times, fileHandle )
-        fileHandle.close()
+        except:
+            needToCreateNewFile = True
+            
+    else:
+        needToCreateNewFile = True
     
     
-    else:#create a new pickle file  
-         
-        fileHandle  = open( fileName, "w" )
-        
-        times[ fileType + "_" + client ] = currentDate          
-        
-        pickle.dump( times, fileHandle )
-        
+    if needToCreateNewFile == True:        
+        #create a new pickle file  
+        print "problematic file : %s" %fileName 
+        if not os.path.isdir( os.path.dirname( fileName ) ) :
+            os.makedirs( os.path.dirname( fileName ) )
+                    
+        fileHandle  = open( fileName, "w" )            
+        pickle.dump( currentDate, fileHandle )        
         fileHandle.close()
 
 
@@ -129,16 +132,16 @@ def getLastUpdate( machine, client, fileType, currentDate, collectUpToNow = Fals
     
     times = {}
     lastUpdate = {}
-    fileName = StatsPaths.STATSPICKLESTIMEOFUPDATES  
+    fileName = fileName = "%s%s_%s_%s" %( StatsPaths.STATSPICKLESTIMEOFUPDATES, fileType, client, machine )   
     
     if os.path.isfile( fileName ):
-        
-        fileHandle  = open( fileName, "r" )
-        times       = pickle.load( fileHandle )
-        
         try :
-            lastUpdate = times[ machine + "_" + fileType + "_" + client ]
+            fileHandle  = open( fileName, "r" )
+            lastUpdate  = pickle.load( fileHandle )      
+            fileHandle.close()
+            
         except:
+            print "problematic file in loading : %s" %fileName
             lastUpdate = StatsDateLib.getIsoWithRoundedHours( StatsDateLib.getIsoFromEpoch( StatsDateLib.getSecondsSinceEpoch(currentDate ) - StatsDateLib.HOUR) )
             pass
             
@@ -146,16 +149,15 @@ def getLastUpdate( machine, client, fileType, currentDate, collectUpToNow = Fals
             
     
     else:#create a new pickle file.Set start of the pickle as last update.   
-         
-        fileHandle  = open( fileName, "w" )
-        
+        if not os.path.isdir( os.path.dirname( fileName ) ) :
+            os.makedirs( os.path.dirname( fileName ) ) 
+            
+        fileHandle  = open( fileName, "w" )        
     
         lastUpdate = StatsDateLib.getIsoWithRoundedHours( StatsDateLib.getIsoFromEpoch( StatsDateLib.getSecondsSinceEpoch(currentDate ) - StatsDateLib.HOUR) )
-
-
-        times[ fileType + "_" + client ] = lastUpdate    
          
-        pickle.dump( times, fileHandle )
+        pickle.dump( lastUpdate, fileHandle )
+        
         fileHandle.close()
        
 
@@ -288,8 +290,7 @@ def getOptionsFromParser( parser, logger = None  ):
     
     if collectUpToNow == False:
         infos.endTime = StatsDateLib.getIsoWithRoundedHours( infos.currentDate ) 
-    
-    
+       
         
     return infos 
 
