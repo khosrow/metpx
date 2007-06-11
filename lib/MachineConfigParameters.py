@@ -59,7 +59,7 @@ class MachineConfigParameters:
             self.machines = machines  
             self.userNames = usersNames
                         
-            for userName in userNames.keys():
+            for userName in userNames:
                 if userName not in self.machines:
                     raise Exception( "_MachineConfigParameters init error. Machines in self.machine do not match those in userNames." )
         
@@ -157,7 +157,7 @@ class MachineConfigParameters:
         
         if  machine not in self.machines :            
             self.addMachineToMachineList(machine)
-        if machineTag not in self.machinesForMachineTags.keys():
+        if machineTag not in self.machinesForMachineTags:
             self.addMachineTagToTagList(machineTag)
                 
         self.machinesForMachineTags[machineTag].append( machine )
@@ -187,7 +187,7 @@ class MachineConfigParameters:
         
         userName = ""
         
-        if machine in self.userNames.keys(): 
+        if machine in self.userNames: 
             userName = self.userNames[machine]
         
         return userName
@@ -212,7 +212,7 @@ class MachineConfigParameters:
         @param machineTag:
         """
         
-        if machineTag not in self.machinesForMachineTags.keys():
+        if machineTag not in self.machinesForMachineTags:
             self.machinesForMachineTags[machineTag] = []
     
         

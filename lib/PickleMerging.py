@@ -127,9 +127,9 @@ class PickleMerging:
                      
                 tempCollection = CpickleWrapper.load( pickle )
                 if tempCollection != None :
-                    for i in xrange( len( tempCollection.fileEntries.keys() )  ):
+                    for i in xrange( len( tempCollection.fileEntries )  ):
                         entries[startingNumberOfEntries + i] = tempCollection.fileEntries[i]
-                    startingNumberOfEntries = startingNumberOfEntries + len( tempCollection.fileEntries.keys() ) 
+                    startingNumberOfEntries = startingNumberOfEntries + len( tempCollection.fileEntries ) 
                 else:                    
                     sys.exit()
             else:
@@ -221,7 +221,7 @@ class PickleMerging:
         temp = newFSC.logger
         del newFSC.logger
         CpickleWrapper.save( newFSC, mergedPickleName )
-        print "saved :%s" %mergedPickleName
+        #print "saved :%s" %mergedPickleName
         newFSC.logger = temp
         
         return newFSC
@@ -282,8 +282,7 @@ class PickleMerging:
             remote locations.
             
         """          
-   
-        print "//////////////////////////GroupName : %s" %groupName
+           
         combinedMachineName = ""
         combinedClientName  = ""
         
@@ -309,8 +308,8 @@ class PickleMerging:
         seperators.extend( StatsDateLib.getSeparatorsWithStartTime( startTime = startTime , width=width, interval=60*StatsDateLib.MINUTE )[:-1])
             
         mergedPickleNames =  PickleMerging.createMergedPicklesList(  startTime = startTime, endTime = endTime, machines = machines, fileType = fileType, clients = clients, groupName = groupName, seperators = seperators ) #Resulting list of the merger.
-            
-        print mergedPickleNames
+           
+        
         for i in xrange( len( mergedPickleNames ) ) : #for every merger needed
                 
                 needToMergeSameHoursPickle = False 
@@ -322,8 +321,7 @@ class PickleMerging:
                     
                     for pickle in pickleNames : #Verify every pickle implicated in merger.
                         # if for some reason pickle has changed since last time                    
-                        if vc.isDifferentFile( file = pickle, user = combinedMachineName, clients = clientsForVersionManagement ) == True : 
-                               
+                        if vc.isDifferentFile( file = pickle, user = combinedMachineName, clients = clientsForVersionManagement ) == True :                                
                             needToMergeSameHoursPickle = True 
                             break
                             
@@ -331,9 +329,8 @@ class PickleMerging:
                 if needToMergeSameHoursPickle == True :#First time or one element has changed   
                     
                     PickleMerging.mergePicklesFromSameHour( logger = logger , pickleNames = pickleNames , clientName = combinedClientName, combinedMachineName = combinedMachineName, currentTime = seperators[i], mergedPickleName = mergedPickleNames[i], fileType = fileType  )
-                    
-                    
-                    for pickle in pickleNames :                        
+                                        
+                    for pickle in pickleNames :
                         vc.updateFileInList( file = pickle )                                               
                     
                     vc.saveList( user = combinedMachineName, clients = clientsForVersionManagement )

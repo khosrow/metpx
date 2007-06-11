@@ -201,7 +201,7 @@ class StatsMonitoringConfigParameters:
             Returns "" if file does not exist.
             
         """     
-        
+         
         file  = "%spreviousMonitoringJob" %StatsPaths.STATSMONITORING
         previousMonitoringJob = ""
         
@@ -209,11 +209,12 @@ class StatsMonitoringConfigParameters:
             fileHandle      = open( file, "r" )
             previousMonitoringJob = pickle.load( fileHandle )
             fileHandle.close()
-        
+            print previousMonitoringJob
+            
         else:
             previousMonitoringJob = StatsDateLib.getIsoTodaysMidnight( currentTime )
             
-            
+        print previousMonitoringJob   
         return previousMonitoringJob        
         
         
