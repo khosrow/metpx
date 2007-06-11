@@ -35,7 +35,7 @@ from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
 
 
-def backupDatabases( timeOfBackup, backupsToKeep ):
+def backupDatabases( timeOfBackup, backupsToKeep =20 ):
     """
        @summary: Copy all databases into a folder sporting the data of the backup.
        
@@ -70,7 +70,7 @@ def backupDatabases( timeOfBackup, backupsToKeep ):
     
     
     
-def backupDatabaseUpdateTimes( timeOfBackup, backupsToKeep ):
+def backupDatabaseUpdateTimes( timeOfBackup, backupsToKeep = 20 ):
     """
     
        @summary: Copy all databases update times into a folder sporting
