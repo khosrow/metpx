@@ -9,7 +9,7 @@ named COPYING in the root of the source directory tree.
 #
 # Author: Nicholas Lemay
 #
-# Date  : 2006-06-19
+# Date  : 2006-06-19, Last updated on 2007-06-11
 #
 # Description: This method allows user to quicly see all the update times stored in the 
 #              time of updates file.
@@ -22,83 +22,101 @@ named COPYING in the root of the source directory tree.
 ##############################################################################################
 """
 
-import os, sys, pickle 
+import glob, os, sys, pickle, time 
 sys.path.insert(1, sys.path[0] + '/../../../')
 
 from pxStats.lib.StatsPaths import StatsPaths
+from pxStats.lib.StatsDateLib import StatsDateLib
 
+LOCAL_MACHINE = os.uname()[1]
 
-def printPickledTimes( pickledTimes, fileName ):
+def printPickledTimes( pickledTimes ):
     """
-        This method prints the content of the pickled-times file. 
+        @summary: Prints out all the pickled times found.
         
-        pre condition : pickledTimes must be a dictionary instance. 
-    
+        @param pickledTimes: Dictionary containing containing the 
+                             name -> timeOfUpdate relationships.
+   
     """
     
+    currentTime = time.time() 
+    currentTime = StatsDateLib.getIsoFromEpoch(currentTime)
     keys = pickledTimes.keys()
     keys.sort()
     
     
     os.system( 'clear' )
-    print "############################################################"
-    print "# Times found in %-42s#" %fileName
-    print ("#                                                          #")
+    print "######################################################################"
+    print "# List of current times of updates.                                  #"
+    print "# Times were found at :  %-43s #" %currentTime 
+    print "# On the machine named : %-43s #"%LOCAL_MACHINE
     
-    for key in keys:
-        
-        print("#%-27s : %-28s#") %(key,pickledTimes[key] )
+    for key in keys:        
+        print("#%32s : %33s#") %( key, pickledTimes[key] )
     
-    print ("#                                                          #")    
-    print "############################################################"
+    print "#                                                                    #"    
+    print "######################################################################"
     
 
 
-def loadPickledTimes( fileName ):
+def getTimeOfUpdate( fileName ):
     """
-        This method loads a standard non-gzip pickle file.
+        @summary: This method loads a standard non-gzip pickle file.        
+                  Returns object found in pickle. 
         
-        Returns object found in pickle. 
+        @note: Filename must exist or else "not available will be returned". 
         
-        Filename must exist or else application is terminated. 
         
+        @return: The object or "Not available."
     """
     
     if os.path.isfile( fileName ):
         
-        fileHandle   = open( fileName, "r" )
-        pickledTimes = pickle.load( fileHandle )
-        fileHandle.close()       
-  
+        try:
+            
+            fileHandle   = open( fileName, "r" )
+            upDateTime = pickle.load( fileHandle )    
+            fileHandle.close()       
+            
+        except:
+            upDateTime = "Not available."
+    
     else:
+        upDateTime = "Not available."
+       
+       
+    return upDateTime  
+       
     
-        print "Error. Pickled file named : %s does not exist." %fileName
-        print "Modify content of this program to use another file."
-        print "Program terminated."
-        sys.exit()    
+def getListOfPickleUpdateFiles():
+    """
+        @summary: Returns the list of currently 
+                  available pickle update files
+        
+        @return: Returns the list of currently 
+                 available pickle update files
+    
+    """
+    
+    files = glob.glob( StatsPaths.STATSPICKLESTIMEOFUPDATES + '*' )
+    
+    return files
 
-    
-    return pickledTimes  
-    
-    
-    
         
 def main():
     """
         Main method.
     """
     
-    #standard use.
-    print "StatsPaths.STATSETC %s" %StatsPaths.STATSETC
-    os.system( 'clear' )
-    fileName = StatsPaths.STATSPICKLESTIMEOFUPDATES
-    pickledTimes = loadPickledTimes( fileName )
-    printPickledTimes( pickledTimes, fileName  )
-
-#     #tests unexisting file 
-#     fileName = "nonexistingfile"
-#     pickledTimes = loadPickledTimes( fileName )
-#     printPickledTimes( pickledTimes, fileName ) 
+    pickledTimes = {} #dictionary containing the name -> timeOfUpdate relations.
+    
+    listOfPicklefiles = getListOfPickleUpdateFiles()
+    
+    for file in listOfPicklefiles:
+        pickledTimes[os.path.basename(file)] = getTimeOfUpdate( file )
+     
+    printPickledTimes( pickledTimes )   
+    
 
 if __name__ == "__main__":
     main()
