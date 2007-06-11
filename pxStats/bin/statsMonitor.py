@@ -553,7 +553,7 @@ def getFoldersAndFilesAssociatedWith( client, fileType, machines, startTime, end
             fileName = ClientStatsPickler.buildThisHoursFileName( client = client, currentTime = hour, fileType = fileType,machine = machine  )
             fileName = fileName.replace('"',"").replace( "'","")
             folder = os.path.dirname( os.path.dirname( fileName ) )
-            if folder not in folders.keys():
+            if folder not in folders:
                 folders[folder] = []
                 
             folders[folder].append( fileName )
@@ -568,7 +568,7 @@ def getFoldersAndFilesAssociatedWith( client, fileType, machines, startTime, end
             fileName = fileName.replace('"',"").replace( "'","")
             folder = os.path.dirname( os.path.dirname( fileName ) )
             
-            if folder not in folders.keys():
+            if folder not in folders:
                 folders[folder] = []
                 
             folders[folder].append( fileName )                      
@@ -822,19 +822,20 @@ def getPickleAnalysis( files, name, lastValidEntry, maximumGap, errorLog ):
     gapFound = False    
     files.sort()    
         
-    for file in files:                 
+    for file in files:                
         
         if os.path.isfile(file):
             
             fcs =  CpickleWrapper.load ( file )
             if fcs != None :
+                
                 for entry in fcs.fileEntries:
-                    nbEntries = len( entry.values.productTypes )
-                    nbErrors  = entry.values.dictionary["errors"].count(1)
+                    nbEntries = len( fcs.fileEntries[entry].values.productTypes )
+                    nbErrors  = fcs.fileEntries[entry].values.dictionary["errors"].count(1)
                     
-                    if (  nbEntries != 0 and nbEntries != nbErrors ) or ( file == files[ len( files ) - 1 ] and entry==fcs.fileEntries[ fcs.nbEntries-1 ] ): 
+                    if (  nbEntries != 0 and nbEntries != nbErrors ) or ( file == files[ len( files ) - 1 ] and  fcs.fileEntries[entry]==fcs.fileEntries[ fcs.nbEntries-1 ] ): 
                         
-                        entryTime = StatsDateLib.getSecondsSinceEpoch( entry.startTime )
+                        entryTime = StatsDateLib.getSecondsSinceEpoch(  fcs.fileEntries[entry].startTime )
                         
                         lastUpdateInSeconds = StatsDateLib.getSecondsSinceEpoch( lastValidEntry )  
                         differenceInMinutes = ( entryTime - lastUpdateInSeconds ) / 60                   
@@ -842,14 +843,14 @@ def getPickleAnalysis( files, name, lastValidEntry, maximumGap, errorLog ):
                         if  int(differenceInMinutes) > ( int(maximumGap) + 5 ) :#give a 5 minute margin
                             gapPresent = True                            
                             
-                            if gapInErrorLog( name, lastValidEntry, entry.startTime, errorLog ) == False:
+                            if gapInErrorLog( name, lastValidEntry,  fcs.fileEntries[entry].startTime, errorLog ) == False:
                                 gapFound = False  
                                                     
-                                reportLines = reportLines + "No data was found between %s and %s.\n" %( lastValidEntry, entry.startTime )
+                                reportLines = reportLines + "No data was found between %s and %s.\n" %( lastValidEntry, fcs.fileEntries[entry].startTime )
                                                 
                         #set time of the last correct entry to the time of the current entry were data was actually found.
                         if ( gapPresent == True and gapFound == True) or ( nbEntries != 0 and nbEntries != nbErrors ) :                                                
-                            lastValidEntry = entry.startTime                                                        
+                            lastValidEntry =  fcs.fileEntries[entry].startTime                                                        
                             gapPresent = False 
                             gapFound   = False
             else:
@@ -894,7 +895,7 @@ def verifyPickleContent( parameters, report ):
             lastValidEntry = getlastValidEntry( txName, parameters.startTime )
             folders = getFoldersAndFilesAssociatedWith(txName,"tx", machine, lastValidEntry, parameters.endTime )
             
-            for folder in folders.keys(): 
+            for folder in folders: 
                 files.extend( folders[folder] )            
 
             brandNewReportLines, lastValidEntry =  getPickleAnalysis( files, txName, lastValidEntry, parameters.maximumGaps[txName], errorLog )  
@@ -1038,7 +1039,7 @@ def verifyFileVersions( parameters, report  ):
         
         currentChecksums[file] = getFileChecksum( file ) 
         
-        if file not in previousFileChecksums.keys():
+        if file not in previousFileChecksums:
             unequalChecksumsFound = True
             newReportLines = newReportLines + "%s has been added.\n" %file
         elif currentChecksums[file] != previousFileChecksums[ file ]:
