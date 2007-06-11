@@ -52,7 +52,7 @@ from pxStats.lib.CpickleWrapper import CpickleWrapper
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.StatsPaths import StatsPaths 
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
-
+from pxStats.lib.LogFileAccessManager import LogFileAccessManager
 
 LOCAL_MACHINE = os.uname()[1]
 
@@ -158,7 +158,7 @@ class FileStatsCollector:
             self.logger = Logger( StatsPaths.STATSLOGGING + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
             self.logger = self.logger.getLogger()
             
-        print self.fileEntries
+        
         if self.fileEntries == {}:            
             self.createEmptyEntries()   # Create all empty buckets right away    
         
@@ -188,8 +188,7 @@ class FileStatsCollector:
         
         isInterestingProduct = False
         #print "produt : %s   interested in : %s " %(product , interestingProductTypes )
-        
-        
+                
         for productType in interestingProductTypes:
             
             if productType == "All":
@@ -483,7 +482,7 @@ class FileStatsCollector:
         
         firstLine      = fileHandle.readline()
         position       = fileHandle.tell()
-        print firstLine
+        #print firstLine
         
         #In case of traceback line
         isInteresting, linetype = FileStatsCollector.isInterestingLine( firstLine, usage = "departure", types = self.statsTypes ) 
@@ -690,8 +689,7 @@ if __name__ == "__main__" :
     endingHours = ['00:59:00', '01:59:00', '02:59:00', '03:59:00', '04:59:00', '05:59:00', '06:59:00', '07:59:00', '08:59:00', '09:59:00', '10:59:00', '11:59:00', '12:59:00', '13:59:00', '14:59:00', '15:59:00', '16:59:00', '17:59:00', '18:59:00', '19:59:00', '20:59:00', '21:59:00', '22:59:00', '23:59:00' ]
      
     stats = FileStatsCollector( files = [ filename ], statsTypes = types , startTime = '2007-06-04 %s' %startingHours[2], endTime = '2007-06-04 %s' %endingHours[10], interval = 1*MINUTE, totalWidth = 9*HOUR  )
-    stats.collectStats()
-    print stats.fileEntries
+    stats.collectStats()   
     timeB = time.time()
     print timeB - timeA    
     

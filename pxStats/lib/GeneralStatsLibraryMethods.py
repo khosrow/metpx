@@ -400,7 +400,7 @@ class GeneralStatsLibraryMethods:
             products  = configParameters.groupParameters.groupsProducts[group]
             products  = str( products ).replace( "[", "" ).replace( "]", "" ).replace( " ", "" )
             
-            description = "-Group Name : %s   -Machine(s) : %s   -Member(s) : %s   -FileType : %s   -Product(s) pattern(s) : %s " %(group, machines, members, fileTypes, products )
+            description = "--Group Name : %s     --Machine(s) : %s    --Member(s) : %s     --FileType : %s     --Product(s) pattern(s) : %s " %(group, machines, members, fileTypes, products )
             
             if configParameters.groupParameters.groupFileTypes[group] == "tx":
                 txNames[group] = description

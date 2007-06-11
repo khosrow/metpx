@@ -89,7 +89,7 @@ class PickleVersionChecker :
         """
         
         self.savedFileList         = {}
-        directory = StatsPaths.STATSDATA + "fileAcessVersions/"              
+        directory = StatsPaths.STATSDATA + "fileAccessVersions/"              
                 
         combinedName = ""
         for client in clients:
@@ -173,7 +173,7 @@ class PickleVersionChecker :
         
         """
         
-        directory = StatsPaths.STATSETC + "fileAcessVersions/"
+        directory = StatsPaths.STATSDATA + "fileAccessVersions/"
          
         
         combinedName = ""
@@ -185,8 +185,10 @@ class PickleVersionChecker :
         if not os.path.isdir( directory ):
             os.makedirs( directory, mode=0777 )
             #create directory
-        
-        CpickleWrapper.save( object = self.savedFileList, filename = directory + fileName )
+        completeFilename = directory + fileName 
+        print "saving %s" %completeFilename
+                
+        CpickleWrapper.save( object = self.savedFileList, filename = completeFilename )
 
  
            
