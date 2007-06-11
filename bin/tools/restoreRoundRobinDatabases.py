@@ -23,15 +23,17 @@ named COPYING in the root of the source directory tree.
 """
 
 import os, commands, time, sys, pickle, glob
-sys.path.insert(1, sys.path[0] + '/../../../')
 
-from backupRRDDatabases import *
+sys.path.insert(1, sys.path[0] + '/../../../')
+import pxStats.bin.tools.backupRRDDatabases
+
 
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
+from pxStats.lib.StatsConfigParameters import StatsConfigParameters
+backupRRDDatabases =  pxStats.bin.tools.backupRRDDatabases
 
-
-def restoreDatabases( timeToRestore, currentTime ):
+def restoreDatabases( timeToRestore, currentTime, nbBackupsToKeep ):
     """
        Restore databases to restore. Archive current databases.
        
@@ -39,8 +41,8 @@ def restoreDatabases( timeToRestore, currentTime ):
     """
     
     #Archive current Database
-    backupRRDDatabases.backupDatabases( currentTime )
-        
+    backupRRDDatabases.backupDatabases( currentTime, nbBackupsToKeep)
+       
     #restore desired 
     source = StatsPaths.STATSDBBACKUPS + "/%s" %timeToRestore
     destination = StatsPaths.STATSCURRENTDB
@@ -50,7 +52,7 @@ def restoreDatabases( timeToRestore, currentTime ):
     print output
 
 
-def restoreDatabaseUpdateTimes( timeToRestore, currentTime ):
+def restoreDatabaseUpdateTimes( timeToRestore, currentTime, nbBackupsToKeep ):
     """
         Copy all databases into a folder sporting the data of the backup.
         
@@ -58,7 +60,7 @@ def restoreDatabaseUpdateTimes( timeToRestore, currentTime ):
     """
     
     #Archive current Database
-    backupRRDDatabases.backupDatabaseUpdateTimes( currentTime )
+    backupRRDDatabases.backupDatabaseUpdateTimes( currentTime, nbBackupsToKeep )
     
     #restore desired 
     source = StatsPaths.STATSDBUPDATESBACKUPS + "/%s" %timeToRestore
@@ -84,6 +86,11 @@ def main():
     currentTime = StatsDateLib.getIsoWithRoundedSeconds( currentTime )
     currentTime = currentTime.replace(" ", "_")
     
+    generalParameters = StatsConfigParameters()
+    
+    generalParameters.getAllParameters()
+    
+    
     if len( sys.argv ) == 2:
         print     sys.argv
         #try:
@@ -97,8 +104,8 @@ def main():
 #             print "Program terminated."     
 #             sys.exit()
                 
-        restoreDatabaseUpdateTimes( timeToRestore, currentTime )        
-        restoreDatabases( timeToRestore, currentTime )    
+        restoreDatabaseUpdateTimes( timeToRestore, currentTime, generalParameters.nbDbBackupsToKeep )        
+        restoreDatabases( timeToRestore, currentTime, generalParameters.nbDbBackupsToKeep )    
             
 
     
