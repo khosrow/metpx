@@ -144,8 +144,12 @@ class FileStatsCollector:
         self.interval         = interval                  # Interval at wich we separate stats entries .
         self.totalWidth       = totalWidth                # used to build timesperators.
         self.maxLatency       = maxLatency                # Acceptable limit for a latency. 
-        self.firstFilledEntry = firstFilledEntry          # Last entry for wich we calculated mean max etc....
+        self.firstFilledEntry = firstFilledEntry          # Last entry for wich we calculated mean max etc....       
         self.lastFilledEntry  = lastFilledEntry           # Last entry we filled with data. 
+        self.lastPositionRead = 0                         # Last read posiiton in the last file read.
+        self.firstLineOfLastFileRead = ""                 # First line of the last file read.
+               
+        
         self.loggerName       = 'fileStatsCollector'      # Name of the logger if none is specified.
         self.logger           = logger                    # Logger
         
@@ -179,10 +183,10 @@ class FileStatsCollector:
                
     def isInterestingProduct( product = "", interestingProductTypes = ["All"] ):
         ''' 
-        @param product: Product to verifry.
+            @param product: Product to verifry.
                
-        @param interestingProductTypes: Array containing the list of valid product types to look for. 
-                                        Product types can contain wildcard characters.
+            @param interestingProductTypes: Array containing the list of valid product types to look for. 
+                                            Product types can contain wildcard characters.
         
         '''
         
@@ -458,27 +462,109 @@ class FileStatsCollector:
     
     
     
-    def findFirstInterestingLine( self, fileHandle, fileSize ):
+    def getFileAccessPointerForFile(self, fileName):
         """
-            Finds the first interesting line in a file.
-            
-            If files were previously read, stops if we find
-            the last line we read the other time.
-            
-            Otherwise, we stop at the first interesting line within the range
-            of the data we want to collect.
         
+           @Summary : Verifies if the specified file was the last one accessed 
+                      by the filetype/client/machine combination specified 
+                      in the current instance. 
+                      
+                      If it is, it will return the position that was last read.
+                      Otherwise returns 0(top of the file.)
+           
+           @param fileName: File for wich you are interested in reading and want to 
+                        read as if it was the last file read.             
+           
+           @return: returns the pointer to where we last read the specified file. 
+           
+           
+            
+        """
+        
+        accessPointer = 0
+        accessFile    =  self.buildLogFilesAccessFileName() 
+        identifier    = os.path.basename( accessFile)
+        accessManager = LogFileAccessManager( accessFile = accessFile )
+        
+        if accessManager.isTheLastFileThatWasReadByThisIdentifier( fileName, identifier ) ==True:
+            accessPointer = accessManager.getLastReadPositionAssociatedWith(identifier)
+        
+        return accessPointer 
+    
+    
+    
+    def saveFileAccessPointer(self):
+        """
+           @summary: Saves the informations relative to 
+                     the last access made to log files
+                     by the fileStatscollector's instance. 
+            
+        """
+        
+        accessFile    = self.buildLogFilesAccessFileName() 
+        identifier    = os.path.basename( accessFile)
+        accessManager = LogFileAccessManager( accessFile = accessFile )
+        
+        accessManager.setFirstLineAndLastReadPositionAssociatedwith(self.firstLineOfLastFileRead, self.lastPositionRead, identifier)       
+        accessManager.saveAccessDictionary()
+            
+        
+    def findFirstInterestingLine( self, file, useSavedFileAccessPointer ):
+        """
+            
+            @summary : Finds the first interesting line in a file.
+            
+            @param file: Name of the file that needs to be searched.
+            
+            @param useSavedFileAccessPointer: If true, will consider the search 
+                                              through the file like a continuation 
+                                              of a previous search. Therefore we will 
+                                              attempt to start the search at the point 
+                                              where the previous one eneded in an attempt 
+                                              to save searching time.          
+           
+           @return : Tuple containing the following fields : 
+                     line : The first interesting line found.
+                     lineType: The type of that line.
+                     position: The position to seek to find the lines following that line.
+                     usedTheSavedFileAccessPointer : Whether or not the access pointer was used.
+                     
         """       
+        
         #print "in  findFirstInterestingLine     "
         line                 = ""
         lineType             = None 
         backupLine           = ""
         lineFound            = False 
         startTimeinSec       = 0
-
+        usedTheSavedFileAccessPointer = False
         
         if self.logger != None :
             self.logger.debug( "Call to findFirstInterestingLine received." )
+        
+        if useSavedFileAccessPointer is True:
+            
+            lastReadPosition = self.getFileAccessPointerForFile(file)
+            fileHandle = open( file, "r")
+            
+            if lastReadPosition != 0 :                
+                
+                usedTheSavedFileAccessPointer = True
+                fileHandle.seek( lastReadPosition )
+            
+                testLine = fileHandle.readline()
+                departure =  FileStatsCollector.findValues( ["departure"] , testLine, fileType = self.fileType,logger= self.logger )["departure"]
+                
+                if departure >=  self.endTime:
+                    
+                    fileHandle.seek( 0 )
+                else:
+                    fileHandle.seek( lastReadPosition )     
+        
+        else:
+        
+            fileHandle = open( file, "r" )
+                
         
         firstLine      = fileHandle.readline()
         position       = fileHandle.tell()
@@ -529,18 +615,32 @@ class FileStatsCollector:
                 
         #print "*****************%s****************" %line     
 
-        return line, lineType, position 
+        return line, lineType, position, usedTheSavedFileAccessPointer  
 
 
 
-    def setValues( self, endTime = "" ):
+    def setValues( self, endTime = "", useSavedFileAccessPointer = False  ):
         """
-            This method opens a file and sets all the values found in the file in the appropriate entry's value dictionary.
-            -Values searched depend on the datatypes asked for by the user.
-            -Number of entries is based on the time separators wich are found with the startTime, width and interval.  -Only entries with arrival time comprised between startTime and startTime + width will be saved in dicts
-            -Entries wich have no values will have 0 as value for means, minimum maximum and median     
+            @summary: This method opens a file and sets all the values found
+                      in the file in the appropriate entry's value dictionary.
+                      
+                      - Values searched depend on the datatypes asked
+                        for by the user when he created the FileStatsCollector
+                        instance.
+                      
+                      - Number of entries is based on the time separators 
+                        wich are found with the startTime, width and interval.  
+                      
+                      - Only entries with arrival time comprised between
+                        startTime and startTime + width will be saved in
+                        dicts
         
-            -Precondition : stats type specified in self must be valid.         
+            @param useSavedFileAccessPointer: Whether or not you want to 
+                                              read the files as a continuation 
+                                              of a previous setting of values.
+                                                 
+            @note: stats type specified in self must be valid.         
+              
               
         """
         
@@ -565,12 +665,13 @@ class FileStatsCollector:
                        
         for file in self.files :#read everyfile and append data found to dictionaries                               
             #print file 
-            entryCount            = 0      #Entry we are currently handling.
-            
+            entryCount = 0      #Entry we are currently handling.
+                                   
+            line, lineType, position, usedTheSavedFileAccessPointer  = self.findFirstInterestingLine( file = file, useSavedFileAccessPointer = useSavedFileAccessPointer )
+            if usedTheSavedFileAccessPointer == True :
+               useSavedFileAccessPointer = False 
+                
             fileHandle = open( file, "r" )
-            
-            line, lineType, position  = self.findFirstInterestingLine( fileHandle, fileSize = os.stat(file)[6] )
-            
             if line != "" :                                        
                 fileHandle.seek( position )
                 departure   = self.findValues( ["departure"] ,  line, lineType, fileType = self.fileType,logger= self.logger )["departure"]
@@ -629,9 +730,15 @@ class FileStatsCollector:
             else:
                 if entryCount > self.lastFilledEntry :#in case of numerous files
                     self.lastFilledEntry  = entryCount                  
-                
-           
-            fileHandle.close()             
+                           
+            
+            if file == self.files[ len(self.files) -1 ]:
+                self.lastPositionRead = fileHandle.tell()#current position
+                fileHandle.seek(0)#go back to top of the file.
+                self.firstLineOfLastFileRead = fileHandle.readline()
+                fileHandle.close()
+            else:
+                fileHandle.close()             
                 
     
     
@@ -658,19 +765,44 @@ class FileStatsCollector:
 
 
 
-    def collectStats( self, endTime = "" ):
+    def buildLogFilesAccessFileName(self):
+        """ 
+            @summary : builds and returns the file name
+                      to be used to save the log access 
+                      file name. 
+            
+            @return: returns the file's name. 
+        """
+        
+        baseName    = os.path.basename(self.files[0])
+        machineName = os.path.basename(os.path.dirname( self.files[0] ))
+        fileType    = baseName.split( "_" )[0]
+        clientName  = baseName.split( "." )[0].split( "_" )[1] 
+        
+        fileName = StatsPaths.STATSLOGACCESS  + "%s_%s_%s" %( fileType, clientName, machineName )
+        
+        return fileName       
+     
+     
+     
+    def collectStats( self, endTime = "", useSavedFileAccessPointer = True, saveFileAccessPointer = True ):
         """
             This is the main method to use with a FileStatsCollector. 
             It will collect the values from the file and set them in a dictionary.
             It will use that dictionary to find the totals and means of each data types wanted. 
-            It will also use that dictionary to find the minimum max andmedians of 
+            It will also use that dictionary to find the minimum max and medians of 
             each data types wanted. 
                
         """
             
-        self.setValues( endTime )   #fill dictionary with values
+        self.setValues( endTime, useSavedFileAccessPointer )   #fill dictionary with values
         self.setMinMaxMeanMedians( startingBucket = self.firstFilledEntry, finishingBucket = self.lastFilledEntry  )  
-                                                          
+        
+        if saveFileAccessPointer == True and len( self.files ) != 0 :
+            
+            self.saveFileAccessPointer()
+            
+                                                              
 
 if __name__ == "__main__" :
     """
@@ -686,9 +818,9 @@ if __name__ == "__main__" :
     
     startingHours=["00:00:00","01:00:00","02:00:00","03:00:00","04:00:00","05:00:00","06:00:00","07:00:00","08:00:00","09:00:00","10:00:00","11:00:00","12:00:00","13:00:00","14:00:00","15:00:00","16:00:00","17:00:00","18:00:00","19:00:00","20:00:00","21:00:00","22:00:00","23:00:00" ]
     
-    endingHours = ['00:59:00', '01:59:00', '02:59:00', '03:59:00', '04:59:00', '05:59:00', '06:59:00', '07:59:00', '08:59:00', '09:59:00', '10:59:00', '11:59:00', '12:59:00', '13:59:00', '14:59:00', '15:59:00', '16:59:00', '17:59:00', '18:59:00', '19:59:00', '20:59:00', '21:59:00', '22:59:00', '23:59:00' ]
+    endingHours = ["01:00:00","02:00:00","03:00:00","04:00:00","05:00:00","06:00:00","07:00:00","08:00:00","09:00:00","10:00:00","11:00:00","12:00:00","13:00:00","14:00:00","15:00:00","16:00:00","17:00:00","18:00:00","19:00:00","20:00:00","21:00:00","22:00:00","23:00:00", "00:00:00" ]
      
-    stats = FileStatsCollector( files = [ filename ], statsTypes = types , startTime = '2007-06-04 %s' %startingHours[2], endTime = '2007-06-04 %s' %endingHours[10], interval = 1*MINUTE, totalWidth = 9*HOUR  )
+    stats = FileStatsCollector( files = [ filename ], statsTypes = types , startTime = '2007-06-12 %s' %startingHours[2], endTime = '2007-06-12 %s' %endingHours[10], interval = 1*MINUTE, totalWidth = 9*HOUR  )
     stats.collectStats()   
     timeB = time.time()
     print timeB - timeA    
