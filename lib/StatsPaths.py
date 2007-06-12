@@ -103,7 +103,7 @@ class StatsPaths:
     
     
     STATSFILEVERSIONS     = STATSDATA + 'fileAcessVersions/'
-    STATSLOGACCESS        = STATSDATA + 'logFileAccess'
+    STATSLOGACCESS        = STATSDATA + 'logFileAccess/'
     STATSMONITORING       = STATSDATA + 'monitoring/'
     STATSPICKLES          = STATSDATA + 'pickles/'
     STATSLOGS             = STATSDATA + 'logFiles/'
