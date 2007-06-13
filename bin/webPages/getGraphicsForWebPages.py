@@ -42,14 +42,14 @@ def updateThisYearsGraphs( currentTime, machinePairs, groupParameters ):
     for machinePair in machinePairs:
         
         status, output = commands.getstatusoutput( "%sgenerateRRDGraphics.py -y --copy -f tx --machines '%s' --havingRun --date '%s' --fixedCurrent" %( StatsPaths.STATSBIN, machineName, currentTime ) )
-        print output
+        #print output
         status, output = commands.getstatusoutput( "%sgenerateRRDGraphics.py -y --copy -f rx --machines '%s' --havingRun --date '%s' --fixedCurrent" %( StatsPaths.STATSBIN, machineName, currentTime ) )
-        print output
+        #print output
         #total graphics 
         status, output = commands.getstatusoutput( '%sgenerateRRDGraphics.py --copy --totals -f "rx" --machines "%s" -y --havingRun --fixedCurrent --date "%s"'  %( StatsPaths.STATSBIN, machineName, currentTime ) )
-        print output
+        #print output
         status, output = commands.getstatusoutput( '%sgenerateRRDGraphics.py --copy --totals -f "tx" --machines "%s" -y  --havingRun --fixedCurrent --date "%s"'  %( StatsPaths.STATSBIN, machineName, currentTime ) )
-        print output
+        #print output
     
     for group in groupParameters.groups:
         groupMembers, groupMachines, groupProducts, groupFileTypes = groupParameters.getAssociatedParametersInStringFormat( group )
@@ -68,14 +68,14 @@ def setLastYearsGraphs( currentTime, machinePairs, groupParameters ):
     for machinePairs in machinePairs:
         
         status, output = commands.getstatusoutput( "%sgenerateRRDGraphics.py -y --copy -f tx --machines '%s' --havingRun --date '%s' --fixedPrevious" %( StatsPaths.STATSBIN, machineName, currentTime ) )
-        print output
+        #print output
         status, output = commands.getstatusoutput( "%sgenerateRRDGraphics.py -y --copy -f rx --machines '%s' --havingRun --date '%s' --fixedPrevious" %( StatsPaths.STATSBIN, machineName, currentTime ) )
-        print output        
+        #print output        
         #total graphics 
         status, output = commands.getstatusoutput( '%sgenerateRRDGraphics.py --copy --totals -f "rx" --machines "%s" --havingRun -y --fixedPrevious --date "%s"' %( StatsPaths.STATSBIN, machineName, currentTime ) )
-        print output
+        #print output
         status, output = commands.getstatusoutput( '%sgenerateRRDGraphics.py --copy --totals -f "tx" --machines "%s" --havingRun -y --fixedPrevious --date "%s"' %( StatsPaths.STATSBIN, machineName, currentTime ) )
-        print output    
+        #print output    
     
     for group in groupParameters.groups:
         groupMembers, groupMachines, groupProducts, groupFileTypes = groupParameters.getAssociatedParametersInStringFormat( group )
@@ -96,14 +96,14 @@ def updateThisMonthsGraphs( currentTime, machinePairs, groupParameters ):
     for machinePair in machinePairs:
     
         status, output = commands.getstatusoutput( "%sgenerateRRDGraphics.py -m --copy -f tx --machines '%s' --havingRun --date '%s' --fixedCurrent" %( StatsPaths.STATSBIN, machinePair, currentTime ) )
-        print output
+        #print output
         status, output = commands.getstatusoutput( "%sgenerateRRDGraphics.py -m --copy -f rx --machines '%s' --havingRun --date '%s' --fixedCurrent" %( StatsPaths.STATSBIN, machinePair, currentTime ) )
-        print output    
+        #print output    
         #total graphics 
         status, output = commands.getstatusoutput( '%sgenerateRRDGraphics.py --copy --totals -f "rx" --machines "%s" --havingRun -m --fixedCurrent --date "%s"' %( StatsPaths.STATSBIN, machinePair, currentTime ) )
-        print output
+        #print output
         status, output = commands.getstatusoutput( '%sgenerateRRDGraphics.py --copy --totals -f "tx" --machines "%s" --havingRun -m --fixedCurrent --date "%s"' %( StatsPaths.STATSBIN, machinePair, currentTime ) )
-        print output 
+        #print output 
     
     for group in groupParameters.groups:
         groupMembers, groupMachines, groupProducts, groupFileTypes = groupParameters.getAssociatedParametersInStringFormat( group )
@@ -123,14 +123,14 @@ def setLastMonthsGraphs( currentTime, machinePairs, groupParameters ):
     for machinePair in machinePairs:
         
         status, output = commands.getstatusoutput( "%sgenerateRRDGraphics.py -m --copy -f tx --machines '%s' --havingRun --date '%s' --fixedPrevious" %( StatsPaths.STATSBIN, machinePair, currentTime ) )
-        print output
+        #print output
         status, output = commands.getstatusoutput( "%sgenerateRRDGraphics.py -m --copy -f rx --machines '%s' --havingRun --date '%s' --fixedPrevious" %( StatsPaths.STATSBIN, machinePair, currentTime ) )
-        print output
+        #print output
         #total graphics 
         status, output = commands.getstatusoutput( '%sgenerateRRDGraphics.py --copy --totals -f "rx" --machines "%s" --havingRun -m --fixedPrevious --date "%s"' %( StatsPaths.STATSBIN, machinePair, currentTime ) )
-        print output
+        #print output
         status, output = commands.getstatusoutput( '%sgenerateRRDGraphics.py --copy --totals -f "tx" --machines "%s" --havingRun -m --fixedPrevious --date "%s"' %( StatsPaths.STATSBIN, machinePair, currentTime ) )
-        print output
+        #print output
         
     for group in groupParameters.groups:
         groupMembers, groupMachines, groupProducts, groupFileTypes = groupParameters.getAssociatedParametersInStringFormat( group )
@@ -150,14 +150,14 @@ def setLastWeeksGraphs( currentTime, machinePairs, groupParameters ):
     for machinePair in machinePairs:
     
         status, output = commands.getstatusoutput( "%sgenerateRRDGraphics.py -w --copy -f tx --machines '%s' --havingRun --date '%s' --fixedPrevious" %( StatsPaths.STATSBIN, machinePair, currentTime ) )
-        print output
+        #print output
         status, output = commands.getstatusoutput( "%sgenerateRRDGraphics.py -w --copy -f rx --machines '%s'  --havingRun --date '%s' --fixedPrevious" %( StatsPaths.STATSBIN, machinePair, currentTime ) )
-        print output    
+        #print output    
         #total graphics 
         status, output = commands.getstatusoutput( '%sgenerateRRDGraphics.py --copy --totals -f "rx" --machines "%s" --havingRun -w --fixedPrevious --date "%s"' %( StatsPaths.STATSBIN, machinePair, currentTime ) )
-        print output
+        #print output
         status, output = commands.getstatusoutput( '%sgenerateRRDGraphics.py --copy --totals -f "tx" --machines "%s" --havingRun -w --fixedPrevious --date "%s"' %( StatsPaths.STATSBIN, machinePair, currentTime ) )
-        print output
+        #print output
     
     for group in groupParameters.groups:
         groupMembers, groupMachines, groupProducts, groupFileTypes = groupParameters.getAssociatedParametersInStringFormat( group )
@@ -178,14 +178,14 @@ def updateThisWeeksGraphs( currentTime, machinePairs, groupParameters ):
     for machinePair in machinePairs:
         #individual graphics 
         status, output = commands.getstatusoutput( "%sgenerateRRDGraphics.py -w --copy -f tx --machines '%s' --havingRun --date '%s' --fixedCurrent " %( StatsPaths.STATSBIN, machinePair, currentTime ) )
-        print output
+        #print output
         status, output = commands.getstatusoutput( "%sgenerateRRDGraphics.py -w --copy -f rx --machines '%s' --havingRun --date '%s' --fixedCurrent " %( StatsPaths.STATSBIN, machinePair, currentTime ) )    
-        print output
+        #print output
         #total graphics 
         status, output = commands.getstatusoutput( '%sgenerateRRDGraphics.py --copy --totals -f "rx" --machines "%s" --havingRun -w --fixedCurrent --date "%s"' %( StatsPaths.STATSBIN, machinePair, currentTime ) )
-        print output
+        #print output
         status, output = commands.getstatusoutput( '%sgenerateRRDGraphics.py --copy --totals -f "tx" --machines "%s" --havingRun -w --fixedCurrent --date "%s"' %( StatsPaths.STATSBIN, machinePair, currentTime ) )
-        print output
+        #print output
     
     for group in groupParameters.groups:
         groupMembers, groupMachines, groupProducts, groupFileTypes = groupParameters.getAssociatedParametersInStringFormat( group )
@@ -221,15 +221,15 @@ def setYesterdaysGraphs( currentTime, machinePairs ):
         if not os.path.isdir( os.path.dirname(dest) ):
             os.makedirs( os.path.dirname(dest) )
         shutil.copyfile( graph, dest )    
-        print "copy %s to %s" %( graph, dest )          
+        #print "copy %s to %s" %( graph, dest )          
      
     #Totals 
     currentTime = StatsDateLib.getIsoFromEpoch(currentTime)
     for machinePair in machinePairs:   
         status, output = commands.getstatusoutput( '%sgenerateRRDGraphics.py --copy --totals -f "rx" --machines "%s" --havingRun -d --fixedPrevious --date "%s"' %( StatsPaths.STATSBIN, machinePair, currentTime ) )
-        print output
+        #print output
         status, output = commands.getstatusoutput( '%sgenerateRRDGraphics.py --copy --totals -f "tx" --machines "%s" --havingRun -d --fixedPrevious --date "%s"' %( StatsPaths.STATSBIN, machinePair, currentTime ) )
-        print output
+        #print output
   
         
         
@@ -278,9 +278,9 @@ def updateDailyGroupsGraphics( currentTime, groupParameters ):
     
     for group in groupParameters.groups:
         groupMembers, groupMachines, groupProducts, groupFileTypes = groupParameters.getAssociatedParametersInStringFormat( group )
-        print '%sgenerateGraphics.py -g %s -c %s --combineClients --copy -d "%s"  -m %s -f %s -p %s  -s 24' %( StatsPaths.STATSBIN, group, groupMembers, currentTime, groupMachines, groupFileTypes, groupProducts )
+        #print '%sgenerateGraphics.py -g %s -c %s --combineClients --copy -d "%s"  -m %s -f %s -p %s  -s 24' %( StatsPaths.STATSBIN, group, groupMembers, currentTime, groupMachines, groupFileTypes, groupProducts )
         status, output = commands.getstatusoutput('%sgenerateGraphics.py -g %s -c %s --combineClients --copy -d "%s"  -m %s -f %s -p %s  -s 24' %( StatsPaths.STATSBIN, group, groupMembers, currentTime, groupMachines, groupFileTypes, groupProducts ) ) 
-        print output 
+        #print output 
         
             
             
@@ -304,20 +304,19 @@ def generateColumboGraphics( parameters, machineParameters ):
        
         for machine in machines:
             logins.append( machineParameters.getUserNameForMachine( machine ) )
-
-        print "logins : %s" %logins    
+           
         logins   = str(logins).replace( "[", "" ).replace( "]", "" ).replace( " ", "" )
         machines = str(machines).replace( "[", "" ).replace( "]", "" ).replace( " ", "" )
         
         
         if "," in machines :
-            print "%sgenerateAllGraphsForServer.py -m '%s' -c  -l '%s'  " %( StatsPaths.STATSBIN, machines.replace( "'","" ),logins.replace( "'","" ))
+            #print "%sgenerateAllGraphsForServer.py -m '%s' -c  -l '%s'  " %( StatsPaths.STATSBIN, machines.replace( "'","" ),logins.replace( "'","" ))
             status, output = commands.getstatusoutput( "%sgenerateAllGraphsForServer.py -m '%s' -c  -l '%s'  " %( StatsPaths.STATSBIN, machines.replace( "'","" ),logins.replace( "'","" )) )
-            print output
+            #print output
         else:
             status, output = commands.getstatusoutput( "%sgenerateAllGraphsForServer.py -i -m '%s' -l '%s'  " %( StatsPaths.STATSBIN, machines.replace( "'","" ),logins.replace( "'","" ) ) )    
-            print "%sgenerateAllGraphsForServer.py -i -m '%s' -l '%s'  " %( StatsPaths.STATSBIN, machines.replace( "'","" ),logins.replace( "'","" ) )
-            print output
+            #print "%sgenerateAllGraphsForServer.py -i -m '%s' -l '%s'  " %( StatsPaths.STATSBIN, machines.replace( "'","" ),logins.replace( "'","" ) )
+            #print output
 
 
         
@@ -338,16 +337,16 @@ def setDailyGraphs( currentTime, machinePairs, machineParameters, configParamete
 
         #Generate all the daily total graphs.
         status, output = commands.getstatusoutput( '%sgenerateRRDGraphics.py --copy --totals -f "rx" --machines "%s" -d --fixedCurrent --date "%s"' %( StatsPaths.STATSBIN, machinePair, currentTime) )
-        print output
+        #print output
 
         status, output = commands.getstatusoutput( '%sgenerateRRDGraphics.py --copy --totals -f "tx" --machines "%s" -d --fixedCurrent --date "%s"' %( StatsPaths.STATSBIN, machinePair,currentTime ) )
-        print output
+        #print output
 
         status, output = commands.getstatusoutput( '%sgenerateRRDGraphics.py --copy --totals -f "rx" --machines "%s" -d --fixedPrevious --date "%s"' %( StatsPaths.STATSBIN, machinePair, currentTime ) )
-        print output
+        #print output
 
         status, output = commands.getstatusoutput( '%sgenerateRRDGraphics.py --copy --totals -f "tx" --machines "%s" -d --fixedPrevious --date "%s"' %( StatsPaths.STATSBIN, machinePair, currentTime ) )
-        print output
+        #print output
 
        
         
