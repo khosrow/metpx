@@ -113,7 +113,7 @@ class StatsPaths:
     STATSCOLGRAPHS        = STATSWEBGRAPHS + 'columbo/'
     
     STATSPICKLESTIMEOFUPDATES    = STATSDATA + 'picklesTimeOfUpdates/'
-    STATSFILEACCESSVERSIONS      = STATSDATA + 'fileAccessVersions'
+    STATSPREVIOUSMACHINEPARAMS   = STATSDATA + 'previousMachineParameters'
     
     
     
