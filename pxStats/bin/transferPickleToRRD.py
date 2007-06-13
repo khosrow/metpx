@@ -375,7 +375,7 @@ def updateRoundRobinDatabases(  client, machines, fileType, endTime, logger = No
     """
             
     combinedMachineName = ""
-    combinedMachineName.join( [machine for machine in machines ] )
+    combinedMachineName = combinedMachineName.join( [machine for machine in machines ] )
     
     tempRRDFileName = RrdUtilities.buildRRDFileName( dataType = "errors", clients = [client], machines = machines, fileType = fileType)
     startTime   = RrdUtilities.getDatabaseTimeOfUpdate(  tempRRDFileName, fileType ) 
@@ -392,21 +392,21 @@ def updateRoundRobinDatabases(  client, machines, fileType, endTime, logger = No
         
         dataPairs   = getPairs( [client], machines, fileType, timeSeperators[i], timeSeperators[i+1] , groupName = "", logger = logger )
 
-        for key in dataPairs.keys():
+        for dataType in dataPairs:
 
-            rrdFileName = RrdUtilities.buildRRDFileName( dataType = key, clients = [client], machines = machines, fileType = fileType )
+            rrdFileName = RrdUtilities.buildRRDFileName( dataType = dataType, clients = [client], machines = machines, fileType = fileType )
 
             if not os.path.isfile( rrdFileName ):
-                 createRoundRobinDatabase(  databaseName = rrdFileName , startTime= startTime, dataType = key )
+                 createRoundRobinDatabase(  databaseName = rrdFileName , startTime= startTime, dataType = dataType )
 
 
             if endTime > startTime :
 
-                for pair in dataPairs[ key ]:
+                for pair in dataPairs[ dataType ]:
                      rrdtool.update( rrdFileName, '%s:%s' %( int(pair[0]), pair[1] ) )
 
                 if logger != None :
-                     logger.info( "Updated  %s db for %s in db named : %s" %( key, client, rrdFileName ) )
+                     logger.info( "Updated  %s db for %s in db named : %s" %( dataType, client, rrdFileName ) )
 
             else:
                 if logger != None :
@@ -488,15 +488,15 @@ def updateGroupedRoundRobinDatabases( infos, logger = None ):
     for i in xrange( len( timeSeperators )-1 ):        
                
         dataPairs   = getPairs( infos.clients, infos.machines, infos.fileTypes[0], timeSeperators[i], timeSeperators[i+1], infos.group, logger )
-        for key in dataPairs.keys():
-            rrdFileName = RrdUtilities.buildRRDFileName( dataType = key, clients = infos.group, groupName = infos.group, machines =  infos.machines,fileType = infos.fileTypes[0], usage = "group" )
+        for dataType in dataPairs:
+            rrdFileName = RrdUtilities.buildRRDFileName( dataType = dataType, clients = infos.group, groupName = infos.group, machines =  infos.machines,fileType = infos.fileTypes[0], usage = "group" )
             if not os.path.isfile( rrdFileName ):
-                createRoundRobinDatabase( rrdFileName, startTime, key)
+                createRoundRobinDatabase( rrdFileName, startTime, dataType )
             if endTime > startTime :
-                for pair in dataPairs[ key ]:
+                for pair in dataPairs[ dataType ]:
                     rrdtool.update( rrdFileName, '%s:%s' %( int(pair[0]), pair[1] ) )
                     if logger != None :
-                       logger.info( "Updated  %s db for %s in db named : %s" %( key, infos.clients, rrdFileName ) )
+                       logger.info( "Updated  %s db for %s in db named : %s" %( dataType, infos.clients, rrdFileName ) )
             else:
                 if logger != None :
                     logger.warning( "This database was not updated since it's last update was more recent than specified date : %s" %rrdFileName )
