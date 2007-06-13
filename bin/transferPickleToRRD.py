@@ -324,14 +324,14 @@ def getMergedData( clients, fileType,  machines, startTime, endTime, groupName =
     else:
         types = [ "errors","bytecount" ]
     
-   
+    print startTime, endTime
     if len( machines ) > 1 or len( clients) > 1:   
         
-        statsCollection = PickleMerging.mergePicklesFromDifferentSources( logger = logger , startTime = StatsDateLib.getIsoFromEpoch(startTime), endTime = StatsDateLib.getIsoFromEpoch(endTime), clients = clients, fileType = fileType, machines = machines, groupName = groupName )                           
+        statsCollection = PickleMerging.mergePicklesFromDifferentSources( logger = logger , startTime = startTime, endTime = endTime, clients = clients, fileType = fileType, machines = machines, groupName = groupName )                           
     
     else:#only one machine, only merge different hours together
        
-        statsCollection = PickleMerging.mergePicklesFromDifferentHours( logger = logger , startTime = StatsDateLib.getIsoFromEpoch(startTime), endTime = StatsDateLib.getIsoFromEpoch(endTime), client = clients[0], fileType = fileType, machine = machines[0] )
+        statsCollection = PickleMerging.mergePicklesFromDifferentHours( logger = logger , startTime = startTime, endTime = endTime, client = clients[0], fileType = fileType, machine = machines[0] )
         
     
     combinedMachineName = ""
@@ -383,8 +383,7 @@ def updateRoundRobinDatabases(  client, machines, fileType, endTime, logger = No
     if  startTime == 0 :
         startTime = StatsDateLib.getSecondsSinceEpoch( StatsDateLib.getIsoTodaysMidnight( endTime ) )
     endTime     = StatsDateLib.getSecondsSinceEpoch( endTime )           
-    startTime   = endTime- (StatsDateLib.DAY*19 )
-    
+        
     timeSeperators = getTimeSeperatorsBasedOnAvailableMemory(StatsDateLib.getIsoFromEpoch( startTime ), StatsDateLib.getIsoFromEpoch( endTime ), [client], fileType, machines ) 
     
     
