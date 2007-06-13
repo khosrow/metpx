@@ -22,7 +22,7 @@ from pxStats.lib.StatsDateLib import StatsDateLib
 
 from pxStats.lib.MachineConfigParameters import MachineConfigParameters
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
-
+from pxStats.lib.CpickleWrapper import CpickleWrapper
 
 LOCAL_MACHINE = os.uname()[1]
             
@@ -49,8 +49,9 @@ def validateParameters( parameters, machineParameters, logger = None  ):
         if len( parameters.detailedParameters.sourceMachinesForTag[tag]) != len( parameters.detailedParameters.picklingMachines[tag] ):    
             if logger != None:
                 logger.error("Error reading config file in launchGraphCreation program. Parameter number mismatch. Program was terminated abruptly.") 
-           
-            print "Error reading config file in launchGraphCreation program. Parameter number mismatch number 2. Program was terminated abruptly."    
+            
+            print "Error reading config file. Parameter number mismatch between pickling machines and source machines associated with %s tag . Program was terminated abruptly." %tag    
+            print "source machines : %s  picklingmachines : %s " %(parameters.detailedParameters.sourceMachinesForTag[tag], parameters.detailedParameters.picklingMachines[tag] )
             sys.exit()
                
         for machine in parameters.detailedParameters.sourceMachinesForTag[tag]:
@@ -76,15 +77,12 @@ def updatePickles( parameters, machineParameters ):
     """      
         
     nbChildProcess = 0    
+     
     
+   
     for tag in parameters.sourceMachinesTags:
-        
-        nbChildProcess = nbChildProcess = + 1
-        
-        pid = os.fork()        
-        
-        if pid == 0: #if child
-        
+        pid = os.fork()
+        if pid == 0: #if child                   
             sourceMachines = machineParameters.getMachinesAssociatedWith(tag)            
             
             for i in range( len( sourceMachines  ) ):
@@ -128,11 +126,13 @@ def updatePickles( parameters, machineParameters ):
                     #print output
                     #print "python %spickleUpdater.py -f rx -m %s " %( StatsPaths.STATSBIN, sourceMachines[i] )
                     
+                    
                     status, output = commands.getstatusoutput( "python %spickleUpdater.py -f tx -m %s "  %(  StatsPaths.STATSBIN, sourceMachines[i]) )
                     #print "python %spickleUpdater.py -f tx -m %s " %( StatsPaths.STATSBIN, sourceMachines[i] )
                     #print output
-                    
-        elif (i%3) == 0:
+        
+            sys.exit()            
+        elif nbChildProcess!=0 and nbChildProcess%3 == 0 :
             while True:#wait on all non terminated child process'
                 try:   #will raise exception when no child process remain.
                     pid, status = os.wait()
@@ -155,9 +155,9 @@ def uploadGraphicFiles( parameters, machineParameters ):
     
    
     for uploadMachine in parameters.graphicsUpLoadMachines :
-        status, output = commands.getstatusoutput( "scp %s* %s@%s:%s " %( StatsPaths.STATSCOLGRAPHS, machineParameters.getUserNameForMachine(uploadMachine), uploadMachine, StatsPaths.PDSCOLGRAPHS   ) )
+        #status, output = commands.getstatusoutput( "scp %s* %s@%s:%s " %( StatsPaths.STATSCOLGRAPHS, machineParameters.getUserNameForMachine(uploadMachine), uploadMachine, StatsPaths.PDSCOLGRAPHS   ) )
         
-        #print "scp %s* %s@%s:%s " %( StatsPaths.STATSCOLGRAPHS, machineParameters.getUserNameForMachine(uploadMachine),uploadMachine, StatsPaths.PDSCOLGRAPHS )
+        print "scp %s* %s@%s:%s " %( StatsPaths.STATSCOLGRAPHS, machineParameters.getUserNameForMachine(uploadMachine),uploadMachine, StatsPaths.PDSCOLGRAPHS )
         #print output
 
         
@@ -219,7 +219,8 @@ def getGraphicsForWebPages( ):
         
     """
     
-    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGES + "getGraphicsForWebPages.py" )
+    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGESGENERATORS + "getGraphicsForWebPages.py" )
+    #print StatsPaths.STATSWEBPAGESGENERATORS + "getGraphicsForWebPages.py"
     #print output                    
 
 
@@ -232,12 +233,17 @@ def updateWebPages():
     """ 
        
     status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGESGENERATORS + "dailyGraphicsWebPage.py" )  
+    #print StatsPaths.STATSWEBPAGESGENERATORS + "dailyGraphicsWebPage.py"
     status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGESGENERATORS + "weeklyGraphicsWebPage.py" )    
+    #print StatsPaths.STATSWEBPAGESGENERATORS + "weeklyGraphicsWebPage.py"
     status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGESGENERATORS + "monthlyGraphicsWebPage.py" )    
+    #print StatsPaths.STATSWEBPAGESGENERATORS + "monthlyGraphicsWebPage.py"
     status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGESGENERATORS + "yearlyGraphicsWebPage.py" )    
+    #print StatsPaths.STATSWEBPAGESGENERATORS + "yearlyGraphicsWebPage.py"
     status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGESGENERATORS + "totalGraphicsWebPages.py" )    
+    #print  StatsPaths.STATSWEBPAGESGENERATORS + "totalGraphicsWebPages.py"
     status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGESGENERATORS + "generateTopWebPage.py" )
-       
+    #print StatsPaths.STATSWEBPAGESGENERATORS + "generateTopWebPage.py"   
     
     
 def monitorActivities( timeParameters, currentTime ):
@@ -337,13 +343,14 @@ def cleanUp( timeParameters, currentTime, daysOfPicklesToKeep ):
                                   
     """     
     
-    if needsToBeRun( timeParameters.pickleCleanerFrequency, currentTime ):
-        #commands.getstatusoutput( StatsPaths.STATSTOOLS + "pickleCleaner.py %s" daysOfPicklesToKeep )
-        print StatsPaths.STATSTOOLS + "pickleCleaner.py" + " " + str( daysOfPicklesToKeep )
+    if needsToBeRun( timeParameters.pickleCleanerFrequency, currentTime ) :
+        
+        status, output = commands.getstatusoutput( StatsPaths.STATSTOOLS + "pickleCleaner.py %s" %daysOfPicklesToKeep )
+        #print StatsPaths.STATSTOOLS + "pickleCleaner.py" + " " + str( daysOfPicklesToKeep )
         
     if needsToBeRun( timeParameters.generalCleanerFrequency, currentTime ):
-        #commands.getstatusoutput( StatsPaths.STATSTOOLS + "clean_dir.plx" + " " + StatsPaths.PXETC + "clean.conf"   )
-        print StatsPaths.STATSTOOLS + "clean_dir.plx" + " " + StatsPaths.PXETC + "clean.conf" 
+        commands.getstatusoutput( StatsPaths.STATSTOOLS + "clean_dir.plx" + " " + StatsPaths.PXETC + "clean.conf"   )
+        #print StatsPaths.STATSTOOLS + "clean_dir.plx" + " " + StatsPaths.PXETC + "clean.conf" 
         
     
     
@@ -366,7 +373,97 @@ def backupRRDDatabases( timeParameters, currentTime, nbBackupsToKeep ):
         #print StatsPaths.STATSTOOLS + "backupRRDDatabases.py" + " " + str(nbBackupsToKeep)
 
 
+def saveCurrentMachineParameters( machineParameters  ):
+    """
+        @summary : Saves the current machineParameters into 
+                   the /data/previousMachineParameters file. 
+        
+        @param machineParameters: Machine parameters to save.
+        
+    """
+    
+    if not os.path.isdir( os.path.dirname( StatsPaths.STATSPREVIOUSMACHINEPARAMS ) ):
+        os.makedirs( StatsPaths.STATSPREVIOUSMACHINEPARAMS )
+    
+    CpickleWrapper.save( machineParameters, StatsPaths.STATSPREVIOUSMACHINEPARAMS)
+        
 
+def getMachineParametersFromPreviousCall() :
+    """
+        @summary: Gets the machine parameters that are 
+                  saved in data/previousMachineParameters.   
+        
+        @return: Returns the saved machine parameters. 
+    
+    """
+    
+    previousMachineParams = None
+    if os.path.isfile( StatsPaths.STATSPREVIOUSMACHINEPARAMS ):
+        previousMachineParams = CpickleWrapper.load( StatsPaths.STATSPREVIOUSMACHINEPARAMS )
+    
+    return  previousMachineParams  
+      
+      
+        
+def getMachinesTagsNeedingUpdates( configParameters, machineParameters ):
+    """
+        @summary : Verifies every machine tags to see if a
+                   member of that group has been renamed 
+                   since the last cront job.
+        
+        @param machineParameters:  Current machine parameters 
+                                  found within the config files.
+                                  
+        @return: List of tags needing updates.
+                 Will return an empty list if nothing needs to be updated.
+                
+                 Will return None if no previous configs were saved.                                     
+    
+    
+    """  
+    
+    tagsNeedingupdates = []
+    
+    previousParameters = getMachineParametersFromPreviousCall()
+    
+    if previousParameters == None:     
+        tagsNeedingupdates = None
+    else:
+        print previousParameters.machinesForMachineTags
+        for tag in configParameters.sourceMachinesTags:
+            if previousParameters.getMachinesAssociatedWith( tag ) != machineParameters.getMachinesAssociatedWith( tag ):
+                tagsNeedingupdates.append( tag )
+    
+    return tagsNeedingupdates
+
+   
+    
+def updateFilesAssociatedWithMachineTags( tagsNeedingUpdates, machineParameters ):   
+    """
+        @summary : For all the tags for wich 
+                   a machine was change we rename all the 
+                   files associated with that tag.
+        
+        @param tagsNeedingUpdates: List of tags that have been modified 
+                                   since the last call.
+                                             
+    
+    """
+    
+    previousParameters = getMachineParametersFromPreviousCall()
+    
+    for tag in tagsNeedingUpdates:
+        previousCombinedMachineNames = ""
+        previousCombinedMachineNames = previousCombinedMachineNames.join( [ x for x in previousParameters.getMachinesAssociatedWith( tag ) ] )
+        
+        currentCombinedMachineNames = ""
+        currentCombinedMachineNames = currentCombinedMachineNames.join( [ x for x in machineParameters.getMachinesAssociatedWith( tag ) ]) 
+        
+        status,output = commands.getstatusoutput( "%sfileRenamer.py -o %s  -n %s --overrideConfirmation" %( StatsPaths.STATSTOOLS, previousCombinedMachineNames, currentCombinedMachineNames  ) )
+        print "%sfileRenamer.py -o %s  -n %s --overrideConfirmation" %( StatsPaths.STATSTOOLS, previousCombinedMachineNames, currentCombinedMachineNames  )
+        print output 
+        
+        
 def main():
     """
         Gets all the parameters from config file.
@@ -385,20 +482,33 @@ def main():
                                                                 
     machineParameters = MachineConfigParameters()
     machineParameters.getParametersFromMachineConfigurationFile()
+    
     validateParameters( generalParameters, machineParameters, None  )
     
+    tagsNeedingUpdates = getMachinesTagsNeedingUpdates( generalParameters, machineParameters )
+    if tagsNeedingUpdates == None : #no previous parameter found
+        saveCurrentMachineParameters( machineParameters  )
+    elif tagsNeedingUpdates != [] :
+        updateFilesAssociatedWithMachineTags( tagsNeedingUpdates, machineParameters )
+        saveCurrentMachineParameters( machineParameters  )
+           
+            
     updatePickles( generalParameters, machineParameters )
-    updateDatabases( generalParameters, machineParameters )   
+    
+    updateDatabases( generalParameters, machineParameters )
+    
     backupRRDDatabases( generalParameters.timeParameters, currentTime, generalParameters.nbDbBackupsToKeep )
-        
+    
     getGraphicsForWebPages()
+    
     updateWebPages()
-    uploadGraphicFiles( generalParameters, machineParameters )       
     
+    uploadGraphicFiles( generalParameters, machineParameters )
+ 
     cleanUp( generalParameters.timeParameters, currentTime, generalParameters.daysOfPicklesToKeep )
-    
+
     monitorActivities( generalParameters.timeParameters, currentTime )
-    
+
     print "Finished."
     
     
