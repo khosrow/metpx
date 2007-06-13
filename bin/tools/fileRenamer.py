@@ -28,13 +28,11 @@ named COPYING in the root of the source directory tree.
   
 """ 
 
-import os  
-import commands 
-import fnmatch
-import pickle
+import commands, fnmatch, os, pickle, sys  
+sys.path.insert(1, sys.path[0] + '/../../../')
+
 from   optparse import OptionParser  
 from fnmatch import fnmatch  
-
 from pxStats.lib.StatsPaths import StatsPaths
 
 LOCAL_MACHINE = os.uname()[1]
@@ -116,6 +114,16 @@ def addOptions( parser ):
     parser.add_option( "--overrideConfirmation", action="store_true", dest = "overrideConfirmation", default=False, help="Whether or not to override the confirmation request." )
     
  
+def filterentriesStartingWithDots(x):
+    """
+        When called within pythons builtin
+        filter method will remove all entries
+        starting with a dot.
+    """
+    
+    return not fnmatch(x,".*")
+
+
 
 def renameCurrentDatabasesTimesOfUpdates( oldMachineName, newMachineName ):  
     """
@@ -128,19 +136,23 @@ def renameCurrentDatabasesTimesOfUpdates( oldMachineName, newMachineName ):
     
     """
     
-    fileTypeDirs = os.listdir( StatsPaths.STATSCURRENTDBUPDATES )
-    
-    for fileTypeDir in fileTypeDirs:     
-        path = StatsPaths.STATSCURRENTDBUPDATES + fileTypeDir + '/'       
-        files = os.listdir(StatsPaths.STATSCURRENTDBUPDATES  + fileTypeDir )        
-        for file in files:            
-            if fnmatch(file, '*_' + oldMachineName ) :
-                source = path + file                
-                splitName = file.split('_')                
-                newFile = splitName[0] + '_' + splitName[1].replace(oldMachineName, newMachineName)
-                destination = path + newFile
-                #print "mv %s %s " %( source, destination )                          
-                status, output = commands.getstatusoutput( "mv %s %s" %(source,destination) )
+    if os.path.isdir( StatsPaths.STATSCURRENTDBUPDATES ):
+        
+        fileTypeDirs = os.listdir( StatsPaths.STATSCURRENTDBUPDATES )
+        fileTypeDirs = filter( filterentriesStartingWithDots ,fileTypeDirs)
+        
+        for fileTypeDir in fileTypeDirs:     
+            path = StatsPaths.STATSCURRENTDBUPDATES + fileTypeDir + '/'    
+            if os.path.isdir(path)   :
+                files = os.listdir(path )        
+                for file in files:            
+                    if fnmatch(file, '*_' + oldMachineName ) :
+                        source = path + file                
+                        splitName = file.split('_')                
+                        newFile = splitName[0] + '_' + splitName[1].replace(oldMachineName, newMachineName)
+                        destination = path + newFile
+                        #print "mv %s %s " %( source, destination )                          
+                        status, output = commands.getstatusoutput( "mv %s %s" %(source,destination) )
 
 
 
@@ -155,20 +167,23 @@ def renameCurrentDatabases( oldMachineName, newMachineName ):
     
     """
     
-    dataTypeDirs = os.listdir( StatsPaths.STATSCURRENTDB )
-    
-    for dataTypeDir in dataTypeDirs:     
-        path = StatsPaths.STATSCURRENTDB + dataTypeDir + '/'       
-        files = os.listdir( StatsPaths.STATSCURRENTDB  + dataTypeDir )        
-        for file in files:            
-            if fnmatch(file, '*_' + oldMachineName ) :
-                source = path + file                
-                splitName = file.split('_')                
-                newFile = splitName[0] + '_' + splitName[1].replace(oldMachineName, newMachineName)
-                destination = path + newFile
-                #print "mv %s %s " %( source, destination )                          
-                status, output = commands.getstatusoutput( "mv %s %s" %(source,destination) )
-    
+    if os.path.isdir( StatsPaths.STATSCURRENTDB ) :
+        dataTypeDirs = os.listdir( StatsPaths.STATSCURRENTDB )
+        dataTypeDirs = filter( filterentriesStartingWithDots, dataTypeDirs )
+        
+        for dataTypeDir in dataTypeDirs:     
+            path = StatsPaths.STATSCURRENTDB + dataTypeDir + '/'       
+            if os.path.isdir(path):
+                files = os.listdir( path )        
+                for file in files:            
+                    if fnmatch(file, '*_' + oldMachineName ) :
+                        source = path + file                
+                        splitName = file.split('_')                
+                        newFile = splitName[0] + '_' + splitName[1].replace(oldMachineName, newMachineName)
+                        destination = path + newFile
+                        #print "mv %s %s " %( source, destination )                          
+                        status, output = commands.getstatusoutput( "mv %s %s" %(source,destination) )
+        
     
     
 def renameDatabaseBackups(oldMachineName, newMachineName ):    
@@ -182,25 +197,29 @@ def renameDatabaseBackups(oldMachineName, newMachineName ):
     
     """
     
-    backupDatesDirs = os.listdir( StatsPaths.STATSDBBACKUPS )
-    
-    for backupDatesDir in backupDatesDirs:     
+    if os.path.isdir(StatsPaths.STATSDBBACKUPS) :
+        backupDatesDirs = os.listdir( StatsPaths.STATSDBBACKUPS )
+        backupDatesDirs = filter( filterentriesStartingWithDots, backupDatesDirs )
         
-        dataTypeDirs = os.listdir( StatsPaths.STATSDBBACKUPS + backupDatesDir )
-    
-        for dataTypeDir in dataTypeDirs:     
-            path = StatsPaths.STATSDBBACKUPS + backupDatesDir+ '/' + dataTypeDir + '/'     
-            files = os.listdir( path )        
-            for file in files:            
-                if fnmatch(file, '*_' + oldMachineName ) :
-                    source = path + file                
-                    splitName = file.split('_')                
-                    newFile = splitName[0] + '_' + splitName[1].replace(oldMachineName, newMachineName)
-                    destination = path + newFile
-                    #print "mv %s %s " %( source, destination )                          
-                    status, output = commands.getstatusoutput( "mv %s %s" %(source,destination) )   
-    
-    
+        
+        for backupDatesDir in backupDatesDirs:     
+            path = StatsPaths.STATSDBBACKUPS + backupDatesDir + '/'
+            if os.path.isdir(path):
+                dataTypeDirs = os.listdir( path )
+            
+                for dataTypeDir in dataTypeDirs:     
+                    path = StatsPaths.STATSDBBACKUPS + backupDatesDir+ '/' + dataTypeDir + '/'     
+                    files = os.listdir( path )        
+                    for file in files:            
+                        if fnmatch(file, '*_' + oldMachineName ) :
+                            source = path + file                
+                            splitName = file.split('_')                
+                            newFile = splitName[0] + '_' + splitName[1].replace(oldMachineName, newMachineName)
+                            destination = path + newFile
+                            #print "mv %s %s " %( source, destination )                          
+                            status, output = commands.getstatusoutput( "mv %s %s" %(source,destination) )   
+        
+        
     
 def renamesDatabaseBackupsTimesOfUpdates( oldMachineName, newMachineName ):
     """
@@ -213,24 +232,27 @@ def renamesDatabaseBackupsTimesOfUpdates( oldMachineName, newMachineName ):
     
     """        
     
-    backupDatesDirs = os.listdir( StatsPaths.STATSDBUPDATESBACKUPS )
-    
-    for backupDatesDir in backupDatesDirs:     
+    if os.path.isdir(StatsPaths.STATSDBUPDATESBACKUPS):
+        backupDatesDirs = os.listdir( StatsPaths.STATSDBUPDATESBACKUPS )
+        backupDatesDirs = filter( filterentriesStartingWithDots, backupDatesDirs ) 
         
-        fileTypeDirs = os.listdir( StatsPaths.STATSDBUPDATESBACKUPS + backupDatesDir )
-    
-        for fileTypeDir in fileTypeDirs:     
-            path = StatsPaths.STATSDBUPDATESBACKUPS + backupDatesDir+ '/' + fileTypeDir + '/'     
-            files = os.listdir( path )        
-            for file in files:            
-                if fnmatch(file, '*_' + oldMachineName ) :
-                    source = path + file                
-                    splitName = file.split('_')                
-                    newFile = splitName[0] + '_' + splitName[1].replace(oldMachineName, newMachineName)
-                    destination = path + newFile
-                    #print "mv %s %s " %( source, destination )                          
-                    status, output = commands.getstatusoutput( "mv %s %s" %(source,destination) )  
-    
+        for backupDatesDir in backupDatesDirs:     
+            path =  StatsPaths.STATSDBUPDATESBACKUPS + backupDatesDir   + "/"
+            if os.path.isdir(path) : 
+                fileTypeDirs = os.listdir( StatsPaths.STATSDBUPDATESBACKUPS + backupDatesDir )
+            
+                for fileTypeDir in fileTypeDirs:     
+                    path = StatsPaths.STATSDBUPDATESBACKUPS + backupDatesDir+ '/' + fileTypeDir + '/'     
+                    files = os.listdir( path )        
+                    for file in files:            
+                        if fnmatch(file, '*_' + oldMachineName ) :
+                            source = path + file                
+                            splitName = file.split('_')                
+                            newFile = splitName[0] + '_' + splitName[1].replace(oldMachineName, newMachineName)
+                            destination = path + newFile
+                            #print "mv %s %s " %( source, destination )                          
+                            status, output = commands.getstatusoutput( "mv %s %s" %(source,destination) )  
+        
     
     
     
@@ -250,38 +272,8 @@ def renameDatabases( oldMachineName, newMachineName ):
     renameDatabaseBackups(oldMachineName, newMachineName )
     renamesDatabaseBackupsTimesOfUpdates( oldMachineName, newMachineName )
     
-    
-    
-def renamePickledTimes( oldMachineName, newMachineName ):  
-    """
-        @summary: Renames all the update times sporting a certain machine name's( oldMachineName ) 
-                  so that they now sport the name of another machine(newMachineName). 
-        
-        @param oldMachineName: Name of the old machine wich needs to be renamed
-        
-        @param newMachineName: Name of the new machine into wich the pickles will be renamed.
-    
-    """
-    
-    fileName = StatsPaths.STATSPICKLESTIMEOFUPDATES
-    
-    if os.path.isfile( fileName ):
-        fileHandle   = open( fileName, "r" )
-        pickledTimes = pickle.load( fileHandle )        
-        fileHandle.close
-        for entry in pickledTimes.keys():
-            if  fnmatch(entry, oldMachineName + '*') :
-                value = pickledTimes[entry]
-                pickledTimes.pop( entry )
-                newEntry = entry.replace( oldMachineName, newMachineName, 1 ) 
-                pickledTimes[newEntry] = value
-                   
-        fileHandle   = open( fileName, "w" )
-        pickle.dump(pickledTimes, fileHandle)        
-        fileHandle.close()
-        
-             
       
+            
 def renamePickles( oldMachineName, newMachineName ):  
     """
         @summary: Renames all the pickles sporting a certain machine name's( oldMachineName ) 
@@ -293,24 +285,29 @@ def renamePickles( oldMachineName, newMachineName ):
     
     """
     
+    if os.path.isdir( StatsPaths.STATSPICKLES ) :
       
-    clientdirs = os.listdir( StatsPaths.STATSPICKLES )
-    
-    for clientDir in clientdirs:
-        dateDirs = os.listdir( StatsPaths.STATSPICKLES  + clientDir )
-        for dateDir in dateDirs :
-            fileTypes = os.listdir( StatsPaths.STATSPICKLES  + clientDir + '/' + dateDir )
-            for fileType in fileTypes:
-                files = os.listdir( StatsPaths.STATSPICKLES  + clientDir + '/' + dateDir + '/' + fileType )
-                path = StatsPaths.STATSPICKLES  + clientDir + '/' + dateDir + '/' + fileType + "/" 
-                for file in files:                    
-                    if fnmatch(file, oldMachineName + '*' ) :
-                        source = path + file
-                        newFile = file.replace(oldMachineName, newMachineName, 1)
-                        destination = path + newFile
-                        #print "mv %s %s " %( source, destination )                          
-                        status, output = commands.getstatusoutput( "mv %s %s" %(source,destination) )
-    
+        clientdirs = os.listdir( StatsPaths.STATSPICKLES )
+        clientdirs = filter( filterentriesStartingWithDots, clientdirs ) 
+        
+        for clientDir in clientdirs:
+            if os.path.isdir( StatsPaths.STATSPICKLES  + clientDir ):
+                dateDirs = os.listdir( StatsPaths.STATSPICKLES  + clientDir )
+                for dateDir in dateDirs :
+                    if os.path.isdir(StatsPaths.STATSPICKLES  + clientDir + '/' + dateDir) : 
+                        fileTypes = os.listdir( StatsPaths.STATSPICKLES  + clientDir + '/' + dateDir )
+                        for fileType in fileTypes:
+                            path = StatsPaths.STATSPICKLES  + clientDir + '/' + dateDir + '/' + fileType + "/"
+                            if os.path.isdir(path) :                              
+                                files = os.listdir( path )                            
+                                for file in files:                    
+                                    if fnmatch(file, oldMachineName + '*' ) :
+                                        source = path + file
+                                        newFile = file.replace(oldMachineName, newMachineName, 1)
+                                        destination = path + newFile
+                                        #print "mv %s %s " %( source, destination )                          
+                                        status, output = commands.getstatusoutput( "mv %s %s" %(source,destination) )
+        
     
     
 def  renameFileVersions( oldMachineName, newMachineName ):  
@@ -323,17 +320,19 @@ def  renameFileVersions( oldMachineName, newMachineName ):
         @param newMachineName: Name of the new machine into wich the pickles will be renamed.
     
     """   
-
-    files = os.listdir( StatsPaths.STATSFILEVERSIONS )
-  
-    for file in files:       
-        print file     
-        if fnmatch(file, oldMachineName + '_*' ) :
-            source = StatsPaths.STATSFILEVERSIONS + file             
-            newFile = file.replace(oldMachineName, newMachineName,1)
-            destination = StatsPaths.STATSFILEVERSIONS + newFile
-            #print "mv %s %s " %( source, destination )                          
-            status, output = commands.getstatusoutput( "mv %s %s" %(source,destination) )  
+    if os.path.isdir(StatsPaths.STATSFILEVERSIONS) :
+        
+        files = os.listdir( StatsPaths.STATSFILEVERSIONS )
+        files = filter( filterentriesStartingWithDots, files )
+        
+        for file in files:       
+            print file     
+            if fnmatch(file, oldMachineName + '_*' ) :
+                source = StatsPaths.STATSFILEVERSIONS + file             
+                newFile = file.replace(oldMachineName, newMachineName,1)
+                destination = StatsPaths.STATSFILEVERSIONS + newFile
+                #print "mv %s %s " %( source, destination )                          
+                status, output = commands.getstatusoutput( "mv %s %s" %(source,destination) )  
     
 
 
@@ -388,16 +387,17 @@ def main():
                     
         
     """ 
-    
+    manualConfirmation = False 
+    overrideConfirmation = False
     parser   = createParser( )  #will be used to parse options 
     oldMachineName, newMachineName, overrideConfirmation = getOptionsFromParser( parser )
     
-    if overrideConfirmation == False:
-        confirmation = getConfirmation( oldMachineName, newMachineName )
     
-    if confirmation == True:    
+    if overrideConfirmation == False:
+        manualConfirmation = getConfirmation( oldMachineName, newMachineName )
+    
+    if overrideConfirmation ==True or manualConfirmation == True:    
         renamePickles( oldMachineName, newMachineName )
-        renamePickledTimes( oldMachineName, newMachineName )
         renameDatabases( oldMachineName, newMachineName )
         renameFileVersions( oldMachineName, newMachineName )
    
