@@ -555,19 +555,20 @@ class FileStatsCollector:
                 testLine = fileHandle.readline()
                 departure =  FileStatsCollector.findValues( ["departure"] , testLine, fileType = self.fileType,logger= self.logger )["departure"]
                 
-                if departure >=  self.endTime:
-                    
+                if departure >=  self.endTime: # Assumes user wants to recalculate old data. 
+                                               # Return to top of the file.
                     fileHandle.seek( 0 )
                 else:
-                    fileHandle.seek( lastReadPosition )     
+                    fileHandle.seek( lastReadPosition ) #Return to position.     
         
         else:
         
             fileHandle = open( file, "r" )
                 
-        
+                
+        position       = fileHandle.tell()#save position prior to readling line in case in it the first interesting line.
         firstLine      = fileHandle.readline()
-        position       = fileHandle.tell()
+        
         #print firstLine
         
         #In case of traceback line
@@ -575,12 +576,11 @@ class FileStatsCollector:
         #print isInteresting
         while isInteresting is False and firstLine != "" :  
             #print firstLine
-            firstLine = fileHandle.readline()
             position  = fileHandle.tell()
+            firstLine = fileHandle.readline()
             isInteresting, linetype = FileStatsCollector.isInterestingLine( firstLine, usage = "departure", types = self.statsTypes )               
             #print firstLine    
                                                  
-        fileHandle.seek( position, 0 )
         line = firstLine 
         
         #print "before last while : %s" %line 
@@ -597,8 +597,7 @@ class FileStatsCollector:
                 departure =  FileStatsCollector.findValues( ["departure"] , line, fileType = self.fileType,logger= self.logger )["departure"]
                 
                 if departure <=  self.endTime and departure >= self.startTime :
-                    #print "found line >start <endtime"
-                    position = fileHandle.tell()
+                    #print "found line >start <endtime"                    
                     lineFound = True                                                                       
                                     
                 elif departure >  self.endTime:# there was no interesting data in that file                    
@@ -611,6 +610,7 @@ class FileStatsCollector:
             else:#keep on readin 
                 #print "useless line : %s" %(line)
                 #print "self.statstypes : %s" %(self.statsTypes)
+                position = fileHandle.tell()#Save position on line about to be read in case it turns out to be the right line.
                 line = fileHandle.readline()        
                 
         #print "*****************%s****************" %line     
@@ -668,11 +668,13 @@ class FileStatsCollector:
             entryCount = 0      #Entry we are currently handling.
                                    
             line, lineType, position, usedTheSavedFileAccessPointer  = self.findFirstInterestingLine( file = file, useSavedFileAccessPointer = useSavedFileAccessPointer )
+            previousPosition = position 
             if usedTheSavedFileAccessPointer == True :
                useSavedFileAccessPointer = False 
                 
             fileHandle = open( file, "r" )
-            if line != "" :                                        
+            if line != "" :             
+                                           
                 fileHandle.seek( position )
                 departure   = self.findValues( ["departure"] ,  line, lineType, fileType = self.fileType,logger= self.logger )["departure"]
                         
@@ -725,7 +727,6 @@ class FileStatsCollector:
                 #print "read the entire file allready"
                 if entryCount > self.lastFilledEntry:#in case of numerous files
                     self.lastFilledEntry  = entryCount                  
-                previousPosition      = 0
                 
             else:
                 if entryCount > self.lastFilledEntry :#in case of numerous files
@@ -733,9 +734,9 @@ class FileStatsCollector:
                            
             
             if file == self.files[ len(self.files) -1 ]:
-                self.lastPositionRead = fileHandle.tell()#current position
+                self.lastPositionRead =previousPosition#Save pos prior to last line read, or else we might loose an important line at the next collection.
                 fileHandle.seek(0)#go back to top of the file.
-                self.firstLineOfLastFileRead = fileHandle.readline()
+                self.firstLineOfLastFileRead = fileHandle.readline()#read the firt line
                 fileHandle.close()
             else:
                 fileHandle.close()             
@@ -814,7 +815,7 @@ if __name__ == "__main__" :
     timeA= time.time()
     types = [ "latency", "errors","bytecount" ]
     
-    filename = StatsPaths.STATSLOGS + 'pxatx/tx_satnet-ice.log'
+    filename = StatsPaths.STATSLOGS + 'someMachine/tx_someclient.log'
     
     startingHours=["00:00:00","01:00:00","02:00:00","03:00:00","04:00:00","05:00:00","06:00:00","07:00:00","08:00:00","09:00:00","10:00:00","11:00:00","12:00:00","13:00:00","14:00:00","15:00:00","16:00:00","17:00:00","18:00:00","19:00:00","20:00:00","21:00:00","22:00:00","23:00:00" ]
     
