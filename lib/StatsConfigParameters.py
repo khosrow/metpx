@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 
 '''
@@ -221,7 +221,7 @@ class StatsConfigParameters:
 
                             groupParameters.groupFileTypes[groupName] = splitLine[3]
                             groupParameters.groupsMembers[groupName].extend( splitLine[4].split(",") )
-                            groupParameters.groupsProducts[groupName].extend( splitLine[5] )
+                            groupParameters.groupsProducts[groupName].extend( splitLine[5].split(",") )
                     
                 line = fileHandle.readline()     
                                 
