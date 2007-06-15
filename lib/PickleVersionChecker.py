@@ -95,7 +95,7 @@ class PickleVersionChecker :
         for client in clients:
             combinedName = combinedName + client
         
-        fileName  = user + "_" + combinedName             
+        fileName  = combinedName + "_" + user            
             
         try :
             
@@ -180,7 +180,7 @@ class PickleVersionChecker :
         for client in clients:
             combinedName = combinedName + client
         
-        fileName  = user + "_" + combinedName
+        fileName  = combinedName + "_" + user 
         
         if not os.path.isdir( directory ):
             os.makedirs( directory, mode=0777 )
