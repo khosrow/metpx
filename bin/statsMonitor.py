@@ -480,7 +480,7 @@ def verifyStatsLogs( parameters, report ,logger = None ):
     
     for logFileType in logFileTypes:
         
-        lfc =  LogFileCollector( startTime  = parameters.startTime , endTime = parameters.endTime, directory = StatsPaths.PXLOG, lastLineRead = "", logType = "stats", name = logFileType, logger = logger )    
+        lfc =  LogFileCollector( startTime  = parameters.startTime , endTime = parameters.endTime, directory = StatsPaths.STATSLOGGING, lastLineRead = "", logType = "stats", name = logFileType, logger = logger )    
         
         lfc.collectEntries()
         logs = lfc.entries                
