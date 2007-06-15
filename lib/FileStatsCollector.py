@@ -201,7 +201,7 @@ class FileStatsCollector:
             else:    
                 pattern = GeneralStatsLibraryMethods.buildPattern(productType)            
 
-            if fnmatch.fnmatch( product, pattern):
+            if fnmatch.fnmatch( product, pattern) == True:
                 isInterestingProduct = True
                 break
             
@@ -263,6 +263,9 @@ class FileStatsCollector:
                 fileEntries[i].filesWhereMaxOccured[aType] = "" 
                 fileEntries[i].timesWhereMaxOccured[aType] = 0 
                 fileEntries[i].medians[aType] =0
+                fileEntries[i].means[aType] =0
+                fileEntries[i].totals[aType] =0
+
                 values[aType]  = [] 
                 files[aType]   = [] 
                 times[aType]   = [] 
@@ -278,7 +281,7 @@ class FileStatsCollector:
                                                 
                 for row in xrange( 0, fileEntries[i].values.rows ) : # for each line in the entry 
                     #Filter based on interesting products
-                    if FileStatsCollector.isInterestingProduct( fileEntries[i].values.productTypes[row], productTypes  ) is True :
+                    if FileStatsCollector.isInterestingProduct( fileEntries[i].values.productTypes[row], productTypes  ) == True :
                         
                         fileEntries[i].nbFiles = fileEntries[i].nbFiles +1
                                                 
@@ -304,9 +307,10 @@ class FileStatsCollector:
                 #calculate sum and means
                 for aType in self.statsTypes :
                     fileEntries[i].totals[aType] = float( sum( values[aType] ) )
-                    fileEntries[i].means[aType] = float(fileEntries[i].totals[aType]) /float( len(values[aType]) )     
+                    if float( len(values[aType]) ) !=0.0:
+                        fileEntries[i].means[aType] = float(fileEntries[i].totals[aType]) /float( len(values[aType]) )     
                     
-                
+                        
                 if "errors" in self.statsTypes:#errors are only handled as totals
                     fileEntries[i].maximums["errors"] = int( fileEntries[i].totals["errors"] )
                     fileEntries[i].filesWhereMaxOccured["errors"] = ""   
