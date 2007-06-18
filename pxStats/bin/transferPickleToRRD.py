@@ -454,7 +454,7 @@ def getTimeSeperatorsBasedOnAvailableMemory( startTime, endTime, clients, fileTy
     
     
     totalSizeToloadInMemory = MemoryManagement.getTotalSizeListOfFiles( allFiles )
-    currentlyAvailableMemory = MemoryManagement.getCurrentFreeMemory( marginOfError = 25 )    
+    currentlyAvailableMemory = MemoryManagement.getCurrentFreeMemory( marginOfError = 0.75 )#never expect more than 25% of the avaiable memory to be avaiable for pickle loading.    
     
     if totalSizeToloadInMemory >= currentlyAvailableMemory:
         seperatorsBasedOnAvailableMemory = MemoryManagement.getSeperatorsForHourlyTreatments( startTime, endTime, currentlyAvailableMemory, hourlyFileSizes  )
@@ -484,7 +484,7 @@ def updateGroupedRoundRobinDatabases( infos, logger = None ):
     timeSeperators = getTimeSeperatorsBasedOnAvailableMemory( StatsDateLib.getIsoFromEpoch( startTime ), StatsDateLib.getIsoFromEpoch( endTime ), infos.clients, infos.fileTypes[0], infos.machines )
     
     
-    for i in xrange( len( timeSeperators )-1 ):        
+    for i in xrange(0, len( timeSeperators ),2 ):#timeseperators should always be coming in pairs
                
         dataPairs   = getPairs( infos.clients, infos.machines, infos.fileTypes[0], timeSeperators[i], timeSeperators[i+1], infos.group, logger )
         for dataType in dataPairs:
