@@ -218,7 +218,7 @@ def getOptionsFromParser( parser, logger = None  ):
             fileTypes.append( "rx" )                 
     
      
-    clients = GeneralStatsLibraryMethods.filterClientsNamesUsingWilcardFilters(end, 1000, clients, machines, fileTypes= fileTypes )  
+    clients = GeneralStatsLibraryMethods.filterClientsNamesUsingWilcardFilters( end, 1000, clients, machines, fileTypes= fileTypes )  
    
     
     infos = _Infos( endTime = end, machines = machines, clients = clients, fileTypes = fileTypes, products = products, group = group )   
@@ -400,10 +400,13 @@ def updateRoundRobinDatabases(  client, machines, fileType, endTime, logger = No
 
 
             if endTime > startTime :
-
-                for pair in dataPairs[ dataType ]:
-                     rrdtool.update( rrdFileName, '%s:%s' %( int(pair[0]), pair[1] ) )
-
+                j = 0 
+                while dataPairs[ dataType ][j][0] < startTime:
+                    j = j +1
+                    
+                for k in range ( j, len( dataPairs[ dataType ] )  ):
+                    rrdtool.update( rrdFileName, '%s:%s' %( int( dataPairs[ dataType ][k][0] ),  dataPairs[ dataType ][k][1] ) )
+                    
                 if logger != None :
                      logger.info( "Updated  %s db for %s in db named : %s" %( dataType, client, rrdFileName ) )
 
@@ -483,19 +486,22 @@ def updateGroupedRoundRobinDatabases( infos, logger = None ):
         
     timeSeperators = getTimeSeperatorsBasedOnAvailableMemory( StatsDateLib.getIsoFromEpoch( startTime ), StatsDateLib.getIsoFromEpoch( endTime ), infos.clients, infos.fileTypes[0], infos.machines )
     
-    
+    print timeSeperators
     for i in xrange(0, len( timeSeperators ),2 ):#timeseperators should always be coming in pairs
-               
+        startTime = timeSeperators[i]       
         dataPairs   = getPairs( infos.clients, infos.machines, infos.fileTypes[0], timeSeperators[i], timeSeperators[i+1], infos.group, logger )
         for dataType in dataPairs:
             rrdFileName = RrdUtilities.buildRRDFileName( dataType = dataType, clients = infos.group, groupName = infos.group, machines =  infos.machines,fileType = infos.fileTypes[0], usage = "group" )
             if not os.path.isfile( rrdFileName ):
                 createRoundRobinDatabase( rrdFileName, startTime, dataType )
             if endTime > startTime :
-                for pair in dataPairs[ dataType ]:
-                    rrdtool.update( rrdFileName, '%s:%s' %( int(pair[0]), pair[1] ) )
-                    if logger != None :
-                       logger.info( "Updated  %s db for %s in db named : %s" %( dataType, infos.clients, rrdFileName ) )
+                j = 0 
+                while dataPairs[ dataType ][j][0] < startTime:
+                    j = j +1
+                    
+                for k in range ( j, len( dataPairs[ dataType ] )  ):
+                    rrdtool.update( rrdFileName, '%s:%s' %( int( dataPairs[ dataType ][k][0] ),  dataPairs[ dataType ][k][1] ) )
+
             else:
                 if logger != None :
                     logger.warning( "This database was not updated since it's last update was more recent than specified date : %s" %rrdFileName )
