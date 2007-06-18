@@ -37,7 +37,7 @@ from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 class MemoryManagement:
         
     
-    def getCurrentFreeMemory( marginOfError = 0 ):
+    def getCurrentFreeMemory( marginOfError = 0.10 ):
         """
             
             @Summary return the amount of free memory ( swap )
@@ -62,7 +62,7 @@ class MemoryManagement:
         currentFreeMemory = int( output.splitlines()[2].split()[3] )
         
         if marginOfError > 0.0 and marginOfError<= .99:
-            currentFreeMemory = float(currentFreeMemory) * float(marginOfError)
+            currentFreeMemory = float(currentFreeMemory) * float( 1 - marginOfError )
         
         return currentFreeMemory
     
@@ -110,7 +110,7 @@ class MemoryManagement:
         fileSizes = map( os.path.getsize, listOfFiles )  
         return fileSizes
       
-      
+    getListOfFileSizes = staticmethod(getListOfFileSizes)
       
     def getSeperatorsForHourlyTreatments( startTime, endTime, currentFreeMemory, fileSizesPerHour  ):    
         """
@@ -165,7 +165,7 @@ def main():
         @summary: Small test case to see if everything works fine 
         
     """
-    
+     
     
     statsConfig   = StatsConfigParameters()
     statsConfig.getAllParameters()
@@ -175,7 +175,7 @@ def main():
     currentTimeEpochFormat = time.time() -(120*60)
     
     endTime = StatsDateLib.getIsoWithRoundedHours( StatsDateLib.getIsoFromEpoch( currentTimeEpochFormat  ) )
-    startTime = StatsDateLib.getIsoWithRoundedHours( StatsDateLib.getIsoFromEpoch( currentTimeEpochFormat -( MyDateLib.DAY*7 )  ) )
+    startTime = StatsDateLib.getIsoWithRoundedHours( StatsDateLib.getIsoFromEpoch( currentTimeEpochFormat -( StatsDateLib.DAY*7 )  ) )
     print startTime, endTime
     groupName = statsConfig.groupParameters.groups[0]    
     clients = statsConfig.groupParameters.groupsMembers[ groupName ]
@@ -185,11 +185,11 @@ def main():
     seperators = [startTime]
     seperators.extend( StatsDateLib.getSeparatorsWithStartTime( startTime = startTime , width=StatsDateLib.DAY*7, interval=StatsDateLib.HOUR )[:-1])
     
-    listOfFiles = pickleMerging.createMergedPicklesList( startTime, endTime, clients, groupName, fileType, machines, seperators )
+    listOfFiles = PickleMerging.createMergedPicklesList( startTime, endTime, clients, groupName, fileType, machines, seperators )
     listOfFileSizes = MemoryManagement.getListOfFileSizes(listOfFiles)
-    currentFreeMemory = MemoryManagement.getCurrentFreeMemory(10)                
+    currentFreeMemory = MemoryManagement.getCurrentFreeMemory(0.55555)                
     
-    if getTotalSizeListOfFiles( listOfFiles ) > currentFreeMemory:       
+    if MemoryManagement.getTotalSizeListOfFiles( listOfFiles ) > currentFreeMemory:       
       
         seperators = MemoryManagement.getSeperatorsForHourlyTreatments( startTime, endTime, currentFreeMemory, listOfFileSizes  )            
         print seperators 
