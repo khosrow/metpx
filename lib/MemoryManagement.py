@@ -112,7 +112,9 @@ class MemoryManagement:
       
     getListOfFileSizes = staticmethod(getListOfFileSizes)
       
-    def getSeperatorsForHourlyTreatments( startTime, endTime, currentFreeMemory, fileSizesPerHour  ):    
+    
+    
+    def getSeperatorsForHourlyTreatments( startTime, endTime, currentFreeMemory, fileSizesPerHour, usage= "rrd"  ):    
         """
         
             @summary : returns a list of time seperators based on a list of file and 
@@ -151,9 +153,19 @@ class MemoryManagement:
             raise Exception( "Cannot build seperators. First file will not even fit within current available memory." )
             
         if seperators[len(seperators) -1 ] !=  endTime :
-            seperators.append( endTime)
-            
-              
+            seperators.append( endTime )
+                    
+        if len(seperators) > 2 : #If any "in between seperators were added"
+            i = 1
+            currentLength = len(seperators) -1
+            while i < currentLength: #add 1 minute 
+                if usage == "rrd":
+                    seperators.insert(i+1, StatsDateLib.getIsoFromEpoch( (StatsDateLib.getSecondsSinceEpoch(seperators[i]) + StatsDateLib.MINUTE)))
+                else:
+                    seperators.insert( i+1, StatsDateLib.getSecondsSinceEpoch(seperators[i]) )
+                currentLength = currentLength + 1
+                i = i + 2
+                        
         return seperators    
         
     getSeperatorsForHourlyTreatments = staticmethod( getSeperatorsForHourlyTreatments )
