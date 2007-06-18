@@ -110,6 +110,8 @@ class StatsPaths:
     STATSWEBPAGES         = STATSDATA + 'webPages/'
     STATSGRAPHS           = STATSDATA + 'graphics/'
     STATSWEBGRAPHS        = STATSGRAPHS + 'webGraphics/'
+    STATSGRAPHSARCHIVES   = STATSWEBGRAPHS + 'archives/' 
+    
     STATSCOLGRAPHS        = STATSWEBGRAPHS + 'columbo/'
     
     STATSPICKLESTIMEOFUPDATES    = STATSDATA + 'picklesTimeOfUpdates/'
