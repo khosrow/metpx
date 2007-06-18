@@ -97,15 +97,18 @@ def generateWebPage( machineNames ):
         </div> 
         
         <div class="right">
+            <a href="%s" target="bottom" >Archives</a>
             <a href="glossary.html" target="bottom" >Glossary</a>
         </div>
+        
+        
     
     </body>    
 
 </html>
            
     
-    """)
+    """ %( StatsPaths.STATSGRAPHSARCHIVES ) )
     
     
     fileHandle.close() 
