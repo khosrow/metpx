@@ -91,6 +91,7 @@ class GeneralStatsLibraryMethods:
                 else:
                     newClientNames.append( clientName )   
             
+            
         return newClientNames
     
     
@@ -218,12 +219,35 @@ class GeneralStatsLibraryMethods:
         #print "new pattern : %s" %newPattern
                                       
         return newPattern            
+        
+        
+        buildPattern = staticmethod( buildPattern )
     
     
-    buildPattern = staticmethod( buildPattern )
+
+
+    def filterGroupNames( fileName ):
+        """
+            When called within pythons builtin
+            filter method will remove all entries
+            starting with a dot. 
+        
+        """
+        
+        statsConfigParameters = StatsConfigParameters()
+        statsConfigParameters.getGroupSettingsFromConfigurationFile()
+        groupNames = statsConfigParameters.groupParameters.groups
+       
+        result = filter(lambda groupName: groupName in fileName, groupNames)
+                
+        return  result == [] 
+        
+        filterGroupNames = staticmethod( filterGroupNames )
+    
+    filterGroupNames = staticmethod( filterGroupNames )
     
     
-    
+        
     def getRxTxNamesHavingRunDuringPeriod( start, end, machines, pattern = None ):  
         """
             Browses all the rrd database directories to find 
@@ -298,6 +322,10 @@ class GeneralStatsLibraryMethods:
                 txDatabase = txDatabase.split("_%s"%combinedMachineName)[0]
                 txNames.append( txDatabase )    
        
+        
+        rxNames = filter( filterGroupNames, rxNames )        
+        txNames = filter( filterGroupNames, txNames )
+        
                 
         try:
             rxNames.remove('rx')    
@@ -412,5 +440,15 @@ class GeneralStatsLibraryMethods:
         
     getRxTxNamesForWebPages = staticmethod(getRxTxNamesForWebPages  )
     
+ 
+def main():
+    """
+    """
     
+    names= ["bob","guy","jean"]
+    names = filter( GeneralStatsLibraryMethods.filterGroupNames, names )   
+    print names
+    
+if __name__ == '__main__':
+    main()   
     
