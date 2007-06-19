@@ -20,6 +20,13 @@ named COPYING in the root of the source directory tree.
 # Note : If this file is to be modified, please run the main() method at the bottom of this 
 #        file to make sure everything still works properly. Feel free to add tests if needed. 
 #
+#        While using this class, you can either use only one file with all your entries 
+#        and give a different identifier to all of you entries, or you can use different
+#        files.
+#        
+#        Using a single file however can be problematic if numerous process try to update 
+#        the file at the same time.
+#
 #############################################################################################
 
 
@@ -34,7 +41,7 @@ from pxStats.lib.CpickleWrapper import CpickleWrapper
 class LogFileAccessManager(object):
     
     
-    def __init__( self, accessDictionary = None, accessFile = StatsPaths.STATSLOGACCESS ):
+    def __init__( self, accessDictionary = None, accessFile = "" ):
         """
             @summary:  LogFileAccessManager constructor. 
             
@@ -42,7 +49,9 @@ class LogFileAccessManager(object):
             @param accessFile:
         
         """
-            
+        if accessFile =="":
+            accessFile = StatsPaths.STATSLOGACCESS + "default"
+                
         self.accessDictionary = accessDictionary or {} # Empty array to start with.
         self.accessFile = accessFile #File that contains the current file acces.
         
@@ -56,6 +65,9 @@ class LogFileAccessManager(object):
                       accessfile.
         """
         
+        if not os.path.isdir( os.path.dirname( self.accessFile ) ):
+            os.makedirs( os.path.dirname( self.accessFile ) )
+            
         CpickleWrapper.save( self.accessDictionary, self.accessFile )
         
         
