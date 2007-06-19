@@ -369,7 +369,7 @@ def backupRRDDatabases( timeParameters, currentTime, nbBackupsToKeep ):
     """  
         
     if needsToBeRun( timeParameters.dbBackupsFrequency, currentTime ):
-        commands.getstatusoutput( StatsPaths.STATSTOOLS + "backupRRDDatabases.py" + " " + str(nbBackupsToKeep) )             
+        commands.getstatusoutput( StatsPaths.STATSTOOLS + "backupRRDDatabases.py" + " " + str( int(nbBackupsToKeep)) )             
         #print StatsPaths.STATSTOOLS + "backupRRDDatabases.py" + " " + str(nbBackupsToKeep)
 
 
