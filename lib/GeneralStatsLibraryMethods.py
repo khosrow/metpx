@@ -46,10 +46,31 @@ from pxStats.lib.MachineConfigParameters import  MachineConfigParameters
 from pxStats.lib.RrdUtilities import RrdUtilities
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 
-
-
+LOCAL_MACHINE = os.uname()[1]
 
 class GeneralStatsLibraryMethods:
+    
+    
+    def isRxTxOrOther( name, rxNames, txNames ):
+        """
+            @return : Returns wheter the name is associated 
+                      
+        """
+        
+        type = "rx"
+        
+        if name in txNames :
+            type = "tx"
+        elif name in rxNames:
+            type = "rx"
+        else:
+            type = "other"
+                    
+        return type
+    
+    isRxTxOrOther = staticmethod( isRxTxOrOther )
+    
+    
     
     def filterClientsNamesUsingWilcardFilters( currentTime, timespan, clientNames, machines, fileTypes ):
         """
@@ -72,8 +93,7 @@ class GeneralStatsLibraryMethods:
                     fileTypes.append( fileTypes[0])
             
             for clientName,fileType in map( None, clientNames, fileTypes ):
-                #print clientName
-                
+                                
                 if  '?' in clientName or '*' in clientName :           
                     
                     pattern =clientName
@@ -273,13 +293,11 @@ class GeneralStatsLibraryMethods:
         
         for machine in machines:
             combinedMachineName = combinedMachineName + machine
-        
-        #print "%sbytecount/*_%s*" %( StatsPaths.STATSCURRENTDB, combinedMachineName )
+                
         rxTxDatabasesLongNames = glob.glob( "%sbytecount/*_%s*" %( StatsPaths.STATSCURRENTDB, combinedMachineName ) )
         txOnlyDatabasesLongNames = glob.glob( "%slatency/*_%s*" %( StatsPaths.STATSCURRENTDB, combinedMachineName )   )
         
-        #print combinedMachineName
-    
+            
         #Keep only client/source names.
         for rxtxLongName in rxTxDatabasesLongNames:
             if pattern == None:
@@ -292,14 +310,10 @@ class GeneralStatsLibraryMethods:
         for txLongName in txOnlyDatabasesLongNames:
             if pattern == None:
                 txOnlyDatabases.append( txLongName )    
-            else:
-                #print "trying to match : %s to %s" %( os.path.basename(txLongName), pattern)
-                if fnmatch.fnmatch(os.path.basename(txLongName), pattern):
-                 #   print "and it succeeded"
+            else:               
+                if fnmatch.fnmatch(os.path.basename(txLongName), pattern):                
                     txOnlyDatabases.append( txLongName )
        
-        #print "@@@@@ %s" %txOnlyDatabases
-        #Filter tx names from rxTxNames
         rxOnlyDatabases = filter( lambda x: x not in txOnlyDatabases, rxTxDatabases )    
         
             
@@ -314,8 +328,7 @@ class GeneralStatsLibraryMethods:
             
         for txDatabase in txOnlyDatabases:                
             lastUpdate = RrdUtilities.getDatabaseTimeOfUpdate( txDatabase, "tx" )
-            #print txDatabase
-            #print "lastUpdate: %s start : %s" %(lastUpdate,start)
+
             if lastUpdate >= start:
                 
                 txDatabase = os.path.basename( txDatabase )    
@@ -339,8 +352,7 @@ class GeneralStatsLibraryMethods:
         
         rxNames.sort()
         txNames.sort()
-        #print "******%s" %rxNames 
-        #print "******%s" %txNames        
+       
         return rxNames, txNames               
         
     getRxTxNamesHavingRunDuringPeriod = staticmethod( getRxTxNamesHavingRunDuringPeriod )    
@@ -372,6 +384,34 @@ class GeneralStatsLibraryMethods:
     
     getRxTxNames = staticmethod(getRxTxNames  )
     
+    
+    
+    def getRxTxNamesCurrentlyRunningOnAllMachinesfoundInConfigfile(): 
+       """ 
+           @summary :  Reads the config file and returns 
+                       all the currently running rx and tx names
+                       associated with any of the source machines 
+                       found within the config file.
+            
+           @return: Returns the rxNames and the txNames found.
+           
+       """
+       
+       rxNames = []
+       txNames = []
+        
+       configParameters = StatsConfigParameters( )
+       configParameters.getAllParameters()
+       for tag in configParameters.sourceMachinesTags:
+           machine = configParameters.detailedParameters.sourceMachinesForTag[ tag ][0]
+           newRxNames, newTxNames = GeneralStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machine)
+           rxNames.extend( filter( lambda x: x not in rxNames, newRxNames )  ) 
+           txNames.extend( filter( lambda x: x not in txNames, newTxNames )  )
+       
+       return rxNames, txNames
+    
+    getRxTxNamesCurrentlyRunningOnAllMachinesfoundInConfigfile = staticmethod( getRxTxNamesCurrentlyRunningOnAllMachinesfoundInConfigfile )
+   
     
     
     def getRxTxNamesForWebPages( start, end ):
