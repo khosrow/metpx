@@ -463,7 +463,15 @@ def updateFilesAssociatedWithMachineTags( tagsNeedingUpdates, machineParameters 
         print "%sfileRenamer.py -o %s  -n %s --overrideConfirmation" %( StatsPaths.STATSTOOLS, previousCombinedMachineNames, currentCombinedMachineNames  )
         print output 
         
-        
+def archiveGraphics():
+    """        
+        @summary : Runs the archiving utility as to allow 
+                   user to access old graphics.
+    """
+    
+    status,output = commands.getstatusoutput( "%sarchiveGraphicFiles.py" %StatsPaths.STATSTOOLS )
+    
+    
 def main():
     """
         Gets all the parameters from config file.
@@ -500,6 +508,8 @@ def main():
     backupRRDDatabases( generalParameters.timeParameters, currentTime, generalParameters.nbDbBackupsToKeep )
     
     getGraphicsForWebPages()
+    
+    archiveGraphics()
     
     updateWebPages()
     
