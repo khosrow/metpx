@@ -107,7 +107,7 @@ def getNameOfDayFileToDateNumberAssociations( currentDate, listOfFilesToMatch ):
     
     dayfileDateNumberAssociations = {}
     currentWeeklyPathDictionary = getCurrentWeeklyPathDictionary( currentDate )
-    print listOfFilesToMatch
+    #print listOfFilesToMatch
     for file in listOfFilesToMatch:   
         day =  os.path.basename( file ).replace( '.png', '' )
         client = os.path.basename( os.path.dirname( file ) )
@@ -132,7 +132,7 @@ def archiveDailyGraphics():
         if not os.path.isdir( os.path.dirname( dayFileToDateNumbersAssociations[ dayFile ] ) ) :
             os.makedirs( os.path.dirname( dayFileToDateNumbersAssociations[ dayFile ] ) )
         status,output = commands.getstatusoutput( "cp %s %s" %( dayFile, dayFileToDateNumbersAssociations[ dayFile ] ) )
-        print "cp %s %s" %( dayFile, dayFileToDateNumbersAssociations[ dayFile ] )
+        #print "cp %s %s" %( dayFile, dayFileToDateNumbersAssociations[ dayFile ] )
     
     
     
