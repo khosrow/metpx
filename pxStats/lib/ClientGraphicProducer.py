@@ -170,7 +170,7 @@ class ClientGraphicProducer:
         
         dataCollection = []        
         
-        print "mergepicklesform differentsource in combined graphics" , None , startTime,  endTime, self.clientNames, self.fileType, self.machines, self.groupName
+        #print "mergepicklesform differentsource in combined graphics" , None , startTime,  endTime, self.clientNames, self.fileType, self.machines, self.groupName
         statsCollection = PickleMerging.mergePicklesFromDifferentSources( logger = None , startTime = startTime, endTime = endTime, clients = self.clientNames, fileType = self.fileType, machines =  self.machines, groupName = self.groupName )
         
         combinedMachineName = ""
@@ -224,7 +224,7 @@ class ClientGraphicProducer:
             dataCollection = self.collectDataForIndividualGraphics( startTime, endTime, types )       
                          
                    
-        if self.productTypes[0] != "All":
+        if self.productTypes[0] != "All" and self.productTypes[0] != "all" and self.productTypes[0] != "*":
             dataCollection = self.recalculateData( dataCollection )               
         
         if self.logger != None :         
