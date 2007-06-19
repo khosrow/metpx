@@ -221,7 +221,7 @@ class GeneralStatsLibraryMethods:
         return newPattern            
         
         
-        buildPattern = staticmethod( buildPattern )
+    buildPattern = staticmethod( buildPattern )
     
     
 
@@ -323,8 +323,8 @@ class GeneralStatsLibraryMethods:
                 txNames.append( txDatabase )    
        
         
-        rxNames = filter( filterGroupNames, rxNames )        
-        txNames = filter( filterGroupNames, txNames )
+        rxNames = filter( GeneralStatsLibraryMethods.filterGroupNames, rxNames )        
+        txNames = filter( GeneralStatsLibraryMethods.filterGroupNames, txNames )
         
                 
         try:
