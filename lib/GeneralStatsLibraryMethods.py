@@ -274,7 +274,7 @@ class GeneralStatsLibraryMethods:
         for machine in machines:
             combinedMachineName = combinedMachineName + machine
         
-        print "%sbytecount/*_%s*" %( StatsPaths.STATSCURRENTDB, combinedMachineName )
+        #print "%sbytecount/*_%s*" %( StatsPaths.STATSCURRENTDB, combinedMachineName )
         rxTxDatabasesLongNames = glob.glob( "%sbytecount/*_%s*" %( StatsPaths.STATSCURRENTDB, combinedMachineName ) )
         txOnlyDatabasesLongNames = glob.glob( "%slatency/*_%s*" %( StatsPaths.STATSCURRENTDB, combinedMachineName )   )
         
@@ -298,7 +298,7 @@ class GeneralStatsLibraryMethods:
                  #   print "and it succeeded"
                     txOnlyDatabases.append( txLongName )
        
-        print "@@@@@ %s" %txOnlyDatabases
+        #print "@@@@@ %s" %txOnlyDatabases
         #Filter tx names from rxTxNames
         rxOnlyDatabases = filter( lambda x: x not in txOnlyDatabases, rxTxDatabases )    
         
@@ -314,8 +314,8 @@ class GeneralStatsLibraryMethods:
             
         for txDatabase in txOnlyDatabases:                
             lastUpdate = RrdUtilities.getDatabaseTimeOfUpdate( txDatabase, "tx" )
-            print txDatabase
-            print "lastUpdate: %s start : %s" %(lastUpdate,start)
+            #print txDatabase
+            #print "lastUpdate: %s start : %s" %(lastUpdate,start)
             if lastUpdate >= start:
                 
                 txDatabase = os.path.basename( txDatabase )    
@@ -339,8 +339,8 @@ class GeneralStatsLibraryMethods:
         
         rxNames.sort()
         txNames.sort()
-        print "******%s" %rxNames 
-        print "******%s" %txNames        
+        #print "******%s" %rxNames 
+        #print "******%s" %txNames        
         return rxNames, txNames               
         
     getRxTxNamesHavingRunDuringPeriod = staticmethod( getRxTxNamesHavingRunDuringPeriod )    

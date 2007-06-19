@@ -322,6 +322,7 @@ class PickleMerging:
                     for pickle in pickleNames : #Verify every pickle implicated in merger.
                         # if for some reason pickle has changed since last time                    
                         if vc.isDifferentFile( file = pickle, user = combinedMachineName, clients = clientsForVersionManagement ) == True :                                
+                            print "%s for %s as found to be different and force hourly pickle merging" %( pickle, clientsForVersionManagement  )
                             needToMergeSameHoursPickle = True 
                             break
                             

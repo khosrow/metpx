@@ -186,7 +186,7 @@ class PickleVersionChecker :
             os.makedirs( directory, mode=0777 )
             #create directory
         completeFilename = directory + fileName 
-        print "saving %s" %completeFilename
+        #print "saving %s" %completeFilename
                 
         CpickleWrapper.save( object = self.savedFileList, filename = completeFilename )
 

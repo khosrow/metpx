@@ -486,23 +486,31 @@ def updateGroupedRoundRobinDatabases( infos, logger = None ):
         
     timeSeperators = getTimeSeperatorsBasedOnAvailableMemory( StatsDateLib.getIsoFromEpoch( startTime ), StatsDateLib.getIsoFromEpoch( endTime ), infos.clients, infos.fileTypes[0], infos.machines )
     
+    
     print timeSeperators
+    
     for i in xrange(0, len( timeSeperators ),2 ):#timeseperators should always be coming in pairs
-        startTime = timeSeperators[i]       
+        
+        startTime = StatsDateLib.getSecondsSinceEpoch( timeSeperators[i] )
         dataPairs   = getPairs( infos.clients, infos.machines, infos.fileTypes[0], timeSeperators[i], timeSeperators[i+1], infos.group, logger )
+    
         for dataType in dataPairs:
             rrdFileName = RrdUtilities.buildRRDFileName( dataType = dataType, clients = infos.group, groupName = infos.group, machines =  infos.machines,fileType = infos.fileTypes[0], usage = "group" )
             if not os.path.isfile( rrdFileName ):
-                createRoundRobinDatabase( rrdFileName, startTime, dataType )
-            if endTime > startTime :
+                createRoundRobinDatabase( rrdFileName, StatsDateLib.getIsoFromEpoch( startTime ), dataType )
+            
+            if endTime >  startTime  :
                 j = 0 
-                while dataPairs[ dataType ][j][0] < startTime:
+                while dataPairs[ dataType ][j][0] < startTime and j < len( dataPairs[ dataType ] ):
+                    print "going over : %s startime was :%s" %(dataPairs[ dataType ][j][0], startTime)
                     j = j +1
                     
                 for k in range ( j, len( dataPairs[ dataType ] )  ):
+                    print "updating %s at %s" %(rrdFileName, int( dataPairs[ dataType ][k][0] ))
                     rrdtool.update( rrdFileName, '%s:%s' %( int( dataPairs[ dataType ][k][0] ),  dataPairs[ dataType ][k][1] ) )
 
             else:
+                print "endTime %s was not bigger than start time %s" %( endTime, startTime ) 
                 if logger != None :
                     logger.warning( "This database was not updated since it's last update was more recent than specified date : %s" %rrdFileName )
         

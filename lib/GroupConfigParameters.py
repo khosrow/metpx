@@ -67,5 +67,5 @@ class GroupConfigParameters:
         groupMachines  = str(self.groupsMachines[group]).replace( "[", "" ).replace( "]", "" ).replace( " ", "" )                 
         groupProducts  = str(self.groupsProducts[group]).replace( "[", "" ).replace( "]", "" ).replace( " ", "" )
         groupFileTypes = str(self.groupFileTypes[group]).replace( "[", "" ).replace( "]", "" ).replace( " ", "" )
-
+        print groupProducts
         return groupMembers, groupMachines, groupProducts, groupFileTypes
