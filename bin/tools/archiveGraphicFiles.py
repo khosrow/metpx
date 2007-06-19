@@ -27,12 +27,17 @@ named COPYING in the root of the source directory tree.
 
 import commands, os, sys, time 
 sys.path.insert(1, sys.path[0] + '/../../../')
+from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+from pxStats.lib.StatsConfigParameters import StatsConfigParameters 
+from pxStats.lib.GroupConfigParameters import GroupConfigParameters
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
 from fnmatch import fnmatch
 
 
-    
+LOCAL_MACHINE = os.uname()[1]
+
+
 def filterentriesStartingWithDots(x):
     """
         When called within pythons builtin
@@ -98,7 +103,7 @@ def getCurrentWeeklyPathDictionary(currentDate):
     return currentWeeklyPathDictionary
     
     
-def getNameOfDayFileToDateNumberAssociations( currentDate, listOfFilesToMatch ):
+def getNameOfDayFileToDateNumberAssociations( currentDate, listOfFilesToMatch, rxNames, txNames, groupParameters ):
     """
         @summary: Returns the associations between original files in day format
                   to the destination where they sould be copied in number format. 
@@ -107,26 +112,40 @@ def getNameOfDayFileToDateNumberAssociations( currentDate, listOfFilesToMatch ):
     
     dayfileDateNumberAssociations = {}
     currentWeeklyPathDictionary = getCurrentWeeklyPathDictionary( currentDate )
+    
+    
     #print listOfFilesToMatch
     for file in listOfFilesToMatch:   
         day =  os.path.basename( file ).replace( '.png', '' )
         client = os.path.basename( os.path.dirname( file ) )
-        pathStart = StatsPaths.STATSGRAPHSARCHIVES + "daily/" + client + "/"
-        dayfileDateNumberAssociations[file] = pathStart +  currentWeeklyPathDictionary[day] + ".png"
+        rxOrTx = GeneralStatsLibraryMethods.isRxTxOrOther(client, rxNames, txNames)
+        
+        if rxOrTx == "other": #verify if name represents a group name. 
+            if client in groupParameters.groups:
+                rxOrTx = groupParameters.groupFileTypes[ client ]
+        
+        if rxOrTx != "other":#discard those who are stillunknowns.
+            pathStart = StatsPaths.STATSGRAPHSARCHIVES + "daily/" + rxOrTx + '/' + client + "/"
+            dayfileDateNumberAssociations[file] = pathStart +  currentWeeklyPathDictionary[day] + ".png"
   
     
     return dayfileDateNumberAssociations        
 
     
     
-def archiveDailyGraphics():
+def archiveDailyGraphics( rxNames, txNames, groupParameters ):
     """
         @summary : Archive the daily graphics found in 
                    the webGraphics folder.
+        
+        @param rxNames: list of currently active rx names.             
+        @param txNames: list of currently active tx names
+    
     """
+    
     currentTime = getCurrentTime() 
     listOfDaysToMatch = getCurrentListOfDailyGraphics()
-    dayFileToDateNumbersAssociations =  getNameOfDayFileToDateNumberAssociations( currentTime, listOfDaysToMatch )
+    dayFileToDateNumbersAssociations =  getNameOfDayFileToDateNumberAssociations( currentTime, listOfDaysToMatch, rxNames, txNames, groupParameters )
     
     for dayFile in dayFileToDateNumbersAssociations:                 
         if not os.path.isdir( os.path.dirname( dayFileToDateNumbersAssociations[ dayFile ] ) ) :
@@ -140,7 +159,12 @@ def main():
     """
         @summary: Archives the different graphic types.
     """
-    archiveDailyGraphics()
+    
+    rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNamesCurrentlyRunningOnAllMachinesfoundInConfigfile()
+    currentParameters = StatsConfigParameters()
+    currentParameters.getAllParameters()
+    groupParameters = currentParameters.groupParameters
+    archiveDailyGraphics( rxNames, txNames, groupParameters )
     
     
 if __name__ == '__main__':
