@@ -33,9 +33,9 @@ import os,sys
 sys.path.insert(1, sys.path[0] + '/../../../')
 
 from pxStats.lib.CpickleWrapper import CpickleWrapper
-from pxStats.lib.NewFileStatsCollector import FileStatsCollector
-from pxStats.lib.NewFileStatsCollector import _FileStatsEntry
-from pxStats.lib.NewFileStatsCollector import _ValuesDictionary 
+from pxStats.lib.FileStatsCollector import FileStatsCollector
+from pxStats.lib.FileStatsCollector import _FileStatsEntry
+from pxStats.lib.FileStatsCollector import _ValuesDictionary 
  
  
 def printPickle( pickle, outputFile = "" ):
@@ -82,7 +82,8 @@ def printPickle( pickle, outputFile = "" ):
         print statsCollection.fileEntries[j].maximums
         print "Total"
         print statsCollection.fileEntries[j].totals
-        
+        print "Files over maximum latency"
+        print statsCollection.fileEntries[j].filesOverMaxLatency
         
     if outputFile != "":
         fileHandle.close()      
