@@ -302,8 +302,11 @@ class FileStatsCollector:
                                     fileEntries[i].maximums[aType]= currentValue
                                     fileEntries[i].filesWhereMaxOccured[aType] = currentfile   
                                     fileEntries[i].timesWhereMaxOccured[aType] = currentTime 
+                                if aType == "latency":
+                                    if currentValue > self.maxLatency:
+                                        fileEntries[i].filesOverMaxLatency = fileEntries[i].filesOverMaxLatency + 1
+                                             
                                     
-                
                 #calculate sum and means
                 for aType in self.statsTypes :
                     fileEntries[i].totals[aType] = float( sum( values[aType] ) )
