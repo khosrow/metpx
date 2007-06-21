@@ -417,10 +417,13 @@ class StatsPlotter:
         
     
     
-    def createCopy( self ):
+    def createCopy( self, copyToArchive = True , copyToColumbo = True):
         """
             Creates a copy of the created image file so that it
-            easily be used in columbo. 
+            easily be used in px's columbo or other daily image program. 
+            
+            If copies are to be needed for graphcis other than daily graphs, 
+            please modify this method accordingly!
             
         """
         
@@ -428,10 +431,10 @@ class StatsPlotter:
         
         if self.groupName != "":            
             
-            destination = StatsPaths.STATSGRAPHS + "webGraphics/groups/%s.png"  %self.groupName 
+            clientName = self.groupName 
                 
         else:   
-        
+                
             clientName = ""
                    
             if len( self.clientNames ) == 0:
@@ -442,16 +445,34 @@ class StatsPlotter:
                     if name != self.clientNames[ len(self.clientNames) -1 ] :
                         clientName = clientName + "-" 
         
-            destination = StatsPaths.STATSGRAPHS + "webGraphics/columbo/%s.png" %clientName
+        year, month, day = StatsDateLib.getYearMonthDayInStrfTime( StatsDateLib.getSecondsSinceEpoch( self.currentTime ) )        
+                                        
+        if copyToArchive == True : 
+            destination = StatsPaths.STATSGRAPHSARCHIVES + "daily/%s/%s/"%( self.fileType, clientName ) + str(year) + "/" + str(month) + "/" + str(day) + ".png"
+            
+            
+            if not os.path.isdir( os.path.dirname( destination ) ):
+                os.makedirs(  os.path.dirname( destination ), mode=0777 )                                                      
+            
+            
+            shutil.copy( src, destination ) 
+            
+            print "cp %s %s  "  %( src, destination )
+        
+        
+        
+        if copyToColumbo == True : 
+            
+            destination = StatsPaths.STATSGRAPHS + "columbo/%s.png" %clientName
+            if not os.path.isdir( os.path.dirname( destination ) ):
+                os.makedirs(  os.path.dirname( destination ), mode=0777 )                                                      
+            
+            
+            shutil.copy( src, destination ) 
+            
+            print "cp %s %s  "  %( src, destination )
 
-        
-        if not os.path.isdir( os.path.dirname( destination ) ):
-            os.makedirs(  os.path.dirname( destination ), mode=0777 )                                                      
-        
-        shutil.copy( src, destination ) 
-        
-        print "cp %s %s  "  %( src, destination )
-       
+
 
        
     def plot( self, createCopy = False  ):
