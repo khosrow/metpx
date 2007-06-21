@@ -951,7 +951,9 @@ def getInterval( startTime, timeOfLastUpdate, graphicType = "daily", goal = "fet
     return interval
 
 
-    
+
+
+     
 def getCopyDestination( type, client, machine, infos ):
     """
        This method returns the absolute path to the copy 
@@ -962,37 +964,30 @@ def getCopyDestination( type, client, machine, infos ):
     
     """
     
-    oneDay = 24*60*60
-    endTimeInSeconds = StatsDateLib.getSecondsSinceEpoch( infos.endTime )
+    startTimeInSeconds = StatsDateLib.getSecondsSinceEpoch( infos.startTime )
+    currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( startTimeInSeconds ) 
+    currentWeek = time.strftime( "%W", time.gmtime( startTimeInSeconds ) )
     
-    if infos.totals != True:
+       
+    if infos.graphicType == "weekly":
+        endOfDestination =  "%s/%s/%s.png" %( currentYear, currentMonth, currentWeek )
+    
+    elif infos.graphicType == "monthly":
+        endOfDestination =  "%s/%s.png" %( currentYear, currentMonth )
+    
+    elif infos.graphicType == "yearly":
+        endOfDestination =  "%s.png" %( currentYear )
+    
+    elif infos.graphicType == "daily":
+        endOfDestination = "%s/%s/%s/%s.png" %( currentYear, currentMonth, currentWeek, currentDay )
         
-        if infos.graphicType == "weekly":
-            fileName =  time.strftime( "%W", time.gmtime( endTimeInSeconds - oneDay ) )
-        elif infos.graphicType == "monthly":
-            fileName =  time.strftime( "%b", time.gmtime( endTimeInSeconds - oneDay ) )
-        elif infos.graphicType == "yearly":
-            fileName =  time.strftime( "%Y", time.gmtime( endTimeInSeconds - oneDay ) )
-        else:
-            fileName = client
-        
-        destination = StatsPaths.STATSGRAPHS + "webGraphics/%s/%s/%s/%.50s.png" %( infos.graphicType, type , client, fileName )
+        #destination = "%s/%s/%s/%s" %( StatsPaths.STATSGRAPHSARCHIVES, infos.graphicType, infos.fileType, label, infos.graphicType, endOfDestination )
+    if infos.totals == True:
+        destination ="%s%s/%s/%s/%s/%s"  %( StatsPaths.STATSGRAPHSARCHIVES, infos.graphicType, "totals", machine, infos.fileType, endOfDestination  )
+    else:    
+        destination = "%s%s/%s/%s/%s/%s" %( StatsPaths.STATSGRAPHSARCHIVES, infos.graphicType, infos.fileType, client, type, endOfDestination )
     
-    else :
-        if infos.graphicType == "weekly":
-            fileName =  time.strftime( "%W", time.gmtime( endTimeInSeconds - oneDay ) )
-        elif infos.graphicType == "monthly":
-            fileName =  time.strftime( "%b", time.gmtime( endTimeInSeconds - oneDay ) )
-        elif infos.graphicType == "yearly":
-            fileName =  time.strftime( "%Y", time.gmtime( endTimeInSeconds - oneDay ) )
-        elif infos.graphicType == "daily":
-            fileName =  time.strftime( "%a", time.gmtime( endTimeInSeconds - oneDay ) )
-        else:
-            fileName = client
-        
-        destination = "%s/webGraphics/totals/%s/%s/%s/%s/%s.png" %( StatsPaths.STATSGRAPHS, machine,infos.fileType, type, infos.graphicType, fileName)
-    
-    
+    print destination
     return destination    
     
          
