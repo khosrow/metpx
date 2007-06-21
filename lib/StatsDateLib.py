@@ -40,8 +40,26 @@ class StatsDateLib:
     HOUR   = 60 * MINUTE
     DAY    = 24 * HOUR
     MINUTES_PER_DAY = 24*60
-
+    LIST_OF_MONTHS_3LETTER_FORMAT = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ]
        
+       
+       
+    def getYearMonthDayInStrfTime( timeInEpochFormat):
+        """
+            @summary : Return the year month day in strftime 
+                       based on an epoch date.   
+        """
+    
+        year  = time.strftime( '%Y', time.gmtime(timeInEpochFormat)  )
+        month = time.strftime( '%B', time.gmtime(timeInEpochFormat)  )
+        day   = time.strftime( '%d', time.gmtime(timeInEpochFormat)  )  
+        
+        return year, month, day   
+    
+    getYearMonthDayInStrfTime = staticmethod(getYearMonthDayInStrfTime)   
+    
+    
+    
     def getStartEndFromPreviousDay( currentTime, nbDays = 1  ):
         """
             Returns the start and end time of
