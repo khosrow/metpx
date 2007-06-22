@@ -50,19 +50,19 @@ LOCAL_MACHINE = os.uname()[1]
    
 NB_WEEKS_DISPLAYED = 3 
     
-def getWeekNumbers():
+def getWeeks():
     """
         Returns the 3 week numbers including current week number.
     
     """
     
-    weekNumbers = []
+    weeks = []
     
     startTime = (time.time() - ( NB_WEEKS_DISPLAYED*7*24*60*60 ) )
     for i in range( 1, ( NB_WEEKS_DISPLAYED + 1 ) ):
-        weekNumbers.append( time.strftime("%W",time.gmtime(startTime + (i*7*24*60*60))) )
+        weeks.append( startTime + (i*7*24*60*60) )
    
-    return weekNumbers
+    return weeks
     
     
     
@@ -282,9 +282,12 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
         
         
         for week in weekNumbers:
-            file = "%swebGraphics/weekly/bytecount/%s/%s.png" % ( StatsPaths.STATSGRAPHS, rxName, week )
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
+            currentWeek = time.strftime("%W", time.gmtime(week))
+            file = StatsPaths.STATSGRAPHSARCHIVES + "weekly/rx/%s/"%( rxName ) + str(currentYear) + "/bytecount/%s.png" %str(currentWeek)
+            
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, file , week ) ) 
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, file , currentWeek ) ) 
         
         fileHandle.write( "</div></td>" )    
     
@@ -293,9 +296,12 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
         fileHandle.write(  """ <td bgcolor="#66CCFF"><div class = "rxTableEntry">Weeks&nbsp;:&nbsp;""" )
         
         for week in weekNumbers:
-            file = "%swebGraphics/weekly/filecount/%s/%s.png" % (StatsPaths.STATSGRAPHS, rxName, week )
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
+            currentWeek = time.strftime("%W", time.gmtime(week))
+            file = StatsPaths.STATSGRAPHSARCHIVES + "weekly/rx/%s/"%( rxName ) + str(currentYear) + "/filecount/%s.png" %str(currentWeek)
+            
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, file , week ) ) 
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, file , currentWeek ) ) 
         
         fileHandle.write( "</div></td>" ) 
         
@@ -303,9 +309,12 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
         fileHandle.write(  """ <td bgcolor="#66CCFF"><div class = "rxTableEntry">Weeks&nbsp;:&nbsp;""" )
         
         for week in weekNumbers:
-            file = "%swebGraphics/weekly/errors/%s/%s.png" % ( StatsPaths.STATSGRAPHS, rxName, week )
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
+            currentWeek = time.strftime("%W", time.gmtime(week))
+            file = StatsPaths.STATSGRAPHSARCHIVES + "weekly/rx/%s/"%( rxName ) + str(currentYear) + "/errors/%s.png" %str(currentWeek)
+            
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, file , week ) ) 
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, file , currentWeek ) ) 
         
         fileHandle.write( "</div></td></tr></table>" )                            
     
@@ -403,9 +412,12 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
           
         
         for week in weekNumbers:
-            file = "%swebGraphics/weekly/latency/%s/%s.png" % ( StatsPaths.STATSGRAPHS, txName, week )
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
+            currentWeek = time.strftime("%W", time.gmtime(week))
+            file = StatsPaths.STATSGRAPHSARCHIVES + "weekly/tx/%s/"%( txName ) + str(currentYear) + "/latency/%s.png" %str(currentWeek)
+            
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, file , week ) )
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, file , currentWeek ) )
         
         fileHandle.write( "</div></td>" )
         
@@ -413,9 +425,11 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
         fileHandle.write(  """ <td bgcolor="#66CCFF"><div class = "txTableEntry">Weeks&nbsp;:&nbsp;""" )
         
         for week in weekNumbers:
-            file = "%swebGraphics/weekly/filesOverMaxLatency/%s/%s.png" % ( StatsPaths.STATSGRAPHS, txName, week )
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
+            currentWeek = time.strftime("%W", time.gmtime(week))
+            file = StatsPaths.STATSGRAPHSARCHIVES + "weekly/tx/%s/"%( txName ) + str(currentYear) + "/filesOverMaxLatency/%s.png" %str(currentWeek)
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, file, week ) )
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, file, currentWeek ) )
         
         fileHandle.write( "</div></td>" )  
         
@@ -423,27 +437,33 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
         fileHandle.write(  """ <td bgcolor="#66CCFF"><div class = "txTableEntry">Weeks&nbsp;:&nbsp;""" )
         
         for week in weekNumbers:
-            file = "%swebGraphics/weekly/bytecount/%s/%s.png" % ( StatsPaths.STATSGRAPHS, txName, week )
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
+            currentWeek = time.strftime("%W", time.gmtime(week))
+            file = StatsPaths.STATSGRAPHSARCHIVES + "weekly/tx/%s/"%( txName ) + str(currentYear) + "/bytecount/%s.png" %str(currentWeek)
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, file, week ) )
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, file, currentWeek ) )
         
         fileHandle.write( "</div></td>" )    
         
         fileHandle.write(  """<td bgcolor="#66CCFF"><div class = "txTableEntry">Weeks&nbsp;:&nbsp;""" )
         
         for week in weekNumbers:
-            file = "%swebGraphics/weekly/filecount/%s/%s.png" % (StatsPaths.STATSGRAPHS, txName, week )
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
+            currentWeek = time.strftime("%W", time.gmtime(week))
+            file = StatsPaths.STATSGRAPHSARCHIVES + "weekly/tx/%s/"%( txName ) + str(currentYear) + "/filecount/%s.png" %str(currentWeek)
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, file, week ) )
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, file, currentWeek ) )
         
         fileHandle.write( "</div></td>" )   
         
         fileHandle.write(  """ <td bgcolor="#66CCFF"><div class = "txTableEntry">Weeks&nbsp;:&nbsp;""" )
         
         for week in weekNumbers:
-            file = "%swebGraphics/weekly/errors/%s/%s.png" % (StatsPaths.STATSGRAPHS, txName, week )
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
+            currentWeek = time.strftime("%W", time.gmtime(week))
+            file = StatsPaths.STATSGRAPHSARCHIVES + "weekly/tx/%s/"%( txName ) + str(currentYear) + "/errors/%s.png" %str(currentWeek)
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, file, week ) )
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, file, currentWeek ) )
         
         fileHandle.write( "</div></td></tr></table>" )    
  
@@ -465,7 +485,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
 
 def main():        
     
-    weeks = getWeekNumbers() 
+    weeks = getWeeks() 
     
     start, end = getStartEndOfWebPage()     
     
