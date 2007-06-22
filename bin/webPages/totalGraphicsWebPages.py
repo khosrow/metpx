@@ -59,26 +59,26 @@ def getDays():
     
     startTime = (time.time() - (5*24*60*60))
     for i in range(1,6):
-        days.append( time.strftime("%a",time.gmtime(startTime + ( i*24*60*60 ) )) )
+        days.append( startTime + ( i*24*60*60 ) )
    
        
     return days
     
     
         
-def getWeekNumbers():
+def getWeeks():
     """
         Returns the 5 week numbers including current week number.
     
     """
     
-    weekNumbers = []
+    weeks = []
     
     startTime = (time.time() - (5*7*24*60*60))
     for i in range(1,6):
-        weekNumbers.append( time.strftime("%W",time.gmtime(startTime + (i*7*24*60*60))) )
+        weeks.append( startTime + (i*7*24*60*60) )
    
-    return weekNumbers
+    return weeks
     
     
     
@@ -87,9 +87,10 @@ def getMonths():
         Returns the 3 months including current month.
     
     """
+    
     currentTime = time.time()
     currentTime = StatsDateLib.getIsoFromEpoch( currentTime )
-    currentDate = datetime.date( int(currentTime[0:4]), int(currentTime[5:7]), int(currentTime[8:10]) )     
+    currentDate = datetime.date( int(currentTime[0:4]), int(currentTime[5:7]), 1 )     
        
     months = []
     
@@ -108,8 +109,8 @@ def getMonths():
         else: 
             day = currentDate.day          
         
-        newdate = datetime.date( year,month,day )
-        months.append( newdate.strftime("%b") )
+        newdate = StatsDateLib.getSecondsSinceEpoch( "%s-%s-01 00:00:00" %( year,month ) ) 
+        months.append( newdate )
         #print year,month,day
     
     months.reverse()
@@ -126,17 +127,14 @@ def getYears():
     
     currentTime = time.time()
     currentTime = StatsDateLib.getIsoFromEpoch( currentTime )
-    currentDate = datetime.date( int(currentTime[0:4]), int(currentTime[5:7]), int(currentTime[8:10]) )     
+    currentDate = datetime.date( int(currentTime[0:4]), int(currentTime[5:7]), 1 )     
     
     years = []    
-    
-    #prevent errors from bisextile years
-    if currentDate.month == 2 and currentDate.day == 29:
-        currentDate.day = 28
+
     for i in range(0,3):
         year = currentDate.year - i
-        newDate = datetime.date( year, currentDate.month, currentDate.day )
-        years.append( newDate.strftime("%Y") )
+        newDate = StatsDateLib.getSecondsSinceEpoch( "%s-%s-%s 00:00:00" %(year, currentDate.month, currentDate.day) )
+        years.append(  newDate )
         
     years.reverse()
        
@@ -174,8 +172,8 @@ def generateWebPage( machineNames ):
         
     """  
     
-    days   = getDays() 
-    weeks  = getWeekNumbers()
+    days   = getDays()
+    weeks  = getWeeks()
     months = getMonths()
     years  = getYears()
     
@@ -274,9 +272,28 @@ def generateWebPage( machineNames ):
                 fileHandle.write( """<td bgcolor="#66CCFF">  """ )
                 
                 for x in timeContainer:
-                    file = "%s/webGraphics/totals/%s/rx/%s/%s/%s.png" %( StatsPaths.STATSGRAPHS, machineName, type, timeType, x ) 
-                    if os.path.isfile(file):    
-                        fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>""" %( x, file, x ) )
+                    year, month, day = StatsDateLib.getYearMonthDayInStrfTime( x )
+                    week = time.strftime( "%W", time.gmtime(x))
+                    if timeType == "daily" :
+                        file = "%sdaily/totals/%s/rx/%s/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, month, type, day )     
+                    elif timeType == "weekly":
+                        file = "%sweekly/totals/%s/rx/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, type, week )
+                    elif timeType == "monthly":
+                        file = "%smonthly/totals/%s/rx/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, type, month )
+                    elif timeType == "yearly":
+                        file = "%syearly/totals/%s/rx/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName,  type, year ) 
+                        
+                    print file
+                    if os.path.isfile(file):  
+                        if timeType == "daily" :
+                            label =  time.strftime( "%a", time.gmtime(x))   
+                        elif timeType == "weekly":
+                            label = week
+                        elif timeType == "monthly":
+                            label = month
+                        elif timeType == "yearly":
+                            label = year   
+                        fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>""" %( label, file, label ) )
                     
                 fileHandle.write( """</td>""" )
             
@@ -330,12 +347,30 @@ def generateWebPage( machineNames ):
                 fileHandle.write( """<td bgcolor="#66CCFF"> """) 
                 
                 for x in timeContainer:
-                    file = "%swebGraphics/totals/%s/tx/%s/%s/%s.png" %( StatsPaths.STATSGRAPHS, machineName, type, timeType,x ) 
-                    if os.path.isfile(file):    
-                        fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s </a>""" %( x,file, x ) )
-                    else:
-                        #print file
-                        allo =2  
+                    year, month, day = StatsDateLib.getYearMonthDayInStrfTime( x )
+                    week = time.strftime( "%W", time.gmtime(x))
+                    if timeType == "daily" :
+                        file = "%sdaily/totals/%s/rx/%s/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, month, type, day )     
+                    elif timeType == "weekly":
+                        file = "%sweekly/totals/%s/rx/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, type, week )
+                    elif timeType == "monthly":
+                        file = "%smonthly/totals/%s/rx/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, type, month )
+                    elif timeType == "yearly":
+                        file = "%syearly/totals/%s/rx/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName,  type, year )  
+                    
+                    print file
+                    if os.path.isfile(file):  
+                        
+                        if timeType == "daily" :
+                            label =  time.strftime( "%a", time.gmtime(x))   
+                        elif timeType == "weekly":
+                            label = week
+                        elif timeType == "monthly":
+                            label = month
+                        elif timeType == "yearly":
+                            label = year     
+                        fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s </a>""" %( label,file, label ) )
+ 
                 fileHandle.write( """</td>""" )
             
             fileHandle.write( """</tr>""" )       
