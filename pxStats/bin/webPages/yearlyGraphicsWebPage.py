@@ -57,7 +57,7 @@ def getYears():
     
     startTime = (time.time() - ( NB_YEARS_DISPLAYED*365*24*60*60))
     for i in range( 1, NB_YEARS_DISPLAYED + 1 ):
-        years.append( time.strftime("%Y",time.gmtime(startTime + (i*365*24*60*60) )) )
+        years.append( startTime + (i*365*24*60*60)  )
    
        
     return years
@@ -269,18 +269,25 @@ def generateWebPage( rxNames, txNames, years ):
             fileHandle.write( """<td bgcolor="#66CCFF"><div class = "rxTableEntry">Years&nbsp;:&nbsp;""" )
                    
         for year in years:
-            file = "%swebGraphics/yearly/bytecount/%s/%s.png" % (StatsPaths.STATSGRAPHS, rxName, year )
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )            
+            file = StatsPaths.STATSGRAPHSARCHIVES + "yearly/rx/%s/"%( rxName ) + "bytecount/%s.png" %str(currentYear)
+            
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, file , year ) ) 
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, file , time.strftime("%Y",time.gmtime(year) ) ) ) 
         
         fileHandle.write( "</div></td>" )      
     
         fileHandle.write(  """ <td bgcolor="#66CCFF"><div class = "rxTableEntry">Years&nbsp;:&nbsp;""" )
         
+        
+        
         for year in years:
-            file = "%swebGraphics/yearly/filecount/%s/%s.png" % (StatsPaths.STATSGRAPHS, rxName, year )
+            
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )            
+            file = StatsPaths.STATSGRAPHSARCHIVES + "yearly/rx/%s/"%( rxName ) + "filecount/%s.png" %str(currentYear)
+            
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, file , year ) ) 
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, file , time.strftime("%Y",time.gmtime(year) ) ) ) 
         
         fileHandle.write( "</div></td>" )    
         
@@ -288,9 +295,10 @@ def generateWebPage( rxNames, txNames, years ):
         fileHandle.write(  """ <td bgcolor="#66CCFF"><div class = "rxTableEntry">Years&nbsp;:&nbsp;""" )
         
         for year in years:
-            file = "%swebGraphics/yearly/errors/%s/%s.png" % (StatsPaths.STATSGRAPHS, rxName, year )
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )            
+            file = StatsPaths.STATSGRAPHSARCHIVES + "yearly/rx/%s/"%( rxName ) + "errors/%s.png" %str(currentYear)
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, file , year ) ) 
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, file , time.strftime("%Y",time.gmtime(year) ) ) ) 
         
         fileHandle.write( "</div></td></tr></table>" )    
               
@@ -389,45 +397,52 @@ def generateWebPage( rxNames, txNames, years ):
             
        
         for year in years:
-            file = "%swebGraphics/yearly/latency/%s/%s.png" % (StatsPaths.STATSGRAPHS, txName, year )
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )            
+            file = StatsPaths.STATSGRAPHSARCHIVES + "yearly/tx/%s/"%( txName ) + "latency/%s.png" %str(currentYear)
+            
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( txName, file , str(year)[-2:] ) )
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( txName, file , time.strftime("%y",time.gmtime(year) ) ) )
         
         fileHandle.write( "</div></td>" )
         
         fileHandle.write(  """ <td bgcolor="#66CCFF"><div class = "txTableEntry">Years&nbsp;:&nbsp;""" )
         
         for year in years:
-            file = "%swebGraphics/yearly/filesOverMaxLatency/%s/%s.png" % ( StatsPaths.STATSGRAPHS, txName, year )
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )            
+            file = StatsPaths.STATSGRAPHSARCHIVES + "yearly/tx/%s/"%( txName ) + "filesOverMaxLatency/%s.png" %str(currentYear)
+            
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( txName, file , str(year)[-2:] ) )
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( txName, file , time.strftime("%y",time.gmtime(year) ) ) )
         
         fileHandle.write( "</div></td>" )
         
         fileHandle.write(  """ <td bgcolor="#66CCFF"><div class = "txTableEntry">Years&nbsp;:&nbsp;""" )
         
         for year in years:
-            file = "%swebGraphics/yearly/bytecount/%s/%s.png" % ( StatsPaths.STATSGRAPHS, txName, year )
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )            
+            file = StatsPaths.STATSGRAPHSARCHIVES + "yearly/tx/%s/"%( txName ) + "bytecount/%s.png" %str(currentYear)
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( txName, file , str(year)[-2:] ) )
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( txName, file , time.strftime("%y",time.gmtime(year) ) ) )
         
         fileHandle.write( "</div></td>" )
         
         fileHandle.write(  """ <td bgcolor="#66CCFF"><div class = "txTableEntry">Years&nbsp;:&nbsp;""" )
         
         for year in years:
-            file = "%swebGraphics/yearly/filecount/%s/%s.png" % ( StatsPaths.STATSGRAPHS, txName, year )
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )            
+            file = StatsPaths.STATSGRAPHSARCHIVES + "yearly/tx/%s/"%( txName ) + "filecount/%s.png" %str(currentYear)
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( txName, file , str(year)[-2:] ) )
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( txName, file , time.strftime("%y",time.gmtime(year) ) ) )
         
         fileHandle.write( "</div></td>" )
         
         fileHandle.write(  """ <td bgcolor="#66CCFF"><div class = "txTableEntry">Years&nbsp;:&nbsp;""" )
         
         for year in years:
-            file = "%swebGraphics/yearly/errors/%s/%s.png" % ( StatsPaths.STATSGRAPHS, txName, year )
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )            
+            file = StatsPaths.STATSGRAPHSARCHIVES + "yearly/tx/%s/"%( txName ) + "errors/%s.png" %str(currentYear)
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( txName, file , str(year)[-2:] ) )
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( txName, file , time.strftime("%y",time.gmtime(year) ) ) )
         
         fileHandle.write( "</div></td></tr></table>" )
 

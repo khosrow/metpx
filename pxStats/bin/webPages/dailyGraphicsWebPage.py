@@ -64,7 +64,7 @@ def getDays():
     
     startTime = ( time.time() - (NB_DAYS_DISPLAYED*24*60*60) )
     for i in range( 1, NB_DAYS_DISPLAYED + 1 ):
-        days.append( time.strftime("%a",time.gmtime(startTime + ( i*365*24*60*60 ) )) )   
+        days.append( ( startTime + ( i*24*60*60 ) ) )   
        
     return days
     
@@ -245,9 +245,13 @@ def generateWebPage( rxNames, txNames, days ):
             
                 
         for day in days:
-            file = "%swebGraphics/daily/%s/%s.png" %( StatsPaths.STATSGRAPHS , rxName, day )
+            
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( day )
+            file = StatsPaths.STATSGRAPHSARCHIVES + "daily/rx/%s/"%( rxName ) + str(currentYear) + "/" + str(currentMonth) + "/" + str(currentDay) + ".png"
+            
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="%s" href="%s">%s   </a>"""%( rxName, file, day ) )
+                fileHandle.write(  """<a target ="%s" href="%s">%s   </a>"""%( rxName, file, time.strftime( "%a", time.gmtime(day) ) ) )
+                
                  
         fileHandle.write( """</div></td></tr></table>""" )
     
@@ -297,9 +301,12 @@ def generateWebPage( rxNames, txNames, days ):
         
         
         for day in days:
-            file = "%swebGraphics/daily/%s/%s.png" %( StatsPaths.STATSGRAPHS, txName, day )
+                        
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( day )
+            file = StatsPaths.STATSGRAPHSARCHIVES + "daily/tx/%s/"%( txName ) + str(currentYear) + "/" + str(currentMonth) + "/" + str(currentDay) + ".png"
+            
             if os.path.isfile( file ):
-                fileHandle.write(  """ <a target ="%s" href="%s">%s   </a>""" %( txName, file, day ) )      
+                fileHandle.write(  """<a target ="%s" href="%s">%s   </a>"""%( rxName, file, time.strftime( "%a", time.gmtime(day) ) ) )     
 
         fileHandle.write( "</div></td></tr></table>" )
 

@@ -59,7 +59,7 @@ def getMonths():
     
     currentTime = time.time()
     currentTime = StatsDateLib.getIsoFromEpoch( currentTime )
-    currentDate = datetime.date( int(currentTime[0:4]), int(currentTime[5:7]), int(currentTime[8:10]) )     
+    currentDate = datetime.date( int(currentTime[0:4]), int(currentTime[5:7]), 1 )  # day always  = 1 in case currentDate.day > 28 
        
     months = []   
         
@@ -73,15 +73,9 @@ def getMonths():
         
         else :                 
             month = currentDate.month - i             
-            year = currentDate.year
-            
-        if currentDate.day > 28:
-            day = currentDate.day -5
-        else: 
-            day = currentDate.day          
-               
-        newdate = datetime.date( year,month,day )
-        months.append( newdate.strftime("%b") )
+            year = currentDate.year                      
+         
+        months.append( StatsDateLib.getSecondsSinceEpoch( "%s-%s-%s 00:00:00" %(year,month,"01") ) )
             
     months.reverse()
         
@@ -100,7 +94,7 @@ def getStartEndOfWebPage():
     
     currentTime = StatsDateLib.getIsoFromEpoch( time.time() )  
     
-    currentDate = datetime.date( int(currentTime[0:4]), int(currentTime[5:7]), int(currentTime[8:10]) )     
+    currentDate = datetime.date( int(currentTime[0:4]), int(currentTime[5:7]), 1 )     
           
         
     nbMonthsToRevwind = NB_MONTHS_DISPLAYED - 1 
@@ -115,13 +109,8 @@ def getStartEndOfWebPage():
         month = currentDate.month - nbMonthsToRevwind             
         year = currentDate.year
         
-    if currentDate.day > 28:
-        day = currentDate.day -5
-    else: 
-        day = currentDate.day          
-            
         
-    start  = "%s-%s-%s 00:00:00" %( year,month,day )      
+    start  = "%s-%s-%s 00:00:00" %( year,month,"01" )      
     end   = StatsDateLib.getIsoTodaysMidnight( currentTime )
     
         
@@ -318,9 +307,12 @@ def generateWebPage( rxNames, txNames, months ):
         
         
         for month in months:
-            file = "%swebGraphics/monthly/bytecount/%s/%s.png" % ( StatsPaths.STATSGRAPHS , rxName, month )
+            
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
+            file = StatsPaths.STATSGRAPHSARCHIVES + "monthly/rx/%s/"%( rxName ) + str(currentYear) + "/bytecount/%.3s.png" %str(currentMonth)
+
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, file ,month ) ) 
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%.3s&nbsp;</a>"""%( rxName, file ,currentMonth ) ) 
         
         fileHandle.write( "</div></td>" )
             
@@ -328,9 +320,11 @@ def generateWebPage( rxNames, txNames, months ):
         fileHandle.write(  """ <td bgcolor="#66CCFF"><div class = "rxTableEntry">Months&nbsp;:&nbsp;""" )        
         
         for month in months:
-            file = "%swebGraphics/monthly/filecount/%s/%s.png" % ( StatsPaths.STATSGRAPHS, rxName, month )
+            
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
+            file = StatsPaths.STATSGRAPHSARCHIVES + "monthly/rx/%s/"%( rxName ) + str(currentYear) + "/filecount/%.3s.png" %str(currentMonth)
             if os.path.isfile(file):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, file ,month ) )   
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%.3s&nbsp;</a>"""%( rxName, file ,currentMonth ) )   
                         
         fileHandle.write( "</div></td>" )
         
@@ -338,9 +332,11 @@ def generateWebPage( rxNames, txNames, months ):
         fileHandle.write(  """ <td bgcolor="#66CCFF"><div class = "rxTableEntry">Months&nbsp;:&nbsp;""" )
         
         for month in months:
-            file = "%swebGraphics/monthly/errors/%s/%s.png" % (StatsPaths.STATSGRAPHS, rxName, month )
+            
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
+            file = StatsPaths.STATSGRAPHSARCHIVES + "monthly/rx/%s/"%( rxName ) + str( currentYear) + "/errors/%.3s.png" %str(currentMonth)
             if os.path.isfile( file ):
-                fileHandle.write(  """ <a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, file ,month ) )  
+                fileHandle.write(  """ <a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%.3s&nbsp;</a>"""%( rxName, file ,currentMonth ) )  
         
         fileHandle.write( "</div></td></tr></table>" )  
               
@@ -443,10 +439,14 @@ def generateWebPage( rxNames, txNames, months ):
             fileHandle.write( """<td bgcolor="#66CCFF"><div class = "txTableEntry">Months:&nbsp;""" )
         
         
-        for month in months:
-            file = "%swebGraphics/monthly/latency/%s/%s.png" % ( StatsPaths.STATSGRAPHS, txName, month )
+        
+        for month in months:            
+            
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
+            file = StatsPaths.STATSGRAPHSARCHIVES + "monthly/tx/%s/"%( txName ) + str(currentYear) + "/latency/%.3s.png" %str(currentMonth)
+            
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, file ,month ) )
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%.3s</a>"""%( txName, file ,currentMonth ) )
         
         fileHandle.write( "</div></td>" )
         
@@ -454,9 +454,12 @@ def generateWebPage( rxNames, txNames, months ):
         fileHandle.write(  """ <td bgcolor="#66CCFF"  ><div class = "txTableEntry">Months:&nbsp;""" )
         
         for month in months:
-            file = "%swebGraphics/monthly/filesOverMaxLatency/%s/%s.png" % ( StatsPaths.STATSGRAPHS, txName, month )
+           
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
+            file = StatsPaths.STATSGRAPHSARCHIVES + "monthly/tx/%s/"%( txName ) + str(currentYear) + "/filesOverMaxLatency/%.3s.png" %str(currentMonth)
+            
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, file ,month ) )
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%.3s</a>"""%( txName, file ,currentMonth ) )
         
         fileHandle.write( "</div></td>" )
         
@@ -465,9 +468,12 @@ def generateWebPage( rxNames, txNames, months ):
         fileHandle.write(  """ <td bgcolor="#66CCFF"  ><div class = "txTableEntry">Months:&nbsp;""" )
         
         for month in months:
-            file = "%swebGraphics/monthly/bytecount/%s/%s.png" % ( StatsPaths.STATSGRAPHS, txName, month )
+            
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
+            file = StatsPaths.STATSGRAPHSARCHIVES + "monthly/tx/%s/"%( txName ) + str(currentYear) + "/bytecount/%.3s.png" %str(currentMonth)
+            
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, file ,month ) )
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%.3s</a>"""%( txName, file ,currentMonth ) )
         
         fileHandle.write( "</div></td>" )
         
@@ -475,9 +481,12 @@ def generateWebPage( rxNames, txNames, months ):
         fileHandle.write(  """ <td bgcolor="#66CCFF"  ><div class = "txTableEntry">Months:&nbsp;""" )
         
         for month in months:
-            file = "%swebGraphics/monthly/filecount/%s/%s.png" % ( StatsPaths.STATSGRAPHS, txName, month )
+            
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
+            file = StatsPaths.STATSGRAPHSARCHIVES + "monthly/tx/%s/"%( txName ) + str(currentYear) + "/filecount/%.3s.png" %str(currentMonth)
+            
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, file ,month ) )
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%.3s</a>"""%( txName, file ,currentMonth ) )
         
         fileHandle.write( "</div></td>" )
         
@@ -485,9 +494,12 @@ def generateWebPage( rxNames, txNames, months ):
         fileHandle.write(  """ <td bgcolor="#66CCFF"><div class = "txTableEntry">Months:&nbsp;""" )
         
         for month in months:
-            file = "%swebGraphics/monthly/errors/%s/%s.png" % ( StatsPaths.STATSGRAPHS, txName, month )
+            
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
+            file = StatsPaths.STATSGRAPHSARCHIVES + "monthly/tx/%s/"%( txName ) + str(currentYear) + "/errors/%.3s.png" %str(currentMonth)
+            print file
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, file ,month ) )
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%.3s</a>"""%( txName, file ,currentMonth ) )
         
         fileHandle.write( "</div></td></tr></table>" )
 
