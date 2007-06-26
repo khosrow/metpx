@@ -184,7 +184,8 @@ class PullFTP(object):
         ndestDir = ''
 
         DD = path.split("/")
-        for  ddword in DD :
+        for  ddword in DD[1:] :
+             ndestDir += '/'
              if ddword == "" : continue
 
              nddword = ""
@@ -192,7 +193,7 @@ class PullFTP(object):
              for dwword in DW :
                  nddword += self.matchPattern(dwword,dwword)
 
-             ndestDir += "/" + nddword 
+             ndestDir += nddword
 
         return ndestDir
 
