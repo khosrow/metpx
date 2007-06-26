@@ -139,7 +139,7 @@ class PickleMerging:
                     entries[i + startingNumberOfEntries ] = emptyEntries [i]
                 startingNumberOfEntries = startingNumberOfEntries + 60
                 
-        statsCollection = FileStatsCollector(  startTime = startTime , endTime = endTime, interval = StatsDateLib.MINUTE, totalWidth = width, fileEntries = entries, logger = logger )
+        statsCollection = FileStatsCollector(  startTime = startTime , endTime = endTime, interval = StatsDateLib.MINUTE, totalWidth = width, fileEntries = entries,fileType= fileType, logger = logger )
            
                 
         return statsCollection        
@@ -322,7 +322,7 @@ class PickleMerging:
                     for pickle in pickleNames : #Verify every pickle implicated in merger.
                         # if for some reason pickle has changed since last time                    
                         if vc.isDifferentFile( file = pickle, user = combinedMachineName, clients = clientsForVersionManagement ) == True :                                
-                            print "%s for %s as found to be different and force hourly pickle merging" %( pickle, clientsForVersionManagement  )
+                           
                             needToMergeSameHoursPickle = True 
                             break
                             

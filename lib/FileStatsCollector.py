@@ -119,7 +119,7 @@ class FileStatsCollector:
     
     """
     
-    def __init__( self, files = None, fileType = "tx", statsTypes = [ "latency", "errors","bytecount" ], startTime = '2005-08-30 20:06:59', endTime = '2005-08-30 20:06:59', interval=1*MINUTE, totalWidth = HOUR, firstFilledEntry = 0, lastFilledEntry = 0, maxLatency = 15, fileEntries = None, logger = None ):
+    def __init__( self, files = None, fileType = "tx", statsTypes = None,  startTime = '2005-08-30 20:06:59', endTime = '2005-08-30 20:06:59', interval=1*MINUTE, totalWidth = HOUR, firstFilledEntry = 0, lastFilledEntry = 0, maxLatency = 15, fileEntries = None, logger = None ):
         """ 
             Constructor. All values can be set from the constructor by the user but recommend usage
             is to set sourceFile and statsType. The class contains other methods to set the other values
@@ -153,6 +153,12 @@ class FileStatsCollector:
         self.loggerName       = 'fileStatsCollector'      # Name of the logger if none is specified.
         self.logger           = logger                    # Logger
         
+        if self.statsTypes == []:
+            if self.fileType == "tx":
+                self.statsTypes = ["latency", "errors","bytecount"]
+            else:
+                self.statsTypes = [ "errors","bytecount"]
+                    
         timeSeperators = [ startTime ]
         timeSeperators.extend( StatsDateLib.getSeparatorsWithStartTime( startTime, self.totalWidth, self.interval ) ) 
         self.timeSeperators = timeSeperators
