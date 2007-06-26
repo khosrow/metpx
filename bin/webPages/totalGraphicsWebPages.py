@@ -183,8 +183,8 @@ def generateWebPage( machineNames ):
     updateFrequency= {"daily":"(upd. hourly)","weekly":"(upd. hourly)","monthly":"(upd. weekly)","yearly":"(upd. monthly)"}  
     
     for machineName in machineNames:
-        if not os.path.isdir("StatsPaths.STATSWEBPAGES"):
-            os.makedirs( "StatsPaths.STATSWEBPAGES" )
+        if not os.path.isdir(StatsPaths.STATSWEBPAGES):
+            os.makedirs( StatsPaths.STATSWEBPAGES )
         machineName = getCombinedMachineName( machineName )
         file = "%s%s.html" %( StatsPaths.STATSWEBPAGES,machineName)
         fileHandle = open( file , 'w' )
