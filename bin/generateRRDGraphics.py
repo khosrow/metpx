@@ -970,22 +970,23 @@ def getCopyDestination( type, client, machine, infos ):
     
        
     if infos.graphicType == "weekly":
-        endOfDestination =  "%s/%s/%s.png" %( currentYear, currentMonth, currentWeek )
+        endOfDestination =  "%s/%s/%s/%s.png" %( currentYear, currentMonth, type, currentWeek )
     
     elif infos.graphicType == "monthly":
-        endOfDestination =  "%s/%s.png" %( currentYear, currentMonth )
+        endOfDestination =  "%s/%s/%s.png" %( currentYear,type, currentMonth )
     
     elif infos.graphicType == "yearly":
-        endOfDestination =  "%s.png" %( currentYear )
+        endOfDestination =  "%s/%s.png" %( type, currentYear )
     
     elif infos.graphicType == "daily":
-        endOfDestination = "%s/%s/%s/%s.png" %( currentYear, currentMonth, currentWeek, currentDay )
+        endOfDestination = "%s/%s/%s/%s.png" %( currentYear, currentMonth, type, currentDay )
         
         #destination = "%s/%s/%s/%s" %( StatsPaths.STATSGRAPHSARCHIVES, infos.graphicType, infos.fileType, label, infos.graphicType, endOfDestination )
     if infos.totals == True:
         destination ="%s%s/%s/%s/%s/%s"  %( StatsPaths.STATSGRAPHSARCHIVES, infos.graphicType, "totals", machine, infos.fileType, endOfDestination  )
     else:    
-        destination = "%s%s/%s/%s/%s/%s" %( StatsPaths.STATSGRAPHSARCHIVES, infos.graphicType, infos.fileType, client, type, endOfDestination )
+        destination = "%s%s/%s/%s/%s/" %( StatsPaths.STATSGRAPHSARCHIVES, infos.graphicType, infos.fileType, client, endOfDestination )
+    
     
     print destination
     return destination    
