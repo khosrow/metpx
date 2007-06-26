@@ -152,8 +152,8 @@ class StatsPlotter:
                 
         date = self.currentTime.replace( "-","" ).replace( " ", "_")
         
-        if self.productTypes[0] == "All":
-            formattedProductName = "All"
+        if self.productTypes[0] == "All" or self.productTypes[0] == "*":
+            formattedProductName = "All" 
         else:
             combinedProductsName = ""
             for product in self.productTypes:
@@ -579,7 +579,10 @@ class StatsPlotter:
             
         if self.groupName == "" :
             entityType = self.sourlient
-            entityName = self.clientNames[clientIndex]
+            if len( self.stats ) ==1:
+                entityName = str(self.clientNames).replace("[","").replace("]","").replace("'","")  
+            else:
+                entityName = self.clientNames[clientIndex]        
         else:
             entityType = "Group"
             entityName = self.groupName
@@ -644,7 +647,13 @@ class StatsPlotter:
         
         if self.groupName == "" :
             entityType = self.sourlient
-            entityName = self.clientNames[clientIndex]
+                        
+            if self.groupName == "" :
+                entityType = self.sourlient
+                if len( self.stats ) ==1:
+                    entityName = str(self.clientNames).replace("[","").replace("]","").replace("'","")  
+                else:
+                    entityName = self.clientNames[clientIndex]   
         else:
             entityType = "Group"
             entityName = self.groupName
@@ -720,7 +729,14 @@ class StatsPlotter:
                
         if self.groupName == "" :
             entityType = self.sourlient
-            entityName = self.clientNames[clientIndex]
+            
+            if self.groupName == "" :
+                entityType = self.sourlient
+                if len( self.stats ) ==1:
+                    entityName = str(self.clientNames).replace("[","").replace("]","").replace("'","")  
+                else:
+                    entityName = self.clientNames[clientIndex]   
+                    
         else:
             entityType = "Group"
             entityName = self.groupName    
