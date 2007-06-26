@@ -284,6 +284,7 @@ class PullFTP(object):
 
             pdir = self.dirPattern(self.destDir)
             if pdir != '' : self.destDir = pdir
+            self.destDir = self.destDir[1:]
 
             # cd to that directory
 
