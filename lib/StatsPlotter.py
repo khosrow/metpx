@@ -21,7 +21,7 @@ named COPYING in the root of the source directory tree.
 
 """
 
-import os, sys
+import os, sys, statvfs
 """
     Small function that adds pxlib to the environment path.  
 """
@@ -155,28 +155,26 @@ class StatsPlotter:
         if self.productTypes[0] == "All":
             formattedProductName = "All"
         else:
-            formattedProductName = "Specific"    
-                
-        fileName = StatsPaths.STATSGRAPHS + "others/gnuplot/%.50s/%s_%.50s_%s_%s_%shours_on_%s_for %s products.png" %( entityName, self.fileType, entityName, date, self.statsTypes, self.timespan, self.machines, formattedProductName )
+            combinedProductsName = ""
+            for product in self.productTypes:
+                combinedProductsName = combinedProductsName + str(product) + "_"
+            
+            formattedProductName = combinedProductsName[ :-1 ] #remove trailing _ character.    
+        
+        folder =   StatsPaths.STATSGRAPHS + "others/gnuplot/%.50s/" %( entityName )      
+        fileName = folder + "%s_%s_%s_%s_%shours_on_%s_for_%s_products.png" %(  self.fileType, entityName, date, self.statsTypes, self.timespan, self.machines, formattedProductName )
+        fileName = fileName.replace( '[', '').replace(']', '').replace(" ", "").replace( "'","" )     
         
         
-        fileName = fileName.replace( '[', '').replace(']', '').replace(" ", "").replace( "'","" )               
-        #TODO make other method out of this
-        splitName = fileName.split( "/" ) 
+        if not os.path.isdir( folder ):
+            os.makedirs( folder )  
         
-        if fileName[0] == "/":
-            directory = "/"
-        else:
-            directory = ""
-        
-        for i in range( 1, len(splitName)-1 ):
-            directory = directory + splitName[i] + "/"
-        
-          
-        if not os.path.isdir( directory ):
-            os.makedirs( directory, mode=0777 )  
-        
-          
+        if len( os.path.basename(fileName) ) > (os.statvfs( folder )[statvfs.F_NAMEMAX]): # length of file too long 
+            maximumLength = (os.statvfs( folder )[statvfs.F_NAMEMAX]) - ( 30 + len(date) + len( str(self.statsTypes)) + len( str( self.timespan ) ) )
+            maxIndyLength = maximumLength / 3 
+            #reduce entityname, machine names and products wich are the only parts wich can cause us to bust the maximum filename size.
+            fileName = folder + ("%s_%." + str( maxIndyLength )+ "s_%s_%s_%shours_on_%." + str( maxIndyLength ) +"s_for_%." + str( maxIndyLength ) + "s_products.png") %(  self.fileType, entityName, date, self.statsTypes, self.timespan, self.machines, formattedProductName ) 
+            
         
         return fileName 
     
@@ -463,7 +461,7 @@ class StatsPlotter:
         
         if copyToColumbo == True : 
             
-            destination = StatsPaths.STATSGRAPHS + "columbo/%s.png" %clientName
+            destination = StatsPaths.STATSGRAPHS + "webGraphics/columbo/%s.png" %clientName
             if not os.path.isdir( os.path.dirname( destination ) ):
                 os.makedirs(  os.path.dirname( destination ), mode=0777 )                                                      
             
