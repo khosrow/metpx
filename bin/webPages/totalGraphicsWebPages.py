@@ -254,6 +254,7 @@ def generateWebPage( machineNames ):
         
         
         for timeType in timeTypes:    
+            
             fileHandle.write( """ 
             <tr> 
                 <td bgcolor="#99FF99" > %s %s</td>                  
@@ -283,7 +284,7 @@ def generateWebPage( machineNames ):
                     elif timeType == "yearly":
                         file = "%syearly/totals/%s/rx/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName,  type, year ) 
                         
-                    print file
+                    
                     if os.path.isfile(file):  
                         if timeType == "daily" :
                             label =  time.strftime( "%a", time.gmtime(x))   
@@ -329,6 +330,7 @@ def generateWebPage( machineNames ):
         
         
         for timeType in timeTypes:    
+            
             fileHandle.write( """ 
             <tr> 
                 <td bgcolor="#99FF99" ><div style="width:10pt";>%s%s</div> </td>                  
@@ -344,21 +346,23 @@ def generateWebPage( machineNames ):
                 timeContainer = years
                          
             for type in txTypes:
+                
                 fileHandle.write( """<td bgcolor="#66CCFF"> """) 
                 
                 for x in timeContainer:
+                    
                     year, month, day = StatsDateLib.getYearMonthDayInStrfTime( x )
                     week = time.strftime( "%W", time.gmtime(x))
                     if timeType == "daily" :
-                        file = "%sdaily/totals/%s/rx/%s/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, month, type, day )     
+                        file = "%sdaily/totals/%s/tx/%s/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, month, type, day )     
                     elif timeType == "weekly":
-                        file = "%sweekly/totals/%s/rx/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, type, week )
+                        file = "%sweekly/totals/%s/tx/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, type, week )
                     elif timeType == "monthly":
-                        file = "%smonthly/totals/%s/rx/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, type, month )
+                        file = "%smonthly/totals/%s/tx/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, type, month )
                     elif timeType == "yearly":
-                        file = "%syearly/totals/%s/rx/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName,  type, year )  
+                        file = "%syearly/totals/%s/tx/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName,  type, year )  
                     
-                    print file
+                    
                     if os.path.isfile(file):  
                         
                         if timeType == "daily" :
