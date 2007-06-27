@@ -27,7 +27,7 @@ named COPYING in the root of the source directory tree.
 """
 
 
-import os , sys, time
+import os , sys, time, statvfs
 sys.path.insert(1, sys.path[0] + '/../../')
 """
     Small function that adds pxlib to the environment path.  
@@ -87,7 +87,7 @@ class ClientStatsPickler:
         
         
         
-    def buildThisHoursFileName(  client = "satnet", offset = 0, currentTime = "", fileType = "tx", machine = "pdsCSP" ):
+    def buildThisHoursFileName(  client = "someclient", offset = 0, currentTime = "", fileType = "tx", machine = "someMachineName" ):
         """ 
             Builds a filename using current currentTime.
             
@@ -104,10 +104,8 @@ class ClientStatsPickler:
                 
         """    
         
-        
-        fileName = StatsPaths.STATSPICKLES +  client + "/"
-        
-        
+        timeFolder = ""
+               
         if currentTime == "":
             currentTime = time.time()
         else:
@@ -115,21 +113,23 @@ class ClientStatsPickler:
         
         currentTime = currentTime + ( offset * StatsDateLib.HOUR )
         splitTime = time.gmtime( currentTime )    
-        
+                
         for i in range( 3 ):
             
             if int( splitTime[i] ) < 10 :
-                fileName = fileName + "0" + str( splitTime[i] )
+                timeFolder = timeFolder + "0" + str( splitTime[i] )
             else:
-                fileName = fileName + str( splitTime[i] )          
+                timeFolder = timeFolder + str( splitTime[i] )          
         
                 
         hour = StatsDateLib.getHoursFromIso( StatsDateLib.getIsoFromEpoch( currentTime ) )
         
-        fileName = fileName + "/" + fileType + "/" + machine + "_" + hour
+        maxLt = ( os.statvfs( StatsPaths.STATSPICKLES )[statvfs.F_NAMEMAX])
         
-        
+        fileName = ( "%s" + "%." +  str( maxLt ) + "s/%s/%s/%." + str( maxLt ) + "s_%s" )   %( StatsPaths.STATSPICKLES, client, timeFolder,  fileType, str(machine),  str(hour) )  
+                
         return fileName 
+          
     
     buildThisHoursFileName = staticmethod( buildThisHoursFileName )    
     
@@ -269,18 +269,21 @@ def main():
     """
             small test case. Tests if everything works plus gives an idea on proper usage.
     """
-    pathToLogFiles =  GeneralStatsLibraryMethods.getPathToLogFiles( LOCAL_MACHINE, LOCAL_MACHINE )
+    #pathToLogFiles =  GeneralStatsLibraryMethods.getPathToLogFiles( LOCAL_MACHINE, LOCAL_MACHINE )
    
-    types = [ "latency","errors","bytecount" ]    
+    #types = [ "latency","errors","bytecount" ]    
       
-    cs = ClientStatsPickler( client = "satnet", directory = pathToLogFiles )
+    #cs = ClientStatsPickler( client = "satnet", directory = pathToLogFiles )
     
-    cs.collectStats( types, directory = pathToLogFiles, fileType = "tx", startTime = '2006-07-16 01:00:12', endTime = "2006-07-16 01:59:12", interval = 1*StatsDateLib.MINUTE )  
+    #cs.collectStats( types, directory = pathToLogFiles, fileType = "tx", startTime = '2006-07-16 01:00:12', endTime = "2006-07-16 01:59:12", interval = 1*StatsDateLib.MINUTE )  
             
-    cs.printStats()        
+    #cs.printStats()        
     
-    print ClientStatsPickler.buildThisHoursFileName()     
-       
+    testFileName = ClientStatsPickler.buildThisHoursFileName("client1client2client3", 0, "2007-07-15 00:00:00", "tx", "machinename")
+    if testFileName != "%sclient1client2client3/20070715/tx/machinename_00" %StatsPaths.STATSPICKLES :
+        print "Error. ClientStatsPickler.buildThisHoursFileName does not produce the right file name."
+        print "Please verify the method's code or it's unit test."
+        sys.exit()
 
 if __name__ == "__main__":
     main()    
