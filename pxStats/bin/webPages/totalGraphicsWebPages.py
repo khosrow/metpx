@@ -57,8 +57,8 @@ def getDays():
     
     days = []
     
-    startTime = (time.time() - (5*24*60*60))
-    for i in range(1,6):
+    startTime = (time.time() - (7*24*60*60))
+    for i in range(1,8):
         days.append( startTime + ( i*24*60*60 ) )
    
        
