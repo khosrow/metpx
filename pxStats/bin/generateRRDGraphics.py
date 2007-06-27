@@ -970,7 +970,7 @@ def getCopyDestination( type, client, machine, infos ):
     
        
     if infos.graphicType == "weekly":
-        endOfDestination =  "%s/%s/%s/%s.png" %( currentYear, currentMonth, type, currentWeek )
+        endOfDestination =  "%s/%s/%s.png" %( currentYear, type, currentWeek )
     
     elif infos.graphicType == "monthly":
         endOfDestination =  "%s/%s/%s.png" %( currentYear,type, currentMonth )
@@ -985,7 +985,7 @@ def getCopyDestination( type, client, machine, infos ):
     if infos.totals == True:
         destination ="%s%s/%s/%s/%s/%s"  %( StatsPaths.STATSGRAPHSARCHIVES, infos.graphicType, "totals", machine, infos.fileType, endOfDestination  )
     else:    
-        destination = "%s%s/%s/%s/%s/" %( StatsPaths.STATSGRAPHSARCHIVES, infos.graphicType, infos.fileType, client, endOfDestination )
+        destination = "%s%s/%s/%s/%s" %( StatsPaths.STATSGRAPHSARCHIVES, infos.graphicType, infos.fileType, client, endOfDestination )
     
     
     print destination
@@ -1099,6 +1099,8 @@ def plotRRDGraph( databaseName, type, fileType, client, machine, infos, logger =
         total = "Total: %s" %total   
         
     title = buildTitle( formatedTitleType, client, infos.endTime, infos.timespan, minimum, maximum, mean )   
+       
+       
                    
     #note : in CDEF:realValue the i value can be changed from 1 to value of the interval variable
     #       in order to get the total displayed instead of the mean.
@@ -1106,7 +1108,7 @@ def plotRRDGraph( databaseName, type, fileType, client, machine, infos, logger =
         rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '800','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end),'--step','%s' %(interval*60), '--vertical-label', '%s' %formatedYLabelType,'--title', '%s'%title, '--lower-limit','0','DEF:%s=%s:%s:AVERAGE'%( type, databaseName, type), 'CDEF:realValue=%s,%i,*' %( type, 1), 'AREA:realValue#%s:%s' %( innerColor, type ),'LINE1:realValue#%s:%s'%( outerColor, type ), 'COMMENT: Min: %s   Max: %s   Mean: %s   %s\c' %( minimum, maximum, mean,total ), 'COMMENT:%s %s %s\c' %( comment, graphicsNote, graphicsLegeng )  )
 
     else:#With monthly graphics, we force the use the day of month number as the x label.       
-        rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '800','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end),'--step','%s' %(interval*60), '--vertical-label', '%s' %formatedYLabelType,'--title', '%s'%title, '--lower-limit','0','DEF:%s=%s:%s:AVERAGE'%( type, databaseName, type), 'CDEF:realValue=%s,%i,*' %( type, 1), 'AREA:realValue#%s:%s' %( innerColor, type ),'LINE1:realValue#%s:%s'%( outerColor, type ), '--x-grid', 'HOUR:24:DAY:1:DAY:1:0:%d','COMMENT: Min: %s   Max: %s   Mean: %s   %s\c' %( minimum, maximum, mean, total ), 'COMMENT:%s %s %s\c' %(comment,graphicsNote, graphicsLegeng)  )       
+        rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '800','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end),'--step','%s' %(interval*60), '--vertical-label', '%s' %formatedYLabelType,'--title', '%s'%title, '--lower-limit','0', 'DEF:input=%s:%s:AVERAGE' %(type, databaseName) , 'CDEF:in_values=input,UN,0,input,IF', 'DEF:%s=%s:%s:AVERAGE'%( type, databaseName, type), 'CDEF:realValue=%s,%i,*' %( type, 1), 'AREA:realValue#%s:%s' %( innerColor, type ),'LINE1:realValue#%s:%s'%( outerColor, type ), '--x-grid', 'HOUR:24:DAY:1:DAY:1:0:%d','COMMENT: Min: %s   Max: %s   Mean: %s   %s\c' %( minimum, maximum, mean, total ), 'COMMENT:%s %s %s\c' %(comment,graphicsNote, graphicsLegeng)  )       
     
     
     if infos.copy == True:
