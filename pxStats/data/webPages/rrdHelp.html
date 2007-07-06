@@ -1,0 +1,91 @@
+<html>
+    <head>
+        <title> RRD query help </title>
+    </head>    
+    
+    <body text="#000000" link="#FFFFFF" vlink="000000" bgcolor="white" >
+
+        <table width="100%" border="1" cellspacing="5" cellpadding="5" bgcolor="#cccccc" bordercolor="#CCCCCC" frame = void >       
+                    
+        <tr>    
+            <td bgcolor="#006699" width =" 20%"><font color =" white">Field</font></td>
+            <td bgcolor="#006699" width =" 20%"><font color =" white">Obligatory/Optional</font></td>
+            <td bgcolor="#006699" width =" 60%"><font color =" white">Definition.</font></td>
+        </tr>   
+        
+        <tr> 
+            <td bgcolor="#66CCFF" width =" 20%%" > End Time   </td>
+            <td bgcolor="#99FF99" width =" 20%%" > Optional. </td>
+            <td bgcolor="#66CCFF" width =" 60%%" > Select the date at wich the graphic is requested and ends. You can either fill out the text box manually or click on the calendar to select a date. Will use the current time as default value.</td>            
+        </tr> 
+        
+        <tr> 
+            <td bgcolor="#66CCFF" width =" 20%%" > Group name </td>
+            <td bgcolor="#99FF99" width =" 20%%" > Optional </td>
+            <td bgcolor="#66CCFF" width =" 60%%" > Specify a group name to give to a series of sourlients that you want to combine.</td>            
+        </tr> 
+        
+        <tr> 
+            <td bgcolor="#66CCFF" width =" 20%%" > Products </td>
+            <td bgcolor="#99FF99" width =" 20%%" > Optional </td>
+            <td bgcolor="#66CCFF" width =" 60%%" > List a series of specific products. Data present within the graphic(s) will be filtered as to contains information that is relative only to the specified product(s). Note : Products can contain wildcards.</td>            
+        </tr>         
+      
+        <tr> 
+            <td bgcolor="#66CCFF" width =" 20%%" > Span </td>
+            <td bgcolor="#99FF99" width =" 20%%" > Optional </td>
+            <td bgcolor="#66CCFF" width =" 60%%" > Specify the time span of the graphic in hours. If no value is specified the default 24 hours value will be used.</td>            
+        </tr> 
+        
+        <tr> 
+            <td bgcolor="#66CCFF" width =" 20%%" > Individual </td>
+            <td bgcolor="#99FF99" width =" 20%%" > Optional </td>
+            <td bgcolor="#66CCFF" width =" 60%%" > Specify that a graphics needs to be plotter for every data type and for every machines specified. Otherwise data will be combined between machines.</td>            
+        </tr>         
+        
+        <tr> 
+            <td bgcolor="#66CCFF" width =" 20%%" > Total </td>
+            <td bgcolor="#99FF99" width =" 20%%" > Optional </td>
+            <td bgcolor="#66CCFF" width =" 60%%" > By using this option, the data of all the specified rx tx or sourlients will be combined to make a single entity.</td>            
+        </tr>                 
+        
+        <tr> 
+            <td bgcolor="#66CCFF" width =" 20%%" > File Type </td>
+            <td bgcolor="#99FF99" width =" 20%%" > Obligatory </td>
+            <td bgcolor="#66CCFF" width =" 60%%" > Specify whether the sourlients are tx or rx.</td>            
+        </tr> 
+        
+        <tr> 
+            <td bgcolor="#66CCFF" width =" 20%%" > Machines </td>
+            <td bgcolor="#99FF99" width =" 20%%" > Obligatory </td>
+            <td bgcolor="#66CCFF" width =" 60%%" > Specify from wich machine(s) the data concerning the sourlients is coming from.</td>            
+        </tr> 
+        
+        <tr> 
+            <td bgcolor="#66CCFF" width =" 20%%" > Stats types   </td>
+            <td bgcolor="#99FF99" width =" 20%%" > Obligatory </td>
+            <td bgcolor="#66CCFF" width =" 60%%" > Specify for wich data types graphics needs to be drawn.</td>            
+        </tr> 
+        
+        <tr> 
+            <td bgcolor="#66CCFF" width =" 20%%" > Pre-determined spans</td>
+            <td bgcolor="#99FF99" width =" 20%%" > Optional </td>
+            <td bgcolor="#66CCFF" width =" 60%%" > Instead of specifying an hourly span, use this option to use pre-calculated spans.</td>            
+        </tr>
+        
+        <tr> 
+            <td bgcolor="#66CCFF" width =" 20%%" > Fixed spans</td>
+            <td bgcolor="#99FF99" width =" 20%%" > Optional </td>
+            <td bgcolor="#66CCFF" width =" 60%%" > When using pre-calculated spans, combine it with one of the fixed spans to get some real date intervals. Example : monthly + fixedprevious will draw up graph(s) that start on the first day of the previous month and end on the last day of the previous month.</td>            
+        </tr>
+        
+        <tr> 
+            <td bgcolor="#66CCFF" width =" 20%%" > Sourlients </td>
+            <td bgcolor="#99FF99" width =" 20%%" > Obligatory </td>
+            <td bgcolor="#66CCFF" width =" 60%%" > Specify the sourlient(s) for wich the the graphic(s) need to be drawn. To do so, use the window that will popup by clicking on the "add sourlients" button. The list of sourlients offered is dependant on the previously selected file type(s) and machine(s). </td>            
+        </tr> 
+        
+      </body>
+                    
+</html>
+
