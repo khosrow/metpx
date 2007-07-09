@@ -893,7 +893,7 @@ def getGraphicsLegend( maximum ):
             elif maximum > 1000:    
                 legend = "k on the y axis stands for kilo, meaning x thousands."
             elif maximum < .1000:
-                legend = "m on the y axis stans for milli, meaning x thousandths."
+                legend = "m on the y axis stands for milli, meaning x thousandths."
                
         except:            
             pass
