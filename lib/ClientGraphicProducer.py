@@ -170,7 +170,7 @@ class ClientGraphicProducer:
         
         dataCollection = []        
         
-        #print "mergepicklesform differentsource in combined graphics" , None , startTime,  endTime, self.clientNames, self.fileType, self.machines, self.groupName
+        
         statsCollection = PickleMerging.mergePicklesFromDifferentSources( logger = None , startTime = startTime, endTime = endTime, clients = self.clientNames, fileType = self.fileType, machines =  self.machines, groupName = self.groupName )
         
         combinedMachineName = ""
@@ -202,17 +202,19 @@ class ClientGraphicProducer:
         
     def produceGraphicWithHourlyPickles( self, types , now = False, createCopy = False, combineClients = False  ):
         """
-            This higher-level method is used to produce a graphic based on the data found in log files
-            concerning a certain client. Data will be searched according to the clientName and timespan
-            attributes of a ClientGraphicProducer.  
+            @summary: This higher-level method is used to produce a graphic based on the data found in log files
+                      concerning a certain client. Data will be searched according to the clientName and timespan
+                      attributes of a ClientGraphicProducer.  
             
-            This method will gather the data starting from current time - timespan up to the time of the call.   
-        
-            Now option not yet implemented.
+                      This method will gather the data starting from current time - timespan up to the time of the call.   
+                
+                      Now option not yet implemented.
+                    
+                      Every pickle necessary for graphic production needs to be there. 
+                      Filling holes with empty data not yet implemented.              
             
-            Every pickle necessary for graphic production needs to be there. 
-            Filling holes with empty data not yet implemented.              
-            
+            @return: Returns the name of the file that was produced.
+               
         """         
         
         dataCollection = [] #                  
@@ -222,28 +224,27 @@ class ClientGraphicProducer:
             dataCollection = self.collectDataForCombinedGraphics(  startTime, endTime, types )              
         else: 
             dataCollection = self.collectDataForIndividualGraphics( startTime, endTime, types )       
-                         
+        
+                       
                    
         if self.productTypes[0] != "All" and self.productTypes[0] != "all" and self.productTypes[0] != "*":
+             
             dataCollection = self.recalculateData( dataCollection )               
         
         if self.logger != None :         
             self.logger.debug( "Call to StatsPlotter :Clients:%s, timespan:%s, currentTime:%s, statsTypes:%s, productTypes:%s :" %( self.clientNames, self.timespan, self.currentTime, types, self.productTypes ) )
         
-        #print "Call to StatsPlotter :Clients:%s, timespan:%s, currentTime:%s, statsTypes:%s, productTypes:%s :" %( self.clientNames, self.timespan, self.currentTime, types, self.productTypes )
-        
+       
         plotter = StatsPlotter( stats = dataCollection, clientNames = self.clientNames, groupName = self.groupName, timespan = self.timespan, currentTime = endTime, now = False, statsTypes = types, productTypes = self.productTypes, logger = self.logger, machines = self.machines, fileType = self.fileType  )
         
         plotter.plot( createCopy )
-                                  
-        print "Plotted graph."
-        
+                                             
         if self.logger != None :
             self.logger.debug( "Returns from StatsPlotter." )
             
             self.logger.info ("Created Graphics for following call : Clients : %s, timespan : %s, currentTime : %s, statsTypes : %s, productTypes : %s :" %( self.clientNames, self.timespan, self.currentTime, types, self.productTypes ) )         
             
-        
+        return plotter.buildImageName()     
 
 if __name__ == "__main__":
     """
