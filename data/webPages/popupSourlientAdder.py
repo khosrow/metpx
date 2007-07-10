@@ -69,7 +69,7 @@ def generateWebPage( sourlientNames, outputFileName):
         <body text="#FFFFFF" link="#FFFFFF" vlink="000000" bgcolor="#CCCCCC">
             <center>
             
-            <form name=" adderForm" method="POST">
+            <form name="adderForm" method="POST">
                 
                 <table bgcolor="#99FF99" >
                     
@@ -118,7 +118,7 @@ def generateWebPage( sourlientNames, outputFileName):
                     
                     <tr>
                         <td colspan=3 align="center">
-                            <input type="button" value="Done" onClick =" javascript:copyLists(window.document.forms['adderForm'].elements['destList'], self.opener.document.forms['gnuplotForm'].elements['sourlientList']);javascript:closeWindow();">
+                            <input type="button" value="Done" onClick ="javascript:copyLists(document.forms['adderForm'].elements['destList'], self.opener.document.forms['inputForm'].elements['sourlientList']);javascript:closeWindow();">
                         </td>
                     </tr>
                 
@@ -179,9 +179,9 @@ def main():
         rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machine )
     
     if fileType == "tx":
-        generateWebPage(txNames, "%s/%sPopSourlientUpAdder.html" %( StatsPaths.STATSWEBPAGES, fileType ) )
+        generateWebPage(txNames, "%s/%s%sPopSourlientUpAdder.html" %( StatsPaths.STATSWEBPAGES, fileType, machine ) )
     elif fileType == "rx":
-        generateWebPage(rxNames, "%s/%sPopSourlientUpAdder.html" %( StatsPaths.STATSWEBPAGES, fileType ) )
+        generateWebPage(rxNames, "%s/%s%sPopSourlientUpAdder.html" %( StatsPaths.STATSWEBPAGES, fileType, machine ) )
     
 
 if __name__ == '__main__':
