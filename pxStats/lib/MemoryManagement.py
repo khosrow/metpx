@@ -79,7 +79,23 @@ class MemoryManagement:
     add = staticmethod( add )
        
        
-       
+    def getSize( file ):
+        """   
+             @summary : get size of a file 
+             
+             @returns : size of existing file or 0 if it does not exist
+        """
+        try:
+            size = os.path.getsize(file)
+        except:
+            size = 0 
+        
+        return size        
+    
+    getSize = staticmethod( getSize )
+    
+    
+        
     def getTotalSizeListOfFiles( listOfFiles ):
         """
         
@@ -91,7 +107,7 @@ class MemoryManagement:
         sum = 0
         
         if listOfFiles != []:
-            sum = reduce( MemoryManagement.add, map( os.path.getsize, listOfFiles ) )
+            sum = reduce( MemoryManagement.add, map( MemoryManagement.getSize , listOfFiles ) )
     
         return sum         
         
