@@ -419,10 +419,10 @@ class FileStatsCollector:
                 except:                
                     
                     if logger is not None :
-                        logger.error("could not find %s value in line %s." %( statstype,line ) ) 
+                        logger.error("could not find %s value in line %s." %( statsType,line ) ) 
                         logger.error("value was replaced by 0.")
                     
-                    values[statstype] = 0    
+                    values[statsType] = 0    
                     pass
         
         else:
@@ -622,7 +622,7 @@ class FileStatsCollector:
                     
             else:#keep on readin 
                 #print "useless line : %s" %(line)
-                #print "self.statstypes : %s" %(self.statsTypes)
+                #print "self.statsTypes : %s" %(self.statsTypes)
                 position = fileHandle.tell()#Save position on line about to be read in case it turns out to be the right line.
                 line = fileHandle.readline()        
                 
