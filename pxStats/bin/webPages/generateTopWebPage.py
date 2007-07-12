@@ -45,7 +45,7 @@ LOCAL_MACHINE = os.uname()[1]
 
 
 
-def generateWebPage( machineNames ):
+def generateWebPage( machineTags ):
     """
         Generates the top.html web page
         to be displayed as the top frame
@@ -81,16 +81,16 @@ def generateWebPage( machineNames ):
     """)
     
     
-    if machineNames != [] :
+    if machineTags != [] :
         fileHandle.write( """
         Combined graphics&nbsp;&nbsp;:&nbsp;&nbsp;&nbsp;
         """ )    
         
-        for machineName in machineNames:
+        for machineTag in machineTags:
             fileHandle.write( """
             <a href="%s.html" target="bottom">%s</a> 
             &nbsp;&nbsp;&nbsp;              
-            """ %( machineName.replace( ',','' ), string.upper(machineName) ) ) 
+            """ %( machineTag.replace( ',','' ), string.upper(machineTag) ) ) 
     
         
     fileHandle.write( """ 
@@ -122,10 +122,11 @@ def main():
     configParameters = StatsConfigParameters()
     configParameters.getAllParameters()
     machineParameters = MachineConfigParameters()
-    machineParameters.getParametersFromMachineConfigurationFile()
+    machineParameters.getParametersFromMachineConfigurationFile()    
+    generateWebPage(  configParameters.sourceMachinesTags )
     machineNames     = machineParameters.getPairedMachinesAssociatedWithListOfTags( configParameters.sourceMachinesTags )
 
-    generateWebPage( machineNames )
+    
     
      
     
