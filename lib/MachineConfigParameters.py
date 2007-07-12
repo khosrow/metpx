@@ -77,8 +77,12 @@ class MachineConfigParameters:
         @return: The machine(s) associated with the tag in list format. 
         
         '''
-        
-        return self.machinesForMachineTags[machineTag]
+        try:
+            machines =  self.machinesForMachineTags[machineTag]
+        except :
+            machines = []
+            
+        return machines
     
     
     def getMachinesAssociatedWithListOfTags(self,tags):
