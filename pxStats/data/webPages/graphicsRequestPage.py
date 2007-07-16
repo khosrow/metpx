@@ -3,7 +3,7 @@
 print """Content-Type: text/html"""
 
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
+MetPX Copyright (C) 1604-1606  Environment Canada
 MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
 named COPYING in the root of the source directory tree.
 
@@ -16,7 +16,7 @@ named COPYING in the root of the source directory tree.
 ##
 ## @author :  Nicholas Lemay
 ##
-## @since  : 2007-06-28, last updated on  2007-07-09
+## @since  : 2007-06-28, last updated on  2007-07-16
 ##
 ##
 ## @summary : This is to be used to generate a dynamic web page where users 
@@ -138,9 +138,11 @@ def printEndOfBody():
     """
 
 
-def printChoiceOfSourlients( form ):
+def printChoiceOfSourlients( plotter, form ):
     """  
         @summary : Prints the list of available  source or clients
+        
+        @param plotter: Plotter that<s currently chosen on the web page. 
         
         @param form: Form with whom this page was called. 
                      Need to know if any clients were previously
@@ -159,11 +161,13 @@ def printChoiceOfSourlients( form ):
         print """
                      
                             <td>
+                                 <label for="sourlientList">Client(s)/Source(s) :</label><br>
                                  <select size=5 name="sourlientList" style="width: 300px;"height: 25px;"" multiple>
         """
         
         for sourlient in sourLients:
-            print """ 
+            print """                 
+                                          
                                     <option value="%s">%s</option>                          
             """%( sourlient, sourlient )
             
@@ -173,8 +177,8 @@ def printChoiceOfSourlients( form ):
                                                             
                                 <br>   
                         
-                                <input type=button value="Add Clients" onclick =" javascript:popupAddingWindow('popupAdder.html');">    
-                                <input type=button value="Delete client" onclick =" javascript:deleteFromList(sourlientList);">
+                                <input type=button class="button" value="Add Clients" onclick =" javascript:popupAddingWindow('popupAdder.html');">    
+                                <input type=button class="button" value="Delete client" onclick ="javascript:deleteFromList(sourlientList);">
                                    
             """
     else:
@@ -183,23 +187,182 @@ def printChoiceOfSourlients( form ):
         print """
 
                     <td>
+                          <label for="sourlientList">Client(s)/Source(s) :</label><br>
                          <select size=5 name="sourlientList" style="width: 300px;" multiple>
                         </select>                   
                
                         <br>               
                     
-                        <input type=button value="Add Sourlients" onclick =";javascript:popupAddingWindow('popupAdder.html');">
+                        <input type=button name="addButton" class="button" value="Add Sourlients" onclick ="javascript:popupAddingWindow( document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].value + (document.inputForm.machines[ document.inputForm.machines.selectedIndex ].value).replace(',','') + 'PopUpSourlientAdder.html' );">
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        <input type=button value="Delete Sourlients" onclick ="javascript:deleteFromList(sourlientList);">
+                        <input type=button name="deleteButton" class="button" value="Delete Sourlients" onclick ="javascript:deleteFromList(sourlientList);">
     """
     
-    if form["plotter"] == "gnuplot":
+    if plotter == "gnuplot":
         printCombineSourlientsCheckbox(form)
-    else:
-        x =2
+      
     print """    
                     </td>
     """
+  
+  
+    
+def printAjaxRequestsScript():
+    """    
+        @summary : prints out the section that will contain the javascript 
+                   functions that will allow us to make queries 
+                   to the request broker and to display the query results 
+                   without having to refresh the page.
+
+        @author:   Java script functions were originaly found here :
+                   http://wikipython.flibuste.net/moin.py/AJAX
+                   
+                   They were modified to fit our specific needs. 
+    """
+    print """
+    
+            <script language="JavaScript">
+
+                function getHTTPObject() {
+                  var xmlhttp;
+                  /*@cc_on
+                  @if (@_jscript_version >= 5)
+                    try {
+                      xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+                      } catch (e) {
+                      try {
+                        xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+                        } catch (E) {
+                        xmlhttp = false;
+                        }
+                      }
+                  @else
+                  xmlhttp = false;
+                  @end @*/
+                
+                  if (!xmlhttp && typeof XMLHttpRequest != 'undefined') {
+                    try {
+                      xmlhttp = new XMLHttpRequest();
+                      } catch (e) {
+                      xmlhttp = false;
+                      }
+                    }
+                  return xmlhttp;
+               }
+                               
+                
+                var http = getHTTPObject();
+                                
+                
+                function executeAjaxRequest( strURL, plotter ) {                  
+                   
+                   var parameters = ''; 
+                   
+                   if( strURL == 'popupSourlientAdder.py'){ 
+                        parameters = getParametersForPopups();
+                   }else if( strURL == 'graphicsRequestBroker.py' ){
+                        parameters = getParametersForGraphicsRequests( plotter );
+                   }                   
+                   
+                  
+                  http.open("GET", strURL + parameters, true );
+                  http.onreadystatechange = handleHttpResponse;
+                  http.send(null);
+                
+                }
+                
+                
+                function handleHttpResponse() {
+                  
+                  if (http.readyState == 4) {                    
+                    var response = http.responseText;
+                  
+                    if( response.match('images') != null && response.match('error') != null){ 
+                        //document.getElementById("errorLabel").innerHTML = str;
+                        var image = response.split(";")[0];
+                        var error = response.split(";")[1];
+                        image = image.split("=")[1];
+                        error = error.split("=")[1];
+    
+                        document.getElementById("errorLabel").innerHTML = '<font color="#C11B17">' + error + '</font>';
+                        document.getElementById("photoslider").src = image;                  
+                                                       
+                    }
+                  }
+               }     
+                    
+                function getParametersForGraphicsRequests( plotter ){
+                    
+                    var qstr = '';
+                    
+                    if( plotter == 'gnuplot'){
+                        qstr = getParametersForGnuplotRequests();
+                    }else if( plotter == 'rrd'){
+                        qstr = getParametersForRRDRequests();
+                    }
+                    
+                    return qstr;
+                                      
+                }
+                
+                                
+                function getParametersForGnuplotRequests(){
+                    
+                     var qstr = '?plotter=gnuplot&querier=graphicsRequestPage.py&endTime=' + document.forms['inputForm'].elements['endTime'].value +'&groupName='+ (document.forms['inputForm'].elements['groupName'].value) +'&products='+ (document.forms['inputForm'].elements['products'].value) +'&span=' + (document.forms['inputForm'].elements['span'].value) +'&fileType=' + (document.inputForm.fileType[document.inputForm.fileType.selectedIndex].value) +'&machines=' + (document.inputForm.machines[document.inputForm.machines.selectedIndex].value) +'&combineSourlients='  + (document.inputForm.combineSourlients.checked) + '&statsTypes='  + (document.inputForm.statsTypes[document.inputForm.statsTypes.selectedIndex].value);
+                        
+                      return qstr;
+                
+                }
+                
+                
+                function getParametersForRRDRequests(  ){
+                    
+                    var qstr = '';
+
+                    var plotter    = 'rrd';
+                    var endTime    = document.forms['inputForm'].elements['endTime'].value;
+                    var groupName  = document.forms['inputForm'].elements['groupName'].value;
+                    var products   = document.forms['inputForm'].elements['products'].value;
+                    var span       = document.forms['inputForm'].elements['span'].value;
+                    var fileType   = document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].value;
+                    var machines   = document.inputForm.machines[ document.inputForm.machines.selectedIndex ].value;
+                    var statsTypes = document.inputForm.statsTypes[ document.inputForm.statsTypes.selectedIndex ].value;
+                    var preDeterminedSpan= document.inputForm.preDeterminedSpan[ document.inputForm.preDeterminedSpan.selectedIndex ].value;
+                    var fixedSpan = document.inputForm.fixedSpan[ document.inputForm.fixedSpan.selectedIndex ].value;
+
+                    var sourlients= document.inputForm.sourlientList.options;
+
+                    qstr = '?plotter=rrd&querier=graphicsRequestPage.py&endTime' + escape(endTime) + '&groupName' + escape(groupName) + '&products' + escape(products) + '&span' + escape(span);
+                    qstr = qstr + '&fileType' + escape(fileType) + '&machines' + escape(machines) +'&statsTypes' + escape(statsTypes);
+                    qstr = qstr + '&preDeterminedSpan' + escape(preDeterminedSpan) + '&fixedSpan' + escape(fixedSpan);
+                    qstr = qstr + '&sourlients' + escape(sourlients);
+
+                    
+                    return qstr;
+
+                    
+                }  
+                    
+                
+                function getParametersForPopups() {
+    
+                    var fileType     = document.inputForm.fileType[document.inputForm.fileType.selectedIndex].value;
+                    
+                    var machines     = document.inputForm.machines[document.inputForm.machines.selectedIndex].value;
+                                                   
+                    var qstr = '?fileType=' + escape(fileType) + '&machines=' + escape(machines);  // NOTE: no '?' before querystring
+        
+                
+                    return qstr;
+                
+                }    
+            
+            
+            </script> 
+                              
+    """
+    
+    
     
 def printSlideShowScript( images ):
     """    
@@ -306,12 +469,21 @@ def printSlideShowScript( images ):
 
 def printRRDImageFieldSet( form ):
     """
+        @summary : Prints out the image field set that allows 
+                   the display of rrd generated graphics. 
+                   
+                   Will use the image slideshow script to diplay 
+                   the images when numerous ones need to be 
+                   displayed.  
+                   
+                   
+        @requires: Requires the  printSlideShowScript(images)            
+                   method to have been run. 
+        
     """
-    width  = 900
-    height = 300
-    
-   
-    
+  
+    width  = 875
+    height = 250     
     
     print """
          <fieldset>
@@ -340,6 +512,7 @@ def printRRDImageFieldSet( form ):
     """%(  width, height )
 
 
+
 def printGnuPlotImageFieldSet(form):
     """
        @summary : Prints the  section where the image will be displayed.
@@ -355,8 +528,8 @@ def printGnuPlotImageFieldSet(form):
     except:
         image = ""
             
-    width  =1200
-    height =1200        
+    width  = 1160
+    height = 1160        
     
         
     print """
@@ -365,7 +538,7 @@ def printGnuPlotImageFieldSet(form):
             <img src="%s">            
         </fieldset>    
         <fieldset>                
-            <input type=button value="View original size" onclick =" wopen('%s', 'popup', %s, %s); return false;">            
+            <input type=button class="button" value="View original size" onclick =" wopen('%s', 'popup', %s, %s); return false;">            
         </fieldset>    
     
     """%( image, image, width, height )
@@ -409,9 +582,9 @@ def printGroupTextBox( form ):
         groupName = ""    
     
     print """
-                        <td width = 200 >
+                        <td width = 210 >
                             <label for="groupName">Group name:</label>
-                            <INPUT TYPE=TEXT NAME="groupName" value = "%s">
+                            <INPUT TYPE=TEXT class="text" NAME="groupName" value = "%s">
                         </td>      
     """%( groupName )
 
@@ -432,9 +605,9 @@ def printProductsTextBox( form ):
         products = ""    
     
     print """
-                        <td width = 200>    
+                        <td width = 210>    
                             <label for="products">Products:</label><br>
-                            <INPUT TYPE=TEXT NAME="products" value = "%s">
+                            <INPUT TYPE=TEXT class="text" NAME="products" value = "%s">
                         </td>  
     """%( products ) 
    
@@ -455,9 +628,9 @@ def printSpanTextBox( form ):
         span = ""    
     
     print """
-                        <td width = 200>    
+                        <td width = 210>    
                             <label for="span">Span(in hours):</label><br>
-                            <INPUT TYPE=TEXT NAME="span" value = "%s">     
+                            <INPUT TYPE=TEXT class="text" NAME="span" value = "%s">     
                         </td>    
     """%( span ) 
 
@@ -479,18 +652,13 @@ def printFileTypeComboBox( form ):
     
     
     print """
-                        <td width = 200>
-                            <select name="fileType" OnChange="location.href='graphicsRequestPage.py?endTime=' + 
-                                         document.forms['inputForm'].elements['endTime'].value + 
-                                         '&groupName='+ (document.forms['inputForm'].elements['groupName'].value) +
-                                         '&products='+ (document.forms['inputForm'].elements['products'].value) +
-                                         '&span=' + (document.forms['inputForm'].elements['span'].value) + 
-                                         '&fileType=' + (document.inputForm.fileType[document.inputForm.fileType.selectedIndex].value) +
-                                         '&machines=' + (document.inputForm.machines[document.inputForm.machines.selectedIndex].value) +
-                                         '&combineSourlients='  + (document.inputForm.combineSourlients.checked)                                                              
-                            ">
+                        <td width = 210>
+                            <label for="fileType">FileType:</label><br>
+                            <select name="fileType" OnChange="JavaScript:executeAjaxRequest( 'popupSourlientAdder.py', '' );Javascript:updateButtons();">
                                 <option>Select a file type...</option>
     """
+    
+    
     for fileType in SUPPORTED_FILETYPES:
         if fileType == selectedFileType:            
             print """                               
@@ -519,7 +687,8 @@ def printSpecificSpanComboBox( form ):
     
     
     print """
-                        <td width = 200px> 
+                        <td width = 210px> 
+                            <label for="preDeterminedSpan">Determined spans : </label><br>
                             <select name="preDeterminedSpan" >     
                             <option>Pre-determined spans...</option>               
     """
@@ -532,6 +701,7 @@ def printSpecificSpanComboBox( form ):
             print """
                                 <option  value="%s">%s</option>
             """%( span, span )
+
 
 
 def printFixedSpanComboBox( form ):
@@ -550,7 +720,8 @@ def printFixedSpanComboBox( form ):
     
     
     print """
-                        <td width = 200px> 
+                        <td width = 210px> 
+                            <label for="fixedSpan">Fixed spans : </label><br>
                             <select name="fixedSpan" >     
                             <option>Select fixed span...</option>               
     """
@@ -574,6 +745,7 @@ def printMachinesComboBox( form ):
                    the combo will be set to this value.
                    
         @param form: Form with whom this program was called.  
+    
     """
     
     try:
@@ -583,8 +755,9 @@ def printMachinesComboBox( form ):
     
     
     print """
-                        <td width = 200px> 
-                            <select name="machines" >     
+                        <td width = 210px> 
+                            <label for="machines">Machine(s):</label><br>
+                            <select class="dropDownBox" name="machines" OnChange="JavaScript:executeAjaxRequest( 'popupSourlientAdder.py', '' ) ">     
                             <option>Select a machine name...</option>               
     """
     for machines in AVAILABLE_MACHINES:
@@ -609,8 +782,8 @@ def printStatsTypesComboBox( plotter, form ):
         
     """
     
-    rrdRxTypes = [ 'bytecount', 'errors', 'bytecount, errors' ]
-    rrdTxTypes = [ 'bytecount', 'errors', 'latency', 'bytecout,errors', 'bytecount,latency', 'errors,latency','bytecount,errors,latency' ]    
+    rrdRxTypes     = [ 'bytecount', 'errors', 'bytecount, errors' ]
+    rrdTxTypes     = [ 'bytecount', 'errors', 'latency', 'bytecout,errors', 'bytecount,latency', 'errors,latency','bytecount,errors,latency' ]    
     gnuplotRxTypes = [ 'bytecount', 'errors', 'bytecount, errors' ]
     gnuplotTxTypes = [ 'bytecount', 'errors', 'latency', 'bytecout,errors', 'bytecount,latency', 'errors,latency','bytecount,errors,latency' ]  
          
@@ -638,15 +811,19 @@ def printStatsTypesComboBox( plotter, form ):
         
         
     print """
-                        <td width = 200px> 
+                        <td width = 210px> 
+                            <label for="statsTypes">Stats type(s):</label><br>
                             <select name="statsTypes" >     
                             <option>Select stats types.</option>               
     """
+    
     for choice in listOfChoices:
+    
         if choice == selectedStatsTypes:            
             print """                               
                                 <option selected value="%s">%s</option>                              
             """ %( choice, choice )
+     
         else:
             print """
                                 <option  value="%s">%s</option>
@@ -661,6 +838,7 @@ def printCombineHavingrunCheckbox( form ):
                    the check box will be checked.
                    
         @param form: Form with whom this program was called.     
+        
     """
     
     try:
@@ -687,7 +865,8 @@ def printIndividualCheckbox( form ):
                    If form contains an Individual value, 
                    the check box will be checked.
                    
-        @param form: Form with whom this program was called.     
+        @param form: Form with whom this program was called.   
+          
     """
     
     try:
@@ -765,24 +944,30 @@ def printCombineSourlientsCheckbox( form ):
     else:
         print """
                                     
-                            <INPUT TYPE="checkbox" NAME="combineSourlients">Combine the sourLients.
+                            <INPUT TYPE="checkbox" NAME="combineSourlients">Combine the source(s)/client(s).
                           
         """    
     
     
 def printEndTime( form ):
     """
+        @summary : Prints end time calendar into the 
+                   inputform
+        
+        @param   : The parameter form with whom this program was called. 
+    
     """
+    
     try:
         endTime = form["endTime"][0]
     except:
         endTime = getCurrentTimeForCalendar() 
         
     print """         
-                        <td bgcolor="#ffffff" valign="top" width = 200>
-                            End Time Date:<br>
-                            <input type="Text" name="endTime" value="%s">
-                            <a href="javascript:cal1.popup();"><img src="cal.gif" width="16" height="16" border="0" alt="Click Here to Pick up the date"></a><br>
+                        <td bgcolor="#ffffff" valign="top" width = 210>
+                            <label for="endTime">End Time Date:</label><br>
+                            <input type="Text" class="text" name="endTime"  value="%s" width = 150>
+                            <a href="javascript:cal1.popup();"><img src="images/cal.gif" width="16" height="16" border="0" alt="Click Here to Pick up the date"></a>
                         
                             <script language="JavaScript">
                                 <!-- // create calendar object(s) just after form tag closed -->
@@ -834,7 +1019,7 @@ def printGnuPlotInputForm(  form   ):
     printFileTypeComboBox(form)
     printMachinesComboBox(form)
     printStatsTypesComboBox( "gnuplot", form )    
-    printChoiceOfSourlients( form )
+    printChoiceOfSourlients( 'gnuplot', form )
 
     #printCombineSourlientsCheckbox(form)  
    
@@ -848,18 +1033,22 @@ def printGnuPlotInputForm(  form   ):
     #Add fieldset for submit button 
     print """
             <fieldset>                             
-                <input type="button" name="generateGraphics" value="Generate graphic(s)" 
-                 onclick="location.href='graphicsRequestBroker.py?querier=graphicsRequestPage.py&endTime=' + 
-                 document.forms['inputForm'].elements['endTime'].value + 
-                 '&groupName='+ (document.forms['inputForm'].elements['groupName'].value) +
-                 '&products='+ (document.forms['inputForm'].elements['products'].value) +
-                 '&span=' + (document.forms['inputForm'].elements['span'].value) + 
-                 '&fileType=' + (document.inputForm.fileType[document.inputForm.fileType.selectedIndex].value) +
-                 '&machines=' + (document.inputForm.machines[document.inputForm.machines.selectedIndex].value) +
-                 '&combineSourlients='  + (document.inputForm.combineSourlients.checked)  +
-                 '&statsTypes='  + (document.inputForm.statsTypes[document.inputForm.statsTypes.selectedIndex].value)                                                              
-                ">
-                <input type=button name="help "value="Get Help" onclick ="wopen( document.plotterChoiceForm.plotterChoice[document.plotterChoiceForm.plotterChoice.selectedIndex].value + 'Help.html', 'popup', 800, 670 );">                                
+                <input type="button"  name="generateGraphics" value="Generate graphic(s)" 
+                 onclick="JavaScript:executeAjaxRequest('graphicsRequestBroker.py', 'gnuplot')" >
+                <input type=button  name="help "value="Get Help" onclick ="wopen( document.plotterChoiceForm.plotterChoice[document.plotterChoiceForm.plotterChoice.selectedIndex].value + 'Help.html', 'popup', 800, 670 );">                                
+            
+    """        
+    
+    
+    
+    print"""
+        
+            <div id="errorLabel"></div>
+        
+    """
+    
+    print """        
+            
             </fieldset>    
     """
     
@@ -910,7 +1099,7 @@ def printRRDInputForm(  form   ):
     printStatsTypesComboBox( "rrd", form )     
     printSpecificSpanComboBox(form)
     printFixedSpanComboBox(form)
-    printChoiceOfSourlients( form )
+    printChoiceOfSourlients( 'rrd', form )
 
     #printCombineSourlientsCheckbox(form)  
    
@@ -924,18 +1113,19 @@ def printRRDInputForm(  form   ):
     #Add fieldset for submit button 
     print """
             <fieldset>                             
-                <input type="button" name="generateGraphics" value="Generate graphic(s)" 
-                 onclick="location.href='graphicsRequestBroker.py?querier=graphicsRequestPage.py&endTime=' + 
-                 document.forms['inputForm'].elements['endTime'].value + 
-                 '&groupName='+ (document.forms['inputForm'].elements['groupName'].value) +
-                 '&products='+ (document.forms['inputForm'].elements['products'].value) +
-                 '&span=' + (document.forms['inputForm'].elements['span'].value) + 
-                 '&fileType=' + (document.inputForm.fileType[document.inputForm.fileType.selectedIndex].value) +
-                 '&machines=' + (document.inputForm.machines[document.inputForm.machines.selectedIndex].value) +
-                 '&combineSourlients='  + (document.inputForm.combineSourlients.checked)  +
-                 '&statsTypes='  + (document.inputForm.statsTypes[document.inputForm.statsTypes.selectedIndex].value)                                                              
-                ">
-                <input type=button name="help "value="Get Help" onclick ="wopen( document.plotterChoiceForm.plotterChoice[document.plotterChoiceForm.plotterChoice.selectedIndex].value + 'Help.html', 'popup', 800, 670 );">                                
+                <input type="button"  name="generateGraphics" value="Generate graphic(s)" 
+                 onclick="JavaScript:executeAjaxRequest('graphicsRequestBroker.py', 'rrd')">
+                <input type=button  name="help "value="Get Help" onclick ="wopen( document.plotterChoiceForm.plotterChoice[document.plotterChoiceForm.plotterChoice.selectedIndex].value + 'Help.html', 'popup', 830, 1100 );">                                
+    """
+    
+    
+    print"""
+        
+            <div id="errorLabel"></div>
+        
+    """
+            
+    print """        
             </fieldset>    
     """
     
@@ -943,6 +1133,7 @@ def printRRDInputForm(  form   ):
     print """
         </form>        
     """
+    
     
      
 def printInputForm( plotter, form ):
@@ -995,7 +1186,7 @@ def printPlottersChoice( plotter ):
     """
     
     
-def printHead( form ):
+def printHead( plotter, form ):
     """
         @summary : Print the head of the html file. 
             
@@ -1026,8 +1217,35 @@ def printHead( form ):
                     font-size:90%;
                     text-align:right;
                 }
-                img { max-height: 400px; }
-                               div.left { float: left; }
+                
+                img{ 
+                    max-height: 325px;
+                    height: expression(this.height > 325 ? 325: true);
+                }
+                
+                input.button{
+                
+                    width: 125px
+                
+                }
+                
+                input.text{
+                    width: 160px
+                }
+                
+                input.endtime{
+                    width = 100px;
+                }
+                
+                
+                select.dropDownBox{
+                    max-width: 160px;
+                    width: expression(this.width > 160 ? 160: true);
+                }
+                
+                
+                
+                div.left { float: left; }
                 div.right {float: right; }
                 <!--
                 A{text-decoration:none}
@@ -1066,11 +1284,41 @@ def printHead( form ):
                     win.focus();
                 }   
             </script>  
+            
+            
+            <script language="Javascript">
+            
+                function updateButtons(){
+                
+                    if ( document.inputForm.fileType[document.inputForm.fileType.selectedIndex].value == 'rx' ){
+                        
+                       document.inputForm.addButton.value    = 'Add Sources   ';
+                       document.inputForm.deleteButton.value = 'Delete Sources';
+                        
+                    }else if( document.inputForm.fileType[document.inputForm.fileType.selectedIndex].value == 'tx' ){
+                        
+                        document.inputForm.addButton.value    = 'Add Clients   ';
+                        document.inputForm.deleteButton.value = 'Delete Clients';
+                    
+                    }else{
+                        document.inputForm.addButton.value    = 'Add ';
+                        document.inputForm.deleteButton.value = 'Delete';
+                    
+                    }
+                }
+                
+            </script>
+            
+            
     """
     
-    if form['plotter'][0] == "rrd":
-        printSlideShowScript( form["image"][0].split(',') )
-        
+    
+    if plotter == "rrd":
+        try:
+            printSlideShowScript( form["image"][0].split(',') )
+        except:#no specified image 
+            printSlideShowScript( [] )
+    printAjaxRequestsScript()         
     print """        
         </head>
     """
@@ -1120,7 +1368,7 @@ def buildWebPageBasedOnReceivedForm( form ):
     
     plotter = getPlotter( form )
     startCGI()
-    printHead( form )
+    printHead( plotter, form )
     printPlottersChoice( plotter )
     printInputForm(plotter, form )
     printImageFieldSet( plotter, form )
