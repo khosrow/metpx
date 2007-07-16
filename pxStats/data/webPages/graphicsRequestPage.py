@@ -332,10 +332,10 @@ def printAjaxRequestsScript():
 
                     var sourlients= document.inputForm.sourlientList.options;
 
-                    qstr = '?plotter=rrd&querier=graphicsRequestPage.py&endTime' + escape(endTime) + '&groupName' + escape(groupName) + '&products' + escape(products) + '&span' + escape(span);
-                    qstr = qstr + '&fileType' + escape(fileType) + '&machines' + escape(machines) +'&statsTypes' + escape(statsTypes);
-                    qstr = qstr + '&preDeterminedSpan' + escape(preDeterminedSpan) + '&fixedSpan' + escape(fixedSpan);
-                    qstr = qstr + '&sourlients' + escape(sourlients);
+                    qstr = '?plotter=rrd&querier=graphicsRequestPage.py&endTime=' + escape(endTime) + '&groupName=' + escape(groupName) + '&products=' + escape(products) + '&span=' + escape(span);
+                    qstr = qstr + '&fileType=' + escape(fileType) + '&machines=' + escape(machines) +'&statsTypes=' + escape(statsTypes);
+                    qstr = qstr + '&preDeterminedSpan=' + escape(preDeterminedSpan) + '&fixedSpan=' + escape(fixedSpan);
+                    qstr = qstr + '&sourlients=' + escape(sourlients);
 
                     
                     return qstr;
