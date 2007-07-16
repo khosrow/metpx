@@ -43,7 +43,7 @@ class SenderFTP(object):
         # General Attributes
         self.client       = client       # Client Object
         self.cacheManager = cacheManager # cache  Object
-        self.cacheData    = None         # last cache Object tested/added
+        self.cacheMD5     = None         # last cache Object tested/added
         if logger is None:
             self.logger = Logger(PXPaths.LOG + 'tx_' + client.name + '.log', 'INFO', 'TX' + name) # Enable logging
             self.logger = self.logger.getLogger()
@@ -187,7 +187,13 @@ class SenderFTP(object):
                     ftp.set_pasv(False)
                 else:
                     ftp.set_pasv(True)
-                self.originalDir = ftp.pwd()
+
+                self.originalDir = '.'
+
+                try   : self.originalDir = ftp.pwd()
+                except:
+                        (type, value, tb) = sys.exc_info()
+                        self.logger.warning("Unable to ftp.pwd (Type: %s, Value: %s)" % (type ,value))
 
                 timex.cancel()
 
@@ -406,8 +412,8 @@ class SenderFTP(object):
                       self.logger.info("(%i Bytes) File %s delivered to %s://%s@%s%s%s" % (nbBytes, file, self.client.protocol, self.client.user, self.client.host, destDirString, destName))
 
                       # add data to cache if needed
-                      if self.client.nodups and self.cacheData != None : 
-                         self.cacheManager.find( self.cacheData, 'md5' ) 
+                      if self.client.nodups and self.cacheMD5 != None : 
+                         self.cacheManager.find( self.cacheMD5, 'standard' ) 
 
                except:
                       (type, value, tb) = sys.exc_info()
@@ -479,8 +485,8 @@ class SenderFTP(object):
                                           self.client.host, destDirString, destName))
     
                           # add data to cache if needed
-                          if self.client.nodups and self.cacheData != None : 
-                             self.cacheManager.find( self.cacheData, 'md5' ) 
+                          if self.client.nodups and self.cacheMD5 != None : 
+                             self.cacheManager.find( self.cacheMD5, 'standard' ) 
 
                    except:
                           (type, value, tb) = sys.exc_info()
@@ -512,18 +518,13 @@ class SenderFTP(object):
     # check if data in cache... if not it is added automatically
     def in_cache(self,unlink_it,path) :
 
-        self.cacheData=None
-
         try   :
-
-                 f=open(path,'r')
-                 self.cacheData=f.read()
-                 f.close()
+                 self.cacheMD5 = self.cacheManager.get_md5_from_file(path)
         except:
                  self.logger.error("Suppress duplicate : could not read %s", os.path.basename(path))
                  return False
 
-        return   self.cacheManager.has(self.cacheData, 'md5') 
+        return   self.cacheManager.has(self.cacheMD5, 'standard') 
 
 if __name__ == '__main__':
     pass
