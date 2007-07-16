@@ -32,6 +32,8 @@ from pxStats.lib.StatsPaths import StatsPaths
 
 LOCAL_MACHINE = os.uname()[1]
 
+
+
 def generateWebPage( sourlientNames, outputFileName):
     """
         @summary: Generates popupAdder web page named after the 
@@ -46,6 +48,7 @@ def generateWebPage( sourlientNames, outputFileName):
     sys.stdout = fileHandle
     
     print """
+    
     <html>
       <head>
         
@@ -141,7 +144,7 @@ def generateWebPage( sourlientNames, outputFileName):
 def main():
     """
         Generates the web page based on the received 
-        machine and file type parameters.
+        machines and file type parameters.
         
     """
     
@@ -170,18 +173,21 @@ def main():
         fileType = ""
         
     try:
-        machine  = form['machine']
+        machines  = form['machines']
+        machine = machines.split( ',' )[0]
+        machines = machines.replace( ',', '' )
     except:
-        error = "Error. Machine name needs to be specified."
+        error = "Error. Machine names need to be specified."
         machine = ""
     
-    if machine != "":          
+    if machines != "":          
+        
         rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machine )
     
     if fileType == "tx":
-        generateWebPage(txNames, "%s/%s%sPopSourlientUpAdder.html" %( StatsPaths.STATSWEBPAGES, fileType, machine ) )
+        generateWebPage(txNames, "%s/%s%sPopUpSourlientAdder.html" %( StatsPaths.STATSWEBPAGES, fileType, machines ) )
     elif fileType == "rx":
-        generateWebPage(rxNames, "%s/%s%sPopSourlientUpAdder.html" %( StatsPaths.STATSWEBPAGES, fileType, machine ) )
+        generateWebPage(rxNames, "%s/%s%sPopUpSourlientAdder.html" %( StatsPaths.STATSWEBPAGES, fileType, machines ) )
     
 
 if __name__ == '__main__':
