@@ -42,7 +42,10 @@ def generateWebPage( sourlientNames, outputFileName):
         
     """
     
-    """ Redirect the output"""
+    if not  os.path.isdir( os.path.dirname(outputFileName) ):
+        os.makedirs( os.path.dirname(outputFileName) )
+    
+    """ Redirect the output"""  
     fileHandle = open( outputFileName, "w" )
     oldStdOut = sys.stdout #save previous stdout
     sys.stdout = fileHandle
@@ -185,9 +188,9 @@ def main():
         rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machine )
     
     if fileType == "tx":
-        generateWebPage(txNames, "%s/%s%sPopUpSourlientAdder.html" %( StatsPaths.STATSWEBPAGES, fileType, machines ) )
+        generateWebPage(txNames, "%s/popUps/%s%sPopUpSourlientAdder.html" %( StatsPaths.STATSWEBPAGES, fileType, machines ) )
     elif fileType == "rx":
-        generateWebPage(rxNames, "%s/%s%sPopUpSourlientAdder.html" %( StatsPaths.STATSWEBPAGES, fileType, machines ) )
+        generateWebPage(rxNames, "%s/popUps/%s%sPopUpSourlientAdder.html" %( StatsPaths.STATSWEBPAGES, fileType, machines ) )
     
 
 if __name__ == '__main__':
