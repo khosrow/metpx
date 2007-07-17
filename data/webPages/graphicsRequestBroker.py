@@ -53,8 +53,16 @@ def returnToQueriersLocationWithReply( querier, reply ):
         
     
     """
-    print """Content-Type: text/html"""
-    print "Location: " + querier + reply #Return location to querier with reply....
+    
+    print """
+        HTTP/1.0 200 OK
+        Server: NCSA/1.0a6
+        Content-type: text/plain
+
+    """   
+    print """%s"""  %( reply )
+    
+    
  
  
 def getQuerierLocation( form ):
@@ -65,8 +73,13 @@ def getQuerierLocation( form ):
          
     """   
     
-    return form["querier"].value
     
+    try:
+        querier = form["querier"]
+    except:
+        querier = "" 
+        
+    return querier
     
     
 def handlePlotRequest( form ): 
@@ -79,27 +92,44 @@ def handlePlotRequest( form ):
     querier =  getQuerierLocation( form ) 
     plotter = getPlotterType(form)
     
+    #validate for known plotter
     if plotter == "gnuplot":
         queryBroker = GnuQueryBroker()
     elif plotter == "rrd":
         queryBroker = RRDQueryBroker()
+    else:
+        queryBroker = None    
+    
+    try:
+        if queryBroker != None :#if valid plotter
+            queryBroker.getParametersFromForm( form )
+            error = queryBroker.searchForParameterErrors()
+            
+            if error == "" :
+                queryBroker.prepareQuery( )
+                queryBroker.executeQuery( )
+                reply = queryBroker.getReplyToSendToquerier()
+            
+            else: #An error was located within the call.
+                queryBroker.replyParameters.error = error
+                reply = queryBroker.getReplyToSendToquerier()
+                returnToQueriersLocationWithReply( querier , reply )
         
-    
-    queryBroker.getParametersFromForm( form )
-    error =queryBroker.searchForParameterErrors()
-    
-    if error == "" :
-        queryBroker.prepareQuery( )
-        queryBroker.executeQuery( )
-        reply = queryBroker.getReplyToSendToquerier()
-    
-    else: #An error was located within the call.
-        reply = queryBroker.getReplyToSendToquerier()
-        reply = reply + "&error=%s" %error
-        
-    returnToQueriersLocationWithReply( querier , reply )
-  
- 
+        else:#other
+            fileHandle = open( 'outputfile', "w" )
+            oldStdOut = sys.stdout #save previous stdout
+            sys.stdout = fileHandle
+            print form
+            print sys.argv
+            fileHandle.close()
+            sys.stdout = oldStdOut
+            reply = "images=;error=Cannot execute query.Unknown plotter.Plotter was %s" %plotter
+            returnToQueriersLocationWithReply( querier , reply )
+     
+    except:      
+         reply = "images=;error=Unknown error. Cannot execute query. Please verify that parameters used are valid." 
+         returnToQueriersLocationWithReply( querier , reply )
+   
    
 def getPlotterType( form ): 
     """
@@ -108,23 +138,42 @@ def getPlotterType( form ):
         @return : Returns the plotter type.
          
     """    
-    
-    return form["plotter"][0]
+    try:
+        plotter = form["plotter"]
+    except:
+        plotter = ""
+        
+    return plotter 
  
  
  
 def getForm():
     """
         @summary: Returns the form with whom this page was called. 
+        
+        @note: The input form is expected ot be contained within the field storage. 
+               Thus this program is expected to be called from requests like 
+               xmlhttp.send()
+        
         @return:  Returns the form with whom this page was called. 
+    
     """
-    form = cgi.FormContent()
+    
+    newForm = {}
+    form = cgi.FieldStorage()
     
     for key in form.keys():
-        if "?" in key:
-            form[key.replace("?","")]= form[key]
-            
-    print form
+        value = form.getvalue(key, "")
+        if isinstance(value, list):
+            # Multiple username fields specified
+            newvalue = ",".join(value)
+        else:
+            newvalue = value
+        
+        newForm[key.replace("?","")]= newvalue
+          
+    form = newForm
+           
     return  form
      
      
