@@ -13,7 +13,7 @@ named COPYING in the root of the source directory tree.
 ##
 ## @author :  Nicholas Lemay
 ##
-## @since  : 2007-06-28, last updated on 2007-07-03  
+## @since  : 2007-06-28, last updated on 2007-07-17  
 ##
 ##
 ## @summary : This interfaces lists the methods that need to be implemented 
@@ -79,6 +79,12 @@ class GraphicsQueryBrokerInterface(object):
         """
         raise "Error. Class needs to implement method" 
     
+    def searchForParameterErrors(self):
+        """
+            Search and return the first error found within the parameters.            
+        """
+        raise "Error. Class needs to implement method."
+        
     def getReplyToSendToquerier(self):
         """
            Returns the reply of the query to send to the querier.
