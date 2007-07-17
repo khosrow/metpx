@@ -10,9 +10,9 @@ named COPYING in the root of the source directory tree.
 ## Name   : generateGraphics.py 
 ##
 ##
-## Author : Nicholas Lemay
+## @author:  Nicholas Lemay
 ##
-## Date   : 06-07-2006 
+## @since:  06-07-2006 last update on 2007-07-17 
 ##
 ##
 ## Description : Small application usefull for generating specific graphics.
@@ -74,7 +74,7 @@ def getOptionsFromParser( parser ):
     
     currentTime   = []
     
-    ( options, args )= parser.parse_args()        
+    ( options, args )= parser.parse_args()            
     collectUpToNow   = options.collectUpToNow
     timespan         = options.timespan
     machines         = options.machines.replace( ' ','').split(',')
@@ -87,7 +87,6 @@ def getOptionsFromParser( parser ):
     combineClients   = options.combineClients
     productTypes     = options.productTypes.replace( ' ', '' ).split( ',' )     
     groupName        = options.groupName.replace( ' ','' ) 
-      
     
     
     try: # Makes sure date is of valid format. 
@@ -134,7 +133,7 @@ def getOptionsFromParser( parser ):
     try :
     
         if fileType == "tx":       
-            validTypes = [ "errors","bytecount","latency", ]
+            validTypes = [ "errors","filecount","bytecount","latency" ]
             
             if types[0] == "All":
                 types = validTypes
@@ -143,7 +142,7 @@ def getOptionsFromParser( parser ):
                     if t not in validTypes:
                         raise Exception("")
         else:
-            validTypes = [ "errors","bytecount" ]
+            validTypes = [ "errors","filecount","bytecount" ]
             
             if types[0] == "All":
                 types = validTypes
@@ -177,7 +176,7 @@ def getOptionsFromParser( parser ):
 
         
         
-def createParser( ):
+def createAParser( ):
     """ 
         Builds and returns the parser 
     
@@ -274,10 +273,10 @@ def main():
         
     """
     
-    parser = createParser( )  #will be used to parse options 
+    parser = createAParser( )  #will be used to parse options 
     
     infos = getOptionsFromParser( parser )          
-
+    print "prior to constructor : %s" %infos.productTypes
     gp = ClientGraphicProducer( clientNames = infos.clientNames, groupName = infos.groupName , timespan = infos.timespan, currentTime = infos.currentTime, productTypes = infos.productTypes, directory = infos.directory , fileType = infos.fileType, machines = infos.machines )  
     
     gp.produceGraphicWithHourlyPickles( types = infos.types, now = infos.collectUpToNow, createCopy = infos.copy, combineClients = infos.combineClients )
