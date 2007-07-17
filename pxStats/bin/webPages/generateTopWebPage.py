@@ -10,9 +10,9 @@ named COPYING in the root of the source directory tree.
 ## Name   : generateTopWebPage.py 
 ##
 ##
-## Author : Nicholas Lemay
+## @author: Nicholas Lemay
 ##
-## Date   : 12-04-2007 
+## @since: 12-04-2007, last update on 2007-07-17 
 ##
 ##
 ## Description : Generates the top frame to be displayed on the pxstats web 
@@ -98,6 +98,7 @@ def generateWebPage( machineTags ):
         
         <div class="right">
             <a href="%s" target="bottom" >Archives</a>
+            <a href="graphicsRequestPage.py" target="bottom">Requests</a>
             <a href="glossary.html" target="bottom" >Glossary</a>
         </div>
         
