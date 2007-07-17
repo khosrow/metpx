@@ -34,7 +34,10 @@ sys.path.insert(1, sys.path[0] + '/../../')
 
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+from pxStats.lib.GraphicsQueryBrokerInterface import GraphicsQueryBrokerInterface
+from pxStats.lib.ClientGraphicProducer import ClientGraphicProducer
 
+LOCAL_MACHINE = os.uname()[1]
 
 
 class GnuQueryBroker(GraphicsQueryBrokerInterface):
@@ -94,7 +97,7 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
             
     class _ReplyParameters( _QueryParameters ):   
         
-        def __init__( self, querier, plotter, image, fileType, sourLients, groupName, machines, combine, endTime,  products, statsTypes,  span ):    
+        def __init__( self, querier, plotter, image, fileType, sourLients, groupName, machines, combine, endTime,  products, statsTypes,  span, error ):    
             """
                 @summary : _ReplyParameters parameters class constructor.                
                 
@@ -110,7 +113,8 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
                 @param products: List of specific products for wich to plot graphics.                
                 @param statsTypes : List of stats types for wich to create the graphics.
                 @param span: span in hoursof the graphic(s). 
-            
+                @param error  : error that has occured during query.
+                
             """           
             
             self.querier    = querier
@@ -125,7 +129,7 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
             self.products   = products
             self.statsTypes = statsTypes
             self.span       = span
-                    
+            self.error      = error        
       
        
     def getParametersFromParser( self, parser ):
@@ -142,27 +146,86 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
         """
             @summary: Initialises the queryParameters
                       based on the form received as 
-                     parameter.         
+                      parameter.        
+                     
+           @note :   Absent parameters will be set to default values( [] or '' )
+                     and will NOT raise exceptions. Use the searchForParameterErrors
+                     function to search for errors           
+                       
+           
         """
         
-        #Every param is set in an array, use [0] to get first item, nothing for array.
-        querier     = form["querier"][0]
-        plotter     = form["plotter"][0] 
-        image       = None
-        fileTypes   = form["fileType"]
-        sourLients  = form["sourLients"]
-        groupName   = form["groupName"][0]
-        machines    = form["machines"]
-        combine     = form["combineSourlients"][0]
-        endTime     = form["endTime"][0]
-        products    = form["products"]
-        statsTypes  = form["statsTypes"]
-        span        = form["span"][0]
+        #print form
         
-        self.queryParameters = _QueryParameters( fileType, sourLients, groupName, machines, combine, endTime,  products, statsTypes,  span )
+        image       = None  #No image was produced yet
         
-        self.replyParameters = _ReplyParameters( querier, plotter, image, fileTypes, sourLients, groupName, machines, combine, endTime,
-                                                 products, statsTypes,  span )
+        #Every param is received  in an array, use [0] to get first item, nothing for array.
+        try:
+            querier = form["querier"].replace("'", "").replace('"','')
+        except:
+            querier = ''
+                
+        try:
+            plotter = form["plotter"].replace("'", "").replace('"','') 
+        except:
+            plotter = ''
+             
+        
+        try:
+            fileTypes = form["fileType"].replace("'", "").replace('"','')
+        except:
+            fileTypes = ''
+        
+        
+        try:
+            sourLients = form["sourLients"].split(',')
+        except:
+            sourLients = []
+        
+        
+        try:
+            groupName = form["groupName"].replace("'", "").replace('"','')
+        except:
+            groupName = ''
+        
+        
+        try:
+            machines = form["machines"].split(',')
+        except:
+            machines = []
+        
+        
+        try:
+            combine = form["combineSourlients"].replace(",", "").replace('"','')
+        except:
+            combine = 'false'
+        
+        try:
+            endTime = form["endTime"].replace("'", "").replace('"','')
+            hour      = endTime.split(" ")[1]
+            splitDate = endTime.split(" ")[0].split( '-' )
+            endTime = "%s" %( splitDate[2] + '-' + splitDate[1]  + '-' + splitDate[0]  + " " + hour )       
+            #print endTime
+        except:
+            endTime = ''
+        
+        try:
+            products = form["products"].split(',')
+        except:
+            products = []
+            
+        try:    
+            statsTypes = form["statsTypes"].split(',')
+        except:
+            statsTypes = []
+        try:
+            span        = form["span"].replace("'", "").replace('"','')
+        except:
+            span = 24
+            
+        self.queryParameters = GnuQueryBroker._QueryParameters( fileTypes, sourLients, groupName, machines, combine, endTime,  products, statsTypes,  span )
+        
+        self.replyParameters = GnuQueryBroker._ReplyParameters( querier, plotter, image, fileTypes, sourLients, groupName, machines, combine, endTime, products, statsTypes,  span, error = '' )
         
         
         
@@ -219,7 +282,7 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
                 int(self.queryParameters.span)
             except:
                 error = "Error. Span(in hours) value needs to be numeric."          
-                
+    
         except:
             
             pass
@@ -231,7 +294,7 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
     
     def prepareQuery(self):
         """
-            Buildup the query line to be executed.
+            @summary:  Buildup the query  to be executed.
         """
         
         directory = GeneralStatsLibraryMethods.getPathToLogFiles( LOCAL_MACHINE, self.queryParameters.machines[0] )
@@ -240,14 +303,20 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
         self.graphicProducer = ClientGraphicProducer( directory = directory, fileType = self.queryParameters.fileType,  
                                                       clientNames = self.queryParameters.sourLients, 
                                                       groupName = self.queryParameters.groupName, 
-                                                      timespan = self.queryParameters.span, currentTime = self.queryParameters.endtime,
-                                                      productTypes = self.queryParameters.products, logger= NONE,
+                                                      timespan = int(self.queryParameters.span), currentTime = self.queryParameters.endTime,
+                                                      productTypes = self.queryParameters.products, logger= None,
                                                       machines = self.queryParameters.machines )
-       
       
-    
-    
-    
+        #------------------------------- print """directory = %s, fileType = %s,
+                 #-------------------------------------------- clientNames = %s,
+                 #---------------------------------------------- groupName = %s,
+                 #------------------------ timespan = int(%s), currentTime = %s,
+                 #------------------------------- productTypes = %s, logger= %s,
+                 #------------------------------------------------ machines = %s
+        # """ %( directory, self.queryParameters.fileType, self.queryParameters.sourLients, self.queryParameters.groupName, self.queryParameters.span, self.queryParameters.endTime, self.queryParameters.products, None, self.queryParameters.machines )
+#------------------------------------------------------------------------------ 
+        
+        
     def executeQuery(self):
         """
             @summary: Execute the built-up query on the needed plotter.
@@ -259,6 +328,13 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
         imageName = self.graphicProducer.produceGraphicWithHourlyPickles( types = self.queryParameters.statsTypes , now = False, 
                                                               createCopy = False, combineClients = self.queryParameters.combine )
     
+        #-------------------------------------- print """ types = %s , now = %s,
+             #----------------------------- createCopy = %s, combineClients = %s
+#------------------------------------------------------------------------------ 
+        # """%( self.queryParameters.statsTypes, False, False, self.queryParameters.combine  )
+        
+        
+        
         self.replyParameters.image = imageName
     
     
@@ -273,9 +349,11 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
         
         params = self.replyParameters
         
-        reply = "?plotter=%s&?image=%s&fileType=%s&sourlients=%s&groupName=%s&machines=%s&combineSourlients=%s&%endTime=%s&products=%s&statsTypes=%s&span=%s" \
-         %( params.plotter, params.image, params.fileType, params.sourLients, params.groupName,
-            params.machines, params.combine, params.endtime, params.products, params.statsTypes, params.span  )
+        reply = "images=%s;error=%s"%(params.image, params.error   )
+        #print reply
+        # reply = "?plotter=%s&?image=%s&fileType=%s&sourlients=%s&groupName=%s&machines=%s&combineSourlients=%s&endTime=%s&products=%s&statsTypes=%s&span=%s" \
+         # %( params.plotter, params.image, params.fileType, params.sourLients, params.groupName,
+            # params.machines, params.combine, params.endTime, params.products, params.statsTypes, params.span  )
          
         return reply
     
