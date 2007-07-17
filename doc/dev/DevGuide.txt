@@ -174,7 +174,7 @@ no trouble (Ubuntu and Kubuntu will work fine.)
 The simplest method of obtaining the source code is to open a shell window on
 a linux system, and execute the command:
 
-svn co https://svn.sourceforge.net/svnroot/metpx/trunk
+svn co https://metpx.svn.sourceforge.net/svnroot/metpx/trunk
 
 If you see *svn: command not found* then you need to have subversion
 installed on your system (likely by apt-get install subversion, as root.)

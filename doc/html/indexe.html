@@ -28,12 +28,14 @@ Protocol support:
 <LI>AM (Canadian proprietary socket protocol) 
 <LI>WMO (see manual 386 for the WMO TCP/IP socket protocol.)
 <LI>FTP (for transport, no support for WMO naming yet (but trivial to add.))
+<LI>SFTP (similar to FTP.)
 <LI>AFTN/IP (NavCanada version of AFTN running on IP networks.) 
 </UL>
 <P>
 features:
 <UL>
 <LI>detailed routing (in production with 30,000 distinct entries in the routing table.)
+<LI>unified/similar for bulletins and files.
 <LI>sub-second latency (with 28,000 routing entries.)
 <LI>high speed routing and delivery. (was &gt;300 messages per second, but that was a year ago, and many features which might slow it down have been added, a re-test is in order.)
 <LI>no message size limit.
@@ -99,7 +101,7 @@ going.
 <P>
 with those explanations, feel free to grab a snapshot can be obtained using subversion via:
 <UL>
-    svn co https://svn.sourceforge.net/svnroot/metpx/trunk
+    svn co https://metpx.svn.sourceforge.net/svnroot/metpx/trunk
 </UL>
 
 available for anonymous read-only access. 

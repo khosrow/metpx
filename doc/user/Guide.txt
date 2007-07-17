@@ -122,13 +122,14 @@ Today, MetPX can receive:
  * Alpha-Manager Protocol sockets (A Canadian proprietary protocol.)
  * WMO GTS socket data.
  * files dropped in a directory on the server (we accept them via scp, ftp, cp, and rcp today.)
- * Planned: files dropped in a remote directory accessible via a file transfer protocol (ftp, sftp.)
+ * files dropped in a remote directory accessible via a file transfer protocol (ftp only for now)
 
 MetPX can Send:
  * Alpha-Manager Protocol sockets (A Canadian proprietary protocol.)
  * AMIS Protocol sockets (mimics a recently deceased 25 year old Canadian digital satellite broadcast.)
  * WMO GTS socket data.
- * via FTP ( Other file transfer protocols are certainly on our list, such as sftp)
+ * via FTP 
+ * via SFTP
 
 MetPX's switching component (sundew) functions, succinctly, as follows:  
  * data is received by pxReceiver processes, 
@@ -199,6 +200,7 @@ Installation
 
 Assuming Debian packages are available, then dpkg -i metpx-sundew-xx-yy.dpkg; apt-get install -f;
 FIXME
+deprecated: read INSTALL file in sundew root directory.
 
 A First Run
 -----------
