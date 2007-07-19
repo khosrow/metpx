@@ -197,8 +197,18 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
         
         try:
             combine = form["combineSourlients"].replace(",", "").replace('"','')
+            
+            if combine == 'false' or combine == 'False':
+                combine = False
+            elif combine == 'true' or combine == 'True':
+                combine = True
+            else:
+                raise    
+            
         except:
-            combine = 'false'
+            combine = False
+        
+        
         
         try:
             endTime = form["endTime"].replace("'", "").replace('"','')
@@ -212,7 +222,7 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
         try:
             products = form["products"].split(',')
         except:
-            products = []
+            products = ['All']
             
         try:    
             statsTypes = form["statsTypes"].split(',')
@@ -220,6 +230,8 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
             statsTypes = []
         try:
             span        = form["span"].replace("'", "").replace('"','')
+            if str(span).replace( ' ', '' ) == '':
+                raise 
         except:
             span = 24
             
