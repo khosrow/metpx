@@ -53,14 +53,16 @@ from pxStats.lib.StatsConfigParameters import StatsConfigParameters
    Define constants to be used for filling out the different select boxes. 
 """
 
+
 SUPPORTED_PLOTTERS = [ "gnuplot", "rrd" ]
 
 SUPPORTED_FILETYPES = [ "rx","tx"]
 
-RX_DATATYPES = { "gnuplot" : [ "bytecount", "errors","bytecout,errors"], "rrd" : [ "bytecount", "filecount","errors"] }
+RX_DATATYPES = { "gnuplot" : [ "bytecount", "filecount","errors", "bytecount,errors", "bytecount,filecount", "errors,filecount", "bytecount,filecount,errors" ], "rrd" : [ 'bytecount',  'filecount', 'errors' ] }
 
-TX_DATATYPES ={ "gnuplot" : [ "bytecount", "errors", "latency", "bytecout,errors", "bytecout,latency", "errors,latency", "bytecout, errors, latency"] ,
-                "rrd": [ "bytecount", "errors", "filecount", "latency", "filesOverMaxLatency"]}
+TX_DATATYPES ={ "gnuplot" : [ "bytecount", "errors", "filecount", "latency", "bytecount,errors", "bytecount,filecount", "bytecount,latency", "error,filecount","error,latency",
+                               "filecount,latency","bytecount,errors,filecount", "bytecount,filecount,latency", "bytecount,errors,latency","bytecount,errors,filecount,latency"], \
+                "rrd": [ 'bytecount', 'errors', 'latency', 'bytecount,errors', 'bytecount,latency', 'errors,latency','bytecount,errors,latency' ]    }
 
 
 FIXED_TIMESPANS = { "gnuplot" : [ "N/A"], "rrd" : [ "daily" , "weekly", "monthly", "yearly" ] }
@@ -151,7 +153,7 @@ def printChoiceOfSourlients( plotter, form ):
     """    
     
     try:
-        sourLients = form["sourLients"]
+        sourLients = form["sourLients"].split(',')
     except KeyError:
         sourLients = None
         
@@ -193,10 +195,11 @@ def printChoiceOfSourlients( plotter, form ):
                
                         <br>               
                     
-                        <input type=button name="addButton" class="button" value="Add Sourlients" onclick ="javascript:popupAddingWindow( document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].value + (document.inputForm.machines[ document.inputForm.machines.selectedIndex ].value).replace(',','') + 'PopUpSourlientAdder.html' );">
+                        <input type=button name="addButton" class="button" value="Add Sourlients" onclick ="javascript:popupAddingWindow( 'popUps/' + document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].value + (document.inputForm.machines[ document.inputForm.machines.selectedIndex ].value).replace(',','') + 'PopUpSourlientAdder.html' );">
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         <input type=button name="deleteButton" class="button" value="Delete Sourlients" onclick ="javascript:deleteFromList(sourlientList);">
-    """
+    
+    """ 
     
     if plotter == "gnuplot":
         printCombineSourlientsCheckbox(form)
@@ -219,6 +222,8 @@ def printAjaxRequestsScript():
                    
                    They were modified to fit our specific needs. 
     """
+    
+    
     print """
     
             <script language="JavaScript">
@@ -308,9 +313,14 @@ def printAjaxRequestsScript():
                                 
                 function getParametersForGnuplotRequests(){
                     
-                     var qstr = '?plotter=gnuplot&querier=graphicsRequestPage.py&endTime=' + document.forms['inputForm'].elements['endTime'].value +'&groupName='+ (document.forms['inputForm'].elements['groupName'].value) +'&products='+ (document.forms['inputForm'].elements['products'].value) +'&span=' + (document.forms['inputForm'].elements['span'].value) +'&fileType=' + (document.inputForm.fileType[document.inputForm.fileType.selectedIndex].value) +'&machines=' + (document.inputForm.machines[document.inputForm.machines.selectedIndex].value) +'&combineSourlients='  + (document.inputForm.combineSourlients.checked) + '&statsTypes='  + (document.inputForm.statsTypes[document.inputForm.statsTypes.selectedIndex].value);
+                     sourlients = new Array();
+                     for (var i = 0; i < document.inputForm.sourlientList.options.length; i++){
+                         sourlients.push( document.inputForm.sourlientList.options[i].value );
+                     }  
+                     
+                     var qstr = '?plotter=gnuplot&querier=graphicsRequestPage.py&endTime=' + document.forms['inputForm'].elements['endTime'].value + '&sourLients=' + sourlients  + '&groupName='+ (document.forms['inputForm'].elements['groupName'].value) +'&products='+ (document.forms['inputForm'].elements['products'].value) +'&span=' + (document.forms['inputForm'].elements['span'].value) +'&fileType=' + (document.inputForm.fileType[document.inputForm.fileType.selectedIndex].value) +'&machines=' + (document.inputForm.machines[document.inputForm.machines.selectedIndex].value) +'&combineSourlients='  + (document.inputForm.combineSourlients.checked) + '&statsTypes='  + (document.inputForm.statsTypes[document.inputForm.statsTypes.selectedIndex].value);
                         
-                      return qstr;
+                     return qstr;
                 
                 }
                 
@@ -328,15 +338,20 @@ def printAjaxRequestsScript():
                     var machines   = document.inputForm.machines[ document.inputForm.machines.selectedIndex ].value;
                     var statsTypes = document.inputForm.statsTypes[ document.inputForm.statsTypes.selectedIndex ].value;
                     var preDeterminedSpan= document.inputForm.preDeterminedSpan[ document.inputForm.preDeterminedSpan.selectedIndex ].value;
-                    var fixedSpan = document.inputForm.fixedSpan[ document.inputForm.fixedSpan.selectedIndex ].value;
-
-                    var sourlients= document.inputForm.sourlientList.options;
+                    var fixedSpan  = document.inputForm.fixedSpan[ document.inputForm.fixedSpan.selectedIndex ].value;
+                    var individual = document.inputForm.individual.checked;
+                    var total      = document.inputForm.total.checked;
+                    
+                    sourlients = new Array();
+                    for (var i = 0; i < document.inputForm.sourlientList.options.length; i++){
+                         sourlients.push( document.inputForm.sourlientList.options[i].value );
+                     }  
 
                     qstr = '?plotter=rrd&querier=graphicsRequestPage.py&endTime=' + escape(endTime) + '&groupName=' + escape(groupName) + '&products=' + escape(products) + '&span=' + escape(span);
                     qstr = qstr + '&fileType=' + escape(fileType) + '&machines=' + escape(machines) +'&statsTypes=' + escape(statsTypes);
                     qstr = qstr + '&preDeterminedSpan=' + escape(preDeterminedSpan) + '&fixedSpan=' + escape(fixedSpan);
-                    qstr = qstr + '&sourlients=' + escape(sourlients);
-
+                    qstr = qstr + '&sourLients=' + escape( sourlients );
+                    qstr = qstr + '&individual' + escape( individual ) + '&total' + escape( total );
                     
                     return qstr;
 
@@ -517,7 +532,7 @@ def printGnuPlotImageFieldSet(form):
     """
        @summary : Prints the  section where the image will be displayed.
        
-       @param from: Form with whom this program was called.
+       @param form: Form with whom this program was called.
       
        @todo: Receive variable imaghe size as a parameter.
         
@@ -555,7 +570,7 @@ def printImageFieldSet( plotter, form ):
        @param plotter : Plotter wich was used to created image. Output image size will be 
                         based on plotter used.
        
-       @todo: Receive variable imaghe size as a parameter.
+       @todo: Receive variable image size as a parameter.
        
     """
     
@@ -599,6 +614,7 @@ def printProductsTextBox( form ):
         @param form: Form with whom this program was called.     
     
     """
+    
     try:
         products = form["products"][0]
     except:
@@ -643,6 +659,7 @@ def printFileTypeComboBox( form ):
                    the combo will be set to this value.
                    
         @param form: Form with whom this program was called.  
+        
     """
     
     try:
@@ -654,7 +671,7 @@ def printFileTypeComboBox( form ):
     print """
                         <td width = 210>
                             <label for="fileType">FileType:</label><br>
-                            <select name="fileType" OnChange="JavaScript:executeAjaxRequest( 'popupSourlientAdder.py', '' );Javascript:updateButtons();">
+                            <select name="fileType" OnChange="JavaScript:executeAjaxRequest( 'popupSourlientAdder.py', '' );Javascript:updateStatsTypes( document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].value );Javascript:updateButtons();">
                                 <option>Select a file type...</option>
     """
     
@@ -782,11 +799,11 @@ def printStatsTypesComboBox( plotter, form ):
         
     """
     
-    rrdRxTypes     = [ 'bytecount', 'errors', 'bytecount, errors' ]
-    rrdTxTypes     = [ 'bytecount', 'errors', 'latency', 'bytecout,errors', 'bytecount,latency', 'errors,latency','bytecount,errors,latency' ]    
-    gnuplotRxTypes = [ 'bytecount', 'errors', 'bytecount, errors' ]
-    gnuplotTxTypes = [ 'bytecount', 'errors', 'latency', 'bytecout,errors', 'bytecount,latency', 'errors,latency','bytecount,errors,latency' ]  
-         
+    rrdRxTypes     = RX_DATATYPES['rrd']
+    rrdTxTypes     = TX_DATATYPES['rrd']
+    gnuplotRxTypes = RX_DATATYPES['gnuplot']
+    gnuplotTxTypes = TX_DATATYPES['gnuplot']
+    
     
     try:
         selectedStatsTypes = form["statsTypes"][0]
@@ -813,7 +830,7 @@ def printStatsTypesComboBox( plotter, form ):
     print """
                         <td width = 210px> 
                             <label for="statsTypes">Stats type(s):</label><br>
-                            <select name="statsTypes" >     
+                            <select name="statsTypes" class="statsTypes">     
                             <option>Select stats types.</option>               
     """
     
@@ -878,13 +895,13 @@ def printIndividualCheckbox( form ):
     if individual == "true" :
             print """
                             <td>        
-                                <INPUT TYPE="checkbox" NAME="individual"  CHECKED>Individual.
+                                <INPUT TYPE="checkbox" name="individual"  checked>Individual.
                             </td. 
             """  
     else:
         print """               
                             <td>
-                                <INPUT TYPE="checkbox" NAME="individual">Individual.                          
+                                <INPUT TYPE="checkbox" name="individual">Individual.                          
                             </td>
         """     
 
@@ -1243,7 +1260,10 @@ def printHead( plotter, form ):
                     width: expression(this.width > 160 ? 160: true);
                 }
                 
-                
+                select.statsTypes{
+                    max-width: 180px;
+                    width: expression(this.width > 180 ? 180: true);
+                }
                 
                 div.left { float: left; }
                 div.right {float: right; }
@@ -1308,7 +1328,48 @@ def printHead( plotter, form ):
                 }
                 
             </script>
+    """
+    
+    if plotter == "rrd" or plotter == "gnuplot":
+        rxStatsTypes = RX_DATATYPES[ plotter ]
+        txStatsTypes = TX_DATATYPES[ plotter ]
+    
+    else:
+        rxStatsTypes=[]
+        txStatsTypes=[]
+                
+    
+    print """
+            <script>
+                function updateStatsTypes( fileType ){
+                
+                    if ( fileType == 'rx' ){
+                        document.inputForm.statsTypes.options.length = 0;
+    """
+    
+    for i in range( len( rxStatsTypes ) ):
+    
+        print """
+                        document.inputForm.statsTypes.options[%s] = new Option('%s','%s');
+        """%( i, rxStatsTypes[i] , rxStatsTypes[i] )                    
+        
+        
+    print """                    
+                    }else if( fileType == 'tx' ){
+                        document.inputForm.statsTypes.options.length = 0;
+    """
+    
+    for  i in range( len( txStatsTypes ) ):
+        print """
+                        document.inputForm.statsTypes.options[%s] = new Option('%s','%s');
+        """%( i, txStatsTypes[i], txStatsTypes[i] )
+    
+    print """                    
+                    }                                   
             
+            }
+        
+        </script>          
             
     """
     
@@ -1347,7 +1408,7 @@ def getPlotter( form ):
     plotter = SUPPORTED_PLOTTERS[0]
     
     try:    
-        plotter = form["plotter"][0]
+        plotter = form["plotter"]
         
     except:
         pass
@@ -1382,14 +1443,21 @@ def getForm():
         @return:  Returns the form with whom this page was called. 
     """
 
-    form = cgi.FormContent()
+    newForm = {}
+    form = cgi.FieldStorage()
     
     for key in form.keys():
-        if "?" in key:
-            form[key.replace("?","")]= form[key]
-            
-    print form
-    
+        value = form.getvalue(key, "")
+        if isinstance(value, list):
+            # Multiple username fields specified
+            newvalue = ",".join(value)
+        else:
+            newvalue = value
+        
+        newForm[key.replace("?","")]= newvalue
+          
+    form = newForm
+           
     return  form
     
 
