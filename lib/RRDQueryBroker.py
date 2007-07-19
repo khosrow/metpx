@@ -1,3 +1,4 @@
+
 #! /usr/bin/env python
 """
 MetPX Copyright (C) 2004-2006  Environment Canada
@@ -237,7 +238,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
             span = 24
         
         try:
-            specificSpan = form["specificSpan"]
+            specificSpan = form["preDeterminedSpan"]
         except:
             specificSpan = ''
         
@@ -342,7 +343,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
         hour      = self.queryParameters.endTime.split(" ")[1]
         splitDate = self.queryParameters.endTime.split(" ")[0].split( '-' )
         
-        date = "-d '%s'" %( splitDate[2] + '-' + splitDate[1]  + '-' + splitDate[0]  + hour )
+        date = "--date '%s'" %( splitDate[2] + '-' + splitDate[1]  + '-' + splitDate[0]  + " " + hour )
         
         fileType = '-f %s' %( str( self.queryParameters.fileType).replace('[','').replace( ']', '' ) )
         
@@ -356,7 +357,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
         if self.queryParameters.specificSpan == "daily":
             specificSpan = "-d"
         elif self.queryParameters.specificSpan == "weekly":
-            specificSpan = "-m"        
+            specificSpan = "-w"        
         elif self.queryParameters.specificSpan == "monthly":
             specificSpan = "-m"
         elif self.queryParameters.specificSpan == "yearly":
