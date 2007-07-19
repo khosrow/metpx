@@ -68,7 +68,7 @@ def generateWebPage( sourlientNames, outputFileName):
         </style>
         <link rel="stylesheet" type="text/css" href="/css/style.css">
     
-        <script src="js/popupListAdder.js"></script>
+        <script src="../js/popupListAdder.js"></script>
       
       </head>
       
