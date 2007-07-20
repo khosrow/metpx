@@ -78,6 +78,36 @@ AVAILABLE_MACHINES   = []
 
 """ """
 
+def getWordsFromFile( file ):
+    """    
+    """
+    
+    lines = []
+    
+    if os.path.isfile( file ):
+        fileHandle = open( file, "r")
+        lines = fileHandle.readlines()
+        for i in range( len( lines ) ):
+            lines[i] = lines[i].replace( '\n','' )
+    
+    lines.sort( )
+    
+        
+    return lines
+
+
+
+def getWordsFromDB( wordType ):
+    """    
+    """
+    
+    words = []
+    
+    if wordType == "products":
+        words = getWordsFromFile( StatsPaths.STATSWEBPAGESWORDDBS + 'products') 
+    elif wordType == "groupName" :
+        words = getWordsFromFile( StatsPaths.STATSWEBPAGESWORDDBS + 'groupNames')
+    return words    
 
 
 
@@ -288,10 +318,11 @@ def printAjaxRequestsScript():
                         var error = response.split(";")[1];
                         image = image.split("=")[1];
                         error = error.split("=")[1];
-    
+                        
                         document.getElementById("errorLabel").innerHTML = '<font color="#C11B17">' + error + '</font>';
-                        document.getElementById("photoslider").src = image;                  
-                                                       
+                        document.getElementById("photoslider").src = image;
+                        
+                                                                                                                        
                     }
                   }
                }     
@@ -310,6 +341,8 @@ def printAjaxRequestsScript():
                                       
                 }
                 
+                
+
                                 
                 function getParametersForGnuplotRequests(){
                     
@@ -596,36 +629,60 @@ def printGroupTextBox( form ):
     except:
         groupName = ""    
     
+    words = getWordsFromDB( 'groupName' )
+    
     print """
-                        <td width = 210 >
-                            <label for="groupName">Group name:</label>
-                            <INPUT TYPE=TEXT class="text" NAME="groupName" value = "%s">
-                        </td>      
-    """%( groupName )
+                        <td width = 210>
+                            <label for="products">Group name:</label><br>
+                             <INPUT TYPE="TEXT" class="text" NAME="groupName" value="%s" id="groupName" >
+                             <div id="autosuggest"><ul></ul></div>
+                             <script language="Javascript">
+                                 
+                                 var groupList = new Array(%s);
+                                 
+                                 new AutoSuggest( document.getElementById('groupName'), groupList );                                   
+                             
+                             </script>
+                                               
+                        </td>
+    
+    """%( groupName, str(words).replace( '[','' ).replace( ']', '' ) )
 
 
 
 def printProductsTextBox( form ):
     """
         @Summary : Prints out the products text box.
-                   If form contains a products value, 
+                   If form contains a products value,
                    the text box will be set to this value.
-                   
-        @param form: Form with whom this program was called.     
-    
+
+        @param form: Form with whom this program was called.
+
     """
-    
+
     try:
         products = form["products"][0]
     except:
-        products = ""    
+        products = ""
+
+    words = getWordsFromDB( 'products' )
     
+        
     print """
-                        <td width = 210>    
+                        <td width = 210>
                             <label for="products">Products:</label><br>
-                            <INPUT TYPE=TEXT class="text" NAME="products" value = "%s">
-                        </td>  
-    """%( products ) 
+                             <INPUT TYPE="TEXT"  NAME="products" value="%s" id="products" >
+                             <div id="autosuggest"><ul></ul></div>
+                             <script language="Javascript">                                 
+                                 var productList = new Array(%s);                                 
+                                 new AutoSuggest( document.getElementById('products'), productList );                                  
+                             </script>
+                                               
+                        </td>
+    
+    """%( products, str(words).replace( '[','' ).replace( ']', '' ) )
+   
+   
    
    
    
@@ -1251,7 +1308,7 @@ def printHead( plotter, form ):
                 }
                 
                 input.endtime{
-                    width = 100px;
+                    width: 100px;
                 }
                 
                 
@@ -1264,6 +1321,44 @@ def printHead( plotter, form ):
                     max-width: 180px;
                     width: expression(this.width > 180 ? 180: true);
                 }
+                
+                
+                .suggestion_list
+                {
+                    background: white;
+                    border: 1px solid;
+                    padding: 4px;
+                }
+                
+                .suggestion_list ul
+                {
+                    padding: 0;
+                    margin: 0;
+                    list-style-type: none;
+                }
+                
+                .suggestion_list a
+                {
+                    text-decoration: none;
+                    color: navy;
+                }
+                
+                .suggestion_list .selected
+                {
+                    background: navy;
+                    color: white;
+                }
+                
+                .suggestion_list .selected a
+                {
+                    color: white;
+                }
+            
+                #autosuggest
+                {
+                    display: none;
+                }
+                            
                 
                 div.left { float: left; }
                 div.right {float: right; }
@@ -1283,6 +1378,7 @@ def printHead( plotter, form ):
         
     print """
             <!--Java scripts sources -->
+            <script language="Javascript" src="js/autosuggest.js"></script>
             <script src="js/calendar1.js"></script>
             <script src="js/calendar2.js"></script>
             <script src="js/windowUtils.js"></script>
