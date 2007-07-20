@@ -12,13 +12,16 @@ Revised: $Date$
 <P>
 MetPX is a message switching system for use with <a href="http://www.wmo.int"> Wmo </a> Global Telecommunications System circuits based on TCP/IP. 
 Developed at the Canadian Meteorological Centre of <a href="http://www.ec.gc.ca">Environment Canada</a> for our own use.  
-MetPX is a work in progress, the development process is being externalized in the hopes of fostering a community around a switching system which all can share and improve together.  
-The system is already production quality for a limited set of features and is in production use at the CMC as the core of our national bulletin switching infrastructure.   
-The software is under continuous, but low-intensity development.  Features are carefully being layered on top of existing stable functions.
+MetPX is a work in progress, the development process is being externalized in the hopes of fostering a community 
+around a switching system which all can share and improve together.  The system is already production quality for a 
+limited set of features and is in production use at the CMC as the core of our national bulletin switching 
+infrastructure.   The software is under continuous, but low-intensity development.  Features are carefully being 
+layered on top of existing stable functions.
 <P>
 [<A HREF="#Documentation">Documentation</A>]
 [<A HREF="#Download">Download</A>]
 [<A HREF="#Source">Getting Source Code</A>]
+[<A HREF="#Links">References &amp; Links</a>]
 <br>
 [ mailing-list:   <A HREF="http://lists.sourceforge.net/lists/listinfo/metpx-devel"> metpx-devel.</a>  ]
 [ Main Project page:   <A HREF="http://www.sourceforge.net/projects/metpx"> Sourceforge </a> ]
@@ -107,6 +110,18 @@ with those explanations, feel free to grab a snapshot can be obtained using subv
 available for anonymous read-only access. 
 
 <P>
+
+<A NAME="Links"><H3>References &amp; Links</H3>
+
+Other, somewhat similar software, no endorsements or judgements should be taken from these links:
+<UL>
+<LI>http://www.wmo.ch/web/www/ois/Operational_Information/WMO386/ManOnGTS.html - WMO Manual 386... The standard reference for this domain.
+<LI>http://www.unidata.ucar.edu/software/ldm  - Local Data Manager.  LDM includes a network protocol, and it fundamentally wishes to exchange with other LDM systems.  This package was instructive in interesting ways, in the early 2000's there was an effort called NLDM which layered meteorological messaging over a standard TCP/IP protocol.  That effort died, however, but the inspiration of keeping the domain (weather) separate from the transport layer (TCP/IP) was an important motivation for MetPX.
+<LI>http://www.dwd.de/AFD - Automatic File Distributor - from the German Weather Service.  Routes files using the transport protocol of the user's choice.  Philosophically close to MetPX.
+<LI>http://www.corobor.com - commercial WMO switch supplier. 
+<LI>http://www.netsys.co.za - commercial WMO switch supplier.
+<LI>http://www.iblsoft.com - commercial WMO switch supplier.
+</UL>
 
 </body>
 </html>
