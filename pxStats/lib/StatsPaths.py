@@ -108,6 +108,7 @@ class StatsPaths:
     STATSPICKLES          = STATSDATA + 'pickles/'
     STATSLOGS             = STATSDATA + 'logFiles/'
     STATSWEBPAGES         = STATSDATA + 'webPages/'
+    STATSWEBPAGESWORDDBS  = STATSWEBPAGES  + 'wordDatabases/'    
     STATSGRAPHS           = STATSDATA + 'graphics/'
     STATSWEBGRAPHS        = STATSGRAPHS + 'webGraphics/'
     STATSGRAPHSARCHIVES   = STATSWEBGRAPHS + 'archives/' 
@@ -171,7 +172,7 @@ def main():
     print "StatsPaths.STATSROOT %s" %StatsPaths.STATSROOT
     print "StatsPaths.STATSWEBGRAPHS %s" %StatsPaths.STATSWEBGRAPHS
     print "StatsPaths.STATSWEBPAGES %s" %StatsPaths.STATSWEBPAGES
-    
+    print "SttatsPaths.STATSWEBPAGESWORDDBS %s" %StatsPaths.STATSWEBPAGESWORDDBS
     
     
         
