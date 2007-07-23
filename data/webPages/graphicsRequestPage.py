@@ -285,11 +285,11 @@ def printAjaxRequestsScript():
                   return xmlhttp;
                }
                                
-                
                 var http = getHTTPObject();
+                
                                 
                 
-                function executeAjaxRequest( strURL, plotter ) {                  
+                function executeAjaxRequest( strURL, plotter, callingObject ) {                  
                    
                    var parameters = ''; 
                    
@@ -297,6 +297,8 @@ def printAjaxRequestsScript():
                         parameters = getParametersForPopups();
                    }else if( strURL == 'graphicsRequestBroker.py' ){
                         parameters = getParametersForGraphicsRequests( plotter );
+                   }else if( strURL == 'updateWordsInDB.py'){
+                       parameters = getParametersForWordUpdate( callingObject );
                    }                   
                    
                   
@@ -310,6 +312,8 @@ def printAjaxRequestsScript():
                 function handleHttpResponse() {
                   
                   if (http.readyState == 4) {                    
+                    
+                    
                     var response = http.responseText;
                   
                     if( response.match('images') != null && response.match('error') != null){ 
@@ -319,13 +323,46 @@ def printAjaxRequestsScript():
                         image = image.split("=")[1];
                         error = error.split("=")[1];
                         
-                        document.getElementById("errorLabel").innerHTML = '<font color="#C11B17">' + error + '</font>';
-                        document.getElementById("photoslider").src = image;
+                        document.getElementById("errorLabel").innerHTML = '<font color="#C11B17">' + image  + '</font>';
                         
-                                                                                                                        
-                    }
-                  }
-               }     
+                        if( image != ''  ){
+                            
+                            if( document.forms['inputForm'].elements['groupName'].value != '' ){
+                                
+                                executeAjaxRequest( 'updateWordsInDB.py', 'plotter', 'groupName' );                                 
+                                
+                            }
+                            if( document.forms['inputForm'].elements['products'].value != ''){
+                                
+                                executeAjaxRequest( 'updateWordsInDB.py', 'plotter', 'products' );
+                            }
+                        
+                        }
+                      }else{
+                         document.getElementById("errorLabel").innerHTML = '<font color="#C11B17">' + 'allo' + '</font>';
+                      }                                                                                                                        
+                    }    
+                 }
+                    
+                  
+                  
+                  
+                function getParametersForWordUpdate( callingObject ){
+                    
+                    var qstr = '?wordType=' + callingObject ;
+                    
+                    if ( callingObject == 'products' ){
+                        qstr = qstr + '&word='  + document.forms['inputForm'].elements['products'].value;
+                    
+                    }else if( callingObject == 'groupName' ){
+                        qstr = qstr + '&word='  + document.forms['inputForm'].elements['groupName'].value;
+                    
+                    }     
+                    
+                    return qstr;  
+                      
+                }  
+                
                     
                 function getParametersForGraphicsRequests( plotter ){
                     
@@ -542,7 +579,7 @@ def printRRDImageFieldSet( form ):
                         <script>
                                 if (linkornot==1)
                                 document.write('<a href="javascript:transport()">')
-                                 document.write('<img src="'+photos[0]+'" name="photoslider" style="filter:revealTrans(duration=2,transition=23)" border=0>')
+                                 document.write('<img src="'+photos[0]+'" name="photoslider" id='photoslider' style="filter:revealTrans(duration=2,transition=23)" border=0>')
                                 if (linkornot==1)
                                 document.write('</a>')
                         </script>
