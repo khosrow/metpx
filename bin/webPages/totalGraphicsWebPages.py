@@ -285,7 +285,7 @@ def generateWebPage( machineTags, machineParameters ):
                             webLink ="archives/weekly/totals/%s/rx/%s/%s/%s.png" %(  machineName, year, type, week )
                         elif timeType == "monthly":
                             file = "%smonthly/totals/%s/rx/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, type, month )
-                            webLink ="archives/weekly/totals/%s/rx/%s/%s/%s.png" %(machineName, year, type, month )
+                            webLink ="archives/monthly/totals/%s/rx/%s/%s/%s.png" %(  machineName, year, type, month )
                         elif timeType == "yearly":
                             file = "%syearly/totals/%s/rx/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName,  type, year ) 
                             webLink = "archives/yearly/totals/%s/rx/%s/%s.png" %(  machineName,  type, year ) 
