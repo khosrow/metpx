@@ -97,7 +97,7 @@ def generateWebPage( machineTags ):
         </div> 
         
         <div class="right">
-            <a href="%s" target="bottom" >Archives</a>
+            <a href="archives" target="bottom" >Archives</a>
             <a href="../scripts/cgi-bin/graphicsRequestPage.py" target="bottom">Requests</a>
             <a href="html/glossary.html" target="bottom" >Glossary</a>
         </div>
@@ -109,7 +109,7 @@ def generateWebPage( machineTags ):
 </html>
            
     
-    """ %( StatsPaths.STATSGRAPHSARCHIVES ) )
+    """  )
     
     
     fileHandle.close() 
