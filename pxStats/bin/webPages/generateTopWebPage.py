@@ -88,7 +88,7 @@ def generateWebPage( machineTags ):
         
         for machineTag in machineTags:
             fileHandle.write( """
-            <a href="%s.html" target="bottom">%s</a> 
+            <a href="html/%s.html" target="bottom">%s</a> 
             &nbsp;&nbsp;&nbsp;              
             """ %( machineTag.replace( ',','' ), string.upper(machineTag) ) ) 
     
