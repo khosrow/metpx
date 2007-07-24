@@ -109,10 +109,10 @@ def generateWebPage( rxNames, txNames, days ):
     txNamesArray.sort()
             
     #Redirect output towards html page to generate.    
-    if not os.path.isdir(StatsPaths.STATSWEBPAGES ):
-        os.makedirs( StatsPaths.STATSWEBPAGES )
+    if not os.path.isdir(StatsPaths.STATSWEBPAGESHTML ):
+        os.makedirs( StatsPaths.STATSWEBPAGESHTML )
     
-    fileHandle = open( StatsPaths.STATSWEBPAGES  +"dailyGraphs.html" , 'w' )
+    fileHandle = open( StatsPaths.STATSWEBPAGESHTML  +"dailyGraphs.html" , 'w' )
 
      
     fileHandle.write( """
@@ -247,10 +247,12 @@ def generateWebPage( rxNames, txNames, days ):
         for day in days:
             
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( day )
-            file = StatsPaths.STATSGRAPHSARCHIVES + "daily/rx/%s/"%( rxName ) + str(currentYear) + "/" + str(currentMonth) + "/" + str(currentDay) + ".png"
+            
+            file = file = StatsPaths.STATSGRAPHSARCHIVES + "daily/rx/%s/"%( rxName ) + str(currentYear) + "/" + str(currentMonth) + "/" + str(currentDay) + ".png"
+            webLink = "archives/daily/rx/%s/"%( rxName ) + str(currentYear) + "/" + str(currentMonth) + "/" + str(currentDay) + ".png"
             
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="%s" href="%s">%s   </a>"""%( rxName, file, time.strftime( "%a", time.gmtime(day) ) ) )
+                fileHandle.write(  """<a target ="%s" href="%s">%s   </a>"""%( rxName, webLink, time.strftime( "%a", time.gmtime(day) ) ) )
                 
                  
         fileHandle.write( """</div></td></tr></table>""" )
@@ -303,10 +305,11 @@ def generateWebPage( rxNames, txNames, days ):
         for day in days:
                         
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( day )
-            file = StatsPaths.STATSGRAPHSARCHIVES + "daily/tx/%s/"%( txName ) + str(currentYear) + "/" + str(currentMonth) + "/" + str(currentDay) + ".png"
+            file = StatsPaths.STATSGRAPHSARCHIVES + "/daily/tx/%s/"%( txName ) + str(currentYear) + "/" + str(currentMonth) + "/" + str(currentDay) + ".png"
+            webLink =  "archives/daily/tx/%s/"%( txName ) + str(currentYear) + "/" + str(currentMonth) + "/" + str(currentDay) + ".png"
             
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="%s" href="%s">%s   </a>"""%( rxName, file, time.strftime( "%a", time.gmtime(day) ) ) )     
+                fileHandle.write(  """<a target ="%s" href="%s">%s   </a>"""%( rxName, webLink, time.strftime( "%a", time.gmtime(day) ) ) )     
 
         fileHandle.write( "</div></td></tr></table>" )
 

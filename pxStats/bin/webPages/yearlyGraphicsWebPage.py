@@ -104,9 +104,9 @@ def generateWebPage( rxNames, txNames, years ):
     txNamesArray.sort()
     
     #Redirect output towards html page to generate.    
-    if not os.path.isdir( StatsPaths.STATSWEBPAGES ):
-        os.makedirs( StatsPaths.STATSWEBPAGES )     
-    fileHandle = open( "%syearlyGraphs.html" %StatsPaths.STATSWEBPAGES , 'w' )
+    if not os.path.isdir( StatsPaths.STATSWEBPAGESHTML ):
+        os.makedirs( StatsPaths.STATSWEBPAGESHTML )     
+    fileHandle = open( "%syearlyGraphs.html" %StatsPaths.STATSWEBPAGESHTML , 'w' )
 
     fileHandle.write(  """
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -269,11 +269,13 @@ def generateWebPage( rxNames, txNames, years ):
             fileHandle.write( """<td bgcolor="#66CCFF"><div class = "rxTableEntry">Years&nbsp;:&nbsp;""" )
                    
         for year in years:
-            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )            
-            file = StatsPaths.STATSGRAPHSARCHIVES + "yearly/rx/%s/"%( rxName ) + "bytecount/%s.png" %str(currentYear)
+            currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )   
+            
+            file = StatsPaths.STATSGRAPHSARCHIVES + "yearly/rx/%s/"%( rxName ) + "bytecount/%s.png" %str(currentYear)         
+            webLink = "archives/yearly/rx/%s/"%( rxName ) + "bytecount/%s.png" %str(currentYear)
             
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, file , time.strftime("%Y",time.gmtime(year) ) ) ) 
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, webLink , time.strftime("%Y",time.gmtime(year) ) ) ) 
         
         fileHandle.write( "</div></td>" )      
     
@@ -285,9 +287,10 @@ def generateWebPage( rxNames, txNames, years ):
             
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )            
             file = StatsPaths.STATSGRAPHSARCHIVES + "yearly/rx/%s/"%( rxName ) + "filecount/%s.png" %str(currentYear)
+            webLink = "archives/yearly/rx/%s/"%( rxName ) + "filecount/%s.png" %str(currentYear)
             
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, file , time.strftime("%Y",time.gmtime(year) ) ) ) 
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, webLink , time.strftime("%Y",time.gmtime(year) ) ) ) 
         
         fileHandle.write( "</div></td>" )    
         
@@ -296,7 +299,9 @@ def generateWebPage( rxNames, txNames, years ):
         
         for year in years:
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )            
-            file = StatsPaths.STATSGRAPHSARCHIVES + "yearly/rx/%s/"%( rxName ) + "errors/%s.png" %str(currentYear)
+            file    = StatsPaths.STATSGRAPHSARCHIVES + "yearly/rx/%s/"%( rxName ) + "errors/%s.png" %str(currentYear)
+            webLink = "archives/yearly/rx/%s/"%( rxName ) + "errors/%s.png" %str(currentYear)
+            
             if os.path.isfile( file ):
                 fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, file , time.strftime("%Y",time.gmtime(year) ) ) ) 
         
@@ -399,50 +404,65 @@ def generateWebPage( rxNames, txNames, years ):
         for year in years:
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )            
             file = StatsPaths.STATSGRAPHSARCHIVES + "yearly/tx/%s/"%( txName ) + "latency/%s.png" %str(currentYear)
+            webLink = "archives/yearly/tx/%s/"%( txName ) + "latency/%s.png" %str(currentYear)
             
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( txName, file , time.strftime("%y",time.gmtime(year) ) ) )
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( txName, webLink , time.strftime("%y",time.gmtime(year) ) ) )
         
         fileHandle.write( "</div></td>" )
         
         fileHandle.write(  """ <td bgcolor="#66CCFF"><div class = "txTableEntry">Years&nbsp;:&nbsp;""" )
         
         for year in years:
+            
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )            
+            
             file = StatsPaths.STATSGRAPHSARCHIVES + "yearly/tx/%s/"%( txName ) + "filesOverMaxLatency/%s.png" %str(currentYear)
+            webLink =  "archives/yearly/tx/%s/"%( txName ) + "filesOverMaxLatency/%s.png" %str(currentYear)
+            
             
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( txName, file , time.strftime("%y",time.gmtime(year) ) ) )
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( txName, webLink , time.strftime("%y",time.gmtime(year) ) ) )
         
         fileHandle.write( "</div></td>" )
         
         fileHandle.write(  """ <td bgcolor="#66CCFF"><div class = "txTableEntry">Years&nbsp;:&nbsp;""" )
         
         for year in years:
+            
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )            
             file = StatsPaths.STATSGRAPHSARCHIVES + "yearly/tx/%s/"%( txName ) + "bytecount/%s.png" %str(currentYear)
+            webLink = "archives/yearly/tx/%s/"%( txName ) + "bytecount/%s.png" %str(currentYear)
+            
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( txName, file , time.strftime("%y",time.gmtime(year) ) ) )
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( txName, webLink , time.strftime("%y",time.gmtime(year) ) ) )
         
         fileHandle.write( "</div></td>" )
         
         fileHandle.write(  """ <td bgcolor="#66CCFF"><div class = "txTableEntry">Years&nbsp;:&nbsp;""" )
         
         for year in years:
+            
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )            
             file = StatsPaths.STATSGRAPHSARCHIVES + "yearly/tx/%s/"%( txName ) + "filecount/%s.png" %str(currentYear)
+            webLink = "archives/yearly/tx/%s/"%( txName ) + "filecount/%s.png" %str(currentYear)
+            
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( txName, file , time.strftime("%y",time.gmtime(year) ) ) )
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( txName, webLink , time.strftime("%y",time.gmtime(year) ) ) )
         
         fileHandle.write( "</div></td>" )
         
         fileHandle.write(  """ <td bgcolor="#66CCFF"><div class = "txTableEntry">Years&nbsp;:&nbsp;""" )
         
         for year in years:
+            
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )            
-            file = StatsPaths.STATSGRAPHSARCHIVES + "yearly/tx/%s/"%( txName ) + "errors/%s.png" %str(currentYear)
+            
+            file    = StatsPaths.STATSGRAPHSARCHIVES + "yearly/tx/%s/"%( txName ) + "errors/%s.png" %str(currentYear)
+            webLink = "archives/yearly/tx/%s/"%( txName ) + "errors/%s.png" %str(currentYear) 
+            
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( txName, file , time.strftime("%y",time.gmtime(year) ) ) )
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( txName, webLink , time.strftime("%y",time.gmtime(year) ) ) )
         
         fileHandle.write( "</div></td></tr></table>" )
 
