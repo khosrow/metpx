@@ -185,10 +185,10 @@ def generateWebPage( machineTags, machineParameters ):
     for machineTag in machineTags:
         machineNames     = machineParameters.getPairedMachinesAssociatedWithListOfTags( [ machineTag ] )
         for machineName in machineNames:
-            if not os.path.isdir(StatsPaths.STATSWEBPAGES):
-                os.makedirs( StatsPaths.STATSWEBPAGES )
+            if not os.path.isdir(StatsPaths.STATSWEBPAGESHTML):
+                os.makedirs( StatsPaths.STATSWEBPAGESHTML )
             machineName = getCombinedMachineName( machineName )
-            file = "%s%s.html" %( StatsPaths.STATSWEBPAGES,machineTag)
+            file = "%s%s.html" %( StatsPaths.STATSWEBPAGESHTML,machineTag)
             fileHandle = open( file , 'w' )
             
             
@@ -279,13 +279,16 @@ def generateWebPage( machineTags, machineParameters ):
                         week = time.strftime( "%W", time.gmtime(x))
                         if timeType == "daily" :
                             file = "%sdaily/totals/%s/rx/%s/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, month, type, day )     
+                            webLink =  "archives/daily/totals/%s/rx/%s/%s/%s/%s.png" %(  machineName, year, month, type, day )     
                         elif timeType == "weekly":
-                            file = "%sweekly/totals/%s/rx/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, type, week )
+                            file = "%sweekly/totals/%s/rx/%s/%s/%s.png" %(  StatsPaths.STATSGRAPHSARCHIVES, machineName, year, type, week )
+                            webLink ="archives/weekly/totals/%s/rx/%s/%s/%s.png" %(  machineName, year, type, week )
                         elif timeType == "monthly":
                             file = "%smonthly/totals/%s/rx/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, type, month )
+                            webLink ="archives/weekly/totals/%s/rx/%s/%s/%s.png" %(machineName, year, type, month )
                         elif timeType == "yearly":
                             file = "%syearly/totals/%s/rx/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName,  type, year ) 
-                            
+                            webLink = "archives/yearly/totals/%s/rx/%s/%s.png" %(  machineName,  type, year ) 
                         
                         if os.path.isfile(file):  
                             if timeType == "daily" :
@@ -296,7 +299,7 @@ def generateWebPage( machineTags, machineParameters ):
                                 label = month
                             elif timeType == "yearly":
                                 label = year   
-                            fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>""" %( label, file, label ) )
+                            fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>""" %( label, webLink, label ) )
                         
                     fileHandle.write( """</td>""" )
                 
@@ -356,14 +359,20 @@ def generateWebPage( machineTags, machineParameters ):
                         year, month, day = StatsDateLib.getYearMonthDayInStrfTime( x )
                         week = time.strftime( "%W", time.gmtime(x))
                         if timeType == "daily" :
-                            file = "%sdaily/totals/%s/tx/%s/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, month, type, day )     
+                            file = "%sdaily/totals/%s/tx/%s/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, month, type, day )
+                            webLink = "archives/daily/totals/%s/tx/%s/%s/%s/%s.png" %( machineName, year, month, type, day )     
+                        
                         elif timeType == "weekly":
                             file = "%sweekly/totals/%s/tx/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, type, week )
+                            webLink = "archives/weekly/totals/%s/tx/%s/%s/%s.png" %( machineName, year, type, week )
+                            
                         elif timeType == "monthly":
                             file = "%smonthly/totals/%s/tx/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, type, month )
+                            webLink = "archives/monthly/totals/%s/tx/%s/%s/%s.png" %( machineName, year, type, month )
+                            
                         elif timeType == "yearly":
                             file = "%syearly/totals/%s/tx/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName,  type, year )  
-                        
+                            webLink = "archives/yearly/totals/%s/tx/%s/%s.png" %(  machineName,  type, year )
                         
                         if os.path.isfile(file):  
                             
@@ -375,7 +384,7 @@ def generateWebPage( machineTags, machineParameters ):
                                 label = month
                             elif timeType == "yearly":
                                 label = year     
-                            fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s </a>""" %( label,file, label ) )
+                            fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s </a>""" %( label, webLink, label ) )
      
                     fileHandle.write( """</td>""" )
                 
