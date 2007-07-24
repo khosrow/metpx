@@ -66,15 +66,15 @@ def generateWebPage( machineTags ):
     <body text="white" link="white" vlink="white" bgcolor="#006699" >
         
         <div class="left">
-            Individual graphics&nbsp;&nbsp;:&nbsp;&nbsp;&nbsp;
-            <a href="dailyGraphs.html" target="bottom">Daily</a> 
-            &nbsp;&nbsp;&nbsp;            
-            <a href="weeklyGraphs.html" target="bottom">Weekly</a>
-            &nbsp;&nbsp;&nbsp;
-            <a href="monthlyGraphs.html" target="bottom">Monthly</a>
-            &nbsp;&nbsp;&nbsp;
-            <a href="yearlyGraphs.html" target="bottom">Yearly</a>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
+            Individual graphics&nbsp;&nbsp;:&nbsp;&nbsp;
+            <a href="html/dailyGraphs.html" target="bottom">Daily</a> 
+            &nbsp;&nbsp;            
+            <a href="html/weeklyGraphs.html" target="bottom">Weekly</a>
+            &nbsp;&nbsp;
+            <a href="html/monthlyGraphs.html" target="bottom">Monthly</a>
+            &nbsp;&nbsp;
+            <a href="html/yearlyGraphs.html" target="bottom">Yearly</a>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
             
        
        
@@ -98,8 +98,8 @@ def generateWebPage( machineTags ):
         
         <div class="right">
             <a href="%s" target="bottom" >Archives</a>
-            <a href="graphicsRequestPage.py" target="bottom">Requests</a>
-            <a href="glossary.html" target="bottom" >Glossary</a>
+            <a href="../scripts/cgi-bin/graphicsRequestPage.py" target="bottom">Requests</a>
+            <a href="html/glossary.html" target="bottom" >Glossary</a>
         </div>
         
         
