@@ -104,9 +104,9 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
     txNamesArray.sort()
     
     #Redirect output towards html page to generate.   
-    if not os.path.isdir( StatsPaths.STATSWEBPAGES ):
-        os.makedirs(  StatsPaths.STATSWEBPAGES )      
-    fileHandle = open( "%sweeklyGraphs.html" % StatsPaths.STATSWEBPAGES , 'w' )
+    if not os.path.isdir( StatsPaths.STATSWEBPAGESHTML ):
+        os.makedirs(  StatsPaths.STATSWEBPAGESHTML )      
+    fileHandle = open( "%sweeklyGraphs.html" % StatsPaths.STATSWEBPAGESHTML , 'w' )
 
 
     fileHandle.write(  """
@@ -285,9 +285,10 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
             currentWeek = time.strftime("%W", time.gmtime(week))
             file = StatsPaths.STATSGRAPHSARCHIVES + "weekly/rx/%s/"%( rxName ) + str(currentYear) + "/bytecount/%s.png" %str(currentWeek)
+            webLink =  "archives/weekly/rx/%s/"%( rxName ) + str(currentYear) + "/bytecount/%s.png" %str(currentWeek)
             
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, file , currentWeek ) ) 
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, webLink , currentWeek ) ) 
         
         fileHandle.write( "</div></td>" )    
     
@@ -299,9 +300,10 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
             currentWeek = time.strftime("%W", time.gmtime(week))
             file = StatsPaths.STATSGRAPHSARCHIVES + "weekly/rx/%s/"%( rxName ) + str(currentYear) + "/filecount/%s.png" %str(currentWeek)
+            webLink = "archives/weekly/rx/%s/"%( rxName ) + str(currentYear) + "/filecount/%s.png" %str(currentWeek)
             
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, file , currentWeek ) ) 
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, webLink , currentWeek ) ) 
         
         fileHandle.write( "</div></td>" ) 
         
@@ -312,9 +314,10 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
             currentWeek = time.strftime("%W", time.gmtime(week))
             file = StatsPaths.STATSGRAPHSARCHIVES + "weekly/rx/%s/"%( rxName ) + str(currentYear) + "/errors/%s.png" %str(currentWeek)
+            webLink = "archives/weekly/rx/%s/"%( rxName ) + str(currentYear) + "/errors/%s.png" %str(currentWeek)
             
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, file , currentWeek ) ) 
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, webLink , currentWeek ) ) 
         
         fileHandle.write( "</div></td></tr></table>" )                            
     
@@ -415,9 +418,10 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
             currentWeek = time.strftime("%W", time.gmtime(week))
             file = StatsPaths.STATSGRAPHSARCHIVES + "weekly/tx/%s/"%( txName ) + str(currentYear) + "/latency/%s.png" %str(currentWeek)
+            webLink =  "archives/weekly/tx/%s/"%( txName ) + str(currentYear) + "/latency/%s.png" %str(currentWeek)
             
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, file , currentWeek ) )
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, webLink , currentWeek ) )
         
         fileHandle.write( "</div></td>" )
         
@@ -427,9 +431,13 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
         for week in weekNumbers:
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
             currentWeek = time.strftime("%W", time.gmtime(week))
+            
             file = StatsPaths.STATSGRAPHSARCHIVES + "weekly/tx/%s/"%( txName ) + str(currentYear) + "/filesOverMaxLatency/%s.png" %str(currentWeek)
+            webLink = "archives/weekly/tx/%s/"%( txName ) + str(currentYear) + "/filesOverMaxLatency/%s.png" %str(currentWeek)
+            
+            
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, file, currentWeek ) )
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, webLink, currentWeek ) )
         
         fileHandle.write( "</div></td>" )  
         
@@ -439,9 +447,12 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
         for week in weekNumbers:
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
             currentWeek = time.strftime("%W", time.gmtime(week))
-            file = StatsPaths.STATSGRAPHSARCHIVES + "weekly/tx/%s/"%( txName ) + str(currentYear) + "/bytecount/%s.png" %str(currentWeek)
+            
+            file    = StatsPaths.STATSGRAPHSARCHIVES + "weekly/tx/%s/"%( txName ) + str(currentYear) + "/bytecount/%s.png" %str(currentWeek) 
+            webLink = "archives/weekly/tx/%s/"%( txName ) + str(currentYear) + "/bytecount/%s.png" %str(currentWeek)
+            
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, file, currentWeek ) )
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, webLink, currentWeek ) )
         
         fileHandle.write( "</div></td>" )    
         
@@ -450,9 +461,12 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
         for week in weekNumbers:
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
             currentWeek = time.strftime("%W", time.gmtime(week))
-            file = StatsPaths.STATSGRAPHSARCHIVES + "weekly/tx/%s/"%( txName ) + str(currentYear) + "/filecount/%s.png" %str(currentWeek)
+            
+            file    = StatsPaths.STATSGRAPHSARCHIVES + "weekly/tx/%s/"%( txName ) + str(currentYear) + "/filecount/%s.png" %str(currentWeek)
+            webLink = "archives/weekly/tx/%s/"%( txName ) + str(currentYear) + "/filecount/%s.png" %str(currentWeek)
+                        
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, file, currentWeek ) )
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, webLink, currentWeek ) )
         
         fileHandle.write( "</div></td>" )   
         
@@ -461,9 +475,12 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
         for week in weekNumbers:
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
             currentWeek = time.strftime("%W", time.gmtime(week))
-            file = StatsPaths.STATSGRAPHSARCHIVES + "weekly/tx/%s/"%( txName ) + str(currentYear) + "/errors/%s.png" %str(currentWeek)
+            
+            file    =  StatsPaths.STATSGRAPHSARCHIVES + "weekly/tx/%s/"%( txName ) + str(currentYear) + "/errors/%s.png" %str(currentWeek)
+            webLink =  "archives/weekly/tx/%s/"%( txName ) + str(currentYear) + "/errors/%s.png" %str(currentWeek)
+                        
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, file, currentWeek ) )
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, webLink, currentWeek ) )
         
         fileHandle.write( "</div></td></tr></table>" )    
  
