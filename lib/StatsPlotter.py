@@ -504,7 +504,7 @@ class StatsPlotter:
         totalHeight = ( 342 * len( self.stats )  * len( self.statsTypes ) )
         
         self.graph( 'set terminal png size 1280,768 xffffff x000000 x404040 \
-                      xff0000 x4169e1 xff8c00 x90ee90 \
+                      xff0000 x4169e1 x228b22 xa020f0 \
                       xadd8e6 x0000ff xdda0dd x9500d3' )
  
         self.graph( 'set size 1.0, %2.1f' % ( totalSize ) )
@@ -546,7 +546,7 @@ class StatsPlotter:
                 self.maxLatency = self.stats[clientIndex].statsCollection.maxLatency
                 
                 if self.statsTypes[statsTypeIndex] == "errors" :
-                    color =4 #green                    
+                    color =4 #purple                    
                     self.addErrorsLabelsToGraph(  clientIndex , statsTypeIndex, nbGraphs, maxPairValue )
                 
                 elif self.statsTypes[statsTypeIndex] == "latency" :
@@ -558,7 +558,7 @@ class StatsPlotter:
                     self.addBytesLabelsToGraph(  clientIndex , statsTypeIndex, nbGraphs,  maxPairValue )
                 
                 elif self.statsTypes[statsTypeIndex] == "filecount" :
-                    color =3 #orange
+                    color =3 #green
                     self.addFilecountLabelsToGraph(clientIndex, statsTypeIndex, nbGraphs, maxPairValue)
                      
                 self.graph.title( "%s" %self.buildTitle( clientIndex, self.statsTypes[statsTypeIndex] , statsTypeIndex, pairs) )
