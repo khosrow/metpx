@@ -1010,7 +1010,7 @@ def createCopy( client, type, machine, imageName, infos ):
         os.remove( destination )  
        
     shutil.copy( src, destination ) 
-     
+    os.chmod(destination, 0777) 
     
     
 def formatedTypesForLables( type ):
@@ -1104,13 +1104,14 @@ def plotRRDGraph( databaseName, type, fileType, client, machine, infos, logger =
                    
     #note : in CDEF:realValue the i value can be changed from 1 to value of the interval variable
     #       in order to get the total displayed instead of the mean.
+    
     if infos.graphicType != "monthly":
         rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '800','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end),'--step','%s' %(interval*60), '--vertical-label', '%s' %formatedYLabelType,'--title', '%s'%title, '--lower-limit','0','DEF:%s=%s:%s:AVERAGE'%( type, databaseName, type), 'CDEF:realValue=%s,%i,*' %( type, 1), 'AREA:realValue#%s:%s' %( innerColor, type ),'LINE1:realValue#%s:%s'%( outerColor, type ), 'COMMENT: Min: %s   Max: %s   Mean: %s   %s\c' %( minimum, maximum, mean,total ), 'COMMENT:%s %s %s\c' %( comment, graphicsNote, graphicsLegeng )  )
-
+        
     else:#With monthly graphics, we force the use the day of month number as the x label.       
         rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '800','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end),'--step','%s' %(interval*60), '--vertical-label', '%s' %formatedYLabelType,'--title', '%s'%title, '--lower-limit','0', 'DEF:input=%s:%s:AVERAGE' %(type, databaseName) , 'CDEF:in_values=input,UN,0,input,IF', 'DEF:%s=%s:%s:AVERAGE'%( type, databaseName, type), 'CDEF:realValue=%s,%i,*' %( type, 1), 'AREA:realValue#%s:%s' %( innerColor, type ),'LINE1:realValue#%s:%s'%( outerColor, type ), '--x-grid', 'HOUR:24:DAY:1:DAY:1:0:%d','COMMENT: Min: %s   Max: %s   Mean: %s   %s\c' %( minimum, maximum, mean, total ), 'COMMENT:%s %s %s\c' %(comment,graphicsNote, graphicsLegeng)  )       
     
-    
+    os.chmod(imageName, 0777)
     if infos.copy == True:
         createCopy( client, type, machine, imageName, infos )
     
