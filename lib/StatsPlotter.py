@@ -466,8 +466,8 @@ class StatsPlotter:
             
             
             shutil.copy( src, destination ) 
-            
-            print "cp %s %s  "  %( src, destination )
+            os.chmod( destination, 0777 )
+            #print "cp %s %s  "  %( src, destination )
         
         
         
@@ -479,8 +479,8 @@ class StatsPlotter:
             
             
             shutil.copy( src, destination ) 
-            
-            print "cp %s %s  "  %( src, destination )
+            os.chmod( destination, 0777 )
+            #print "cp %s %s  "  %( src, destination )
 
 
 
@@ -567,7 +567,7 @@ class StatsPlotter:
                 
                 nbGraphs = nbGraphs + 1 
                 
-                    
+        os.chmod( self.imageName, 0777 )            
         if createCopy :
             del self.graph
             self.createCopy( )     
