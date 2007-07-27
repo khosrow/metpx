@@ -54,7 +54,7 @@ LOCAL_MACHINE = os.uname()[1]
     
 class _GraphicsInfos:
 
-    def __init__( self, fileType, types, totals, graphicType, clientNames = None ,  timespan = 12, startTime = None, endTime = None, machines = ["machine1"], copy = False, mergerType = ""  ):            
+    def __init__( self, fileType, types, totals, graphicType, clientNames = None ,  timespan = 12, startTime = None, endTime = None, machines = ["machine1"], copy = False, mergerType = "", turnOffLogging = False  ):            
         
         self.fileType     = fileType          # Type of log files to be used.    
         self.types        = types             # Type of graphics to produce. 
@@ -67,7 +67,7 @@ class _GraphicsInfos:
         self.copy         = copy              # Whether or not to create copies of the images. 
         self.graphicType  = graphicType       # daily, weekly, monthly yearly or other                
         self.mergerType   = mergerType        # Type of merger either "" for none or totalForMachine or group  
-        
+        self.turnOffLogging =turnOffLogging   # Whether to turn off logging or not 
         
 #################################################################
 #                                                               #
@@ -107,6 +107,7 @@ def getOptionsFromParser( parser ):
     fixedCurrent     = options.fixedCurrent
     fixedPrevious    = options.fixedPrevious
     copy             = options.copy
+    turnOffLogging   = options.turnOffLogging
     
     counter = 0  
     specialParameters = [daily, monthly, weekly, yearly]
@@ -304,7 +305,7 @@ def getOptionsFromParser( parser ):
     
     end = StatsDateLib.getIsoWithRoundedHours( end )
     
-    infos = _GraphicsInfos( startTime = start, endTime = end, graphicType = graphicType, clientNames = clientNames, types = types, timespan = timespan, machines = machines, fileType = fileType, totals = totals, copy = copy, mergerType = mergerType  )   
+    infos = _GraphicsInfos( startTime = start, endTime = end, graphicType = graphicType, clientNames = clientNames, types = types, timespan = timespan, machines = machines, fileType = fileType, totals = totals, copy = copy, mergerType = mergerType,turnOffLogging = turnOffLogging  )   
             
     return infos                       
 
@@ -354,6 +355,7 @@ Options:
     - With   |--machines you can specify from wich machine the data is to be used.
     - With -s|--span you can specify the time span to be used to create the graphic 
     - With -t|--types you can specify what data types need to be collected
+    - With --turnOffLogging you can turn of the logger.
     - With --totals you can specify that you want a single grpahics for every datatype that
       uses the cmbined data of all the client or sources of a machien or collection of machines instead 
       of creating a graphic per client/source. 
@@ -415,6 +417,8 @@ def addOptions( parser ):
     parser.add_option("-t", "--types", type="string", dest="types", default="All",help="Types of data to look for.")   
     
     parser.add_option("--totals", action="store_true", dest = "totals", default=False, help="Create graphics based on the totals of all the values found for all specified clients or for a specific file type( tx, rx ).")
+    
+    parser.add_option("--turnOffLogging", action="store_true", dest = "turnOffLogging", default=False, help="Turn off the logger")
     
     parser.add_option("-w", "--weekly", action="store_true", dest = "weekly", default=False, help="Create weekly graph(s).")
     
@@ -1010,7 +1014,10 @@ def createCopy( client, type, machine, imageName, infos ):
         os.remove( destination )  
        
     shutil.copy( src, destination ) 
-    os.chmod(destination, 0777) 
+    try:
+        os.chmod(imageName, 0777)
+    except:
+        pass 
     
     
 def formatedTypesForLables( type ):
@@ -1109,9 +1116,13 @@ def plotRRDGraph( databaseName, type, fileType, client, machine, infos, logger =
         rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '800','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end),'--step','%s' %(interval*60), '--vertical-label', '%s' %formatedYLabelType,'--title', '%s'%title, '--lower-limit','0','DEF:%s=%s:%s:AVERAGE'%( type, databaseName, type), 'CDEF:realValue=%s,%i,*' %( type, 1), 'AREA:realValue#%s:%s' %( innerColor, type ),'LINE1:realValue#%s:%s'%( outerColor, type ), 'COMMENT: Min: %s   Max: %s   Mean: %s   %s\c' %( minimum, maximum, mean,total ), 'COMMENT:%s %s %s\c' %( comment, graphicsNote, graphicsLegeng )  )
         
     else:#With monthly graphics, we force the use the day of month number as the x label.       
-        rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '800','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end),'--step','%s' %(interval*60), '--vertical-label', '%s' %formatedYLabelType,'--title', '%s'%title, '--lower-limit','0', 'DEF:input=%s:%s:AVERAGE' %(type, databaseName) , 'CDEF:in_values=input,UN,0,input,IF', 'DEF:%s=%s:%s:AVERAGE'%( type, databaseName, type), 'CDEF:realValue=%s,%i,*' %( type, 1), 'AREA:realValue#%s:%s' %( innerColor, type ),'LINE1:realValue#%s:%s'%( outerColor, type ), '--x-grid', 'HOUR:24:DAY:1:DAY:1:0:%d','COMMENT: Min: %s   Max: %s   Mean: %s   %s\c' %( minimum, maximum, mean, total ), 'COMMENT:%s %s %s\c' %(comment,graphicsNote, graphicsLegeng)  )       
+        rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '800','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end),'--step','%s' %(interval*60), '--vertical-label', '%s' %formatedYLabelType,'--title', '%s'%title, '--lower-limit','0','DEF:%s=%s:%s:AVERAGE'%( type, databaseName, type), 'CDEF:realValue=%s,%i,*' %( type, 1), 'AREA:realValue#%s:%s' %( innerColor, type ),'LINE1:realValue#%s:%s'%( outerColor, type ), '--x-grid', 'HOUR:24:DAY:1:DAY:1:0:%d','COMMENT: Min: %s   Max: %s   Mean: %s   %s\c' %( minimum, maximum, mean, total ), 'COMMENT:%s %s %s\c' %(comment,graphicsNote, graphicsLegeng)  )    
     
-    os.chmod(imageName, 0777)
+    try:
+        os.chmod(imageName, 0777)
+    except:
+        pass
+    
     if infos.copy == True:
         createCopy( client, type, machine, imageName, infos )
     
@@ -1351,13 +1362,16 @@ def main():
     if not os.path.isdir( StatsPaths.STATSLOGGING  ):
         os.makedirs( StatsPaths.STATSLOGGING  , mode=0777 )
     
-    logger = Logger( StatsPaths.STATSLOGGING   + 'stats_'+'rrd_graphs' + '.log.notb', 'INFO', 'TX' + 'rrd_graphs', bytes = True  ) 
-    
-    logger = logger.getLogger()
+
        
     parser = createParser() 
    
     infos = getOptionsFromParser( parser )
+    if infos.turnOffLogging == False:
+        logger = Logger( StatsPaths.STATSLOGGING   + 'stats_'+'rrd_graphs' + '.log.notb', 'INFO', 'TX' + 'rrd_graphs', bytes = True  ) 
+        logger = logger.getLogger()
+    else:
+        logger = None    
 
     generateRRDGraphics( infos, logger = logger )
     
