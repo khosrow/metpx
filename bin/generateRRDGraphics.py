@@ -259,7 +259,9 @@ def getOptionsFromParser( parser ):
         else:
             clientNames = rxNames    
             
-    
+    else:
+        if totals == True :  
+            mergerType = "regular"
     try :
             
         if fileType == "tx":       
@@ -987,12 +989,15 @@ def getCopyDestination( type, client, machine, infos ):
         
         #destination = "%s/%s/%s/%s" %( StatsPaths.STATSGRAPHSARCHIVES, infos.graphicType, infos.fileType, label, infos.graphicType, endOfDestination )
     if infos.totals == True:
-        destination ="%s%s/%s/%s/%s/%s"  %( StatsPaths.STATSGRAPHSARCHIVES, infos.graphicType, "totals", machine, infos.fileType, endOfDestination  )
+        if infos.mergerTpe == 'totalForMachine':
+            destination ="%s%s/%s/%s/%s/%s"  %( StatsPaths.STATSGRAPHSARCHIVES, infos.graphicType, "totals", machine, infos.fileType, endOfDestination  )
+        else:
+            destination =  "%s%s/%s/%s/%s" %( StatsPaths.STATSGRAPHSARCHIVES, infos.graphicType, infos.fileType, client, endOfDestination )   
     else:    
         destination = "%s%s/%s/%s/%s" %( StatsPaths.STATSGRAPHSARCHIVES, infos.graphicType, infos.fileType, client, endOfDestination )
     
     
-    print destination
+    #print destination
     return destination    
     
          
@@ -1154,8 +1159,8 @@ def createNewMergedDatabase( infos, dataType,  machine, start, interval    ) :
     
     @param infos: _GraphicsInfos instance that is used throughout the program.
     
-    """
-       
+    """    
+                                                  
     rrdFilename = RrdUtilities.buildRRDFileName( dataType = dataType, clients = infos.clientNames, machines =[machine], fileType = infos.fileType, usage =infos.mergerType)
     
     
@@ -1180,6 +1185,10 @@ def createNewMergedDatabase( infos, dataType,  machine, start, interval    ) :
         start = start - (1440*60)
         rrdtool.create( rrdFilename, '--start','%s' %( start ), '--step', '86400', 'DS:%s:GAUGE:86400:U:U' %dataType, 'RRA:AVERAGE:0:1:3650','RRA:MIN:0:1:3650','RRA:MAX:0:1:3650' )
     
+    try:
+        os.chmod( rrdFilename, 0777 )
+    except:
+        pass    
     
     return rrdFilename
     
@@ -1202,17 +1211,19 @@ def getInfosFromDatabases( dataOutputs, names, machine, fileType, startTime, end
     
     i = 0 
     lastUpdate =0
-    nbEntries = 0    
+    nbEntries  = 0    
         
     while lastUpdate == 0 and i < len( names) : # in case some databases dont exist
-        
+        nbEntries   = 0
         rrdFileName = RrdUtilities.buildRRDFileName( "errors", clients = [ names[i] ], machines = [machine], fileType = fileType, usage = "regular" )
         lastUpdate  = RrdUtilities.getDatabaseTimeOfUpdate( rrdFileName, fileType )    
-        nbEntries   = len( dataOutputs[ names[i] ] )
+
+        nbEntries   = len( dataOutputs[ names[i] ]) 
+         
         i = i + 1        
          
    
-    return  nbEntries, lastUpdate
+    return  int(nbEntries), lastUpdate
 
     
     
@@ -1236,11 +1247,11 @@ def getPairsFromAllDatabases( type, machine, start, end, infos, logger=None ):
         databaseName = RrdUtilities.buildRRDFileName( dataType = type , clients = [client], machines = machine, fileType = infos.fileType) 
 
         status, output = commands.getstatusoutput("rrdtool fetch %s  'AVERAGE' -s %s  -e %s" %( databaseName, (start), end) )
-
-        output = output.split( "\n" )[2:]
-        typeData[client] = output
-    
-
+       
+        splitOutput = []
+        splitOutput = output.splitlines()[2:]
+        typeData[client] = splitOutput
+     
     nbEntries, lastUpdate = getInfosFromDatabases(typeData, infos.clientNames, machine, infos.fileType, start, end)   
     
     
@@ -1268,7 +1279,7 @@ def getPairsFromAllDatabases( type, machine, start, end, infos, logger=None ):
         if type == "latency" and total != None:#latency is always an average
             total = total / ( len( output ) )
                      
-        
+       
         pairs.append( [typeData[client][i].split( " " )[0].replace( ":", "" ), total] )        
 
     
@@ -1317,9 +1328,10 @@ def createMergedDatabases( infos, logger = None ):
             for pair in pairs:
                 if pair[1] != None :
                     rrdtool.update( combinedDatabaseName, '%s:%s' %( int(pair[0]), pair[1] ) )
-                        
-            RrdUtilities.setDatabaseTimeOfUpdate(combinedDatabaseName, infos.fileType, lastUpdate)
-            
+            try:            
+                RrdUtilities.setDatabaseTimeOfUpdate(combinedDatabaseName, infos.fileType, lastUpdate)
+            except:
+                pass
                 
     return databaseNames
                     
@@ -1335,10 +1347,17 @@ def generateRRDGraphics( infos, logger = None ):
         #todo : Make 2 title options
         
         databaseNames = createMergedDatabases( infos, logger )
-                
+        
+        clientName = ''
+        for client in infos.clientNames:    
+            clientName = clientName +  client
+               
         for machine in infos.machines:#in total graphics there should be only one iteration...
             for type in infos.types:
-                plotRRDGraph( databaseNames[type], type, infos.fileType,infos.fileType, machine, infos,logger =logger )
+                if infos.mergerType == 'regular':
+                    plotRRDGraph(databaseNames[type], type, infos.fileType, clientName, machine, infos, logger = logger)
+                else:
+                    plotRRDGraph( databaseNames[type], type, infos.fileType,infos.fileType, machine, infos, logger =logger )
               
     else:
         
