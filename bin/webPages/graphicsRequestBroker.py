@@ -13,7 +13,7 @@ named COPYING in the root of the source directory tree.
 ##
 ## @author :  Nicholas Lemay
 ##
-## @since  : 2007-06-28, last updated on  
+## @since  : 2007-06-28, last updated on  2007-07-17 
 ##
 ##
 ## @summary : This file is to be used as a bridge between the graphics 
@@ -32,13 +32,15 @@ named COPYING in the root of the source directory tree.
 import cgi, os, sys
 import cgitb; cgitb.enable()
 
-sys.path.insert(1, sys.path[0] + '/../../../')
+sys.path.insert(1, sys.path[0] + '/../../')
+sys.path.insert(2, sys.path[0] + '/../../..')
+
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.ClientGraphicProducer import ClientGraphicProducer
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.GnuQueryBroker import GnuQueryBroker
 from pxStats.lib.RRDQueryBroker import RRDQueryBroker
-
+from cgi import escape
 LOCAL_MACHINE = os.uname()[1]
 
 
@@ -60,7 +62,7 @@ def returnToQueriersLocationWithReply( querier, reply ):
         Content-type: text/plain
 
     """   
-    print """%s"""  %( reply )
+    print """%s"""  %( escape(reply) )
     
     
  
@@ -109,26 +111,20 @@ def handlePlotRequest( form ):
                 queryBroker.prepareQuery( )
                 queryBroker.executeQuery( )
                 reply = queryBroker.getReplyToSendToquerier()
-            
+                returnToQueriersLocationWithReply( querier , reply )
+                
             else: #An error was located within the call.
                 queryBroker.replyParameters.error = error
                 reply = queryBroker.getReplyToSendToquerier()
                 returnToQueriersLocationWithReply( querier , reply )
         
         else:#other
-            fileHandle = open( 'outputfile', "w" )
-            oldStdOut = sys.stdout #save previous stdout
-            sys.stdout = fileHandle
-            print form
-            print sys.argv
-            fileHandle.close()
-            sys.stdout = oldStdOut
             reply = "images=;error=Cannot execute query.Unknown plotter.Plotter was %s" %plotter
             returnToQueriersLocationWithReply( querier , reply )
-     
-    except:      
-         reply = "images=;error=Unknown error. Cannot execute query. Please verify that parameters used are valid." 
-         returnToQueriersLocationWithReply( querier , reply )
+         
+    except Exception,inst:
+        reply = "images=;error=Unexpected error : %s." %(inst)
+        returnToQueriersLocationWithReply( querier , reply )
    
    
 def getPlotterType( form ): 
