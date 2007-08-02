@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-
-print """Content-Type: text/html"""
-
 """
 MetPX Copyright (C) 1604-1606  Environment Canada
 MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
@@ -35,8 +32,8 @@ named COPYING in the root of the source directory tree.
 
 import os, time, sys
 import cgi, cgitb; cgitb.enable()
-sys.path.insert(1, sys.path[0] + '/../../../')
-
+sys.path.insert(1, sys.path[0] + '/../../')
+sys.path.insert(2, sys.path[0] + '/../../..')
 try:
     pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
 except KeyError:
@@ -62,7 +59,8 @@ RX_DATATYPES = { "gnuplot" : [ "bytecount", "filecount","errors", "bytecount,err
 
 TX_DATATYPES ={ "gnuplot" : [ "bytecount", "errors", "filecount", "latency", "bytecount,errors", "bytecount,filecount", "bytecount,latency", "error,filecount","error,latency",
                                "filecount,latency","bytecount,errors,filecount", "bytecount,filecount,latency", "bytecount,errors,latency","bytecount,errors,filecount,latency"], \
-                "rrd": [ 'bytecount', 'errors', 'latency', 'bytecount,errors', 'bytecount,latency', 'errors,latency','bytecount,errors,latency' ]    }
+                "rrd": [ "bytecount", "errors", "filecount", "latency", "bytecount,errors", "bytecount,filecount", "bytecount,latency", "error,filecount","error,latency", \
+                         "filecount,latency","bytecount,errors,filecount", "bytecount,filecount,latency", "bytecount,errors,latency","bytecount,errors,filecount,latency" ]   }
 
 
 FIXED_TIMESPANS = { "gnuplot" : [ "N/A"], "rrd" : [ "daily" , "weekly", "monthly", "yearly" ] }
@@ -80,6 +78,15 @@ AVAILABLE_MACHINES   = []
 
 def getWordsFromFile( file ):
     """    
+        
+        @summary : Searchs and returns the words from
+                   the specified database file.
+        
+        @param  file: name of the file to search 
+        
+        @return: Returns the words found within
+                 the file.  
+    
     """
     
     lines = []
@@ -98,7 +105,16 @@ def getWordsFromFile( file ):
 
 
 def getWordsFromDB( wordType ):
-    """    
+    """ 
+        @summary : Searchs and returns the words from
+                   the database file associated with 
+                   the specifed wordtype.
+        
+        @param  wordType: Type of words to look for. 
+        
+        @return: Returns the words found within
+                 the databases.     
+        
     """
     
     words = []
@@ -107,6 +123,7 @@ def getWordsFromDB( wordType ):
         words = getWordsFromFile( StatsPaths.STATSWEBPAGESWORDDBS + 'products') 
     elif wordType == "groupName" :
         words = getWordsFromFile( StatsPaths.STATSWEBPAGESWORDDBS + 'groupNames')
+   
     return words    
 
 
@@ -135,10 +152,8 @@ def getAvailableMachines():
                 
     AVAILABLE_MACHINES.sort()
     
-    print AVAILABLE_MACHINES
-    
-                
-                    
+       
+                                
 def getCurrentTimeForCalendar( ):
     """
         @summary : Returns the current time in a format 
@@ -193,8 +208,8 @@ def printChoiceOfSourlients( plotter, form ):
         print """
                      
                             <td>
-                                 <label for="sourlientList">Client(s)/Source(s) :</label><br>
-                                 <select size=5 name="sourlientList" style="width: 300px;"height: 25px;"" multiple>
+                                 <div name="sourlientListLabel" id="sourlientListLabel">Client(s)/Source(s) :</div>
+                                 <select size=5 name="sourlientList" style="width: 300px;"height: 20px;"" multiple>
         """
         
         for sourlient in sourLients:
@@ -209,8 +224,8 @@ def printChoiceOfSourlients( plotter, form ):
                                                             
                                 <br>   
                         
-                                <input type=button class="button" value="Add Clients" onclick =" javascript:popupAddingWindow('popupAdder.html');">    
-                                <input type=button class="button" value="Delete client" onclick ="javascript:deleteFromList(sourlientList);">
+                                <input type=button class="button" value="Add Clients" onclick =" javascript:popupAddingWindow('popupAdder.html');"></input>    
+                                <input type=button class="button" value="Delete client" onclick ="javascript:deleteFromList(sourlientList);"></input> 
                                    
             """
     else:
@@ -219,28 +234,24 @@ def printChoiceOfSourlients( plotter, form ):
         print """
 
                     <td>
-                          <label for="sourlientList">Client(s)/Source(s) :</label><br>
-                         <select size=5 name="sourlientList" style="width: 300px;" multiple>
+                        
+                        <div name="sourlientListLabel" id="sourlientListLabel">Client(s)/Source(s) :</div>
+                        <select size=5 name="sourlientList" style="width: 300px;" multiple>
                         </select>                   
                
                         <br>               
                     
-                        <input type=button name="addButton" class="button" value="Add Sourlients" onclick ="javascript:popupAddingWindow( 'popUps/' + document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].value + (document.inputForm.machines[ document.inputForm.machines.selectedIndex ].value).replace(',','') + 'PopUpSourlientAdder.html' );">
+                        <input type=button name="addButton" class="button" value="Add Sourlients" onclick ="javascript:popupAddingWindow( '../../html/popUps/' + document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].value + document.inputForm.machines[ document.inputForm.machines.selectedIndex ].value.replace( /,/g , '' ) + 'PopUpSourlientAdder.html' );"></input> 
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        <input type=button name="deleteButton" class="button" value="Delete Sourlients" onclick ="javascript:deleteFromList(sourlientList);">
-    
-    """ 
-    
-    if plotter == "gnuplot":
-        printCombineSourlientsCheckbox(form)
-      
-    print """    
+                        <input type=button name="deleteButton" class="button" value="Delete Sourlients" onclick ="javascript:deleteFromList(sourlientList);"></input> 
+       
                     </td>
+                    
     """
   
   
     
-def printAjaxRequestsScript():
+def printAjaxRequestsScript( plotter ):
     """    
         @summary : prints out the section that will contain the javascript 
                    functions that will allow us to make queries 
@@ -292,19 +303,34 @@ def printAjaxRequestsScript():
                 function executeAjaxRequest( strURL, plotter, callingObject ) {                  
                    
                    var parameters = ''; 
+                   var errors ='';
                    
                    if( strURL == 'popupSourlientAdder.py'){ 
                         parameters = getParametersForPopups();
+                        //document.getElementById("errorLabel").innerHTML = '<font color="#FFFFFF">&nbsp;&nbsp;&nbsp; Application status : Updating list of sources and clients.</font>'
+                 
                    }else if( strURL == 'graphicsRequestBroker.py' ){
+                        document.getElementById("errorLabel").innerHTML = '<font color="#FFFFFF"> Application status : Executing the graphics creation request...</font>';
                         parameters = getParametersForGraphicsRequests( plotter );
+                        errors = searchFormForErrors();
+                        
                    }else if( strURL == 'updateWordsInDB.py'){
+                       document.getgetElementById("errorLabel").innerHTML = '<font color="#FFFFFF">&nbsp;&nbsp;&nbsp; Application status : Updating Databases(s).</font>'
                        parameters = getParametersForWordUpdate( callingObject );
-                   }                   
                    
+                   }                   
+                                  
                   
-                  http.open("GET", strURL + parameters, true );
-                  http.onreadystatechange = handleHttpResponse;
-                  http.send(null);
+                  if( errors == '' || strURL != 'graphicsRequestBroker.py' ){
+                  
+                      http.open("GET", strURL + parameters, true );
+                      http.onreadystatechange = handleHttpResponse;
+                      http.send(null);
+                  
+                  }else{
+                  
+                      document.getElementById("errorLabel").innerHTML = '<font color="#C11B17">' + errors + '</font>';
+                  }    
                 
                 }
                 
@@ -315,31 +341,72 @@ def printAjaxRequestsScript():
                     
                     
                     var response = http.responseText;
-                  
-                    if( response.match('images') != null && response.match('error') != null){ 
-                        //document.getElementById("errorLabel").innerHTML = str;
+                    //document.getElementById("errorLabel").innerHTML = response;
+                     if( response.match('images') != null && response.match('error') != null){ 
+                        
                         var image = response.split(";")[0];
                         var error = response.split(";")[1];
                         image = image.split("=")[1];
                         error = error.split("=")[1];
-                        
-                        document.getElementById("errorLabel").innerHTML = '<font color="#C11B17">' + image  + '</font>';
+                    
+                        if( error != '' && error !=null ){
+                            document.getElementById("errorLabel").innerHTML = '<font color="#C11B17">' + error + '</font>';
+                            
+                        }else{
+                            document.getElementById("errorLabel").innerHTML = '<font color="#C11B17">Application status : Executing the graphics creation request...</font>';
+                        }
                         
                         if( image != ''  ){
                             
+    """
+    
+    if plotter == 'gnuplot':
+        
+        print """
+                           document.getElementById("gnuplotImage").src=image;
+                           
+	    """
+        
+        
+    elif plotter == 'rrd':
+        
+        print """
+                           
+                           var imageList = image.split(',');
+                           wich = 0;
+                           document.getElementById("photoslider").src=imageList[0];
+                           photos = new Array( imageList.length );
+                           for( i=0; i < imageList.length; i++ ){
+                               photos[i] =  imageList[i];
+                               photoslink[i] = imageList[i];
+                               
+                           }     
+
+
+        """
+        
+    print """                    
                             if( document.forms['inputForm'].elements['groupName'].value != '' ){
                                 
                                 executeAjaxRequest( 'updateWordsInDB.py', 'plotter', 'groupName' );                                 
                                 
                             }
+    
+    """
+    
+    if plotter != "rrd":
+        print """                        
                             if( document.forms['inputForm'].elements['products'].value != ''){
                                 
                                 executeAjaxRequest( 'updateWordsInDB.py', 'plotter', 'products' );
                             }
+        """                    
+        
+    print """
                         
                         }
                       }else{
-                         document.getElementById("errorLabel").innerHTML = '<font color="#C11B17">' + 'allo' + '</font>';
+                         
                       }                                                                                                                        
                     }    
                  }
@@ -402,7 +469,6 @@ def printAjaxRequestsScript():
                     var plotter    = 'rrd';
                     var endTime    = document.forms['inputForm'].elements['endTime'].value;
                     var groupName  = document.forms['inputForm'].elements['groupName'].value;
-                    var products   = document.forms['inputForm'].elements['products'].value;
                     var span       = document.forms['inputForm'].elements['span'].value;
                     var fileType   = document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].value;
                     var machines   = document.inputForm.machines[ document.inputForm.machines.selectedIndex ].value;
@@ -417,11 +483,11 @@ def printAjaxRequestsScript():
                          sourlients.push( document.inputForm.sourlientList.options[i].value );
                      }  
 
-                    qstr = '?plotter=rrd&querier=graphicsRequestPage.py&endTime=' + escape(endTime) + '&groupName=' + escape(groupName) + '&products=' + escape(products) + '&span=' + escape(span);
+                    qstr = '?plotter=rrd&querier=graphicsRequestPage.py&endTime=' + escape(endTime) + '&groupName=' + escape(groupName) + '&span=' + escape(span);
                     qstr = qstr + '&fileType=' + escape(fileType) + '&machines=' + escape(machines) +'&statsTypes=' + escape(statsTypes);
                     qstr = qstr + '&preDeterminedSpan=' + escape(preDeterminedSpan) + '&fixedSpan=' + escape(fixedSpan);
                     qstr = qstr + '&sourLients=' + escape( sourlients );
-                    qstr = qstr + '&individual' + escape( individual ) + '&total' + escape( total );
+                    qstr = qstr + '&individual=' + escape( individual ) + '&total=' + escape( total );
                     
                     return qstr;
 
@@ -442,7 +508,141 @@ def printAjaxRequestsScript():
                 
                 }    
             
-            
+    """
+    
+    if plotter == "rrd":
+        
+        print """
+                function searchFormForErrors(){
+                    
+                    var errors = '';
+                    
+                    var sourlients = new Array();
+                    
+                    for (var i = 0; i < document.inputForm.sourlientList.options.length; i++){
+                        sourlients.push( document.inputForm.sourlientList.options[i].value );
+                    } 
+                    
+                    var fileType   = document.inputForm.fileType[document.inputForm.fileType.selectedIndex].value;
+                    var machines   = document.inputForm.machines[document.inputForm.machines.selectedIndex].value;
+                    var statsTypes = document.inputForm.statsTypes[document.inputForm.statsTypes.selectedIndex].value;
+                    var optionalOptionsVisibility = document.getElementById("advancedOptions").style.visibility;
+                    var fixedSpan       = document.inputForm.fixedSpan[ document.inputForm.fixedSpan.selectedIndex ].value;
+                    var determinedSpan  = document.inputForm.preDeterminedSpan[ document.inputForm.preDeterminedSpan.selectedIndex ].value;
+                    
+                    if( fileType.match('Select') !=null ){
+                        errors= 'Error. Please select a filetype.'
+                    
+                    }else if(machines.match('Select') !=null ){
+                         errors = 'Error. Please select a machine.'
+                         
+                    }else if(statsTypes.match('Select') !=null ){
+                         errors = 'Error. Please select a stats type.'
+                    
+                    }else if( fixedSpan.match('Select') == null && determinedSpan.match('Pre') != null  ){
+                        errors = 'Error. Cannot specify fixed span without determined span.';
+                    
+                    }else if( sourlients.length == 0 ){
+                        errors = 'Error. Please add a client or a source to the list.';
+                    
+                    }else if( optionalOptionsVisibility !='hidden'){
+                        var span = document.forms['inputForm'].elements['span'].value;
+                        individualFieldChecked = document.inputForm.individual.checked;
+                        totalFieldChecked= document.inputForm.total.checked;
+  
+                        if( totalFieldChecked ==true && individualFieldChecked == true ){
+                            errors = 'Error. Cannot use individul and total options at the same time.'
+                        
+                        }
+                        
+                        
+                        if( span != ''){
+                            if ( isInt(span) == true ){
+                                if( span < 1 || span > 48  ){
+                                    errors = 'Error. Span value must be between 1 and 48.'
+                            }
+                        
+                            }else{
+                                errors = 'Error. Span value must be a NUMERICAL value between 1 and 48.'
+                            }
+                        
+                        }
+                        
+                        
+                    }
+                                      
+                    
+                    return errors;
+                    
+                
+                }
+        """
+        
+    elif plotter == "gnuplot":    
+        
+        print """
+                 function isInt(x) {
+                     var y=parseInt(x);
+                     
+                     if (isNaN(y)) return false;
+                     
+                     return x==y && x.toString()==y.toString();
+                }
+        
+                function searchFormForErrors(){
+                    
+                    var errors = '';
+                    
+                    var sourlients = new Array();
+                    
+                    for (var i = 0; i < document.inputForm.sourlientList.options.length; i++){
+                        sourlients.push( document.inputForm.sourlientList.options[i].value );
+                    } 
+                    
+                    var fileType = document.inputForm.fileType[document.inputForm.fileType.selectedIndex].value;
+                    var machines = document.inputForm.machines[document.inputForm.machines.selectedIndex].value;
+                    var statsTypes = document.inputForm.statsTypes[document.inputForm.statsTypes.selectedIndex].value;
+                    var optionalOptionsVisibility = document.getElementById("advancedOptions").style.visibility;
+                    
+                    if( fileType.match('Select') !=null ){
+                        errors= 'Error. Please select a filetype.'
+                    
+                    }else if(machines.match('Select') !=null ){
+                         errors = 'Error. Please select a machine.'
+                         
+                    }else if(statsTypes.match('Select') !=null ){
+                         errors = 'Error. Please select a stats type.'
+                    
+                    }else if(sourlients.length == 0 ){
+                         errors = 'Error. Please add a client or a source to the list.'
+                    
+                    }else if( optionalOptionsVisibility !='hidden'){
+                        var span = document.forms['inputForm'].elements['span'].value;
+                        if( span != ''){
+                            if ( isInt(span) == true ){
+                                if( span < 1 || span > 48  ){
+                                    errors = 'Error. Span value must be between 1 and 48.'
+                            }
+                        
+                            }else{
+                                errors = 'Error. Span value must be a NUMERICAL value between 1 and 48.'
+                            }
+                        
+                        }
+                    
+                    
+                    }
+                    
+                    return errors;
+                
+                
+                }
+    
+        """
+    
+    
+    
+    print """        
             </script> 
                               
     """
@@ -476,29 +676,27 @@ def printSlideShowScript( images ):
                 var photoslink=new Array();
                 var which=0;
     """
-    
+   
     for i in range(  len( images ) ):
         print """
-                photos[%s]="%s";
+                
+                    photos[%s]="%s";
+                    photoslink[%s]="%s"
+        """ %(i, images[i], i, images[i] )
         
-        """ %(i, images[i])
-
-    
     print """            
                 //Specify whether images should be linked or not (1=linked)
-                var linkornot=0;
+                var linkornot=1;
                 
                 //Set corresponding URLs for above images. Define ONLY if variable linkornot equals "1"
-                photoslink[0]="";
-                photoslink[1]="";
-                photoslink[2]="";
+    
                 
                 //do NOT edit pass this line
                 
                 var preloadedimages=new Array();
                 for (i=0;i<photos.length;i++){
-                preloadedimages[i]=new Image();
-                preloadedimages[i].src=photos[i];
+                    preloadedimages[i]=new Image();
+                    preloadedimages[i].src=photos[i];
                 }
                 
                 
@@ -571,27 +769,30 @@ def printRRDImageFieldSet( form ):
     height = 250     
     
     print """
-         <fieldset>
-            <legend>Resulting graphic(s)</legend>
+         <fieldset class="imgFieldset">
+            <legend class="legendLevel1">Resulting graphic(s)</legend>
             <table border="0" cellspacing="0" cellpadding="0">
                 <tr>
                     <td>
                         <script>
-                                if (linkornot==1)
-                                document.write('<a href="javascript:transport()">')
-                                 document.write('<img src="'+photos[0]+'" name="photoslider" id='photoslider' style="filter:revealTrans(duration=2,transition=23)" border=0>')
-                                if (linkornot==1)
-                                document.write('</a>')
+                                if (linkornot==1){
+                                    document.write('<a href="javascript:transport()">');
+                                } 
+                                 document.write('<img src="'+photos[0]+'" name="photoslider" id="photoslider" style="filter:revealTrans(duration=2,transition=23)" border=0>');
+                                if (linkornot==1){
+                                    document.write('</a>')
+                                }
                         </script>
                     </td>
                 </tr>
-            </table>        
+                
+               </table> 
         </fieldset>
 
-        <fieldset>
-             <input type=button value="Previous image result." onclick ="backward();return false;">
-             <input type=button value="View original size"     onclick ="wopen( photoslider.src, 'popup', %s, %s); return false;">
-             <input type=button value="Next image result."     onclick ="forward();return false;" >
+        <fieldset class="fieldSetaction">
+             <input type=button value="Previous image result." onclick ="backward();return false;"></input> 
+             <input type=button value="View original size"     onclick ="wopen( photoslider.src, 'popup', %s, %s); return false;"></input> 
+             <input type=button value="Next image result."     onclick ="forward();return false;" ></input> 
         </fieldset>
 
     """%(  width, height )
@@ -618,15 +819,23 @@ def printGnuPlotImageFieldSet(form):
     
         
     print """
-         <fieldset>
-            <legend>Resulting graphic</legend>
-            <img src="%s">            
-        </fieldset>    
-        <fieldset>                
-            <input type=button class="button" value="View original size" onclick =" wopen('%s', 'popup', %s, %s); return false;">            
+         <fieldset class="imgFieldset">
+            <legend class="legendLevel1">Resulting graphic</legend>
+                 <div class="clipwrapper">
+                    <div class="clip">
+                        <img name="gnuplotImage" id="gnuplotImage" src="%s" >   
+                    </div>
+                </div>
+        
+            </fieldset>    
+        
+        <fieldset class="fieldSetaction">    
+     
+        <input type=button class="button" value="View original size" onclick ="wopen(document.getElementById('gnuplotImage').src, 'popup', %s, %s); return false;"></input>             
+        
         </fieldset>    
     
-    """%( image, image, width, height )
+    """%( image, width, height )
 
 
     
@@ -670,14 +879,14 @@ def printGroupTextBox( form ):
     
     print """
                         <td width = 210>
-                            <label for="products">Group name:</label><br>
+                            <label for="groupName">Group name:</label><br>
                              <INPUT TYPE="TEXT" class="text" NAME="groupName" value="%s" id="groupName" >
                              <div id="autosuggest"><ul></ul></div>
                              <script language="Javascript">
                                  
                                  var groupList = new Array(%s);
                                  
-                                 new AutoSuggest( document.getElementById('groupName'), groupList );                                   
+                                 new AutoSuggest( document.getElementById("groupName"), groupList );                                   
                              
                              </script>
                                                
@@ -711,13 +920,22 @@ def printProductsTextBox( form ):
                              <INPUT TYPE="TEXT"  NAME="products" value="%s" id="products" >
                              <div id="autosuggest"><ul></ul></div>
                              <script language="Javascript">                                 
-                                 var productList = new Array(%s);                                 
-                                 new AutoSuggest( document.getElementById('products'), productList );                                  
+                                 var productList = new Array();                                 
+    """%( products )
+    
+    for i in range( len( words )):
+        print """
+                                productList[%s] = '%s';
+        """%( i, words[i] )
+            
+    
+    print """
+                                 new AutoSuggest( document.getElementById("products"), productList );                                  
                              </script>
                                                
                         </td>
     
-    """%( products, str(words).replace( '[','' ).replace( ']', '' ) )
+    """
    
    
    
@@ -765,7 +983,7 @@ def printFileTypeComboBox( form ):
     print """
                         <td width = 210>
                             <label for="fileType">FileType:</label><br>
-                            <select name="fileType" OnChange="JavaScript:executeAjaxRequest( 'popupSourlientAdder.py', '' );Javascript:updateStatsTypes( document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].value );Javascript:updateButtons();">
+                            <select name="fileType" OnChange="JavaScript:executeAjaxRequest( 'popupSourlientAdder.py', '' );Javascript:updateStatsTypes( document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].value );Javascript:updateLabelsOnFileTypeChange(); ">
                                 <option>Select a file type...</option>
     """
     
@@ -779,7 +997,12 @@ def printFileTypeComboBox( form ):
             print """
                                 <option  value="%s">%s</option>
             """%( fileType, fileType )
- 
+    
+    
+    print """            
+                            </select>
+                      </td>      
+    """
 
       
 def printSpecificSpanComboBox( form ):
@@ -869,7 +1092,7 @@ def printMachinesComboBox( form ):
                         <td width = 210px> 
                             <label for="machines">Machine(s):</label><br>
                             <select class="dropDownBox" name="machines" OnChange="JavaScript:executeAjaxRequest( 'popupSourlientAdder.py', '' ) ">     
-                            <option>Select a machine name...</option>               
+                            <option>Select machine(s)...</option>               
     """
     for machines in AVAILABLE_MACHINES:
         if machines == selectedMachines:            
@@ -881,7 +1104,10 @@ def printMachinesComboBox( form ):
                                 <option  value="%s">%s</option>
             """%( machines, machines )
 
-
+    print """
+                            </select>
+                       </td>     
+    """
     
 def printStatsTypesComboBox( plotter, form ):
     """    
@@ -925,7 +1151,7 @@ def printStatsTypesComboBox( plotter, form ):
                         <td width = 210px> 
                             <label for="statsTypes">Stats type(s):</label><br>
                             <select name="statsTypes" class="statsTypes">     
-                            <option>Select stats types.</option>               
+                                <option>Select stats types.</option>               
     """
     
     for choice in listOfChoices:
@@ -940,6 +1166,11 @@ def printStatsTypesComboBox( plotter, form ):
                                 <option  value="%s">%s</option>
             """%( choice, choice )    
 
+
+    print """            
+                            </select>
+                        </td>
+    """
 
 
 def printCombineHavingrunCheckbox( form ):
@@ -989,13 +1220,13 @@ def printIndividualCheckbox( form ):
     if individual == "true" :
             print """
                             <td>        
-                                <INPUT TYPE="checkbox" name="individual"  checked>Individual.
+                                <INPUT TYPE="checkbox" name="individual"  checked DISABLED>Individual machines( Not yet implemented ).
                             </td. 
             """  
     else:
         print """               
                             <td>
-                                <INPUT TYPE="checkbox" name="individual">Individual.                          
+                                <INPUT TYPE="checkbox" name="individual" DISABLED>Individual machines( Not yet implemented).                          
                             </td>
         """     
 
@@ -1038,6 +1269,7 @@ def printCombineSourlientsCheckbox( form ):
                    the check box will be checked.
                    
         @param form: Form with whom this program was called.     
+    
     """
     
     try:
@@ -1048,14 +1280,22 @@ def printCombineSourlientsCheckbox( form ):
     
     if combineSourlients == "true" :
             print """
-                                    
-                            <INPUT TYPE="checkbox" NAME="combineSourlients"  CHECKED>Combine the sourLients.
+                         
+                         <td>   
+                            <br> 
+                            <INPUT TYPE="checkbox" NAME="combineSourlients"  CHECKED>
+                            <div id="combineSourlientsLabel" style="display:inline;">Combine source(s)/client(s).</div>
+                         </td>   
                          
             """  
     else:
         print """
-                                    
-                            <INPUT TYPE="checkbox" NAME="combineSourlients">Combine the source(s)/client(s).
+                         
+                        <td>       
+                            <br> 
+                            <INPUT TYPE="checkbox" NAME="combineSourlients"  >
+                            <div id="combineSourlientsLabel" style="display:inline;">Combine source(s)/client(s).</div>
+                        </td>     
                           
         """    
     
@@ -1065,7 +1305,7 @@ def printEndTime( form ):
         @summary : Prints end time calendar into the 
                    inputform
         
-        @param   : The parameter form with whom this program was called. 
+        @param  form : The parameter form with whom this program was called. 
     
     """
     
@@ -1074,17 +1314,17 @@ def printEndTime( form ):
     except:
         endTime = getCurrentTimeForCalendar() 
         
-    print """         
-                        <td bgcolor="#ffffff" valign="top" width = 210>
+    print  """         
+                        <td bgcolor="#FFFFFF" valign="top" width = 210>
                             <label for="endTime">End Time Date:</label><br>
                             <input type="Text" class="text" name="endTime"  value="%s" width = 150>
-                            <a href="javascript:cal1.popup();"><img src="images/cal.gif" width="16" height="16" border="0" alt="Click Here to Pick up the date"></a>
+                            <a href="javascript:cal1.popup();"><img src="../../images/cal.gif" width="16" height="16" border="0" alt="Click Here to Pick up the date"></a>
                         
                             <script language="JavaScript">
                                 <!-- // create calendar object(s) just after form tag closed -->
-                                // specify form element as the only parameter (document.forms['formname'].elements['inputname']);
+                                // specify form element as the only parameter (document.forms["formname"].elements["inputname"]);
                                 // note: you can have as many calendar objects as you need for your application
-                                var cal1 = new calendar1(document.forms['inputForm'].elements['endTime']);
+                                var cal1 = new calendar1(document.forms["inputForm"].elements["endTime"]);
                                 cal1.year_scroll = true;
                                 cal1.time_comp = true;
                             </script>                            
@@ -1099,67 +1339,99 @@ def printGnuPlotInputForm(  form   ):
         @summary: Prints a form containing all the 
                   the avaiable field for a graph to
                   be plotted with gnu. 
+       @param  form : The parameter form with whom this program was called.            
     """
     
     #Start of form
     print """
-        <form name="inputForm"  method="post" class="fieldset legend">
-            <fieldset>
-                <legend>Gnuplot fields</legend>
-                
-                <table>
-                    <tr>
+        <form name="inputForm">
+    """
+    
+        
+    print """   
+            <fieldset class="fieldsetLevel1">
+                <legend class="legendLevel1">Required fields</legend>
+               
+                <table bgcolor="#FFF4E5">
+                                           
                 
     """         
+
+    print """       <tr bgcolor="#FFF4E5">
     
-    #Print first table row
-    printEndTime(form)
-    printGroupTextBox(form)
-    printProductsTextBox(form)
-    printSpanTextBox(form)
-    
-    
-    #Jump a table row.
-    print """
-                    </tr>   
-                    <tr>
-                    </tr> 
-                    <tr>
     """
     
     printFileTypeComboBox(form)
     printMachinesComboBox(form)
     printStatsTypesComboBox( "gnuplot", form )    
+    printCombineSourlientsCheckbox(form)
     printChoiceOfSourlients( 'gnuplot', form )
 
     #printCombineSourlientsCheckbox(form)  
    
     #End of fieldSet
-    print """       
-                     </tr>                                                        
-                </table>             
-            </fieldset>  
-    """
+    print """                
     
-    #Add fieldset for submit button 
-    print """
-            <fieldset>                             
-                <input type="button"  name="generateGraphics" value="Generate graphic(s)" 
-                 onclick="JavaScript:executeAjaxRequest('graphicsRequestBroker.py', 'gnuplot')" >
-                <input type=button  name="help "value="Get Help" onclick ="wopen( document.plotterChoiceForm.plotterChoice[document.plotterChoiceForm.plotterChoice.selectedIndex].value + 'Help.html', 'popup', 800, 670 );">                                
-            
-    """        
-    
-    
-    
-    print"""
-        
-            <div id="errorLabel"></div>
-        
+                   </tr>       
+                </table>     
+            </fieldset>    
     """
     
     print """        
+        
+        <fieldset class="fieldSetOptional" >
+            <div name="advancedOptionsLinkDiv" id="advancedOptionsLinkDiv" class="left">
+               <a href="JavaScript:showAdvancedOptions();" name="advancedOptionsLink" id="advancedOptionsLink">Show advanced options...</a>
+            </div>
+            <br>
+    """
+    
+    
+    print """         
             
+             <div name="advancedOptions" id="advancedOptions" style="visibility:hidden">
+                <table>
+                    <tr>
+                   
+            
+    """
+    
+    printEndTime(form)        
+    printSpanTextBox(form)
+    printGroupTextBox(form)
+    printProductsTextBox(form)
+            
+    print """     
+                       
+                   </tr>
+               </table>    
+             </div> 
+            
+        </fieldset>
+    
+    """
+    
+    
+    #Add fieldset for submit button 
+    print """
+            <fieldset class="fieldSetAction">     
+                <div class="left" >
+                    <input type="button"  name="generateGraphics" value="Generate graphic(s)" onclick="JavaScript:executeAjaxRequest('graphicsRequestBroker.py', 'gnuplot')" ></input> 
+                    <input type="button"  name="switchPlotter" value="Switch to rrd plotter." onclick="location.href='graphicsRequestPage.py?plotter=rrd'"></input>
+                    <div id="errorLabel" style="display:inline;"> <font color="#FFFFFF">&nbsp;&nbsp;&nbsp; Application status : Awaiting request(s).</font></div>     
+                </div>         
+                                    
+    """
+
+
+    print """
+                <div class="right">
+                      <input type=button  name="help "value="Get Help" onclick ="wopen( '../../html/gnuplotHelp.html', 'popup', 800, 670 );"></input>
+                </div>
+    """
+    
+    print """        
+                        
             </fieldset>    
     """
     
@@ -1168,9 +1440,22 @@ def printGnuPlotInputForm(  form   ):
         </form>        
     """
     
+    
+def printLogo():
+    """
+        @summary : Prints out the logo at the middle
+                  of the top of the page.
+    
+    """
+    
+    print """
+                     <div style="position: absolute; left: 250px; top:-10px; height: 100px; width: 100px">
+                        <img name="logo" id="logo" src="logo.gif" ></img>
+                   </div>
 
-
-
+    """
+    
+    
 def printRRDInputForm(  form   ):
     """
         @summary: Prints a form containing all the 
@@ -1178,66 +1463,90 @@ def printRRDInputForm(  form   ):
                   be plotted with gnu. 
     """
     
-    #Start of form
+    
+ 
+    #Non-optional section first....
     print """
         <form name="inputForm"  method="post" class="fieldset legend">
-            <fieldset>
-                <legend>RRD fields</legend>
+            <fieldset class="fieldSetLevel1">
+                <legend class="legendLevel1">RRD fields</legend>
                 
                 <table>
                     <tr>
                 
     """         
-    
-    #Print first table row
-    printEndTime(form)
-    printGroupTextBox(form)
-    printProductsTextBox(form)
-    printSpanTextBox(form)
-    printIndividualCheckbox(form)
-    printTotalCheckbox(form)
-    
-    #Jump a table row.
-    print """
-                    </tr>   
-                    <tr>
-                    </tr> 
-                    <tr>
-    """
-    
     printFileTypeComboBox(form)
     printMachinesComboBox(form)
     printStatsTypesComboBox( "rrd", form )     
     printSpecificSpanComboBox(form)
     printFixedSpanComboBox(form)
     printChoiceOfSourlients( 'rrd', form )
-
-    #printCombineSourlientsCheckbox(form)  
-   
-    #End of fieldSet
-    print """       
-                     </tr>                                                        
-                </table>             
-            </fieldset>  
-    """
     
-    #Add fieldset for submit button 
     print """
-            <fieldset>                             
-                <input type="button"  name="generateGraphics" value="Generate graphic(s)" 
-                 onclick="JavaScript:executeAjaxRequest('graphicsRequestBroker.py', 'rrd')">
-                <input type=button  name="help "value="Get Help" onclick ="wopen( document.plotterChoiceForm.plotterChoice[document.plotterChoiceForm.plotterChoice.selectedIndex].value + 'Help.html', 'popup', 830, 1100 );">                                
+                    </tr> 
+    
+                </table>
+    
+            </fieldset>
     """
     
-    
-    print"""
-        
-            <div id="errorLabel"></div>
-        
-    """
-            
+      
+    #Optional section.
     print """        
-            </fieldset>    
+        
+        <fieldset class="fieldSetOptional" >
+            <div name="advancedOptionsLinkDiv" id="advancedOptionsLinkDiv">
+               <a href="JavaScript:showAdvancedOptions();" name="advancedOptionsLink" id="advancedOptionsLink"> Show advanced options...</a>
+            </div>
+    """
+    
+    print """         
+            
+            <div name="advancedOptions" id="advancedOptions" style="visibility:hidden">
+                <table>
+                    <tr>
+            
+    """
+    
+    
+    #Print first table row
+    printEndTime(form)
+    printGroupTextBox(form)
+    printSpanTextBox(form)
+    printTotalCheckbox(form)
+    printIndividualCheckbox(form)
+        
+    
+    print """     
+                   </tr>
+               </table>    
+            </div>
+            
+        </fieldset>
+    
+    """
+    
+    #Add fieldset for submit button
+    print """
+            <fieldset class="fieldSetAction">
+                <div class="left" >     
+                     <input type="button"  name="generateGraphics" value="Generate graphic(s)" onclick="JavaScript:executeAjaxRequest('graphicsRequestBroker.py', 'rrd')"></input> 
+                     <input type="button"  name="switchPlotter "value="Switch to gnuplot plotter." onclick="location.href='graphicsRequestPage.py?plotter=gnuplot'"> </input>          
+                     <div name="errorLabel "id="errorLabel" style="display:inline;"><font color="#FFFFFF">&nbsp;&nbsp;&nbsp; Application status : Awaiting request(s).</font></div> 
+                </div>    
+    """
+
+
+    print"""
+             <div class="right">
+                <input type=button  name="help "value="Get Help" onclick ="wopen( '../../html/rrdHelp.html', 'popup', 830, 1100 );">
+            </div>
+            
+
+    """
+
+    print """
+            </fieldset>
     """
     
     #End of form.
@@ -1246,11 +1555,18 @@ def printRRDInputForm(  form   ):
     """
     
     
+  
+     
+     
      
 def printInputForm( plotter, form ):
     """
         @summary: Prints the form based 
                   on the plotter that was chosen
+                  
+        @param  plotter: Plotter that was chosen by the user. 
+        
+        @param  form : The parameter form with whom this program was called.            
                   
     """
     
@@ -1273,29 +1589,11 @@ def printPlottersChoice( plotter ):
     
     
     print """
-        <body text=black link="#FFFFFF" vlink="000000" bgcolor=#99FF99 >
-            <form name="plotterChoiceForm">                
-                <select name="plotterChoice"
-                    OnChange="location.href='graphicsRequestPage.py?plotter='+(plotterChoiceForm.plotterChoice.options[selectedIndex].value)" >                
-                
-    """
-    
-    for supportedPlotter in  SUPPORTED_PLOTTERS :
-        if supportedPlotter == plotter:
-            
-            print """
-                        <option selected value="%s">%s</option>
-             """ %( supportedPlotter,supportedPlotter )    
-        else:
-            print """
-                        <option value="%s">%s</option>
-             """ %( supportedPlotter,supportedPlotter )            
+        <body text="black" link="blue" vlink="blue" bgcolor="#7ACC7A" >
              
-    print """   
-                </select>
-            </form>
     """
-    
+      
+        
     
 def printHead( plotter, form ):
     """
@@ -1313,25 +1611,66 @@ def printHead( plotter, form ):
             <title>Graphic requests.</title>
             <link rel="stylesheet" type="text/css" href="/css/style.css">
             
-            <style type="text/css">                
-                fieldset { 
+            <style type="text/css">      
+                      
+                fieldset.fieldSetLevel1{ 
                     border:2px solid; 
                     border-color: #3b87a9;
-                    background-color:white; 
+                    background-color:#FFF4E5 ; 
                 }
 
-                legend {
+                fieldset.fieldSetOptional{ 
+                    border:2px solid; 
+                    border-color: #3b87a9;
+                    background-color:#FFFFFF; 
+                }
+                
+                
+                
+                fieldset.fieldSetAction{
+                    border:2px solid; 
+                    border-color: #3b87a9;
+                    background-color:#7092B9; 
+                    height:14px;
+                    max-height: 16px;
+                    height: expression(this.height > 16 ? 16: true);
+                }
+                
+                legend.legendLevel1{
                     padding: 0.2em 0.5em;
                     border:2px solid;
                     border-color:#3b87a9;
                     color:black;
                     font-size:90%;
                     text-align:right;
+                    align:right;
                 }
                 
-                img{ 
-                    max-height: 325px;
-                    height: expression(this.height > 325 ? 325: true);
+                  
+                .clipwrapper{
+                  position:relative;
+                  height:330px;
+                  max-height: 330px;
+                  height: expression(this.height > 330 ? 330: true);
+                }
+                
+                .clip{
+                  height:315px;  
+                  position:absolute;
+                  clip:rect(20px 900px 315px 10px);
+                  max-height: 320px;
+                  height: expression(this.width > 320 ? 320: true);
+                  overflow:hidden;
+                }
+                
+                
+                fieldSet.imgFieldset{
+                    border:2px solid; 
+                    border-color: #3b87a9;
+                    background-color:white; 
+                    height:340px; 
+                    max-height: 340px;
+                    height: expression(this.height > 340 ? 340: true);
                 }
                 
                 input.button{
@@ -1359,6 +1698,15 @@ def printHead( plotter, form ):
                     width: expression(this.width > 180 ? 180: true);
                 }
                 
+                
+                .imgContainer{
+                    height:320px;
+                    max-height: 320px;
+                    height: expression(this.height > 320 ? 320: true);
+                    max-width: 900px;
+                    width: expression(this.width > 900 ? 900: true);
+                    overflow:hidden;
+                } 
                 
                 .suggestion_list
                 {
@@ -1396,9 +1744,10 @@ def printHead( plotter, form ):
                     display: none;
                 }
                             
-                
+                  
                 div.left { float: left; }
                 div.right {float: right; }
+                div.top{ float:top; }
                 <!--
                 A{text-decoration:none}
                 -->
@@ -1415,11 +1764,11 @@ def printHead( plotter, form ):
         
     print """
             <!--Java scripts sources -->
-            <script language="Javascript" src="js/autosuggest.js"></script>
-            <script src="js/calendar1.js"></script>
-            <script src="js/calendar2.js"></script>
-            <script src="js/windowUtils.js"></script>
-            <script src="js/popupListAdder.js"></script>
+            <script language="Javascript" src="../js/autosuggest.js"></script>
+            <script src="../js/calendar1.js"></script>
+            <script src="../js/calendar2.js"></script>
+            <script src="../js/windowUtils.js"></script>
+            <script src="../js/popupListAdder.js"></script>
             <script>
                 counter =0;             
                 function wopen(url, name, w, h){
@@ -1441,26 +1790,34 @@ def printHead( plotter, form ):
             
             <script language="Javascript">
             
-                function updateButtons(){
+                function updateLabelsOnFileTypeChange(){
                 
                     if ( document.inputForm.fileType[document.inputForm.fileType.selectedIndex].value == 'rx' ){
                         
                        document.inputForm.addButton.value    = 'Add Sources   ';
                        document.inputForm.deleteButton.value = 'Delete Sources';
+                       document.getElementById( 'combineSourlientsLabel').innerHTML = 'Combine source(s).&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+                       document.getElementById( 'sourlientListLabel').innerHTML = 'Sources : ';
                         
                     }else if( document.inputForm.fileType[document.inputForm.fileType.selectedIndex].value == 'tx' ){
                         
-                        document.inputForm.addButton.value    = 'Add Clients   ';
+                        document.inputForm.addButton.value    = 'Add Clients';
                         document.inputForm.deleteButton.value = 'Delete Clients';
-                    
+                        document.getElementById( 'combineSourlientsLabel').innerHTML = 'Combine client(s).&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+                        document.getElementById( 'sourlientListLabel').innerHTML = 'Clients : ';
+                        
                     }else{
                         document.inputForm.addButton.value    = 'Add ';
                         document.inputForm.deleteButton.value = 'Delete';
+                        document.getElementById( 'combineSourlientsLabel').innerHTML = 'Combine sources/clients.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+                        document.getElementById( 'sourlientListLabel').innerHTML = 'Client(s)/Source(s) :';
                     
                     }
                 }
                 
-            </script>
+                
+            </script>           
+                       
     """
     
     if plotter == "rrd" or plotter == "gnuplot":
@@ -1503,7 +1860,14 @@ def printHead( plotter, form ):
             }
         
         </script>          
-            
+        <script language="JavaScript">
+                 function showAdvancedOptions(){
+                     document.getElementById("advancedOptions").style.visibility = "visible";
+                     document.getElementById("advancedOptionsLinkDiv").style.visibility = "hidden";
+                 }     
+        
+        </script>
+                           
     """
     
     
@@ -1512,7 +1876,11 @@ def printHead( plotter, form ):
             printSlideShowScript( form["image"][0].split(',') )
         except:#no specified image 
             printSlideShowScript( [] )
-    printAjaxRequestsScript()         
+            
+    printAjaxRequestsScript( plotter )         
+    
+    
+    
     print """        
         </head>
     """
@@ -1524,7 +1892,7 @@ def startCGI():
         
     """
     print "Content-Type: text/html"
-    print
+    print ""
     
     
 def getPlotter( form ):
@@ -1564,6 +1932,7 @@ def buildWebPageBasedOnReceivedForm( form ):
     startCGI()
     printHead( plotter, form )
     printPlottersChoice( plotter )
+    printLogo()
     printInputForm(plotter, form )
     printImageFieldSet( plotter, form )
     printEndOfBody()
