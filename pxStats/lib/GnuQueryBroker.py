@@ -316,7 +316,7 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
                                                       clientNames = self.queryParameters.sourLients, 
                                                       groupName = self.queryParameters.groupName, 
                                                       timespan = int(self.queryParameters.span), currentTime = self.queryParameters.endTime,
-                                                      productTypes = self.queryParameters.products, logger= None,
+                                                      productTypes = self.queryParameters.products, logger= None, logging = False, 
                                                       machines = self.queryParameters.machines )
       
         #------------------------------- print """directory = %s, fileType = %s,
@@ -361,11 +361,10 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
         
         params = self.replyParameters
         
-        reply = "images=%s;error=%s"%(params.image, params.error   )
-        #print reply
-        # reply = "?plotter=%s&?image=%s&fileType=%s&sourlients=%s&groupName=%s&machines=%s&combineSourlients=%s&endTime=%s&products=%s&statsTypes=%s&span=%s" \
-         # %( params.plotter, params.image, params.fileType, params.sourLients, params.groupName,
-            # params.machines, params.combine, params.endTime, params.products, params.statsTypes, params.span  )
+        reformatedImageLocation = '../../pxStats' + params.image.split( 'pxStats' )[1]
+                
+        reply = "images=%s;error=%s"%( reformatedImageLocation, params.error   )
+
          
         return reply
     
