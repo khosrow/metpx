@@ -529,6 +529,8 @@ def printAjaxRequestsScript( plotter ):
                     var optionalOptionsVisibility = document.getElementById("advancedOptions").style.visibility;
                     var fixedSpan       = document.inputForm.fixedSpan[ document.inputForm.fixedSpan.selectedIndex ].value;
                     var determinedSpan  = document.inputForm.preDeterminedSpan[ document.inputForm.preDeterminedSpan.selectedIndex ].value;
+                    var groupName       = document.getElementById( 'groupName' ).value;
+                    
                     
                     if( fileType.match('Select') !=null ){
                         errors= 'Error. Please select a filetype.'
@@ -542,8 +544,8 @@ def printAjaxRequestsScript( plotter ):
                     }else if( fixedSpan.match('Select') == null && determinedSpan.match('Pre') != null  ){
                         errors = 'Error. Cannot specify fixed span without determined span.';
                     
-                    }else if( sourlients.length == 0 ){
-                        errors = 'Error. Please add a client or a source to the list.';
+                    }else if( sourlients.length == 0 && groupName == '' ){
+                        errors = 'Error. Please add a client/source to the list or specify a group name.';
                     
                     }else if( optionalOptionsVisibility !='hidden'){
                         var span = document.forms['inputForm'].elements['span'].value;
