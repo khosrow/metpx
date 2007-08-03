@@ -25,7 +25,7 @@ named COPYING in the root of the source directory tree.
 ##
 ##############################################################################
 """
-import os,sys
+import os,sys, time
 
 sys.path.insert(1, sys.path[0] + '/../../')
 
@@ -107,7 +107,10 @@ class PickleMerging:
         
         if logger != None :
             logger.debug( "Call to mergeHourlyPickles received." )
-        
+            logging = True
+        else:
+            logging = False
+                
         pickles = []
         entries = {}
         width = StatsDateLib.getSecondsSinceEpoch( endTime ) - StatsDateLib.getSecondsSinceEpoch( startTime )
@@ -121,10 +124,12 @@ class PickleMerging:
         
         
         startingNumberOfEntries = 0
+        #print "prior to loading and merging pickles : %s " %( StatsDateLib.getIsoFromEpoch( time.time() ) ) 
         for pickle in pickles : 
             
             if os.path.isfile( pickle ) :
-                     
+                
+                    
                 tempCollection = CpickleWrapper.load( pickle )
                 if tempCollection != None :
                     for i in xrange( len( tempCollection.fileEntries )  ):
@@ -138,8 +143,10 @@ class PickleMerging:
                 for i in xrange( 60 ):
                     entries[i + startingNumberOfEntries ] = emptyEntries [i]
                 startingNumberOfEntries = startingNumberOfEntries + 60
-                
-        statsCollection = FileStatsCollector(  startTime = startTime , endTime = endTime, interval = StatsDateLib.MINUTE, totalWidth = width, fileEntries = entries,fileType= fileType, logger = logger )
+        
+        #print "after the  loading and merging og pickles : %s " %( StatsDateLib.getIsoFromEpoch( time.time() ) )        
+        
+        statsCollection = FileStatsCollector(  startTime = startTime , endTime = endTime, interval = StatsDateLib.MINUTE, totalWidth = width, fileEntries = entries,fileType= fileType, logger = logger, logging = logging )
            
                 
         return statsCollection        
@@ -163,7 +170,10 @@ class PickleMerging:
         
         if logger != None : 
             logger.debug( "Call to mergePickles received." )
-                  
+            logging = True
+        else:
+            logging = False
+                
         entryList = []
         
         
@@ -176,14 +186,14 @@ class PickleMerging:
             else:#Use empty entry if there is no existing pickle of that name
                 
                 endTime = StatsDateLib.getIsoFromEpoch( StatsDateLib.getSecondsSinceEpoch( currentTime ) + StatsDateLib.HOUR ) 
-                entryList.append( FileStatsCollector( startTime = currentTime, endTime = endTime,logger =logger  ) )         
+                entryList.append( FileStatsCollector( startTime = currentTime, endTime = endTime,logger =logger, logging =logging   ) )         
                 
                 if logger != None :
                     logger.warning( "Pickle named %s did not exist. Empty entry was used instead." %pickle )    
         
         
         #start off with a carbon copy of first pickle in list.
-        newFSC = FileStatsCollector( files = entryList[0].files , statsTypes =  entryList[0].statsTypes, startTime = entryList[0].startTime, endTime = entryList[0].endTime, interval=entryList[0].interval, totalWidth = entryList[0].totalWidth, firstFilledEntry = entryList[0].firstFilledEntry, lastFilledEntry = entryList[0].lastFilledEntry, maxLatency = entryList[0].maxLatency, fileEntries = entryList[0].fileEntries,logger = logger )
+        newFSC = FileStatsCollector( files = entryList[0].files , statsTypes =  entryList[0].statsTypes, startTime = entryList[0].startTime, endTime = entryList[0].endTime, interval=entryList[0].interval, totalWidth = entryList[0].totalWidth, firstFilledEntry = entryList[0].firstFilledEntry, lastFilledEntry = entryList[0].lastFilledEntry, maxLatency = entryList[0].maxLatency, fileEntries = entryList[0].fileEntries,logger = logger, logging = logging )
                  
         if PickleMerging.entryListIsValid( entryList ) == True :
             
@@ -362,7 +372,7 @@ def main():
     timea = time.time()
     PickleMerging.mergePicklesFromSameHour(logger = None, pickleNames=["/apps/px/pxStats/data/pickles/1", "/apps/px/pxStats/data/pickles/2","/apps/px/pxStats/data/pickles/1", "/apps/px/pxStats/data/pickles/2","/apps/px/pxStats/data/pickles/1", "/apps/px/pxStats/data/pickles/2"], mergedPickleName = "/apps/px/data/pickles/testResultatsNew", clientName="myTest", combinedMachineName="someMachine", currentTime = "2007-06-04 18:00:00", fileType = 'tx')
     timeb = time.time()
-    print timeb-timea
+    #print timeb-timea
 
 if __name__ == "__main__":
     main()
