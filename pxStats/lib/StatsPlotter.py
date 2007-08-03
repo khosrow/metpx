@@ -171,7 +171,8 @@ class StatsPlotter:
         
         if not os.path.isdir( folder ):
             os.makedirs( folder, 0777 )  
-        
+            os.chmod(folder, 0777)
+       
         if len( os.path.basename(fileName) ) > (os.statvfs( folder )[statvfs.F_NAMEMAX]): # length of file too long 
             maximumLength = (os.statvfs( folder )[statvfs.F_NAMEMAX]) - ( 30 + len(date) + len( str(self.statsTypes)) + len( str( self.timespan ) ) )
             maxIndyLength = maximumLength / 3 
@@ -466,7 +467,7 @@ class StatsPlotter:
             
             if not os.path.isdir( os.path.dirname( destination ) ):
                 os.makedirs(  os.path.dirname( destination ), mode=0777 )                                                      
-            
+                os.chmod( os.path.dirname( destination ), mode=0777 )
             
             shutil.copy( src, destination ) 
             
@@ -483,7 +484,7 @@ class StatsPlotter:
             destination = StatsPaths.STATSGRAPHS + "webGraphics/columbo/%s.png" %clientName
             if not os.path.isdir( os.path.dirname( destination ) ):
                 os.makedirs(  os.path.dirname( destination ), mode=0777 )                                                      
-            
+                os.chmod( os.path.dirname( destination ), mode=0777 )
             
             shutil.copy( src, destination ) 
             try:
