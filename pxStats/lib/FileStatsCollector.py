@@ -119,7 +119,7 @@ class FileStatsCollector:
     
     """
     
-    def __init__( self, files = None, fileType = "tx", statsTypes = None,  startTime = '2005-08-30 20:06:59', endTime = '2005-08-30 20:06:59', interval=1*MINUTE, totalWidth = HOUR, firstFilledEntry = 0, lastFilledEntry = 0, maxLatency = 15, fileEntries = None, logger = None ):
+    def __init__( self, files = None, fileType = "tx", statsTypes = None,  startTime = '2005-08-30 20:06:59', endTime = '2005-08-30 20:06:59', interval=1*MINUTE, totalWidth = HOUR, firstFilledEntry = 0, lastFilledEntry = 0, maxLatency = 15, fileEntries = None, logger = None, logging =True ):
         """ 
             Constructor. All values can be set from the constructor by the user but recommend usage
             is to set sourceFile and statsType. The class contains other methods to set the other values
@@ -152,6 +152,8 @@ class FileStatsCollector:
         
         self.loggerName       = 'fileStatsCollector'      # Name of the logger if none is specified.
         self.logger           = logger                    # Logger
+        self.logging          = logging                   # Whether or not to enable logging.
+        
         
         if self.statsTypes == []:
             if self.fileType == "tx":
@@ -164,9 +166,10 @@ class FileStatsCollector:
         self.timeSeperators = timeSeperators
         self.nbEntries        = len ( self.timeSeperators ) -1 # Nb of entries or "buckets" 
         
-        if self.logger is None: # Enable logging
-            self.logger = Logger( StatsPaths.STATSLOGGING + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
-            self.logger = self.logger.getLogger()
+        if self.logging == True:
+            if self.logger is None: # Enable logging
+                self.logger = Logger( StatsPaths.STATSLOGGING + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
+                self.logger = self.logger.getLogger()
             
         
         if self.fileEntries == {}:            
