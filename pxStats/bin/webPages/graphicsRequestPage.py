@@ -59,7 +59,7 @@ RX_DATATYPES = { "gnuplot" : [ "bytecount", "filecount","errors", "bytecount,err
 
 TX_DATATYPES ={ "gnuplot" : [ "bytecount", "errors", "filecount", "latency", "bytecount,errors", "bytecount,filecount", "bytecount,latency", "error,filecount","error,latency",
                                "filecount,latency","bytecount,errors,filecount", "bytecount,filecount,latency", "bytecount,errors,latency","bytecount,errors,filecount,latency"], \
-                "rrd": [ "bytecount", "errors", "filecount", "latency", "bytecount,errors", "bytecount,filecount", "bytecount,latency", "error,filecount","error,latency", \
+                "rrd": [ "bytecount", "errors", "filecount", "latency", "bytecount,errors", "bytecount,filecount", "bytecount,latency", "errors,filecount","errors,latency", \
                          "filecount,latency","bytecount,errors,filecount", "bytecount,filecount,latency", "bytecount,errors,latency","bytecount,errors,filecount,latency" ]   }
 
 
