@@ -156,7 +156,7 @@ class ClientGraphicProducer:
             combinedMachineName = ""
             combinedMachineName = combinedMachineName.join( [ machine for machine in self.machines] )
                 
-            dataCollection.append( ClientStatsPickler( client = self.clientNames, statsTypes = types, directory = self.directory, statsCollection = statsCollection, machine = combinedMachineName ) )
+            dataCollection.append( ClientStatsPickler( client = self.clientNames, statsTypes = types, directory = self.directory, statsCollection = statsCollection, machine = combinedMachineName, logger = None, logging =False  ) )
                             
         
         return dataCollection
@@ -182,7 +182,7 @@ class ClientGraphicProducer:
         combinedMachineName = combinedMachineName.join( [machine for machine in self.machines])
                 
         #Verifier params utiliser par cette ligne
-        dataCollection.append( ClientStatsPickler( client = self.clientNames, statsTypes = types, directory = self.directory, statsCollection = statsCollection, machine = combinedMachineName ) )
+        dataCollection.append( ClientStatsPickler( client = self.clientNames, statsTypes = types, directory = self.directory, statsCollection = statsCollection, machine = combinedMachineName, logger = None, logging = False ) )
         
         return dataCollection
                
