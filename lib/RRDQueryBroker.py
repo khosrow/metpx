@@ -188,7 +188,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
         try :
             sourLients = form["sourLients"].split(',')
         except:
-            sourlients = []
+            sourLients = []
         
         try :
             groupName = form["groupName"]        
@@ -220,7 +220,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
         except:
             endTime = ''
         
-        print "!!!%s" %endTime
+        
         
         try :    
             products     = form["products"].split(',')
@@ -335,11 +335,19 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
             @SIDE_EFFECT :  modifies self.query value.
             
         """
+       
         
         pathToGenerateRRDGraphs = StatsPaths.STATSBIN + "generateRRDGraphics.py"
         
-        sourlients = '-c %s'  %( str( self.queryParameters.sourLients).replace( '[', '' ).replace( ']', '' ) )
+        if self.queryParameters.sourLients !=[] :
+            sourlients = '-c '
+            for sourLient in self.queryParameters.sourLients:
+                sourlients = sourlients + sourLient + ','
+            sourlients = sourlients[:-1]
+        else:
+            sourlients = ''
         
+                
         hour      = self.queryParameters.endTime.split(" ")[1]
         splitDate = self.queryParameters.endTime.split(" ")[0].split( '-' )
         
@@ -388,14 +396,17 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
             total = ''    
         
         if self.queryParameters.statsTypes !=[] and self.queryParameters.statsTypes != '':
-            types = "--types %s" %( str( self.queryParameters.statsTypes ).replace( '[', '' ).replace( ']', '' ) )
+            statsTypes = '-t '
+            for type in self.queryParameters.statsTypes:
+                statsTypes = statsTypes + type + ','
+            types = statsTypes[:-1]
                    
         else:
-            type = ''
+            types = ''
             
-        self.query = "%s %s %s %s %s %s %s %s %s %s %s " %( pathToGenerateRRDGraphs, sourlients, machines, date, fileType, fixedSpan, specificSpan, havingRun, total, individual, types)
+        self.query = "%s %s %s %s %s %s %s %s %s %s %s --turnOffLogging" %( pathToGenerateRRDGraphs, sourlients, machines, date, fileType, fixedSpan, specificSpan, havingRun, total, individual, types)
             
-            
+           
             
     def getImagesFromQueryOutput( self, output ):
         """ 
@@ -406,15 +417,19 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
             
         """
         
-        images = []
+        images = ''
         
         lines = output.splitlines()
         
         for line in lines :
-            if "".startswith( "Plotted : " ):
-                imageName = (line.split( ":" )[1]).replace( " ", "")
-                images.append( imageName )
-            
+            if  "Plotted" in line:
+                #print line 
+                imageName = line.replace( "Plotted :", "").replace( " ", "")
+                imageName = '../../pxStats' + imageName.split( 'pxStats' )[1] 
+                images = images + imageName + ','
+                
+        images = images[:-1]    
+        #print images
         return images 
     
     
@@ -426,11 +441,10 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
             @SIDE-EFECT : Will set the name of the generated images in self.replyparameters.image
             
         """
-        print self.query
+        #print self.query
         status, output = commands.getstatusoutput( self.query )  
-        
-        if status == 0 :#If query was executed properly.
-            self.image = self.getImagesFromQueryOutput(output)
+       
+        self.replyParameters.image = self.getImagesFromQueryOutput(output)
     
     
     
@@ -444,7 +458,8 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
         
         params = self.replyParameters
         
-        reply = "images=%s;error=%s" %(params.image, params.error)
+        reply = "images=%s;error=%s" %(  params.image,  params.error )
+        
         
         # reply = "?plotter=%s&?image=%s&fileType=%s&sourlients=%s&groupName=%s&machines=%s&individual=%s&total=%s&endTime=%s&products=%s&statsTypes=%s&span=%s&specificSpan=%s&fixedSpan=%s" \
          # %( params.plotter, params.image, params.fileType, params.sourLients, params.groupName,
