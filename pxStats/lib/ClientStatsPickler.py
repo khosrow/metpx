@@ -62,7 +62,7 @@ class ClientStatsPickler:
         
     """
     
-    def __init__( self, client = "", directory = "", statsTypes = None, statsCollection = None, pickleName = "", logger = None, machine = "pdsCSP"  ):
+    def __init__( self, client = "", directory = "", statsTypes = None, statsCollection = None, pickleName = "", logger = None, logging = True, machine = "pdsCSP"  ):
         """ 
             Constructor.
             -Builds a ClientStatsPickler with no entries.           
@@ -75,13 +75,17 @@ class ClientStatsPickler:
         self.machine          = machine                # Machine on wich the data resides.
         self.loggerName       = 'pickling'             # Name of the logger.             
         self.logger           = logger                 # Permits a logging system for this object.
+        self.logging          = logging                # Whether or not to enable logging.      
         
-        if logger is None: # Enable logging
-            if not os.path.isdir( StatsPaths.STATSLOGGING ):
-                os.makedirs( StatsPaths.STATSLOGGING , mode=0777 )
-            self.logger = Logger( StatsPaths.STATSLOGGING + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
-            self.logger = self.logger.getLogger()
-           
+        if self.logging == True:
+            if logger is None: # Enable logging
+                if not os.path.isdir( StatsPaths.STATSLOGGING ):
+                    os.makedirs( StatsPaths.STATSLOGGING , mode=0777 )
+                self.logger = Logger( StatsPaths.STATSLOGGING + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
+                self.logger = self.logger.getLogger()
+        else:
+            logger = True
+               
         self.statsCollection  = statsCollection or FileStatsCollector( logger = self.logger )
         self.fileCollection   = LogFileCollector( directory = directory, logger = self.logger )       
         
