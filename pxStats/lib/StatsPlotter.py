@@ -52,7 +52,7 @@ LOCAL_MACHINE = os.uname()[1]
 
 class StatsPlotter:
 
-    def __init__( self, timespan,  stats = None, clientNames = None, groupName = "", type='lines', interval=1, imageName="gnuplotOutput", title = "Stats",currentTime = "",now = False, statsTypes = None, productTypes = ["All"], logger = None, fileType = "tx", machines = "", entryType = "minute", maxLatency = 15 ):
+    def __init__( self, timespan,  stats = None, clientNames = None, groupName = "", type='lines', interval=1, imageName="gnuplotOutput", title = "Stats",currentTime = "",now = False, statsTypes = None, productTypes = ["All"], logger = None, logging = True, fileType = "tx", machines = "", entryType = "minute", maxLatency = 15 ):
         """
             StatsPlotter constructor. 
             
@@ -94,15 +94,18 @@ class StatsPlotter:
         self.initialiseArrays()
         self.loggerName       = 'statsPlotter'
         self.logger           = logger
+        self.logging          = logging
+        
         
         if self.fileType == 'tx':
             self.sourlient = "Client"
         else:
             self.sourlient = "Source"  
         
-        if self.logger == None: # Enable logging
-            self.logger = Logger( StatsPaths.STATSLOGGING +  'stats_' + self.loggerName + '.log', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
-            self.logger = self.logger.getLogger()
+        if self.logging == True:
+            if self.logger == None: # Enable logging
+                self.logger = Logger( StatsPaths.STATSLOGGING +  'stats_' + self.loggerName + '.log', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
+                self.logger = self.logger.getLogger()
             
         self.xtics       = self.getXTics( )        # Seperators on the x axis.
     
@@ -167,7 +170,7 @@ class StatsPlotter:
         
         
         if not os.path.isdir( folder ):
-            os.makedirs( folder )  
+            os.makedirs( folder, 0777 )  
         
         if len( os.path.basename(fileName) ) > (os.statvfs( folder )[statvfs.F_NAMEMAX]): # length of file too long 
             maximumLength = (os.statvfs( folder )[statvfs.F_NAMEMAX]) - ( 30 + len(date) + len( str(self.statsTypes)) + len( str( self.timespan ) ) )
@@ -466,7 +469,11 @@ class StatsPlotter:
             
             
             shutil.copy( src, destination ) 
-            os.chmod( destination, 0777 )
+            
+            try:
+                os.chmod( destination, 0777 )
+            except:
+                pass
             #print "cp %s %s  "  %( src, destination )
         
         
@@ -479,7 +486,10 @@ class StatsPlotter:
             
             
             shutil.copy( src, destination ) 
-            os.chmod( destination, 0777 )
+            try:
+                os.chmod( destination, 0777 )
+            except:
+                pass
             #print "cp %s %s  "  %( src, destination )
 
 
@@ -566,8 +576,12 @@ class StatsPlotter:
                 self.graph.plot( Gnuplot.Data( pairs , with="%s %s 1" % ( self.type, color) ) )
                 
                 nbGraphs = nbGraphs + 1 
+        
                 
-        os.chmod( self.imageName, 0777 )            
+        try:
+            os.chmod( self.imageName, 0777 )            
+        except:
+            pass
         if createCopy :
             del self.graph
             self.createCopy( )     
