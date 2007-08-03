@@ -339,7 +339,9 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
         
         pathToGenerateRRDGraphs = StatsPaths.STATSBIN + "generateRRDGraphics.py"
         
-        if self.queryParameters.sourLients !=[] :
+        if self.queryParameters.groupName != '':
+            sourlients = '-c %s' %self.queryParameters.groupName
+        elif self.queryParameters.sourLients !=[] :
             sourlients = '-c '
             for sourLient in self.queryParameters.sourLients:
                 sourlients = sourlients + sourLient + ','
