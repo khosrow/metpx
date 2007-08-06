@@ -233,7 +233,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
             statsTypes = []
         
         try:
-            span = form["span"][0] 
+            span = form["span"]
         except:
             span = 24
         
@@ -373,7 +373,13 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
         elif self.queryParameters.specificSpan == "yearly":
             specificSpan = "-y"
         else:
-            specificSpan = ""      
+            specificSpan = ""    
+              
+        if specificSpan == "":
+            span = "--span %s" %( self.queryParameters.span )
+        else:
+            span = ""
+        
         
         if self.queryParameters.fixedSpan == "fixedCurrent" :
             fixedSpan = "--fixedCurrent"
@@ -406,7 +412,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
         else:
             types = ''
             
-        self.query = "%s %s %s %s %s %s %s %s %s %s %s --turnOffLogging" %( pathToGenerateRRDGraphs, sourlients, machines, date, fileType, fixedSpan, specificSpan, havingRun, total, individual, types)
+        self.query = "%s %s %s %s %s %s %s %s %s %s %s %s --turnOffLogging" %( pathToGenerateRRDGraphs, sourlients, machines, date, fileType, fixedSpan, specificSpan, havingRun, total, individual, types, span )
             
            
             
