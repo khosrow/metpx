@@ -69,8 +69,22 @@ class StatsPaths:
         Stats specific paths.
         pxStats must be checked-out in a pxStats folder.
     """ 
+    realPath = os.path.realpath( __file__ )
+    foundSymlink = ''
+    associatedPath = ''
+    dirname =  os.path.dirname(realPath)
+    while( dirname != '/'):
+        
+        if os.path.islink(os.path.dirname(realPath)):
+            foundSymlink =  os.path.dirname(realPath)
+            associatedPath = os.path.realpath( os.path.dirname(realPath)  )
+            break
+        dirname =  os.path.dirname( dirname )
     
-    STATSROOT   =  os.path.dirname( sys.path[0] )   
+    if foundSymlink !='':
+        STATSROOT = associatedPath + '/'+ realPath.split( 'foundSymlink' )[1]
+    else:
+        STATSROOT= realPath
     while(os.path.basename(STATSROOT) != "pxStats" ):
         STATSROOT = os.path.dirname(STATSROOT)
     
