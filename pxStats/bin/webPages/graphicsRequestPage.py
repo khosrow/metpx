@@ -13,11 +13,12 @@ named COPYING in the root of the source directory tree.
 ##
 ## @author :  Nicholas Lemay
 ##
-## @since  : 2007-06-28, last updated on  2007-07-16
+## @since  : 2007-06-28, last updated on  2007-08-07
 ##
 ##
-## @summary : This is to be used to generate a dynamic web page where users 
-##            are to be albe to fill out forms and get an appropriate graphic
+## @summary : This file is to be hosted on a cgi-enabled web server as to 
+##            generate a dynamic python/cgi web page. That web page will 
+##            allow users to fill out forms and getappropriate graphics
 ##            based on the parameters filled within the forms.
 ##
 ##
@@ -46,18 +47,18 @@ from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 
+
+
 """
    Define constants to be used for filling out the different select boxes. 
 """
-
-
 SUPPORTED_PLOTTERS = [ "gnuplot", "rrd" ]
 
 SUPPORTED_FILETYPES = [ "rx","tx"]
 
 RX_DATATYPES = { "gnuplot" : [ "bytecount", "filecount","errors", "bytecount,errors", "bytecount,filecount", "errors,filecount", "bytecount,filecount,errors" ], "rrd" : [ 'bytecount',  'filecount', 'errors' ] }
 
-TX_DATATYPES ={ "gnuplot" : [ "bytecount", "errors", "filecount", "latency", "bytecount,errors", "bytecount,filecount", "bytecount,latency", "error,filecount","error,latency",
+TX_DATATYPES ={ "gnuplot" : [ "bytecount", "errors", "filecount", "latency", "bytecount,errors", "bytecount,filecount", "bytecount,latency", "errors,filecount","errors,latency",
                                "filecount,latency","bytecount,errors,filecount", "bytecount,filecount,latency", "bytecount,errors,latency","bytecount,errors,filecount,latency"], \
                 "rrd": [ "bytecount", "errors", "filecount", "latency", "bytecount,errors", "bytecount,filecount", "bytecount,latency", "errors,filecount","errors,latency", \
                          "filecount,latency","bytecount,errors,filecount", "bytecount,filecount,latency", "bytecount,errors,latency","bytecount,errors,filecount,latency" ]   }
@@ -74,7 +75,7 @@ FIXED_SPANS = [ 'fixedCurrent', 'fixedPrevious' ]
 AVAILABLE_MACHINES   = []
 
 
-""" """
+
 
 def getWordsFromFile( file ):
     """    
@@ -120,9 +121,9 @@ def getWordsFromDB( wordType ):
     words = []
     
     if wordType == "products":
-        words = getWordsFromFile( StatsPaths.STATSWEBPAGESWORDDBS + 'products') 
+        words = getWordsFromFile( '../../wordDatabases/products'   ) 
     elif wordType == "groupName" :
-        words = getWordsFromFile( StatsPaths.STATSWEBPAGESWORDDBS + 'groupNames')
+        words = getWordsFromFile( '../../wordDatabases/groupNames' )
    
     return words    
 
@@ -170,7 +171,7 @@ def getCurrentTimeForCalendar( ):
     currentDay = splitDay[2] + "-" + splitDay[1] + "-" + splitDay[0] 
     
     return currentDay + " " + currentHour
-    
+   
     
     
     
@@ -302,61 +303,63 @@ def printAjaxRequestsScript( plotter ):
                 
                 function executeAjaxRequest( strURL, plotter, callingObject ) {                  
                    
-                   var parameters = ''; 
-                   var errors ='';
+                   var parameters = ""; 
+                   var errors = "";
+                   http = getHTTPObject();
                    
                    if( strURL == 'popupSourlientAdder.py'){ 
                         parameters = getParametersForPopups();
-                        //document.getElementById("errorLabel").innerHTML = '<font color="#FFFFFF">&nbsp;&nbsp;&nbsp; Application status : Updating list of sources and clients.</font>'
+                        document.getElementById("errorLabel").innerHTML = '<font color="#FFFFFF">Application status : Updating list of sources and clients.</font>'
                  
                    }else if( strURL == 'graphicsRequestBroker.py' ){
-                        document.getElementById("errorLabel").innerHTML = '<font color="#FFFFFF"> Application status : Executing the graphics creation request...</font>';
+                        document.getElementById("errorLabel").innerHTML = '<font color="#FFFFFF">Application status : Executing the graphics creation request...</font>';
                         parameters = getParametersForGraphicsRequests( plotter );
                         errors = searchFormForErrors();
                         
                    }else if( strURL == 'updateWordsInDB.py'){
-                       document.getgetElementById("errorLabel").innerHTML = '<font color="#FFFFFF">&nbsp;&nbsp;&nbsp; Application status : Updating Databases(s).</font>'
+                       document.getElementById("errorLabel").innerHTML = '<font color="#FFFFFF">Application status : Updating Database(s).</font>'
                        parameters = getParametersForWordUpdate( callingObject );
                    
                    }                   
                                   
-                  
-                  if( errors == '' || strURL != 'graphicsRequestBroker.py' ){
-                  
-                      http.open("GET", strURL + parameters, true );
-                      http.onreadystatechange = handleHttpResponse;
-                      http.send(null);
-                  
+                   
+                   if ( errors == "" ){                               
+   
+                        http.open("GET", strURL + parameters, true );
+                        http.onreadystatechange = handleHttpResponse;
+                        http.send(null);                       
+
                   }else{
-                  
-                      document.getElementById("errorLabel").innerHTML = '<font color="#C11B17">' + errors + '</font>';
-                  }    
+                      document.getElementById("errorLabel").innerHTML = '<font color="#C11B17">' + errors + '</font>'; 
+                  }
+                     
                 
                 }
                 
                 
                 function handleHttpResponse() {
                   
-                  if (http.readyState == 4) {                    
-                    
-                    
-                    var response = http.responseText;
-                    //document.getElementById("errorLabel").innerHTML = response;
+                  var response = http.responseText;
+                  
+                  if (http.readyState == 4) {                                       
+                                         
+                     //document.getElementById("errorLabel").innerHTML = response;
                      if( response.match('images') != null && response.match('error') != null){ 
                         
-                        var image = response.split(";")[0];
-                        var error = response.split(";")[1];
-                        image = image.split("=")[1];
-                        error = error.split("=")[1];
-                    
-                        if( error != '' && error !=null ){
+                        var imagePart = response.split(';')[0];
+                        var errorPart = response.split(';')[1];
+                        var image = imagePart.split("images=")[1];
+                        var error = errorPart.split("error=")[1];
+                                                            
+                        if(  (/[a-z]/i).test(error) ){
                             document.getElementById("errorLabel").innerHTML = '<font color="#C11B17">' + error + '</font>';
-                            
+                                                     
                         }else{
-                            document.getElementById("errorLabel").innerHTML = '<font color="#C11B17">Application status : Executing the graphics creation request...</font>';
+                            document.getElementById("errorLabel").innerHTML = '<font color="#FFFFFF">Application status : Awaiting request(s).</font>';
                         }
                         
                         if( image != ''  ){
+                        
                             
     """
     
@@ -381,7 +384,8 @@ def printAjaxRequestsScript( plotter ):
                                photoslink[i] = imageList[i];
                                
                            }     
-
+                           
+                           document.getElementById('imageCounter').innerHTML = '<font color="FFFFFF"> Now showing image ' + (which+1) + ' of ' + photos.length +'.</font>' ;          
 
         """
         
@@ -404,10 +408,15 @@ def printAjaxRequestsScript( plotter ):
         
     print """
                         
+                        }else{
+                            
                         }
                       }else{
-                         
+                          
                       }                                                                                                                        
+                    }else{
+                        //document.getElementById("errorLabel").innerHTML = '<font color="#FFFFFF">'+response+'</font>';
+                    
                     }    
                  }
                     
@@ -513,9 +522,18 @@ def printAjaxRequestsScript( plotter ):
     if plotter == "rrd":
         
         print """
+                function isInt(x) {
+                     var y=parseInt(x);
+                     
+                     if (isNaN(y)) return false;
+                     
+                     return x==y && x.toString()==y.toString();
+                }
+                
+                
                 function searchFormForErrors(){
                     
-                    var errors = '';
+                    var errors = "";
                     
                     var sourlients = new Array();
                     
@@ -560,8 +578,8 @@ def printAjaxRequestsScript( plotter ):
                         
                         if( span != ''){
                             if ( isInt(span) == true ){
-                                if( span < 1 || span > 48  ){
-                                    errors = 'Error. Span value must be between 1 and 48.'
+                                if( span < 1 || span > 50000 ){
+                                    errors = 'Error. Span value must be between 1 and 50000.'
                             }
                         
                             }else{
@@ -718,7 +736,7 @@ def printSlideShowScript( images ):
                 }
                 
                 function keeptrack(){
-                    window.status="Image "+(which+1)+" of "+photos.length;
+                    document.getElementById('imageCounter').innerHTML = '<font color="FFFFFF"> Now showing image ' + (which+1) + ' of ' + photos.length +'.</font>' ; 
                 }
                 
                 
@@ -729,6 +747,7 @@ def printSlideShowScript( images ):
                         document.images.photoslider.src=photos[which];
                         playeffect();
                         keeptrack();
+                        
                     }
                 }
                 
@@ -739,6 +758,7 @@ def printSlideShowScript( images ):
                         document.images.photoslider.src=photos[which];
                         playeffect();
                         keeptrack();
+                        
                     }
                 }
                 
@@ -795,6 +815,7 @@ def printRRDImageFieldSet( form ):
              <input type=button value="Previous image result." onclick ="backward();return false;"></input> 
              <input type=button value="View original size"     onclick ="wopen( photoslider.src, 'popup', %s, %s); return false;"></input> 
              <input type=button value="Next image result."     onclick ="forward();return false;" ></input> 
+             <div name="imageCounter" id ="imageCounter" style="display:inline;"></div>
         </fieldset>
 
     """%(  width, height )
@@ -960,7 +981,7 @@ def printSpanTextBox( form ):
     print """
                         <td width = 210>    
                             <label for="span">Span(in hours):</label><br>
-                            <INPUT TYPE=TEXT class="text" NAME="span" value = "%s">     
+                            <INPUT TYPE=TEXT class="text" NAME="span" id="span" value = "%s">     
                         </td>    
     """%( span ) 
 
@@ -1025,7 +1046,7 @@ def printSpecificSpanComboBox( form ):
     print """
                         <td width = 210px> 
                             <label for="preDeterminedSpan">Determined spans : </label><br>
-                            <select name="preDeterminedSpan" >     
+                            <select name="preDeterminedSpan" id="preDeterminedSpan" onClick="enableOrDisableSpan()">     
                             <option>Pre-determined spans...</option>               
     """
     for span in PRE_DETERMINED_SPANS:
@@ -1452,7 +1473,7 @@ def printLogo():
     
     print """
                      <div style="position: absolute; left: 250px; top:-10px; height: 100px; width: 100px">
-                        <img name="logo" id="logo" src="logo.gif" ></img>
+                        <img name="logo" id="logo" src="../../imgages/logo.gif" ></img>
                    </div>
 
     """
@@ -1867,6 +1888,22 @@ def printHead( plotter, form ):
                      document.getElementById("advancedOptions").style.visibility = "visible";
                      document.getElementById("advancedOptionsLinkDiv").style.visibility = "hidden";
                  }     
+                 
+                 
+                 function enableOrDisableSpan(){
+                     
+                     if( document.getElementById("preDeterminedSpan").value.match('Pre') != null  ){
+                     
+                         document.getElementById("span").disabled = false;
+                    
+                     }else{
+                     
+                         document.getElementById("span").disabled = true;
+                     
+                     }
+                 
+                 }   
+        
         
         </script>
                            
