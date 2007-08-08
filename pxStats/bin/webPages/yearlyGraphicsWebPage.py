@@ -112,9 +112,9 @@ def generateWebPage( rxNames, txNames, years ):
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
     <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
-        <link rel="stylesheet" href="windowfiles/dhtmlwindow.css" type="text/css" />
+        <link rel="stylesheet" href="../scripts/js/windowfiles/dhtmlwindow.css" type="text/css" />
         
-        <script type="text/javascript" src="windowfiles/dhtmlwindow.js">
+        <script type="text/javascript" src="../scripts/js/windowfiles/dhtmlwindow.js">
             
             This is left here to give credit to the original 
             creators of the dhtml script used for the group pop ups: 
