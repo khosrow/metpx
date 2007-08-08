@@ -115,7 +115,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
    
     <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
         
-        <link rel="stylesheet" href="windowfiles/dhtmlwindow.css" type="text/css" />
+        <link rel="stylesheet" href="../scripts/js/windowfiles/dhtmlwindow.css" type="text/css" />
         
         <script type="text/javascript" src="../scripts/js/windowfiles/dhtmlwindow.js">
             
