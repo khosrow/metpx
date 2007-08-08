@@ -117,7 +117,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
         
         <link rel="stylesheet" href="windowfiles/dhtmlwindow.css" type="text/css" />
         
-        <script type="text/javascript" src="windowfiles/dhtmlwindow.js">
+        <script type="text/javascript" src="../scripts/js/windowfiles/dhtmlwindow.js">
             
             This is left here to give credit to the original 
             creators of the dhtml script used for the group pop ups: 
