@@ -147,9 +147,9 @@ def generateWebPage( rxNames, txNames, months ):
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
     
     <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
-        <link rel="stylesheet" href="windowfiles/dhtmlwindow.css" type="text/css" />
+        <link rel="stylesheet" href="../scripts/js/windowfiles/dhtmlwindow.css" type="text/css" />
         
-        <script type="text/javascript" src="windowfiles/dhtmlwindow.js">
+        <script type="text/javascript" src="../scripts/js/windowfiles/dhtmlwindow.js">
             
             This is left here to give credit to the original 
             creators of the dhtml script used for the group pop ups: 
@@ -309,8 +309,8 @@ def generateWebPage( rxNames, txNames, months ):
         for month in months:
             
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
-            file = StatsPaths.STATSGRAPHSARCHIVES + "monthly/rx/%s/"%( rxName ) + str(currentYear) + "/bytecount/%.3s.png" %str(currentMonth)
-            webLink = "archives/monthly/rx/%s/"%( rxName ) + str(currentYear) + "/bytecount/%.3s.png" %str(currentMonth)
+            file = StatsPaths.STATSGRAPHSARCHIVES + "monthly/rx/%s/"%( rxName ) + str(currentYear) + "/bytecount/%s.png" %str(currentMonth)
+            webLink = "archives/monthly/rx/%s/"%( rxName ) + str(currentYear) + "/bytecount/%s.png" %str(currentMonth)
 
             if os.path.isfile( file ):
                 fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%.3s&nbsp;</a>"""%( rxName, webLink ,currentMonth ) ) 
@@ -323,8 +323,8 @@ def generateWebPage( rxNames, txNames, months ):
         for month in months:
             
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
-            file = StatsPaths.STATSGRAPHSARCHIVES + "monthly/rx/%s/"%( rxName ) + str(currentYear) + "/filecount/%.3s.png" %str(currentMonth)
-            webLink = "archives/monthly/rx/%s/"%( rxName ) + str(currentYear) + "/filecount/%.3s.png" %str(currentMonth)
+            file = StatsPaths.STATSGRAPHSARCHIVES + "monthly/rx/%s/"%( rxName ) + str(currentYear) + "/filecount/%s.png" %str(currentMonth)
+            webLink = "archives/monthly/rx/%s/"%( rxName ) + str(currentYear) + "/filecount/%s.png" %str(currentMonth)
             if os.path.isfile(file):
                 fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%.3s&nbsp;</a>"""%( rxName, webLink ,currentMonth ) )   
                         
@@ -336,8 +336,8 @@ def generateWebPage( rxNames, txNames, months ):
         for month in months:
             
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
-            file = StatsPaths.STATSGRAPHSARCHIVES + "monthly/rx/%s/"%( rxName ) + str( currentYear) + "/errors/%.3s.png" %str(currentMonth)
-            webLink = "archives/monthly/rx/%s/"%( rxName ) + str( currentYear) + "/errors/%.3s.png" %str(currentMonth)
+            file = StatsPaths.STATSGRAPHSARCHIVES + "monthly/rx/%s/"%( rxName ) + str( currentYear) + "/errors/%s.png" %str(currentMonth)
+            webLink = "archives/monthly/rx/%s/"%( rxName ) + str( currentYear) + "/errors/%s.png" %str(currentMonth)
             
             if os.path.isfile( file ):
                 fileHandle.write(  """ <a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%.3s&nbsp;</a>"""%( rxName, webLink ,currentMonth ) )  
@@ -447,8 +447,8 @@ def generateWebPage( rxNames, txNames, months ):
         for month in months:            
             
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
-            file = StatsPaths.STATSGRAPHSARCHIVES + "monthly/tx/%s/"%( txName ) + str(currentYear) + "/latency/%.3s.png" %str(currentMonth)
-            webLink = "archives/monthly/tx/%s/"%( txName ) + str(currentYear) + "/latency/%.3s.png" %str(currentMonth)
+            file = StatsPaths.STATSGRAPHSARCHIVES + "monthly/tx/%s/"%( txName ) + str(currentYear) + "/latency/%s.png" %str(currentMonth)
+            webLink = "archives/monthly/tx/%s/"%( txName ) + str(currentYear) + "/latency/%s.png" %str(currentMonth)
             
             if os.path.isfile( file ):
                 fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%.3s</a>"""%( txName, webLink ,currentMonth ) )
@@ -461,8 +461,8 @@ def generateWebPage( rxNames, txNames, months ):
         for month in months:
            
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
-            file = StatsPaths.STATSGRAPHSARCHIVES + "monthly/tx/%s/"%( txName ) + str(currentYear) + "/filesOverMaxLatency/%.3s.png" %str(currentMonth)
-            webLink = "archives/monthly/tx/%s/"%( txName ) + str(currentYear) + "/filesOverMaxLatency/%.3s.png" %str(currentMonth)
+            file = StatsPaths.STATSGRAPHSARCHIVES + "monthly/tx/%s/"%( txName ) + str(currentYear) + "/filesOverMaxLatency/%s.png" %str(currentMonth)
+            webLink = "archives/monthly/tx/%s/"%( txName ) + str(currentYear) + "/filesOverMaxLatency/%s.png" %str(currentMonth)
             
             if os.path.isfile( file ):
                 fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%.3s</a>"""%( txName, webLink ,currentMonth ) )
@@ -476,8 +476,8 @@ def generateWebPage( rxNames, txNames, months ):
         for month in months:
             
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
-            file    = StatsPaths.STATSGRAPHSARCHIVES + "monthly/tx/%s/"%( txName ) + str(currentYear) + "/bytecount/%.3s.png" %str(currentMonth)
-            webLink = "archives/monthly/tx/%s/"%( txName ) + str(currentYear) + "/bytecount/%.3s.png" %str(currentMonth)
+            file    = StatsPaths.STATSGRAPHSARCHIVES + "monthly/tx/%s/"%( txName ) + str(currentYear) + "/bytecount/%s.png" %str(currentMonth)
+            webLink = "archives/monthly/tx/%s/"%( txName ) + str(currentYear) + "/bytecount/%s.png" %str(currentMonth)
             
             if os.path.isfile( file ):
                 fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%.3s</a>"""%( txName, webLink ,currentMonth ) )
@@ -490,8 +490,8 @@ def generateWebPage( rxNames, txNames, months ):
         for month in months:
             
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
-            file    = StatsPaths.STATSGRAPHSARCHIVES + "monthly/tx/%s/"%( txName ) + str(currentYear) + "/filecount/%.3s.png" %str(currentMonth)
-            webLink = "archives/monthly/tx/%s/"%( txName ) + str(currentYear) + "/filecount/%.3s.png" %str(currentMonth)
+            file    = StatsPaths.STATSGRAPHSARCHIVES + "monthly/tx/%s/"%( txName ) + str(currentYear) + "/filecount/%s.png" %str(currentMonth)
+            webLink = "archives/monthly/tx/%s/"%( txName ) + str(currentYear) + "/filecount/%s.png" %str(currentMonth)
             
             if os.path.isfile( file ):
                 fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%.3s</a>"""%( txName, webLink ,currentMonth ) )
@@ -504,8 +504,8 @@ def generateWebPage( rxNames, txNames, months ):
         for month in months:
             
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
-            file = StatsPaths.STATSGRAPHSARCHIVES + "monthly/tx/%s/"%( txName ) + str(currentYear) + "/errors/%.3s.png" %str(currentMonth)
-            webLink = "archives/monthly/tx/%s/"%( txName ) + str(currentYear) + "/errors/%.3s.png" %str(currentMonth)
+            file = StatsPaths.STATSGRAPHSARCHIVES + "monthly/tx/%s/"%( txName ) + str(currentYear) + "/errors/%s.png" %str(currentMonth)
+            webLink = "archives/monthly/tx/%s/"%( txName ) + str(currentYear) + "/errors/%s.png" %str(currentMonth)
             
             if os.path.isfile( file ):
                 fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%.3s</a>"""%( txName, file ,currentMonth ) )
