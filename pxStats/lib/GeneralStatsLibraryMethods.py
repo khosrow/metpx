@@ -424,7 +424,7 @@ class GeneralStatsLibraryMethods:
                       If key has an associated value different from 
                       "", this means that the entry is a group tag name. 
                       
-                      The value will be the description of the group. 
+                      The value will be an html  description of the group. 
                         
             @param start: Start of the span to look into.  
             
@@ -468,7 +468,7 @@ class GeneralStatsLibraryMethods:
             products  = configParameters.groupParameters.groupsProducts[group]
             products  = str( products ).replace( "[", "" ).replace( "]", "" ).replace( " ", "" )
             
-            description = "--Group Name : %s     --Machine(s) : %s    --Member(s) : %s     --FileType : %s     --Product(s) pattern(s) : %s " %(group, machines, members, fileTypes, products )
+            description = "<font color='#7ACC7A'>--Group Name : </font> <font color='#006699'>%s</font>  <br>   <font color='#7ACC7A'>--Machine(s) : </font><font color='#006699'>%s</font>  <br>   <font color='#7ACC7A'>--Member(s) : </font><font color='#006699'>%s</font>  <br>    <font color='#7ACC7A'>--FileType : </font><font color='#006699'>%s</font>  <br>    <font color='#7ACC7A'>--Product(s) pattern(s) : </font><font color='#006699'>%s</font> " %(group, machines, members, fileTypes, products )
             
             if configParameters.groupParameters.groupFileTypes[group] == "tx":
                 txNames[group] = description
