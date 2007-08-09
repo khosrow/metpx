@@ -159,77 +159,116 @@ def generateWebPage( rxNames, txNames, days ):
                 win.resizeTo(w, h);
                 win.focus();
             }         
-        </script>    
+        </script>   
+        
+        <script>
+                function showSourceHelpPage(){
+                   var sourceHelpPage = dhtmlwindow.open("sourceHelpPage", "iframe", "helpPages/source.html", "Definition of 'source'", "width=875px,height=100px,resize=1,scrolling=1,center=1", "recal")
+                   sourceHelpPage.moveTo("middle", "middle"); 
+                }
+                
+                
+                function showClientHelpPage(){
+                   var clientHelpPage = dhtmlwindow.open("client", "iframe", "helpPages/client.html", "Definition of 'client'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
+                    .moveTo("middle", "middle");
+                }
+                
+        </script>
+        
+         
         <STYLE>
             <!--
             A{text-decoration:none}
             -->
         </STYLE>
+        
+        
         <style type="text/css">
-            div.left { float: left; }
-            div.right {float: right; }
-        
-            div.txScroll {
-                height: 200px;
-                width: 1255px;
+            div.tableContainer {
+                width: 95%;        /* table width will be 99% of this*/
+                height: 275px;     /* must be greater than tbody*/
                 overflow: auto;
-                word-wrap:break-word;
-                border: 0px ;                    
-                padding: 0px;
-            }
-                
-            div.txTableEntry{
-                width:580px;            
-                height: auto;
-            }
+                margin: 0 auto;
+                }
             
-            div.rxScroll {
-                height: 200px;
-                width: 1255px;
-                overflow: auto;
-                word-wrap:break-word;
-                border: 0px ;                    
-                padding: 0px;
-            }
+            table {
+                width: 99%;        /*100% of container produces horiz. scroll in Mozilla*/
+                border: none;
+                background-color: #f7f7f7;
+                table-layout: fixed;
+                }
                 
-            div.rxTableEntry{
-                width:580px;            
-                height: auto;
-            }        
-        
-        
-        
-        </style>    
-        
-        <body text="#000000" link="#FFFFFF" vlink="000000" bgcolor="#CCCCCC" >
-        
-        <br>
-        <h2>Daily graphics for RX sources from MetPx. <font size = "2">*updated hourly</font></h2>
-        
-        
-        <TABLE cellspacing=10 cellpadding=8 id=header bgcolor="#cccccc"> 
-            <tr>    
-                <td bgcolor="#006699">
-                    <div class = "rxTableEntry">
-                        <font color = "white">
-                            <div class="left">Sources</div>
-                            <a target ="popup" href="%s" onClick="wopen('helpPages/source.html', 'popup', 875, 100); return false;">
-                                <div class="right">?</div>
-                            </a>
-                        </font>
-                    </div>
-                </td>
+            table>tbody    {  /* child selector syntax which IE6 and older do not support*/
+                overflow: auto; 
+                height: 225px;
+                overflow-x: hidden;
+                }
                 
-                <td bgcolor="#006699">
-                    <div class = "rxTableEntry">
-                        <font color = "white">List of available daily graphics.</font>
-                    </div>
-                </td>
-            </tr>   
-        </table>
+            thead tr    {
+                position:relative; 
+                
+                }
+                
+            thead td, thead th {
+                text-align: center;
+                font-size: 14px; 
+                background-color:"#006699";
+                color: steelblue;
+                font-weight: bold;
+                border-top: solid 1px #d8d8d8;
+                }    
+                
+            td    {
+                color: #000;
+                padding-right: 2px;
+                font-size: 12px;
+                text-align: left;
+                border-bottom: solid 1px #d8d8d8;
+                border-left: solid 1px #d8d8d8;
+                }
+            
+            tfoot td    {
+                text-align: center;
+                font-size: 11px;
+                font-weight: bold;
+                background-color: papayawhip;
+                color: steelblue;
+                border-top: solid 2px slategray;
+                }
+        
+            td:last-child {padding-right: 20px;} /*prevent Mozilla scrollbar from hiding cell content*/
+        
+        </style>
+      
+        
+        <body text="#000000" link="#FFFFFF" vlink="000000" bgcolor="#FFF4E5" >
+        
+            <h2>Daily graphics for RX sources from MetPx. <font size = "2">*updated hourly</font></h2>
+        
+            <div class="tableContainer">         
+               <table> 
+                   <thead>
+        
+                        <tr>    
+                            <td bgcolor="#006699">
+                                <div class = "rxTableEntry">
+                                    <font color = "white">
+                                        <div class="left">Sources</div>
+                                        <a target ="popup" href="%s" onClick="showSourceHelpPage(); return false;">
+                                            <div class="right">?</div>
+                                        </a>
+                                    </font>
+                                </div>
+                            </td>
+                            
+                            <td bgcolor="#006699">
+                                <font color = "white">List of available daily graphics.</font>                                
+                            </td>
+                        </tr>   
+                    </thead>
         
         
-        <div class="rxScroll"> 
+                    <tbody>
     
     """)
     
@@ -237,11 +276,11 @@ def generateWebPage( rxNames, txNames, days ):
     
     for rxName in rxNamesArray :
         if rxNames[rxName] == "" :
-            fileHandle.write( """<table cellspacing=10 cellpadding=8> <tr> <td bgcolor="#99FF99"><div class = "rxTableEntry"> %s </div></td> """ %(rxName))
-            fileHandle.write( """<td bgcolor="#66CCFF"><div class = "rxTableEntry">   Days :   """ )
+            fileHandle.write( """<tr> <td bgcolor="#99FF99"> %s</td> """ %(rxName))
+            fileHandle.write( """<td bgcolor="#66CCFF"> Days :   """ )
         else:
-            fileHandle.write( """<table cellspacing=10 cellpadding=8> <tr> <td bgcolor="#99FF99"><div class = "rxTableEntry"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Group description');descriptionWindow.show(); return false">?</a></div></div></td> """ %(rxName, rxNames[rxName].replace("'","").replace('"','')))
-            fileHandle.write( """<td bgcolor="#66CCFF"><div class = "rxTableEntry">   Days :   """ )
+            fileHandle.write( """<tr> <td bgcolor="#99FF99"><div class="left"> %s</div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Group description');descriptionWindow.show(); return false">?</a></div></td> """ %(rxName, rxNames[rxName].replace("'","").replace('"','')))
+            fileHandle.write( """<td bgcolor="#66CCFF"> Days :   """ )
             
                 
         for day in days:
@@ -255,51 +294,54 @@ def generateWebPage( rxNames, txNames, days ):
                 fileHandle.write(  """<a target ="%s" href="%s">%s   </a>"""%( rxName, webLink, time.strftime( "%a", time.gmtime(day) ) ) )
                 
                  
-        fileHandle.write( """</div></td></tr></table>""" )
+        fileHandle.write( """</td></tr>""" )
     
     fileHandle.write( """
-      
+    
+            </tbody>
+        </table>
     </div>
        
-    <br>
     <h2>Daily graphics for TX clients from MetPx. <font size = "2">*updated hourly</font></h2>
     
-    <TABLE cellspacing=10 cellpadding=8 id=header bgcolor="#cccccc">   
-        <tr>
+    <div class="tableContainer">         
+        <table> 
+            <thead>
+                <tr>
 
-             <td bgcolor="#006699">
-                <div class = "txTableEntry">
-                    <font color = "white">
-                        <div class="left">Clients</div>
-                        <a target ="popup" href="%s" onClick="wopen('helpPages/client.html', 'popup', 875, 100); return false;">
-                            <div class="right">?</div>
-                        </a>
-                    </font>
-                </div>
-            </td>
+                     <td bgcolor="#006699">
+                        <div class = "txTableEntry">
+                            <font color = "white">
+                                <div class="left">Clients</div>
+                                <a target ="popup" href="%s" onClick="showClientHelpPage(); return false;">
+                                    <div class="right">?</div>
+                                </a>
+                            </font>
+                        </div>
+                    </td>
+                    
+                    <td bgcolor="#006699">
+                        <div class = "txTableEntry">
+                            <font color = "white">List of available daily graphics.</font>
+                        </div>    
+                    </td>
             
-            <td bgcolor="#006699">
-                <div class = "txTableEntry">
-                    <font color = "white">List of available daily graphics.</font>
-                </div>    
-            </td>
-            
-        </tr>  
-     </table>   
+                </tr>  
+         </thead>   
      
      
-    <div class="txScroll"> 
+        <tbody> 
     
        
     """   )       
         
     for txName in txNamesArray : 
         if txNames[txName] == "" :
-            fileHandle.write( """<table cellspacing=10 cellpadding=8> <tr> <td bgcolor="#99FF99"><div class = "txTableEntry"> %s </div></td> """ %(txName))
+            fileHandle.write( """<tr> <td bgcolor="#99FF99"> %s</td> """ %(txName))
             fileHandle.write( """<td bgcolor="#66CCFF"><div class = "txTableEntry">   Days :   """ )
         else:
-            fileHandle.write( """<table cellspacing=10 cellpadding=8> <tr> <td bgcolor="#99FF99"><div class = "txTableEntry"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Group description');descriptionWindow.show(); return false">?</a></div></div></td> """ %(txName, txNames[txName].replace("'","").replace('"','') ))
-            fileHandle.write( """<td bgcolor="#66CCFF"><div class = "txTableEntry">   Days :   """ )
+            fileHandle.write( """<tr> <td bgcolor="#99FF99"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Group description');descriptionWindow.show(); return false">?</a></div></td> """ %(txName, txNames[txName].replace("'","").replace('"','') ))
+            fileHandle.write( """<td bgcolor="#66CCFF">  Days :   """ )
         
         
         for day in days:
@@ -311,12 +353,14 @@ def generateWebPage( rxNames, txNames, days ):
             if os.path.isfile( file ):
                 fileHandle.write(  """<a target ="%s" href="%s">%s   </a>"""%( rxName, webLink, time.strftime( "%a", time.gmtime(day) ) ) )     
 
-        fileHandle.write( "</div></td></tr></table>" )
+        fileHandle.write( "</td></tr>" )
 
     fileHandle.write(  """
       
-    </div>
+          </tbody>
     
+      </table>    
+       
     </body>
 
 </html>
