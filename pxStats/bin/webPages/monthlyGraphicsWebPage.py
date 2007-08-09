@@ -185,112 +185,165 @@ def generateWebPage( rxNames, txNames, months ):
                     win.resizeTo(w, h);
                     win.focus();
                 }   
-            </script>                
+            </script>  
+            
+            
+            <script>
+                function showSourceHelpPage(){
+                   var sourceHelpPage = dhtmlwindow.open("sourceHelpPage", "iframe", "helpPages/source.html", "Definition of 'source'", "width=875px,height=100px,resize=1,scrolling=1,center=1", "recal")
+                   sourceHelpPage.moveTo("middle", "middle"); 
+                }
+                
+                function showBytecountHelpPage(){
+                   var byteCountHelpPage = dhtmlwindow.open("byteCount", "iframe", "helpPages/byteCount.html", "Definition of 'byteCount'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
+                    byteCountHelpPage.moveTo("middle", "middle");
+                }
+                
+                function showClientHelpPage(){
+                   var clientHelpPage = dhtmlwindow.open("client", "iframe", "helpPages/client.html", "Definition of 'client'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
+                    .moveTo("middle", "middle");
+                }
+                
+                function showErrorsHelpPage(){
+                   var errorsHelpPage = dhtmlwindow.open("errors", "iframe", "helpPages/errors.html", "Definition of 'errors'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
+                    errorsHelpPage.moveTo("middle", "middle");
+                }
+                
+                function showFilecountHelpPage(){
+                   var fileCountHelpPage = dhtmlwindow.open("fileCount", "iframe", "helpPages/fileCount.html", "Definition of 'filecount'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
+                    fileCountHelpPage.moveTo("middle", "middle");
+                }
+                          
+                function showFilesOverMaxLatencyHelpPage(){
+                   var filesOverMaxLatencyHelpPage = dhtmlwindow.open("filesOverMaxLatency", "iframe", "helpPages/filesOverMaxLatency.html", "Definition of 'filesOverMaxLatency'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
+                    filesOverMaxLatencyHelpPage.moveTo("middle", "middle");
+                }
+                
+                function showLatencyHelpPage(){
+                   var latencyHelpPage = dhtmlwindow.open("latency", "iframe", "helpPages/latency.html", "Definition of 'latency'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
+                    latencyHelpPages.moveTo("middle", "middle");
+                }
+                               
+                
+            </script>            
+            
+                                  
+                          
             <STYLE>
                 <!--
                 A{text-decoration:none}
                 -->
             </STYLE>
             <style type="text/css">
-                div.left { float: left;word-wrap:break-word; }
-                div.right {float: right;word-wrap:break-word; }
-                    
-                div.txScroll {
-                    height: 200px;
-                    width: 1255px;
+                div.tableContainer {
+                    width: 95%;        /* table width will be 99% of this*/
+                    height: 275px;     /* must be greater than tbody*/
                     overflow: auto;
-                    word-wrap:break-word;
-                    border: 0px ;                    
-                    padding: 0px;
-                }
-                    
-                div.txTableEntry{
-                    width:177px;            
-                    height: auto;
-                }
+                    margin: 0 auto;
+                    }
                 
-                div.rxScroll {
-                    height: 200px;
-                    width: 1255px;
-                    overflow: auto;
-                    word-wrap:break-word;
-                    border: 0px ;                    
-                    padding: 0px;
-                }
+                table {
+                    width: 99%;        /*100% of container produces horiz. scroll in Mozilla*/
+                    border: none;
+                    background-color: #f7f7f7;
+                    table-layout: fixed;
+                    }
                     
-                div.rxTableEntry{
-                    width:277px;            
-                    height: auto;
-                }       
-                                
-                <!--
-                A{text-decoration:none}
-                -->
-                <!--
-                // -->
+                table>tbody    {  /* child selector syntax which IE6 and older do not support*/
+                    overflow: auto; 
+                    height: 225px;
+                    overflow-x: hidden;
+                    }
+                    
+                thead tr    {
+                    position:relative; 
+                    
+                    }
+                    
+                thead td, thead th {
+                    text-align: center;
+                    font-size: 14px; 
+                    background-color:"#006699";
+                    color: steelblue;
+                    font-weight: bold;
+                    border-top: solid 1px #d8d8d8;
+                    }    
+                    
+                td    {
+                    color: #000;
+                    padding-right: 2px;
+                    font-size: 12px;
+                    text-align: left;
+                    border-bottom: solid 1px #d8d8d8;
+                    border-left: solid 1px #d8d8d8;
+                    }
+                
+                tfoot td    {
+                    text-align: center;
+                    font-size: 11px;
+                    font-weight: bold;
+                    background-color: papayawhip;
+                    color: steelblue;
+                    border-top: solid 2px slategray;
+                    }
+            
+                td:last-child {padding-right: 20px;} /*prevent Mozilla scrollbar from hiding cell content*/
             
             </style>
             
         </head>    
         
-        <body text="#000000" link="#FFFFFF" vlink="000000" bgcolor="#CCCCCC" >          
+        <body text="#000000" link="#FFFFFF" vlink="000000" bgcolor="#FFF4E5" >          
         
-        <br>
         <h2>Monthly graphics for RX sources from MetPx. <font size = "2">*updated weekly</font></h2>
         
-        <table cellspacing=10 cellpadding=8 id=header bgcolor="#cccccc">    
+        <div class="tableContainer">         
+           <table> 
+               <thead>   
         
-        <tr>    
-            <td bgcolor="#006699" >
-                <div class = "rxTableEntry">
-                    <font color = "white">
-                        <div class="left">Sources</div>
-                        <a target ="popup" href="%s" onClick="wopen('helpPages/source.html', 'popup', 875, 100); return false;">
-                            <div class="right">?</div>
-                        </a>
-                    </font>
-                </div>
-            </td>
-            
-            <td bgcolor="#006699" title = "Display the total of bytes received every day of the week for each sources.">
-                <div class = "rxTableEntry">
-                    <font color = "white">
-                        <div class="left">Bytecount</div>
-                        <a target ="popup" href="%s" onClick="wopen('helpPages/byteCount.html', 'popup', 875, 100); return false;">
-                            <div class="right">?</div>
-                        </a> 
-                    </font>
-                </div>
-            </td>
-            
-            <td bgcolor="#006699" title = "Display the total of files received every day of the week for each sources.">
-                <div class = "rxTableEntry">
-                    <font color = "white">
-                        <div class="left">Filecount</div>
-                        <a target ="popup" href="%s" onClick="wopen('helpPages/fileCount.html', 'popup', 875, 100); return false;">
-                            <div class="right">?</div>
-                        </a>
-                    </font>
-                </div>        
-            </td>
-            
-            <td bgcolor="#006699" title = "Display the total of errors that occured during the receptions for every day of the week for each sources.">
-                <div class = "rxTableEntry">
-                    <font color = "white">
-                        <div class="left">Errors</div>
-                        <a target ="popup"  href="%s" onClick="wopen('helpPages/errors.html', 'popup', 875, 100); return false;">
-                            <div class="right">?</div>
-                        </a>
-                    </font>
-                </div>
-            </td>
-            
-            
-        </tr>   
+                    <tr>    
+                        <td bgcolor="#006699" >
+                                <font color = "white">
+                                    <div class="left">Sources</div>
+                                    <a target ="popup" href="%s" onClick="showSourceHelpPage(); return false;">
+                                        <div class="right">?</div>
+                                    </a>
+                                </font>
+                        </td>
+                        
+                        <td bgcolor="#006699" title = "Display the total of bytes received every day of the week for each sources.">
+                                <font color = "white">
+                                    <div class="left">Bytecount</div>
+                                    <a target ="popup" href="%s" onClick="showBytecountHelpPage(); return false;">
+                                        <div class="right">?</div>
+                                    </a> 
+                                </font>
+                        </td>
+                        
+                        <td bgcolor="#006699" title = "Display the total of files received every day of the week for each sources.">
+                                <font color = "white">
+                                    <div class="left">Filecount</div>
+                                    <a target ="popup" href="%s" onClick="showFilecountHelpPage(); return false;">
+                                        <div class="right">?</div>
+                                    </a>
+                                </font>
+                        </td>
+                        
+                        <td bgcolor="#006699" title = "Display the total of errors that occured during the receptions for every day of the week for each sources.">
+                                <font color = "white">
+                                    <div class="left">Errors</div>
+                                    <a target ="popup"  href="%s" onClick="showErrorsHelpPage(); return false;">
+                                        <div class="right">?</div>
+                                    </a>
+                                </font>
+                        </td>
+                        
+                        
+                    </tr>   
         
-        </table>
+               </thead>
         
-        <div class="rxScroll"> 
+               <tbody> 
                   
     """ )
     
@@ -299,11 +352,11 @@ def generateWebPage( rxNames, txNames, months ):
     for rxName in rxNamesArray :
         
         if rxNames[rxName] == "" :
-            fileHandle.write( """<table cellspacing=10 cellpadding=8> <tr> <td bgcolor="#99FF99"><div class = "rxTableEntry"> %s </div></td> """ %(rxName))
-            fileHandle.write( """<td bgcolor="#66CCFF"><div class = "rxTableEntry">Months&nbsp;:&nbsp;""" )
+            fileHandle.write( """<tr> <td bgcolor="#99FF99">%s</td> """ %(rxName))
+            fileHandle.write( """<td bgcolor="#66CCFF">Months&nbsp;:&nbsp;""" )
         else:
-            fileHandle.write( """<table cellspacing=10 cellpadding=8> <tr> <td bgcolor="#99FF99"><div class = "rxTableEntry"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Group description');descriptionWindow.show(); return false">?</a></div></div></td> """ %(rxName, rxNames[rxName].replace("'","").replace('"','')))
-            fileHandle.write( """<td bgcolor="#66CCFF"><div class = "rxTableEntry">Months&nbsp;:&nbsp;""" )
+            fileHandle.write( """ <tr> <td bgcolor="#99FF99"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Group description');descriptionWindow.show(); return false">?</a></div></td> """ %(rxName, rxNames[rxName].replace("'","").replace('"','')))
+            fileHandle.write( """<td bgcolor="#66CCFF">Months&nbsp;:&nbsp;""" )
         
         
         for month in months:
@@ -315,10 +368,10 @@ def generateWebPage( rxNames, txNames, months ):
             if os.path.isfile( file ):
                 fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%.3s&nbsp;</a>"""%( rxName, webLink ,currentMonth ) ) 
         
-        fileHandle.write( "</div></td>" )
+        fileHandle.write( "</td>" )
             
         
-        fileHandle.write(  """ <td bgcolor="#66CCFF"><div class = "rxTableEntry">Months&nbsp;:&nbsp;""" )        
+        fileHandle.write(  """ <td bgcolor="#66CCFF">Months&nbsp;:&nbsp;""" )        
         
         for month in months:
             
@@ -328,10 +381,10 @@ def generateWebPage( rxNames, txNames, months ):
             if os.path.isfile(file):
                 fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%.3s&nbsp;</a>"""%( rxName, webLink ,currentMonth ) )   
                         
-        fileHandle.write( "</div></td>" )
+        fileHandle.write( "</td>" )
         
         
-        fileHandle.write(  """ <td bgcolor="#66CCFF"><div class = "rxTableEntry">Months&nbsp;:&nbsp;""" )
+        fileHandle.write(  """ <td bgcolor="#66CCFF">Months&nbsp;:&nbsp;""" )
         
         for month in months:
             
@@ -342,105 +395,89 @@ def generateWebPage( rxNames, txNames, months ):
             if os.path.isfile( file ):
                 fileHandle.write(  """ <a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%.3s&nbsp;</a>"""%( rxName, webLink ,currentMonth ) )  
         
-        fileHandle.write( "</div></td></tr></table>" )  
+        fileHandle.write( "</td></tr>" )  
               
     
     fileHandle.write(  """
-
+            </tbody>
         </table>
     </div>
     
-    
-    <br>
-    <h2>Monthly graphics for TX clients from MetPx. <font size = "2">*updated weekly</font></h2>
-    
-    
-        <table  cellspacing=10 cellpadding=8 id=header bgcolor="#cccccc">
-    
-        <tr>
+    <h2>Monthly graphics for TX clients from MetPx. <font size = "2">*updated weekly</font></h2>    
+        <div class="tableContainer">         
+            <table> 
+               <thead>
+                    <tr>
 
-            <td bgcolor="#006699">
-                <div class = "txTableEntry">
-                    <font color = "white">
-                        <div class="left">Clients</div>
-                        <a target ="popup" href="%s" onClick="wopen('helpPages/client.html', 'popup', 875, 100); return false;">
-                            <div class="right">?</div>
-                        </a>
-                    </font>
-                </div>
-            </td>
+                        <td bgcolor="#006699">
+                                <font color = "white">
+                                    <div class="left">Clients</div>
+                                    <a target ="popup" href="%s" onClick="showClientHelpPage(); return false;">
+                                        <div class="right">?</div>
+                                    </a>
+                                </font>
+                        </td>
+                        
+                        <td bgcolor="#006699"  title = "Display the taverage latency of file transfers for every day of the week for each clients.">
+                            <font color = "white">
+                                    <div class="left">Latency</div>
+                                    <a target ="popup" href="%s" onClick="showLatencyHelpPage(); return false;">
+                                        <div class="right">?</div>
+                                    </a>                
+                            </font>            
+                        </td>
+                        
+                        <td bgcolor="#006699"  title = "Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients.">
+                                <font color = "white">
+                                    <div class="left">Files over Max. Lat.</div>
+                                     <a target ="popup" href="%s" onClick="showFilesOverMaxLatencyHelpPage(); return false;">
+                                        <div class="right">?</div>
+                                     </a>                        
+                                </font>
+                        </td>
+                        
+                        <td bgcolor="#006699" title = "Display the total of bytes transfered every day of the week for each clients.">
+                                <font color = "white">
+                                    <div class="left">Bytecount</div>
+                                    <a target ="popup" href="%s" onClick="showBytecountHelpPage(); return false;">
+                                        <div class="right">?</div>
+                                    </a>
+                                </font>
+                        </td>
+                        
+                        <td bgcolor="#006699"  title = "Display the total of files transferred every day of the week for each clients.">
+                                <font color = "white">
+                                    <div class="left">Filecount</div>
+                                    <a target ="popup" href="%s" onClick="showFilecountHelpPage(); return false;">
+                                        <div class="right">?</div>
+                                    </a>
+                                </font>
+                        </td>
+                        
+                        <td bgcolor="#006699" title = "Display the total of errors that occured during file transfers every day of the week for each clients.">
+                                <font color = "white">
+                                    <div class="left">Errors</div>
+                                    <a target ="popup" href="%s" onClick="showErrorsHelpPage(); return false;">
+                                        <div class="right">?</div>
+                                    </a>
+                                </font>
+                        </td>
             
-            <td bgcolor="#006699"  title = "Display the taverage latency of file transfers for every day of the week for each clients.">
-                <font color = "white">
-                    <div class = "txTableEntry">
-                        <div class="left">Latency</div>
-                        <a target ="popup" href="%s" onClick="wopen('helpPages/latency.html', 'popup', 875, 100); return false;">
-                            <div class="right">?</div>
-                        </a>                
-                    </div>
-                </font>            
-            </td>
-            
-            <td bgcolor="#006699"  title = "Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients.">
-                <div class = "txTableEntry">
-                    <font color = "white">
-                        <div class="left">Files over Max. Lat.</div>
-                         <a target ="popup" href="%s" onClick="wopen('helpPages/filesOverMaxLatency.html', 'popup', 875, 100); return false;">
-                            <div class="right">?</div>
-                         </a>                        
-                    </font>
-                </div>
-            </td>
-            
-            <td bgcolor="#006699" title = "Display the total of bytes transfered every day of the week for each clients.">
-                <div class = "txTableEntry">
-                    <font color = "white">
-                        <div class="left">Bytecount</div>
-                        <a target ="popup" href="%s" onClick="wopen('helpPages/byteCount.html', 'popup', 875, 100); return false;">
-                            <div class="right">?</div>
-                        </a>
-                    </font>
-                </div>
-            </td>
-            
-            <td bgcolor="#006699"  title = "Display the total of files transferred every day of the week for each clients.">
-                <div class = "txTableEntry">
-                    <font color = "white">
-                        <div class="left">Filecount</div>
-                        <a target ="popup" href="%s" onClick="wopen('helpPages/fileCount.html', 'popup', 875, 100); return false;">
-                            <div class="right">?</div>
-                        </a>
-                    </font>
-                </div>
-            </td>
-            
-            <td bgcolor="#006699" title = "Display the total of errors that occured during file transfers every day of the week for each clients.">
-                <div class = "txTableEntry">
-                    <font color = "white">
-                        <div class="left">Errors</div>
-                        <a target ="popup" href="%s" onClick="wopen('helpPages/errors.html', 'popup', 875, 100); return false;">
-                            <div class="right">?</div>
-                        </a>
-                    </font>
-                </div>
-            </td>
-            
-        </tr>              
-        </table>
-               
-        <div class="txScroll">
-          
-        
+                    </tr>  
+                </thead>
+                
+                <tbody>    
+    
     """   )      
            
     
     for txName in txNamesArray : 
         if txNames[txName] == "" :
-            fileHandle.write( """<table cellspacing=10 cellpadding=8> <tr> <td bgcolor="#99FF99"><div class = "txTableEntry"> %s </div></td> """ %(txName))
-            fileHandle.write( """<td bgcolor="#66CCFF"><div class = "txTableEntry">Months:&nbsp;""" )
+            fileHandle.write( """<tr> <td bgcolor="#99FF99">%s</td> """ %(txName))
+            fileHandle.write( """<td bgcolor="#66CCFF">Months:&nbsp;""" )
         else:
-            fileHandle.write( """<table cellspacing=10 cellpadding=8> <tr> <td bgcolor="#99FF99"><div class = "txTableEntry"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Group description');descriptionWindow.show(); return false">?</a></div></div></td> """ %(txName, txNames[txName].replace("'","").replace('"','') ))
-            fileHandle.write( """<td bgcolor="#66CCFF"><div class = "txTableEntry">Months:&nbsp;""" )
+            fileHandle.write( """<tr> <td bgcolor="#99FF99"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Group description');descriptionWindow.show(); return false">?</a></div></td> """ %(txName, txNames[txName].replace("'","").replace('"','') ))
+            fileHandle.write( """<td bgcolor="#66CCFF">Months:&nbsp;""" )
         
         
         
@@ -453,10 +490,10 @@ def generateWebPage( rxNames, txNames, months ):
             if os.path.isfile( file ):
                 fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%.3s</a>"""%( txName, webLink ,currentMonth ) )
         
-        fileHandle.write( "</div></td>" )
+        fileHandle.write( "</td>" )
         
         
-        fileHandle.write(  """ <td bgcolor="#66CCFF"  ><div class = "txTableEntry">Months:&nbsp;""" )
+        fileHandle.write(  """ <td bgcolor="#66CCFF"  >Months:&nbsp;""" )
         
         for month in months:
            
@@ -467,11 +504,11 @@ def generateWebPage( rxNames, txNames, months ):
             if os.path.isfile( file ):
                 fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%.3s</a>"""%( txName, webLink ,currentMonth ) )
         
-        fileHandle.write( "</div></td>" )
+        fileHandle.write( "</td>" )
         
         
         
-        fileHandle.write(  """ <td bgcolor="#66CCFF"  ><div class = "txTableEntry">Months:&nbsp;""" )
+        fileHandle.write(  """ <td bgcolor="#66CCFF">Months:&nbsp;""" )
         
         for month in months:
             
@@ -482,10 +519,10 @@ def generateWebPage( rxNames, txNames, months ):
             if os.path.isfile( file ):
                 fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%.3s</a>"""%( txName, webLink ,currentMonth ) )
         
-        fileHandle.write( "</div></td>" )
+        fileHandle.write( "</td>" )
         
         
-        fileHandle.write(  """ <td bgcolor="#66CCFF"  ><div class = "txTableEntry">Months:&nbsp;""" )
+        fileHandle.write(  """ <td bgcolor="#66CCFF"  >Months:&nbsp;""" )
         
         for month in months:
             
@@ -496,10 +533,10 @@ def generateWebPage( rxNames, txNames, months ):
             if os.path.isfile( file ):
                 fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%.3s</a>"""%( txName, webLink ,currentMonth ) )
         
-        fileHandle.write( "</div></td>" )
+        fileHandle.write( "</td>" )
         
         
-        fileHandle.write(  """ <td bgcolor="#66CCFF"><div class = "txTableEntry">Months:&nbsp;""" )
+        fileHandle.write(  """ <td bgcolor="#66CCFF">Months:&nbsp;""" )
         
         for month in months:
             
@@ -510,14 +547,15 @@ def generateWebPage( rxNames, txNames, months ):
             if os.path.isfile( file ):
                 fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%.3s</a>"""%( txName, file ,currentMonth ) )
         
-        fileHandle.write( "</div></td></tr></table>" )
+        fileHandle.write( "</td></tr>" )
 
         
 
     fileHandle.write(  """
-    
-    </div>
-    </body>
+                    </tbody>
+                </table>
+            </div>        
+        </body>
     </html>
     
     
