@@ -989,7 +989,7 @@ def getCopyDestination( type, client, machine, infos ):
         
         #destination = "%s/%s/%s/%s" %( StatsPaths.STATSGRAPHSARCHIVES, infos.graphicType, infos.fileType, label, infos.graphicType, endOfDestination )
     if infos.totals == True:
-        if infos.mergerTpe == 'totalForMachine':
+        if infos.mergerType == 'totalForMachine':
             destination ="%s%s/%s/%s/%s/%s"  %( StatsPaths.STATSGRAPHSARCHIVES, infos.graphicType, "totals", machine, infos.fileType, endOfDestination  )
         else:
             destination =  "%s%s/%s/%s/%s" %( StatsPaths.STATSGRAPHSARCHIVES, infos.graphicType, infos.fileType, client, endOfDestination )   
