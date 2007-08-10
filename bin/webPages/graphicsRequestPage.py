@@ -1473,7 +1473,7 @@ def printLogo():
     
     print """
                      <div style="position: absolute; left: 250px; top:-10px; height: 100px; width: 100px">
-                        <img name="logo" id="logo" src="../../imgages/logo.gif" ></img>
+                        <img name="logo" id="logo" src="../../images/requestLogo.gif" ></img>
                    </div>
 
     """
