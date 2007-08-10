@@ -233,12 +233,12 @@ def generateWebPage( machineTags, machineParameters ):
                     // -->
                 </style>    
                 
-                <body text="#000000" link="#FFFFFF" vlink="000000" bgcolor="#CCCCCC" >
+                <body text="#000000" link="#FFFFFF" vlink="000000" bgcolor="#FFF4E5" >
                             
                     <h2>RX totals for %s.</h2>
                 
         
-                <table style="table-layout: fixed; width: 1250px; border-left: 0px gray solid; border-bottom: 0px gray solid; padding:0px; margin: 0px" cellspacing=10 cellpadding=6 >
+                <table style="table-layout: fixed; width: 100%%; border-left: 0px gray solid; border-bottom: 0px gray solid; padding:0px; margin: 0px" cellspacing=10 cellpadding=6 >
                 
                 <tr>    
                     <td bgcolor="#006699" ><font color = "white"><div class="left">Type</font></td>   
@@ -313,7 +313,7 @@ def generateWebPage( machineTags, machineParameters ):
                
                     <h2>TX totals for %s.</h2>
                 
-                <table style="table-layout: fixed; width: 1250px; border-left: 0px gray solid; border-bottom: 0px gray solid; padding:0px; margin: 0px" cellspacing=10 cellpadding=6 >
+                <table style="table-layout: fixed; width: 100%%; border-left: 0px gray solid; border-bottom: 0px gray solid; padding:0px; margin: 0px" cellspacing=10 cellpadding=6 >
                     <tr>
                         
                         <td bgcolor="#006699"   title = >Type</font></td> 
