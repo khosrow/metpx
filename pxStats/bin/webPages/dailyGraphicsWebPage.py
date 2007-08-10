@@ -254,7 +254,7 @@ def generateWebPage( rxNames, txNames, days ):
                                 <div class = "rxTableEntry">
                                     <font color = "white">
                                         <div class="left">Sources</div>
-                                        <a target ="popup" href="%s" onClick="showSourceHelpPage(); return false;">
+                                        <a target ="popup" href="#" onClick="showSourceHelpPage(); return false;">
                                             <div class="right">?</div>
                                         </a>
                                     </font>
@@ -313,7 +313,7 @@ def generateWebPage( rxNames, txNames, days ):
                         <div class = "txTableEntry">
                             <font color = "white">
                                 <div class="left">Clients</div>
-                                <a target ="popup" href="%s" onClick="showClientHelpPage(); return false;">
+                                <a target ="popup" href="#" onClick="showClientHelpPage(); return false;">
                                     <div class="right">?</div>
                                 </a>
                             </font>

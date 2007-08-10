@@ -258,8 +258,8 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
                 }
                 
                 function showLatencyHelpPage(){
-                   var latencyHelpPage = dhtmlwindow.open("byteCount", "iframe", "helpPages/latency.html", "Definition of 'latency'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
-                    latencyHelpPages.moveTo("middle", "middle");
+                   var latencyHelpPage = dhtmlwindow.open("latency", "iframe", "helpPages/latency.html", "Definition of 'latency'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
+                    latencyHelpPage.moveTo("middle", "middle");
                 }
                                
                 
@@ -282,7 +282,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
                             <div class="left">
                             Sources                            
                             </div>
-                            <a target ="popup" href="%s" onClick="showSourceHelpPage(); return false;">
+                            <a target ="popup" href="#" onClick="showSourceHelpPage(); return false;">
                                 <div class="right">
                                 ?
                                 </div>
@@ -297,7 +297,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
                             <div class="left">
                             Bytecount
                             </div>
-                            <a target ="popup" href="%s" onClick="showBytecountHelpPage(); return false;">
+                            <a target ="popup" href="#" onClick="showBytecountHelpPage(); return false;">
                                 <div class="right">
                                 ?
                                 </div>
@@ -310,7 +310,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
                    
                         <font color = "white">
                             <div class="left">Filecount</div>
-                            <a target ="popup" href="%s" onClick="showFilecountHelpPage(); return false;">                            
+                            <a target ="popup" href="#" onClick="showFilecountHelpPage(); return false;">                            
                                 <div class="right">?</div>                            
                             </a>
                         </font>
@@ -321,7 +321,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
                     
                         <font color = "white">
                             <div class="left">Errors</div>
-                            <a target ="popup"  href="%s" onClick="showErrorsHelpPage(); return false;">
+                            <a target ="popup"  href="#" onClick="showErrorsHelpPage(); return false;">
                                 <div class="right">?</div>
                             </a>
                         </font>
@@ -406,7 +406,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
                             
                                 <font color = "white">
                                     <div class="left">Clients</div>
-                                    <a target ="popup" href="%s" onClick="showClientPage(); return false;">
+                                    <a target ="popup" href="#" onClick="showClientHelpPage(); return false;">
                                         <div class="right">?</div>
                                     </a>
                                 </font> 
@@ -416,7 +416,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
                         <td bgcolor="#006699" title = "Display the taverage latency of file transfers for every day of the week for each clients.">
                             
                                 <font color = "white"><div class="left">Latency</div>
-                                    <a target ="popup" href="%s" onClick="showLatencyHelpPage(); return false;">
+                                    <a target ="popup" href="#" onClick="showLatencyHelpPage(); return false;">
                                         <div class="right">?</div>
                                     </a>
                                 </font>
@@ -426,7 +426,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
                         <td bgcolor="#006699" title = "Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients.">
                             
                                 <font color = "white"><div class="left">Files Over Max. Lat.</div>
-                                    <a target ="popup" href="%s" onClick="showFilesOverMaxLatencyHelpPage(); return false;">
+                                    <a target ="popup" href="#" onClick="showFilesOverMaxLatencyHelpPage(); return false;">
                                         <div class="right">?</div>
                                     </a>
                                 </font>
@@ -437,7 +437,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
                             
                                 <font color = "white">                 
                                     <div class="left">Bytecount</div>
-                                     <a target ="popup" href="%s" onClick="showbyteCountHelpPage(); return false;">
+                                     <a target ="popup" href="#" onClick="showBytecountHelpPage(); return false;">
                                             <div class="right">?</div>
                                      </a>                            
                                 </font>
@@ -448,7 +448,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
                             
                                 <font color = "white">
                                     <div class="left">Filecount</div>
-                                    <a target ="popup" href="%s" onClick="showFilecountHelpPage(); return false;">
+                                    <a target ="popup" href="#" onClick="showFilecountHelpPage(); return false;">
                                         <div class="right">?</div>
                                     </a>
                                 </font>
@@ -459,7 +459,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
                             
                                 <font color = "white">
                                     <div class="left">Errors</div>
-                                    <a target ="popup" href="%s" onClick="showErrorsHelpPage(); return false;">
+                                    <a target ="popup" href="#" onClick="showErrorsHelpPage(); return false;">
                                         <div class="right">?</div>
                                     </a>
                                 </font>
