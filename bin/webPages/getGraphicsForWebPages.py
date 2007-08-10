@@ -25,6 +25,8 @@ sys.path.insert(1, sys.path[0] + '/../../../')
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 from pxStats.lib.MachineConfigParameters import MachineConfigParameters
+from pxStats.lib.StatsConfigParameters import StatsConfigParameters
+from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.StatsPaths import StatsPaths
 from fnmatch import fnmatch
 
@@ -207,28 +209,49 @@ def setYesterdaysGraphs( currentTime, machinePairs ):
         
     """
     
-    yesterday   = time.strftime( "%a", time.gmtime( currentTime  - (24*60*60) ))
+    configParameters = StatsConfigParameters()
+    configParameters.getAllParameters()
     
+    rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNamesCurrentlyRunningOnAllMachinesfoundInConfigfile()
+    
+    
+    yesterday   = time.strftime( "%d", time.gmtime( currentTime  - (24*60*60) ))
+    year, month, day = StatsDateLib.getYearMonthDayInStrfTime(time.time())
+        
     filePattern = StatsPaths.STATSGRAPHS + "webGraphics/columbo/*.png"
     currentGraphs = glob.glob( filePattern )  
     
     filePattern = StatsPaths.STATSGRAPHS + "webGraphics/groups/*.png"
-    currentGraphs.extend( glob.glob( filePattern ) ) 
-   
+    currentGraphs.extend( glob.glob( filePattern ) )  
+    
+    
     for graph in currentGraphs:
         clientName = os.path.basename(graph).replace( ".png","" )
-        dest = StatsPaths.STATSGRAPHS + "webGraphics/daily/%s/%s.png" %( clientName, yesterday )
+        
+        if clientName in configParameters.groupParameters.groups:
+            fileType = configParameters.groupParameters.groupFileTypes[clientName]
+            
+        else:    
+            if clientName in rxNames:
+                fileType = 'rx'
+            else:
+                fileType = 'tx'    
+            
+        dest = StatsPaths.STATSGRAPHS + "webGraphics/archives/daily/%s/%s/%s/%s/%s.png" %( fileType, clientName,year,month, yesterday )
+        
+        
         if not os.path.isdir( os.path.dirname(dest) ):
             os.makedirs( os.path.dirname(dest) )
         shutil.copyfile( graph, dest )    
         #print "copy %s to %s" %( graph, dest )          
-     
+    
     #Totals 
     currentTime = StatsDateLib.getIsoFromEpoch(currentTime)
-    for machinePair in machinePairs:   
-        status, output = commands.getstatusoutput( '%sgenerateRRDGraphics.py --copy --totals -f "rx" --machines "%s" --havingRun -d --fixedPrevious --date "%s"' %( StatsPaths.STATSBIN, machinePair, currentTime ) )
+    for machinePair in machinePairs:
+         status, output = commands.getstatusoutput( '%sgenerateRRDGraphics.py --copy --totals -f "rx" --machines "%s" --havingRun -d --fixedPrevious --date "%s"' %( StatsPaths.STATSBIN, machinePair, currentTime ) )
         #print output
-        status, output = commands.getstatusoutput( '%sgenerateRRDGraphics.py --copy --totals -f "tx" --machines "%s" --havingRun -d --fixedPrevious --date "%s"' %( StatsPaths.STATSBIN, machinePair, currentTime ) )
+         status, output = commands.getstatusoutput( '%sgenerateRRDGraphics.py --copy --totals -f "tx" --machines "%s" --havingRun -d --fixedPrevious --date "%s"' %( StatsPaths.STATSBIN, machinePair, currentTime ) )
+
                 
         
 def setCurrentColumboAndGroupGraphsAsDailyGraphs( currentTime )  :
