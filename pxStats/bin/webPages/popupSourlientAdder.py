@@ -26,7 +26,8 @@ named COPYING in the root of the source directory tree.
 import cgi, os, time, sys
 import cgitb; cgitb.enable()
 
-sys.path.insert(1, sys.path[0] + '/../../../')
+sys.path.insert(1, sys.path[0] + '/../../')
+sys.path.insert(2, sys.path[0] + '/../../..')
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.StatsPaths import StatsPaths
 
@@ -68,7 +69,83 @@ def generateWebPage( sourlientNames, outputFileName):
         </style>
         <link rel="stylesheet" type="text/css" href="/css/style.css">
     
-        <script src="../js/popupListAdder.js"></script>
+        <script type="text/javascript" language="JavaScript">
+            
+            function popupAddingWindow( url ) {
+                var newWindow;
+                var props = 'scrollBars=no,resizable=no,toolbar=no,menubar=no,location=no,directories=no,width=700,height=300';
+                newWindow = window.open(url, "Add_from_Src_to_Dest", props);
+            }
+            
+            function closeWindow(){
+                window.close();
+            }
+            
+            // Fill the selcted item list with the items already present in parent.
+            function copyLists( srcList, destList ) {
+                
+                var len = destList.length;
+                for(var i = 0; i < srcList.length; i++) {
+                    if ( srcList.options[i] != null ) {
+                        
+                        //Check if this value already exist in the destList or not
+                        //if not then add it otherwise do not add it.
+                        var found = false;
+                        for(var count = 0; count < len; count++) {
+                            if (destList.options[count] != null) {
+                                if (srcList.options[i].text == destList.options[count].text) {
+                                    found = true;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        if (found != true) {
+                            destList.options[len] = new Option(srcList.options[i].text); 
+                            len++;
+                        }
+                    }
+                }
+            }
+            
+            
+            // Add the SELECTED items from the source to destination list
+            // will only add the items wich are not allready present in dest list.
+            function addSrcToDestList( srcList, destList ) {
+                var len = destList.length;
+                for(var i = 0; i < srcList.length; i++) {
+                    if ((srcList.options[i] != null) && (srcList.options[i].selected)) {
+                        //Check if this value already exist in the destList or not
+                        //if not then add it otherwise do not add it.
+                        var found = false;
+                        for(var count = 0; count < len; count++) {
+                            if (destList.options[count] != null) {
+                                if (srcList.options[i].text == destList.options[count].text) {
+                                    found = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (found != true) {
+                            destList.options[len] = new Option(srcList.options[i].text); 
+                            len++;
+                        }
+                    }
+                }
+            }
+            
+            // Deletes from the destination list.
+            function deleteFromList( list ) {
+                var len = list.options.length;
+                for(var i = (len-1); i >= 0; i--) {
+                    if ((list.options[i] != null) && (list.options[i].selected == true)) {
+                        list.options[i] = null;
+                    }
+                }
+            }
+            
+        
+        </script>
       
       </head>
       
@@ -124,7 +201,7 @@ def generateWebPage( sourlientNames, outputFileName):
                     
                     <tr>
                         <td colspan=3 align="center">
-                            <input type="button" value="Done" onClick ="javascript:copyLists(document.forms['adderForm'].elements['destList'], self.opener.document.forms['inputForm'].elements['sourlientList']);javascript:closeWindow();">
+                            <input type="button" value="Done" onClick ="javascript:window.opener.copyLists(document.forms['adderForm'].elements['destList'], window.opener.document.forms['inputForm'].elements['sourlientList']);javascript:closeWindow();">
                         </td>
                     </tr>
                 
@@ -142,7 +219,26 @@ def generateWebPage( sourlientNames, outputFileName):
     fileHandle.close()                 
     sys.stdout = oldStdOut #resets standard output 
     
+
+def returnReply( error = '' ):
+    """
+        @summary : Prints an empty reply so that the receiving web page will
+                   not modify it's display.
+        
+    """
     
+    reply = "images='';error=%s" %error 
+    
+    print """
+        HTTP/1.0 200 OK
+        Server: NCSA/1.0a6
+        Content-type: text/plain
+
+    """
+    
+    print """%s"""  %( reply )    
+
+
     
 def main():
     """
@@ -188,10 +284,11 @@ def main():
         rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machine )
     
     if fileType == "tx":
-        generateWebPage(txNames, "%s/popUps/%s%sPopUpSourlientAdder.html" %( StatsPaths.STATSWEBPAGES, fileType, machines ) )
+        generateWebPage(txNames, "../../html/popUps/%s%sPopUpSourlientAdder.html" %( fileType, machines ) )
     elif fileType == "rx":
-        generateWebPage(rxNames, "%s/popUps/%s%sPopUpSourlientAdder.html" %( StatsPaths.STATSWEBPAGES, fileType, machines ) )
+        generateWebPage(rxNames, "../../html/popUps/%s%sPopUpSourlientAdder.html" %( fileType, machines ) )
     
-
+    returnReply('') 
+        
 if __name__ == '__main__':
     main()
