@@ -225,7 +225,7 @@ def printChoiceOfSourlients( plotter, form ):
                                                             
                                 <br>   
                         
-                                <input type=button class="button" value="Add Clients" onclick =" javascript:popupAddingWindow('popupAdder.html');"></input>    
+                                <input type=button class="button" value="Add Clients" onclick ="javascript:handleAddSourlientsRequest();"></input>    
                                 <input type=button class="button" value="Delete client" onclick ="javascript:deleteFromList(sourlientList);"></input> 
                                    
             """
@@ -242,7 +242,7 @@ def printChoiceOfSourlients( plotter, form ):
                
                         <br>               
                     
-                        <input type=button name="addButton" class="button" value="Add Sourlients" onclick ="javascript:popupAddingWindow( '../../html/popUps/' + document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].value + document.inputForm.machines[ document.inputForm.machines.selectedIndex ].value.replace( /,/g , '' ) + 'PopUpSourlientAdder.html' );"></input> 
+                        <input type=button name="addButton" class="button" value="Add Sourlients" onclick ="javascript:handleAddSourlientsRequest();"></input> 
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         <input type=button name="deleteButton" class="button" value="Delete Sourlients" onclick ="javascript:deleteFromList(sourlientList);"></input> 
        
@@ -298,7 +298,7 @@ def printAjaxRequestsScript( plotter ):
                }
                                
                 var http = getHTTPObject();
-                
+               
                                 
                 
                 function executeAjaxRequest( strURL, plotter, callingObject ) {                  
@@ -310,7 +310,8 @@ def printAjaxRequestsScript( plotter ):
                    if( strURL == 'popupSourlientAdder.py'){ 
                         parameters = getParametersForPopups();
                         document.getElementById("errorLabel").innerHTML = '<font color="#FFFFFF">Application status : Updating list of sources and clients.</font>'
-                 
+                        errors = searchFormForPopUpErrors(); 
+                     
                    }else if( strURL == 'graphicsRequestBroker.py' ){
                         document.getElementById("errorLabel").innerHTML = '<font color="#FFFFFF">Application status : Executing the graphics creation request...</font>';
                         parameters = getParametersForGraphicsRequests( plotter );
@@ -339,10 +340,10 @@ def printAjaxRequestsScript( plotter ):
                 
                 function handleHttpResponse() {
                   
-                  var response = http.responseText;
+                  
                   
                   if (http.readyState == 4) {                                       
-                                         
+                     var response = http.responseText;                    
                      //document.getElementById("errorLabel").innerHTML = response;
                      if( response.match('images') != null && response.match('error') != null){ 
                         
@@ -461,10 +462,10 @@ def printAjaxRequestsScript( plotter ):
                     
                      sourlients = new Array();
                      for (var i = 0; i < document.inputForm.sourlientList.options.length; i++){
-                         sourlients.push( document.inputForm.sourlientList.options[i].value );
+                         sourlients.push( document.inputForm.sourlientList.options[i].text );
                      }  
                      
-                     var qstr = '?plotter=gnuplot&querier=graphicsRequestPage.py&endTime=' + document.forms['inputForm'].elements['endTime'].value + '&sourLients=' + sourlients  + '&groupName='+ (document.forms['inputForm'].elements['groupName'].value) +'&products='+ (document.forms['inputForm'].elements['products'].value) +'&span=' + (document.forms['inputForm'].elements['span'].value) +'&fileType=' + (document.inputForm.fileType[document.inputForm.fileType.selectedIndex].value) +'&machines=' + (document.inputForm.machines[document.inputForm.machines.selectedIndex].value) +'&combineSourlients='  + (document.inputForm.combineSourlients.checked) + '&statsTypes='  + (document.inputForm.statsTypes[document.inputForm.statsTypes.selectedIndex].value);
+                     var qstr = '?plotter=gnuplot&querier=graphicsRequestPage.py&endTime=' + document.forms['inputForm'].elements['endTime'].value + '&sourLients=' + sourlients  + '&groupName='+ (document.forms['inputForm'].elements['groupName'].value) +'&products='+ (document.forms['inputForm'].elements['products'].value) +'&span=' + (document.forms['inputForm'].elements['span'].value) +'&fileType=' + (document.inputForm.fileType[document.inputForm.fileType.selectedIndex].text) +'&machines=' + (document.inputForm.machines[document.inputForm.machines.selectedIndex].text) +'&combineSourlients='  + (document.inputForm.combineSourlients.checked) + '&statsTypes='  + (document.inputForm.statsTypes[document.inputForm.statsTypes.selectedIndex].text);
                         
                      return qstr;
                 
@@ -479,17 +480,17 @@ def printAjaxRequestsScript( plotter ):
                     var endTime    = document.forms['inputForm'].elements['endTime'].value;
                     var groupName  = document.forms['inputForm'].elements['groupName'].value;
                     var span       = document.forms['inputForm'].elements['span'].value;
-                    var fileType   = document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].value;
-                    var machines   = document.inputForm.machines[ document.inputForm.machines.selectedIndex ].value;
-                    var statsTypes = document.inputForm.statsTypes[ document.inputForm.statsTypes.selectedIndex ].value;
-                    var preDeterminedSpan= document.inputForm.preDeterminedSpan[ document.inputForm.preDeterminedSpan.selectedIndex ].value;
-                    var fixedSpan  = document.inputForm.fixedSpan[ document.inputForm.fixedSpan.selectedIndex ].value;
+                    var fileType   = document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].text;
+                    var machines   = document.inputForm.machines[ document.inputForm.machines.selectedIndex ].text;
+                    var statsTypes = document.inputForm.statsTypes[ document.inputForm.statsTypes.selectedIndex ].text;
+                    var preDeterminedSpan= document.inputForm.preDeterminedSpan[ document.inputForm.preDeterminedSpan.selectedIndex ].text;
+                    var fixedSpan  = document.inputForm.fixedSpan[ document.inputForm.fixedSpan.selectedIndex ].text;
                     var individual = document.inputForm.individual.checked;
                     var total      = document.inputForm.total.checked;
                     
                     sourlients = new Array();
                     for (var i = 0; i < document.inputForm.sourlientList.options.length; i++){
-                         sourlients.push( document.inputForm.sourlientList.options[i].value );
+                         sourlients.push( document.inputForm.sourlientList.options[i].text );
                      }  
 
                     qstr = '?plotter=rrd&querier=graphicsRequestPage.py&endTime=' + escape(endTime) + '&groupName=' + escape(groupName) + '&span=' + escape(span);
@@ -506,9 +507,9 @@ def printAjaxRequestsScript( plotter ):
                 
                 function getParametersForPopups() {
     
-                    var fileType     = document.inputForm.fileType[document.inputForm.fileType.selectedIndex].value;
+                    var fileType     = document.inputForm.fileType[document.inputForm.fileType.selectedIndex].text;
                     
-                    var machines     = document.inputForm.machines[document.inputForm.machines.selectedIndex].value;
+                    var machines     = document.inputForm.machines[document.inputForm.machines.selectedIndex].text;
                                                    
                     var qstr = '?fileType=' + escape(fileType) + '&machines=' + escape(machines);  // NOTE: no '?' before querystring
         
@@ -516,12 +517,38 @@ def printAjaxRequestsScript( plotter ):
                     return qstr;
                 
                 }    
+                
+                
+                function searchFormForPopUpErrors(){
+                    var errors = "";
+                    var fileType   = document.getElementById('fileType')[document.getElementById('fileType').selectedIndex].text;
+                    var machines   = document.getElementById('machines')[document.getElementById('machines').selectedIndex].text;
+                
+                    if( fileType.match('Select') !=null ){
+                        errors= 'Error. Please select a filetype.'
+                    
+                    }else if(machines.match('Select') !=null ){
+                         errors = 'Error. Please select a machine.'
+                         
+                    }
+                
+                    return errors;
+                    
+                }
+                
+                
+                
+                
+                
+                
+                
             
     """
     
     if plotter == "rrd":
         
         print """
+                
                 function isInt(x) {
                      var y=parseInt(x);
                      
@@ -530,7 +557,7 @@ def printAjaxRequestsScript( plotter ):
                      return x==y && x.toString()==y.toString();
                 }
                 
-                
+                 
                 function searchFormForErrors(){
                     
                     var errors = "";
@@ -538,15 +565,15 @@ def printAjaxRequestsScript( plotter ):
                     var sourlients = new Array();
                     
                     for (var i = 0; i < document.inputForm.sourlientList.options.length; i++){
-                        sourlients.push( document.inputForm.sourlientList.options[i].value );
+                        sourlients.push( document.inputForm.sourlientList.options[i].text );
                     } 
                     
-                    var fileType   = document.inputForm.fileType[document.inputForm.fileType.selectedIndex].value;
-                    var machines   = document.inputForm.machines[document.inputForm.machines.selectedIndex].value;
-                    var statsTypes = document.inputForm.statsTypes[document.inputForm.statsTypes.selectedIndex].value;
+                    var fileType   = document.inputForm.fileType[document.inputForm.fileType.selectedIndex].text;
+                    var machines   = document.inputForm.machines[document.inputForm.machines.selectedIndex].text;
+                    var statsTypes = document.inputForm.statsTypes[document.inputForm.statsTypes.selectedIndex].text;
                     var optionalOptionsVisibility = document.getElementById("advancedOptions").style.visibility;
-                    var fixedSpan       = document.inputForm.fixedSpan[ document.inputForm.fixedSpan.selectedIndex ].value;
-                    var determinedSpan  = document.inputForm.preDeterminedSpan[ document.inputForm.preDeterminedSpan.selectedIndex ].value;
+                    var fixedSpan       = document.inputForm.fixedSpan[ document.inputForm.fixedSpan.selectedIndex ].text;
+                    var determinedSpan  = document.inputForm.preDeterminedSpan[ document.inputForm.preDeterminedSpan.selectedIndex ].text;
                     var groupName       = document.getElementById( 'groupName' ).value;
                     
                     
@@ -616,12 +643,12 @@ def printAjaxRequestsScript( plotter ):
                     var sourlients = new Array();
                     
                     for (var i = 0; i < document.inputForm.sourlientList.options.length; i++){
-                        sourlients.push( document.inputForm.sourlientList.options[i].value );
+                        sourlients.push( document.inputForm.sourlientList.options[i].text );
                     } 
                     
-                    var fileType = document.inputForm.fileType[document.inputForm.fileType.selectedIndex].value;
-                    var machines = document.inputForm.machines[document.inputForm.machines.selectedIndex].value;
-                    var statsTypes = document.inputForm.statsTypes[document.inputForm.statsTypes.selectedIndex].value;
+                    var fileType = document.inputForm.fileType[document.inputForm.fileType.selectedIndex].text;
+                    var machines = document.inputForm.machines[document.inputForm.machines.selectedIndex].text;
+                    var statsTypes = document.inputForm.statsTypes[document.inputForm.statsTypes.selectedIndex].text;
                     var optionalOptionsVisibility = document.getElementById("advancedOptions").style.visibility;
                     
                     if( fileType.match('Select') !=null ){
@@ -743,9 +770,9 @@ def printSlideShowScript( images ):
                 function backward(){
                     if (which>0){
                         which--;
-                        applyeffect();
+                        //applyeffect();
                         document.images.photoslider.src=photos[which];
-                        playeffect();
+                        //playeffect();
                         keeptrack();
                         
                     }
@@ -754,9 +781,9 @@ def printSlideShowScript( images ):
                 function forward(){
                     if (which<photos.length-1){
                         which++;
-                        applyeffect();
+                        //applyeffect();
                         document.images.photoslider.src=photos[which];
-                        playeffect();
+                        //playeffect();
                         keeptrack();
                         
                     }
@@ -1006,7 +1033,7 @@ def printFileTypeComboBox( form ):
     print """
                         <td width = 210>
                             <label for="fileType">FileType:</label><br>
-                            <select name="fileType" OnChange="JavaScript:executeAjaxRequest( 'popupSourlientAdder.py', '' );Javascript:updateStatsTypes( document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].value );Javascript:updateLabelsOnFileTypeChange(); ">
+                            <select name="fileType" id="fileType" OnChange="JavaScript:executeAjaxRequest( 'popupSourlientAdder.py', '' );Javascript:updateStatsTypes( document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].text );Javascript:updateLabelsOnFileTypeChange(); ">
                                 <option>Select a file type...</option>
     """
     
@@ -1114,7 +1141,7 @@ def printMachinesComboBox( form ):
     print """
                         <td width = 210px> 
                             <label for="machines">Machine(s):</label><br>
-                            <select class="dropDownBox" name="machines" OnChange="JavaScript:executeAjaxRequest( 'popupSourlientAdder.py', '' ) ">     
+                            <select class="dropDownBox" name="machines" id="machines" OnChange="JavaScript:executeAjaxRequest( 'popupSourlientAdder.py', '' ) ">     
                             <option>Select machine(s)...</option>               
     """
     for machines in AVAILABLE_MACHINES:
@@ -1811,6 +1838,19 @@ def printHead( plotter, form ):
             </script>  
                     <script type="text/javascript" language="JavaScript">
             
+            
+            function handleAddSourlientsRequest(){
+                 
+                 var errors = searchFormForPopUpErrors();
+                 
+                 if( errors == ""){
+                     popupAddingWindow( '../../html/popUps/' + document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].text + document.inputForm.machines[ document.inputForm.machines.selectedIndex ].text.replace( /,/g , '' ) + 'PopUpSourlientAdder.html' );
+                }else{
+                    document.getElementById("errorLabel").innerHTML = '<font color="#C11B17">' + errors + '</font>';
+                }
+            
+            }
+            
             function popupAddingWindow( url ) {
                 var newWindow;
                 var props = 'scrollBars=no,resizable=no,toolbar=no,menubar=no,location=no,directories=no,width=700,height=300';
@@ -1968,7 +2008,7 @@ def printHead( plotter, form ):
                  
                  function enableOrDisableSpan(){
                      
-                     if( document.getElementById("preDeterminedSpan").value.match('Pre') != null  ){
+                     if( document.inputForm.preDeterminedSpan[ document.inputForm.preDeterminedSpan.selectedIndex ].text.match('Pre') != null  ){
                      
                          document.getElementById("span").disabled = false;
                     
