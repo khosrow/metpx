@@ -65,6 +65,8 @@ def generateWebPage( sourlientNames, outputFileName):
                 width:300px;            
                 height: auto;
             }
+            
+            
         
         </style>
         <link rel="stylesheet" type="text/css" href="/css/style.css">
@@ -149,12 +151,13 @@ def generateWebPage( sourlientNames, outputFileName):
       
       </head>
       
-        <body text="#FFFFFF" link="#FFFFFF" vlink="000000" bgcolor="#CCCCCC">
+        <body text="#FFFFFF" link="#FFFFFF" vlink="000000" bgcolor="#7ACC7A">
+            
             <center>
             
             <form name="adderForm" method="POST">
                 
-                <table bgcolor="#99FF99" >
+                <table bgcolor="#FFF4E5" >
                     
                     <tr>
                         <font color ="white">
@@ -167,9 +170,9 @@ def generateWebPage( sourlientNames, outputFileName):
                     
                     <tr>
         
-                        <td bgcolor="#99FF99" width="300">
+                        <td bgcolor="#7ACC7A" width="300">
                                 
-                                <select size="12" style="width: 300px;" name="srcList" multiple> 
+                                <select size="12" style="width: 300px;height: 225px;font: 14px;" name="srcList" multiple> 
   
     """
     
@@ -185,31 +188,27 @@ def generateWebPage( sourlientNames, outputFileName):
                         
                         </td>
                         
-                        <td bgcolor="#99FF99" width="74" align="center">
-                            <input type="button" value=" >> " onClick="javascript:addSrcToDestList( document.forms['adderForm'].elements['srcList'], document.forms['adderForm'].elements['destList']  )">
+                        <td bgcolor="#FFF4E5" width="74" align="center">
+                            <input type="button" value=" >> " style="font: 14px;" onClick="javascript:addSrcToDestList( document.forms['adderForm'].elements['srcList'], document.forms['adderForm'].elements['destList']  )">
                             <br><br>
-                            <input type="button" value=" << " onclick="javascript:deleteFromList( document.forms['adderForm'].elements['destList'] );">
+                            <input type="button" value=" << " style="font: 14px;" onclick="javascript:deleteFromList( document.forms['adderForm'].elements['destList'] );">
+                            <br><br> 
+                            <input type="button" value="Done" style="font: 14px;" onClick ="javascript:window.opener.copyLists(document.forms['adderForm'].elements['destList'], window.opener.document.forms['inputForm'].elements['sourlientList']);javascript:closeWindow();">  
                         </td>
                         
-                        <td bgcolor="#99FF99" width="300">               
-                            <select size="12" style="width: 300px;" name="destList" multiple>
+                        <td bgcolor="#7ACC7A" width="300">               
+                            <select size="12" style="width: 300px;height: 225px;font: 14px;" name="destList" multiple>
                             </select>
     
                         </td>
                     
                     </tr>
-                    
-                    <tr>
-                        <td colspan=3 align="center">
-                            <input type="button" value="Done" onClick ="javascript:window.opener.copyLists(document.forms['adderForm'].elements['destList'], window.opener.document.forms['inputForm'].elements['sourlientList']);javascript:closeWindow();">
-                        </td>
-                    </tr>
-                
+
                 </table>
             
             </form>
     
-        
+            
         </body>
     
     </html>
