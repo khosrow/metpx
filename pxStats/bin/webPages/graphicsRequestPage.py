@@ -181,6 +181,7 @@ def printEndOfBody():
     """
     
     print """    
+            
         </body>
     </html>
     """
@@ -210,7 +211,7 @@ def printChoiceOfSourlients( plotter, form ):
                      
                             <td>
                                  <div name="sourlientListLabel" id="sourlientListLabel">Client(s)/Source(s) :</div>
-                                 <select size=5 name="sourlientList" style="width: 300px;"height: 20px;"" multiple>
+                                 <select size=5 name="sourlientList" style="font: 14px;width: 300px;"height: 20px;" multiple>
         """
         
         for sourlient in sourLients:
@@ -237,7 +238,7 @@ def printChoiceOfSourlients( plotter, form ):
                     <td>
                         
                         <div name="sourlientListLabel" id="sourlientListLabel">Client(s)/Source(s) :</div>
-                        <select size=5 name="sourlientList" style="width: 300px;" multiple>
+                        <select size=5 name="sourlientList" style="font: 14px;width: 300px;"height: 20px;" multiple>
                         </select>                   
                
                         <br>               
@@ -708,6 +709,9 @@ def printSlideShowScript( images ):
                    This code was modified according to the terms of use found here:
                    http://dynamicdrive.com/notice.htm    
     """
+
+    width  = 875
+    height = 250   
     
     print """
     
@@ -790,13 +794,14 @@ def printSlideShowScript( images ):
                 }
                 
                 function transport(){
-                    window.location=photoslink[which];
+                    wopen( photoslider.src, 'popup', %s, %s);
                 }
             
         </script>
 
     
-    """
+    """%( width, height )
+
 
 
 def printRRDImageFieldSet( form ):
@@ -839,9 +844,9 @@ def printRRDImageFieldSet( form ):
         </fieldset>
 
         <fieldset class="fieldSetaction">
-             <input type=button value="Previous image result." onclick ="backward();return false;"></input> 
-             <input type=button value="View original size"     onclick ="wopen( photoslider.src, 'popup', %s, %s); return false;"></input> 
-             <input type=button value="Next image result."     onclick ="forward();return false;" ></input> 
+             <input type=button class="largeButton"  value="Previous image result." onclick ="backward();return false;"></input> 
+             <input type=button class="button"  value="View original size"     onclick ="wopen( photoslider.src, 'popup', %s, %s); return false;"></input> 
+             <input type=button class="largeButton"  value="Next image result."     onclick ="forward();return false;" ></input> 
              <div name="imageCounter" id ="imageCounter" style="display:inline;"></div>
         </fieldset>
 
@@ -1033,7 +1038,7 @@ def printFileTypeComboBox( form ):
     print """
                         <td width = 210>
                             <label for="fileType">FileType:</label><br>
-                            <select name="fileType" id="fileType" OnChange="JavaScript:executeAjaxRequest( 'popupSourlientAdder.py', '' );Javascript:updateStatsTypes( document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].text );Javascript:updateLabelsOnFileTypeChange(); ">
+                            <select class="dropDownBox" name="fileType" id="fileType" OnChange="JavaScript:executeAjaxRequest( 'popupSourlientAdder.py', '' );Javascript:updateStatsTypes( document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].text );Javascript:updateLabelsOnFileTypeChange(); ">
                                 <option>Select a file type...</option>
     """
     
@@ -1073,7 +1078,7 @@ def printSpecificSpanComboBox( form ):
     print """
                         <td width = 210px> 
                             <label for="preDeterminedSpan">Determined spans : </label><br>
-                            <select name="preDeterminedSpan" id="preDeterminedSpan" onClick="enableOrDisableSpan()">     
+                            <select class="dropDownBox" name="preDeterminedSpan" id="preDeterminedSpan" onClick="enableOrDisableSpan()">     
                             <option>Pre-determined spans...</option>               
     """
     for span in PRE_DETERMINED_SPANS:
@@ -1106,7 +1111,7 @@ def printFixedSpanComboBox( form ):
     print """
                         <td width = 210px> 
                             <label for="fixedSpan">Fixed spans : </label><br>
-                            <select name="fixedSpan" >     
+                            <select class="dropDownBox" name="fixedSpan" >     
                             <option>Select fixed span...</option>               
     """
     
@@ -1200,7 +1205,7 @@ def printStatsTypesComboBox( plotter, form ):
     print """
                         <td width = 210px> 
                             <label for="statsTypes">Stats type(s):</label><br>
-                            <select name="statsTypes" class="statsTypes">     
+                            <select class="dropDownBox" name="statsTypes" class="statsTypes">     
                                 <option>Select stats types.</option>               
     """
     
@@ -1466,8 +1471,8 @@ def printGnuPlotInputForm(  form   ):
     print """
             <fieldset class="fieldSetAction">     
                 <div class="left" >
-                    <input type="button"  name="generateGraphics" value="Generate graphic(s)" onclick="JavaScript:executeAjaxRequest('graphicsRequestBroker.py', 'gnuplot')" ></input> 
-                    <input type="button"  name="switchPlotter" value="Switch to rrd plotter." onclick="location.href='graphicsRequestPage.py?plotter=rrd'"></input>
+                    <input type="button"  class="largeButton"  name="generateGraphics" value="Generate graphic(s)" onclick="JavaScript:executeAjaxRequest('graphicsRequestBroker.py', 'gnuplot')" ></input> 
+                    <input type="button"  class="largeButton"   name="switchPlotter" value="Switch to rrd plotter." onclick="location.href='graphicsRequestPage.py?plotter=rrd'"></input>
                     <div id="errorLabel" style="display:inline;"> <font color="#FFFFFF">&nbsp;&nbsp;&nbsp; Application status : Awaiting request(s).</font></div>     
                 </div>         
                                     
@@ -1476,7 +1481,7 @@ def printGnuPlotInputForm(  form   ):
 
     print """
                 <div class="right">
-                      <input type=button  name="help "value="Get Help" onclick ="wopen( '../../html/gnuplotHelp.html', 'popup', 800, 670 );"></input>
+                      <input type=button  class="button"   name="help "value="Get Help" onclick ="wopen( '../../html/gnuplotHelp.html', 'popup', 800, 670 );"></input>
                 </div>
     """
     
@@ -1580,8 +1585,8 @@ def printRRDInputForm(  form   ):
     print """
             <fieldset class="fieldSetAction">
                 <div class="left" >     
-                     <input type="button"  name="generateGraphics" value="Generate graphic(s)" onclick="JavaScript:executeAjaxRequest('graphicsRequestBroker.py', 'rrd')"></input> 
-                     <input type="button"  name="switchPlotter "value="Switch to gnuplot plotter." onclick="location.href='graphicsRequestPage.py?plotter=gnuplot'"> </input>          
+                     <input type="button"  class="largeButton"  name="generateGraphics" value="Generate graphic(s)" onclick="JavaScript:executeAjaxRequest('graphicsRequestBroker.py', 'rrd')"></input> 
+                     <input type="button"  class="largeButton"  name="switchPlotter "value="Switch to gnuplot plotter." onclick="location.href='graphicsRequestPage.py?plotter=gnuplot'"> </input>          
                      <div name="errorLabel "id="errorLabel" style="display:inline;"><font color="#FFFFFF">&nbsp;&nbsp;&nbsp; Application status : Awaiting request(s).</font></div> 
                 </div>    
     """
@@ -1589,7 +1594,7 @@ def printRRDInputForm(  form   ):
 
     print"""
              <div class="right">
-                <input type=button  name="help "value="Get Help" onclick ="wopen( '../../html/rrdHelp.html', 'popup', 830, 1100 );">
+                <input type=button  class="button"   name="help "value="Get Help" onclick ="wopen( '../../html/rrdHelp.html', 'popup', 830, 1100 );">
             </div>
             
 
@@ -1640,6 +1645,7 @@ def printPlottersChoice( plotter ):
     
     print """
         <body text="black" link="blue" vlink="blue" bgcolor="#7ACC7A" >
+            
              
     """
       
@@ -1724,10 +1730,17 @@ def printHead( plotter, form ):
                 }
                 
                 input.button{
-                
-                    width: 125px
-                
+                    height: 24px;
+                    width: 125px;
+                    font: 14px;
                 }
+                
+                input.largeButton{
+                    height: 24px;
+                    width: 175px;
+                    font: 14px;
+                }
+                
                 
                 input.text{
                     width: 160px
@@ -1739,6 +1752,7 @@ def printHead( plotter, form ):
                 
                 
                 select.dropDownBox{
+                    font: 14px;
                     max-width: 160px;
                     width: expression(this.width > 160 ? 160: true);
                 }
@@ -1853,7 +1867,7 @@ def printHead( plotter, form ):
             
             function popupAddingWindow( url ) {
                 var newWindow;
-                var props = 'scrollBars=no,resizable=no,toolbar=no,menubar=no,location=no,directories=no,width=700,height=300';
+                var props = 'scrollBars=no,resizable=no,toolbar=no,menubar=no,location=no,directories=no,width=700,height=275';
                 newWindow = window.open(url, "Add_from_Src_to_Dest", props);
             }
             
