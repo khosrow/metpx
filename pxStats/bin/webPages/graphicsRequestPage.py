@@ -378,7 +378,7 @@ def printAjaxRequestsScript( plotter ):
         print """
                            
                            var imageList = image.split(',');
-                           wich = 0;
+                           which = 0;
                            document.getElementById("photoslider").src=imageList[0];
                            photos = new Array( imageList.length );
                            for( i=0; i < imageList.length; i++ ){
@@ -457,6 +457,9 @@ def printAjaxRequestsScript( plotter ):
                 }
                 
                 
+                function clearSourlientsList(){
+                    document.inputForm.sourlientList.options.length = 0;
+                }
 
                                 
                 function getParametersForGnuplotRequests(){
@@ -1038,7 +1041,7 @@ def printFileTypeComboBox( form ):
     print """
                         <td width = 210>
                             <label for="fileType">FileType:</label><br>
-                            <select class="dropDownBox" name="fileType" id="fileType" OnChange="JavaScript:executeAjaxRequest( 'popupSourlientAdder.py', '' );Javascript:updateStatsTypes( document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].text );Javascript:updateLabelsOnFileTypeChange(); ">
+                            <select class="dropDownBox" name="fileType" id="fileType" OnChange="JavaScript:executeAjaxRequest( 'popupSourlientAdder.py', '' );Javascript:updateStatsTypes( document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].text );Javascript:updateLabelsOnFileTypeChange();javascript:clearSourlientsList(); ">
                                 <option>Select a file type...</option>
     """
     
@@ -1146,7 +1149,7 @@ def printMachinesComboBox( form ):
     print """
                         <td width = 210px> 
                             <label for="machines">Machine(s):</label><br>
-                            <select class="dropDownBox" name="machines" id="machines" OnChange="JavaScript:executeAjaxRequest( 'popupSourlientAdder.py', '' ) ">     
+                            <select class="dropDownBox" name="machines" id="machines" OnChange="JavaScript:executeAjaxRequest( 'popupSourlientAdder.py', '' ); JavaScript:clearSourlientsList(); ">     
                             <option>Select machine(s)...</option>               
     """
     for machines in AVAILABLE_MACHINES:
