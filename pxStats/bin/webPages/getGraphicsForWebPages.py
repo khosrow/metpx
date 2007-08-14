@@ -221,9 +221,6 @@ def setYesterdaysGraphs( currentTime, machinePairs ):
     filePattern = StatsPaths.STATSGRAPHS + "webGraphics/columbo/*.png"
     currentGraphs = glob.glob( filePattern )  
     
-    filePattern = StatsPaths.STATSGRAPHS + "webGraphics/groups/*.png"
-    currentGraphs.extend( glob.glob( filePattern ) )  
-    
     
     for graph in currentGraphs:
         clientName = os.path.basename(graph).replace( ".png","" )
