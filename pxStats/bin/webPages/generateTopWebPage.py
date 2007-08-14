@@ -99,7 +99,7 @@ def generateWebPage( machineTags ):
         <div class="right">
             <a href="archives" target="bottom" >Archives</a>
             <a href="../scripts/cgi-bin/graphicsRequestPage.py" target="bottom">Requests</a>
-            <a href="html/glossary.html" target="bottom" >Glossary</a>
+            <a href="html/helpPages/glossary.html" target="bottom" >Glossary</a>
         </div>
         
         
