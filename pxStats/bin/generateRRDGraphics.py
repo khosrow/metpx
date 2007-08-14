@@ -606,9 +606,10 @@ def fetchDataFromRRDDatabase( databaseName, startTime, endTime, interval, graphi
         #print databaseName, 'AVERAGE', '-r', str(resolution), '-s', "%s" %(startTime), '-e', '%s' %(endTime)
     
     except:
-        print "Error.Could not fetch data from %s." %databaseName
-        print "Program terminated."
-        sys.exit()
+        output = ""
+        #------------- print "Error.Could not fetch data from %s." %databaseName
+        #------------------------------------------- print "Program terminated."
+        #------------------------------------------------------------ sys.exit()
         
     
     return output 
@@ -639,98 +640,102 @@ def getGraphicsMinMaxMeanTotal( databaseName, startTime, endTime,graphicType, da
         realEndTime = endTime    
         
     output = fetchDataFromRRDDatabase( databaseName, startTime, endTime, dataInterval, graphicType )  
-    meanTuples = output[2]
-    nbEntries = len( meanTuples )-1 #we dont use the first entry
     
-
+    
+    if output != "":
+    
+        meanTuples = output[2]
+        nbEntries = len( meanTuples )-1 #we dont use the first entry
         
-             
-    desiredNumberOfEntries = float( (realEndTime - startTime)/(desiredInterval*60) )
-      
-    #print "nbEntries %s desiredNumberOfEntries %s" %( nbEntries, desiredNumberOfEntries )
-    if nbEntries > desiredNumberOfEntries:
-        nbEntriesPerPoint = int( nbEntries/desiredNumberOfEntries )
-        nbEntries = desiredNumberOfEntries
-                
-        
-    if type == "totals":
-        
-        for i in range( 1,len(meanTuples),1 ) :            
+    
             
-            if meanTuples[i][0] != 'None' and meanTuples[i][0] != None :
-                
-                realValue = ( float(meanTuples[i][0]) * float(interval)/ nbEntriesPerPoint ) 
-                
-                if  realValue > max:
-                    max = realValue
-                if realValue < min or min == None :
-                    min = realValue 
-                
-                sum = sum + realValue 
-                
-            else:# don't count non-filled entries in mean.
-                nbEntries = nbEntries - 1
+                 
+        desiredNumberOfEntries = float( (realEndTime - startTime)/(desiredInterval*60) )
+          
+        #print "nbEntries %s desiredNumberOfEntries %s" %( nbEntries, desiredNumberOfEntries )
+        if nbEntries > desiredNumberOfEntries:
+            nbEntriesPerPoint = int( nbEntries/desiredNumberOfEntries )
+            nbEntries = desiredNumberOfEntries
                     
-        if nbEntries != 0:            
-            avg = sum / nbEntries 
-        
-        
-        total = sum
             
-    else:
-        
-        
-        for i in range( int(nbEntriesPerPoint)+1 ,( len(meanTuples) ), int(nbEntriesPerPoint) ) : 
+        if type == "totals":
             
-            if nbEntriesPerPoint != 1:           
-                value = None
-                nbInvalidEntries = 0 
-                               
-                for j in range( i-int(nbEntriesPerPoint), i, 1):                    
-                    if meanTuples[j][0] != 'None' and meanTuples[j][0] != None :
-                        if value == None :
-                            value = 0.0
-                        value = value + float( meanTuples[j][0] )
-                                                     
-                    else:# don't count non-filled entries in mean.
-                         
-                        nbInvalidEntries = nbInvalidEntries + 1
-                                        
-                if nbInvalidEntries == nbEntriesPerPoint:
-                    
-                    nbEntries = nbEntries - 1 
-                
-                if value != None :                    
-                    value = float( float(value)/ float(nbEntriesPerPoint) )
-                    
-                    if  value > max:
-                        max = value
-                    if value < min or min == None :
-                        min = value 
-                    
-                    sum = sum + value 
-        
-            else:         
+            for i in range( 1,len(meanTuples),1 ) :            
                 
                 if meanTuples[i][0] != 'None' and meanTuples[i][0] != None :
-                
-                    value = ( float(meanTuples[i][0]) ) 
                     
-                    if  value > max:
-                        max = value
-                    if  value < min or min == None :
-                        min = value 
+                    realValue = ( float(meanTuples[i][0]) * float(interval)/ nbEntriesPerPoint ) 
                     
-                    sum = sum + value 
+                    if  realValue > max:
+                        max = realValue
+                    if realValue < min or min == None :
+                        min = realValue 
+                    
+                    sum = sum + realValue 
                     
                 else:# don't count non-filled entries in mean.
                     nbEntries = nbEntries - 1
+                        
+            if nbEntries != 0:            
+                avg = sum / nbEntries 
+            
+            
+            total = sum
+                
+        else:
+            
+            
+            for i in range( int(nbEntriesPerPoint)+1 ,( len(meanTuples) ), int(nbEntriesPerPoint) ) : 
+                
+                if nbEntriesPerPoint != 1:           
+                    value = None
+                    nbInvalidEntries = 0 
+                                   
+                    for j in range( i-int(nbEntriesPerPoint), i, 1):                    
+                        if meanTuples[j][0] != 'None' and meanTuples[j][0] != None :
+                            if value == None :
+                                value = 0.0
+                            value = value + float( meanTuples[j][0] )
+                                                         
+                        else:# don't count non-filled entries in mean.
+                             
+                            nbInvalidEntries = nbInvalidEntries + 1
+                                            
+                    if nbInvalidEntries == nbEntriesPerPoint:
+                        
+                        nbEntries = nbEntries - 1 
                     
+                    if value != None :                    
+                        value = float( float(value)/ float(nbEntriesPerPoint) )
+                        
+                        if  value > max:
+                            max = value
+                        if value < min or min == None :
+                            min = value 
+                        
+                        sum = sum + value 
             
-        if nbEntries != 0:            
-            avg = float(sum) / float(nbEntries)
-            
-        total = float( sum ) * float( desiredInterval )
+                else:         
+                    
+                    if meanTuples[i][0] != 'None' and meanTuples[i][0] != None :
+                    
+                        value = ( float(meanTuples[i][0]) ) 
+                        
+                        if  value > max:
+                            max = value
+                        if  value < min or min == None :
+                            min = value 
+                        
+                        sum = sum + value 
+                        
+                    else:# don't count non-filled entries in mean.
+                        nbEntries = nbEntries - 1
+                        
+                
+            if nbEntries != 0:            
+                avg = float(sum) / float(nbEntries)
+                
+            total = float( sum ) * float( desiredInterval )
               
     
     return min, max, avg, total
@@ -1066,6 +1071,8 @@ def plotRRDGraph( databaseName, type, fileType, client, machine, infos, logger =
         
     """
     
+    errorOccured = False
+    
     imageName    = buildImageName( type, client, machine, infos, logger )        
     start        = int ( StatsDateLib.getSecondsSinceEpoch ( infos.startTime ) ) 
     end          = int ( StatsDateLib.getSecondsSinceEpoch ( infos.endTime ) )  
@@ -1118,23 +1125,33 @@ def plotRRDGraph( databaseName, type, fileType, client, machine, infos, logger =
     #       in order to get the total displayed instead of the mean.
     
     if infos.graphicType != "monthly":
-        rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '800','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end),'--step','%s' %(interval*60), '--vertical-label', '%s' %formatedYLabelType,'--title', '%s'%title, '--lower-limit','0','DEF:%s=%s:%s:AVERAGE'%( type, databaseName, type), 'CDEF:realValue=%s,%i,*' %( type, 1), 'AREA:realValue#%s:%s' %( innerColor, type ),'LINE1:realValue#%s:%s'%( outerColor, type ), 'COMMENT: Min: %s   Max: %s   Mean: %s   %s\c' %( minimum, maximum, mean,total ), 'COMMENT:%s %s %s\c' %( comment, graphicsNote, graphicsLegeng )  )
-        
+        try:
+            rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '800','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end),'--step','%s' %(interval*60), '--vertical-label', '%s' %formatedYLabelType,'--title', '%s'%title, '--lower-limit','0','DEF:%s=%s:%s:AVERAGE'%( type, databaseName, type), 'CDEF:realValue=%s,%i,*' %( type, 1), 'AREA:realValue#%s:%s' %( innerColor, type ),'LINE1:realValue#%s:%s'%( outerColor, type ), 'COMMENT: Min: %s   Max: %s   Mean: %s   %s\c' %( minimum, maximum, mean,total ), 'COMMENT:%s %s %s\c' %( comment, graphicsNote, graphicsLegeng )  )
+        except:
+            errorOccured = True
+            print "Error : Could not generate %s " %imageName
     else:#With monthly graphics, we force the use the day of month number as the x label.       
-        rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '800','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end),'--step','%s' %(interval*60), '--vertical-label', '%s' %formatedYLabelType,'--title', '%s'%title, '--lower-limit','0','DEF:%s=%s:%s:AVERAGE'%( type, databaseName, type), 'CDEF:realValue=%s,%i,*' %( type, 1), 'AREA:realValue#%s:%s' %( innerColor, type ),'LINE1:realValue#%s:%s'%( outerColor, type ), '--x-grid', 'HOUR:24:DAY:1:DAY:1:0:%d','COMMENT: Min: %s   Max: %s   Mean: %s   %s\c' %( minimum, maximum, mean, total ), 'COMMENT:%s %s %s\c' %(comment,graphicsNote, graphicsLegeng)  )    
+        try:
+            rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '800','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end),'--step','%s' %(interval*60), '--vertical-label', '%s' %formatedYLabelType,'--title', '%s'%title, '--lower-limit','0','DEF:%s=%s:%s:AVERAGE'%( type, databaseName, type), 'CDEF:realValue=%s,%i,*' %( type, 1), 'AREA:realValue#%s:%s' %( innerColor, type ),'LINE1:realValue#%s:%s'%( outerColor, type ), '--x-grid', 'HOUR:24:DAY:1:DAY:1:0:%d','COMMENT: Min: %s   Max: %s   Mean: %s   %s\c' %( minimum, maximum, mean, total ), 'COMMENT:%s %s %s\c' %(comment,graphicsNote, graphicsLegeng)  )    
+        except:
+            errorOccured = True
+            print "Error : Could not generate %s " %imageName
     
-    try:
-        os.chmod(imageName, 0777)
-    except:
-        pass
-    
-    if infos.copy == True:
-        createCopy( client, type, machine, imageName, infos )
-    
-    print "Plotted : %s" %imageName
-    if logger != None:
-        logger.info(  "Plotted : %s" %imageName )
+    if errorOccured == False:
+        try:
+            os.chmod(imageName, 0777)
+        except:
+            pass
         
+        if infos.copy == True:
+            createCopy( client, type, machine, imageName, infos )
+        
+        print "Plotted : %s" %imageName
+        if logger != None:
+            logger.info(  "Plotted : %s" %imageName )
+    else:
+        if logger != None:
+            logger.error(  "Error : Could not generate %s " %imageName)     
         
 
 def createNewMergedDatabase( infos, dataType,  machine, start, interval    ) :       
