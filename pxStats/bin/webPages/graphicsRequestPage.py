@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-MetPX Copyright (C) 1604-1606  Environment Canada
+MetPX Copyright (C) 2004-2006  Environment Canada
 MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
 named COPYING in the root of the source directory tree.
 
@@ -881,7 +881,9 @@ def printGnuPlotImageFieldSet(form):
             <legend class="legendLevel1">Resulting graphic</legend>
                  <div class="clipwrapper">
                     <div class="clip">
-                        <img name="gnuplotImage" id="gnuplotImage" src="%s" >   
+                        <a href="#">
+                            <img name="gnuplotImage" id="gnuplotImage" src="%s" onclick ="wopen(document.getElementById('gnuplotImage').src, 'popup', %s, %s); return false;">   
+                        </a>
                     </div>
                 </div>
         
@@ -893,7 +895,7 @@ def printGnuPlotImageFieldSet(form):
         
         </fieldset>    
     
-    """%( image, width, height )
+    """%( image, width, height, width, height )
 
 
     
@@ -1484,7 +1486,7 @@ def printGnuPlotInputForm(  form   ):
 
     print """
                 <div class="right">
-                      <input type=button  class="button"   name="help "value="Get Help" onclick ="wopen( '../../html/gnuplotHelp.html', 'popup', 800, 670 );"></input>
+                      <input type=button  class="button"   name="help "value="Get Help" onclick ="wopen( '../../html/helpPages/gnuplotHelp.html', 'popup', 800, 670 );"></input>
                 </div>
     """
     
@@ -1597,7 +1599,7 @@ def printRRDInputForm(  form   ):
 
     print"""
              <div class="right">
-                <input type=button  class="button"   name="help "value="Get Help" onclick ="wopen( '../../html/rrdHelp.html', 'popup', 830, 1100 );">
+                <input type=button  class="button"   name="help "value="Get Help" onclick ="wopen( '../../html/helpPages/rrdHelp.html', 'popup', 830, 1100 );">
             </div>
             
 
