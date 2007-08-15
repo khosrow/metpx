@@ -1074,7 +1074,7 @@ def verifyWebPages( parameters, report ):
     
     newReportLines = ""
     outdatedPageFound = False 
-    files = glob.glob( "%s*Graphs*.html" %StatsPaths.STATSWEBPAGES )  
+    files = glob.glob( "%s*Graphs*.html" %StatsPaths.STATSWEBPAGESHTML )  
     currentTime = StatsDateLib.getSecondsSinceEpoch( parameters.endTime )
     
     
