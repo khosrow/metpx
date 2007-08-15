@@ -13,7 +13,7 @@ named COPYING in the root of the source directory tree.
 ##
 ## @author :  Nicholas Lemay
 ##
-## @since  : 2007-07-20
+## @since  : 2007-07-20; Last updated on 2007-08-15
 ##
 ## @summary : This file is to be called to set up the different file and 
 ##            folder required to have a properly set-up web interface. 
@@ -38,22 +38,27 @@ def createSymbolicLinks( path ):
         
     """
     
-    
-    commands.getstatusoutput("ln -s %shtml %s/html" %( StatsPaths.STATSWEBPAGES, path  ) )
-    print "ln -s %shtml %s/html" %( StatsPaths.STATSWEBPAGES, path  ) 
-    
-    commands.getstatusoutput("ln -s %s %s/pxStats" %( StatsPaths.STATSROOT, path  ) )
-    print "ln -s %s %s/pxStats" %( StatsPaths.STATSROOT, path  )
-    
-    commands.getstatusoutput( "ln -s %s %s" %(StatsPaths.STATSWEBPAGES + "top.html", path + "/top.html")  )
-    print "ln -s %s %s" %(StatsPaths.STATSWEBPAGES + "top.html", path + "/top.html")
-    
-    commands.getstatusoutput( "ln -s %s %s" %(StatsPaths.STATSWEBPAGES + "bottom.html", path + "/bottom.html")  )
-    print "ln -s %s %s" %(StatsPaths.STATSWEBPAGES + "bottom.html", path + "/bottom.html") 
-
+    # .../path/archives 
     commands.getstatusoutput("ln -s %s %s/archives" %( StatsPaths.STATSGRAPHSARCHIVES[:-1], path  ) )
     print "ln -s %s %s/archives" %( StatsPaths.STATSGRAPHSARCHIVES, path  )
     
+    # .../path/bottom.html
+    commands.getstatusoutput( "ln -s %s %s" %(StatsPaths.STATSWEBPAGES + "bottom.html", path + "/bottom.html")  )
+    print "ln -s %s %s" %(StatsPaths.STATSWEBPAGES + "bottom.html", path + "/bottom.html") 
+    
+    # .../path/html
+    commands.getstatusoutput("ln -s %shtml %s/html" %( StatsPaths.STATSWEBPAGES, path  ) )
+    print "ln -s %shtml %s/html" %( StatsPaths.STATSWEBPAGES, path  )
+        
+    # .../path/pxStats
+    commands.getstatusoutput("ln -s %s %s/pxStats" %( StatsPaths.STATSROOT, path  ) )
+    print "ln -s %s %s/pxStats" %( StatsPaths.STATSROOT, path  )
+    
+    # .../path/top.html
+    commands.getstatusoutput( "ln -s %s %s" %(StatsPaths.STATSWEBPAGES + "top.html", path + "/top.html")  )
+    print "ln -s %s %s" %(StatsPaths.STATSWEBPAGES + "top.html", path + "/top.html")   
+ 
+    # .../path/html/archives
     commands.getstatusoutput("ln -s %s %s/html/archives" %( StatsPaths.STATSGRAPHSARCHIVES[:-1], path  ) )
     print "ln -s %s %s/html/archives" %( StatsPaths.STATSGRAPHSARCHIVES, path  )
    
@@ -84,16 +89,17 @@ def copyFiles( path ):
     shutil.copyfile( StatsPaths.STATSWEBPAGESGENERATORS + "popupSourlientAdder.py", path + "/scripts/cgi-bin/" + "popupSourlientAdder.py"  )
     print 'copy "%s to %s"' %( StatsPaths.STATSWEBPAGESGENERATORS + "popupSourlientAdder.py", path + "/scripts/cgi-bin/" + "popupSourlientAdder.py"  )  
     
-    shutil.copyfile( StatsPaths.STATSWEBPAGESGENERATORS + "graphicsRequestBroker.py", path + "/scripts/cgi-bin/" + "updateWordsInDB.py"  )
+    shutil.copyfile( StatsPaths.STATSWEBPAGESGENERATORS + "updateWordsInDB.py", path + "/scripts/cgi-bin/" + "updateWordsInDB.py"  )
     print 'copy "%s to %s"' %( StatsPaths.STATSWEBPAGESGENERATORS + "graphicsRequestBroker.py", path + "/scripts/cgi-bin/" + "updateWordsInDB.py"  ) 
-
+    
+    
 
 def createSubFolders( path ):
     """
-        @summary : Creates all the required sub folders
+        @summary : Creates all the required sub folders.
     """
     
-    subFolders = [ "scripts/cgi-bin", "wordDatabases"  ] 
+    subFolders = [ "images", "scripts", "scripts/cgi-bin", "scripts/js", "wordDatabases"  ] 
     
     for subFolder in subFolders :
         if not os.path.isdir( path + '/'+ subFolder ):
@@ -103,6 +109,8 @@ def createSubFolders( path ):
     
 def createRootFolderIfNecessary( path ):
     """
+        @summary : Creates path towards installation
+                   folder if it does not allready exist.
     """
     
     if not os.path.isdir(path):
@@ -126,6 +134,21 @@ def isValidRootInstallationPath( path ):
     return isValid    
 
 
+
+def printHelp():
+    """
+        @summary: Prints out help lines.
+    """
+    
+    print ""
+    print "installPxStatsWebInterface.py help page." 
+    print ""
+    print "Usage : installPxStatsWebInterface.py installationPath"
+    print "Installation path must be an aboslute path name of the following form : /a/b/c/d "
+    print "Installation path does not need to exist. Permissions for folder arborescence creation must be possessed."
+    print ""
+    
+    
 def main():
     """
         @summary: calls up the different methods required to set up 
@@ -134,21 +157,28 @@ def main():
     
     if len( sys.argv ) == 2:
         
-        #try:
+        if  sys.argv[1] == "-h" or sys.argv[1] == "--help":
+        
+            printHelp()
+        
+        else:    
             
-        if not isValidRootInstallationPath( sys.argv[1] ) :
-             raise
-        
-        createRootFolderIfNecessary( sys.argv[1] )
-        createSubFolders( sys.argv[1] ) 
-        copyFiles( sys.argv[1] )
-        createSymbolicLinks( sys.argv[1] )
-        
-        #except:
-         #   print "Specified folder must be an absolute path name. Please use folowing syntax : '/a/b/c/d'."
-          #  sys.exit()
+            try:
+                
+                if not isValidRootInstallationPath( sys.argv[1] ) :
+                    raise
+                
+                createRootFolderIfNecessary( sys.argv[1] )
+                createSubFolders( sys.argv[1] ) 
+                copyFiles( sys.argv[1] )
+                createSymbolicLinks( sys.argv[1] )
+            
+            except:
+                print "Specified folder must be an absolute path name. Please use folowing syntax : '/a/b/c/d'."
+                sys.exit()
     else:
-        print "Please specify an absolute path that refers to installation path."
+        print "Error. Application must be called with one and only one parameter. Use -h|--help for further help."
+        
 
 if __name__ == '__main__':
     main()
