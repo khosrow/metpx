@@ -26,7 +26,8 @@ named COPYING in the root of the source directory tree.
 import cgi, os, time, sys
 import cgitb; cgitb.enable()
 
-sys.path.insert(1, sys.path[0] + '/../../../')
+sys.path.insert(1, sys.path[0] + '/../../')
+sys.path.insert(2, sys.path[0] + '/../../..')
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.StatsPaths import StatsPaths
 
