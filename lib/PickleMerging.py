@@ -231,6 +231,11 @@ class PickleMerging:
         temp = newFSC.logger
         del newFSC.logger
         CpickleWrapper.save( newFSC, mergedPickleName )
+        try:
+            os.chmod( mergedPickleName, 0777 )
+        except:
+            pass    
+        
         #print "saved :%s" %mergedPickleName
         newFSC.logger = temp
         

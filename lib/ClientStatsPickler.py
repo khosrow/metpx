@@ -216,7 +216,10 @@ class ClientStatsPickler:
                 loggerNeedsToBeReplaced = True 
             
             CpickleWrapper.save ( object = self.statsCollection, filename = self.pickleName ) 
-            
+            try:
+                os.chmod(self.pickleName, 0777)
+            except:
+                pass    
             
             if loggerNeedsToBeReplaced :  
                 self.statsCollection.logger = temp
