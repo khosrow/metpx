@@ -29,7 +29,10 @@ named COPYING in the root of the source directory tree.
     Small function that adds pxlib to the environment path.  
 """
 import os, time, sys
-sys.path.insert(1, sys.path[0] + '/../../../')
+sys.path.insert(1, sys.path[0] + '/../../')
+sys.path.insert(2, sys.path[0] + '/../../..')
+
+
 try:
     pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
 except KeyError:
@@ -73,7 +76,10 @@ def generateWebPage( images ):
     
     """
     
-    file = StatsPaths.STATSWEBPAGESHTML + "combinedImageWebPage"
+    smallImageWidth  = 900
+    smallImageHeight = 320
+    
+    file = StatsPaths.STATSWEBPAGESHTML + "combinedImageWebPage.html"
     fileHandle = open( file, "w")           
     
     
@@ -81,7 +87,24 @@ def generateWebPage( images ):
     
     <html>
         <head>
-            
+        
+            <style type="text/css">      
+                 a.photosLink{
+                
+                    display: block;
+                
+                    width: 1200px;
+                
+                    height: 310px;
+                
+                    background: url("") 0 0 no-repeat;
+                
+                    text-decoration: none;
+
+                }  
+                
+            </style>    
+                  
             <script type="text/javascript" src="../scripts/js/windowfiles/dhtmlwindow.js">
 
                 This is left here to give credit to the original
@@ -110,22 +133,34 @@ def generateWebPage( images ):
                     win.resizeTo(w, h);
                     win.focus();
                 }
+                
+                function transport( image ){
+                    wopen( image, 'popup', %s, %s);
+                
+                }
+                
             </script>
                
         </head>
         <body>
-    """)
+        
+    """ %( smallImageWidth, smallImageHeight ) )
     
     
-    width  = 900
-    height = 320
+
     
     for i in range(len(images) ):
     
-        fileHandle.write("""
-
-            <img name="image%s" id="image%s" src="%s" onclick ="wopen(document.getElementById('image%s').src, 'popup', %s, %s); return false;">
-        """ %( i, i, images[i],i, width, height ) ) 
+        fileHandle.write(""" 
+            <a href="#" class="photosLink"  name="photo%s" onclick="javascript:transport('%s')" id="photo%s" border=0>
+            </a>
+            <script>
+                document.getElementById('photo%s').style.background="url(" + "%s" + ") no-repeat";
+            </script>
+            
+        """%( i, images[i], i, i, images[i] ) )
+    
+    
     
     
     fileHandle.write( """    
@@ -137,7 +172,8 @@ def generateWebPage( images ):
     
     
     fileHandle.close()
-
+    
+    os.chmod(file,0777)
 
     
 def getImagesFromForm():
@@ -156,6 +192,7 @@ def getImagesFromForm():
 
     for key in form.keys():
         value = form.getvalue(key, "")
+        print value
         if isinstance(value, list):
             newvalue = ",".join(value)
                    
@@ -166,7 +203,9 @@ def getImagesFromForm():
 
     try:
         images = newForm["images"]  
-        images = images.split(',')
+        print images 
+        images = images.split(';')
+        print images 
     except:
         pass
         
@@ -179,13 +218,15 @@ def main():
                    Replies to the querier after generating web page so that querier
                    is informed the page was generated.     
     """
-    
+   
     images = getImagesFromForm()
     #print images
     generateWebPage( images )
     returnReplyToQuerier()
-    
 
+
+        
+        
 if __name__ == '__main__':
     main()   
     
