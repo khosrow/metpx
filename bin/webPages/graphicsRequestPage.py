@@ -52,28 +52,25 @@ from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 """
    Define constants to be used for filling out the different select boxes. 
 """
-SUPPORTED_PLOTTERS = [ "gnuplot", "rrd" ]
 
 SUPPORTED_FILETYPES = [ "rx","tx"]
 
-RX_DATATYPES = { "gnuplot" : [ "bytecount", "filecount","errors", "bytecount,errors", "bytecount,filecount", "errors,filecount", "bytecount,filecount,errors" ], "rrd" : [ 'bytecount',  'filecount', 'errors' ] }
+RX_DATATYPES = [ "bytecount", "filecount","errors", "bytecount,errors", "bytecount,filecount", "filecount,errors", "bytecount,filecount,errors" ]
 
-TX_DATATYPES ={ "gnuplot" : [ "bytecount", "errors", "filecount", "latency", "bytecount,errors", "bytecount,filecount", "bytecount,latency", "errors,filecount","errors,latency",
-                               "filecount,latency","bytecount,errors,filecount", "bytecount,filecount,latency", "bytecount,errors,latency","bytecount,errors,filecount,latency"], \
-                "rrd": [ "bytecount", "errors", "filecount", "latency", "bytecount,errors", "bytecount,filecount", "bytecount,latency", "errors,filecount","errors,latency", \
-                         "filecount,latency","bytecount,errors,filecount", "bytecount,filecount,latency", "bytecount,errors,latency","bytecount,errors,filecount,latency" ]   }
+TX_DATATYPES = [ "latency","bytecount","filecount", "errors", "bytecount,errors", "bytecount,filecount", "latency, bytecount", "filecount,errors", "latency,errors",
+                 "latency,filecount", "bytecount,filecount,errors", "latency,bytecount,filecount", "latency,bytecount,errors","latency,bytecount,filecount,errors"]
+                
 
+FIXED_TIMESPANS = [ "daily" , "weekly", "monthly", "yearly" ] 
 
-FIXED_TIMESPANS = { "gnuplot" : [ "N/A"], "rrd" : [ "daily" , "weekly", "monthly", "yearly" ] }
-
-FIXED_PARAMETERS = { "gnuplot" : [ "N/A" ], "rrd" : [ "fixedCurrent", "fixedPrevious" ] }
+FIXED_PARAMETERS =  [ "fixedCurrent", "fixedPrevious" ] 
 
 PRE_DETERMINED_SPANS = [ 'daily', 'monthly', 'weekly', 'yearly' ]
 
 FIXED_SPANS = [ 'fixedCurrent', 'fixedPrevious' ]
 
-AVAILABLE_MACHINES   = []
-
+MAIN_MACHINES   = []
+OTHER_MACHINES  = []
 
 
 
@@ -142,17 +139,19 @@ def getAvailableMachines():
     configParameters = StatsConfigParameters()
     configParameters.getAllParameters()
     
+    
     for tag in configParameters.detailedParameters.sourceMachinesForTag:
         machines = configParameters.detailedParameters.sourceMachinesForTag[tag]
+        MAIN_MACHINES.append( str(machines).replace("[", "").replace("]", "").replace('"','').replace("'","").replace(" ", "") )
         for i in range( len( machines ) ):
-            AVAILABLE_MACHINES.append( machines[i] )
+            OTHER_MACHINES.append( machines[i] )
             combinedNames = machines[i]
             for j in range( i+1, len( machines ) ) :
-                combinedNames = combinedNames + ',' + machines[j]
-                AVAILABLE_MACHINES.append( combinedNames )
+                combinedNames = combinedNames + ',' + machines[j].replace(" ","")
+                OTHER_MACHINES.append( combinedNames )
                 
-    AVAILABLE_MACHINES.sort()
-    
+    OTHER_MACHINES.sort()
+    MAIN_MACHINES.sort();
        
                                 
 def getCurrentTimeForCalendar( ):
@@ -187,16 +186,13 @@ def printEndOfBody():
     """
 
 
-def printChoiceOfSourlients( plotter, form ):
+def printChoiceOfSourlients( form ):
     """  
         @summary : Prints the list of available  source or clients
         
-        @param plotter: Plotter that<s currently chosen on the web page. 
-        
-        @param form: Form with whom this page was called. 
-                     Need to know if any clients were previously
-                     selected. 
-                    
+         @param form: Form with whom this page was called. 
+                      Need to know if any clients were previously
+                      selected.                     
     """    
     
     try:
@@ -253,7 +249,7 @@ def printChoiceOfSourlients( plotter, form ):
   
   
     
-def printAjaxRequestsScript( plotter ):
+def printAjaxRequestsScript():
     """    
         @summary : prints out the section that will contain the javascript 
                    functions that will allow us to make queries 
@@ -266,11 +262,15 @@ def printAjaxRequestsScript( plotter ):
                    They were modified to fit our specific needs. 
     """
     
+    largeImageWidth  = 925 
+    largeImageHeight = 960
     
     print """
     
             <script language="JavaScript">
-
+                
+                var multiPartSingleImage = false;
+                var realImageListLength = 1;
                 function getHTTPObject() {
                   var xmlhttp;
                   /*@cc_on
@@ -302,7 +302,7 @@ def printAjaxRequestsScript( plotter ):
                
                                 
                 
-                function executeAjaxRequest( strURL, plotter, callingObject ) {                  
+                function executeAjaxRequest( strURL, callingObject ) {                  
                    
                    var parameters = ""; 
                    var errors = "";
@@ -315,14 +315,18 @@ def printAjaxRequestsScript( plotter ):
                      
                    }else if( strURL == 'graphicsRequestBroker.py' ){
                         document.getElementById("errorLabel").innerHTML = '<font color="#FFFFFF">Application status : Executing the graphics creation request...</font>';
-                        parameters = getParametersForGraphicsRequests( plotter );
+                        parameters = getParametersForGraphicsRequests();
                         errors = searchFormForErrors();
                         
                    }else if( strURL == 'updateWordsInDB.py'){
                        document.getElementById("errorLabel").innerHTML = '<font color="#FFFFFF">Application status : Updating Database(s).</font>'
                        parameters = getParametersForWordUpdate( callingObject );
                    
-                   }                   
+                   }else if ( strURL == "generateImageWebPage.py"){
+                       document.getElementById("errorLabel").innerHTML = '<font color="#FFFFFF">Application status : Generating image web page.(s).</font>'
+                       parameters = getParametersForImageWebPage( );
+                   
+                   }                 
                                   
                    
                    if ( errors == "" ){                               
@@ -352,61 +356,82 @@ def printAjaxRequestsScript( plotter ):
                         var errorPart = response.split(';')[1];
                         var image = imagePart.split("images=")[1];
                         var error = errorPart.split("error=")[1];
+                        
                                                             
                         if(  (/[a-z]/i).test(error) ){
                             document.getElementById("errorLabel").innerHTML = '<font color="#C11B17">' + error + '</font>';
                                                      
+                        }else if(response.match('action') != null ) {
+
+                            var actionPart = response.split(';')[2];
+                            var action = actionPart.split("action=")[1];
+                            document.getElementById("errorLabel").innerHTML = '<font color="#FFFFFF">Application status : Awaiting request(s).</font>';
+                            executeAjaxReplyAction( action );
+                        
                         }else{
                             document.getElementById("errorLabel").innerHTML = '<font color="#FFFFFF">Application status : Awaiting request(s).</font>';
                         }
                         
-                        if( image != ''  ){
-                        
-                            
+                        if( image !="''" && image != '"' && image != '""' && image != '' && image!= null && image.length >1 ){
+                                                     
     """
-    
-    if plotter == 'gnuplot':
+
         
-        print """
-                           document.getElementById("gnuplotImage").src=image;
+    print """            
+                       
+                         
+                           var imageList = image.split('+');
+                           realImageListLength = 1;
                            
-	    """
-        
-        
-    elif plotter == 'rrd':
-        
-        print """
+                           if ( imageList.length == 1 ){
+                               realImageListLength = getRealimageListLength();
+                           }else{
+                               realImageListLength = imageList.length; 
                            
-                           var imageList = image.split(',');
-                           which = 0;
-                           document.getElementById("photoslider").src=imageList[0];
-                           photos = new Array( imageList.length );
-                           for( i=0; i < imageList.length; i++ ){
-                               photos[i] =  imageList[i];
-                               photoslink[i] = imageList[i];
-                               
+                           }                           
+                           
+                           if ( imageList.length != 1 || ( imageList.length == realImageListLength )){
+                               multiPartSingleImage = false;
+                               which = 0;
+                               document.getElementById("photoslider").style.background="url(" + imageList[0] + ") no-repeat";
+                               photos = new Array( imageList.length );
+                               photoslink = new Array( imageList.length );
+                               for( i=0; i < imageList.length; i++ ){
+                                   photos[i] =  imageList[i];
+                                   photoslink[i] = imageList[i];
+                               } 
+                                  
+                           }else{
+                               for( i=0; i < imageList.length; i++ ){
+                                   photos[i] =  imageList[i];
+                                   photoslink[i] = imageList[i];
+                               }    
+                               multiPartSingleImage = true;
+                               which = 0;
+                               document.getElementById("photoslider").style.background="url(" + imageList[0] + ") no-repeat";
                            }     
                            
-                           document.getElementById('imageCounter').innerHTML = '<font color="FFFFFF"> Now showing image ' + (which+1) + ' of ' + photos.length +'.</font>' ;          
+                           
+                           document.getElementById('imageCounter').innerHTML = '<font color="FFFFFF"> Now showing image ' + (which+1) + ' of ' + realImageListLength +'.</font>' ;          
 
-        """
+    """
         
     print """                    
                             if( document.forms['inputForm'].elements['groupName'].value != '' ){
                                 
-                                executeAjaxRequest( 'updateWordsInDB.py', 'plotter', 'groupName' );                                 
+                                executeAjaxRequest( 'updateWordsInDB.py',  'groupName' );                                 
                                 
                             }
     
     """
     
-    if plotter != "rrd":
-        print """                        
+    
+    print """                        
                             if( document.forms['inputForm'].elements['products'].value != ''){
                                 
-                                executeAjaxRequest( 'updateWordsInDB.py', 'plotter', 'products' );
+                                executeAjaxRequest( 'updateWordsInDB.py', 'products' );
                             }
-        """                    
+    """                    
         
     print """
                         
@@ -422,9 +447,55 @@ def printAjaxRequestsScript( plotter ):
                     }    
                  }
                     
+                 
+                function getRealimageListLength(){
+                    
+                    var realImageListLength=0;                   
+                    
+                        
+                    if( document.inputForm.combineSourlients.checked ){
+                        
+                        var statsTypes=  document.inputForm.statsTypes[ document.inputForm.statsTypes.selectedIndex ].text.split(',')
+                        realImageListLength = statsTypes.length;
+                    
+                    }else{
+                    
+                        sourlients = new Array();
+                        for (var i = 0; i < document.inputForm.sourlientList.options.length; i++){
+                             sourlients.push( document.inputForm.sourlientList.options[i].text );
+                         }  
+                         
+                        var statsTypes= document.inputForm.statsTypes[ document.inputForm.statsTypes.selectedIndex ].text.split(',');
+                        
+                        realImageListLength = sourlients.length * statsTypes.length;
+                        
+                    }                      
+                                      
+                    
+                    return realImageListLength;
+                                        
+                } 
                   
-                  
-                  
+                
+                function getParametersForImageWebPage(){
+                    
+                    var qstr = "" ;
+                    var listOfImagesToCombine = "";
+                    
+                    
+                    for (i=0;i<photos.length;i++){
+                        listOfImagesToCombine = listOfImagesToCombine + photos[i] + ';';
+                    }
+                    
+                    listOfImagesToCombine = listOfImagesToCombine.slice( 0, listOfImagesToCombine.length - 1 );
+                    
+                    qstr = "?images=" + escape(listOfImagesToCombine) + "&errors=";
+                    
+                    return qstr; 
+                    
+                }  
+                
+                
                 function getParametersForWordUpdate( callingObject ){
                     
                     var qstr = '?wordType=' + callingObject ;
@@ -442,15 +513,45 @@ def printAjaxRequestsScript( plotter ):
                 }  
                 
                     
-                function getParametersForGraphicsRequests( plotter ){
+                function getParametersForGraphicsRequests( ){
                     
                     var qstr = '';
+
                     
-                    if( plotter == 'gnuplot'){
-                        qstr = getParametersForGnuplotRequests();
-                    }else if( plotter == 'rrd'){
-                        qstr = getParametersForRRDRequests();
+                    var endTime    = document.forms['inputForm'].elements['endTime'].value;
+                    var groupName  = document.forms['inputForm'].elements['groupName'].value;
+                    var span       = document.forms['inputForm'].elements['span'].value;
+                    var fileType   = document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].text;
+                    var machines   = document.inputForm.machines[ document.inputForm.machines.selectedIndex ].text;
+                    var products   = document.forms['inputForm'].elements['products'].value;
+                    var statsTypes = document.inputForm.statsTypes[ document.inputForm.statsTypes.selectedIndex ].text;
+                    var preDeterminedSpan= document.inputForm.preDeterminedSpan[ document.inputForm.preDeterminedSpan.selectedIndex ].text;
+                    var fixedSpan  = document.inputForm.fixedSpan[ document.inputForm.fixedSpan.selectedIndex ].text;
+                    //var individual = document.inputForm.individual.checked;
+                    var combineSourlients = document.inputForm.combineSourlients.checked;
+                    
+                    
+                    if ( document.getElementById("span").disabled == true ){
+                        span='';
                     }
+                    
+                    
+                    if (document.getElementById("products").disabled == true){
+                        products='';
+                    
+                    }
+                    
+                    sourlients = new Array();
+                    for (var i = 0; i < document.inputForm.sourlientList.options.length; i++){
+                         sourlients.push( document.inputForm.sourlientList.options[i].text );
+                     }  
+
+                    qstr = '?querier=escape("graphicsRequestPage.py")&endTime=' + escape(endTime) + '&groupName=' + escape(groupName) + '&span=' + escape(span);
+                    qstr = qstr + '&fileType=' + escape(fileType) + '&machines=' + escape(machines) +'&statsTypes=' + escape(statsTypes);
+                    qstr = qstr + '&preDeterminedSpan=' + escape(preDeterminedSpan) + '&fixedSpan=' + escape(fixedSpan);
+                    qstr = qstr + '&sourLients=' + escape( sourlients );
+                    qstr = qstr  + '&combineSourlients=' + escape( combineSourlients );//+ '&individual=' + escape( individual )
+                    qstr = qstr + '&products='+ escape(products);
                     
                     return qstr;
                                       
@@ -462,60 +563,13 @@ def printAjaxRequestsScript( plotter ):
                 }
 
                                 
-                function getParametersForGnuplotRequests(){
-                    
-                     sourlients = new Array();
-                     for (var i = 0; i < document.inputForm.sourlientList.options.length; i++){
-                         sourlients.push( document.inputForm.sourlientList.options[i].text );
-                     }  
-                     
-                     var qstr = '?plotter=gnuplot&querier=graphicsRequestPage.py&endTime=' + document.forms['inputForm'].elements['endTime'].value + '&sourLients=' + sourlients  + '&groupName='+ (document.forms['inputForm'].elements['groupName'].value) +'&products='+ (document.forms['inputForm'].elements['products'].value) +'&span=' + (document.forms['inputForm'].elements['span'].value) +'&fileType=' + (document.inputForm.fileType[document.inputForm.fileType.selectedIndex].text) +'&machines=' + (document.inputForm.machines[document.inputForm.machines.selectedIndex].text) +'&combineSourlients='  + (document.inputForm.combineSourlients.checked) + '&statsTypes='  + (document.inputForm.statsTypes[document.inputForm.statsTypes.selectedIndex].text);
-                        
-                     return qstr;
-                
-                }
-                
-                
-                function getParametersForRRDRequests(  ){
-                    
-                    var qstr = '';
-
-                    var plotter    = 'rrd';
-                    var endTime    = document.forms['inputForm'].elements['endTime'].value;
-                    var groupName  = document.forms['inputForm'].elements['groupName'].value;
-                    var span       = document.forms['inputForm'].elements['span'].value;
-                    var fileType   = document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].text;
-                    var machines   = document.inputForm.machines[ document.inputForm.machines.selectedIndex ].text;
-                    var statsTypes = document.inputForm.statsTypes[ document.inputForm.statsTypes.selectedIndex ].text;
-                    var preDeterminedSpan= document.inputForm.preDeterminedSpan[ document.inputForm.preDeterminedSpan.selectedIndex ].text;
-                    var fixedSpan  = document.inputForm.fixedSpan[ document.inputForm.fixedSpan.selectedIndex ].text;
-                    var individual = document.inputForm.individual.checked;
-                    var total      = document.inputForm.total.checked;
-                    
-                    sourlients = new Array();
-                    for (var i = 0; i < document.inputForm.sourlientList.options.length; i++){
-                         sourlients.push( document.inputForm.sourlientList.options[i].text );
-                     }  
-
-                    qstr = '?plotter=rrd&querier=graphicsRequestPage.py&endTime=' + escape(endTime) + '&groupName=' + escape(groupName) + '&span=' + escape(span);
-                    qstr = qstr + '&fileType=' + escape(fileType) + '&machines=' + escape(machines) +'&statsTypes=' + escape(statsTypes);
-                    qstr = qstr + '&preDeterminedSpan=' + escape(preDeterminedSpan) + '&fixedSpan=' + escape(fixedSpan);
-                    qstr = qstr + '&sourLients=' + escape( sourlients );
-                    qstr = qstr + '&individual=' + escape( individual ) + '&total=' + escape( total );
-                    
-                    return qstr;
-
-                    
-                }  
-                    
-                
                 function getParametersForPopups() {
     
                     var fileType     = document.inputForm.fileType[document.inputForm.fileType.selectedIndex].text;
                     
                     var machines     = document.inputForm.machines[document.inputForm.machines.selectedIndex].text;
                                                    
-                    var qstr = '?fileType=' + escape(fileType) + '&machines=' + escape(machines);  // NOTE: no '?' before querystring
+                    var qstr = '?fileType=' + escape(fileType) + '&machines=' + escape(machines);  
         
                 
                     return qstr;
@@ -523,35 +577,22 @@ def printAjaxRequestsScript( plotter ):
                 }    
                 
                 
-                function searchFormForPopUpErrors(){
-                    var errors = "";
-                    var fileType   = document.getElementById('fileType')[document.getElementById('fileType').selectedIndex].text;
-                    var machines   = document.getElementById('machines')[document.getElementById('machines').selectedIndex].text;
+               
                 
-                    if( fileType.match('Select') !=null ){
-                        errors= 'Error. Please select a filetype.'
+                
+                function executeAjaxReplyAction( action ){
+                    if( action.match('showImageWindow') != null ){
+                         window.open( '%s', 'mywindow', "status = 0, height=%s, width=%s, resizable=0" );
                     
-                    }else if(machines.match('Select') !=null ){
-                         errors = 'Error. Please select a machine.'
-                         
                     }
-                
-                    return errors;
                     
                 }
-                
-                
-                
-                
-                
-                
-                
-            
-    """
+                        
+    """ %( "../../html/combinedImageWebPage.html", largeImageHeight, largeImageWidth )
     
-    if plotter == "rrd":
+ 
         
-        print """
+    print """
                 
                 function isInt(x) {
                      var y=parseInt(x);
@@ -598,13 +639,13 @@ def printAjaxRequestsScript( plotter ):
                     
                     }else if( optionalOptionsVisibility !='hidden'){
                         var span = document.forms['inputForm'].elements['span'].value;
-                        individualFieldChecked = document.inputForm.individual.checked;
-                        totalFieldChecked= document.inputForm.total.checked;
+                        //individualFieldChecked = document.inputForm.individual.checked;
+                        //totalFieldChecked= document.inputForm.total.checked;
   
-                        if( totalFieldChecked ==true && individualFieldChecked == true ){
-                            errors = 'Error. Cannot use individul and total options at the same time.'
+                        //if( totalFieldChecked ==true  ){ //&& individualFieldChecked == true
+                        //    errors = 'Error. Cannot use individul and total options at the same time.'
                         
-                        }
+                        //}
                         
                         
                         if( span != ''){
@@ -627,77 +668,9 @@ def printAjaxRequestsScript( plotter ):
                     
                 
                 }
-        """
-        
-    elif plotter == "gnuplot":    
-        
-        print """
-                 function isInt(x) {
-                     var y=parseInt(x);
-                     
-                     if (isNaN(y)) return false;
-                     
-                     return x==y && x.toString()==y.toString();
-                }
-        
-                function searchFormForErrors(){
-                    
-                    var errors = '';
-                    
-                    var sourlients = new Array();
-                    
-                    for (var i = 0; i < document.inputForm.sourlientList.options.length; i++){
-                        sourlients.push( document.inputForm.sourlientList.options[i].text );
-                    } 
-                    
-                    var fileType = document.inputForm.fileType[document.inputForm.fileType.selectedIndex].text;
-                    var machines = document.inputForm.machines[document.inputForm.machines.selectedIndex].text;
-                    var statsTypes = document.inputForm.statsTypes[document.inputForm.statsTypes.selectedIndex].text;
-                    var optionalOptionsVisibility = document.getElementById("advancedOptions").style.visibility;
-                    
-                    if( fileType.match('Select') !=null ){
-                        errors= 'Error. Please select a filetype.'
-                    
-                    }else if(machines.match('Select') !=null ){
-                         errors = 'Error. Please select a machine.'
-                         
-                    }else if(statsTypes.match('Select') !=null ){
-                         errors = 'Error. Please select a stats type.'
-                    
-                    }else if(sourlients.length == 0 ){
-                         errors = 'Error. Please add a client or a source to the list.'
-                    
-                    }else if( optionalOptionsVisibility !='hidden'){
-                        var span = document.forms['inputForm'].elements['span'].value;
-                        if( span != ''){
-                            if ( isInt(span) == true ){
-                                if( span < 1 || span > 48  ){
-                                    errors = 'Error. Span value must be between 1 and 48.'
-                            }
-                        
-                            }else{
-                                errors = 'Error. Span value must be a NUMERICAL value between 1 and 48.'
-                            }
-                        
-                        }
-                    
-                    
-                    }
-                    
-                    return errors;
                 
-                
-                }
-    
+            </script>     
         """
-    
-    
-    
-    print """        
-            </script> 
-                              
-    """
-    
     
     
 def printSlideShowScript( images ):
@@ -713,9 +686,11 @@ def printSlideShowScript( images ):
                    http://dynamicdrive.com/notice.htm    
     """
 
-    width  = 875
-    height = 250   
-    
+    smallImageWidth  = 1200
+    smallImageHeight = 900   
+    largeImageWidth  = 1200
+    largeImageHeight = 900
+
     print """
     
             <script type="text/javascript">
@@ -738,19 +713,15 @@ def printSlideShowScript( images ):
                     photoslink[%s]="%s"
         """ %(i, images[i], i, images[i] )
         
+        
     print """            
                 //Specify whether images should be linked or not (1=linked)
                 var linkornot=1;
-                
-                //Set corresponding URLs for above images. Define ONLY if variable linkornot equals "1"
-    
-                
-                //do NOT edit pass this line
-                
+                         
                 var preloadedimages=new Array();
                 for (i=0;i<photos.length;i++){
                     preloadedimages[i]=new Image();
-                    preloadedimages[i].src=photos[i];
+                    preloadedimages[i].background=photos[i];
                 }
                 
                 
@@ -770,60 +741,97 @@ def printSlideShowScript( images ):
                 }
                 
                 function keeptrack(){
-                    document.getElementById('imageCounter').innerHTML = '<font color="FFFFFF"> Now showing image ' + (which+1) + ' of ' + photos.length +'.</font>' ; 
+                    document.getElementById('imageCounter').innerHTML = '<font color="FFFFFF"> Now showing image ' + (which+1) + ' of ' + realImageListLength +'.</font>' ; 
                 }
                 
                 
                 function backward(){
-                    if (which>0){
-                        which--;
-                        //applyeffect();
-                        document.images.photoslider.src=photos[which];
-                        //playeffect();
-                        keeptrack();
-                        
+                
+                    if( multiPartSingleImage == true){
+                        if(which>0){
+                            which--;
+                             document.getElementById('photoslider').style.backgroundPosition = ' 0 -' + (which*307.5)+'px';
+                             keeptrack();
+                        }
+                    
+                    }else{
+                        if (which>0){
+                            which--;
+                            //applyeffect();
+                            document.getElementById('photoslider').style.background = "url(" + photos[which] + ") no-repeat";
+                            //playeffect();
+                            keeptrack();
+                            
+                        }
                     }
                 }
+                
                 
                 function forward(){
-                    if (which<photos.length-1){
-                        which++;
-                        //applyeffect();
-                        document.images.photoslider.src=photos[which];
-                        //playeffect();
-                        keeptrack();
+                
+                    if( multiPartSingleImage == true){
                         
+                        if(which<realImageListLength-1){
+                            which++;
+                            document.getElementById('photoslider').style.backgroundPosition = ' 0 -' + (which*307.5)+'px';
+                            keeptrack();
+                        }
+                    
+                    }else{
+                    
+                        if (which<photos.length-1){
+                            which++;
+                            //applyeffect();
+                            document.getElementById('photoslider').style.background="url(" + photos[which] + ") no-repeat";
+                            //playeffect();
+                            keeptrack();
+                            
+                       }
+                
                     }
+                
                 }
                 
-                function transport(){
-                    wopen( photoslider.src, 'popup', %s, %s);
+                
+                function transport(){                     
+                    wopen( photoslink[which], 'popup', %s, %s);
                 }
+                
+                
+                function showAllImages(){
+                
+                   if( multiPartSingleImage == true){
+                        wopen( photoslink[which], 'popup', %s, %s);
+                   }else{
+                       executeAjaxRequest( 'generateImageWebPage.py', '' );
+                   }         
+                                        
+                   
+                }
+            
+
+            
             
         </script>
 
     
-    """%( width, height )
+    """ %( smallImageWidth, smallImageHeight, largeImageWidth, largeImageHeight )
 
 
-
-def printRRDImageFieldSet( form ):
+    
+def printImageFieldSet( form ):
     """
-        @summary : Prints out the image field set that allows 
-                   the display of rrd generated graphics. 
-                   
-                   Will use the image slideshow script to diplay 
-                   the images when numerous ones need to be 
-                   displayed.  
-                   
-                   
-        @requires: Requires the  printSlideShowScript(images)            
-                   method to have been run. 
-        
+       
+       @summary : Prints the  section where the image will be displayed.
+       
+       @param form: Form with whom this program was called.
+       
+       @todo: Receive variable image size as a parameter.
+       
     """
-  
-    width  = 875
-    height = 250     
+    
+    #-------------------------------------------------------------- width  = 875
+    #-------------------------------------------------------------- height = 250
     
     print """
          <fieldset class="imgFieldset">
@@ -832,13 +840,11 @@ def printRRDImageFieldSet( form ):
                 <tr>
                     <td>
                         <script>
-                                if (linkornot==1){
-                                    document.write('<a href="javascript:transport()">');
-                                } 
-                                 document.write('<img src="'+photos[0]+'" name="photoslider" id="photoslider" style="filter:revealTrans(duration=2,transition=23)" border=0>');
-                                if (linkornot==1){
-                                    document.write('</a>')
-                                }
+
+                                document.write('<a href="#" class="photoslider" background=photos[0] name="photoslider" onclick="javascript:transport()" id="photoslider" style="filter:revealTrans(duration=2,transition=23)" border=0>');
+                                
+                                document.write('</a>')
+                                
                         </script>
                     </td>
                 </tr>
@@ -848,75 +854,12 @@ def printRRDImageFieldSet( form ):
 
         <fieldset class="fieldSetaction">
              <input type=button class="largeButton"  value="Previous image result." onclick ="backward();return false;"></input> 
-             <input type=button class="button"  value="View original size"     onclick ="wopen( photoslider.src, 'popup', %s, %s); return false;"></input> 
+             <input type=button class="button"  value="View all images" onclick ="showAllImages(); return false;"></input> 
              <input type=button class="largeButton"  value="Next image result."     onclick ="forward();return false;" ></input> 
              <div name="imageCounter" id ="imageCounter" style="display:inline;"></div>
         </fieldset>
 
-    """%(  width, height )
-
-
-
-def printGnuPlotImageFieldSet(form):
-    """
-       @summary : Prints the  section where the image will be displayed.
-       
-       @param form: Form with whom this program was called.
-      
-       @todo: Receive variable imaghe size as a parameter.
-        
-    """
-    
-    try:
-        image = form["image"][0].split(',')[0]
-    except:
-        image = ""
-            
-    width  = 1160
-    height = 1160        
-    
-        
-    print """
-         <fieldset class="imgFieldset">
-            <legend class="legendLevel1">Resulting graphic</legend>
-                 <div class="clipwrapper">
-                    <div class="clip">
-                        <a href="#">
-                            <img name="gnuplotImage" id="gnuplotImage" src="%s" onclick ="wopen(document.getElementById('gnuplotImage').src, 'popup', %s, %s); return false;">   
-                        </a>
-                    </div>
-                </div>
-        
-            </fieldset>    
-        
-        <fieldset class="fieldSetaction">    
-     
-        <input type=button class="button" value="View original size" onclick ="wopen(document.getElementById('gnuplotImage').src, 'popup', %s, %s); return false;"></input>             
-        
-        </fieldset>    
-    
-    """%( image, width, height, width, height )
-
-
-    
-def printImageFieldSet( plotter, form ):
-    """
-       
-       @summary : Prints the  section where the image will be displayed.
-       
-       @param from: Form with whom this program was called.
-       
-       @param plotter : Plotter wich was used to created image. Output image size will be 
-                        based on plotter used.
-       
-       @todo: Receive variable image size as a parameter.
-       
-    """
-    
-    if plotter == "gnuplot":
-        printGnuPlotImageFieldSet(form)
-    elif plotter == "rrd":
-        printRRDImageFieldSet(form)    
+    """ #%(  width, height )
 
 
     
@@ -940,7 +883,7 @@ def printGroupTextBox( form ):
     print """
                         <td width = 210>
                             <label for="groupName">Group name:</label><br>
-                             <INPUT TYPE="TEXT" class="text" NAME="groupName" value="%s" id="groupName" >
+                             <INPUT TYPE="TEXT" class="text" NAME="groupName" value="%s" id="groupName" style="font: 14px;" >
                              <div id="autosuggest"><ul></ul></div>
                              <script language="Javascript">
                                  
@@ -977,7 +920,7 @@ def printProductsTextBox( form ):
     print """
                         <td width = 210>
                             <label for="products">Products:</label><br>
-                             <INPUT TYPE="TEXT"  NAME="products" value="%s" id="products" >
+                             <INPUT TYPE="TEXT"  NAME="products" value="%s" id="products" style="font: 14px;" >
                              <div id="autosuggest"><ul></ul></div>
                              <script language="Javascript">                                 
                                  var productList = new Array();                                 
@@ -1018,7 +961,7 @@ def printSpanTextBox( form ):
     print """
                         <td width = 210>    
                             <label for="span">Span(in hours):</label><br>
-                            <INPUT TYPE=TEXT class="text" NAME="span" id="span" value = "%s">     
+                            <INPUT TYPE=TEXT class="text" NAME="span" id="span" value = "%s" style="font: 14px;">     
                         </td>    
     """%( span ) 
 
@@ -1083,9 +1026,11 @@ def printSpecificSpanComboBox( form ):
     print """
                         <td width = 210px> 
                             <label for="preDeterminedSpan">Determined spans : </label><br>
-                            <select class="dropDownBox" name="preDeterminedSpan" id="preDeterminedSpan" onClick="enableOrDisableSpan()">     
+                            <select class="dropDownBox" name="preDeterminedSpan" id="preDeterminedSpan" onClick="JavaScript:enableOrDisableSpan();enableOrDisableProducts();JavaScript:updateFixedSpans();">     
                             <option>Pre-determined spans...</option>               
     """
+    
+    
     for span in PRE_DETERMINED_SPANS:
         if span == selectedPreDeterminedSpan:            
             print """                               
@@ -1147,21 +1092,41 @@ def printMachinesComboBox( form ):
     except:
         selectedMachines = ""
     
-    
+    #"javascript: this.style.width='auto';" onblur="javascript: this.style.width=125;"
     print """
                         <td width = 210px> 
                             <label for="machines">Machine(s):</label><br>
-                            <select class="dropDownBox" name="machines" id="machines" OnChange="JavaScript:executeAjaxRequest( 'popupSourlientAdder.py', '' ); JavaScript:clearSourlientsList(); ">     
-                            <option>Select machine(s)...</option>               
+                            <select class="dropDownBox"  name="machines" id="machines" OnClick="JavaScript:executeAjaxRequest( 'popupSourlientAdder.py', '' ); JavaScript:clearSourlientsList(); ">     
+                            <option style="width:500px">Select machine(s)...</option>
+                            <optgroup  style="width:500px" bgcolor="#7092B9" label="Main machine(s):">Main machine(s):</optgroup>                
     """
-    for machines in AVAILABLE_MACHINES:
+    
+    for machines in MAIN_MACHINES:
         if machines == selectedMachines:            
             print """                               
-                                <option selected value="%s">%s</option>                              
+                                <option style="width:300px"selected value="%s">%s</option>                              
             """ %( machines, machines )
         else:
             print """
-                                <option  value="%s">%s</option>
+                                <option  style="width:300px" value="%s">%s</option>
+            """%( machines, machines )
+    
+    
+    
+    
+    print """
+                            <optgroup style="width:300px"bgcolor="#7092B9" label="Other machine(s):">Other machine(s):</optgroup> 
+    
+    """
+    
+    for machines in OTHER_MACHINES:
+        if machines == selectedMachines:            
+            print """                               
+                                <option style="width:300px" selected value="%s">%s</option>                              
+            """ %( machines, machines )
+        else:
+            print """
+                                <option  style="width:300px" value="%s">%s</option>
             """%( machines, machines )
 
     print """
@@ -1169,7 +1134,7 @@ def printMachinesComboBox( form ):
                        </td>     
     """
     
-def printStatsTypesComboBox( plotter, form ):
+def printStatsTypesComboBox(  form ):
     """    
         @Summary : Prints out the machines combo box.
                    If form contains a machines value, 
@@ -1178,11 +1143,6 @@ def printStatsTypesComboBox( plotter, form ):
         @param form: Form with whom this program was called.  
         
     """
-    
-    rrdRxTypes     = RX_DATATYPES['rrd']
-    rrdTxTypes     = TX_DATATYPES['rrd']
-    gnuplotRxTypes = RX_DATATYPES['gnuplot']
-    gnuplotTxTypes = TX_DATATYPES['gnuplot']
     
     
     try:
@@ -1195,15 +1155,11 @@ def printStatsTypesComboBox( plotter, form ):
     except:    
         filetype = "rx"
         
-    if plotter == "rrd" and filetype == "rx":    
-        listOfChoices = rrdRxTypes
-    elif plotter == "rrd" and filetype == "tx":
-        listOfChoices = rrdTxTypes 
-    elif plotter == "gnuplot" and filetype == "rx":
-        listOfChoices = gnuplotRxTypes
-    elif plotter == "gnuplot" and filetype == "tx":            
-        listOfChoices = gnuplotTxTypes
-    else:
+    if  filetype == "rx":    
+        listOfChoices = RX_DATATYPES
+    elif  filetype == "tx":
+        listOfChoices = TX_DATATYPES
+    else:    
         listOfChoices = []    
         
         
@@ -1377,7 +1333,7 @@ def printEndTime( form ):
     print  """         
                         <td bgcolor="#FFFFFF" valign="top" width = 210>
                             <label for="endTime">End Time Date:</label><br>
-                            <input type="Text" class="text" name="endTime"  value="%s" width = 150>
+                            <input type="Text" class="text" name="endTime"  value="%s" width = 150 style="font: 14px;">
                             <a href="javascript:cal1.popup();"><img src="../../images/cal.gif" width="16" height="16" border="0" alt="Click Here to Pick up the date"></a>
                         
                             <script language="JavaScript">
@@ -1476,8 +1432,7 @@ def printGnuPlotInputForm(  form   ):
     print """
             <fieldset class="fieldSetAction">     
                 <div class="left" >
-                    <input type="button"  class="largeButton"  name="generateGraphics" value="Generate graphic(s)" onclick="JavaScript:executeAjaxRequest('graphicsRequestBroker.py', 'gnuplot')" ></input> 
-                    <input type="button"  class="largeButton"   name="switchPlotter" value="Switch to rrd plotter." onclick="location.href='graphicsRequestPage.py?plotter=rrd'"></input>
+                    <input type="button"  class="largeButton"  name="generateGraphics" value="Generate graphic(s)" onclick="JavaScript:executeAjaxRequest('graphicsRequestBroker.py')" ></input> 
                     <div id="errorLabel" style="display:inline;"> <font color="#FFFFFF">&nbsp;&nbsp;&nbsp; Application status : Awaiting request(s).</font></div>     
                 </div>         
                                     
@@ -1574,7 +1529,7 @@ def printRRDInputForm(  form   ):
     printGroupTextBox(form)
     printSpanTextBox(form)
     printTotalCheckbox(form)
-    printIndividualCheckbox(form)
+    #printIndividualCheckbox(form)
         
     
     print """     
@@ -1590,8 +1545,7 @@ def printRRDInputForm(  form   ):
     print """
             <fieldset class="fieldSetAction">
                 <div class="left" >     
-                     <input type="button"  class="largeButton"  name="generateGraphics" value="Generate graphic(s)" onclick="JavaScript:executeAjaxRequest('graphicsRequestBroker.py', 'rrd')"></input> 
-                     <input type="button"  class="largeButton"  name="switchPlotter "value="Switch to gnuplot plotter." onclick="location.href='graphicsRequestPage.py?plotter=gnuplot'"> </input>          
+                     <input type="button"  class="largeButton"  name="generateGraphics" value="Generate graphic(s)" onclick="JavaScript:executeAjaxRequest('graphicsRequestBroker.py')"></input> 
                      <div name="errorLabel "id="errorLabel" style="display:inline;"><font color="#FFFFFF">&nbsp;&nbsp;&nbsp; Application status : Awaiting request(s).</font></div> 
                 </div>    
     """
@@ -1619,44 +1573,105 @@ def printRRDInputForm(  form   ):
      
      
      
-def printInputForm( plotter, form ):
+def printInputForm( form ):
     """
         @summary: Prints the form based 
-                  on the plotter that was chosen
+                  on the chosen parameters
                   
-        @param  plotter: Plotter that was chosen by the user. 
-        
         @param  form : The parameter form with whom this program was called.            
                   
     """
     
-    if plotter == "gnuplot" :
-        printGnuPlotInputForm( form )
-    
-    elif plotter == "rrd":
-        printRRDInputForm( form )    
-    
-
-
-def printPlottersChoice( plotter ):
-    """    
-        @summary : Prints the section relative to the available choice
-                   of plotters.
-        
-        @param plotter: The plotter name that was used as a parameter 
-                        when this page was called.            
-    """
-    
+    #Non-optional section first....
+    print """
+        <form name="inputForm"  method="post" class="fieldset legend">
+            <fieldset class="fieldSetLevel1">
+                <legend class="legendLevel1">Input fields</legend>
+                
+                <table>
+                    <tr>
+                
+    """         
+    printFileTypeComboBox(form)
+    printMachinesComboBox(form)
+    printStatsTypesComboBox( form )     
+    printSpecificSpanComboBox(form)
+    printFixedSpanComboBox(form)
+    printChoiceOfSourlients(  form )
     
     print """
-        <body text="black" link="blue" vlink="blue" bgcolor="#7ACC7A" >
-            
-             
+                    </tr> 
+    
+                </table>
+    
+            </fieldset>
     """
+    
+      
+    #Optional section.
+    print """        
+        
+        <fieldset class="fieldSetOptional" >
+            <div name="advancedOptionsLinkDiv" id="advancedOptionsLinkDiv">
+               <a href="JavaScript:showAdvancedOptions();" name="advancedOptionsLink" id="advancedOptionsLink"> Show advanced options...</a>
+            </div>
+    """
+    
+    print """         
+            
+            <div name="advancedOptions" id="advancedOptions" style="visibility:hidden">
+                <table>
+                    <tr>
+            
+    """
+    
+    
+    #Print first table row
+    printEndTime(form)
+    printSpanTextBox(form)
+    printGroupTextBox(form)
+    printProductsTextBox(form)
+    printCombineSourlientsCheckbox(form)        
+    
+    print """     
+                   </tr>
+               </table>    
+            </div>
+            
+        </fieldset>
+    
+    """
+    
+    #Add fieldset for submit button
+    print """
+            <fieldset class="fieldSetAction">
+                <div class="left" >     
+                     <input type="button"  class="largeButton"  name="generateGraphics" value="Generate graphic(s)" onclick="JavaScript:executeAjaxRequest('graphicsRequestBroker.py')"></input> 
+                     <div name="errorLabel "id="errorLabel" style="display:inline;"><font color="#FFFFFF">&nbsp;&nbsp;&nbsp; Application status : Awaiting request(s).</font></div> 
+                </div>    
+    """
+
+
+    print"""
+             <div class="right">
+                <input type=button  class="button"   name="help "value="Get Help" onclick ="wopen( '../../html/helpPages/rrdHelp.html', 'popup', 830, 1100 );">
+            </div>
+            
+
+    """
+
+    print """
+            </fieldset>
+    """
+    
+    #End of form.
+    print """
+        </form>        
+    """
+    
       
         
-    
-def printHead( plotter, form ):
+def printHead( form ):
     """
         @summary : Print the head of the html file. 
             
@@ -1673,7 +1688,21 @@ def printHead( plotter, form ):
             <link rel="stylesheet" type="text/css" href="/css/style.css">
             
             <style type="text/css">      
-                      
+                a.photoslider{
+                
+                    display: block;
+                
+                    width: 1200px;
+                
+                    height: 310px;
+                
+                    background: url("") 0 0 no-repeat;
+                
+                    text-decoration: none;
+
+                }      
+                
+                
                 fieldset.fieldSetLevel1{ 
                     border:2px solid; 
                     border-color: #3b87a9;
@@ -1759,7 +1788,8 @@ def printHead( plotter, form ):
                 select.dropDownBox{
                     font: 14px;
                     max-width: 160px;
-                    width: expression(this.width > 160 ? 160: true);
+                    width: expression(Math.min(parseInt(this.offsetWidth), 160 ) + "px");
+                    
                 }
                 
                 select.statsTypes{
@@ -1855,7 +1885,29 @@ def printHead( plotter, form ):
                     win.focus();
                 }   
             </script>  
-                    <script type="text/javascript" language="JavaScript">
+            
+            <script type="text/javascript" language="JavaScript">   
+                function searchFormForPopUpErrors(){
+                    var errors = "";
+                    var fileType   = document.getElementById('fileType')[document.getElementById('fileType').selectedIndex].text;
+                    var machines   = document.getElementById('machines')[document.getElementById('machines').selectedIndex].text;
+                
+                    if( fileType.match('Select') !=null ){
+                        errors= 'Error. Please select a filetype.'
+                    
+                    }else if(machines.match('Select') !=null ){
+                         errors = 'Error. Please select a machine.'
+                         
+                    }
+                
+                    return errors;
+                    
+                }            
+            
+            </script>
+            
+            
+            <script type="text/javascript" language="JavaScript">
             
             
             function handleAddSourlientsRequest(){
@@ -1978,15 +2030,10 @@ def printHead( plotter, form ):
                        
     """
     
-    if plotter == "rrd" or plotter == "gnuplot":
-        rxStatsTypes = RX_DATATYPES[ plotter ]
-        txStatsTypes = TX_DATATYPES[ plotter ]
     
-    else:
-        rxStatsTypes=[]
-        txStatsTypes=[]
-                
-    
+    rxStatsTypes = RX_DATATYPES
+    txStatsTypes = TX_DATATYPES
+                   
     print """
             <script>
                 function updateStatsTypes( fileType ){
@@ -2020,10 +2067,56 @@ def printHead( plotter, form ):
         </script>          
         <script language="JavaScript">
                  function showAdvancedOptions(){
+                     document.getElementById("advancedOptionsLinkDiv").innerHTML = "<a href='JavaScript:hideAdvancedOptions();' name='advancedOptionsLink' id='advancedOptionsLink'> Hide advanced options...</a>";
                      document.getElementById("advancedOptions").style.visibility = "visible";
-                     document.getElementById("advancedOptionsLinkDiv").style.visibility = "hidden";
+                     
                  }     
                  
+                 function hideAdvancedOptions(){
+                     document.getElementById("advancedOptions").style.visibility = "hidden";
+                     document.getElementById("advancedOptionsLinkDiv").innerHTML= "<a href='JavaScript:showAdvancedOptions();' name='advancedOptionsLink' id='advancedOptionsLink> Show advanced options...</a>";
+                 }
+                 
+                 
+                 function updateFixedSpans(){
+                     
+                     determinedSpan= document.inputForm.preDeterminedSpan[ document.inputForm.preDeterminedSpan.selectedIndex ].text;;
+                         document.inputForm.fixedSpan.options[0].selected=true;
+                     if( determinedSpan == "daily"){
+                         document.inputForm.fixedSpan.options[1].text = "Current day.";
+                         document.inputForm.fixedSpan.options[2].text = "Previous day.";                     
+                     }else if( determinedSpan == "weekly" ){
+                         document.inputForm.fixedSpan.options[1].text = "Current week.";
+                         document.inputForm.fixedSpan.options[2].text = "Previous week.";                        
+                     }else if( determinedSpan == "monthly" ){
+                         document.inputForm.fixedSpan.options[1].text  = "Current month.";
+                         document.inputForm.fixedSpan.options[2].text  = "Previous month.";
+                     }else if( determinedSpan == "yearly" ){
+                         document.inputForm.fixedSpan.options[1].text = "Current year.";
+                         document.inputForm.fixedSpan.options[2].text = "Previous year.";                   
+                     }else{
+                         document.inputForm.fixedSpan.options[1].text = "Current";
+                         document.inputForm.fixedSpan.options[2].text = "Previous";
+                     }
+                 
+                 
+                 }
+                 
+                 
+                 function enableOrDisableProducts(){
+                     
+                     if( document.inputForm.preDeterminedSpan[ document.inputForm.preDeterminedSpan.selectedIndex ].text.match('Pre') != null  ||
+                        document.inputForm.preDeterminedSpan[ document.inputForm.preDeterminedSpan.selectedIndex ].text.match('daily') != null ){
+                     
+                         document.getElementById("products").disabled = false;
+                    
+                     }else{
+                     
+                         document.getElementById("products").disabled = true;
+                     
+                     }
+                 
+                 }   
                  
                  function enableOrDisableSpan(){
                      
@@ -2043,15 +2136,15 @@ def printHead( plotter, form ):
         </script>
                            
     """
+    printAjaxRequestsScript() 
     
-    
-    if plotter == "rrd":
-        try:
-            printSlideShowScript( form["image"][0].split(',') )
-        except:#no specified image 
-            printSlideShowScript( [] )
+       
+    try:
+        printSlideShowScript( form["image"][0].split(';') )
+    except:#no specified image 
+        printSlideShowScript( [] )
             
-    printAjaxRequestsScript( plotter )         
+            
     
     
     
@@ -2069,46 +2162,35 @@ def startCGI():
     print ""
     
     
-def getPlotter( form ):
+    
+def printBody():    
     """
-        @summary: Gets the plotter that was specified when calling this page
-                  or the default plotter if no plotter was specified. 
-        
-        @param form: The form that was received when the page was called.
-        
-        @return : Returns the plotter. 
-         
     """
     
-    plotter = SUPPORTED_PLOTTERS[0]
     
-    try:    
-        plotter = form["plotter"]
-        
-    except:
-        pass
+    print """
+        <body text="black" link="blue" vlink="blue" bgcolor="#7ACC7A" >
+
+
+    """
+
     
-    return plotter 
-
-
-
 def buildWebPageBasedOnReceivedForm( form ):
     """
         
         @summary: Buils up the graphics query page. Fields will be filled with the values
                   that were set in the form. If no parameters was received, we use defaults.
        
-        @param form:
+        @param form: form with whom this program was called.
          
     """
     
-    plotter = getPlotter( form )
     startCGI()
-    printHead( plotter, form )
-    printPlottersChoice( plotter )
+    printHead( form )
+    printBody()
     printLogo()
-    printInputForm(plotter, form )
-    printImageFieldSet( plotter, form )
+    printInputForm( form )
+    printImageFieldSet( form )
     printEndOfBody()
 
         
@@ -2140,8 +2222,8 @@ def getForm():
 
 def main():
     """
-        @summary : Displays the content of the p[age based 
-                   on selected plotter.  
+        @summary : Displays the content of the page based 
+                   on parameters.  
     """    
     
     getAvailableMachines()
@@ -2149,10 +2231,8 @@ def main():
     form = getForm()
     
     buildWebPageBasedOnReceivedForm( form )
+      
     
-    
-    
-   
     
 if __name__ == '__main__':
     main()
