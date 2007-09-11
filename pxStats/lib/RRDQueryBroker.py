@@ -211,7 +211,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
             individual = 'false'
         
         try:
-            total = form["total"]     
+            total = form["combineSourlients"].replace(",", "").replace('"','')  
         except:
             total = 'false'
             
@@ -381,9 +381,9 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
             span = ""
         
         
-        if self.queryParameters.fixedSpan == "fixedCurrent" :
+        if "current"  in str(self.queryParameters.fixedSpan).lower() :
             fixedSpan = "--fixedCurrent"
-        elif self.queryParameters.fixedSpan == "fixedPrevious":
+        elif "previous" in str(self.queryParameters.fixedSpan).lower():
             fixedSpan = "--fixedPrevious"     
         else:
             fixedSpan = ""
@@ -434,7 +434,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
                 #print line 
                 imageName = line.replace( "Plotted :", "").replace( " ", "")
                 imageName = '../../pxStats' + imageName.split( 'pxStats' )[1] 
-                images = images + imageName + ','
+                images = images + imageName + '+'
                 
         images = images[:-1]    
         #print images
@@ -454,7 +454,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
        
         self.replyParameters.image = self.getImagesFromQueryOutput(output)
     
-    
+        
     
     def getReplyToSendToquerier(self):
         """
@@ -466,6 +466,9 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
         
         params = self.replyParameters
         
+        if params.image == '':
+            params.error = 'Error. Could not produce image with the specified parameters.' 
+            
         reply = "images=%s;error=%s" %(  params.image,  params.error )
         
         
