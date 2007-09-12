@@ -69,3 +69,21 @@ class GroupConfigParameters:
         groupFileTypes = str(self.groupFileTypes[group]).replace( "[", "" ).replace( "]", "" ).replace( " ", "" )
         print groupProducts
         return groupMembers, groupMachines, groupProducts, groupFileTypes
+    
+    
+    
+    def getGroupsAssociatedWithMachine(self, machine ): 
+        """
+        
+            @param machine: Machine for wich you want to get the 
+                            associated groups.
+                             
+            @return: Returns the associated groups.                  
+        
+        """
+        
+        def f(x): return machine in self.groupsMachines[x]
+        
+        interestingGroups = filter( f, self.groups )
+        
+        return interestingGroups
