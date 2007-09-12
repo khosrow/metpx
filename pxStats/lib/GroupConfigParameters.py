@@ -82,8 +82,55 @@ class GroupConfigParameters:
         
         """
         
-        def f(x): return machine in self.groupsMachines[x]
+        def filterMachines(x): return machine in self.groupsMachines[x]
         
-        interestingGroups = filter( f, self.groups )
+        interestingGroups = filter( filterMachines, self.groups )
         
         return interestingGroups
+    
+    
+    def getGroupsAssociatedWithFiletype(self, fileType ): 
+        """
+        
+            @param fileType: Filetype for wich you want to get the 
+                            associated groups.
+                             
+            @return: Returns the associated groups.                  
+        
+        """
+        
+        def filterFileTypes(x): return fileType == self.groupFileTypes[x]
+        
+        interestingGroups = filter( filterFileTypes, self.groups )
+        
+        return interestingGroups
+    
+    
+    
+    def getGroupsAssociatedWithFiletypeAndMachine( self, fileType, machine):
+        """        
+            @param fileType: Filetype for wich you want to get the 
+                            associated groups. 
+           
+            @param machine: Filetype for wich you want to get the 
+                            associated groups.           
+               
+            @return: Returns the associated groups. 
+        
+        """
+        
+        def filterFileTypes(x): return fileType == self.groupFileTypes[x]
+        
+        interestingGroups = filter( filterFileTypes, self.groups )
+        
+        def filterMachines(x): return machine in self.groupsMachines[x]
+        
+        interestingGroups = filter( filterMachines, interestingGroups )
+        
+        return interestingGroups
+        
+    
+    
+    
+    
+    
