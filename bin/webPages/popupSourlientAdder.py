@@ -29,18 +29,31 @@ import cgitb; cgitb.enable()
 sys.path.insert(1, sys.path[0] + '/../../')
 sys.path.insert(2, sys.path[0] + '/../../..')
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 from pxStats.lib.StatsPaths import StatsPaths
 
 LOCAL_MACHINE = os.uname()[1]
 
 
 
-def generateWebPage( sourlientNames, outputFileName):
+def generateWebPage( sourlientNames, groups, fileType, outputFileName ):
     """
+    
+        
         @summary: Generates popupAdder web page named after the 
                   received outputFileName and based on the 
                   list of sourlients names received  
         
+        @param sourlientNames : List of sources or clients that need to be printed.
+        
+        @param groups : List of groups that need to be printed.
+        
+        @param fileType:   
+        
+        @param outputFileName : Filename that needs to be created.
+        
+        @return : None
+    
     """
     
     if not  os.path.isdir( os.path.dirname(outputFileName) ):
@@ -176,10 +189,44 @@ def generateWebPage( sourlientNames, outputFileName):
   
     """
     
-    for i in range(len(sourlientNames)):
-        print """    
-                                    <option value="%s">%s</option>                      
-        """%( i+1, sourlientNames[i] )
+    startingIndex = 1
+    
+    if len(groups) > 0 :
+        
+        print """
+                                        <optgroup label="Groups:">Groups:</optgroup>
+        """
+        
+        for i in range(len(groups)):
+            print """    
+                                        <option value="%s">%s</option>                      
+            """%( i+startingIndex, groups[i] )
+        
+        startingIndex = i 
+    
+    
+    if len( sourlientNames ) > 0:
+        
+        if fileType == "tx":
+            print """
+                                        <optgroup label="TX clients : ">TX clients : </optgroup>
+            """  
+            
+        elif fileType == "rx":
+            print """
+                                        <optgroup label="RX sources : ">RX sources : </optgroup>
+            """
+        else:
+            print """
+                                        <optgroup label="Sourlients : ">Sourlients : </optgroup>
+            """       
+        
+        for i in range(len(sourlientNames)):
+            print """    
+                                        <option value="%s">%s</option>                      
+            """%( i+startingIndex, sourlientNames[i] )
+   
+   
    
     print """   
                                 
@@ -238,6 +285,23 @@ def returnReply( error = '' ):
     print """%s"""  %( reply )    
 
 
+
+def getGroups( fileType, machine):
+    """
+        @param fileType: Filetype for wich to search groups for.
+        @param machine : Machien for wich to search groups for.
+        
+        @return: returns the list of groups matching the filetype and machine parameters
+            
+    """
+    
+    configParameters = StatsConfigParameters()
+    configParameters.getAllParameters()
+    
+    interestingGroups = configParameters.groupParameters.getGroupsAssociatedWithFiletypeAndMachine( fileType, machine )
+
+    return interestingGroups
+
     
 def main():
     """
@@ -281,11 +345,13 @@ def main():
     if machines != "":          
         
         rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machine )
+        
+        groups = getGroups( fileType, machine )
     
     if fileType == "tx":
-        generateWebPage(txNames, "../../html/popUps/%s%sPopUpSourlientAdder.html" %( fileType, machines ) )
+        generateWebPage(txNames, groups, fileType, "../../html/popUps/%s%sPopUpSourlientAdder.html" %( fileType, machines ) )
     elif fileType == "rx":
-        generateWebPage(rxNames, "../../html/popUps/%s%sPopUpSourlientAdder.html" %( fileType, machines ) )
+        generateWebPage(rxNames, groups, fileType, "../../html/popUps/%s%sPopUpSourlientAdder.html" %( fileType, machines ) )
     
     returnReply('') 
         
