@@ -284,9 +284,18 @@ class FileStatsCollector:
                 
                 for aType in self.statsTypes :
                     if aType != "errors":
+                        
                         firstValue = fileEntries[i].values.dictionary[aType][0]
-                        fileEntries[i].minimums[aType] = firstValue                                     
+                        currentfile = fileEntries[i].files[0]
+                        currentTime = fileEntries[i].times[0]
+                        
+                        fileEntries[i].minimums[aType] = firstValue          
+                        fileEntries[i].filesWhereMinOccured[aType] = currentfile
+                        fileEntries[i].timesWhereMinOccured[aType] = currentTime                              
+                        
                         fileEntries[i].maximums[aType] = firstValue   
+                        fileEntries[i].filesWhereMaxOccured[aType] = currentfile   
+                        fileEntries[i].timesWhereMaxOccured[aType] = currentTime                          
                                                 
                 for row in xrange( 0, fileEntries[i].values.rows ) : # for each line in the entry 
                     #Filter based on interesting products
@@ -307,7 +316,7 @@ class FileStatsCollector:
                                     fileEntries[i].minimums[aType] =   currentValue                                 
                                     fileEntries[i].filesWhereMinOccured[aType] = currentfile
                                     fileEntries[i].timesWhereMinOccured[aType] = currentTime              
-                                elif currentValue > fileEntries[i].maximums[aType]:    
+                                if currentValue > fileEntries[i].maximums[aType]:    
                                     fileEntries[i].maximums[aType]= currentValue
                                     fileEntries[i].filesWhereMaxOccured[aType] = currentfile   
                                     fileEntries[i].timesWhereMaxOccured[aType] = currentTime 
@@ -542,7 +551,7 @@ class FileStatsCollector:
            @return : Tuple containing the following fields : 
                      line : The first interesting line found.
                      lineType: The type of that line.
-                     position: The position to seek to find the lines following that line.
+                     position: The position of the line that was returned.
                      usedTheSavedFileAccessPointer : Whether or not the access pointer was used.
                      
         """       
@@ -684,7 +693,7 @@ class FileStatsCollector:
             entryCount = 0      #Entry we are currently handling.
                                    
             line, lineType, position, usedTheSavedFileAccessPointer  = self.findFirstInterestingLine( file = file, useSavedFileAccessPointer = useSavedFileAccessPointer )
-            previousPosition = position 
+            
             if usedTheSavedFileAccessPointer == True :
                useSavedFileAccessPointer = False 
                 
@@ -692,6 +701,8 @@ class FileStatsCollector:
             if line != "" :             
                                            
                 fileHandle.seek( position )
+                fileHandle.readline()#Set file position AFTER the line we are currently handling.
+                previousPosition = fileHandle.tell()#position prior to next interesting line.
                 departure   = self.findValues( ["departure"] ,  line, lineType, fileType = self.fileType,logger= self.logger )["departure"]
                         
             while line  != "" and str(departure)[:-2] < str(endTime)[:-2]: #while in proper range 
