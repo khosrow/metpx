@@ -545,7 +545,7 @@ def generateWebPage( rxNames, txNames, months ):
             webLink = "archives/monthly/tx/%s/"%( txName ) + str(currentYear) + "/errors/%s.png" %str(currentMonth)
             
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%.3s</a>"""%( txName, file ,currentMonth ) )
+                fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%.3s</a>"""%( txName, webLink ,currentMonth ) )
         
         fileHandle.write( "</td></tr>" )
 
