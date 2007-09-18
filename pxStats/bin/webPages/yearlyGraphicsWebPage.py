@@ -127,7 +127,7 @@ def generateWebPage( rxNames, txNames, years ):
         </script>
         <script type="text/javascript">
 
-            var descriptionWindow=dhtmlwindow.open("description", "inline", "description", "Group description", "width=900px,height=120px,left=150px,top=10px,resize=1,scrolling=0", "recal")
+            var descriptionWindow=dhtmlwindow.open("description", "inline", "description", "Description", "width=900px,height=120px,left=150px,top=10px,resize=1,scrolling=0", "recal")
             descriptionWindow.hide()
 
         </script>
@@ -351,7 +351,7 @@ def generateWebPage( rxNames, txNames, years ):
             fileHandle.write( """<tr> <td bgcolor="#99FF99"> %s </td> """ %(rxName))
             fileHandle.write( """<td bgcolor="#66CCFF">Years&nbsp;:&nbsp;""" )
         else:
-            fileHandle.write( """<tr> <td bgcolor="#99FF99"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Group description');descriptionWindow.show(); return false">?</a></div></td> """ %(rxName, rxNames[rxName].replace("'","").replace('"','')))
+            fileHandle.write( """<tr> <td bgcolor="#99FF99"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false">?</a></div></td> """ %(rxName, rxNames[rxName].replace("'","").replace('"','')))
             fileHandle.write( """<td bgcolor="#66CCFF">Years&nbsp;:&nbsp;""" )
                    
         for year in years:
@@ -473,7 +473,7 @@ def generateWebPage( rxNames, txNames, years ):
             fileHandle.write( """ <tr> <td bgcolor="#99FF99">%s</td> """ %(txName))
             fileHandle.write( """<td bgcolor="#66CCFF">Years&nbsp;:&nbsp;""" )
         else:
-            fileHandle.write( """<tr> <td bgcolor="#99FF99"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Group description');descriptionWindow.show(); return false">?</a></div></td> """ %(txName, txNames[txName].replace("'","").replace('"','') ))
+            fileHandle.write( """<tr> <td bgcolor="#99FF99"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false">?</a></div></td> """ %(txName, txNames[txName].replace("'","").replace('"','') ))
             fileHandle.write( """<td bgcolor="#66CCFF">Years&nbsp;:&nbsp;""" )
             
        
