@@ -226,7 +226,7 @@ class GeneralStatsLibraryMethods:
         
         newPattern = '*'
         
-        if pattern == "All":
+        if pattern == "All" or pattern == '':
             newPattern = "*"
         else:
             if pattern[0] != "*" and pattern[0] != '?' :
@@ -451,10 +451,12 @@ class GeneralStatsLibraryMethods:
             newRxNames, newTxNames  = GeneralStatsLibraryMethods.getRxTxNamesHavingRunDuringPeriod( start, end, machines )
              
             for rxName in newRxNames :
-                rxNames[rxName] = ""
+                description = "<font color='#008800'>--Source Name : </font> <font color='#006699'>%s</font>  <br>   <font color='#008800'>--Machine(s) : </font><font color='#006699'>%s</font> <br> " %(rxName, str(machines).replace('[', '').replace(']', '') )
+                rxNames[rxName] = description
              
             for txName in newTxNames:
-                txNames[txName] = ""
+                description = "<font color='#008800'>--Client Name : </font> <font color='#006699'>%s</font>  <br>   <font color='#008800'>--Machine(s) : </font><font color='#006699'>%s</font> <br> " %(txName, str(machines).replace('[', '').replace(']', '') )
+                txNames[txName] = description
             
         
         for group in configParameters.groupParameters.groups:        
