@@ -355,7 +355,7 @@ def generateWebPage( rxNames, txNames, months ):
             fileHandle.write( """<tr> <td bgcolor="#99FF99">%s</td> """ %(rxName))
             fileHandle.write( """<td bgcolor="#66CCFF">Months&nbsp;:&nbsp;""" )
         else:
-            fileHandle.write( """ <tr> <td bgcolor="#99FF99"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Group description');descriptionWindow.show(); return false">?</a></div></td> """ %(rxName, rxNames[rxName].replace("'","").replace('"','')))
+            fileHandle.write( """ <tr> <td bgcolor="#99FF99"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false">?</a></div></td> """ %(rxName, rxNames[rxName].replace("'","").replace('"','')))
             fileHandle.write( """<td bgcolor="#66CCFF">Months&nbsp;:&nbsp;""" )
         
         
@@ -476,7 +476,7 @@ def generateWebPage( rxNames, txNames, months ):
             fileHandle.write( """<tr> <td bgcolor="#99FF99">%s</td> """ %(txName))
             fileHandle.write( """<td bgcolor="#66CCFF">Months:&nbsp;""" )
         else:
-            fileHandle.write( """<tr> <td bgcolor="#99FF99"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Group description');descriptionWindow.show(); return false">?</a></div></td> """ %(txName, txNames[txName].replace("'","").replace('"','') ))
+            fileHandle.write( """<tr> <td bgcolor="#99FF99"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false">?</a></div></td> """ %(txName, txNames[txName].replace("'","").replace('"','') ))
             fileHandle.write( """<td bgcolor="#66CCFF">Months:&nbsp;""" )
         
         
