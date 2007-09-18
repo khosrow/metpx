@@ -8,7 +8,7 @@ named COPYING in the root of the source directory tree.
 #######################################################################################
 ##
 ## Name   : generateRRDGraphics.py 
-# ##  
+##  
 ## Author : Nicholas Lemay  
 ##
 ## Date   : October 2nd 2006
@@ -1127,16 +1127,18 @@ def plotRRDGraph( databaseName, type, fileType, client, machine, infos, logger =
     if infos.graphicType != "monthly":
         try:
             rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '800','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end),'--step','%s' %(interval*60), '--vertical-label', '%s' %formatedYLabelType,'--title', '%s'%title, '--lower-limit','0','DEF:%s=%s:%s:AVERAGE'%( type, databaseName, type), 'CDEF:realValue=%s,%i,*' %( type, 1), 'AREA:realValue#%s:%s' %( innerColor, type ),'LINE1:realValue#%s:%s'%( outerColor, type ), 'COMMENT: Min: %s   Max: %s   Mean: %s   %s\c' %( minimum, maximum, mean,total ), 'COMMENT:%s %s %s\c' %( comment, graphicsNote, graphicsLegeng )  )
-        except:
+        except Exception, inst:
             errorOccured = True
             print "Error : Could not generate %s " %imageName
+            print "Error was : %s" %inst
     else:#With monthly graphics, we force the use the day of month number as the x label.       
         try:
             rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '800','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end),'--step','%s' %(interval*60), '--vertical-label', '%s' %formatedYLabelType,'--title', '%s'%title, '--lower-limit','0','DEF:%s=%s:%s:AVERAGE'%( type, databaseName, type), 'CDEF:realValue=%s,%i,*' %( type, 1), 'AREA:realValue#%s:%s' %( innerColor, type ),'LINE1:realValue#%s:%s'%( outerColor, type ), '--x-grid', 'HOUR:24:DAY:1:DAY:1:0:%d','COMMENT: Min: %s   Max: %s   Mean: %s   %s\c' %( minimum, maximum, mean, total ), 'COMMENT:%s %s %s\c' %(comment,graphicsNote, graphicsLegeng)  )    
-        except:
+        except Exception, inst:
             errorOccured = True
             print "Error : Could not generate %s " %imageName
-    
+            print "Error was : %s" %inst
+            
     if errorOccured == False:
         try:
             os.chmod(imageName, 0777)
@@ -1242,23 +1244,149 @@ def getInfosFromDatabases( dataOutputs, names, machine, fileType, startTime, end
    
     return  int(nbEntries), lastUpdate
 
+
     
-    
-def getPairsFromAllDatabases( type, machine, start, end, infos, logger=None ):
-    """
-        This method gathers all the needed between start and end from all the
-        databases wich are of the specifed type and from the specified machine.
-        
-        It then makes only one entry per timestamp, and returns the 
-        ( timestamp, combinedValue ) pairs.
-        
+def getPairsFromDatabasesWithProportions( type, machine, start, end, infos, logger=None ):
     """
     
+        @summary : Takes the data pairs from the wanted 
+                   client/sources of a machine, 
+                   merges all it's data into a series of 
+                   pairs and returns those pairs. 
+                   
+                   When using this method, data will be merged 
+                   together in proportion with the "weight" of 
+                   each client/sources. Meaning that a 
+                   client/source that is handling   
+        
+        @param type : Data type : latency, bytecount, filecount etc.
+        
+        @param start : Start of the span of data we are interested in.
+        
+        @param end : End of the span of data we are interested in.
+        
+        @param infos : _GraphicsInfos instance containing vital infos.
+        
+        @param logger : Logger in wich to write log entries. 
+        
+        @return :  The merged data pairs.     
+    
+    """
+    
+    databaseName    = "" # Temporary name of databases to query for data.
+    filecounts      = {} # List of filecoutns used to build up propertions
+    typeData        = {} # The data found of the specified type. 
+    lastUpdate      = 0  # Last update of the series fo databases.
+    nbEntries       = 0  # number of entries found within each databases 
+    pairs           = [] # Data pairs to return    
+    filecountTotals = [] #total number of files for each entry
+        
+        
+    
+    # Get filecount value for each sourlient.
+    for client in infos.clientNames:#Gather all pairs for that type
+        
+        databaseName = RrdUtilities.buildRRDFileName( dataType = "filecount" , clients = [client], machines = machine, fileType = infos.fileType) 
+
+        status, output = commands.getstatusoutput("rrdtool fetch %s  'AVERAGE' -s %s  -e %s" %( databaseName, (start), end) )
+       
+        splitOutput = []
+        splitOutput = output.splitlines()[2:]
+        filecounts[client] = splitOutput
+    
+    
+    nbEntries, lastUpdate = getInfosFromDatabases(filecounts, infos.clientNames, machine, infos.fileType, start, end)  
+    #calculate total of files per entry.
+    for entry in range( nbEntries ):
+        totalFilecount = 0.0 
+        for client in infos.clientNames:
+            value = (filecounts[client][entry]).split( ":" )[1].replace(" ", "")
+            if value != 'nan':
+                totalFilecount = float( float(totalFilecount) +  float( value ) )
+        
+        print "entry : %s total:%s" %( entry, totalFilecount )
+        filecountTotals.append( totalFilecount )
+            
+        
+    
+    #get interesting data 
+    for client in infos.clientNames:#Gather all pairs for that type
+        
+        databaseName = RrdUtilities.buildRRDFileName( dataType = type , clients = [client], machines = machine, fileType = infos.fileType) 
+
+        status, output = commands.getstatusoutput("rrdtool fetch %s  'AVERAGE' -s %s  -e %s" %( databaseName, (start), end) )
+       
+        splitOutput = []
+        splitOutput = output.splitlines()[2:]
+        typeData[client] = splitOutput
+    
+    
+    # Calculate weight of current each sourlients  for every entry.
+    for entry in range( nbEntries ):
+        entryDate =  typeData[infos.clientNames[0]][entry].split( " " )[0].replace( ":", "" )
+        valueToAdd = 0.0   
+        total = 0.0           
+        percentage = 0 
+        
+        for client in infos.clientNames:
+            #find out ratio.
+            clientsFilecount = float( (filecounts[client][entry]).split( ":" )[1].replace(" ", "") )
+            #get value 
+            valueToAdd = ( typeData[client][entry] ).split( ":" )[1].replace(" ", "")
+            
+            if valueToAdd != 'nan' :
+                valueToAdd = float( valueToAdd )
+            else:      
+                valueToAdd = 0
+                
+                
+            if filecountTotals[entry] != 0.0 and str(clientsFilecount) != 'nan':
+                valueToAdd = float( valueToAdd * float(  clientsFilecount/filecountTotals[entry] ) )
+                percentage = percentage + float(  clientsFilecount/filecountTotals[entry] )
+            else :
+                valueToAdd = 0
+            
+            
+            # Add up total.
+            total = total + valueToAdd
+            print "client : %s value : %s clientFiles : %s Total : %s Addedvalue : %s" %( client, ( typeData[client][entry] ).split( ":" )[1].replace(" ", ""), clientsFilecount,filecountTotals[entry], valueToAdd )
+        
+            print "percentage :%s" %percentage
+        # Add total to pairsto return 
+        pairs.append( [typeData[client][entry].split( " " )[0].replace( ":", "" ), total] )
+    
+    
+    
+    return pairs
+
+
+
+def getPairsFromDatabasesWithoutProportions( type, machine, start, end, infos, logger=None ):
+    """
+
+        @summary : Takes the data pairs from the wanted 
+                   client/sources of a machine, 
+                   merges all it's data into a series of 
+                   pairs and returns those pairs. 
+        
+        @param type : Data type : latency, bytecount, filecount etc.
+        
+        @param start : Start of the span of data we are interested in.
+        
+        @param end : End of the span of data we are interested in.
+        
+        @param infos : _GraphicsInfos instance containing vital infos.
+        
+        @param logger : Logger in wich to write log entries. 
+        
+        
+        @return :  The merged data pairs. 
+    
+    """
+
     pairs = []
     typeData = {}     
        
-    
-    
     for client in infos.clientNames:#Gather all pairs for that type
         
         databaseName = RrdUtilities.buildRRDFileName( dataType = type , clients = [client], machines = machine, fileType = infos.fileType) 
@@ -1301,6 +1429,42 @@ def getPairsFromAllDatabases( type, machine, start, end, infos, logger=None ):
 
     
     return pairs
+
+
+
+    
+def getPairsFromAllDatabases( type, machine, start, end, infos, logger=None ):
+    """
+        @summary : This method gathers all the needed data between start and end 
+                   from all the databases wich are of the specifed type and
+                   from the specified machine and that rekate to the specified 
+                   client/sources.
+        
+        @param type : Data type : latency, bytecount, filecount etc.
+        
+        @param start : Start of the span of data we are interested in.
+        
+        @param end : End of the span of data we are interested in.
+        
+        @param infos : _GraphicsInfos instance containing vital infos.
+        
+        @param logger : Logger in wich to write log entries. 
+        
+        @return : Array containing one tuple entry per timestamp of the following form : 
+                 ( timestamp, combinedValue ) pairs.
+        
+    """
+    
+    pairs = []
+    
+    if type == "latency":
+        pairs = getPairsFromDatabasesWithoutProportions( type, machine, start, end, infos, logger=None )
+    else :
+        pairs = getPairsFromDatabasesWithProportions( type, machine, start, end, infos, logger=None )
+        
+    return pairs        
+    
+    
     
     
     
