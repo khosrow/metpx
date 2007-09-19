@@ -33,7 +33,9 @@ sys.path.insert(1, sys.path[0] + '/../../')
 
 
 from pxStats.lib.StatsPaths import StatsPaths
+from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 from pxStats.lib.GraphicsQueryBrokerInterface import GraphicsQueryBrokerInterface
 from pxStats.lib.ClientGraphicProducer import ClientGraphicProducer
 
@@ -187,13 +189,19 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
             groupName = form["groupName"].replace("'", "").replace('"','')
         except:
             groupName = ''
-        
-        
+
         try:
             machines = form["machines"].split(',')
         except:
             machines = []
         
+        if groupName != '' and ( sourLients == [] or sourlients == [''] ) :
+            configParameters = StatsConfigParameters( )
+            configParameters.getAllParameters()
+            
+            if groupName in configParameters.groupParameters.groups:
+                if configParameters.groupParameters.groupFileTypes[groupName] == fileTypes and configParameters.groupParameters.groupsMachines[groupName] == machines:
+                    sourLients = configParameters.groupParameters.groupsMembers[groupName]
         
         try:
             combine = form["combineSourlients"].replace(",", "").replace('"','')
@@ -215,14 +223,22 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
             hour      = endTime.split(" ")[1]
             splitDate = endTime.split(" ")[0].split( '-' )
             endTime = "%s" %( splitDate[2] + '-' + splitDate[1]  + '-' + splitDate[0]  + " " + hour )       
-            #print endTime
+            
+            if "current" in str(form["fixedSpan"]).lower():
+                start, endTime = StatsDateLib.getStartEndFromCurrentDay(endTime)
+                
+            elif "previous" in str(form["fixedSpan"]).lower():    
+                start, endTime = StatsDateLib.getStartEndFromPreviousDay( endTime )
+                
         except:
             endTime = ''
         
         try:
             products = form["products"].split(',')
+            if products == [""]:
+                raise
         except:
-            products = ['All']
+            products = ["*"]
             
         try:    
             statsTypes = form["statsTypes"].split(',')
@@ -232,8 +248,13 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
             span        = form["span"].replace("'", "").replace('"','')
             if str(span).replace( ' ', '' ) == '':
                 raise 
+            span = int(span)
+                
         except:
             span = 24
+            
+            
+        sourLients = GeneralStatsLibraryMethods.filterClientsNamesUsingWilcardFilters( endTime, span, sourLients, machines, [fileTypes])    
             
         self.queryParameters = GnuQueryBroker._QueryParameters( fileTypes, sourLients, groupName, machines, combine, endTime,  products, statsTypes,  span )
         
@@ -278,9 +299,13 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
                 if fileType != "tx" and fileType != "rx":
                     error = "Error. FileType needs to be either rx or tx."
                     raise
-            if self.queryParameters.sourLients == []:
-                error = "Error. At least one sourlient needs to be specified."
             
+            if self.queryParameters.sourLients == []:
+                if self.queryParameters.groupName == "":
+                    error = "Error. At least one sourlient name needs to be specified."
+                else:
+                    error = "Error. When specifying a group name without any sourlients names, the group must be a pre-existing group."
+                        
             if self.queryParameters.machines == []:
                 error = "Error. At least one machine name needs to be specified."
             
@@ -311,6 +336,7 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
         
         directory = GeneralStatsLibraryMethods.getPathToLogFiles( LOCAL_MACHINE, self.queryParameters.machines[0] )
         
+        self.queryParameters.sourLients.reverse()
         
         self.graphicProducer = ClientGraphicProducer( directory = directory, fileType = self.queryParameters.fileType,  
                                                       clientNames = self.queryParameters.sourLients, 
@@ -318,7 +344,9 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
                                                       timespan = int(self.queryParameters.span), currentTime = self.queryParameters.endTime,
                                                       productTypes = self.queryParameters.products, logger= None, logging = False, 
                                                       machines = self.queryParameters.machines )
-      
+        
+
+         
         #------------------------------- print """directory = %s, fileType = %s,
                  #-------------------------------------------- clientNames = %s,
                  #---------------------------------------------- groupName = %s,
@@ -336,9 +364,15 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
             @side-effect : Will set the name of the produced image in the reply parameters.
         
         """
+        
+        #print "sourlients : %s" %self.queryParameters.sourLients
+        
+        self.queryParameters.statsTypes.reverse()#reverse temporarily.
          
         imageName = self.graphicProducer.produceGraphicWithHourlyPickles( types = self.queryParameters.statsTypes , now = False, 
                                                               createCopy = False, combineClients = self.queryParameters.combine )
+    
+        self.queryParameters.statsTypes.reverse()#undo reverse.
     
         #-------------------------------------- print """ types = %s , now = %s,
              #----------------------------- createCopy = %s, combineClients = %s
@@ -362,7 +396,7 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
         params = self.replyParameters
         
         reformatedImageLocation = '../../pxStats' + params.image.split( 'pxStats' )[1]
-                
+                        
         reply = "images=%s;error=%s"%( reformatedImageLocation, params.error   )
 
          
