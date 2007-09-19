@@ -155,7 +155,7 @@ def uploadGraphicFiles( parameters, machineParameters ):
     
    
     for uploadMachine in parameters.graphicsUpLoadMachines :
-        #status, output = commands.getstatusoutput( "scp %s* %s@%s:%s " %( StatsPaths.STATSCOLGRAPHS, machineParameters.getUserNameForMachine(uploadMachine), uploadMachine, StatsPaths.PDSCOLGRAPHS   ) )
+        status, output = commands.getstatusoutput( "scp %s* %s@%s:%s " %( StatsPaths.STATSCOLGRAPHS, machineParameters.getUserNameForMachine(uploadMachine), uploadMachine, StatsPaths.PDSCOLGRAPHS   ) )
         
         print "scp %s* %s@%s:%s " %( StatsPaths.STATSCOLGRAPHS, machineParameters.getUserNameForMachine(uploadMachine),uploadMachine, StatsPaths.PDSCOLGRAPHS )
         #print output
@@ -373,6 +373,7 @@ def backupRRDDatabases( timeParameters, currentTime, nbBackupsToKeep ):
         #print StatsPaths.STATSTOOLS + "backupRRDDatabases.py" + " " + str(nbBackupsToKeep)
 
 
+
 def saveCurrentMachineParameters( machineParameters  ):
     """
         @summary : Saves the current machineParameters into 
@@ -387,6 +388,7 @@ def saveCurrentMachineParameters( machineParameters  ):
     
     CpickleWrapper.save( machineParameters, StatsPaths.STATSPREVIOUSMACHINEPARAMS)
         
+
 
 def getMachineParametersFromPreviousCall() :
     """
@@ -431,9 +433,12 @@ def getMachinesTagsNeedingUpdates( configParameters, machineParameters ):
     else:
         print previousParameters.machinesForMachineTags
         for tag in configParameters.sourceMachinesTags:
-            if previousParameters.getMachinesAssociatedWith( tag ) != machineParameters.getMachinesAssociatedWith( tag ):
-                tagsNeedingupdates.append( tag )
-    
+            try:
+                if previousParameters.getMachinesAssociatedWith( tag ) != machineParameters.getMachinesAssociatedWith( tag ):
+                    tagsNeedingupdates.append( tag )
+            except:
+                pass    
+            
     return tagsNeedingupdates
 
    
@@ -463,13 +468,17 @@ def updateFilesAssociatedWithMachineTags( tagsNeedingUpdates, machineParameters 
         print "%sfileRenamer.py -o %s  -n %s --overrideConfirmation" %( StatsPaths.STATSTOOLS, previousCombinedMachineNames, currentCombinedMachineNames  )
         print output 
         
+        
+        
 def archiveGraphics():
     """        
         @summary : Runs the archiving utility as to allow 
                    user to access old graphics.
+                   
     """
     
     status,output = commands.getstatusoutput( "%sarchiveGraphicFiles.py" %StatsPaths.STATSTOOLS )
+    
     
     
 def main():
@@ -508,7 +517,7 @@ def main():
     backupRRDDatabases( generalParameters.timeParameters, currentTime, generalParameters.nbDbBackupsToKeep )
     
     getGraphicsForWebPages()
-    
+        
     archiveGraphics()
     
     updateWebPages()
