@@ -556,7 +556,9 @@ def printAjaxRequestsScript():
                          + (endTime.getMinutes() < 10 ? '0' : '') + (endTime.getMinutes()) + ":"
                          + (endTime.getSeconds() < 10 ? '0' : '') + (endTime.getSeconds())
 
-                     
+                         combineSourlients = false;
+                         products = '';
+                         span='';
                      }
 
                     qstr = '?querier=escape("graphicsRequestPage.py")&endTime=' + escape(endTime) +  '&span=' + escape(span);//'&groupName=' + escape(groupName) +
@@ -655,15 +657,8 @@ def printAjaxRequestsScript():
                     //    errors = 'Error. Group name and specific clients/sources names cannot be used at the same time.';
                     
                     }else if( optionalOptionsVisibility !='hidden'){
-                        var span = document.forms['inputForm'].elements['span'].value;
-                        //individualFieldChecked = document.inputForm.individual.checked;
-                        //totalFieldChecked= document.inputForm.total.checked;
-  
-                        //if( totalFieldChecked ==true  ){ //&& individualFieldChecked == true
-                        //    errors = 'Error. Cannot use individul and total options at the same time.'
-                        
-                        //}
-                        
+                    
+                        var span = document.forms['inputForm'].elements['span'].value;                       
                         
                         if( span != ''){
                             if ( isInt(span) == true ){
@@ -675,9 +670,20 @@ def printAjaxRequestsScript():
                                 errors = 'Error. Span value must be a NUMERICAL value between 1 and 48.'
                             }
                         
+                        }else{
+                        
+                            if( determinedSpan.match('Select') != null ){
+                                errors = 'Error. Specify a determined span or use the span option in the advanced options.'
+                            }
+                        
                         }
                         
                         
+                    }else if(optionalOptionsVisibility =='hidden'){
+                        if( determinedSpan.match('Select') != null ){
+                            errors = 'Error. Specify a determined span or use the span option in the advanced options.'
+                        }
+                    
                     }
                     
                 
@@ -2216,7 +2222,7 @@ def printHead( form ):
                  
                  function enableOrDisableSpan(){
                      
-                     if( document.inputForm.preDeterminedSpan[ document.inputForm.preDeterminedSpan.selectedIndex ].text.match('Pre') != null  ){
+                     if( document.inputForm.preDeterminedSpan[ document.inputForm.preDeterminedSpan.selectedIndex ].text.match('Select') != null  ){
                      
                          document.getElementById("span").disabled = false;
                     
