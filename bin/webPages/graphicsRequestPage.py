@@ -65,7 +65,7 @@ FIXED_TIMESPANS = [ "daily" , "weekly", "monthly", "yearly" ]
 
 FIXED_PARAMETERS =  [ "fixedCurrent", "fixedPrevious" ] 
 
-PRE_DETERMINED_SPANS = [ 'daily', 'monthly', 'weekly', 'yearly' ]
+PRE_DETERMINED_SPANS = [ 'daily', 'weekly', 'monthly',  'yearly' ]
 
 FIXED_SPANS = [ 'fixedCurrent', 'fixedPrevious' ]
 
@@ -119,9 +119,9 @@ def getWordsFromDB( wordType ):
     
     if wordType == "products":
         words = getWordsFromFile( '../../wordDatabases/products'   ) 
-    elif wordType == "groupName" :
-        words = getWordsFromFile( '../../wordDatabases/groupNames' )
-   
+    #-------------------------------------------- elif wordType == "groupName" :
+        #---------- words = getWordsFromFile( '../../wordDatabases/groupNames' )
+#------------------------------------------------------------------------------ 
     return words    
 
 
@@ -207,7 +207,7 @@ def printChoiceOfSourlients( form ):
                      
                             <td>
                                  <div name="sourlientListLabel" id="sourlientListLabel">Client(s)/Source(s) :</div>
-                                 <select size=5 name="sourlientList" style="font: 14px;width: 300px;"height: 20px;" multiple>
+                                 <select size=5 name="sourlientList" id="sourlientList" style="font: 14px;width: 300px;"height: 20px;" multiple>
         """
         
         for sourlient in sourLients:
@@ -222,8 +222,8 @@ def printChoiceOfSourlients( form ):
                                                             
                                 <br>   
                         
-                                <input type=button class="button" value="Add Clients" onclick ="javascript:handleAddSourlientsRequest();"></input>    
-                                <input type=button class="button" value="Delete client" onclick ="javascript:deleteFromList(sourlientList);"></input> 
+                                <input type=button class="button" name="addButton" id="addButton" value="Add Clients" onclick ="javascript:handleAddSourlientsRequest();"></input>    
+                                <input type=button class="button" name="deleteButton" id="deleteButton" value="Delete client" onclick ="javascript:deleteFromList(sourlientList);"></input> 
                                    
             """
     else:
@@ -234,14 +234,16 @@ def printChoiceOfSourlients( form ):
                     <td>
                         
                         <div name="sourlientListLabel" id="sourlientListLabel">Client(s)/Source(s) :</div>
-                        <select size=5 name="sourlientList" style="font: 14px;width: 300px;"height: 20px;" multiple>
+                        <select size=5 name="sourlientList" id="sourlientList" style="font: 14px;width: 300px;"height: 20px;" multiple>
+                            <option value="File type required to enable this."">File type required to enable this.</option>
+                             <option value="Machine is required to enable this.">File type required to enable this.</option>
                         </select>                   
                
                         <br>               
                     
-                        <input type=button name="addButton" class="button" value="Add Sourlients" onclick ="javascript:handleAddSourlientsRequest();"></input> 
+                        <input type=button name="addButton" id="addButton" class="button" value="Add Sourlients" onclick ="javascript:handleAddSourlientsRequest();" DISABLED ></input> 
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        <input type=button name="deleteButton" class="button" value="Delete Sourlients" onclick ="javascript:deleteFromList(sourlientList);"></input> 
+                        <input type=button name="deleteButton" id="deleteButton" class="button" value="Delete Sourlients" onclick ="javascript:deleteFromList(sourlientList);" DISABLED></input> 
        
                     </td>
                     
@@ -416,14 +418,14 @@ def printAjaxRequestsScript():
 
     """
         
-    print """                    
-                            if( document.forms['inputForm'].elements['groupName'].value != '' ){
-                                
-                                executeAjaxRequest( 'updateWordsInDB.py',  'groupName' );                                 
-                                
-                            }
-    
-    """
+    #----------------------------------------------------------------- print """
+                            # if( document.forms['inputForm'].elements['groupName'].value != '' ){
+#------------------------------------------------------------------------------ 
+                                # executeAjaxRequest( 'updateWordsInDB.py',  'groupName' );
+#------------------------------------------------------------------------------ 
+                            #------------------------------------------------- }
+#------------------------------------------------------------------------------ 
+    #----------------------------------------------------------------------- """
     
     
     print """                        
@@ -503,8 +505,8 @@ def printAjaxRequestsScript():
                     if ( callingObject == 'products' ){
                         qstr = qstr + '&word='  + document.forms['inputForm'].elements['products'].value;
                     
-                    }else if( callingObject == 'groupName' ){
-                        qstr = qstr + '&word='  + document.forms['inputForm'].elements['groupName'].value;
+                    //}else if( callingObject == 'groupName' ){
+                    //    qstr = qstr + '&word='  + document.forms['inputForm'].elements['groupName'].value;
                     
                     }     
                     
@@ -516,10 +518,10 @@ def printAjaxRequestsScript():
                 function getParametersForGraphicsRequests( ){
                     
                     var qstr = '';
-
+                    var optionalOptionsVisibility = document.getElementById("advancedOptions").style.visibility;
                     
                     var endTime    = document.forms['inputForm'].elements['endTime'].value;
-                    var groupName  = document.forms['inputForm'].elements['groupName'].value;
+                    //var groupName  = document.forms['inputForm'].elements['groupName'].value;
                     var span       = document.forms['inputForm'].elements['span'].value;
                     var fileType   = document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].text;
                     var machines   = document.inputForm.machines[ document.inputForm.machines.selectedIndex ].text;
@@ -545,8 +547,19 @@ def printAjaxRequestsScript():
                     for (var i = 0; i < document.inputForm.sourlientList.options.length; i++){
                          sourlients.push( document.inputForm.sourlientList.options[i].text );
                      }  
+                     
+                     if( optionalOptionsVisibility =='hidden'){
+                         endTime = new Date();
+                         endTime = (endTime.getDate() < 10 ? '0' : '') +endTime.getDate() + "-"
+                         + (endTime.getMonth() < 9 ? '0' : '') + (endTime.getMonth() + 1) + "-"
+                         + endTime.getFullYear() + " " + (endTime.getHours() < 10 ? '0' : '') + endTime.getHours() + ":"
+                         + (endTime.getMinutes() < 10 ? '0' : '') + (endTime.getMinutes()) + ":"
+                         + (endTime.getSeconds() < 10 ? '0' : '') + (endTime.getSeconds())
 
-                    qstr = '?querier=escape("graphicsRequestPage.py")&endTime=' + escape(endTime) + '&groupName=' + escape(groupName) + '&span=' + escape(span);
+                     
+                     }
+
+                    qstr = '?querier=escape("graphicsRequestPage.py")&endTime=' + escape(endTime) +  '&span=' + escape(span);//'&groupName=' + escape(groupName) +
                     qstr = qstr + '&fileType=' + escape(fileType) + '&machines=' + escape(machines) +'&statsTypes=' + escape(statsTypes);
                     qstr = qstr + '&preDeterminedSpan=' + escape(preDeterminedSpan) + '&fixedSpan=' + escape(fixedSpan);
                     qstr = qstr + '&sourLients=' + escape( sourlients );
@@ -582,7 +595,7 @@ def printAjaxRequestsScript():
                 
                 function executeAjaxReplyAction( action ){
                     if( action.match('showImageWindow') != null ){
-                         window.open( '%s', 'mywindow', "status = 0, height=%s, width=%s, resizable=0" );
+                         window.open( '%s', 'mywindow', "status = 0, height=%s, width=%s, resizable=0, scrollbars=yes" );
                     
                     }
                     
@@ -619,7 +632,7 @@ def printAjaxRequestsScript():
                     var optionalOptionsVisibility = document.getElementById("advancedOptions").style.visibility;
                     var fixedSpan       = document.inputForm.fixedSpan[ document.inputForm.fixedSpan.selectedIndex ].text;
                     var determinedSpan  = document.inputForm.preDeterminedSpan[ document.inputForm.preDeterminedSpan.selectedIndex ].text;
-                    var groupName       = document.getElementById( 'groupName' ).value;
+                    //var groupName       = document.getElementById( 'groupName' ).value;
                     
                     
                     if( fileType.match('Select') !=null ){
@@ -634,8 +647,12 @@ def printAjaxRequestsScript():
                     }else if( fixedSpan.match('Select') == null && determinedSpan.match('Pre') != null  ){
                         errors = 'Error. Cannot specify fixed span without determined span.';
                     
-                    }else if( sourlients.length == 0 && groupName == '' ){
-                        errors = 'Error. Please add a client/source to the list or specify a group name.';
+                    
+                    }else if( sourlients.length == 0 ){
+                       errors = 'Error. Please add a client/source to the list or specify a group name.';
+                    
+                    //}else if( sourlients.length != 0 && groupName != '' ){
+                    //    errors = 'Error. Group name and specific clients/sources names cannot be used at the same time.';
                     
                     }else if( optionalOptionsVisibility !='hidden'){
                         var span = document.forms['inputForm'].elements['span'].value;
@@ -662,7 +679,8 @@ def printAjaxRequestsScript():
                         
                         
                     }
-                                      
+                    
+                
                     
                     return errors;
                     
@@ -794,14 +812,20 @@ def printSlideShowScript( images ):
                 
                 
                 function transport(){                     
-                    wopen( photoslink[which], 'popup', %s, %s);
+                    
+                    if( multiPartSingleImage == true){
+                        wopen( photoslink[0], 'popup', %s, %s);
+                    }else{
+                        wopen( photoslink[which], 'popup', %s, %s);
+                    }    
+                        
                 }
                 
                 
                 function showAllImages(){
                 
                    if( multiPartSingleImage == true){
-                        wopen( photoslink[which], 'popup', %s, %s);
+                        wopenScrolling( photoslink[0], 'popup', %s, %s);
                    }else{
                        executeAjaxRequest( 'generateImageWebPage.py', '' );
                    }         
@@ -815,7 +839,7 @@ def printSlideShowScript( images ):
         </script>
 
     
-    """ %( smallImageWidth, smallImageHeight, largeImageWidth, largeImageHeight )
+    """ %( smallImageWidth, smallImageHeight, largeImageWidth, largeImageHeight, largeImageWidth, largeImageHeight )
 
 
     
@@ -986,7 +1010,7 @@ def printFileTypeComboBox( form ):
     print """
                         <td width = 210>
                             <label for="fileType">FileType:</label><br>
-                            <select class="dropDownBox" name="fileType" id="fileType" OnChange="JavaScript:executeAjaxRequest( 'popupSourlientAdder.py', '' );Javascript:updateStatsTypes( document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].text );Javascript:updateLabelsOnFileTypeChange();javascript:clearSourlientsList(); ">
+                            <select class="dropDownBox" name="fileType" id="fileType" OnChange="JavaScript:executeAjaxRequest( 'popupSourlientAdder.py', '' );Javascript:updateStatsTypes( document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].text );Javascript:updateLabelsOnFileTypeChange();javascript:clearSourlientsList(); javascript:enableOrDisableSourlientsAdder();">
                                 <option>Select a file type...</option>
     """
     
@@ -1027,7 +1051,7 @@ def printSpecificSpanComboBox( form ):
                         <td width = 210px> 
                             <label for="preDeterminedSpan">Determined spans : </label><br>
                             <select class="dropDownBox" name="preDeterminedSpan" id="preDeterminedSpan" onClick="JavaScript:enableOrDisableSpan();enableOrDisableProducts();JavaScript:updateFixedSpans();">     
-                            <option>Pre-determined spans...</option>               
+                            <option>Select a span...</option>               
     """
     
     
@@ -1096,7 +1120,7 @@ def printMachinesComboBox( form ):
     print """
                         <td width = 210px> 
                             <label for="machines">Machine(s):</label><br>
-                            <select class="dropDownBox"  name="machines" id="machines" OnClick="JavaScript:executeAjaxRequest( 'popupSourlientAdder.py', '' ); JavaScript:clearSourlientsList(); ">     
+                            <select class="dropDownBox"  name="machines" id="machines" OnClick="JavaScript:executeAjaxRequest( 'popupSourlientAdder.py', '' ); JavaScript:clearSourlientsList();javascript:enableOrDisableSourlientsAdder(); ">     
                             <option style="width:500px">Select machine(s)...</option>
                             <optgroup  style="width:500px" bgcolor="#7092B9" label="Main machine(s):">Main machine(s):</optgroup>                
     """
@@ -1414,7 +1438,7 @@ def printGnuPlotInputForm(  form   ):
     
     printEndTime(form)        
     printSpanTextBox(form)
-    printGroupTextBox(form)
+    #printGroupTextBox(form)
     printProductsTextBox(form)
             
     print """     
@@ -1526,7 +1550,7 @@ def printRRDInputForm(  form   ):
     
     #Print first table row
     printEndTime(form)
-    printGroupTextBox(form)
+    #printGroupTextBox(form)
     printSpanTextBox(form)
     printTotalCheckbox(form)
     #printIndividualCheckbox(form)
@@ -1629,7 +1653,7 @@ def printInputForm( form ):
     #Print first table row
     printEndTime(form)
     printSpanTextBox(form)
-    printGroupTextBox(form)
+    #printGroupTextBox(form)
     printProductsTextBox(form)
     printCombineSourlientsCheckbox(form)        
     
@@ -1654,7 +1678,7 @@ def printInputForm( form ):
 
     print"""
              <div class="right">
-                <input type=button  class="button"   name="help "value="Get Help" onclick ="wopen( '../../html/helpPages/rrdHelp.html', 'popup', 830, 1100 );">
+                <input type=button  class="button"   name="help "value="Get Help" onclick ="wopen( '../../html/helpPages/requestHelp.html', 'popup', 830, 1100 );">
             </div>
             
 
@@ -1868,10 +1892,14 @@ def printHead( form ):
             <script src="../js/calendar2.js"></script>
             <script src="../js/windowUtils.js"></script>
             <script src="../js/popupListAdder.js"></script>
+           
             <script>
+                
                 counter =0;             
+                
+                
                 function wopen(url, name, w, h){
-                // This function was taken on www.boutell.com
+                    // This function was taken on www.boutell.com
                     
                     w += 32;
                     h += 96;
@@ -1884,6 +1912,22 @@ def printHead( form ):
                     win.resizeTo(w, h);
                     win.focus();
                 }   
+                
+                function wopenScrolling(url, name, w, h){
+                    // This function was taken on www.boutell.com
+                    
+                    w += 32;
+                    h += 96;
+                    counter +=1; 
+                    var win = window.open(url,
+                    counter,
+                    'width=' + w + ', height=' + h + ', ' +
+                    'location=no, menubar=no, ' +
+                    'status=no, toolbar=no, scrollbars=yes, resizable=no');
+                    win.resizeTo(w, h);
+                    win.focus();
+                } 
+                
             </script>  
             
             <script type="text/javascript" language="JavaScript">   
@@ -2083,18 +2127,27 @@ def printHead( form ):
                      determinedSpan= document.inputForm.preDeterminedSpan[ document.inputForm.preDeterminedSpan.selectedIndex ].text;;
                          document.inputForm.fixedSpan.options[0].selected=true;
                      if( determinedSpan == "daily"){
+                         document.inputForm.fixedSpan.options[0].text = "Past 24 hours";
                          document.inputForm.fixedSpan.options[1].text = "Current day.";
                          document.inputForm.fixedSpan.options[2].text = "Previous day.";                     
+                     
                      }else if( determinedSpan == "weekly" ){
+                         document.inputForm.fixedSpan.options[0].text = "Past 7 days.";
                          document.inputForm.fixedSpan.options[1].text = "Current week.";
                          document.inputForm.fixedSpan.options[2].text = "Previous week.";                        
+                     
                      }else if( determinedSpan == "monthly" ){
+                         document.inputForm.fixedSpan.options[0].text = "Past 30 days.";
                          document.inputForm.fixedSpan.options[1].text  = "Current month.";
                          document.inputForm.fixedSpan.options[2].text  = "Previous month.";
+                     
                      }else if( determinedSpan == "yearly" ){
+                         document.inputForm.fixedSpan.options[0].text = "Past 365 days.";
                          document.inputForm.fixedSpan.options[1].text = "Current year.";
                          document.inputForm.fixedSpan.options[2].text = "Previous year.";                   
+                     
                      }else{
+                         document.inputForm.fixedSpan.options[0].text = "Select fixed span...";
                          document.inputForm.fixedSpan.options[1].text = "Current";
                          document.inputForm.fixedSpan.options[2].text = "Previous";
                      }
@@ -2102,6 +2155,48 @@ def printHead( form ):
                  
                  }
                  
+                 
+                 function enableOrDisableSourlientsAdder(){
+                     
+                     var errorCounter = 0;
+                     
+                     if( document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].text.match('elect') != null){
+                         
+                         
+                         document.getElementById("sourlientList").options[errorCounter] = new Option("File type required to enable this.");
+                         errorCounter = errorCounter + 1;
+                         
+                     }else{
+                         document.getElementById("sourlientList").options[errorCounter+1] = new Option("");
+                     
+                     }
+                                          
+                       
+                     if( document.inputForm.machines[ document.inputForm.machines.selectedIndex ].text.match('elect') != null){
+                         
+                         document.getElementById("sourlientList").options[errorCounter] = new Option("Machine is required to enable this.");
+                         errorCounter = errorCounter + 1;
+                     }else{
+                     
+                         document.getElementById("sourlientList").options[errorCounter+1].text = new Option("");
+                     
+                     }   
+                     
+                     
+                     
+                     if( errorCounter == 0){
+                         document.getElementById("addButton").disabled = false;
+                         document.getElementById("deleteButton").disabled = false;
+                         clearSourlientsList();   
+                        
+                     }else{
+                         document.getElementById("addButton").disabled = true;
+                         document.getElementById("deleteButton").disabled = true;
+                     
+                     }
+                     
+
+                 }
                  
                  function enableOrDisableProducts(){
                      
@@ -2117,6 +2212,7 @@ def printHead( form ):
                      }
                  
                  }   
+                 
                  
                  function enableOrDisableSpan(){
                      
