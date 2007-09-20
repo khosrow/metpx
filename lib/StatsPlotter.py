@@ -466,8 +466,8 @@ class StatsPlotter:
             
             
             if not os.path.isdir( os.path.dirname( destination ) ):
-                os.makedirs(  os.path.dirname( destination ), mode=0777 )                                                      
-                os.chmod( os.path.dirname( destination ), mode=0777 )
+                os.makedirs(  os.path.dirname( destination ), 0777 )                                                      
+                os.chmod( os.path.dirname( destination ), 0777 )
             
             shutil.copy( src, destination ) 
             
@@ -483,8 +483,8 @@ class StatsPlotter:
             
             destination = StatsPaths.STATSGRAPHS + "webGraphics/columbo/%s.png" %clientName
             if not os.path.isdir( os.path.dirname( destination ) ):
-                os.makedirs(  os.path.dirname( destination ), mode=0777 )                                                      
-                os.chmod( os.path.dirname( destination ), mode=0777 )
+                os.makedirs(  os.path.dirname( destination ), 0777 )                                                      
+                os.chmod( os.path.dirname( destination ), 0777 )
             
             shutil.copy( src, destination ) 
             try:
