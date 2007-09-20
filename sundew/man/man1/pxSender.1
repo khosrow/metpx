@@ -87,7 +87,7 @@ This option defines the type of the sender... keyword is one of
     am              - AM   protocol socket
     amis            - AMIS protocol socket
     wmo             - WMO  protocol socket
-    single-file     - user defined the protocol to use for delevery (Ex.FTP)
+    single-file     - user defined the protocol to use for delevery (Ex.ftp,sftp)
 .fi
 .TP
 \fBdestfn_script script (default:None)\fR
@@ -214,7 +214,7 @@ Port to bind for the transmission.
 .SH TYPE SINGLE-FILE SPECIFIC OPTIONS
 .TP
 \fBprotocol name (Default: ftp )\fR
-The following protocols are supported :  file, ftp and sftp.
+The following protocols are supported :  \fBfile\fR, \fBftp\fR and \fBsftp\fR.
 The ftp and sftp protocols are use to send file on a remote host.
 They requiere the use of options host,user, password,directory.
 If there is only one directory the option destination can replace
