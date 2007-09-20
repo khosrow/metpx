@@ -54,6 +54,32 @@ LOCAL_MACHINE = os.uname()[1]
 NB_DAYS_DISPLAYED = 7 
     
 
+
+def getMachineNameFromDescription( description ):
+    """
+        @summary: Parses a description and extracts the 
+                  machien name out of it.
+        
+        @param description: HTML description associated 
+                            with a client or source.
+        
+        @return : Returns the machine           
+    
+    """
+    
+    machines = ""
+    print description
+    lines = description.split("<br>")
+    
+    for line in lines :
+        if "machine" in str(line).lower():
+            machines = line.split(":")[1].replace( " ","" ).replace("'","").replace('"',"")
+                
+        
+    return machines    
+
+
+
 def getDays():
     """
         Returns the last 3 year numbers including the current year.
@@ -184,6 +210,12 @@ def generateWebPage( rxNames, txNames, days ):
         
         
         <style type="text/css">
+            div.left { float: left; }
+            div.right {float: right; }
+        </style>
+    
+        
+        <style type="text/css">
             div.tableContainer {
                 width: 95%;        /* table width will be 99% of this*/
                 height: 275px;     /* must be greater than tbody*/
@@ -253,10 +285,13 @@ def generateWebPage( rxNames, txNames, days ):
                             <td bgcolor="#006699">
                                 <div class = "rxTableEntry">
                                     <font color = "white">
-                                        <div class="left">Sources</div>
-                                        <a target ="popup" href="#" onClick="showSourceHelpPage(); return false;">
-                                            <div class="right">?</div>
-                                        </a>
+                                        <center>
+                                                Sources
+                                                <br>
+                                                <a target ="popup" href="#" onClick="showSourceHelpPage(); return false;">
+                                                ?
+                                                </a>
+                                        </center>
                                     </font>
                                 </div>
                             </td>
@@ -275,11 +310,13 @@ def generateWebPage( rxNames, txNames, days ):
     
     
     for rxName in rxNamesArray :
+        
         if rxNames[rxName] == "" :
             fileHandle.write( """<tr> <td bgcolor="#99FF99"> %s</td> """ %(rxName))
             fileHandle.write( """<td bgcolor="#66CCFF"> Days :   """ )
         else:
-            fileHandle.write( """<tr> <td bgcolor="#99FF99"><div class="left"> %s</div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false">?</a></div></td> """ %(rxName, rxNames[rxName].replace("'","").replace('"','')))
+            machineName = getMachineNameFromDescription( rxNames[rxName] ) 
+            fileHandle.write( """<tr> <td bgcolor="#99FF99"><div class="left"> %s</div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false"><font color="black">?</font></a></div><br>(%s)</td> """ %(rxName, rxNames[rxName].replace("'","").replace('"',''), machineName ) )
             fileHandle.write( """<td bgcolor="#66CCFF"> Days :   """ )
             
                 
@@ -312,10 +349,13 @@ def generateWebPage( rxNames, txNames, days ):
                      <td bgcolor="#006699">
                         <div class = "txTableEntry">
                             <font color = "white">
-                                <div class="left">Clients</div>
-                                <a target ="popup" href="#" onClick="showClientHelpPage(); return false;">
-                                    <div class="right">?</div>
-                                </a>
+                                <center>
+                                    Clients
+                                    <br>
+                                    <a target ="popup" href="#" onClick="showClientHelpPage(); return false;">                                        
+                                      ?
+                                    </a>
+                                <center>
                             </font>
                         </div>
                     </td>
@@ -335,12 +375,18 @@ def generateWebPage( rxNames, txNames, days ):
        
     """   )       
         
-    for txName in txNamesArray : 
+        
+        
+    for txName in txNamesArray :
+        
+        
+        
         if txNames[txName] == "" :
             fileHandle.write( """<tr> <td bgcolor="#99FF99"> %s</td> """ %(txName))
             fileHandle.write( """<td bgcolor="#66CCFF"><div class = "txTableEntry">   Days :   """ )
         else:
-            fileHandle.write( """<tr> <td bgcolor="#99FF99"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false">?</a></div></td> """ %(txName, txNames[txName].replace("'","").replace('"','') ))
+            machineName = getMachineNameFromDescription( txNames[txName] ) 
+            fileHandle.write( """<tr> <td bgcolor="#99FF99"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false"><font color="black">?</font></a></div><br>(%s)</td> """ %(txName, txNames[txName].replace("'","").replace('"',''), machineName ))
             fileHandle.write( """<td bgcolor="#66CCFF">  Days :   """ )
         
         
