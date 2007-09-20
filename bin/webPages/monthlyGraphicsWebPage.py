@@ -51,6 +51,32 @@ LOCAL_MACHINE  = os.uname()[1]
 NB_MONTHS_DISPLAYED = 3 
 
 
+
+def getMachineNameFromDescription( description ):
+    """
+        @summary: Parses a description and extracts the 
+                  machien name out of it.
+        
+        @param description: HTML description associated 
+                            with a client or source.
+        
+        @return : Returns the machine           
+    
+    """
+    
+    machines = ""
+    print description
+    lines = description.split("<br>")
+    
+    for line in lines :
+        if "machine" in str(line).lower():
+            machines = line.split(":")[1].replace( " ","" ).replace(",",", ").replace("'","").replace('"',"")
+                
+        
+    return machines 
+
+
+
 def getMonths():
     """
         Returns  months including current month.
@@ -234,6 +260,12 @@ def generateWebPage( rxNames, txNames, months ):
                 A{text-decoration:none}
                 -->
             </STYLE>
+            
+            <style type="text/css">
+                div.left { float: left; }
+                div.right {float: right; }
+            </style>
+            
             <style type="text/css">
                 div.tableContainer {
                     width: 95%;        /* table width will be 99% of this*/
@@ -301,45 +333,64 @@ def generateWebPage( rxNames, txNames, months ):
            <table> 
                <thead>   
         
-                    <tr>    
-                        <td bgcolor="#006699" >
-                                <font color = "white">
-                                    <div class="left">Sources</div>
-                                    <a target ="popup" href="#" onClick="showSourceHelpPage(); return false;">
-                                        <div class="right">?</div>
-                                    </a>
-                                </font>
+                    <tr>
+                        <td bgcolor="#006699">
+                            
+                                <font color = "white">                            
+                                    <center>
+                                        Sources     
+                                        <br>                       
+                                        <a target ="popup" href="#" onClick="showSourceHelpPage(); return false;">
+                                            ?
+                                        </a>
+                                    <center>        
+                                </font>      
+                           
                         </td>
                         
                         <td bgcolor="#006699" title = "Display the total of bytes received every day of the week for each sources.">
+                            
                                 <font color = "white">
-                                    <div class="left">Bytecount</div>
-                                    <a target ="popup" href="#" onClick="showBytecountHelpPage(); return false;">
-                                        <div class="right">?</div>
-                                    </a> 
+                                    <center>
+                                        Bytecount
+                                        <br>
+                                        <a target ="popup" href="#" onClick="showBytecountHelpPage(); return false;">                                
+                                            ?
+                                        </a>
+                                    </center>
                                 </font>
+                            
                         </td>
                         
                         <td bgcolor="#006699" title = "Display the total of files received every day of the week for each sources.">
+                           
                                 <font color = "white">
-                                    <div class="left">Filecount</div>
-                                    <a target ="popup" href="#" onClick="showFilecountHelpPage(); return false;">
-                                        <div class="right">?</div>
-                                    </a>
+                                    <center>
+                                        Filecount
+                                        <br>
+                                        <a target ="popup" href="#" onClick="showFilecountHelpPage(); return false;">                            
+                                            ?                          
+                                        </a>
+                                    </center>    
                                 </font>
+                                          
                         </td>
                         
                         <td bgcolor="#006699" title = "Display the total of errors that occured during the receptions for every day of the week for each sources.">
+                            
                                 <font color = "white">
-                                    <div class="left">Errors</div>
-                                    <a target ="popup"  href="#" onClick="showErrorsHelpPage(); return false;">
-                                        <div class="right">?</div>
-                                    </a>
+                                    <center>
+                                        Errors
+                                        <br>
+                                        <a target ="popup"  href="#" onClick="showErrorsHelpPage(); return false;">
+                                            ?
+                                        </a>
+                                    </center>
                                 </font>
+                           
+                        
                         </td>
-                        
-                        
-                    </tr>   
+                    </tr>
         
                </thead>
         
@@ -355,7 +406,8 @@ def generateWebPage( rxNames, txNames, months ):
             fileHandle.write( """<tr> <td bgcolor="#99FF99">%s</td> """ %(rxName))
             fileHandle.write( """<td bgcolor="#66CCFF">Months&nbsp;:&nbsp;""" )
         else:
-            fileHandle.write( """ <tr> <td bgcolor="#99FF99"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false">?</a></div></td> """ %(rxName, rxNames[rxName].replace("'","").replace('"','')))
+            machineName = getMachineNameFromDescription( rxNames[rxName] )
+            fileHandle.write( """ <tr> <td bgcolor="#99FF99"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false"><font color="black">?</font></a></div><br>(%s)</td> """ %(rxName, rxNames[rxName].replace("'","").replace('"',''), machineName ) )
             fileHandle.write( """<td bgcolor="#66CCFF">Months&nbsp;:&nbsp;""" )
         
         
@@ -407,63 +459,93 @@ def generateWebPage( rxNames, txNames, months ):
         <div class="tableContainer">         
             <table> 
                <thead>
-                    <tr>
+                     <tr>
 
                         <td bgcolor="#006699">
+                            
                                 <font color = "white">
-                                    <div class="left">Clients</div>
-                                    <a target ="popup" href="#" onClick="showClientHelpPage(); return false;">
-                                        <div class="right">?</div>
-                                    </a>
-                                </font>
+                                    <center>
+                                        Clients
+                                        <br>
+                                        <a target ="popup" href="#" onClick="showClientHelpPage(); return false;">
+                                            ?
+                                        </a>
+                                    </center>    
+                                </font> 
+                           
                         </td>
-                        
-                        <td bgcolor="#006699"  title = "Display the taverage latency of file transfers for every day of the week for each clients.">
-                            <font color = "white">
-                                    <div class="left">Latency</div>
-                                    <a target ="popup" href="#" onClick="showLatencyHelpPage(); return false;">
-                                        <div class="right">?</div>
-                                    </a>                
-                            </font>            
-                        </td>
-                        
-                        <td bgcolor="#006699"  title = "Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients.">
+                    
+                        <td bgcolor="#006699" title = "Display the taverage latency of file transfers for every day of the week for each clients.">
+                            
                                 <font color = "white">
-                                    <div class="left">Files over Max. Lat.</div>
-                                     <a target ="popup" href="#" onClick="showFilesOverMaxLatencyHelpPage(); return false;">
-                                        <div class="right">?</div>
-                                     </a>                        
+                                    <center>
+                                        Latency
+                                        <br>
+                                        <a target ="popup" href="#" onClick="showLatencyHelpPage(); return false;">
+                                            ?
+                                        </a>
+                                    </center>
                                 </font>
+                           
                         </td>
-                        
+                    
+                        <td bgcolor="#006699" title = "Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients.">
+                            
+                                <font color = "white">
+                                    <center>
+                                        Files Over Max. Lat.
+                                        <br>
+                                        <a target ="popup" href="#" onClick="showFilesOverMaxLatencyHelpPage(); return false;">
+                                            ?
+                                        </a>
+                                    </center>
+                                </font>
+                                            
+                        </td>
+                    
                         <td bgcolor="#006699" title = "Display the total of bytes transfered every day of the week for each clients.">
-                                <font color = "white">
-                                    <div class="left">Bytecount</div>
-                                    <a target ="popup" href="#" onClick="showBytecountHelpPage(); return false;">
-                                        <div class="right">?</div>
-                                    </a>
+                            
+                                <font color = "white">    
+                                    <center>
+                                        Bytecount
+                                        <br>
+                                        <a target ="popup" href="#" onClick="showBytecountHelpPage(); return false;">
+                                            ?
+                                        </a>
+                                    </center>                                  
                                 </font>
+                            
                         </td>
                         
                         <td bgcolor="#006699"  title = "Display the total of files transferred every day of the week for each clients.">
+                            
                                 <font color = "white">
-                                    <div class="left">Filecount</div>
-                                    <a target ="popup" href="#" onClick="showFilecountHelpPage(); return false;">
-                                        <div class="right">?</div>
-                                    </a>
+                                    <center>
+                                        Filecount
+                                        <br>
+                                        <a target ="popup" href="#" onClick="showFilecountHelpPage(); return false;">
+                                            ?
+                                        </a>
+                                    </center>
                                 </font>
+                                           
                         </td>
                         
                         <td bgcolor="#006699" title = "Display the total of errors that occured during file transfers every day of the week for each clients.">
+                            
                                 <font color = "white">
-                                    <div class="left">Errors</div>
-                                    <a target ="popup" href="#" onClick="showErrorsHelpPage(); return false;">
-                                        <div class="right">?</div>
-                                    </a>
-                                </font>
+                                    <center>
+                                        Errors
+                                        <br>
+                                        <a target ="popup" href="#" onClick="showErrorsHelpPage(); return false;">
+                                            ?
+                                        </a>
+                                    </center>    
+                                </font>                                       
                         </td>
             
-                    </tr>  
+                    </tr>
+                    
                 </thead>
                 
                 <tbody>    
@@ -476,7 +558,8 @@ def generateWebPage( rxNames, txNames, months ):
             fileHandle.write( """<tr> <td bgcolor="#99FF99">%s</td> """ %(txName))
             fileHandle.write( """<td bgcolor="#66CCFF">Months:&nbsp;""" )
         else:
-            fileHandle.write( """<tr> <td bgcolor="#99FF99"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false">?</a></div></td> """ %(txName, txNames[txName].replace("'","").replace('"','') ))
+            machineName = getMachineNameFromDescription( txNames[txName] )
+            fileHandle.write( """<tr> <td bgcolor="#99FF99"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false"><font color="black">?</font></a></div><br>(%s)</td> """ %(txName, txNames[txName].replace("'","").replace('"',''), machineName ))
             fileHandle.write( """<td bgcolor="#66CCFF">Months:&nbsp;""" )
         
         
