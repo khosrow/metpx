@@ -497,7 +497,7 @@ def updateGroupedRoundRobinDatabases( infos, logger = None ):
         for dataType in dataPairs:
             rrdFileName = RrdUtilities.buildRRDFileName( dataType = dataType, clients = infos.group, groupName = infos.group, machines =  infos.machines,fileType = infos.fileTypes[0], usage = "group" )
             if not os.path.isfile( rrdFileName ):
-                createRoundRobinDatabase( rrdFileName, StatsDateLib.getIsoFromEpoch( startTime ), dataType )
+                createRoundRobinDatabase( rrdFileName,  startTime, dataType )
             
             if endTime >  startTime  :
                 j = 0 
