@@ -248,7 +248,7 @@ def getOptionsFromParser( parser ):
     if clientNames[0] == "ALL":
         # Get all of the client/sources that have run between graph's start and end. 
         if totals == True or havingRun == True :                  
-            rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNamesHavingRunDuringPeriod( start, end, machines )
+            rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNamesHavingRunDuringPeriod( start, end, machines,havingrunOnAllMachines = True )
             mergerType = "totalForMachine"
         else:#Build graphs only for currently runningclient/sources.      
             rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machines[0] )
@@ -1304,7 +1304,7 @@ def getPairsFromDatabasesWithProportions( type, machine, start, end, infos, logg
             if value != 'nan':
                 totalFilecount = float( float(totalFilecount) +  float( value ) )
         
-        print "entry : %s total:%s" %( entry, totalFilecount )
+        #print "entry : %s total:%s" %( entry, totalFilecount )
         filecountTotals.append( totalFilecount )
             
         
@@ -1349,9 +1349,9 @@ def getPairsFromDatabasesWithProportions( type, machine, start, end, infos, logg
             
             # Add up total.
             total = total + valueToAdd
-            print "client : %s value : %s clientFiles : %s Total : %s Addedvalue : %s" %( client, ( typeData[client][entry] ).split( ":" )[1].replace(" ", ""), clientsFilecount,filecountTotals[entry], valueToAdd )
+            #print "client : %s value : %s clientFiles : %s Total : %s Addedvalue : %s" %( client, ( typeData[client][entry] ).split( ":" )[1].replace(" ", ""), clientsFilecount,filecountTotals[entry], valueToAdd )
         
-            print "percentage :%s" %percentage
+            #print "percentage :%s" %percentage
         # Add total to pairsto return 
         pairs.append( [typeData[client][entry].split( " " )[0].replace( ":", "" ), total] )
     
