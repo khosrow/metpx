@@ -268,7 +268,7 @@ class GeneralStatsLibraryMethods:
     
     
         
-    def getRxTxNamesHavingRunDuringPeriod( start, end, machines, pattern = None ):  
+    def getRxTxNamesHavingRunDuringPeriod( start, end, machines, pattern = None, havingrunOnAllMachines = False  ):  
         """
             Browses all the rrd database directories to find 
             the time of the last update of each databases.
@@ -291,32 +291,59 @@ class GeneralStatsLibraryMethods:
         start = StatsDateLib.getSecondsSinceEpoch(start)
         end = StatsDateLib.getSecondsSinceEpoch(end)
         
-        for machine in machines:
-            combinedMachineName = combinedMachineName + machine
-                
-        rxTxDatabasesLongNames = glob.glob( "%sbytecount/*_%s*" %( StatsPaths.STATSCURRENTDB, combinedMachineName ) )
-        txOnlyDatabasesLongNames = glob.glob( "%slatency/*_%s*" %( StatsPaths.STATSCURRENTDB, combinedMachineName )   )
-        
+        if havingrunOnAllMachines == False:
+            for machine in machines:           
+                    
+                rxTxDatabasesLongNames = glob.glob( "%sbytecount/*_*%s*" %( StatsPaths.STATSCURRENTDB, machine ) )
+                txOnlyDatabasesLongNames = glob.glob( "%slatency/*_*%s*" %( StatsPaths.STATSCURRENTDB, machine )   )
             
-        #Keep only client/source names.
-        for rxtxLongName in rxTxDatabasesLongNames:
-            if pattern == None:
-                rxTxDatabases.append( rxtxLongName )
-            else:
-                if fnmatch.fnmatch(os.path.basename(rxtxLongName), pattern ):
+                
+                #Keep only client/source names.
+                for rxtxLongName in rxTxDatabasesLongNames:
+                    if pattern == None:
+                        if rxtxLongName not in rxTxDatabases:
+                            rxTxDatabases.append( rxtxLongName )
+                    else:
+                        if fnmatch.fnmatch(os.path.basename(rxtxLongName), pattern ):
+                            if rxtxLongName not in rxTxDatabases:
+                                rxTxDatabases.append( rxtxLongName )
+                 
+                    
+                for txLongName in txOnlyDatabasesLongNames:
+                    if pattern == None:
+                        if txLongName not in txOnlyDatabases:
+                            txOnlyDatabases.append( txLongName )    
+                    else:               
+                        if fnmatch.fnmatch(os.path.basename(txLongName), pattern):                
+                            if txLongName not in txOnlyDatabases:
+                                txOnlyDatabases.append( txLongName )  
+        
+        else:
+            for machine in machines:
+                combinedMachineName = combinedMachineName + machine
+    
+            rxTxDatabasesLongNames = glob.glob( "%sbytecount/*_%s*" %( StatsPaths.STATSCURRENTDB, combinedMachineName ) )
+            txOnlyDatabasesLongNames = glob.glob( "%slatency/*_%s*" %( StatsPaths.STATSCURRENTDB, combinedMachineName )   )
+    
+    
+            #Keep only client/source names.
+            for rxtxLongName in rxTxDatabasesLongNames:
+                if pattern == None:
                     rxTxDatabases.append( rxtxLongName )
-             
-                
-        for txLongName in txOnlyDatabasesLongNames:
-            if pattern == None:
-                txOnlyDatabases.append( txLongName )    
-            else:               
-                if fnmatch.fnmatch(os.path.basename(txLongName), pattern):                
+                else:
+                    if fnmatch.fnmatch(os.path.basename(rxtxLongName), pattern ):
+                        rxTxDatabases.append( rxtxLongName )
+    
+    
+            for txLongName in txOnlyDatabasesLongNames:
+                if pattern == None:
                     txOnlyDatabases.append( txLongName )
-       
-        rxOnlyDatabases = filter( lambda x: x not in txOnlyDatabases, rxTxDatabases )    
+                else:
+                    if fnmatch.fnmatch(os.path.basename(txLongName), pattern):
+                        txOnlyDatabases.append( txLongName )    
         
-            
+        rxOnlyDatabases = filter( lambda x: x not in txOnlyDatabases, rxTxDatabases )    
+                    
             
         for rxDatabase in rxOnlyDatabases:  
             lastUpdate = RrdUtilities.getDatabaseTimeOfUpdate( rxDatabase, "rx" )
