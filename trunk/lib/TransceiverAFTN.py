@@ -671,7 +671,7 @@ class TransceiverAFTN:
             for index in range(len(data)):
                 if nextPart == 0:
                     # We will have access to the first part of the message here (big or not)
-                    mp = MessageParser(data[index], mm, self.logger)
+                    mp = MessageParser(data[index], mm, self.logger, True)
                     mm.header, mm.type = mp.getHeader(), mp.getType()
                     self.logger.debug("Header: %s, Type: %s" % (mm.header, mm.type))
                 if mm.header== None and mm.type==None:

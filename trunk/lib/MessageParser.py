@@ -31,9 +31,14 @@ class MessageParser:
 
     REPLY_TYPES = ['RQM_OK', 'RQF_OK', 'RQM_UNK', 'RQF_UNK']
 
-    def __init__(self, text, messageManager=None, logger=None):
+    def __init__(self, text, messageManager=None, logger=None, tx=False):
+        """
+        tx: default is False, means the MessageParser has been called on reception, when True, it means that
+            it had been called on transmission
+        """
         self.mm = messageManager
         self.logger = logger
+        self.tx = tx
 
         if type(text) == str:
             self.text = text
@@ -64,7 +69,7 @@ class MessageParser:
         type: %s
         serviceType: %s (%s)
         header: %s 
-        """ % (self.type, self.serviceType, MessageParser.names[self.serviceType], self.header)
+        """ % (self.type, self.serviceType, MessageParser.names.get(self.serviceType, "Undefined Service Type"), self.header)
 
     def findType(self):
         """
@@ -97,7 +102,7 @@ class MessageParser:
         elif words[0] in ['RQM', 'RQF'] and len(words) >= 2 and words[1] in ['UNK', 'OK']:
             self.type = words[0] + '_' + words[1]
 
-        elif words[0] in MessageAFTN.PRIORITIES:
+        elif words[0] in MessageAFTN.PRIORITIES and self.tx:
             self.type = 'PRI_DESTADD_TEXT'
             self.priority = words[0]
             addresses = words[1:]
@@ -153,30 +158,32 @@ class MessageParser:
 
     def findServiceType(self):
         wordsFirstLine = self.textLines[0].split()
+        try:
+            if wordsFirstLine[1] == "QTA" and wordsFirstLine[2] == "MIS":
+                self.serviceType = 0
+            elif wordsFirstLine[1] == "LR" and wordsFirstLine[3] == "EXP":
+                self.serviceType = 1 
+            elif wordsFirstLine[1] == "LR" and wordsFirstLine[3] == "LS":
+                self.serviceType = 2 
+            elif wordsFirstLine[1] == "QTA" and wordsFirstLine[2] == "OGN" and wordsFirstLine[4] == "CORRUPT":
+                self.serviceType = 3 
+            elif wordsFirstLine[1] == "QTA" and wordsFirstLine[2] == "OGN" and wordsFirstLine[4] == "INCORRECT":
+                self.serviceType = 8 
+            elif (wordsFirstLine[1] == "AFTN" and wordsFirstLine[2] == "MHS" and wordsFirstLine[3] == "COMSTATE") or wordsFirstLine[1] == "COMSTATE":
+                self.serviceType = 9 
 
-        if wordsFirstLine[1] == "QTA" and wordsFirstLine[2] == "MIS":
-            self.serviceType = 0
-        elif wordsFirstLine[1] == "LR" and wordsFirstLine[3] == "EXP":
-            self.serviceType = 1 
-        elif wordsFirstLine[1] == "LR" and wordsFirstLine[3] == "LS":
-            self.serviceType = 2 
-        elif wordsFirstLine[1] == "QTA" and wordsFirstLine[2] == "OGN" and wordsFirstLine[4] == "CORRUPT":
-            self.serviceType = 3 
-        elif wordsFirstLine[1] == "QTA" and wordsFirstLine[2] == "OGN" and wordsFirstLine[4] == "INCORRECT":
-            self.serviceType = 8 
-        elif (wordsFirstLine[1] == "AFTN" and wordsFirstLine[2] == "MHS" and wordsFirstLine[3] == "COMSTATE") or wordsFirstLine[1] == "COMSTATE":
-            self.serviceType = 9 
-
-        if len(self.textLines) >= 3:
-            wordsThirdLine = self.textLines[2].split()
-            if wordsFirstLine[1] == "ADS" and wordsThirdLine[0] == "UNKNOWN" and len(wordsFirstLine) == 4:
-                self.serviceType = 4 
-            elif wordsFirstLine[1] == "ADS" and wordsThirdLine[0] == "CHECK":
-                self.serviceType = 5 
-            elif wordsFirstLine[1] == "ADS" and wordsThirdLine[0] == "UNKNOWN" and len(wordsFirstLine) == 3:
-                self.serviceType = 6 
-            elif wordsFirstLine[1] == "ADS" and wordsThirdLine[0] == "UNAUTHORIZED":
-                self.serviceType = 7 
+            if len(self.textLines) >= 3:
+                wordsThirdLine = self.textLines[2].split()
+                if wordsFirstLine[1] == "ADS" and wordsThirdLine[0] == "UNKNOWN" and len(wordsFirstLine) == 4:
+                    self.serviceType = 4 
+                elif wordsFirstLine[1] == "ADS" and wordsThirdLine[0] == "CHECK":
+                    self.serviceType = 5 
+                elif wordsFirstLine[1] == "ADS" and wordsThirdLine[0] == "UNKNOWN" and len(wordsFirstLine) == 3:
+                    self.serviceType = 6 
+                elif wordsFirstLine[1] == "ADS" and wordsThirdLine[0] == "UNAUTHORIZED":
+                    self.serviceType = 7 
+        except:
+            self.serviceType = None
 
 if __name__ == '__main__':
     import os
