@@ -74,6 +74,58 @@ class _CsvInfos:
         self.dataSource = dataSource
         self.machinesAreClusters = machinesAreClusters
         
+
+
+def getInterval( startTime, timeOfLastUpdate, graphicType = "daily", goal = "fetchData"  ):    
+    """         
+        Returns the interval that was used for data consolidation. 
+        
+        If graphicsType is weekly, monthly or yearly interval returned
+        will always be the same as long timeOfLastUpdate- startTime is 
+        within it's the maximum lenggth of it's associated RRA. 
+        
+        Otherwise it is based on the distance between
+        starTTime being used and the time of the 
+        last update of the database.
+        
+        Method is very usefull when handling totals.    
+       
+    """ 
+    #432000 is 5 days in seconds
+    #1209600 is 14 days in seconds
+    #21024000 is 243 days in seconds    
+        
+    if graphicType == "yearly" and  (timeOfLastUpdate - startTime ):
+        interval = 1440
+    elif graphicType == "monthly" and (timeOfLastUpdate - startTime ) < (21024000):
+        interval = 240
+    elif graphicType == "weekly"  and (timeOfLastUpdate - startTime ) < (1209600):
+        interval = 60  
+    elif graphicType == "daily"  and (timeOfLastUpdate - startTime ) < (432000):
+        if goal == "fetchData":
+            interval = 1                     
+        else :
+            interval = 10           
+    
+    elif ( timeOfLastUpdate - startTime ) < (432000):#less than 5 days
+        if goal == "fetchData":
+            interval = 1                    
+        else :
+            interval = 10
+                         
+    elif ( timeOfLastUpdate - startTime ) < (1209600):#less than two week
+        interval = 60
+        
+    elif (timeOfLastUpdate - startTime) < (21024000):
+        interval = 240
+         
+    else:
+        interval = 1440    
+        
+       
+    return interval
+
+
         
 def buildCsvFileName( infos ):
     """ 
@@ -179,10 +231,24 @@ def writeCsvFileHeader( fileHandle, infos ):
         
     """
     
+    valueTypes = [ "min", "max", "mean", "total" ]
     if infos.fileType == "rx":
-        fileHandle.write( "sources," + str(SUPPORTED_RX_DATATYPES).replace("[", "").replace( "]","") + '\n' )
+        valuesToWrite = ""
+        dataTypes = SUPPORTED_RX_DATATYPES
+        for dataType in dataTypes:
+            for valueType in valueTypes:
+                valuesToWrite = valuesToWrite + "," + dataType + " " + valueType
+                
+        fileHandle.write( "sources" + valuesToWrite + '\n' )
+        
     elif infos.fileType == "tx":
-        fileHandle.write( "clients," + str(SUPPORTED_TX_DATATYPES).replace("[", "").replace( "]","") + '\n' )    
+        valuesToWrite = ""
+        dataTypes = SUPPORTED_TX_DATATYPES
+        for dataType in dataTypes:
+            for valueType in valueTypes:
+                valuesToWrite = valuesToWrite + "," + dataType + " " + valueType        
+        
+        fileHandle.write( "clients"  + valuesToWrite + '\n' )    
     
         
     
@@ -209,6 +275,8 @@ def writeDataToFileName( infos, sourlients, data, fileName ):
     """
     
     lineTowrite = ""
+    valueTypes = [ "min", "max", "mean", "total" ]
+    
     
     if infos.fileType == "rx":
         dataTypes = SUPPORTED_RX_DATATYPES
@@ -224,7 +292,8 @@ def writeDataToFileName( infos, sourlients, data, fileName ):
     if not os.path.isdir( os.path.dirname(fileName) ):
         os.makedirs(os.path.dirname(fileName), 0777 )
         
-        
+    print data    
+    
     fileHandle = open( fileName, "w" )
     
     writeCsvFileHeader( fileHandle, infos )
@@ -241,56 +310,169 @@ def writeDataToFileName( infos, sourlients, data, fileName ):
             lineTowrite = sourlientName + ' on ' + machine
             
             for dataType in dataTypes:
-                lineTowrite = lineTowrite + ',' + str( data[sourlientName][machine][dataType] )
+                for valueType in valueTypes:
+                    lineTowrite = lineTowrite + ',' + str( data[sourlientName][machine][dataType][valueType] )
             
             fileHandle.write(lineTowrite +  '\n' )
     
     
     fileHandle.close()
- 
- 
- 
-def getAbsoluteMean( databaseName, startTime, endTime, logger = None  ):
-    """
-        This methods returns the mean of the entire set of data found between 
-        startTime and endTime within the specified database name.
-        
-                
-        In most case this will be a different mean than the visible mean found
-        on the graphic since the drawn points usually show the total or average of 
-        numerous data entries.
-        
-    """
-    
-    sum = 0 
-    avg = 0
-    
-    try :
-        
-        output = rrdtool.fetch( databaseName, 'AVERAGE', '-s', "%s" %(int(StatsDateLib.getSecondsSinceEpoch(startTime)) + 60 ), '-e', '%s' %int(StatsDateLib.getSecondsSinceEpoch(endTime)) )
-        
-        meanTuples = output[2]
-        i = 0
-        for meanTuple in meanTuples :
-            #print meanTuple
-            if meanTuple[0] != 'None' and meanTuple[0] != None :
-                sum = sum + float(meanTuple[0])
-                i = i + 1         
-        
-        avg = sum / len( meanTuples )  
-        
-    
-    except Exception, inst:
-        #print inst
-        if logger != None:
-            logger.error( "Error in generateRRDGraphics.getOverallMin. Unable to read %s" %databaseName )
-        pass    
-            
-    return avg  
- 
-    
-    
 
+
+
+def fetchDataFromRRDDatabase( databaseName, startTime, endTime, interval, graphicType):
+    """
+        Returns the stored data from a database based on the desiered interval.
+    """
+    
+    resolution = int(interval*60)
+    
+    if endTime > ( time.time() )/3600*3600:
+        endTime = int(time.time())/3600*3600 #top of the hour...databases are never any newer
+        
+    # round end time to time closest to desired resolution EX : closest 10 minutes,hour,day,etc... 
+    endTime = int(endTime)/int(resolution)*int(resolution)
+          
+    
+    try:
+        output = rrdtool.fetch( databaseName, 'AVERAGE', '-r', str(resolution), '-s', "%s" %(startTime), '-e', '%s' %(endTime) )
+        #print databaseName, 'AVERAGE', '-r', str(resolution), '-s', "%s" %(startTime), '-e', '%s' %(endTime)
+    
+    except:
+        output = ""
+        #------------- print "Error.Could not fetch data from %s." %databaseName
+        #------------------------------------------- print "Program terminated."
+        #------------------------------------------------------------ sys.exit()
+        
+    
+    return output  
+
+def getGraphicsMinMaxMeanTotal( databaseName, startTime, endTime,graphicType, dataInterval, desiredInterval = None,  type="average", logger=None ):
+    """
+        This methods returns the min max and mean of the entire set of data that is drawn 
+        on the graphic.
+                
+    """
+    
+    min = None
+    max = None
+    sum = 0.0
+    avg = 0
+    total = 0.0
+    nbEntries = 0    
+    nbEntriesPerPoint =1    
+    
+    if desiredInterval == None :
+        desiredInterval = dataInterval
+        
+    if endTime > ( time.time()/3600 * 3600 ):
+        realEndTime = int(time.time())/3600 * 3600 # round to start of hour, wich should be last update... 
+    else :
+        realEndTime = endTime    
+        
+    output = fetchDataFromRRDDatabase( databaseName, startTime, endTime, dataInterval, graphicType )  
+    
+    
+    if output != "":
+    
+        meanTuples = output[2]
+        nbEntries = len( meanTuples )-1 #we dont use the first entry
+        
+    
+            
+                 
+        desiredNumberOfEntries = float( (realEndTime - startTime)/(desiredInterval*60) )
+          
+        #print "nbEntries %s desiredNumberOfEntries %s" %( nbEntries, desiredNumberOfEntries )
+        if nbEntries > desiredNumberOfEntries:
+            nbEntriesPerPoint = int( nbEntries/desiredNumberOfEntries )
+            nbEntries = desiredNumberOfEntries
+                    
+            
+        if type == "totals":
+            
+            for i in range( 1,len(meanTuples),1 ) :            
+                
+                if meanTuples[i][0] != 'None' and meanTuples[i][0] != None :
+                    
+                    realValue = ( float(meanTuples[i][0]) * float(interval)/ nbEntriesPerPoint ) 
+                    
+                    if  realValue > max:
+                        max = realValue
+                    if realValue < min or min == None :
+                        min = realValue 
+                    
+                    sum = sum + realValue 
+                    
+                else:# don't count non-filled entries in mean.
+                    nbEntries = nbEntries - 1
+                        
+            if nbEntries != 0:            
+                avg = sum / nbEntries 
+            
+            
+            total = sum
+                
+        else:
+            
+            
+            for i in range( int(nbEntriesPerPoint)+1 ,( len(meanTuples) ), int(nbEntriesPerPoint) ) : 
+                
+                if nbEntriesPerPoint != 1:           
+                    value = None
+                    nbInvalidEntries = 0 
+                                   
+                    for j in range( i-int(nbEntriesPerPoint), i, 1):                    
+                        if meanTuples[j][0] != 'None' and meanTuples[j][0] != None :
+                            if value == None :
+                                value = 0.0
+                            value = value + float( meanTuples[j][0] )
+                                                         
+                        else:# don't count non-filled entries in mean.
+                             
+                            nbInvalidEntries = nbInvalidEntries + 1
+                                            
+                    if nbInvalidEntries == nbEntriesPerPoint:
+                        
+                        nbEntries = nbEntries - 1 
+                    
+                    if value != None :                    
+                        value = float( float(value)/ float(nbEntriesPerPoint) )
+                        
+                        if  value > max:
+                            max = value
+                        if value < min or min == None :
+                            min = value 
+                        
+                        sum = sum + value 
+            
+                else:         
+                    
+                    if meanTuples[i][0] != 'None' and meanTuples[i][0] != None :
+                    
+                        value = ( float(meanTuples[i][0]) ) 
+                        
+                        if  value > max:
+                            max = value
+                        if  value < min or min == None :
+                            min = value 
+                        
+                        sum = sum + value 
+                        
+                    else:# don't count non-filled entries in mean.
+                        nbEntries = nbEntries - 1
+                        
+                
+            if nbEntries != 0:            
+                avg = float(sum) / float(nbEntries)
+                
+            total = float( sum ) * float( desiredInterval )
+              
+    
+    return min, max, avg, total 
+ 
+ 
+       
 def getDataFromDatabases( sourlients, dataTypes, infos ):
     """
         @summary: Gathers up all the requried data from allthe concerned databases 
@@ -321,14 +503,22 @@ def getDataFromDatabases( sourlients, dataTypes, infos ):
                 machine = str(machines).replace('[','').replace(']', '').replace(',','').replace( "'",'' ).replace('"','' ).replace(" ",'').replace('[','').replace(']', '').replace(',','').replace( "'",'' ).replace('"','' ).replace(" ",'')           
             if machine in sourlientsMachines:
                 data[sourlient][machine] = {}
+                
                 for dataType in dataTypes :
-                    databaseName = RrdUtilities.buildRRDFileName(dataType, [sourlient], [machine], "", infos.fileType)
-                    print databaseName
-                    mean =   getAbsoluteMean(databaseName, infos.start, infos.end, logger = None )  
-                    data[sourlient][machine][dataType] = mean   
                     
-    
-    
+                    databaseName = RrdUtilities.buildRRDFileName(dataType, [sourlient], [machine], "", infos.fileType)
+                    lastUpdate = RrdUtilities.getDatabaseTimeOfUpdate( databaseName, infos.fileType )        
+                    fetchedInterval = getInterval( int(StatsDateLib.getSecondsSinceEpoch(infos.start)), lastUpdate, dataType, goal = "fetchData"  )  
+                    desiredInterval = getInterval( int(StatsDateLib.getSecondsSinceEpoch(infos.start)), lastUpdate, dataType, goal = "plotGraphic"  )
+                    interval        = desiredInterval     
+                    minimum, maximum, mean, total = getGraphicsMinMaxMeanTotal( databaseName, int(StatsDateLib.getSecondsSinceEpoch(infos.start)), int(StatsDateLib.getSecondsSinceEpoch(infos.end)), infos.span, fetchedInterval,desiredInterval, type = "average" )
+                    data[sourlient][machine][dataType] = {}
+                    data[sourlient][machine][dataType]["min"]   = minimum
+                    data[sourlient][machine][dataType]["max"]   = maximum
+                    data[sourlient][machine][dataType]["mean"]  = mean
+                    data[sourlient][machine][dataType]["total"] = total
+                     
+
     return data
     
     
@@ -359,10 +549,10 @@ def transferDatabasesToCsvFile( infos ):
     
     fileName = buildCsvFileName( infos )
 
-    print fileName
+    
     
     writeDataToFileName(infos, sourlients, data, fileName)
-
+    print fileName
 
 
 def transferPicklesToCsvFile( infos ):
