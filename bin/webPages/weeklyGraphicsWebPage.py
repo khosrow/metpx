@@ -330,7 +330,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
                 fileHandle.write(  "<div class='right'><font size='2' color='black'>CSV files&nbsp;:&nbsp; " )
                 oneFileFound = True 
             
-            fileHandle.write(  """<a  href="%s" class="blackLinks">%.3s.csv&nbsp;</a>"""%(  webLink,currentMonth ) ) 
+            fileHandle.write(  """<a  href="%s" class="blackLinks">%.3s.csv&nbsp;</a>"""%(  webLink,currentWeek ) ) 
         
     if oneFileFound == True :    
         fileHandle.write(  """
@@ -501,7 +501,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
                 fileHandle.write(  "<div class='right'><font size='2' color='black'> CSV files&nbsp;:&nbsp; " )
                 oneFileFound = True 
             
-            fileHandle.write(  """<a  href="%s" class="blackLinks">%.3s.csv&nbsp;</a>"""%(  webLink,currentMonth ) ) 
+            fileHandle.write(  """<a  href="%s" class="blackLinks">%.3s.csv&nbsp;</a>"""%(  webLink,currentWeek ) ) 
         
     if oneFileFound == True :    
         fileHandle.write(  """
