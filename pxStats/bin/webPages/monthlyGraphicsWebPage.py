@@ -45,7 +45,7 @@ from PXManager import *
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
-
+from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 
 LOCAL_MACHINE  = os.uname()[1]    
 NB_MONTHS_DISPLAYED = 3 
@@ -65,7 +65,7 @@ def getMachineNameFromDescription( description ):
     """
     
     machines = ""
-    print description
+    
     lines = description.split("<br>")
     
     for line in lines :
@@ -267,6 +267,10 @@ def generateWebPage( rxNames, txNames, months ):
             </style>
             
             <style type="text/css">
+                a.blackLinks{
+                    color: #000000;
+                }
+                
                 div.tableContainer {
                     width: 95%;        /* table width will be 99% of this*/
                     height: 275px;     /* must be greater than tbody*/
@@ -274,14 +278,16 @@ def generateWebPage( rxNames, txNames, months ):
                     margin: 0 auto;
                     }
                 
-                table {
+
+                
+                table.cssTable {
                     width: 99%;        /*100% of container produces horiz. scroll in Mozilla*/
                     border: none;
                     background-color: #f7f7f7;
                     table-layout: fixed;
                     }
                     
-                table>tbody    {  /* child selector syntax which IE6 and older do not support*/
+                table.cssTable.tbody    {  /* child selector syntax which IE6 and older do not support*/
                     overflow: auto; 
                     height: 225px;
                     overflow-x: hidden;
@@ -301,7 +307,7 @@ def generateWebPage( rxNames, txNames, months ):
                     border-top: solid 1px #d8d8d8;
                     }    
                     
-                td    {
+                td.cssTable  {
                     color: #000;
                     padding-right: 2px;
                     font-size: 12px;
@@ -326,89 +332,130 @@ def generateWebPage( rxNames, txNames, months ):
         </head>    
         
         <body text="#000000" link="#FFFFFF" vlink="000000" bgcolor="#FFF4E5" >          
+        <br>
+        <table>
+            <td>
+                <tr>
+                    <div class="left"><b><font size="5"> Monthly graphics for RX sources from MetPx. </font><font size = "2">*updated weekly</font></b></div>
+                    
+                     
+    """)
+     
         
-        <h2>Monthly graphics for RX sources from MetPx. <font size = "2">*updated weekly</font></h2>
+    oneFileFound = False    
+    for month in months:
+        parameters = StatsConfigParameters( )
+        parameters.getAllParameters()
+               
+        machinesStr = str( parameters.sourceMachinesTags ).replace( '[','' ).replace( ']','' ).replace(',','').replace("'","").replace('"','').replace(" ","")
+        currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
+        file = "/apps/px/pxStats/data/csvFiles/monthly/" + 'rx'+"/%s/%s/%s.csv" %( machinesStr, currentYear, currentMonth )
+        webLink = "csvFiles/monthly/" + 'rx' + "/%s/%s/%s.csv" %( machinesStr, currentYear, currentMonth )
+        print file
         
-        <div class="tableContainer">         
-           <table> 
-               <thead>   
+        if os.path.isfile( file ):
+            if oneFileFound == False :
+                fileHandle.write(  "<div class='right'><font size='2' color='black'>CSV files&nbsp;:&nbsp;" )
+                oneFileFound = True
+            fileHandle.write(  """<a  href="%s" style="color:#000000" class="blackLinks">%.3s.csv&nbsp;</a>"""%(  webLink,currentMonth ) ) 
+    
+    
+    if oneFileFound == True :    
+        fileHandle.write(  """
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            </font>
+                        </div>
+        """ )        
+    
         
-                    <tr>
-                        <td bgcolor="#006699">
-                            
-                                <font color = "white">                            
-                                    <center>
-                                        Sources     
-                                        <br>                       
-                                        <a target ="popup" href="#" onClick="showSourceHelpPage(); return false;">
-                                            ?
-                                        </a>
-                                    <center>        
-                                </font>      
-                           
-                        </td>
+    
+    fileHandle.write( """
+                     </tr>
+                </td>
+             </table>   
+             <br>
+             <br>
+    
+    <div class="tableContainer">         
+       <table class="cssTable" > 
+           <thead>   
+    
+                <tr>
+                    <td bgcolor="#006699" class="cssTable">
                         
-                        <td bgcolor="#006699" title = "Display the total of bytes received every day of the week for each sources.">
-                            
-                                <font color = "white">
-                                    <center>
-                                        Bytecount
-                                        <br>
-                                        <a target ="popup" href="#" onClick="showBytecountHelpPage(); return false;">                                
-                                            ?
-                                        </a>
-                                    </center>
-                                </font>
-                            
-                        </td>
+                            <font color = "white">                            
+                                <center>
+                                    Sources     
+                                    <br>                       
+                                    <a target ="popup" href="#" onClick="showSourceHelpPage(); return false;">
+                                        ?
+                                    </a>
+                                <center>        
+                            </font>      
+                       
+                    </td>
+                    
+                    <td bgcolor="#006699" class="cssTable" title = "Display the total of bytes received every day of the week for each sources.">
                         
-                        <td bgcolor="#006699" title = "Display the total of files received every day of the week for each sources.">
-                           
-                                <font color = "white">
-                                    <center>
-                                        Filecount
-                                        <br>
-                                        <a target ="popup" href="#" onClick="showFilecountHelpPage(); return false;">                            
-                                            ?                          
-                                        </a>
-                                    </center>    
-                                </font>
-                                          
-                        </td>
+                            <font color = "white">
+                                <center>
+                                    Bytecount
+                                    <br>
+                                    <a target ="popup" href="#" onClick="showBytecountHelpPage(); return false;">                                
+                                        ?
+                                    </a>
+                                </center>
+                            </font>
                         
-                        <td bgcolor="#006699" title = "Display the total of errors that occured during the receptions for every day of the week for each sources.">
-                            
-                                <font color = "white">
-                                    <center>
-                                        Errors
-                                        <br>
-                                        <a target ="popup"  href="#" onClick="showErrorsHelpPage(); return false;">
-                                            ?
-                                        </a>
-                                    </center>
-                                </font>
-                           
+                    </td>
+                    
+                    <td bgcolor="#006699" class="cssTable" title = "Display the total of files received every day of the week for each sources.">
+                       
+                            <font color = "white">
+                                <center>
+                                    Filecount
+                                    <br>
+                                    <a target ="popup" href="#" onClick="showFilecountHelpPage(); return false;">                            
+                                        ?                          
+                                    </a>
+                                </center>    
+                            </font>
+                                      
+                    </td>
+                    
+                    <td bgcolor="#006699" class="cssTable" title = "Display the total of errors that occured during the receptions for every day of the week for each sources.">
                         
-                        </td>
-                    </tr>
-        
-               </thead>
-        
-               <tbody> 
-                  
-    """ )
+                            <font color = "white">
+                                <center>
+                                    Errors
+                                    <br>
+                                    <a target ="popup"  href="#" onClick="showErrorsHelpPage(); return false;">
+                                        ?
+                                    </a>
+                                </center>
+                            </font>
+                       
+                    
+                    </td>
+                </tr>
+    
+           </thead>
+    
+           <tbody> 
+              
+""" )
     
     
     #print months
     for rxName in rxNamesArray :
         
         if rxNames[rxName] == "" :
-            fileHandle.write( """<tr> <td bgcolor="#99FF99">%s</td> """ %(rxName))
-            fileHandle.write( """<td bgcolor="#66CCFF">Months&nbsp;:&nbsp;""" )
+            fileHandle.write( """<tr> <td class="cssTable" bgcolor="#99FF99">%s</td> """ %(rxName))
+            fileHandle.write( """<td class="cssTable" bgcolor="#66CCFF">Months&nbsp;:&nbsp;""" )
         else:
             machineName = getMachineNameFromDescription( rxNames[rxName] )
-            fileHandle.write( """ <tr> <td bgcolor="#99FF99"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false"><font color="black">?</font></a></div><br>(%s)</td> """ %(rxName, rxNames[rxName].replace("'","").replace('"',''), machineName ) )
-            fileHandle.write( """<td bgcolor="#66CCFF">Months&nbsp;:&nbsp;""" )
+            fileHandle.write( """ <tr> <td class="cssTable" bgcolor="#99FF99"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false"><font color="black">?</font></a></div><br>(%s)</td> """ %(rxName, rxNames[rxName].replace("'","").replace('"',''), machineName ) )
+            fileHandle.write( """<td class="cssTable" bgcolor="#66CCFF">Months&nbsp;:&nbsp;""" )
         
         
         for month in months:
@@ -423,7 +470,7 @@ def generateWebPage( rxNames, txNames, months ):
         fileHandle.write( "</td>" )
             
         
-        fileHandle.write(  """ <td bgcolor="#66CCFF">Months&nbsp;:&nbsp;""" )        
+        fileHandle.write(  """ <td class="cssTable" bgcolor="#66CCFF">Months&nbsp;:&nbsp;""" )        
         
         for month in months:
             
@@ -436,7 +483,7 @@ def generateWebPage( rxNames, txNames, months ):
         fileHandle.write( "</td>" )
         
         
-        fileHandle.write(  """ <td bgcolor="#66CCFF">Months&nbsp;:&nbsp;""" )
+        fileHandle.write(  """ <td class="cssTable" bgcolor="#66CCFF">Months&nbsp;:&nbsp;""" )
         
         for month in months:
             
@@ -452,16 +499,52 @@ def generateWebPage( rxNames, txNames, months ):
     
     fileHandle.write(  """
             </tbody>
+            
+            
         </table>
     </div>
+    <br>
+    <table>
+        <td>
+            <tr>
+                <div class="left"><b><font size="5"> Monthly graphics for TX clients from MetPx. </font><font size = "2">*updated weekly</font></b></div> """)
     
-    <h2>Monthly graphics for TX clients from MetPx. <font size = "2">*updated weekly</font></h2>    
+    oneFileFound = False
+    for month in months:
+        parameters = StatsConfigParameters( )
+        parameters.getAllParameters()               
+        machinesStr = str( parameters.sourceMachinesTags ).replace( '[','' ).replace( ']','' ).replace(',','').replace("'","").replace('"','').replace(" ","")
+        currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
+        file = "/apps/px/pxStats/data/csvFiles/monthly/" + 'tx'+"/%s/%s/%s.csv" %( machinesStr, currentYear, currentMonth )
+        webLink = "csvFiles/monthly/" + 'tx' + "/%s/%s/%s.csv" %( machinesStr, currentYear, currentMonth )
+        
+        if os.path.isfile( file ):
+            if oneFileFound == False:
+                fileHandle.write(  "<div class='right'><font size='2' color='black'>CSV files&nbsp;:&nbsp;" )
+                oneFileFound = True 
+            
+            fileHandle.write(  """<a  href="%s" style="color:#000000" class="blackLinks">%.3s.csv&nbsp;</a>"""%(  webLink,currentMonth ) ) 
+        
+    if oneFileFound == True :    
+        fileHandle.write(  """
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            </font>
+                        </div>
+        """ )
+    
+    fileHandle.write("""
+                        </tr>
+                    </td>
+                 </table>   
+             <br>
+             <br>
+        
         <div class="tableContainer">         
-            <table> 
+            <table class="cssTable"> 
                <thead>
                      <tr>
 
-                        <td bgcolor="#006699">
+                        <td class="cssTable" bgcolor="#006699">
                             
                                 <font color = "white">
                                     <center>
@@ -475,7 +558,7 @@ def generateWebPage( rxNames, txNames, months ):
                            
                         </td>
                     
-                        <td bgcolor="#006699" title = "Display the taverage latency of file transfers for every day of the week for each clients.">
+                        <td class="cssTable" bgcolor="#006699" title = "Display the taverage latency of file transfers for every day of the week for each clients.">
                             
                                 <font color = "white">
                                     <center>
@@ -489,7 +572,7 @@ def generateWebPage( rxNames, txNames, months ):
                            
                         </td>
                     
-                        <td bgcolor="#006699" title = "Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients.">
+                        <td class="cssTable" bgcolor="#006699" title = "Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients.">
                             
                                 <font color = "white">
                                     <center>
@@ -503,7 +586,7 @@ def generateWebPage( rxNames, txNames, months ):
                                             
                         </td>
                     
-                        <td bgcolor="#006699" title = "Display the total of bytes transfered every day of the week for each clients.">
+                        <td class="cssTable" bgcolor="#006699" title = "Display the total of bytes transfered every day of the week for each clients.">
                             
                                 <font color = "white">    
                                     <center>
@@ -517,7 +600,7 @@ def generateWebPage( rxNames, txNames, months ):
                             
                         </td>
                         
-                        <td bgcolor="#006699"  title = "Display the total of files transferred every day of the week for each clients.">
+                        <td class="cssTable" bgcolor="#006699"  title = "Display the total of files transferred every day of the week for each clients.">
                             
                                 <font color = "white">
                                     <center>
@@ -531,7 +614,7 @@ def generateWebPage( rxNames, txNames, months ):
                                            
                         </td>
                         
-                        <td bgcolor="#006699" title = "Display the total of errors that occured during file transfers every day of the week for each clients.">
+                        <td  class="cssTable" bgcolor="#006699" title = "Display the total of errors that occured during file transfers every day of the week for each clients.">
                             
                                 <font color = "white">
                                     <center>
@@ -555,12 +638,12 @@ def generateWebPage( rxNames, txNames, months ):
     
     for txName in txNamesArray : 
         if txNames[txName] == "" :
-            fileHandle.write( """<tr> <td bgcolor="#99FF99">%s</td> """ %(txName))
+            fileHandle.write( """<tr> <td class="cssTable" bgcolor="#99FF99">%s</td> """ %(txName))
             fileHandle.write( """<td bgcolor="#66CCFF">Months:&nbsp;""" )
         else:
             machineName = getMachineNameFromDescription( txNames[txName] )
-            fileHandle.write( """<tr> <td bgcolor="#99FF99"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false"><font color="black">?</font></a></div><br>(%s)</td> """ %(txName, txNames[txName].replace("'","").replace('"',''), machineName ))
-            fileHandle.write( """<td bgcolor="#66CCFF">Months:&nbsp;""" )
+            fileHandle.write( """<tr> <td class="cssTable" bgcolor="#99FF99"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false"><font color="black">?</font></a></div><br>(%s)</td> """ %(txName, txNames[txName].replace("'","").replace('"',''), machineName ))
+            fileHandle.write( """<td class="cssTable" bgcolor="#66CCFF">Months:&nbsp;""" )
         
         
         
@@ -576,7 +659,7 @@ def generateWebPage( rxNames, txNames, months ):
         fileHandle.write( "</td>" )
         
         
-        fileHandle.write(  """ <td bgcolor="#66CCFF"  >Months:&nbsp;""" )
+        fileHandle.write(  """ <td  class="cssTable" bgcolor="#66CCFF"  >Months:&nbsp;""" )
         
         for month in months:
            
@@ -591,7 +674,7 @@ def generateWebPage( rxNames, txNames, months ):
         
         
         
-        fileHandle.write(  """ <td bgcolor="#66CCFF">Months:&nbsp;""" )
+        fileHandle.write(  """ <td class="cssTable" bgcolor="#66CCFF">Months:&nbsp;""" )
         
         for month in months:
             
@@ -605,7 +688,7 @@ def generateWebPage( rxNames, txNames, months ):
         fileHandle.write( "</td>" )
         
         
-        fileHandle.write(  """ <td bgcolor="#66CCFF"  >Months:&nbsp;""" )
+        fileHandle.write(  """ <td class="cssTable" bgcolor="#66CCFF"  >Months:&nbsp;""" )
         
         for month in months:
             
@@ -619,7 +702,7 @@ def generateWebPage( rxNames, txNames, months ):
         fileHandle.write( "</td>" )
         
         
-        fileHandle.write(  """ <td bgcolor="#66CCFF">Months:&nbsp;""" )
+        fileHandle.write(  """ <td class="cssTable" bgcolor="#66CCFF">Months:&nbsp;""" )
         
         for month in months:
             
