@@ -293,7 +293,7 @@ def generateWebPage( rxNames, txNames, years ):
                     table-layout: fixed;
                     }
                     
-                table.cssTable.tbody    {  /* child selector syntax which IE6 and older do not support*/
+                table.cssTable>tbody    {  /* child selector syntax which IE6 and older do not support*/
                     overflow: auto; 
                     height: 225px;
                     overflow-x: hidden;
