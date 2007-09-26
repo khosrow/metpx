@@ -43,7 +43,7 @@ from PXManager import *
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
-
+from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 LOCAL_MACHINE = os.uname()[1]
     
 NB_YEARS_DISPLAYED = 3
@@ -63,7 +63,7 @@ def getMachineNameFromDescription( description ):
     """
     
     machines = ""
-    print description
+    
     lines = description.split("<br>")
     
     for line in lines :
@@ -270,7 +270,13 @@ def generateWebPage( rxNames, txNames, years ):
                 div.right {float: right; }
             </style>
         
-            <style type="text/css">
+        
+           <style type="text/css">
+           
+                a.blackLinks{
+                    color: #000000;
+                }
+                
                 div.tableContainer {
                     width: 95%;        /* table width will be 99% of this*/
                     height: 275px;     /* must be greater than tbody*/
@@ -278,14 +284,16 @@ def generateWebPage( rxNames, txNames, years ):
                     margin: 0 auto;
                     }
                 
-                table {
+
+                
+                table.cssTable {
                     width: 99%;        /*100% of container produces horiz. scroll in Mozilla*/
                     border: none;
                     background-color: #f7f7f7;
                     table-layout: fixed;
                     }
                     
-                table>tbody    {  /* child selector syntax which IE6 and older do not support*/
+                table.cssTable.tbody    {  /* child selector syntax which IE6 and older do not support*/
                     overflow: auto; 
                     height: 225px;
                     overflow-x: hidden;
@@ -305,7 +313,7 @@ def generateWebPage( rxNames, txNames, years ):
                     border-top: solid 1px #d8d8d8;
                     }    
                     
-                td    {
+                td.cssTable  {
                     color: #000;
                     padding-right: 2px;
                     font-size: 12px;
@@ -326,17 +334,56 @@ def generateWebPage( rxNames, txNames, years ):
                 td:last-child {padding-right: 20px;} /*prevent Mozilla scrollbar from hiding cell content*/
             
             </style>
+
             
         </head>    
         
-        <body text="#000000" link="#FFFFFF" vlink="000000" bgcolor="#FFF4E5" >
-
-            <h2>Yearly graphics for RX sources from MetPx. <font size = "2">*updated monthly</font></h2>
+        <body text="#000000" link="#FFFFFF" vlink="000000" bgcolor="#FFF4E5" > 
+            <br>
+            <table>
+                <td>
+                    <tr>
+                    <div class="left"><b><font size="5"> Yearly graphics for RX sources from MetPx. </font><font size = "2">*updated monthly</font></b></div> 
+    
+    """)
+    
+    oneFileFound = False
+    
+    for year in years:  
+        parameters = StatsConfigParameters( )
+        parameters.getAllParameters()               
+        machinesStr = str( parameters.sourceMachinesTags ).replace( '[','' ).replace( ']','' ).replace(',','').replace("'","").replace('"','').replace(" ","")
+        currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )
+        file = "/apps/px/pxStats/data/csvFiles/yearly/rx/%s/%s.csv" %( machinesStr, currentYear )
+        webLink = "csvFiles/yearly/rx/%s/%s.csv" %( machinesStr, currentYear )
+        print file
+        if os.path.isfile( file ):
+            if oneFileFound == False:
+                fileHandle.write(  "<div class='right'><font size='2' color='black'>CSV files&nbsp;:&nbsp; " )
+                oneFileFound = True 
+            
+            fileHandle.write(  """<a  href="%s" class="blackLinks">%.4s.csv&nbsp;</a>"""%(  webLink,currentYear ) ) 
+        
+    if oneFileFound == True :    
+        fileHandle.write(  """
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            </font>
+                        </div>
+        """ )
+        
+        
+    fileHandle.write("""
+                     </tr>
+                </td>
+             </table>   
+         <br>
+         <br>   
+    
             <div class="tableContainer">            
-            <table> 
+            <table class="cssTable"> 
                <thead>        
                     <tr>
-                        <td bgcolor="#006699">
+                        <td bgcolor="#006699" class="cssTable">
                             
                                 <font color = "white">                            
                                     <center>
@@ -350,7 +397,7 @@ def generateWebPage( rxNames, txNames, years ):
                            
                         </td>
                         
-                        <td bgcolor="#006699" title = "Display the total of bytes received every day of the week for each sources.">
+                        <td bgcolor="#006699" class="cssTable" title = "Display the total of bytes received every day of the week for each sources.">
                             
                                 <font color = "white">
                                     <center>
@@ -364,7 +411,7 @@ def generateWebPage( rxNames, txNames, years ):
                             
                         </td>
                         
-                        <td bgcolor="#006699" title = "Display the total of files received every day of the week for each sources.">
+                        <td bgcolor="#006699" class="cssTable" title = "Display the total of files received every day of the week for each sources.">
                            
                                 <font color = "white">
                                     <center>
@@ -378,7 +425,7 @@ def generateWebPage( rxNames, txNames, years ):
                                           
                         </td>
                         
-                        <td bgcolor="#006699" title = "Display the total of errors that occured during the receptions for every day of the week for each sources.">
+                        <td bgcolor="#006699" class="cssTable" title = "Display the total of errors that occured during the receptions for every day of the week for each sources.">
                             
                                 <font color = "white">
                                     <center>
@@ -401,12 +448,12 @@ def generateWebPage( rxNames, txNames, years ):
     
     for rxName in rxNamesArray :
         if rxNames[rxName] == "" :
-            fileHandle.write( """<tr> <td bgcolor="#99FF99"> %s </td> """ %(rxName))
-            fileHandle.write( """<td bgcolor="#66CCFF">Years&nbsp;:&nbsp;""" )
+            fileHandle.write( """<tr> <td bgcolor="#99FF99" class="cssTable"> %s </td> """ %(rxName))
+            fileHandle.write( """<td bgcolor="#66CCFF" class="cssTable">Years&nbsp;:&nbsp;""" )
         else:
             machineName = getMachineNameFromDescription( rxNames[rxName] )
-            fileHandle.write( """<tr> <td bgcolor="#99FF99"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false"><font color="black">?</font></a></div><br>(%s)</td> """ %(rxName, rxNames[rxName].replace("'","").replace('"',''), machineName))
-            fileHandle.write( """<td bgcolor="#66CCFF">Years&nbsp;:&nbsp;""" )
+            fileHandle.write( """<tr> <td bgcolor="#99FF99" class="cssTable"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false"><font color="black">?</font></a></div><br>(%s)</td> """ %(rxName, rxNames[rxName].replace("'","").replace('"',''), machineName))
+            fileHandle.write( """<td bgcolor="#66CCFF" class="cssTable">Years&nbsp;:&nbsp;""" )
                    
         for year in years:
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )   
@@ -419,7 +466,7 @@ def generateWebPage( rxNames, txNames, years ):
         
         fileHandle.write( "</td>" )      
     
-        fileHandle.write(  """ <td bgcolor="#66CCFF">Years&nbsp;:&nbsp;""" )
+        fileHandle.write(  """ <td bgcolor="#66CCFF" class="cssTable">Years&nbsp;:&nbsp;""" )
         
         
         
@@ -435,7 +482,7 @@ def generateWebPage( rxNames, txNames, years ):
         fileHandle.write( "</td>" )    
         
         
-        fileHandle.write(  """ <td bgcolor="#66CCFF">Years&nbsp;:&nbsp;""" )
+        fileHandle.write(  """ <td bgcolor="#66CCFF" class="cssTable">Years&nbsp;:&nbsp;""" )
         
         for year in years:
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )            
@@ -448,19 +495,58 @@ def generateWebPage( rxNames, txNames, years ):
         fileHandle.write( "</td></tr>" )    
               
     
-    fileHandle.write(  """
-                    </tbody>
-            </table>
-        </div>    
+    fileHandle.write(  """    
+            </tbody>
+        </table>
+    </div> 
     
-    <h2>Yearly graphics for TX clients from MetPx. <font size = "2">*updated monthly</font></h2>
+        <br>
+        <table >
+            <td>
+                <tr>
+                <div class="left"><b><font size="5"> Yearly graphics for TX clients from MetPx. </font><font size = "2">*updated monthly</font></b></div> 
+    
+    """)
+    
+    oneFileFound = False
+    
+    for year in years:    
+        parameters = StatsConfigParameters( )
+        parameters.getAllParameters()               
+        machinesStr = str( parameters.sourceMachinesTags ).replace( '[','' ).replace( ']','' ).replace(',','').replace("'","").replace('"','').replace(" ","")
+        currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )
+        file = "/apps/px/pxStats/data/csvFiles/yearly/tx/%s/%s.csv" %( machinesStr, currentYear ) 
+        webLink = "csvFiles/yearly/tx/%s/%s.csv" %( machinesStr, currentYear ) 
         
+        print file
+        if os.path.isfile( file ):
+            if oneFileFound == False:
+                fileHandle.write(  "<div class='right'><font size='2' color='black'> CSV files&nbsp;:&nbsp; " )
+                oneFileFound = True 
+            
+            fileHandle.write(  """<a  href="%s" class="blackLinks">%.4s.csv&nbsp;</a>"""%(  webLink,currentYear ) ) 
+        
+    if oneFileFound == True :    
+        fileHandle.write(  """
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            </font>
+                        </div>
+        """ )
+    
+    
+    
+    fileHandle.write("""   
+                        </tr>
+                    </td>
+                 </table>   
+             <br>
+             <br>  
         <div class="tableContainer">         
-            <table> 
+            <table class="cssTable" > 
                <thead>
                     <tr>
 
-                        <td bgcolor="#006699">
+                        <td bgcolor="#006699" class="cssTable">
                             
                                 <font color = "white">
                                     <center>
@@ -474,7 +560,7 @@ def generateWebPage( rxNames, txNames, years ):
                            
                         </td>
                     
-                        <td bgcolor="#006699" title = "Display the taverage latency of file transfers for every day of the week for each clients.">
+                        <td bgcolor="#006699" class="cssTable" title = "Display the taverage latency of file transfers for every day of the week for each clients.">
                             
                                 <font color = "white">
                                     <center>
@@ -488,7 +574,7 @@ def generateWebPage( rxNames, txNames, years ):
                            
                         </td>
                     
-                        <td bgcolor="#006699" title = "Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients.">
+                        <td bgcolor="#006699" class="cssTable" title = "Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients.">
                             
                                 <font color = "white">
                                     <center>
@@ -502,7 +588,7 @@ def generateWebPage( rxNames, txNames, years ):
                                             
                         </td>
                     
-                        <td bgcolor="#006699" title = "Display the total of bytes transfered every day of the week for each clients.">
+                        <td bgcolor="#006699" class="cssTable" title = "Display the total of bytes transfered every day of the week for each clients.">
                             
                                 <font color = "white">    
                                     <center>
@@ -516,7 +602,7 @@ def generateWebPage( rxNames, txNames, years ):
                             
                         </td>
                         
-                        <td bgcolor="#006699"  title = "Display the total of files transferred every day of the week for each clients.">
+                        <td bgcolor="#006699" class="cssTable" title = "Display the total of files transferred every day of the week for each clients.">
                             
                                 <font color = "white">
                                     <center>
@@ -530,7 +616,7 @@ def generateWebPage( rxNames, txNames, years ):
                                            
                         </td>
                         
-                        <td bgcolor="#006699" title = "Display the total of errors that occured during file transfers every day of the week for each clients.">
+                        <td bgcolor="#006699" class="cssTable" title = "Display the total of errors that occured during file transfers every day of the week for each clients.">
                             
                                 <font color = "white">
                                     <center>
@@ -553,12 +639,12 @@ def generateWebPage( rxNames, txNames, years ):
         
     for txName in txNamesArray : 
         if txNames[txName] == "" :
-            fileHandle.write( """ <tr> <td bgcolor="#99FF99">%s</td> """ %(txName))
-            fileHandle.write( """<td bgcolor="#66CCFF">Years&nbsp;:&nbsp;""" )
+            fileHandle.write( """ <tr> <td bgcolor="#99FF99" class="cssTable">%s</td> """ %(txName))
+            fileHandle.write( """<td bgcolor="#66CCFF" class="cssTable">Years&nbsp;:&nbsp;""" )
         else:
             machineName = getMachineNameFromDescription( txNames[txName] )
-            fileHandle.write( """<tr> <td bgcolor="#99FF99"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false"><font color="black">?</font></a></div><br>(%s)</td> """ %(txName, txNames[txName].replace("'","").replace('"',''), machineName ))
-            fileHandle.write( """<td bgcolor="#66CCFF">Years&nbsp;:&nbsp;""" )
+            fileHandle.write( """<tr> <td bgcolor="#99FF99" class="cssTable"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false"><font color="black">?</font></a></div><br>(%s)</td> """ %(txName, txNames[txName].replace("'","").replace('"',''), machineName ))
+            fileHandle.write( """<td bgcolor="#66CCFF" class="cssTable">Years&nbsp;:&nbsp;""" )
             
        
         for year in years:
@@ -571,7 +657,7 @@ def generateWebPage( rxNames, txNames, years ):
         
         fileHandle.write( "</td>" )
         
-        fileHandle.write(  """ <td bgcolor="#66CCFF">Years&nbsp;:&nbsp;""" )
+        fileHandle.write(  """ <td bgcolor="#66CCFF" class="cssTable" >Years&nbsp;:&nbsp;""" )
         
         for year in years:
             
@@ -586,7 +672,7 @@ def generateWebPage( rxNames, txNames, years ):
         
         fileHandle.write( "</td>" )
         
-        fileHandle.write(  """ <td bgcolor="#66CCFF">Years&nbsp;:&nbsp;""" )
+        fileHandle.write(  """ <td bgcolor="#66CCFF" class="cssTable" >Years&nbsp;:&nbsp;""" )
         
         for year in years:
             
@@ -612,7 +698,7 @@ def generateWebPage( rxNames, txNames, years ):
         
         fileHandle.write( "</td>" )
         
-        fileHandle.write(  """ <td bgcolor="#66CCFF">Years&nbsp;:&nbsp;""" )
+        fileHandle.write(  """ <td bgcolor="#66CCFF" class="cssTable" >Years&nbsp;:&nbsp;""" )
         
         for year in years:
             
