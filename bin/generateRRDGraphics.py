@@ -248,7 +248,7 @@ def getOptionsFromParser( parser ):
     if clientNames[0] == "ALL":
         # Get all of the client/sources that have run between graph's start and end. 
         if totals == True or havingRun == True :                  
-            rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNamesHavingRunDuringPeriod( start, end, machines,havingrunOnAllMachines = True )
+            rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNamesHavingRunDuringPeriod( start, end, machines,None, havingrunOnAllMachines = True )
             mergerType = "totalForMachine"
         else:#Build graphs only for currently runningclient/sources.      
             rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machines[0] )
@@ -1272,7 +1272,8 @@ def getPairsFromDatabasesWithProportions( type, machine, start, end, infos, logg
         @return :  The merged data pairs.     
     
     """
-    
+
+        
     databaseName    = "" # Temporary name of databases to query for data.
     filecounts      = {} # List of filecoutns used to build up propertions
     typeData        = {} # The data found of the specified type. 
@@ -1340,13 +1341,14 @@ def getPairsFromDatabasesWithProportions( type, machine, start, end, infos, logg
                 valueToAdd = 0
                 
                 
-            if filecountTotals[entry] != 0.0 and str(clientsFilecount) != 'nan':
+            if filecountTotals[entry] != 0.0 and str(clientsFilecount).lower() != 'nan':
                 valueToAdd = float( valueToAdd * float(  clientsFilecount/filecountTotals[entry] ) )
                 percentage = percentage + float(  clientsFilecount/filecountTotals[entry] )
+               
             else :
                 valueToAdd = 0
             
-            
+
             # Add up total.
             total = total + valueToAdd
             #print "client : %s value : %s clientFiles : %s Total : %s Addedvalue : %s" %( client, ( typeData[client][entry] ).split( ":" )[1].replace(" ", ""), clientsFilecount,filecountTotals[entry], valueToAdd )
@@ -1354,8 +1356,8 @@ def getPairsFromDatabasesWithProportions( type, machine, start, end, infos, logg
             #print "percentage :%s" %percentage
         # Add total to pairsto return 
         pairs.append( [typeData[client][entry].split( " " )[0].replace( ":", "" ), total] )
-    
-    
+
+  
     
     return pairs
 
@@ -1458,9 +1460,10 @@ def getPairsFromAllDatabases( type, machine, start, end, infos, logger=None ):
     pairs = []
     
     if type == "latency":
-        pairs = getPairsFromDatabasesWithoutProportions( type, machine, start, end, infos, logger=None )
+        pairs = getPairsFromDatabasesWithProportions( type, machine, start, end, infos, logger=None ) 
+        #pairs = getPairsFromDatabasesWithoutProportions( type, machine, start, end, infos, logger=None )       
     else :
-        pairs = getPairsFromDatabasesWithProportions( type, machine, start, end, infos, logger=None )
+        pairs = getPairsFromDatabasesWithoutProportions( type, machine, start, end, infos, logger=None )
         
     return pairs        
     
