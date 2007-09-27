@@ -72,14 +72,22 @@ class RrdUtilities:
         combinedClientsName = ""  
         for client in clients:
             combinedClientsName = combinedClientsName + client
-               
-        if usage == "regular":
-            fileName = StatsPaths.STATSCURRENTDB + "%s/%s_%s" %( dataType, combinedClientsName, combinedMachineName )  
-        elif usage == "group":
-             fileName = StatsPaths.STATSCURRENTDB + "%s/%s_%s" %( dataType, groupName, combinedMachineName )    
-        elif usage == "totalForMachine":
-             fileName = StatsPaths.STATSCURRENTDB + "%s/%s_%s" %( dataType, fileType, combinedMachineName )            
         
+        if len(clients) ==1:       
+            if usage == "regular":
+                fileName = StatsPaths.STATSCURRENTDB + "%s/%s_%s" %( dataType, combinedClientsName, combinedMachineName )  
+            elif usage == "group":
+                 fileName = StatsPaths.STATSCURRENTDB + "%s/%s_%s" %( dataType, groupName, combinedMachineName )    
+            elif usage == "totalForMachine":
+                 fileName = StatsPaths.STATSCURRENTDB + "%s/%s_%s" %( dataType, fileType, combinedMachineName )            
+        else:
+            if usage == "regular":
+                fileName = StatsPaths.STATSCURRENTDB + "%s/combined/%s_%s" %( dataType, combinedClientsName, combinedMachineName )  
+            elif usage == "group":
+                 fileName = StatsPaths.STATSCURRENTDB + "%s/combined/%s_%s" %( dataType, groupName, combinedMachineName )    
+            elif usage == "totalForMachine":
+                 fileName = StatsPaths.STATSCURRENTDB + "%s/combined/%s_%s" %( dataType, fileType, combinedMachineName )   
+            
         return  fileName 
     
     
@@ -103,7 +111,10 @@ class RrdUtilities:
         fileHandle  = open( fileName, "w" )
         pickle.dump( timeOfUpdate, fileHandle )
         fileHandle.close()
-    
+        try:
+            os.chmod( fileName, 0777 )
+        except:
+            pass    
     setDatabaseTimeOfUpdate = staticmethod( setDatabaseTimeOfUpdate )
     
     
@@ -120,7 +131,7 @@ class RrdUtilities:
         lastUpdate = 0
         folder   = StatsPaths.STATSCURRENTDBUPDATES + "%s/" %(fileType )    
         fileName = folder + os.path.basename( databaseName )
-        #print fileName
+        
         if os.path.isfile( fileName ):
             
             fileHandle  = open( fileName, "r" )
