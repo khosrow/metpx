@@ -15,7 +15,7 @@ named COPYING in the root of the source directory tree.
 ##                 
 ## Author : Nicholas Lemay  
 ##
-## Date   : November 22nd 2006, last updated on May 9th 2007
+## Date   : November 22nd 2006, last updated on October 2nd 2007
 ##
 #############################################################################
 """
@@ -216,7 +216,7 @@ def setYesterdaysGraphs( currentTime, machinePairs ):
     
     
     yesterday   = time.strftime( "%d", time.gmtime( currentTime  - (24*60*60) ))
-    year, month, day = StatsDateLib.getYearMonthDayInStrfTime(time.time())
+    year, month, day = StatsDateLib.getYearMonthDayInStrfTime(currentTime)
         
     filePattern = StatsPaths.STATSGRAPHS + "webGraphics/columbo/*.png"
     currentGraphs = glob.glob( filePattern )  
@@ -246,7 +246,7 @@ def setYesterdaysGraphs( currentTime, machinePairs ):
     currentTime = StatsDateLib.getIsoFromEpoch(currentTime)
     for machinePair in machinePairs:
          status, output = commands.getstatusoutput( '%sgenerateRRDGraphics.py --copy --totals -f "rx" --machines "%s" --havingRun -d --fixedPrevious --date "%s"' %( StatsPaths.STATSBIN, machinePair, currentTime ) )
-        #print output
+         #print output
          status, output = commands.getstatusoutput( '%sgenerateRRDGraphics.py --copy --totals -f "tx" --machines "%s" --havingRun -d --fixedPrevious --date "%s"' %( StatsPaths.STATSBIN, machinePair, currentTime ) )
 
                 
@@ -301,7 +301,7 @@ def updateDailyGroupsGraphics( currentTime, groupParameters ):
         
             
             
-def generateColumboGraphics( parameters, machineParameters ):
+def generateColumboGraphics( currentTime, parameters, machineParameters ):
     """
         Generates all the graphics required by columbo. 
         
@@ -327,12 +327,12 @@ def generateColumboGraphics( parameters, machineParameters ):
         
         
         if "," in machines :
-            #print "%sgenerateAllGraphsForServer.py -m '%s' -c  -l '%s'  " %( StatsPaths.STATSBIN, machines.replace( "'","" ),logins.replace( "'","" ))
-            status, output = commands.getstatusoutput( "%sgenerateAllGraphsForServer.py -m '%s' -c  -l '%s'  " %( StatsPaths.STATSBIN, machines.replace( "'","" ),logins.replace( "'","" )) )
+            #print "%sgenerateAllGraphsForServer.py -m '%s' -c  -l '%s' --date '%s'  " %( StatsPaths.STATSBIN, machines.replace( "'","" ),logins.replace( "'","" ),currentTime )
+            status, output = commands.getstatusoutput( "%sgenerateAllGraphsForServer.py -m '%s' -c  -l '%s' --date '%s'  " %( StatsPaths.STATSBIN, machines.replace( "'","" ),logins.replace( "'","" ), currentTime ) )
             #print output
         else:
-            status, output = commands.getstatusoutput( "%sgenerateAllGraphsForServer.py -i -m '%s' -l '%s'  " %( StatsPaths.STATSBIN, machines.replace( "'","" ),logins.replace( "'","" ) ) )    
-            #print "%sgenerateAllGraphsForServer.py -i -m '%s' -l '%s'  " %( StatsPaths.STATSBIN, machines.replace( "'","" ),logins.replace( "'","" ) )
+            status, output = commands.getstatusoutput( "%sgenerateAllGraphsForServer.py -i -m '%s' -l '%s'  --date '%s' " %( StatsPaths.STATSBIN, machines.replace( "'","" ),logins.replace( "'","" ), currentTime ) )    
+            #print "%sgenerateAllGraphsForServer.py -i -m '%s' -l '%s' --date '%s'  " %( StatsPaths.STATSBIN, machines.replace( "'","" ),logins.replace( "'","" ),currentTime )
             #print output
 
 
@@ -345,7 +345,7 @@ def setDailyGraphs( currentTime, machinePairs, machineParameters, configParamete
     currentTimeSSE = currentTime
     currentTime = StatsDateLib.getIsoFromEpoch(currentTime)     
     
-    generateColumboGraphics( configParameters, machineParameters )              
+    generateColumboGraphics( currentTime, configParameters, machineParameters )              
     updateDailyGroupsGraphics( currentTime, configParameters.groupParameters )  
     
     setCurrentColumboAndGroupGraphsAsDailyGraphs( currentTimeSSE )
