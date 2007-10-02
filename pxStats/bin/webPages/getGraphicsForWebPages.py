@@ -216,7 +216,7 @@ def setYesterdaysGraphs( currentTime, machinePairs ):
     
     
     yesterday   = time.strftime( "%d", time.gmtime( currentTime  - (24*60*60) ))
-    year, month, day = StatsDateLib.getYearMonthDayInStrfTime(currentTime)
+    year, month, day = StatsDateLib.getYearMonthDayInStrfTime(currentTime  - (24*60*60))
         
     filePattern = StatsPaths.STATSGRAPHS + "webGraphics/columbo/*.png"
     currentGraphs = glob.glob( filePattern )  
