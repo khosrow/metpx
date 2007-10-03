@@ -481,6 +481,15 @@ def archiveGraphics():
     
     
     
+def updateCsvFiles():
+    """    
+        @summary : Runs the csv file update utility.
+    """
+    
+    status,output = commands.getstatusoutput( "%sgetCsvFilesforWebPages.py" %StatsPaths.STATSWEBPAGESGENERATORS )
+    
+    
+    
 def main():
     """
         Gets all the parameters from config file.
@@ -516,9 +525,11 @@ def main():
     
     backupRRDDatabases( generalParameters.timeParameters, currentTime, generalParameters.nbDbBackupsToKeep )
     
+    updateCsvFiles( )
+    
     getGraphicsForWebPages()
         
-    archiveGraphics()
+    #archiveGraphics()
     
     updateWebPages()
     
