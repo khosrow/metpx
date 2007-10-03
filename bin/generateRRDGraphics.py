@@ -7,11 +7,11 @@ named COPYING in the root of the source directory tree.
 
 #######################################################################################
 ##
-## Name   : generateRRDGraphics.py 
+## @Name:  generateRRDGraphics.py 
 ##  
-## Author : Nicholas Lemay  
+## @author:  Nicholas Lemay  
 ##
-## Date   : October 2nd 2006
+## @since: October 2nd 2006, last updated on october 2nd 2007.
 ##
 ## Goal   : This files contains all the methods needed to generate graphics using data  
 ##          found in RRD databases.
@@ -247,7 +247,8 @@ def getOptionsFromParser( parser ):
     
     if clientNames[0] == "ALL":
         # Get all of the client/sources that have run between graph's start and end. 
-        if totals == True or havingRun == True :                  
+        if totals == True or havingRun == True :          
+            print start, end, machines       
             rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNamesHavingRunDuringPeriod( start, end, machines,None, havingrunOnAllMachines = True )
             mergerType = "totalForMachine"
         else:#Build graphs only for currently runningclient/sources.      
@@ -256,6 +257,7 @@ def getOptionsFromParser( parser ):
                      
         if fileType == "tx":    
             clientNames = txNames  
+            print clientNames
         else:
             clientNames = rxNames    
             
@@ -430,7 +432,7 @@ def addOptions( parser ):
         
 def buildTitle( type, client, endTime, timespan, minimum, maximum, mean):
     """
-        Returns the title of the graphic based on infos. 
+        @summary : Returns the title of the graphic based on infos. 
     
     """    
     
@@ -458,7 +460,7 @@ def buildTitle( type, client, endTime, timespan, minimum, maximum, mean):
     
 def getGraphicsNote( interval, type ):
     """
-        Returns the note to be displayed at the bottom of the graphic.
+        @return : Returns the note to be displayed at the bottom of the graphic.
     """
     
     graphicsNote = ""
@@ -478,6 +480,7 @@ def getGraphicsNote( interval, type ):
              
 def getAbsoluteMin( databaseName, startTime, endTime, logger = None ):
     """
+        @summary : 
         This methods returns the minimum of the entire set of data found between 
         startTime and endTime within the specified database name.
         
@@ -646,10 +649,7 @@ def getGraphicsMinMaxMeanTotal( databaseName, startTime, endTime,graphicType, da
     
         meanTuples = output[2]
         nbEntries = len( meanTuples )-1 #we dont use the first entry
-        
-    
-            
-                 
+                        
         desiredNumberOfEntries = float( (realEndTime - startTime)/(desiredInterval*60) )
           
         #print "nbEntries %s desiredNumberOfEntries %s" %( nbEntries, desiredNumberOfEntries )
@@ -965,7 +965,7 @@ def getInterval( startTime, timeOfLastUpdate, graphicType = "daily", goal = "fet
 
 
      
-def getCopyDestination( type, client, machine, infos ):
+def getArchiveCopyDestination( type, client, machine, infos ):
     """
        This method returns the absolute path to the copy 
        to create based on the time of creation of the 
@@ -1015,10 +1015,21 @@ def createCopy( client, type, machine, imageName, infos ):
     """ 
    
     src         = imageName
-    destination = getCopyDestination( type, client, machine, infos )
+    destination = getArchiveCopyDestination( type, client, machine, infos )
 
     if not os.path.isdir( os.path.dirname( destination ) ):
         os.makedirs( os.path.dirname( destination ), mode=0777 )                                                      
+        dirname = os.path.dirname( destination )                                                  
+        
+        while( dirname != StatsPaths.STATSGRAPHSARCHIVES[:-1] ):#[:-1] removes the last / character 
+                    
+            try:
+                os.chmod( dirname, 0777 )
+            except:
+                pass
+            
+            dirname = os.path.dirname(dirname)
+    
     
     if os.path.isfile( destination ):
         os.remove( destination )  
@@ -1028,6 +1039,7 @@ def createCopy( client, type, machine, imageName, infos ):
         os.chmod(imageName, 0777)
     except:
         pass 
+    
     
     
 def formatedTypesForLables( type ):
@@ -1245,8 +1257,360 @@ def getInfosFromDatabases( dataOutputs, names, machine, fileType, startTime, end
     return  int(nbEntries), lastUpdate
 
 
+
+
+def getNormalisedDataBaseData( data, desiredNumberOfEntries, mergerType = "average" ):
+    """
+        @summary : This methods takes an array of x entries 
+                   and tranforms it into an array of y entries.
+        
+        @note: If desiredNumberOfEntries is bigger then the number 
+               of entries within the data or if the length of data 
+               % desiredNumberOfEntries is not equal to 0 the original 
+               data will be returned un modified.
+        
+        @param data: Array containing the data we need to normalise.
+        
+        @param desiredNumberOfEntries: The number of entries to wich 
+                                       the array needs to be reduced.
+                                       
+        @param mergerType : Wheter to merge the data per average or by total.
+                                       
+        @return: Returns the normalised array.                                       
+        
     
-def getPairsFromDatabasesWithProportions( type, machine, start, end, infos, logger=None ):
+    """
+    
+    newArray = []
+    
+    if ( len(data) > desiredNumberOfEntries ) and (len(data) % desiredNumberOfEntries == 0 ) :
+    
+        nbOldEntriesPerNewEntry = len(data) / desiredNumberOfEntries 
+        newValue = 0
+        
+        for i in range(len(data)):
+            if i != 0 and (i%nbOldEntriesPerNewEntry) ==0:
+                if mergerType == "average" :
+                    newArray.append( float(newValue)/float(nbOldEntriesPerNewEntry) ) 
+                else:
+                    newArray.append( float(newValue) )    
+
+                newValue =0
+                
+            newValue = newValue + data[i]    
+        
+        if mergerType == "average" :
+            newArray.append( float(newValue)/float(nbOldEntriesPerNewEntry) ) 
+        else:
+            newArray.append( float(newValue) ) 
+        
+    else:
+        newArray = data 
+        
+    return newArray        
+
+
+
+def getMostPopularTimeOfLastUpdate( dataBaseNames, fileType = "tx" ):
+    """
+        @summary : Gathers the time of the last 
+                   update of all the specified 
+                   databases and returns the 
+                   update time that was found
+                   to be the most popular.
+       
+       
+       @param dataBaseNames: list of database names 
+                             for which we are interested 
+                             in finding their update times.
+       
+       @param fileType : FileType associated with the databases.   
+                             
+       @return: Return the most popular time of update found.
+                                            
+                     
+    """
+    
+    maximumPopularity = 0
+    mostPopular = 0
+    timesOfUpdate = {}
+    
+    
+    for dataBaseName in dataBaseNames:
+        timeOfLastUpdate = RrdUtilities.getDatabaseTimeOfUpdate( dataBaseName, fileType )
+        
+        if timeOfLastUpdate in timesOfUpdate:
+            timesOfUpdate[timeOfLastUpdate] = timesOfUpdate[timeOfLastUpdate] + 1 
+        else:
+            timesOfUpdate[timeOfLastUpdate] = 1     
+    
+    for timeOfUpdate in timesOfUpdate:
+        if timesOfUpdate[timeOfUpdate] > maximumPopularity:
+            mostPopular = timeOfUpdate
+            maximumPopularity = timesOfUpdate[timeOfUpdate]
+             
+    return mostPopular   
+
+
+
+def getDesirableArrayLength( arrays ):
+    """
+        @summary : Receives a series of arrays and returns 
+                   the most popular length amongst the arrays.
+        
+        @param arrays : List of arrays to analyse.
+        
+        @return : The most popular array size.              
+                   
+    """
+    
+    maximumPopularity = 0
+    mostPopular = 0
+    arraySizes = {}
+    
+    
+    for array in arrays:
+        arraySize = len(array)
+        
+        if arraySize in arraySizes:
+            arraySizes[arraySize] = arraySizes[arraySize] + 1 
+        else:
+            arraySizes[arraySize] = 1     
+    
+    for arraySize in arraySizes:
+        if arraySizes[arraySize] > maximumPopularity:
+            mostPopular = arraySize
+            maximumPopularity = arraySizes[arraySize]
+             
+    return mostPopular    
+    
+
+
+def getDataForAllSourlients( infos, dataType = "fileCount" ):
+    """ 
+        @summary : 
+        
+        @param infos: Infos with whom the program the program what was. 
+        
+        @return : Returns the dictionary containing the timespant filecount 
+                  associations for all sourlients.
+        
+    """
+    
+    
+    data = {} 
+    
+    # Get filecount value for each sourlient.
+    for client in infos.clientNames:#Gather all pairs for that type
+        
+        databaseName = RrdUtilities.buildRRDFileName( dataType = dataType, clients = [client], machines = infos.machines, fileType = infos.fileType) 
+        #print databaseName
+        if infos.totals == True :#try and force all databases to give back data with the exact same resolution.
+            
+            timeOfLastUpdate = RrdUtilities.getDatabaseTimeOfUpdate(databaseName, "tx")
+            interval = getInterval( StatsDateLib.getSecondsSinceEpoch(infos.startTime), timeOfLastUpdate, infos.graphicType, "")
+            resolution = int(interval*60)
+            status, output = commands.getstatusoutput("rrdtool fetch %s  'AVERAGE' -r '%s' -s %s  -e %s" %(  databaseName, str(resolution), int(StatsDateLib.getSecondsSinceEpoch(infos.startTime)), int(StatsDateLib.getSecondsSinceEpoch(infos.endTime) ) ) )
+            
+        else:    
+            status, output = commands.getstatusoutput("rrdtool fetch %s  'AVERAGE' -s %s  -e %s" %( databaseName, int(StatsDateLib.getSecondsSinceEpoch(infos.startTime)), int(StatsDateLib.getSecondsSinceEpoch(infos.endTime) ) ))
+            
+        #print output 
+        clientsData = []
+        splitOutputLines = []
+        splitOutputLines = output.splitlines()[2:]
+        
+        for line in splitOutputLines:
+            try:
+                value = float(line.split(":")[1].replace(" ","") ) 
+            except: 
+                value = 0.0    
+            clientsData.append(value )
+        
+        data[client] = clientsData[:-1]
+    
+    
+    return data     
+
+
+
+def getDatabaseNames( sourlients, fileType, datatype, machines ):
+    """
+        @summary : Returns the database names associated with 
+                   the received parameters.  
+    
+        @param sourlients: list of sourlients we are interested in. 
+    
+        @param fileType : Filetype of the sourlients
+        
+        @param datatype : Type of data were are interested in
+                          (latency, filecount,bytecount,error,)
+        
+        @param machines : Machine for wich we need database names.
+        
+        @return:  Returns the list of database names found in 
+                  a dictionary format with {sourlient:databaseName }
+                  associations.
+        
+    """
+    
+    databaseNames = {}
+    
+    for sourlient in sourlients:
+        databaseName = RrdUtilities.buildRRDFileName( dataType = datatype , clients = sourlient, machines = machines, fileType = fileType ) 
+        databaseNames[sourlient] = databaseName
+    
+    return databaseNames
+
+
+
+
+
+def getTimeStamps( start, end, spanType, sourlients,machines, fileType, dataType = "bytecount" ):
+    """
+        @summary : builds the series of different time 
+                   stamps that are found between start 
+                   and end based on the span type.  
+        
+        @param start : startTime of the span we are interested in.
+        
+        @param end   : endTime of the span we are interested in.
+        
+        @param spanType : daily, weekly, monthly, yearly.  
+        
+        @param sourlients : List of clients/sources that we are currently working with.
+        
+        @param fileType : Filetype we are currently working with(tx/rx).
+        
+        @param dataType : Datatype we are currently working with( latency, filecount,bytecount,error,)
+    
+        @return   : Returns the list of timestamps.
+         
+         
+    """
+    
+    timeStamps = []
+    
+    databaseNames = getDatabaseNames( sourlients, fileType, dataType,machines )
+    timeOfLastUpdate = getMostPopularTimeOfLastUpdate(databaseNames) 
+    interval = getInterval( start, timeOfLastUpdate, spanType, "")
+    interval = interval * 60
+    
+    timeStamp = start  + interval
+    while timeStamp <= end :
+        timeStamps.append( timeStamp )
+        timeStamp = timeStamp + interval
+    #print timeStamps
+    
+    return timeStamps 
+    
+    
+    
+def getFileCountsTotals( fileCounts ):
+    """    
+        @summary : Takes filecounts dictionary containing an entry 
+                   for all sourlients for every time stamps. 
+                  
+        @note : All arraysd must be of the same length          
+                   
+        @param fileCounts: Array containing dictionaries with 
+                          {sourlient:value} associations.             
+        
+        @return: Returns an array containing the total of files
+                 for every time stamp 
+        
+        
+    """
+    
+    fileCountsTotals = []
+    valueToAdd = 0 
+    
+    nbEntries = len( fileCounts[fileCounts.keys()[0]] )
+     
+    for i in range(nbEntries) : 
+        valueToAdd = 0.0
+        
+        for sourlient in fileCounts.keys() :
+            fileCountToAdd = fileCounts[sourlient][i]
+            if str(fileCountToAdd) != 'nan':
+                valueToAdd = valueToAdd + fileCountToAdd
+            
+        fileCountsTotals.append( valueToAdd )
+        
+            
+    return fileCountsTotals
+    
+    
+    
+def mergeData( timeStamps, fileCounts, data, withProportions = False, mergerTypeWithoutProportions = "average" ):
+    """
+
+        @summary : Takes an array containing data values 
+                   for every time stamps received in parameter and 
+                   combines the data for every time stamps following 
+                   the fileCounts proportions  
+       
+        @param timeStamps: Array containing the timestamps to be 
+                            used when plotting the graphics. 
+        
+        @param fileCounts: Array containing the file counts values for 
+                           every sourlient for every time stamps.ex [{'bob':123}]
+        
+        @param data:  Array containing the values of a specific data type for 
+                      every sourlient for every time stamps.ex [{'bob':123}]
+        
+        @param withProportions: Whether or not to use filecount poportions
+                                when merging the data. When set to True,
+                                every value will be multiplied by the ratio of 
+                                files the currently handled sourlient has
+                                sent or received in proportion with the 
+                                total sent or received during that time
+                                stamp.     
+                                
+                                    
+        @param mergerTypeWithoutProportions: Specifies whether to use 'average' or 'total'
+                                             when merging without proportions. 
+                                              
+        
+        @return: Returns the merged data in the following form :
+                [(timestamp1,value1),(timestamp2,value2)]
+                             
+    
+    """
+    
+    i=0
+    mergedData = []
+    valueToAdd = 0.0
+    
+    if withProportions == True:
+        fileCountsTotals = getFileCountsTotals(fileCounts)
+    
+    for i in range( len(timeStamps) ):
+        valueToAdd = 0.0
+        
+        for sourlient in data.keys():
+            sourlientsValue = data[sourlient][i]
+            #print "%s %s : %s" %(timeStamps[i], sourlient, sourlientsValue)
+            if ( str(sourlientsValue) != 'nan'):
+                if withProportions == True:
+                    print float(sourlientsValue), float( float(fileCounts[sourlient][i])), float(fileCountsTotals[i])
+                    valueToAdd = valueToAdd + float(sourlientsValue) * float( float(fileCounts[sourlient][i]) / float(fileCountsTotals[i]) )
+                else:
+                    valueToAdd = valueToAdd + float(sourlientsValue)
+                    
+        if withProportions == False:
+            if mergerTypeWithoutProportions == "average":
+                valueToAdd = float(valueToAdd) / float( len( data.keys() ) ) 
+                print "did the avrage"     
+        
+        mergedData.append( [timeStamps[i], valueToAdd] )
+    
+    print mergedData
+    return mergedData
+    
+    
+    
+def getPairsFromDatabases( type, machine, start, end, infos, logger=None, mergeWithProportions = False, mergerTypeWithoutProportions = "average" ):
     """
     
         @summary : Takes the data pairs from the wanted 
@@ -1267,169 +1631,65 @@ def getPairsFromDatabasesWithProportions( type, machine, start, end, infos, logg
         
         @param infos : _GraphicsInfos instance containing vital infos.
         
+        @param mergeWithProportions : Whether or not to merge the data based
+                                      on the filecount ratio of each sourlients
+                                      or not.
+                                       
         @param logger : Logger in wich to write log entries. 
         
         @return :  The merged data pairs.     
     
     """
-
-        
-    databaseName    = "" # Temporary name of databases to query for data.
-    filecounts      = {} # List of filecoutns used to build up propertions
-    typeData        = {} # The data found of the specified type. 
-    lastUpdate      = 0  # Last update of the series fo databases.
-    nbEntries       = 0  # number of entries found within each databases 
-    pairs           = [] # Data pairs to return    
-    filecountTotals = [] #total number of files for each entry
-        
-        
     
-    # Get filecount value for each sourlient.
-    for client in infos.clientNames:#Gather all pairs for that type
-        
-        databaseName = RrdUtilities.buildRRDFileName( dataType = "filecount" , clients = [client], machines = machine, fileType = infos.fileType) 
-
-        status, output = commands.getstatusoutput("rrdtool fetch %s  'AVERAGE' -s %s  -e %s" %( databaseName, (start), end) )
-       
-        splitOutput = []
-        splitOutput = output.splitlines()[2:]
-        filecounts[client] = splitOutput
+    print "############Type %s ###################" %(type)
     
-    
-    nbEntries, lastUpdate = getInfosFromDatabases(filecounts, infos.clientNames, machine, infos.fileType, start, end)  
-    #calculate total of files per entry.
-    for entry in range( nbEntries ):
-        totalFilecount = 0.0 
-        for client in infos.clientNames:
-            value = (filecounts[client][entry]).split( ":" )[1].replace(" ", "")
-            if value != 'nan':
-                totalFilecount = float( float(totalFilecount) +  float( value ) )
-        
-        #print "entry : %s total:%s" %( entry, totalFilecount )
-        filecountTotals.append( totalFilecount )
-            
-        
-    
-    #get interesting data 
-    for client in infos.clientNames:#Gather all pairs for that type
-        
-        databaseName = RrdUtilities.buildRRDFileName( dataType = type , clients = [client], machines = machine, fileType = infos.fileType) 
-
-        status, output = commands.getstatusoutput("rrdtool fetch %s  'AVERAGE' -s %s  -e %s" %( databaseName, (start), end) )
-       
-        splitOutput = []
-        splitOutput = output.splitlines()[2:]
-        typeData[client] = splitOutput
-    
-    
-    # Calculate weight of current each sourlients  for every entry.
-    for entry in range( nbEntries ):
-        entryDate =  typeData[infos.clientNames[0]][entry].split( " " )[0].replace( ":", "" )
-        valueToAdd = 0.0   
-        total = 0.0           
-        percentage = 0 
-        
-        for client in infos.clientNames:
-            #find out ratio.
-            clientsFilecount = float( (filecounts[client][entry]).split( ":" )[1].replace(" ", "") )
-            #get value 
-            valueToAdd = ( typeData[client][entry] ).split( ":" )[1].replace(" ", "")
-            
-            if valueToAdd != 'nan' :
-                valueToAdd = float( valueToAdd )
-            else:      
-                valueToAdd = 0
-                
-                
-            if filecountTotals[entry] != 0.0 and str(clientsFilecount).lower() != 'nan':
-                valueToAdd = float( valueToAdd * float(  clientsFilecount/filecountTotals[entry] ) )
-                percentage = percentage + float(  clientsFilecount/filecountTotals[entry] )
-               
-            else :
-                valueToAdd = 0
-            
-
-            # Add up total.
-            total = total + valueToAdd
-            #print "client : %s value : %s clientFiles : %s Total : %s Addedvalue : %s" %( client, ( typeData[client][entry] ).split( ":" )[1].replace(" ", ""), clientsFilecount,filecountTotals[entry], valueToAdd )
-        
-            #print "percentage :%s" %percentage
-        # Add total to pairsto return 
-        pairs.append( [typeData[client][entry].split( " " )[0].replace( ":", "" ), total] )
-
-  
-    
-    return pairs
-
-
-
-def getPairsFromDatabasesWithoutProportions( type, machine, start, end, infos, logger=None ):
-    """
-
-        @summary : Takes the data pairs from the wanted 
-                   client/sources of a machine, 
-                   merges all it's data into a series of 
-                   pairs and returns those pairs. 
-        
-        @param type : Data type : latency, bytecount, filecount etc.
-        
-        @param start : Start of the span of data we are interested in.
-        
-        @param end : End of the span of data we are interested in.
-        
-        @param infos : _GraphicsInfos instance containing vital infos.
-        
-        @param logger : Logger in wich to write log entries. 
-        
-        
-        @return :  The merged data pairs. 
-    
-    """
-
-    pairs = []
-    typeData = {}     
-       
-    for client in infos.clientNames:#Gather all pairs for that type
-        
-        databaseName = RrdUtilities.buildRRDFileName( dataType = type , clients = [client], machines = machine, fileType = infos.fileType) 
-
-        status, output = commands.getstatusoutput("rrdtool fetch %s  'AVERAGE' -s %s  -e %s" %( databaseName, (start), end) )
-       
-        splitOutput = []
-        splitOutput = output.splitlines()[2:]
-        typeData[client] = splitOutput
+    data       = {}
+    fileCounts = {}
+    timeStamps = [] 
      
-    nbEntries, lastUpdate = getInfosFromDatabases(typeData, infos.clientNames, machine, infos.fileType, start, end)   
+    #databaseNames = getDatabaseNames(infos.clientNames, infos.fileType, type, infos.machines) 
+    #timeOfLastUpdate = getMostPopularTimeOfLastUpdate(dataBaseNames, infos.fileType )  
+    
+    #infos= _GraphicsInfos(fileType, types, totals, graphicType, clientNames, timespan, startTime, endTime, machines, copy, mergerType, turnOffLogging)
+    timeStamps = getTimeStamps(start, end, infos.graphicType, infos.clientNames, infos.machines, infos.fileType, type)
+    
+    data = getDataForAllSourlients(infos, type  )
+    
+    arrays = [data[sourLient] for sourLient in data.keys() ]
+     
+    #print arrays  
+    desirableArrayLength =  getDesirableArrayLength( arrays ) 
     
     
-    for i in range( nbEntries ) :#make total of all clients for every timestamp
-        
-        total = None
-        
-        for client in infos.clientNames:
+    if desirableArrayLength != len(timeStamps):
+        raise Exception("desirableArrayLength(%s) != len(timeStamps)(%s)" %(desirableArrayLength, len(timeStamps) ) )
+    
+    for sourlient in data.keys() :
+        if len( data[sourlient]) != desirableArrayLength:
+            print "len before %s %s" %(len( data[sourlient]), desirableArrayLength )
             
-            try : 
-                data = typeData[client][i].split( ":" )[1].replace(" ", "")
-                
-                if data != None and data != 'None' and data!= 'nan':                  
-                    
-                    try:
-                        total = total + ( float( data ) )                                       
-                    except:#total == None :
-                        total = 0.0
-                        total = total + ( float( data ) )                     
-                                                                        
-            except:
-                pass
-                             
-        
-        if type == "latency" and total != None:#latency is always an average
-            total = total / ( len( output ) )
-                     
-       
-        pairs.append( [typeData[client][i].split( " " )[0].replace( ":", "" ), total] )        
-
+            if mergeWithProportions == True :
+                mergerType = "average" 
+            else :
+                mergerType = mergerTypeWithoutProportions 
+            data[sourlient] = getNormalisedDataBaseData(data[sourlient], desirableArrayLength, mergerType=mergerType )   
+            print "len after %s" %len(data[sourlient])
     
+    if mergeWithProportions == True :
+        
+        fileCounts = getDataForAllSourlients(infos, "filecount" )
+        
+        for sourlient in fileCounts.keys():
+            if len( fileCounts[sourlient]) != desirableArrayLength:
+                fileCounts[sourlient] = getNormalisedDataBaseData(fileCounts[sourlient], desirableArrayLength, mergerType="total")  
+                print sourlient
+                
+                
+        pairs = mergeData(timeStamps, fileCounts, data, withProportions = True)
+    
+    else:
+        pairs = mergeData(timeStamps, fileCounts, data, withProportions = False, mergerTypeWithoutProportions = mergerTypeWithoutProportions)
+            
     return pairs
 
 
@@ -1460,10 +1720,10 @@ def getPairsFromAllDatabases( type, machine, start, end, infos, logger=None ):
     pairs = []
     
     if type == "latency":
-        pairs = getPairsFromDatabasesWithProportions( type, machine, start, end, infos, logger=None ) 
+        pairs = getPairsFromDatabases( type, machine, start, end, infos, mergeWithProportions = True ) 
         #pairs = getPairsFromDatabasesWithoutProportions( type, machine, start, end, infos, logger=None )       
     else :
-        pairs = getPairsFromDatabasesWithoutProportions( type, machine, start, end, infos, logger=None )
+        pairs = getPairsFromDatabases( type, machine, start, end, infos, mergeWithProportions = False, mergerTypeWithoutProportions = "total" )
         
     return pairs        
     
@@ -1581,5 +1841,93 @@ def main():
     
     
 if __name__ == "__main__":
-    main()    
+    """
+        Set testing variable to run test cases.    
+    """
     
+    testing = False 
+    
+    if testing == False:
+        main()    
+    else:
+        
+        #this block unit tests the getNormalisedDataBaseData 
+        #####Test 1#################
+        data = [1,2,3,6,6,6]
+        desiredNumberOfEntries =2 
+        mergerType = "average"
+
+        result = getNormalisedDataBaseData(data, desiredNumberOfEntries, mergerType)
+        if result !=[2,6]:
+            raise Exception("Error. getNormalisedDataBaseData test 1 failed.")
+        
+        #####Test 2#################
+        data = [1,2,3,4,5,6,7]
+        desiredNumberOfEntries =2 
+        mergerType = "average"
+
+        result = getNormalisedDataBaseData(data, desiredNumberOfEntries, mergerType)
+        if result !=[1,2,3,4,5,6,7]:
+            raise Exception("Error. getNormalisedDataBaseData test 2 failed.")        
+        
+        #####Test 3#################
+        data = []
+        desiredNumberOfEntries =2 
+        mergerType = "average"
+
+        result = getNormalisedDataBaseData(data, desiredNumberOfEntries, mergerType)
+        if result !=[]:
+            raise Exception("Error. getNormalisedDataBaseData test 3 failed.")          
+        
+        #####Test 4#################
+        data = [1,2,3,4,5,6]
+        desiredNumberOfEntries =2 
+        mergerType = "total"
+        result = getNormalisedDataBaseData(data, desiredNumberOfEntries, mergerType)
+        if result !=[6,15]:
+            raise Exception("Error. getNormalisedDataBaseData test 4 failed.")        
+        
+        
+        #this blocks tests getDesirableArrayLength
+        
+        array1 = [1,2] 
+        array2 = [1,2]
+        array3 = [1,2,3]
+        array4 = [1,2,3]
+        array5 = [1,2,3,4,5]
+        array6 = [1,2,3,4,5]
+        array7 = [1,2,3,4,5]
+        array8 = [1,2]
+        array9 = [1,2]
+        ##########Test 1 ################
+        arrays = []
+        desirableArrayLength = getDesirableArrayLength(arrays)
+        if desirableArrayLength != 0:
+            raise Exception("Error. getDesirableArrayLength test 1 failed.")
+        
+        ##########Test 2 ################
+        arrays = [array1,array2,array3,array4,array5,array6,array7,array8,array9]
+        desirableArrayLength = getDesirableArrayLength(arrays)
+        if desirableArrayLength != 2:
+            raise Exception("Error. getDesirableArrayLength test 2 failed.")        
+
+        ##########Test 3 ################
+        arrays = [array5,array6,array7,array8,array9]
+        desirableArrayLength = getDesirableArrayLength(arrays)
+        if desirableArrayLength != 5:
+            raise Exception("Error. getDesirableArrayLength test 3 failed.")
+        
+        ##########Test 4 ################
+        arrays = [array2,array3]
+        desirableArrayLength = getDesirableArrayLength(arrays)
+        if desirableArrayLength != 2:
+            raise Exception("Error. getDesirableArrayLength test 4 failed.")        
+        
+        
+        
+        
+        
+        
+        
+                
+        
