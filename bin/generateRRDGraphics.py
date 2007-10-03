@@ -11,7 +11,7 @@ named COPYING in the root of the source directory tree.
 ##  
 ## @author:  Nicholas Lemay  
 ##
-## @since: October 2nd 2006, last updated on october 2nd 2007.
+## @since: October 2nd 2006, last updated on october 3rd 2007.
 ##
 ## Goal   : This files contains all the methods needed to generate graphics using data  
 ##          found in RRD databases.
@@ -304,8 +304,29 @@ def getOptionsFromParser( parser ):
             combinedMachineName = combinedMachineName + machine
                     
         machines = [ combinedMachineName ]              
+         
                 
+    if len(clientNames) <1:
+        print "Error. No client/sources were found that matched the specified parameters" %( fileType, validTypes )
+        print 'Verify parameters used, especially the machines parameter.' 
+        print "Use -h for additional help."
+        print "Program terminated."
+        sys.exit()
+
+
+    if len(clientNames) <1:
+        print "Error. No client/sources were found that matched the specified parameters" 
+        print 'Verify parameters used, especially the machines parameter.' 
+        print "Use -h for additional help."
+        print "Program terminated."
+        sys.exit()  
     
+    elif len(clientNames) == 1 and totals == True:   
+        print "Error. Cannot use totals option with only one client/source name."
+        print 'Either remove --total option or use more than one client/source..' 
+        print "Use -h for additional help."
+        print "Program terminated."
+        sys.exit()          
     
     end = StatsDateLib.getIsoWithRoundedHours( end )
     
@@ -433,6 +454,22 @@ def addOptions( parser ):
 def buildTitle( type, client, endTime, timespan, minimum, maximum, mean):
     """
         @summary : Returns the title of the graphic based on infos. 
+        
+        @param type:
+        
+        @param client:
+        
+        @param endTime:
+        
+        @param timespan:
+        
+        @param minimum:
+        
+        @param maximum:
+        
+        @param mean:
+
+        @return:  Returns the title of the graphic based on infos.
     
     """    
     
@@ -460,6 +497,9 @@ def buildTitle( type, client, endTime, timespan, minimum, maximum, mean):
     
 def getGraphicsNote( interval, type ):
     """
+        @summary : Returns the note to be displayed at the bottom of the graphic.
+        @param interval:
+        @param type:
         @return : Returns the note to be displayed at the bottom of the graphic.
     """
     
@@ -480,15 +520,16 @@ def getGraphicsNote( interval, type ):
              
 def getAbsoluteMin( databaseName, startTime, endTime, logger = None ):
     """
-        @summary : 
-        This methods returns the minimum of the entire set of data found between 
-        startTime and endTime within the specified database name.
+        @summary : This methods returns the minimum of the entire
+                   set of data found between startTime and endTime
+                   within the specified database name.
         
-        In most case this will be a different min than the visible min found
-        on the graphic since the drawn points usually show the total or average of 
-        numerous data entries.
+                   In most case this will be a different min than
+                   the visible min found on the graphic since the
+                   drawn points usually show the total or average of 
+                   numerous data entries.
         
-    
+        @return : The absolute minimum
     """
     
     minimum = None 
@@ -520,13 +561,24 @@ def getAbsoluteMin( databaseName, startTime, endTime, logger = None ):
     
 def getAbsoluteMax( databaseName, startTime, endTime, logger = None ):
     """
-        This methods returns the max of the entire set of data found between 
-        startTime and endTime within the specified database name.        
-                
-        In most case this will be a different max than the visible max found
-        on the graphic since the drawn points usually show the total or average of 
-        numerous data entries.
+        @summary : This methods returns the max of the entire set
+                   of data found between startTime and endTime 
+                   within the specified database name.        
+                   
+                   In most case this will be a different max than
+                   the visible max found on the graphic since the
+                   drawn points usually show the total or average of 
+                   numerous data entries.
         
+        @param databaseName:
+        
+        @param startTime:
+        
+        @param endTime:
+        
+        @param logger:
+    
+        @return : The absolute max 
     """  
     
     maximum = None
@@ -554,13 +606,24 @@ def getAbsoluteMax( databaseName, startTime, endTime, logger = None ):
        
 def getAbsoluteMean( databaseName, startTime, endTime, logger = None  ):
     """
-        This methods returns the mean of the entire set of data found between 
-        startTime and endTime within the specified database name.
+        @summary : This methods returns the mean of the entire set
+                   of data found between startTime and endTime 
+                   within the specified database name.
         
-                
-        In most case this will be a different mean than the visible mean found
-        on the graphic since the drawn points usually show the total or average of 
-        numerous data entries.
+                  In most case this will be a different mean 
+                  than the visible mean found on the graphic since
+                  the drawn points usually show the total or
+                  average of numerous data entries.
+         
+        @param databaseName:
+        
+        @param startTime:
+        
+        @param endTime:
+        
+        @param logger:
+         
+        @return : the absolute mean.
         
     """
     
@@ -592,7 +655,23 @@ def getAbsoluteMean( databaseName, startTime, endTime, logger = None  ):
     
 def fetchDataFromRRDDatabase( databaseName, startTime, endTime, interval, graphicType):
     """
-        Returns the stored data from a database based on the desiered interval.
+        @summary : Returns the stored data from a database based
+                   on the desiered interval.
+    
+    
+        @param databaseName:
+        
+        @param startTime:
+        
+        @param endTime:
+        
+        @param interval:
+        
+        @param graphicType:
+       
+        @return :  Returns the stored data from a database based 
+        on the desiered interval.
+    
     """
     
     resolution = int(interval*60)
@@ -621,9 +700,27 @@ def fetchDataFromRRDDatabase( databaseName, startTime, endTime, interval, graphi
     
 def getGraphicsMinMaxMeanTotal( databaseName, startTime, endTime,graphicType, dataInterval, desiredInterval = None,  type="average", logger=None ):
     """
-        This methods returns the min max and mean of the entire set of data that is drawn 
-        on the graphic.
-                
+        @summary : This methods returns the min max and mean of 
+                   the entire set of data that is drawn on 
+                   the graphic.
+        
+        @param databaseName:
+        
+        @param startTime:
+        
+        @param endTime:
+        
+        @param graphicType:
+        
+        @param dataInterval:
+        
+        @param desiredInterval:
+        
+        @param type:
+        
+        @param logger:
+               
+        @return : the min, max, avg, total of the graphic
     """
     
     min = None
@@ -744,8 +841,19 @@ def getGraphicsMinMaxMeanTotal( databaseName, startTime, endTime,graphicType, da
     
 def buildImageName(  type, client, machine, infos, logger = None ):
     """
-        Builds and returns the image name to be created by rrdtool.
+        @summary : Builds and returns the image name to be created by rrdtool.
         
+        @param type:
+        
+        @param client:
+        
+        @param machine:
+        
+        @param infos:
+        
+        @param logger:
+        
+        @return : Builds and returns the image name to be created by rrdtool.
     """
 
     span = infos.timespan
@@ -790,9 +898,22 @@ def buildImageName(  type, client, machine, infos, logger = None ):
         
 def formatMinMaxMeanTotal( minimum, maximum, mean, total, type, averageOrTotal = "average" ):
     """
-        Formats min, max and median so that it can be used 
-        properly as a label on the produced graphic.
+        @summary : Formats min, max and median so that it can be used 
+                    properly as a label on the produced graphic.
         
+        @param minimum:
+        
+        @param maximum:
+        
+        @param mean:
+        
+        @param total:
+        
+        @param type:
+        
+        @param averageOrTotal:
+        
+        @return :The formated minimum, maximum, mean, total in a tuple of that order.
     """    
     
     values = [ minimum, maximum, mean, total ]
@@ -878,9 +999,13 @@ def formatMinMaxMeanTotal( minimum, maximum, mean, total, type, averageOrTotal =
 
 def getGraphicsLegend( maximum ):
     """
-        Returns the legend according to the 
-        unit that is anticipated to be displayed within the graphics.
-        Legend is based on the maximum observed.
+        @summary : Returns the legend according to the 
+                   unit that is anticipated to be displayed within the graphics.
+                   
+        @param maximum :The legend is based on the maximum observed.
+        
+        @return : The graphics legend.
+        
     """
     
     legend = ""
@@ -914,17 +1039,29 @@ def getGraphicsLegend( maximum ):
             
 def getInterval( startTime, timeOfLastUpdate, graphicType = "daily", goal = "fetchData"  ):    
     """         
-        Returns the interval that was used for data consolidation. 
+        @summary : Returns the interval that was used 
+                  for data consolidation. 
         
-        If graphicsType is weekly, monthly or yearly interval returned
-        will always be the same as long timeOfLastUpdate- startTime is 
-        within it's the maximum lenggth of it's associated RRA. 
+                  If graphicsType is weekly, monthly or yearly 
+                  interval returned will always be the same as 
+                  long timeOfLastUpdate- startTime is within 
+                  it's the maximum lenggth of it's associated RRA. 
+                    
+                  Otherwise it is based on the distance between
+                  starTTime being used and the time of the 
+                  last update of the database.
+                    
+                  Method is very usefull when handling totals.    
         
-        Otherwise it is based on the distance between
-        starTTime being used and the time of the 
-        last update of the database.
+        @param startTime:
         
-        Method is very usefull when handling totals.    
+        @param timeOfLastUpdate:
+        
+        @param graphicType:
+        
+        @param goal:
+       
+       @return : The calculated interval
        
     """ 
     #432000 is 5 days in seconds
@@ -967,11 +1104,21 @@ def getInterval( startTime, timeOfLastUpdate, graphicType = "daily", goal = "fet
      
 def getArchiveCopyDestination( type, client, machine, infos ):
     """
-       This method returns the absolute path to the copy 
-       to create based on the time of creation of the 
-       graphic and the span of the graphic.
+       @summary : This method returns the absolute path to the copy 
+                  to create based on the time of creation of the 
+                  graphic and the span of the graphic.
        
-       Precondition : graphic type must be either weekly, monthly or yearly. 
+       @note: Precondition : graphic type must be either weekly, monthly or yearly. 
+       
+       @param type:
+       
+       @param client:
+       
+       @param machine:
+       
+       @param infos:
+    
+       @return : The carchive copy destination. 
     
     """
     
@@ -1008,9 +1155,18 @@ def getArchiveCopyDestination( type, client, machine, infos ):
          
     
 def createCopy( client, type, machine, imageName, infos ):
+
     """
-        Create a copy in the appropriate 
-        folder to the file named imageName.
+        @summary : Create a copy in the appropriate 
+                   folder to the file named imageName.
+        
+        @param client:
+        @param type:
+        @param machine:
+        @param imageName:
+        @param infos:
+        
+    
         
     """ 
    
@@ -1044,12 +1200,16 @@ def createCopy( client, type, machine, imageName, infos ):
     
 def formatedTypesForLables( type ):
     """
-        Takes the type of a graphic to be drawn
-        ( latency, filesOverMaxLatency...) and formats
-        it so that it can be used in the graphics labels.
-        ( y-axis label and title)       
+        @summary : Takes the type of a graphic to be drawn
+                    ( latency, filesOverMaxLatency...) and formats
+                    it so that it can be used in the graphics labels.
+                    ( y-axis label and title)       
         
-        Will not format an unknown type.
+        @note : Will not format an unknown type.
+        
+        @param type:latency,filesOverMaxLatency, bytecount,filecount or errors.
+        
+        @return : Returns the formated title and y axis label 
         
     """
     
@@ -1079,7 +1239,21 @@ def formatedTypesForLables( type ):
         
 def plotRRDGraph( databaseName, type, fileType, client, machine, infos, logger = None ):
     """
-        This method is used to produce a rrd graphic.
+        @summary : This method is used to produce a rrd graphic.
+        
+        @param databaseName:
+        
+        @param type:
+        
+        @param fileType:
+        
+        @param client:
+        
+        @param machine:
+        
+        @param infos:
+        
+        @param logger:
         
     """
     
@@ -1230,16 +1404,32 @@ def createNewMergedDatabase( infos, dataType,  machine, start, interval    ) :
     
 def getInfosFromDatabases( dataOutputs, names, machine, fileType, startTime, endTime ):
     """
-        This method browsess a list of database names and returns
-        the infos of the first valid databases found.
+        @summary : This method browsess a list of database 
+                   names and returns the infos of the first
+                   valid databases found.
         
-        names, machine and type are used to generate the db names.
-        startTime is the time for wich we want to know the interval 
-        between itself and the time of the last update of the db.
+                   names, machine and type are used to 
+                   generate the db names. startTime is the 
+                   time for wich we want to know the interval 
+                   between itself and the time of the last 
+                   update of the db.
+              
+        @param dataOutputs:
         
-        Return nbEntries, lastUpdate and interval that is used 
-        between a certain start time and the time of the last 
-        update of that db. 
+        @param names:
+        
+        @param machine:
+        
+        @param fileType:
+        
+        @param startTime:
+        
+        @param endTime:       
+              
+                    
+      @return:     Return nbEntries, lastUpdate and interval that is used 
+                   between a certain start time and the time of the last 
+                   update of that db. 
          
     """
     
@@ -1597,7 +1787,8 @@ def mergeData( timeStamps, fileCounts, data, withProportions = False, mergerType
             if ( str(sourlientsValue) != 'nan'):
                 if withProportions == True:
                     #print float(sourlientsValue), float( float(fileCounts[sourlient][i])), float(fileCountsTotals[i])
-                    valueToAdd = valueToAdd + float(sourlientsValue) * float( float(fileCounts[sourlient][i]) / float(fileCountsTotals[i]) )
+                    if float(fileCountsTotals[i]) !=0.0:
+                        valueToAdd = valueToAdd + float(sourlientsValue) * float( float(fileCounts[sourlient][i]) / float(fileCountsTotals[i]) )
                 else:
                     valueToAdd = valueToAdd + float(sourlientsValue)
                     
@@ -1687,7 +1878,8 @@ def getPairsFromDatabases( type, machine, start, end, infos, logger=None, mergeW
         for sourlient in fileCounts.keys():
             if len( fileCounts[sourlient]) != desirableArrayLength:
                 fileCounts[sourlient] = getNormalisedDataBaseData(fileCounts[sourlient], desirableArrayLength, mergerType="average")  
-                #print sourlient
+                if len( fileCounts[sourlient]) != desirableArrayLength:
+                    print "%s still has a problem %s %s " %(sourlient, len( fileCounts[sourlient]), desirableArrayLength) 
                 
                 
         pairs = mergeData(timeStamps, fileCounts, data, withProportions = True)
@@ -1789,7 +1981,7 @@ def createMergedDatabases( infos, logger = None ):
             
 def generateRRDGraphics( infos, logger = None ):
     """
-        This method generates all the graphics. 
+        @summary : This method generates all the graphics. 
                 
     """    
         
@@ -1824,7 +2016,7 @@ def generateRRDGraphics( infos, logger = None ):
 
 def main():
     """
-        Gathers options, then makes call to generateRRDGraphics   
+        @summary : Gathers options, then makes call to generateRRDGraphics   
     
     """        
         
@@ -1848,7 +2040,7 @@ def main():
     
 if __name__ == "__main__":
     """
-        Set testing variable to run test cases.    
+        @note : Set testing variable to True to run the unit like test cases.    
     """
     
     testing = False 
