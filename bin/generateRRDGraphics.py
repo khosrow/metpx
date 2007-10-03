@@ -248,7 +248,7 @@ def getOptionsFromParser( parser ):
     if clientNames[0] == "ALL":
         # Get all of the client/sources that have run between graph's start and end. 
         if totals == True or havingRun == True :          
-            print start, end, machines       
+            #print start, end, machines       
             rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNamesHavingRunDuringPeriod( start, end, machines,None, havingrunOnAllMachines = True )
             mergerType = "totalForMachine"
         else:#Build graphs only for currently runningclient/sources.      
@@ -257,7 +257,7 @@ def getOptionsFromParser( parser ):
                      
         if fileType == "tx":    
             clientNames = txNames  
-            print clientNames
+            #print clientNames
         else:
             clientNames = rxNames    
             
@@ -1197,6 +1197,7 @@ def createNewMergedDatabase( infos, dataType,  machine, start, interval    ) :
     
     
     if interval == 1:#daily :
+        #print "daily 240 "
         start = start - 60
         #print "^^^^^^^^^^^", rrdFilename, '--start','%s' %( start ), '--step', '60', 'DS:%s:GAUGE:60:U:U' %dataType,'RRA:AVERAGE:0:1:7200','RRA:MIN:0:1:7200', 'RRA:MAX:0:1:7200'
         rrdtool.create( rrdFilename, '--start','%s' %( start ), '--step', '60', 'DS:%s:GAUGE:60:U:U' %dataType,'RRA:AVERAGE:0:1:7200','RRA:MIN:0:1:7200', 'RRA:MAX:0:1:7200' )
@@ -1205,14 +1206,16 @@ def createNewMergedDatabase( infos, dataType,  machine, start, interval    ) :
     elif interval == 60:#weekly :
         start = start - (60*60)
         rrdtool.create( rrdFilename, '--start','%s' %( start ), '--step', '3600', 'DS:%s:GAUGE:3600:U:U' %dataType,'RRA:AVERAGE:0:1:336','RRA:MIN:0:1:336', 'RRA:MAX:0:1:336' )
-    
+        #print "weekly 240 "
     
     elif interval == 240:#monthly
+        #print "monthly 240 "
         start = start - (240*60)
         rrdtool.create( rrdFilename, '--start','%s' %( start ), '--step', '14400', 'DS:%s:GAUGE:14400:U:U' %dataType, 'RRA:AVERAGE:0:1:1460','RRA:MIN:0:1:1460','RRA:MAX:0:1:1460' )
     
     
     else:#yearly
+        #print "yearly 1440 "
         start = start - (1440*60)
         rrdtool.create( rrdFilename, '--start','%s' %( start ), '--step', '86400', 'DS:%s:GAUGE:86400:U:U' %dataType, 'RRA:AVERAGE:0:1:3650','RRA:MIN:0:1:3650','RRA:MAX:0:1:3650' )
     
@@ -1496,8 +1499,8 @@ def getTimeStamps( start, end, spanType, sourlients,machines, fileType, dataType
     interval = getInterval( start, timeOfLastUpdate, spanType, "")
     interval = interval * 60
     
-    timeStamp = start  + interval
-    while timeStamp <= end :
+    timeStamp = start
+    while timeStamp < end :
         timeStamps.append( timeStamp )
         timeStamp = timeStamp + interval
     #print timeStamps
@@ -1593,7 +1596,7 @@ def mergeData( timeStamps, fileCounts, data, withProportions = False, mergerType
             #print "%s %s : %s" %(timeStamps[i], sourlient, sourlientsValue)
             if ( str(sourlientsValue) != 'nan'):
                 if withProportions == True:
-                    print float(sourlientsValue), float( float(fileCounts[sourlient][i])), float(fileCountsTotals[i])
+                    #print float(sourlientsValue), float( float(fileCounts[sourlient][i])), float(fileCountsTotals[i])
                     valueToAdd = valueToAdd + float(sourlientsValue) * float( float(fileCounts[sourlient][i]) / float(fileCountsTotals[i]) )
                 else:
                     valueToAdd = valueToAdd + float(sourlientsValue)
@@ -1601,11 +1604,11 @@ def mergeData( timeStamps, fileCounts, data, withProportions = False, mergerType
         if withProportions == False:
             if mergerTypeWithoutProportions == "average":
                 valueToAdd = float(valueToAdd) / float( len( data.keys() ) ) 
-                print "did the avrage"     
+                #print "did the avrage"     
         
         mergedData.append( [timeStamps[i], valueToAdd] )
     
-    print mergedData
+    #print mergedData
     return mergedData
     
     
@@ -1641,7 +1644,7 @@ def getPairsFromDatabases( type, machine, start, end, infos, logger=None, mergeW
     
     """
     
-    print "############Type %s ###################" %(type)
+    #print "############Type %s ###################" %(type)
     
     data       = {}
     fileCounts = {}
@@ -1658,22 +1661,24 @@ def getPairsFromDatabases( type, machine, start, end, infos, logger=None, mergeW
     arrays = [data[sourLient] for sourLient in data.keys() ]
      
     #print arrays  
-    desirableArrayLength =  getDesirableArrayLength( arrays ) 
+    #desirableArrayLength =  getDesirableArrayLength( arrays ) 
     
+    desirableArrayLength = len(timeStamps)
     
     if desirableArrayLength != len(timeStamps):
+        #print timeStamps
         raise Exception("desirableArrayLength(%s) != len(timeStamps)(%s)" %(desirableArrayLength, len(timeStamps) ) )
     
     for sourlient in data.keys() :
         if len( data[sourlient]) != desirableArrayLength:
-            print "len before %s %s" %(len( data[sourlient]), desirableArrayLength )
+            #print "len before %s %s" %(len( data[sourlient]), desirableArrayLength )
             
-            if mergeWithProportions == True :
-                mergerType = "average" 
-            else :
-                mergerType = mergerTypeWithoutProportions 
-            data[sourlient] = getNormalisedDataBaseData(data[sourlient], desirableArrayLength, mergerType=mergerType )   
-            print "len after %s" %len(data[sourlient])
+            #--------------------------------- if mergeWithProportions == True :
+                #---------------------------------------- mergerType = "average"
+            #------------------------------------------------------------ else :
+                #--------------------- mergerType = mergerTypeWithoutProportions
+            data[sourlient] = getNormalisedDataBaseData(data[sourlient], desirableArrayLength, mergerType="average" )   
+            #print "len after %s" %len(data[sourlient])
     
     if mergeWithProportions == True :
         
@@ -1681,14 +1686,15 @@ def getPairsFromDatabases( type, machine, start, end, infos, logger=None, mergeW
         
         for sourlient in fileCounts.keys():
             if len( fileCounts[sourlient]) != desirableArrayLength:
-                fileCounts[sourlient] = getNormalisedDataBaseData(fileCounts[sourlient], desirableArrayLength, mergerType="total")  
-                print sourlient
+                fileCounts[sourlient] = getNormalisedDataBaseData(fileCounts[sourlient], desirableArrayLength, mergerType="average")  
+                #print sourlient
                 
                 
         pairs = mergeData(timeStamps, fileCounts, data, withProportions = True)
     
     else:
         pairs = mergeData(timeStamps, fileCounts, data, withProportions = False, mergerTypeWithoutProportions = mergerTypeWithoutProportions)
+            
             
     return pairs
 
