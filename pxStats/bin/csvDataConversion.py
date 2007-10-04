@@ -231,12 +231,6 @@ def getAllClientOrSourcesNamesFromMachines( infos ):
         
         if configParameters.groupParameters.groupFileTypes[group] == infos.fileType : 
             sourlients[group] = [str( configParameters.groupParameters.groupsMachines[group] ).replace('[','').replace(']', '').replace(',','').replace( "'",'' ).replace('"','' ).replace(" ",'')]
-            #print "adding following group %s" %(configParameters.groupParameters.groupsMachines[group])
-        else:
-            
-            #print "group : %s fileType %s infos.fileType : %s" %(group, configParameters.groupParameters.groupFileTypes[group], infos.fileType )    
-    
-    #print sourlients
     
     return sourlients
 
