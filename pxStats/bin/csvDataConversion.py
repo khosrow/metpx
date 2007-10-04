@@ -31,7 +31,7 @@ from pxStats.lib.MachineConfigParameters import MachineConfigParameters
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.RrdUtilities import RrdUtilities 
 from pxStats.lib.StatsPaths import StatsPaths
-
+from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 
 SUPPORTED_RX_DATATYPES = ["bytecount", "filecount", "errors" ]
 SUPPORTED_TX_DATATYPES = [ "latency", "filesOverMaxLatency", "bytecount",  "filecount", "errors" ]
@@ -42,7 +42,7 @@ LOCAL_MACHINE = os.uname()[1]
 class _CsvInfos:
     
     
-    def __init__( self, start, end , span ,timeSpan, fileType, machines, machinesAreClusters, dataSource ):
+    def __init__( self, start, end , span ,timeSpan, fileType, machines, machinesAreClusters,  dataSource, includegroups = True):
         """
             @summary: _CsvInfos constructor 
             
@@ -59,6 +59,9 @@ class _CsvInfos:
             
             @param machinesAreClusters: Whether or not the machines are clusters. 
             
+            @param includeGroups : Whether or not to include groups in the data that 
+                                   is written in the csv files. 
+            
             @param dataSource : Whether to get the data from databases or from pickles.
             
             @return : New _CsvInfos instance.
@@ -72,6 +75,7 @@ class _CsvInfos:
         self.fileType   = fileType 
         self.machines   = machines      
         self.dataSource = dataSource
+        self.includegroups = includegroups
         self.machinesAreClusters = machinesAreClusters
         
 
@@ -193,13 +197,17 @@ def getAllClientOrSourcesNamesFromMachines( infos ):
             machineConfig = MachineConfigParameters()
             machineConfig.getParametersFromMachineConfigurationFile()
             machines = machineConfig.getMachinesAssociatedWith( machine )
-            print machines
+            #print machines
             machine = str( machines ).replace('[','').replace(']', '').replace(',','').replace( "'",'' ).replace('"','' ).replace(" ",'')
-            rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNamesHavingRunDuringPeriod( infos.start, infos.end, machines, pattern = None, havingrunOnAllMachines = True  )    
-            
+            if machine != '':
+                rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNamesHavingRunDuringPeriod( infos.start, infos.end, machines, pattern = None, havingrunOnAllMachines = True  )    
+            else:
+                rxNames, txNames = [],[]
         else:
-            #machine = str( members ).replace('[','').replace(']', '').replace(',','')
-            rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNamesHavingRunDuringPeriod( infos.start, infos.end, infos.machines, pattern = None, havingrunOnAllMachines = False  )    
+            if machine != '':
+                rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNamesHavingRunDuringPeriod( infos.start, infos.end, infos.machines, pattern = None, havingrunOnAllMachines = False  )    
+            else:
+                rxNames, txNames = [],[]    
         
         if infos.fileType == "rx":
             namesToAdd = rxNames
@@ -213,7 +221,23 @@ def getAllClientOrSourcesNamesFromMachines( infos ):
             else:
                 sourlients[nameToAdd] = [ machine ]      
     
-    print sourlients
+    
+    
+    configParameters = StatsConfigParameters()
+    configParameters.getAllParameters()
+    groups = configParameters.groupParameters.groups
+    
+    for group in groups : 
+        
+        if configParameters.groupParameters.groupFileTypes[group] == infos.fileType : 
+            sourlients[group] = [str( configParameters.groupParameters.groupsMachines[group] ).replace('[','').replace(']', '').replace(',','').replace( "'",'' ).replace('"','' ).replace(" ",'')]
+            #print "adding following group %s" %(configParameters.groupParameters.groupsMachines[group])
+        else:
+            
+            #print "group : %s fileType %s infos.fileType : %s" %(group, configParameters.groupParameters.groupFileTypes[group], infos.fileType )    
+    
+    #print sourlients
+    
     return sourlients
 
 
@@ -292,7 +316,7 @@ def writeDataToFileName( infos, sourlients, data, fileName ):
     if not os.path.isdir( os.path.dirname(fileName) ):
         os.makedirs(os.path.dirname(fileName), 0777 )
         
-    print data    
+    #print data    
     
     fileHandle = open( fileName, "w" )
     
@@ -308,7 +332,8 @@ def writeDataToFileName( infos, sourlients, data, fileName ):
         for machine in machines:
                 
             lineTowrite = sourlientName + ' on ' + machine
-            
+            #print "line to write : %s " %lineTowrite
+            #print data[sourlientName]
             for dataType in dataTypes:
                 for valueType in valueTypes:
                     lineTowrite = lineTowrite + ',' + str( data[sourlientName][machine][dataType][valueType] )
@@ -493,14 +518,22 @@ def getDataFromDatabases( sourlients, dataTypes, infos ):
     
     for sourlient in sourlients.keys() :
         data[sourlient] = {}
+        
         sourlientsMachines = sourlients[sourlient]
             
         for machine in infos.machines :
+            
             if infos.machinesAreClusters == True:
                 machineConfig = MachineConfigParameters()
                 machineConfig.getParametersFromMachineConfigurationFile()
                 machines = machineConfig.getMachinesAssociatedWith( machine ) 
+                oldMachine = machine
                 machine = str(machines).replace('[','').replace(']', '').replace(',','').replace( "'",'' ).replace('"','' ).replace(" ",'').replace('[','').replace(']', '').replace(',','').replace( "'",'' ).replace('"','' ).replace(" ",'')           
+            
+            if machine == '':
+                #print "trouvaille !!!"
+                machine = oldMachine
+                
             if machine in sourlientsMachines:
                 data[sourlient][machine] = {}
                 
@@ -552,7 +585,7 @@ def transferDatabasesToCsvFile( infos ):
     
     
     writeDataToFileName(infos, sourlients, data, fileName)
-    print fileName
+    #print fileName
 
 
 def transferPicklesToCsvFile( infos ):
@@ -604,6 +637,7 @@ def getOptionsFromParser( parser ):
     fixedCurrent     = options.fixedCurrent
     fixedPrevious    = options.fixedPrevious
     turnOffLogging   = options.turnOffLogging
+    includeGroups    = options.includeGroups
     machinesAreClusters = options.machinesAreClusters
     
     
@@ -717,9 +751,27 @@ def getOptionsFromParser( parser ):
         print "Program terminated."
         sys.exit()    
 
-        
-        
+    if includeGroups == True:
+        configParameters = StatsConfigParameters()
+        configParameters.getAllParameters()
+        groups = configParameters.groupParameters.groups
+        for machine in machines:
+            if machinesAreClusters == True :
+                machineConfig = MachineConfigParameters()
+                machineConfig.getParametersFromMachineConfigurationFile()
+                machinesAssociatedWith = machineConfig.getMachinesAssociatedWith( machine ) 
+                machinesToTest = str(machinesAssociatedWith).replace('[','').replace(']', '').replace(',','').replace( "'",'' ).replace('"','' ).replace(" ",'').replace('[','').replace(']', '').replace(',','').replace( "'",'' ).replace('"','' ).replace(" ",'')       
+            
+             
+            for group in groups:
+                groupsMachine =  str( configParameters.groupParameters.groupsMachines[group] ).replace('[','').replace(']', '').replace(',','').replace( "'",'' ).replace('"','' ).replace(" ",'')
+                #print   "machinesToTest %s groupsMachine %s" %(machinesToTest,groupsMachine ) 
+                if machinesToTest in groupsMachine :
+                    if groupsMachine not in machines:
+                        machines.append(groupsMachine)
+    #print machines
     infos = _CsvInfos( start = start , end = end  , span = span, timeSpan = timeSpan, fileType = fileType, machines = machines,machinesAreClusters = machinesAreClusters, dataSource = "databases" )    
+    
     return infos
 
 
@@ -743,6 +795,8 @@ def addOptions( parser ):
    
     parser.add_option( "--fixedCurrent", action="store_true", dest="fixedCurrent", default=False, help="Do not use floating weeks|days|months|years. Use current fixed interval found.")
    
+    parser.add_option( "--includeGroups", action="store_true", dest="includeGroups", default=False, help="Include groups of all the specified machines or clusters." )
+    
     parser.add_option( "--machines", action="store", type="string", dest="machines", default=LOCAL_MACHINE, help = "Machines for wich you want to collect data." )   
     
     parser.add_option("--machinesAreClusters", action="store_true", dest = "machinesAreClusters", default=False, help="Specified machines are clusters.")
@@ -777,6 +831,7 @@ Options:
       based on the fixed dates of the calendar.
     - With --fixedPrevious you can specify that you want a graphic based on the current( week, month year)
       based on the fixed dates of the calendar.
+    - With --includeGroups you can specify that you want to see groups appear in the csv files.
     - With -d|--daily you can specify you want daily data.
     - With --date you can specify the date of the call.
     - With -w|--weekly you can specify you want weekly data.
