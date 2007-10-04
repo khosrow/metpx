@@ -252,6 +252,8 @@ class PickleMerging:
         """    
         
         pickleList = []
+        #print machines 
+        #print clients 
         
         for machine in machines:
             for client in clients: 
