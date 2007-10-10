@@ -318,6 +318,7 @@ class GeneralStatsLibraryMethods:
                             if txLongName not in txOnlyDatabases:
                                 txOnlyDatabases.append( txLongName )  
         
+        
         else:
             for machine in machines:
                 combinedMachineName = combinedMachineName + machine
@@ -345,12 +346,14 @@ class GeneralStatsLibraryMethods:
         rxOnlyDatabases = filter( lambda x: x not in txOnlyDatabases, rxTxDatabases )    
                     
             
+            
+            
         for rxDatabase in rxOnlyDatabases:  
             lastUpdate = RrdUtilities.getDatabaseTimeOfUpdate( rxDatabase, "rx" )
             if lastUpdate >= start:
                 #fileName format is ../path/rxName_machineName     
-                rxDatabase = os.path.basename( rxDatabase )
-                rxDatabase = rxDatabase.split("_%s"%combinedMachineName)[0]       
+                rxDatabase = os.path.basename( rxDatabase )                
+                rxDatabase = rxDatabase.split( "_%s" %( rxDatabase.split('_')[-1:][0] ) )[0]       
                 rxNames.append( rxDatabase  )
             
         for txDatabase in txOnlyDatabases:                
@@ -358,8 +361,8 @@ class GeneralStatsLibraryMethods:
 
             if lastUpdate >= start:
                 
-                txDatabase = os.path.basename( txDatabase )    
-                txDatabase = txDatabase.split("_%s"%combinedMachineName)[0]
+                txDatabase = os.path.basename( txDatabase )
+                txDatabase = txDatabase.split("_%s" %( txDatabase.split('_')[-1:][0] ) )[0]     
                 txNames.append( txDatabase )    
        
         
