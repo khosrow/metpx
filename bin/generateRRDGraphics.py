@@ -426,7 +426,7 @@ def addOptions( parser ):
     parser.add_option( "--fixedPrevious", action="store_true", dest="fixedPrevious", default=False, help="Do not use floating weeks|days|months|years. Use previous fixed interval found.")
    
     parser.add_option( "--fixedCurrent", action="store_true", dest="fixedCurrent", default=False, help="Do not use floating weeks|days|months|years. Use current fixed interval found.")
-    
+            
     parser.add_option( "--havingRun", action="store_true", dest="havingRun", default=False, help="Do not use only the currently running client/sources. Use all that have run between graphic(s) start and end instead.")
     
     parser.add_option("-i", "--individual", action="store_true", dest = "individual", default=False, help="Dont combine data from specified machines. Create graphs for every machine independently")
@@ -1367,8 +1367,7 @@ def createNewMergedDatabase( infos, dataType,  machine, start, interval    ) :
     """    
                                                   
     rrdFilename = RrdUtilities.buildRRDFileName( dataType = dataType, clients = infos.clientNames, machines =[machine], fileType = infos.fileType, usage =infos.mergerType)
-    
-    
+       
     
     if interval == 1:#daily :
         #print "daily 240 "
@@ -1440,7 +1439,10 @@ def getInfosFromDatabases( dataOutputs, names, machine, fileType, startTime, end
     while lastUpdate == 0 and i < len( names) : # in case some databases dont exist
         nbEntries   = 0
         rrdFileName = RrdUtilities.buildRRDFileName( "errors", clients = [ names[i] ], machines = [machine], fileType = fileType, usage = "regular" )
-        lastUpdate  = RrdUtilities.getDatabaseTimeOfUpdate( rrdFileName, fileType )    
+        if not os.path.isFile(rrdFileName):
+            rrdFileName = RrdUtilities.buildRRDFileName( "errors", groupName =  names[i], machines = [machine], fileType = fileType, usage = "group" )
+        if os.path.isfile(rrdFileName):
+            lastUpdate  = RrdUtilities.getDatabaseTimeOfUpdate( rrdFileName, fileType )    
 
         nbEntries   = len( dataOutputs[ names[i] ]) 
          
@@ -1597,6 +1599,9 @@ def getDataForAllSourlients( infos, dataType = "fileCount" ):
     for client in infos.clientNames:#Gather all pairs for that type
         
         databaseName = RrdUtilities.buildRRDFileName( dataType = dataType, clients = [client], machines = infos.machines, fileType = infos.fileType) 
+        if not os.path.isfile(databaseName):
+            databaseName = RrdUtilities.buildRRDFileName( dataType = dataType, groupName =  client, machines = infos.machines, fileType = infos.fileType, usage = "group" ) 
+        
         #print databaseName
         if infos.totals == True :#try and force all databases to give back data with the exact same resolution.
             
@@ -1651,6 +1656,11 @@ def getDatabaseNames( sourlients, fileType, datatype, machines ):
     
     for sourlient in sourlients:
         databaseName = RrdUtilities.buildRRDFileName( dataType = datatype , clients = sourlient, machines = machines, fileType = fileType ) 
+        if not os.path.isfile(databaseName):
+            databaseName = RrdUtilities.buildRRDFileName( dataType = datatype , groupName = sourlient, machines = machines, fileType = fileType, usage="group" ) 
+        if not os.path.isfile(databaseName):
+            databaseName = ""
+            
         databaseNames[sourlient] = databaseName
     
     return databaseNames
@@ -1957,6 +1967,9 @@ def createMergedDatabases( infos, logger = None ):
             i = 0 
             while i < len(infos.clientNames) and lastUpdate == 0 :
                 databaseName = RrdUtilities.buildRRDFileName( dataType = type, clients = [infos.clientNames[i]] , machines = [machine],  fileType = infos.fileType, usage = "regular"  )
+                if not os.path.isfile(databaseName):
+                    RrdUtilities.buildRRDFileName( dataType = type, groupName = infos.clientNames[i] , machines = [machine],  fileType = infos.fileType, usage = "group"  )    
+                
                 lastUpdate  =  RrdUtilities.getDatabaseTimeOfUpdate( databaseName, infos.fileType )
             
             interval = getInterval( start, lastUpdate, infos.graphicType, goal = "fetchData"  )    
@@ -2010,6 +2023,9 @@ def generateRRDGraphics( infos, logger = None ):
                 for type in infos.types : 
                    
                     databaseName = RrdUtilities.buildRRDFileName( dataType = type, clients = [client], machines = [machine], fileType = infos.fileType )
+                    if not os.path.isfile(databaseName):
+                        databaseName = RrdUtilities.buildRRDFileName( dataType = type, groupName=client, machines = [machine], fileType = infos.fileType, usage = "group" )
+                    
                     plotRRDGraph( databaseName, type, infos.fileType, client, machine, infos,logger = logger )
                 
 
