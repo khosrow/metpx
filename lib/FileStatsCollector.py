@@ -629,7 +629,8 @@ class FileStatsCollector:
                     #print "found line by %s > %s" %( departure, self.endTime )
                     lineFound = True   
                 
-                else:
+                else:# < startime
+                    position = fileHandle.tell()
                     line = fileHandle.readline ()
                     
             else:#keep on readin 
@@ -694,6 +695,8 @@ class FileStatsCollector:
                                    
             line, lineType, position, usedTheSavedFileAccessPointer  = self.findFirstInterestingLine( file = file, useSavedFileAccessPointer = useSavedFileAccessPointer )
             
+            previousPosition = position #in case we need to save it without it ever being it used.
+            
             if usedTheSavedFileAccessPointer == True :
                useSavedFileAccessPointer = False 
                 
@@ -701,8 +704,8 @@ class FileStatsCollector:
             if line != "" :             
                                            
                 fileHandle.seek( position )
-                fileHandle.readline()#Set file position AFTER the line we are currently handling.
-                previousPosition = fileHandle.tell()#position prior to next interesting line.
+                previousPosition = fileHandle.tell()#save position as to not dicard it forever if it's discarded now for being out of range
+                fileHandle.readline()               #That line could be needed for a future update 
                 departure   = self.findValues( ["departure"] ,  line, lineType, fileType = self.fileType,logger= self.logger )["departure"]
                         
             while line  != "" and str(departure)[:-2] < str(endTime)[:-2]: #while in proper range 
