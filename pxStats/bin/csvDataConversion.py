@@ -42,11 +42,12 @@ LOCAL_MACHINE = os.uname()[1]
 class _CsvInfos:
     
     
-    def __init__( self, start, end , span ,timeSpan, fileType, machines, machinesAreClusters,  dataSource, includegroups = True):
+    def __init__( self, start, end , span ,timeSpan, fileType, machinesForLabels, machinesToSearch, machinesAreClusters,  dataSource, includegroups = True):
         """
             @summary: _CsvInfos constructor 
             
             @param start : Start of the span for wich we want to transfer data.
+            
             @param end: End of the span for wich we want to transfer data. 
             
             @param span: Span for wich we want to transfer data             
@@ -55,7 +56,10 @@ class _CsvInfos:
             
             @param fileType: RX or TX
                        
-            @param machines: Machines for wich to gather data.
+            @param machinesForLabels: Main machines  for wich to gather data.
+            
+            @param machinesToSearch : Machines to search for, may include main machines,machines clusters and special
+                                      machines that are allowed for groups for example.
             
             @param machinesAreClusters: Whether or not the machines are clusters. 
             
@@ -68,12 +72,14 @@ class _CsvInfos:
         
         """
         
+        
         self.start      = start
         self.end        = end
         self.span       = span
         self.timeSpan   = timeSpan
         self.fileType   = fileType 
-        self.machines   = machines      
+        self.machinesForLabels   = machinesForLabels
+        self.machinesToSearch    = machinesToSearch      
         self.dataSource = dataSource
         self.includegroups = includegroups
         self.machinesAreClusters = machinesAreClusters
@@ -143,7 +149,7 @@ def buildCsvFileName( infos ):
                       
     """
     
-    machinesStr = str(infos.machines).replace('[','').replace( ']','' ).replace(',', '').replace("'","").replace( '"','').replace( ' ','' )
+    machinesStr = str(infos.machinesForLabels).replace('[','').replace( ']','' ).replace(',', '').replace("'","").replace( '"','').replace( ' ','' )
     
     currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( StatsDateLib.getSecondsSinceEpoch (infos.start) )     
     currentWeek = time.strftime( "%W", time.gmtime( StatsDateLib.getSecondsSinceEpoch (infos.start) ) )
@@ -163,8 +169,7 @@ def buildCsvFileName( infos ):
     elif infos.span == "yearly":
         fileName = fileName + "yearly/" + infos.fileType  + "/%s/%s.csv" %( machinesStr, currentYear )
         
-   
-    
+ 
     return fileName 
 
 
@@ -190,24 +195,36 @@ def getAllClientOrSourcesNamesFromMachines( infos ):
     
     sourlients ={} 
     
-    for machine in infos.machines: 
+    for machine in infos.machinesToSearch: 
         
         if infos.machinesAreClusters == True:
             
             machineConfig = MachineConfigParameters()
             machineConfig.getParametersFromMachineConfigurationFile()
             machines = machineConfig.getMachinesAssociatedWith( machine )
-            #print machines
-            machine = str( machines ).replace('[','').replace(']', '').replace(',','').replace( "'",'' ).replace('"','' ).replace(" ",'')
+            
+            if machines != []:
+                #print machines
+                machine = str( machines ).replace('[','').replace(']', '').replace(',','').replace( "'",'' ).replace('"','' ).replace(" ",'')
+                if machine != '':
+                    rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNamesHavingRunDuringPeriod( infos.start, infos.end, machines, pattern = None, havingrunOnAllMachines = True  )    
+                else:
+                    rxNames, txNames = [],[]
+            
+            else: #might be a groups machine,in this case do not force to have run on all machines.....
+            
+                if machine != '':
+                    rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNamesHavingRunDuringPeriod( infos.start, infos.end, [machine], pattern = None, havingrunOnAllMachines = False  )    
+                else:
+                    rxNames, txNames = [],[]               
+        
+        else:#not a cluster, une mahcine name directly. Force to have run exclusivly on specified machine. 
+        
             if machine != '':
-                rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNamesHavingRunDuringPeriod( infos.start, infos.end, machines, pattern = None, havingrunOnAllMachines = True  )    
-            else:
-                rxNames, txNames = [],[]
-        else:
-            if machine != '':
-                rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNamesHavingRunDuringPeriod( infos.start, infos.end, infos.machines, pattern = None, havingrunOnAllMachines = False  )    
+                rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNamesHavingRunDuringPeriod( infos.start, infos.end, [machine], pattern = None, havingrunOnAllMachines = True  )    
             else:
                 rxNames, txNames = [],[]    
+        
         
         if infos.fileType == "rx":
             namesToAdd = rxNames
@@ -322,19 +339,23 @@ def writeDataToFileName( infos, sourlients, data, fileName ):
         
         sourlients[sourlientName].sort()
         machines = sourlients[sourlientName]
-        
-        for machine in machines:
+        try:
+            for machine in machines:
+                    
+                lineTowrite = sourlientName + ' on ' + machine
+                #print "line to write : %s " %lineTowrite
+                #print data[sourlientName]
+                for dataType in dataTypes:
+                    for valueType in valueTypes:
+                        lineTowrite = lineTowrite + ',' + str( data[sourlientName][machine][dataType][valueType] )
                 
-            lineTowrite = sourlientName + ' on ' + machine
-            #print "line to write : %s " %lineTowrite
-            #print data[sourlientName]
-            for dataType in dataTypes:
-                for valueType in valueTypes:
-                    lineTowrite = lineTowrite + ',' + str( data[sourlientName][machine][dataType][valueType] )
-            
-            fileHandle.write(lineTowrite +  '\n' )
-    
-    
+                fileHandle.write(lineTowrite +  '\n' )
+        
+        except:
+            print "%s, %s : %s" %( sourlientName, dataType, data[sourlientName] ) 
+            pass
+        
+        
     fileHandle.close()
 
 
@@ -364,7 +385,9 @@ def fetchDataFromRRDDatabase( databaseName, startTime, endTime, interval, graphi
         #------------------------------------------------------------ sys.exit()
         
     
-    return output  
+    return output 
+
+ 
 
 def getGraphicsMinMaxMeanTotal( databaseName, startTime, endTime,graphicType, dataInterval, desiredInterval = None,  type="average", logger=None ):
     """
@@ -515,7 +538,7 @@ def getDataFromDatabases( sourlients, dataTypes, infos ):
         
         sourlientsMachines = sourlients[sourlient]
             
-        for machine in infos.machines :
+        for machine in infos.machinesToSearch :
             
             if infos.machinesAreClusters == True:
                 machineConfig = MachineConfigParameters()
@@ -534,7 +557,12 @@ def getDataFromDatabases( sourlients, dataTypes, infos ):
                 for dataType in dataTypes :
                     
                     databaseName = RrdUtilities.buildRRDFileName(dataType, [sourlient], [machine], "", infos.fileType)
+                    if not os.path.isfile( databaseName ):
+                        if infos.includegroups == True:
+                            databaseName = RrdUtilities.buildRRDFileName(dataType = dataType, groupName = sourlient, machines = [machine], fileType = infos.fileType, usage = "group" )
+                            #print databaseName
                     lastUpdate = RrdUtilities.getDatabaseTimeOfUpdate( databaseName, infos.fileType )        
+                                        
                     fetchedInterval = getInterval( int(StatsDateLib.getSecondsSinceEpoch(infos.start)), lastUpdate, dataType, goal = "fetchData"  )  
                     desiredInterval = getInterval( int(StatsDateLib.getSecondsSinceEpoch(infos.start)), lastUpdate, dataType, goal = "plotGraphic"  )
                     interval        = desiredInterval     
@@ -749,6 +777,7 @@ def getOptionsFromParser( parser ):
         configParameters = StatsConfigParameters()
         configParameters.getAllParameters()
         groups = configParameters.groupParameters.groups
+        machinesToSearch = machines[:]#Forces a copy and nota reference.
         for machine in machines:
             if machinesAreClusters == True :
                 machineConfig = MachineConfigParameters()
@@ -761,10 +790,12 @@ def getOptionsFromParser( parser ):
                 groupsMachine =  str( configParameters.groupParameters.groupsMachines[group] ).replace('[','').replace(']', '').replace(',','').replace( "'",'' ).replace('"','' ).replace(" ",'')
                 #print   "machinesToTest %s groupsMachine %s" %(machinesToTest,groupsMachine ) 
                 if machinesToTest in groupsMachine :
-                    if groupsMachine not in machines:
-                        machines.append(groupsMachine)
+                    if groupsMachine not in machinesToSearch:
+                        machinesToSearch.append(groupsMachine)
+    
+    
     #print machines
-    infos = _CsvInfos( start = start , end = end  , span = span, timeSpan = timeSpan, fileType = fileType, machines = machines,machinesAreClusters = machinesAreClusters, dataSource = "databases" )    
+    infos = _CsvInfos( start = start , end = end  , span = span, timeSpan = timeSpan, fileType = fileType, machinesForLabels = machines, machinesToSearch = machinesToSearch, machinesAreClusters = machinesAreClusters, dataSource = "databases" )    
     
     return infos
 
