@@ -29,7 +29,7 @@ from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
 
 
-def getDirListToKeep( daysToKeep = 7 ):
+def getDirListToKeep( daysToKeep = 21 ):
     """
           Gets the list of directories to keep. Based on DAYS_TO_KEEP constant.
     """
@@ -58,7 +58,7 @@ def cleanPickles( dirsToKeep ):
             completePath = upperDir + "/" + innerFolder
             
             if innerFolder not in dirsToKeep:
-                #status, output = commands.getstatusoutput("rm -rf %s " %completePath )
+                status, output = commands.getstatusoutput("rm -rf %s " %completePath )
                 print "deleted : %s " %completePath
                 
     
@@ -70,13 +70,13 @@ def main():
         
     """
     
-    daysToKeep = 7
+    daysToKeep = 21
     
     if len( sys.argv ) == 2:
         try:
             daysToKeep =  int( sys.argv[1] )
         except:
-            print "Days to keep value must be an integer. For default 7 days value, type nothing."
+            print "Days to keep value must be an integer. For default 21 days value, type nothing."
             sys.exit()
             
     dirsToKeep = getDirListToKeep( daysToKeep )
