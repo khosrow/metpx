@@ -316,7 +316,7 @@ def generateWebPage( machineTags, machineParameters ):
                 <table style="table-layout: fixed; width: 100%%; border-left: 0px gray solid; border-bottom: 0px gray solid; padding:0px; margin: 0px" cellspacing=10 cellpadding=6 >
                     <tr>
                         
-                        <td bgcolor="#006699"   title = >Type</font></td> 
+                        <td bgcolor="#006699"   title = ><font color = "white">Type</font></td> 
                         
                         <td bgcolor="#006699"  "Display the average latency of file transfers for all clients."><font color = "white"><font color = "white"><div class="left">Latency</div><a target ="popup" href="help" onClick="wopen('helpPages/latency.html', 'popup', 875, 100); return false;"><div class="right">?</div></a></font></td>
                         
