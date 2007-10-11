@@ -33,6 +33,7 @@ sys.path.append(pxlib)
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 
 
+TOTAL_OPERATIONAL_COSTS =  10
 
 def rewriteFile( fileName, lines ):
     """
@@ -81,7 +82,7 @@ def getFieldPosition( fieldName, firstLine ):
 
 
 
-def calculateCosts1( lines  ):
+def calculateCosts1( lines, totals  ):
     """
         @summary : Calculates the cost based on the 
                    number of files and 
@@ -98,16 +99,28 @@ def calculateCosts1( lines  ):
     
     costs = []
     
+    
+    bytesTotalPosition     = getFieldPosition( 'bytecount total', lines[0] )
+    fileCountTotalPosition = getFieldPosition( 'filecount total', lines[0] )
+    
+    costsComingFromBytecount = 0.40 * TOTAL_OPERATIONAL_COSTS
+    costsComingFromFilecount = 0.60  * TOTAL_OPERATIONAL_COSTS
+    
+    byteCountTotal = totals[ bytesTotalPosition -1 ]
+    fileCountTotal = totals[ fileCountTotalPosition -1 ]
+        
+    
     if len( lines ) > 0 :
         
-        bytesMeanPosition     = getFieldPosition( 'bytecount mean', lines[0] )
-        fileCountMeanPosition = getFieldPosition( 'filecount mean', lines[0] )
-        
-        
         for line in lines[1:]:
-            splitLine = line.split(',')
-            cost = 5 * float(splitLine[bytesMeanPosition]) + 7 * float(splitLine[fileCountMeanPosition])
-            costs.append( cost )
+                splitLine = line.split(',')
+                byteCost = ( float( splitLine[ bytesTotalPosition ] ) / float( byteCountTotal ) )  * costsComingFromBytecount
+                fileCost = ( float( splitLine[ fileCountTotalPosition ] ) / float( fileCountTotal ) )  * costsComingFromFilecount
+                totalCost = byteCost + fileCost 
+                
+                cost = ( byteCost, fileCost, totalCost )
+                
+                costs.append( cost )
 
     return costs             
 
@@ -248,15 +261,15 @@ def addCostsToLines( lines ):
 
     """
 
-    
-    costs1 = calculateCosts1( lines )
+    totals = calculateTotalsForEachColumn( lines )
+    costs1 = calculateCosts1( lines, totals )
     #put other costs here
     
     lines[0] = lines[0].replace('\n','')
-    lines[0] = lines[0]+',costs1' 
+    lines[0] = lines[0]+',cost for bytes, cost for files, total cost' 
     for i in range( len(lines[1:]) ):
         lines[i+1] = lines[i+1].replace('\n','')
-        lines[i+1] = lines[i+1] + ',' + str(costs1[i]) #put other costs there
+        lines[i+1] = lines[i+1] + ',' + str(costs1[i]).replace( '(', '' ).replace( ')','' ) #put other costs there
  
     #print lines    
     return lines
@@ -314,7 +327,7 @@ def main():
         if len( lines ) >1: 
             
             lines = addCostsToLines(lines)
-            
+                        
             lines = addTotalsAndMeansToLines(lines) 
                        
             rewriteFile(fileName, lines)
