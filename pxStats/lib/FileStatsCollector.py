@@ -378,8 +378,11 @@ class FileStatsCollector:
                             d2 = splitLine[6].split(":")[6]     
                                     
                             result = (datetime.datetime( int(d1[0:4]), int(d1[5:7]), int(d1[8:10]), int(d1[11:13]), int(d1[14:16]), int(d1[17:19])) - datetime.datetime( int(d2[0:4]),int(d2[4:6]),int(d2[6:8]),int(d2[8:10]),int(d2[10:12]),int(d2[12:14]) ) )                          
+                            
                             values[statsType] = result.seconds + (result.days*24*60*60)
-                                
+                            if values[statsType] < 0 :
+                                values[statsType] = 0 
+                                      
                         elif statsType == "arrival":                  
                         
                             arrival = StatsDateLib.isoDateDashed( splitLine[6].split( ":" )[6] )    
