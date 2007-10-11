@@ -178,7 +178,7 @@ def addTotalsAndMeansToLines( lines ):
     """
     
     #totals section
-    lineToAdd = 'Total'
+    lineToAdd = 'Total ( without groups )'
     
     totals = calculateTotalsForEachColumn( lines )
     
@@ -194,14 +194,21 @@ def addTotalsAndMeansToLines( lines ):
     lines.append( lineToAdd )
     
     #means section
-    nbSourlients = getNbSourlients(lines)
-    print "nbsourlients :%s" %nbSourlients
+    configParameters = StatsConfigParameters()
+    
+    configParameters.getAllParameters()
+    
+    knownGroups = configParameters.groupParameters.groups
+    
+    nbSourlients = getNbSourlients( lines, False ) 
+    
+    #print "nbsourlients :%s" %nbSourlients
     means = [0 for i in range( len( lines[0].split(',') ) -1 ) ]
 
     for i in range( len( totals ) ):
         means[i] = float(totals[i]) / float( nbSourlients )
     
-    lines.append( 'Means,' + str(means).replace( '[', '' ).replace( ']', '' ) )
+    lines.append( 'Means ( without groups ),' + str(means).replace( '[', '' ).replace( ']', '' ) )
         
     return lines 
 
@@ -228,17 +235,17 @@ def getNbSourlients( lines, includeGroups = False ):
     configParameters.getAllParameters()
     
     knownGroups = configParameters.groupParameters.groups
-    
+
     for line in lines :
         
         entryIsValid = True
         fields = line.split( ',' )
         if includeGroups == False:
-            if fields[0] in knownGroups:
+            if str(fields[0].split( ' ' )[0]).replace(' ', '') in knownGroups :                
                 entryIsValid = False
                 
-        if str(fields[0]).lower() == 'clients' or str(fields[0]).lower() == 'sources'  \
-        or str(fields[0]).lower() == 'totals' or str(fields[0]).lower() == 'means' :
+        if  'client' in str(fields[0]).lower()  or 'source'  in str(fields[0]).lower()  \
+        or  'total'  in str(fields[0]).lower()  or 'mean' in str(fields[0]).lower() :
             entryIsValid = False
         
         if entryIsValid == True:
