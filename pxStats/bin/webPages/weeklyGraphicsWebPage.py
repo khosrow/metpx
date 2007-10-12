@@ -307,9 +307,8 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
         
         <body text="#000000" link="#FFFFFF" vlink="000000" bgcolor="#FFF4E5" >
         <br>
-        <table>
-            <td>
-                <tr>
+        <table width = "100%">
+            <tr width = "100%">
                 <div class="left"><b><font size="5"> Weekly graphics for RX sources from MetPx. </font><font size = "2">*updated hourly</font></b></div> 
     
     """)
@@ -341,8 +340,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
         
         
     fileHandle.write("""
-                     </tr>
-                </td>
+                 </tr>               
              </table>   
          <br>
          <br>   
@@ -425,7 +423,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
             fileHandle.write( """<td bgcolor="#66CCFF"> Weeks&nbsp;:&nbsp;""" )
         else:
             machineName = getMachineNameFromDescription( rxNames[rxName] )
-            fileHandle.write( """ <tr> <td bgcolor="#99FF99" class="cssTable"><div class="left"> '%s' </div> <div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false"><font color="black">?</font></a></div><br>(%s)</td> """ %(rxName, rxNames[rxName].replace("'","").replace('"',''), machineName ) )
+            fileHandle.write( """ <tr> <td bgcolor="#99FF99" class="cssTable"><div class="left"> %s </div> <div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false"><font color="black">?</font></a></div><br>(%s)</td> """ %(rxName, rxNames[rxName].replace("'","").replace('"',''), machineName ) )
             fileHandle.write( """<td bgcolor="#66CCFF">  Weeks&nbsp;:&nbsp;""" )        
         
         
@@ -477,9 +475,8 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
     </div> 
     
         <br>
-        <table >
-            <td>
-                <tr>
+        <table width = "100%">            
+            <tr width = "100%">
                 <div class="left"><b><font size="5"> Weekly graphics for TX clients from MetPx. </font><font size = "2">*updated hourly</font></b></div> 
     
     """)
@@ -495,7 +492,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
         file = "/apps/px/pxStats/data/csvFiles/weekly/" +  "tx" + "/%s/%s/%s.csv" %( machinesStr, currentYear, currentWeek ) 
         webLink = "csvFiles/weekly/" + 'tx' +  "/%s/%s/%s.csv" %( machinesStr, currentYear, currentWeek ) 
         
-        print file
+        #print file
         if os.path.isfile( file ):
             if oneFileFound == False:
                 fileHandle.write(  "<div class='right'><font size='2' color='black'> CSV files&nbsp;:&nbsp; " )
@@ -513,8 +510,8 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
     
     
     fileHandle.write("""   
-                        </tr>
-                    </td>
+                     </tr>
+                    
                  </table>   
              <br>
              <br>
