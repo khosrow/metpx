@@ -340,9 +340,8 @@ def generateWebPage( rxNames, txNames, years ):
         
         <body text="#000000" link="#FFFFFF" vlink="000000" bgcolor="#FFF4E5" > 
             <br>
-            <table>
-                <td>
-                    <tr>
+            <table width = "100%">
+                <tr width = "100%">
                     <div class="left"><b><font size="5"> Yearly graphics for RX sources from MetPx. </font><font size = "2">*updated monthly</font></b></div> 
     
     """)
@@ -501,9 +500,8 @@ def generateWebPage( rxNames, txNames, years ):
     </div> 
     
         <br>
-        <table >
-            <td>
-                <tr>
+        <table width = "100%">            
+            <tr width = "100%">
                 <div class="left"><b><font size="5"> Yearly graphics for TX clients from MetPx. </font><font size = "2">*updated monthly</font></b></div> 
     
     """)

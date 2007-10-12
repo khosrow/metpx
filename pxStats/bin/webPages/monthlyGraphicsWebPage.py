@@ -333,9 +333,9 @@ def generateWebPage( rxNames, txNames, months ):
         
         <body text="#000000" link="#FFFFFF" vlink="000000" bgcolor="#FFF4E5" >          
         <br>
-        <table>
-            <td>
-                <tr>
+        <table width = "100%" >
+            
+                <tr width = "100%">
                     <div class="left"><b><font size="5"> Monthly graphics for RX sources from MetPx. </font><font size = "2">*updated weekly</font></b></div>
                     
                      
@@ -504,9 +504,8 @@ def generateWebPage( rxNames, txNames, months ):
         </table>
     </div>
     <br>
-    <table>
-        <td>
-            <tr>
+    <table width = "100%">
+            <tr width = "100%" >
                 <div class="left"><b><font size="5"> Monthly graphics for TX clients from MetPx. </font><font size = "2">*updated weekly</font></b></div> """)
     
     oneFileFound = False
@@ -558,7 +557,7 @@ def generateWebPage( rxNames, txNames, months ):
                            
                         </td>
                     
-                        <td class="cssTable" bgcolor="#006699" title = "Display the taverage latency of file transfers for every day of the week for each clients.">
+                        <td class="cssTable" bgcolor="#006699" title = "Display the average latency of file transfers for every day of the week for each clients.">
                             
                                 <font color = "white">
                                     <center>
