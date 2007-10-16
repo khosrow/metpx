@@ -585,6 +585,8 @@ def transferDatabasesToCsvFile( infos ):
                    writes out the data into a csv
                    files.
     
+        @return : returns the file name that was used.
+        
     """
     
     
@@ -607,7 +609,9 @@ def transferDatabasesToCsvFile( infos ):
     
     
     writeDataToFileName(infos, sourlients, data, fileName)
-    #print fileName
+    
+    return fileName
+
 
 
 def transferPicklesToCsvFile( infos ):
@@ -628,14 +632,18 @@ def transferDataToCsvFile( infos ):
         @param infos: _CvsInfos instance containing the required 
                       to know wich data to gather.  
     
-        @return: None
+        @return: The filename that was used.
     
     """
     
+    fileName = ""
+    
     if infos.dataSource == "databases":
-        transferDatabasesToCsvFile( infos )
+        fileName = transferDatabasesToCsvFile( infos )
     
-    
+    return fileName
+
+
     
 def getOptionsFromParser( parser ):
     """
@@ -889,8 +897,11 @@ def main():
     #get arguments
     parser = createParser()
     infos  = getOptionsFromParser(parser)
-    transferDataToCsvFile(infos)
+    filename = transferDataToCsvFile(infos)
     
+    print "generated filename : %s" %filename
+
+
 
 if __name__ == '__main__':
     main()
