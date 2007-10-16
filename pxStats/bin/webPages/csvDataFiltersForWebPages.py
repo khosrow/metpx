@@ -30,10 +30,30 @@ except KeyError:
 
 sys.path.append(pxlib)
 
+from optparse import OptionParser
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 
 
-TOTAL_OPERATIONAL_COSTS =  10
+TOTAL_YEARLY_OPERATIONAL_COSTS =  10
+
+
+
+class _csvFilterParameters:
+    
+
+    def __init__(self, fileName, totalOperationalCost ):
+        """        
+            @param fileName: Name of the file on which to apply the filter.
+            
+            @param totalOperationalCost: Total cost of operations for the span that 
+                                         is covered within the specified file. 
+            
+        """
+        
+        self.fileName             = fileName
+        self.totalOperationalCost = totalOperationalCost
+
+
 
 def rewriteFile( fileName, lines ):
     """
@@ -82,7 +102,7 @@ def getFieldPosition( fieldName, firstLine ):
 
 
 
-def calculateCosts1( lines, totals  ):
+def calculateCosts1( lines, totals, cost  ):
     """
         @summary : Calculates the cost based on the 
                    number of files and 
@@ -93,6 +113,11 @@ def calculateCosts1( lines, totals  ):
         @param lines: Lines for which we need to 
                      calculate costs1
         
+        @param : Precalculated total for each column so that we can figure out 
+                 each clients percentage of contribution tothe total cost.
+                 
+        @param cost : 
+                  
         @return : Returns an array containing costs1
                   for every line received as a parameter. 
     """
@@ -103,8 +128,8 @@ def calculateCosts1( lines, totals  ):
     bytesTotalPosition     = getFieldPosition( 'bytecount total', lines[0] )
     fileCountTotalPosition = getFieldPosition( 'filecount total', lines[0] )
     
-    costsComingFromBytecount = 0.40 * TOTAL_OPERATIONAL_COSTS
-    costsComingFromFilecount = 0.60  * TOTAL_OPERATIONAL_COSTS
+    costsComingFromBytecount = 0.40 * cost
+    costsComingFromFilecount = 0.60 * cost
     
     byteCountTotal = totals[ bytesTotalPosition -1 ]
     fileCountTotal = totals[ fileCountTotalPosition -1 ]
@@ -256,7 +281,7 @@ def getNbSourlients( lines, includeGroups = False ):
 
 
 
-def addCostsToLines( lines ): 
+def addCostsToLines( lines, cost ): 
     """    
         @summary : Calculates the differents costs based on 
                    all the known costs calculating methods
@@ -269,7 +294,7 @@ def addCostsToLines( lines ):
     """
 
     totals = calculateTotalsForEachColumn( lines )
-    costs1 = calculateCosts1( lines, totals )
+    costs1 = calculateCosts1( lines, totals, cost )
     #put other costs here
     
     lines[0] = lines[0].replace('\n','')
@@ -311,8 +336,114 @@ def getLinesFromFile( fileName ):
         fileHandle.close()
     
     return lines
+ 
+ 
+ 
+def getOptionsFromParser( parser ):
+    """
         
+        @summary : This method parses the argument vector received 
+                   when the program was called.
+                   
+                   It takes the parameterss wich have been passed 
+                   by the user and sets them in the corresponding
+                   fields of the infos variable.   
+    
+        @note:     If errors are encountered in parameters used,
+                   it will immediatly terminate 
+                   the application.
         
+        @return : A _csvFilterParameters instance containing the 
+                  parameters.          
+    
+    """  
+
+    ( options, args )= parser.parse_args() 
+        
+    cost =  options.cost
+    fileName = options.fileName
+    
+    try : 
+        
+        if fileName == "":   
+            raise 
+        else:
+            if not os.path.isfile( fileName ):
+                fileName = os.path.abspath( fileName )
+                if not os.path.isfile( fileName ):
+                    raise
+    
+    except:        
+        print "Error. An existing file name MUST be specified." 
+        print "Use -h for help."
+        print "Program terminated."
+        sys.exit()
+
+    try :
+        cost = float(cost)
+        if cost <= 0.0:
+            raise
+       
+    except:         
+        print "Error. You MUST specify a cost value above 0." 
+        print "Use -h for help."
+        print "Program terminated."
+        sys.exit()
+
+
+    parameters = _csvFilterParameters( fileName, cost )
+    return parameters 
+ 
+def addOptions( parser ):
+    """
+        @summary : This method is used to add all available options to the option parser.
+        
+    """       
+    
+    parser.add_option("-f", "--fileName", action="store", type="string", dest="fileName", default='', help="File on which to apply the filter.")  
+    
+    parser.add_option("-c", "--cost", action="store", type="string", dest="cost", default=0, help="Total operational cost of the period covered by the specified file.")  
+        
+       
+       
+        
+def createAParser( ):
+    """ 
+        @summary : Builds and returns the parser 
+    
+        @return : The parser
+    """
+    
+    usage = """
+
+%prog [options]
+********************************************
+* See doc.txt for more details.            *
+********************************************
+
+Options:
+ 
+    - With -c|--cost you can specify the total cost of the period the filter is applied on. 
+    - With -f|--fileName you can specify the file name on which to apply the filter.
+        
+Notes : 
+
+    - Default value for costs does not exist. This parameter MUST be specified. 
+    - Default filename does not exist. This parameter MUST be specified.    
+    
+    parser = OptionParser( usage )
+    addOptions( parser )
+    
+    
+    """
+    
+    parser = OptionParser( usage )
+    
+    addOptions( parser )
+  
+    return parser   
+
+
     
 def main():
     """
@@ -325,36 +456,32 @@ def main():
         
     """
     
-    if len( sys.argv ) == 2:
-        fileName = sys.argv[1]
-         
-        lines = getLinesFromFile(fileName)
+    parser = createAParser()
+    
+    parameters= getOptionsFromParser(parser)
+    
+    lines = getLinesFromFile( parameters.fileName)
+    
+    #print lines
+    if len( lines ) >1: 
         
-        #print lines
-        if len( lines ) >1: 
-            
-            lines = addCostsToLines(lines)
-                        
-            lines = addTotalsAndMeansToLines(lines) 
-                       
-            rewriteFile(fileName, lines)
-        
-        else:
-            print "Error. Specified files does not exist or contains no data."
-            print "Please specify a proper file name when calling this program."
-            print "Program terminated."
-            sys.exit()
-            
+        lines = addCostsToLines( lines, parameters.totalOperationalCost )
+                    
+        lines = addTotalsAndMeansToLines( lines ) 
+                   
+        rewriteFile( parameters.fileName, lines )
+    
     else:
-        print "Error. This program needs to be called with "
-        print "one and only one parameter."
-        print "Please specify a fileName when calling this program."
+        print "Error. Specified files does not exist or contains no data."
+        print "Please specify a proper file name when calling this program."
         print "Program terminated."
         sys.exit()
+            
         
         
 if __name__ == '__main__':
     """
         @calls up main program
     """
+    
     main()
