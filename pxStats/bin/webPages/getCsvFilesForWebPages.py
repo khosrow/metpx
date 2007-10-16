@@ -105,11 +105,6 @@ def updateLastYearsFiles( clusters, currentTime, cost ):
     
     status, output = commands.getstatusoutput( StatsPaths.STATSBIN + 'csvDataConversion.py --includeGroups -y --machines "%s" --machinesAreClusters --fixedPrevious --date "%s" -f rx'  %( clusters, currentTime ) )
     print output
- 
-    fileName = getFileNameFromExecutionOutput(output)
-    
-    if fileName != "":
-        commands.getstatusoutput(StatsPaths.STATSWEBPAGESGENERATORS + 'csvDataFiltersForWebPages.py -c %s -f %s ' %(cost, fileName) )
     
     status, output = commands.getstatusoutput( StatsPaths.STATSBIN + 'csvDataConversion.py --includeGroups -y --machines "%s" --machinesAreClusters --fixedPrevious --date "%s" -f tx'  %( clusters, currentTime ) )
     print output
@@ -158,13 +153,7 @@ def updateLastMonthsFiles( clusters, currentTime, cost ):
     
     status, output = commands.getstatusoutput( StatsPaths.STATSBIN + 'csvDataConversion.py --includeGroups -m --machines "%s" --machinesAreClusters --fixedPrevious --date "%s" -f rx'  %( clusters, currentTime ) )
     print output
-    
-    fileName = getFileNameFromExecutionOutput(output)
-    
-    if fileName != "":
-        commands.getstatusoutput(StatsPaths.STATSWEBPAGESGENERATORS + 'csvDataFiltersForWebPages.py -c %s -f %s ' %(cost, fileName) )
-    
-      
+        
     status, output = commands.getstatusoutput( StatsPaths.STATSBIN + 'csvDataConversion.py --includeGroups -m --machines "%s" --machinesAreClusters --fixedPrevious --date "%s" -f tx'  %( clusters, currentTime ) )
     print output
     fileName = getFileNameFromExecutionOutput(output)
@@ -213,11 +202,7 @@ def updateLastWeeksFiles( clusters, currentTime, cost ):
     
     
     status, output = commands.getstatusoutput( StatsPaths.STATSBIN + 'csvDataConversion.py --includeGroups -w --machines "%s" --machinesAreClusters --fixedPrevious --date "%s" -f rx'  %( clusters, currentTime ) )
-    print output
-    fileName = getFileNameFromExecutionOutput(output)
-    if fileName != "":
-        commands.getstatusoutput(StatsPaths.STATSWEBPAGESGENERATORS + 'csvDataFiltersForWebPages.py -c %s -f %s ' %(cost, fileName) )
-    
+    print output   
        
     status, output = commands.getstatusoutput( StatsPaths.STATSBIN + 'csvDataConversion.py --includeGroups -w --machines "%s" --machinesAreClusters --fixedPrevious --date "%s" -f tx'  %( clusters, currentTime ) )
     print output
@@ -267,13 +252,7 @@ def updateYesterdaysFiles( clusters, currentTime, cost ):
     
     status, output = commands.getstatusoutput( StatsPaths.STATSBIN + 'csvDataConversion.py --includeGroups -d --machines "%s" --machinesAreClusters --fixedPrevious --date "%s" -f rx'  %( clusters, currentTime ) )
     print output
-    
-    fileName = getFileNameFromExecutionOutput(output)
-    
-    if fileName != "":
-        commands.getstatusoutput(StatsPaths.STATSWEBPAGESGENERATORS + 'csvDataFiltersForWebPages.py -c %s -f %s ' %(cost, fileName) )
-    
-    
+       
     status, output = commands.getstatusoutput( StatsPaths.STATSBIN + 'csvDataConversion.py --includeGroups -d --machines "%s" --machinesAreClusters --fixedPrevious --date "%s" -f tx'  %( clusters, currentTime ) )
     print output      
     fileName = getFileNameFromExecutionOutput(output)
