@@ -28,7 +28,7 @@ named COPYING in the root of the source directory tree.
 """
     Small function that adds pxlib to the environment path.  
 """
-import os, time, sys
+import gettext, os, time, sys
 sys.path.insert(1, sys.path[0] + '/../../../')
 try:
     pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
@@ -68,7 +68,7 @@ def getMachineNameFromDescription( description ):
     """
     
     machines = ""
-    print description
+    
     lines = description.split("<br>")
     
     for line in lines :
@@ -117,7 +117,7 @@ def getStartEndOfWebPage():
         
 
     
-def generateWebPage( rxNames, txNames, days ):
+def generateWebPage( rxNames, txNames, days, language = 'en' ):
     """
         Generates a web page based on all the 
         rxnames and tx names that have run during
@@ -126,8 +126,18 @@ def generateWebPage( rxNames, txNames, days ):
         Only links to available graphics will be 
         displayed.
         
-    """       
-        
+    """  
+    
+    if language == 'fr':
+        fileName = StatsPaths.STATSLANGFRBINWEBPAGES + "dailyGraphicsWebPage" 
+    elif language == 'en':
+        fileName = StatsPaths.STATSLANGENBINWEBPAGES + "dailyGraphicsWebPage"      
+    
+    translator = gettext.GNUTranslations(open(fileName))
+    _ = translator.gettext    
+    
+    
+    
     rxNamesArray = rxNames.keys()
     txNamesArray = txNames.keys()
     
@@ -138,7 +148,7 @@ def generateWebPage( rxNames, txNames, days ):
     if not os.path.isdir(StatsPaths.STATSWEBPAGESHTML ):
         os.makedirs( StatsPaths.STATSWEBPAGESHTML )
     
-    fileHandle = open( StatsPaths.STATSWEBPAGESHTML  +"dailyGraphs.html" , 'w' )
+    fileHandle = open( StatsPaths.STATSWEBPAGESHTML  +"dailyGraphs_%s.html" %language , 'w' )
 
      
     fileHandle.write( """
@@ -275,7 +285,7 @@ def generateWebPage( rxNames, txNames, days ):
         
         <body text="#000000" link="#FFFFFF" vlink="000000" bgcolor="#FFF4E5" >
         
-            <h2>Daily graphics for RX sources from MetPx. <font size = "2">*updated hourly</font></h2>
+            <h2>""" + _( "Daily graphics for RX sources from MetPx.") + """ <font size = "2">""" + _("*updated hourly") + """</font></h2>
         
             <div class="tableContainer">         
                <table> 
@@ -297,7 +307,7 @@ def generateWebPage( rxNames, txNames, days ):
                             </td>
                             
                             <td bgcolor="#006699">
-                                <font color = "white">List of available daily graphics.</font>                                
+                                <font color = "white">""" + _("List of available daily graphics.") + """</font>                                
                             </td>
                         </tr>   
                     </thead>
@@ -313,11 +323,11 @@ def generateWebPage( rxNames, txNames, days ):
         
         if rxNames[rxName] == "" :
             fileHandle.write( """<tr> <td bgcolor="#99FF99"> %s</td> """ %(rxName))
-            fileHandle.write( """<td bgcolor="#66CCFF"> Days :   """ )
+            fileHandle.write( """<td bgcolor="#66CCFF"> """ + _("Days") + """ :   """ )
         else:
             machineName = getMachineNameFromDescription( rxNames[rxName] ) 
             fileHandle.write( """<tr> <td bgcolor="#99FF99"><div class="left"> %s</div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false"><font color="black">?</font></a></div><br>(%s)</td> """ %(rxName, rxNames[rxName].replace("'","").replace('"',''), machineName ) )
-            fileHandle.write( """<td bgcolor="#66CCFF"> Days :   """ )
+            fileHandle.write( """<td bgcolor="#66CCFF"> """ + _("Days") + """ :   """ )
             
                 
         for day in days:
@@ -328,7 +338,7 @@ def generateWebPage( rxNames, txNames, days ):
             webLink = "archives/daily/rx/%s/"%( rxName ) + str(currentYear) + "/" + str(currentMonth) + "/" + str(currentDay) + ".png"
             
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="%s" href="%s">%s   </a>"""%( rxName, webLink, time.strftime( "%a", time.gmtime(day) ) ) )
+                fileHandle.write(  """<a target ="%s" href="%s">"""%( rxName, webLink) + _("%s" %time.strftime( "%a", time.gmtime(day) ) )  + """   </a>""" )
                 
                  
         fileHandle.write( """</td></tr>""" )
@@ -339,7 +349,7 @@ def generateWebPage( rxNames, txNames, days ):
         </table>
     </div>
        
-    <h2>Daily graphics for TX clients from MetPx. <font size = "2">*updated hourly</font></h2>
+    <h2>""" + _("Daily graphics for TX clients from MetPx.") + """ <font size = "2">""" +_("*updated hourly") + """</font></h2>
     
     <div class="tableContainer">         
         <table> 
@@ -362,7 +372,7 @@ def generateWebPage( rxNames, txNames, days ):
                     
                     <td bgcolor="#006699">
                         <div class = "txTableEntry">
-                            <font color = "white">List of available daily graphics.</font>
+                            <font color = "white">""" + _("List of available daily graphics.") + """</font>
                         </div>    
                     </td>
             
@@ -383,11 +393,11 @@ def generateWebPage( rxNames, txNames, days ):
         
         if txNames[txName] == "" :
             fileHandle.write( """<tr> <td bgcolor="#99FF99"> %s</td> """ %(txName))
-            fileHandle.write( """<td bgcolor="#66CCFF"><div class = "txTableEntry">   Days :   """ )
+            fileHandle.write( """<td bgcolor="#66CCFF"><div class = "txTableEntry">   """ + _("Days") + """ :   """ )
         else:
             machineName = getMachineNameFromDescription( txNames[txName] ) 
             fileHandle.write( """<tr> <td bgcolor="#99FF99"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false"><font color="black">?</font></a></div><br>(%s)</td> """ %(txName, txNames[txName].replace("'","").replace('"',''), machineName ))
-            fileHandle.write( """<td bgcolor="#66CCFF">  Days :   """ )
+            fileHandle.write( """<td bgcolor="#66CCFF">  """ + _("Days") + """ :   """ )
         
         
         for day in days:
@@ -397,7 +407,7 @@ def generateWebPage( rxNames, txNames, days ):
             webLink =  "archives/daily/tx/%s/"%( txName ) + str(currentYear) + "/" + str(currentMonth) + "/" + str(currentDay) + ".png"
             
             if os.path.isfile( file ):
-                fileHandle.write(  """<a target ="%s" href="%s">%s   </a>"""%( rxName, webLink, time.strftime( "%a", time.gmtime(day) ) ) )     
+                fileHandle.write(  """<a target ="%s" href="%s">"""%( rxName, webLink) + _("%s" %(time.strftime( "%a", time.gmtime(day)) ))+"""  </a>""" )    
 
         fileHandle.write( "</td></tr>" )
 
