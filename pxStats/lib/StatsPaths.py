@@ -116,7 +116,7 @@ class StatsPaths:
     STATSLANGFRBINWEBPAGES   = STATSLANGFRBIN + 'webPages/'
     STATSLANGFRLIB           = STATSLANGFR + 'lib/'
      
-    STATSLANGFR              = STATSLANG + 'en/'
+    STATSLANGEN             = STATSLANG + 'en/'
     STATSLANGENBIN           = STATSLANGEN + 'bin/'
     STATSLANGENBINTOOLS      = STATSLANGENBIN + 'tools/'
     STATSLANGENBINDEBUGTOOLS = STATSLANGENBIN + 'debugTools/'
