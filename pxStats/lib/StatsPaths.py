@@ -95,6 +95,7 @@ class StatsPaths:
     STATSDATA    = STATSROOT + 'data/'
     STATSDOC     = STATSROOT + 'doc/'
     STATSETC     = STATSROOT + 'etc/'
+    STATSLANG    = STATSROOT + 'lang/'
     STATSLIB     = STATSROOT + 'lib/'
     STATSLOGGING = STATSROOT + 'logs/'
     STATSMAN     = STATSROOT + 'man/'
@@ -106,7 +107,22 @@ class StatsPaths:
     STATSPXRXCONFIGS  = STATSPXCONFIGS + 'rx/'
     STATSPXTXCONFIGS  = STATSPXCONFIGS + 'tx/'
     STATSPXTRXCONFIGS = STATSPXCONFIGS + 'trx/'
-        
+    
+    
+    STATSLANGFR              = STATSLANG + 'fr/'
+    STATSLANGFRBIN           = STATSLANGFR + 'bin/'
+    STATSLANGFRBINTOOLS      = STATSLANGFRBIN + 'tools/'
+    STATSLANGFRBINDEBUGTOOLS = STATSLANGFRBIN + 'debugTools/'
+    STATSLANGFRBINWEBPAGES   = STATSLANGFRBIN + 'webPages/'
+    STATSLANGFRLIB           = STATSLANGFR + 'lib/'
+     
+    STATSLANGFR              = STATSLANG + 'en/'
+    STATSLANGENBIN           = STATSLANGEN + 'bin/'
+    STATSLANGENBINTOOLS      = STATSLANGENBIN + 'tools/'
+    STATSLANGENBINDEBUGTOOLS = STATSLANGENBIN + 'debugTools/'
+    STATSLANGENBINWEBPAGES   = STATSLANGENBIN + 'webPages/'
+    STATSLANGENLIB           = STATSLANGEN + 'lib/'
+    
     STATSLIBRARY = STATSLIB
     
     STATSDB               = STATSDATA + 'databases/'
