@@ -20,10 +20,12 @@ named COPYING in the root of the source directory tree.
 ##
 ##############################################################################
 """
+
 """
     Small function that adds pxlib to the environment path.  
 """
-import os, time, sys, datetime, string
+
+import gettext, os, time, sys, datetime, string
 sys.path.insert(1, sys.path[0] + '/../../../')
 try:
     pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
@@ -44,75 +46,95 @@ from pxStats.lib.MachineConfigParameters import MachineConfigParameters
 LOCAL_MACHINE = os.uname()[1]   
 
 
-
-def generateWebPage( machineTags ):
+def generateWebPage( machineTags, language = 'en' ):
     """
-        Generates the top.html web page
-        to be displayed as the top frame
-        of the pxstats web site.
+        @summary :  Generates the top.html web page
+                    to be displayed as the top frame
+                    of the pxstats web site.
+        
+        @param machineTags  : Tags representing machine groups 
+                              for which we are producing graphics.              
+        
+        @param language : Language for which to generate the web page.
+                    
     """
+    
+    if language == 'fr':
+        fileName = StatsPaths.STATSLANGFRBINWEBPAGES + "generateTopWebPage" 
+    elif language == 'en':
+        fileName = StatsPaths.STATSLANGENBINWEBPAGES + "generateTopWebPage" 
+    
+    
+    
+    translator = gettext.GNUTranslations(open(fileName))
+    _ = translator.gettext
 
-    file = "%stop.html" %StatsPaths.STATSWEBPAGES 
+    file = "%stop_%s.html" %( StatsPaths.STATSWEBPAGES, language )
     fileHandle = open( file , 'w' )
-    
-    fileHandle.write( """ 
+
+    fileHandle.write( """
+
     <html>
-    
+
     <style type="text/css">
         div.left { float: left; }
         div.right {float: right; }
     </style>
-    
+
     <body text="white" link="white" vlink="white" bgcolor="#006699" >
-        
+
         <div class="left">
-            Individual graphics&nbsp;&nbsp;:&nbsp;&nbsp;
-            <a href="html/dailyGraphs.html" target="bottom">Daily</a> 
-            &nbsp;&nbsp;            
-            <a href="html/weeklyGraphs.html" target="bottom">Weekly</a>
+            """ + _("Individual graphics") + """&nbsp;&nbsp;:&nbsp;&nbsp;
+
+             <a href="html/dailyGraphs_%s.html target="bottom">"""%language  + _("Daily") + """</a>
             &nbsp;&nbsp;
-            <a href="html/monthlyGraphs.html" target="bottom">Monthly</a>
+
+             <a href="html/weeklyGraphs_%s.html target="bottom">"""%language + _("Weekly")  + """</a>
             &nbsp;&nbsp;
-            <a href="html/yearlyGraphs.html" target="bottom">Yearly</a>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  
-            
-       
-       
-    """)
-    
-    
+
+             <a href="html/monthlyGraphs_%s.html target="bottom">"""%language + _("Monthly") + """</a>
+            &nbsp;&nbsp;
+
+             <a href="html/yearlyGraphs_%s.html" target="bottom">""" %language +_("Yearly") + """</a>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+    """   )
+
+
     if machineTags != [] :
         fileHandle.write( """
-        Combined graphics&nbsp;&nbsp;:&nbsp;&nbsp;&nbsp;
-        """ )    
-        
+        """ + _("Clusters") + """&nbsp;&nbsp;:&nbsp;&nbsp;&nbsp;
+        """ )
+
         for machineTag in machineTags:
             fileHandle.write( """
-            <a href="html/%s.html" target="bottom">%s</a> 
-            &nbsp;&nbsp;&nbsp;              
-            """ %( machineTag.replace( ',','' ), string.upper(machineTag) ) ) 
-    
-        
-    fileHandle.write( """ 
-        </div> 
-        
+            <a href="html/%s_%s.html" target="bottom">%s</a>
+            &nbsp;&nbsp;&nbsp;
+             """ %( machineTag.replace( ',','' ),language , string.upper(machineTag) ) )
+
+
+    fileHandle.write( """
+        </div>
+
         <div class="right">
             <a href="archives" target="bottom" >Archives</a>
-            <a href="../scripts/cgi-bin/graphicsRequestPage.py" target="bottom">Requests</a>
-            <a href="html/helpPages/glossary.html" target="bottom" >Glossary</a>
+
+             <a href="../scripts/cgi-bin/graphicsRequestPage.py?lang=%s" target="bottom">"""%language + _("Requests") + """</a>
+
+             <a href="html/helpPages/glossary_%s.html" target="bottom" >""" %language + _("Glossary") + """</a>
         </div>
-        
-        
-    
-    </body>    
+
+
+
+    </body>
 
 </html>
-           
-    
-    """  )
-    
-    
-    fileHandle.close() 
+
+
+    """ )
+
+
+    fileHandle.close()
 
 
 
