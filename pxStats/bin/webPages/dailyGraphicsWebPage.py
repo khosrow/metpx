@@ -199,15 +199,15 @@ def generateWebPage( rxNames, txNames, days, language = 'en' ):
         
         <script>
                 function showSourceHelpPage(){
-                   var sourceHelpPage = dhtmlwindow.open("sourceHelpPage", "iframe", "helpPages/source.html", "Definition of 'source'", "width=875px,height=100px,resize=1,scrolling=1,center=1", "recal")
+                   var sourceHelpPage = dhtmlwindow.open("sourceHelpPage", "iframe", "helpPages/source_%s.html", "Definition of 'source'", "width=875px,height=100px,resize=1,scrolling=1,center=1", "recal")
                    sourceHelpPage.moveTo("middle", "middle"); 
-                }
+                }""" %(language) + """
                 
                 
                 function showClientHelpPage(){
-                   var clientHelpPage = dhtmlwindow.open("client", "iframe", "helpPages/client.html", "Definition of 'client'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
+                   var clientHelpPage = dhtmlwindow.open("client", "iframe", "helpPages/client_%s.html", "Definition of 'client'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
                     .moveTo("middle", "middle");
-                }
+                }""" %(language) + """
                 
         </script>
         
