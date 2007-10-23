@@ -1,0 +1,34 @@
+msgid  "Mon"
+msgstr "Lun"
+msgid  "Tue"
+msgstr "Mar"
+msgid  "Wed"
+msgstr "Mer"
+msgid  "Thu"
+msgstr "Jeu"
+msgid  "Fri"
+msgstr "Ven"
+msgid  "Sat"
+msgstr "Sam"
+msgid  "Sun"
+msgstr "Dim"
+
+msgid  "Days"
+msgstr "Jours"
+
+#: dailyGraphicsWebPage.py:278
+msgid "Daily graphics for RX sources from MetPx."
+msgstr "Graphiques journaliers pour les sources(RX) de MetPx."
+
+#: dailyGraphicsWebPage.py:278 dailyGraphicsWebPage.py:342
+msgid "*updated hourly"
+msgstr "*mis-à-jour à chaques heures."
+
+#: dailyGraphicsWebPage.py:300 dailyGraphicsWebPage.py:365
+msgid "List of available daily graphics."
+msgstr "List des graphiques journaliers disponibles."
+
+#: dailyGraphicsWebPage.py:342
+msgid "Daily graphics for TX clients from MetPx."
+msgstr "Graphiques journaliers pour les clients(TX) de MetPX."
+
