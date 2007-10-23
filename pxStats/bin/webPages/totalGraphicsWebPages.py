@@ -26,7 +26,7 @@ named COPYING in the root of the source directory tree.
 """
     Small function that adds pxlib to the environment path.  
 """
-import os, time, sys, datetime, string
+import gettext, os, time, sys, datetime, string
 sys.path.insert(1, sys.path[0] + '/../../../')
 try:
     pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
@@ -161,7 +161,7 @@ def getCombinedMachineName( machines ):
 
 
             
-def generateWebPage( machineTags, machineParameters ):
+def generateWebPage( machineTags, machineParameters, language = 'en' ):
     """
         Generates a web page based on all the 
         rxnames and tx names that have run during
@@ -172,15 +172,28 @@ def generateWebPage( machineTags, machineParameters ):
         
     """  
     
+    if language == 'fr':
+        fileName = StatsPaths.STATSLANGFRBINWEBPAGES + "totalGraphicsWebPages" 
+    elif language == 'en':
+        fileName = StatsPaths.STATSLANGENBINWEBPAGES + "totalGraphicsWebPages"      
+    
+    translator = gettext.GNUTranslations(open(fileName))
+    _ = translator.gettext    
+    #print translator._catalog
+    
     days   = getDays()
     weeks  = getWeeks()
     months = getMonths()
     years  = getYears()
     
-    rxTypes      = [ "bytecount", "filecount", "errors"]
-    txTypes      = [ "latency", "filesOverMaxLatency", "bytecount", "filecount", "errors"]
-    timeTypes    = [ "daily","weekly","monthly","yearly"]
-    updateFrequency= {"daily":"(upd. hourly)","weekly":"(upd. hourly)","monthly":"(upd. weekly)","yearly":"(upd. monthly)"}  
+    rxTypes      = [ _("bytecount"), _("filecount"), _("errors")]
+    txTypes      = [ _("latency"), _("filesOverMaxLatency"), _("bytecount"), _("filecount"), _("errors") ]
+    
+    rxTypesInFileNames  = { _("bytecount"):"bytecount", _("filecount"):"filecount", _("errors"):"errors"}
+    txTypesInFileNames  = { _("latency"):"latency" , _("filesOverMaxLatency"):"filesOverMaxLatency", _("bytecount"):"bytecount", _("filecount"):"filecount", _("errors"):"errors" }
+    
+    timeTypes    = [ _("daily"),_("weekly"),_("monthly"),_("yearly")]
+    updateFrequency= { _("daily"): _("(upd. hourly)"),_("weekly"):_("(upd. hourly)"), _("monthly"):_("(upd. weekly)"),_("yearly"):_("(upd. monthly)")}  
     
     for machineTag in machineTags:
         machineNames     = machineParameters.getPairedMachinesAssociatedWithListOfTags( [ machineTag ] )
@@ -188,7 +201,7 @@ def generateWebPage( machineTags, machineParameters ):
             if not os.path.isdir(StatsPaths.STATSWEBPAGESHTML):
                 os.makedirs( StatsPaths.STATSWEBPAGESHTML )
             machineName = getCombinedMachineName( machineName )
-            file = "%s%s.html" %( StatsPaths.STATSWEBPAGESHTML,machineTag)
+            file = "%s%s_%s.html" %( StatsPaths.STATSWEBPAGESHTML, machineTag, language )
             fileHandle = open( file , 'w' )
             
             
@@ -235,23 +248,22 @@ def generateWebPage( machineTags, machineParameters ):
                 
                 <body text="#000000" link="#FFFFFF" vlink="000000" bgcolor="#FFF4E5" >
                             
-                    <h2>RX totals for %s.</h2>
-                
+                    <h2>""" +  _("RX totals for") + ' %s'%string.upper( machineTag ) + """</h2>               
         
-                <table style="table-layout: fixed; width: 100%%; border-left: 0px gray solid; border-bottom: 0px gray solid; padding:0px; margin: 0px" cellspacing=10 cellpadding=6 >
+                <table style="table-layout: fixed; width: 100%; border-left: 0px gray solid; border-bottom: 0px gray solid; padding:0px; margin: 0px" cellspacing=10 cellpadding=6 >
                 
                 <tr>    
                     <td bgcolor="#006699" ><font color = "white"><div class="left">Type</font></td>   
                     
-                    <td bgcolor="#006699"  title = "Display the total of bytes received by all sources."><font color = "white"><div class="left">ByteCount</div><a target ="popup" href="help" onClick="wopen('helpPages/byteCount.html', 'popup', 875, 100); return false;"><div class="right">?</div></a></font></td>
+                    <td bgcolor="#006699"  title =" """  + _( "Display the total of bytes received by all sources.") + """ "><font color = "white"><div class="left">""" + _("ByteCount") + """</div><a target ="popup" href="help" onClick="wopen('helpPages/byteCount_%s.html'  """%(language)+ """ , 'popup', 875, 100); return false;"><div class="right">?</div></a></font></td>
                     
-                    <td bgcolor="#006699"  title = "Display the total of files received by all sources."><font color = "white"><div class="left">FileCount</div><a target ="popup" href="help" onClick="wopen('helpPages/fileCount.html', 'popup', 875, 100); return false;"><div class="right">?</div></a></font></td>
+                    <td bgcolor="#006699"  title =" """ +_( "Display the total of files received by all sources.") + """ "><font color = "white"><div class="left">""" + _("FileCount") + """</div><a target ="popup" href="help" onClick="wopen('helpPages/fileCount_%s.html' """%(language)+ """, 'popup', 875, 100); return false;"><div class="right">?</div></a></font></td>
                     
-                    <td bgcolor="#006699"  title = "Display the total of errors that occured during all the receptions."><font color = "white"><div class="left">Errors</div><a target ="popup"  href="help" onClick="wopen('helpPages/errors.html', 'popup', 875, 100); return false;"><div class="right">?</div></a></font></td>
+                    <td bgcolor="#006699"  title =" """ +_( "Display the total of errors that occured during all the receptions.") + """ "><font color = "white"><div class="left">""" + _("Errors") + """</div><a target ="popup"  href="help" onClick="wopen('helpPages/errors_%s.html'  """%(language)+ """, 'popup', 875, 100); return false;"><div class="right">?</div></a></font></td>
                     
                 </tr>
                    
-                """ %( string.upper( machineTag ) ) ) 
+                """   ) 
             
             
             
@@ -262,45 +274,50 @@ def generateWebPage( machineTags, machineParameters ):
                     <td bgcolor="#99FF99" > %s %s</td>                  
             
                 """ %(( timeType[0].upper() + timeType[1:] ), updateFrequency[timeType] ) )
-                if timeType == "daily" :
+                if timeType == timeTypes[0] :
                     timeContainer = days     
-                elif timeType == "weekly":
+                elif timeType == timeTypes[1] :
                     timeContainer = weeks
-                elif timeType == "monthly":
+                elif timeType == timeTypes[2] :
                     timeContainer = months
-                elif timeType == "yearly":
+                elif timeType == timeTypes[3] :
                     timeContainer = years
-                             
+
+                                 
                 for type in rxTypes:
+                    
                     fileHandle.write( """<td bgcolor="#66CCFF">  """ )
                     
                     for x in timeContainer:
                         year, month, day = StatsDateLib.getYearMonthDayInStrfTime( x )
                         week = time.strftime( "%W", time.gmtime(x))
-                        if timeType == "daily" :
-                            file = "%sdaily/totals/%s/rx/%s/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, month, type, day )     
-                            webLink =  "archives/daily/totals/%s/rx/%s/%s/%s/%s.png" %(  machineName, year, month, type, day )     
-                        elif timeType == "weekly":
-                            file = "%sweekly/totals/%s/rx/%s/%s/%s.png" %(  StatsPaths.STATSGRAPHSARCHIVES, machineName, year, type, week )
-                            webLink ="archives/weekly/totals/%s/rx/%s/%s/%s.png" %(  machineName, year, type, week )
-                        elif timeType == "monthly":
-                            file = "%smonthly/totals/%s/rx/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, type, month )
-                            webLink ="archives/monthly/totals/%s/rx/%s/%s/%s.png" %(  machineName, year, type, month )
-                        elif timeType == "yearly":
-                            file = "%syearly/totals/%s/rx/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName,  type, year ) 
-                            webLink = "archives/yearly/totals/%s/rx/%s/%s.png" %(  machineName,  type, year ) 
+                        if timeType ==  timeTypes[0] :
+                            file = "%sdaily/totals/%s/rx/%s/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, month, rxTypesInFileNames[type], day )     
+                            webLink =  "archives/daily/totals/%s/rx/%s/%s/%s/%s.png" %(  machineName, year, month, rxTypesInFileNames[type], day )     
+                        elif timeType ==  timeTypes[1]:
+                            file = "%sweekly/totals/%s/rx/%s/%s/%s.png" %(  StatsPaths.STATSGRAPHSARCHIVES, machineName, year, rxTypesInFileNames[type], week )
+                            webLink ="archives/weekly/totals/%s/rx/%s/%s/%s.png" %(  machineName, year, rxTypesInFileNames[type], week )
+                        elif timeType ==  timeTypes[2]:
+                            file = "%smonthly/totals/%s/rx/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, rxTypesInFileNames[type], month )
+                            webLink ="archives/monthly/totals/%s/rx/%s/%s/%s.png" %(  machineName, year, rxTypesInFileNames[type], month )
+                        elif timeType ==  timeTypes[3]:
+                            file = "%syearly/totals/%s/rx/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName,  rxTypesInFileNames[type], year ) 
+                            webLink = "archives/yearly/totals/%s/rx/%s/%s.png" %(  machineName,  rxTypesInFileNames[type], year ) 
+                        
                         
                         if os.path.isfile(file):  
-                            if timeType == "daily" :
+ 
+                            if timeType == timeTypes[0] :
                                 label =  time.strftime( "%a", time.gmtime(x))   
-                            elif timeType == "weekly":
+                            elif timeType == timeTypes[1]:
                                 label = week
-                            elif timeType == "monthly":
+                            elif timeType == timeTypes[2]:
                                 label = month
-                            elif timeType == "yearly":
+                            elif timeType == timeTypes[3]:
                                 label = year   
-                            fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>""" %( label, webLink, label ) )
-                        
+                            fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">"""%( label, webLink ) +  "%s" %label  + """&nbsp;</a>"""  )
+                      
+                            
                     fileHandle.write( """</td>""" )
                 
                 fileHandle.write( """</tr>""" )       
@@ -311,43 +328,42 @@ def generateWebPage( machineTags, machineParameters ):
             
             fileHandle.write("""                
                
-                    <h2>TX totals for %s.</h2>
+                    <h2>""" + _("TX totals for") + " %s " %( string.upper( machineTag ) + """</h2>
                 
-                <table style="table-layout: fixed; width: 100%%; border-left: 0px gray solid; border-bottom: 0px gray solid; padding:0px; margin: 0px" cellspacing=10 cellpadding=6 >
+                <table style="table-layout: fixed; width: 100%; border-left: 0px gray solid; border-bottom: 0px gray solid; padding:0px; margin: 0px" cellspacing=10 cellpadding=6 >
                     <tr>
                         
                         <td bgcolor="#006699"   title = ><font color = "white">Type</font></td> 
                         
-                        <td bgcolor="#006699"  "Display the average latency of file transfers for all clients."><font color = "white"><font color = "white"><div class="left">Latency</div><a target ="popup" href="help" onClick="wopen('helpPages/latency.html', 'popup', 875, 100); return false;"><div class="right">?</div></a></font></td>
+                        <td bgcolor="#006699"  """ + _("Display the average latency of file transfers for all clients.") + """ "><font color = "white"><font color = "white"><div class="left">""" + _("Latency")+"""</div><a target ="popup" href="help" onClick="wopen('helpPages/latency_%s.html'"""%language + """, 'popup', 875, 100); return false;"><div class="right">?</div></a></font></td>
                         
-                        <td bgcolor="#006699"  title = "Display the number of files for wich the latency was over 15 seconds for all clients."><font color = "white"><div class="left">Files Over Max. Lat.</div><a target ="popup" href="help" onClick="wopen('helpPages/filesOverMaxLatency.html', 'popup', 875, 100); return false;"><div class="right">?</div></a></font></td> 
+                        <td bgcolor="#006699"  title =" """ + _( "Display the number of files for wich the latency was over 15 seconds for all clients.") +""" "><font color = "white"><div class="left">""" + _("Files Over Max. Lat.") + """</div><a target ="popup" href="help" onClick="wopen('helpPages/filesOverMaxLatency_%s.html'"""%language + """, 'popup', 875, 100); return false;"><div class="right">?</div></a></font></td> 
                         
-                        <td bgcolor="#006699"  title = "Display number of bytes transfered to all clients." ><font color = "white"><div class="left">ByteCount</div><a target ="popup" href="help" onClick="wopen('helpPages/byteCount.html', 'popup', 875, 100); return false;"><div class="right">?</div></a></font></td>
+                        <td bgcolor="#006699"  title =" """ + _( "Display number of bytes transfered to all clients.") + """ "><font color = "white"><div class="left">""" +_("ByteCount") + """</div><a target ="popup" href="help" onClick="wopen('helpPages/byteCount_%s.html'"""%language + """, 'popup', 875, 100); return false;"><div class="right">?</div></a></font></td>
                         
-                        <td bgcolor="#006699" title = "Display the number of files transferred every day to all clients."><font color = "white"><div class="left">FileCount</div><a target ="popup" href="help" onClick="wopen('helpPages/fileCount.html', 'popup', 875, 100); return false;"><div class="right">?</div></a></font></td>
+                        <td bgcolor="#006699" title  =" """ + _( "Display the number of files transferred every day to all clients.") + """ "><font color = "white"><div class="left">""" + _("FileCount") + """</div><a target ="popup" href="help" onClick="wopen('helpPages/fileCount_%s.html'""" %language + """, 'popup', 875, 100); return false;"><div class="right">?</div></a></font></td>
                         
-                        <td bgcolor="#006699"  title = "Display the total of errors that occured during the file transfers to allclients."><font color = "white"><div class="left">Errors</div><a target ="popup" href="help" onClick="wopen('helpPages/errors.html', 'popup', 875, 100); return false;"><div class="right">?</div></a></font></td>
+                        <td bgcolor="#006699"  title =" """ + _( "Display the total of errors that occured during the file transfers to allclients.") + """ "><font color = "white"><div class="left">""" + _("Errors") + """</div><a target ="popup" href="help" onClick="wopen('helpPages/errors_%s.html'"""%language + """, 'popup', 875, 100); return false;"><div class="right">?</div></a></font></td>
                     
                     </tr>   
                    
-                """ %( string.upper( machineTag ) ) )
+                """ ) )
             
             
             
             for timeType in timeTypes:    
-                
                 fileHandle.write( """ 
                 <tr> 
-                    <td bgcolor="#99FF99" ><div style="width:10pt";>%s%s</div> </td>                  
+                    <td bgcolor="#99FF99" ><div style="width:10pt";>%s %s</div> </td>                  
             
                 """ %(( timeType[0].upper() + timeType[1:] ), updateFrequency[timeType] ) ) 
-                if timeType == "daily" :
+                if timeType == timeTypes[0] :
                     timeContainer = days     
-                elif timeType == "weekly":
+                elif timeType == timeTypes[1]:
                     timeContainer = weeks
-                elif timeType == "monthly":
+                elif timeType == timeTypes[2]:
                     timeContainer = months
-                elif timeType == "yearly":
+                elif timeType == timeTypes[3]:
                     timeContainer = years
                              
                 for type in txTypes:
@@ -358,40 +374,41 @@ def generateWebPage( machineTags, machineParameters ):
                         
                         year, month, day = StatsDateLib.getYearMonthDayInStrfTime( x )
                         week = time.strftime( "%W", time.gmtime(x))
-                        if timeType == "daily" :
-                            file = "%sdaily/totals/%s/tx/%s/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, month, type, day )
-                            webLink = "archives/daily/totals/%s/tx/%s/%s/%s/%s.png" %( machineName, year, month, type, day )     
+                        if timeType == timeTypes[0] :
+                            file = "%sdaily/totals/%s/tx/%s/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, month, txTypesInFileNames[type], day )
+                            webLink = "archives/daily/totals/%s/tx/%s/%s/%s/%s.png" %( machineName, year, month, txTypesInFileNames[type], day )     
                         
-                        elif timeType == "weekly":
-                            file = "%sweekly/totals/%s/tx/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, type, week )
-                            webLink = "archives/weekly/totals/%s/tx/%s/%s/%s.png" %( machineName, year, type, week )
+                        elif timeType == timeTypes[1]:
+                            file = "%sweekly/totals/%s/tx/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, txTypesInFileNames[type], week )
+                            webLink = "archives/weekly/totals/%s/tx/%s/%s/%s.png" %( machineName, year, txTypesInFileNames[type], week )
                             
-                        elif timeType == "monthly":
-                            file = "%smonthly/totals/%s/tx/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, type, month )
-                            webLink = "archives/monthly/totals/%s/tx/%s/%s/%s.png" %( machineName, year, type, month )
+                        elif timeType == timeTypes[2]:
+                            file = "%smonthly/totals/%s/tx/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, txTypesInFileNames[type], month )
+                            webLink = "archives/monthly/totals/%s/tx/%s/%s/%s.png" %( machineName, year, txTypesInFileNames[type], month )
                             
-                        elif timeType == "yearly":
-                            file = "%syearly/totals/%s/tx/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName,  type, year )  
-                            webLink = "archives/yearly/totals/%s/tx/%s/%s.png" %(  machineName,  type, year )
+                        elif timeType == timeTypes[3]:
+                            file = "%syearly/totals/%s/tx/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName,  txTypesInFileNames[type], year )  
+                            webLink = "archives/yearly/totals/%s/tx/%s/%s.png" %(  machineName,  txTypesInFileNames[type], year )
                         
                         if os.path.isfile(file):  
                             
-                            if timeType == "daily" :
+                            if timeType == timeTypes[0] :
                                 label =  time.strftime( "%a", time.gmtime(x))   
-                            elif timeType == "weekly":
+                            elif timeType == timeTypes[1]:
                                 label = week
-                            elif timeType == "monthly":
+                            elif timeType == timeTypes[2]:
                                 label = month
-                            elif timeType == "yearly":
+                            elif timeType == timeTypes[3]:
                                 label = year     
-                            fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s </a>""" %( label, webLink, label ) )
-     
+                            fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">"""%( label, webLink ) + "%s" %str(label) + """ </a>"""  )
+                        
+                                 
                     fileHandle.write( """</td>""" )
                 
                 fileHandle.write( """</tr>""" )       
                     
             fileHandle.write( """</table>""")             
-            
+            fileHandle.write( """</body></html>""")
             #End of tx part.             
             
             fileHandle.close()         
