@@ -1,0 +1,32 @@
+#: generateTopWebPage.py:76
+msgid "Individual graphics"
+msgstr "Individuels"
+
+#: generateTopWebPage.py:78
+msgid "Daily"
+msgstr "Journaliers"
+
+#: generateTopWebPage.py:81
+msgid "Weekly"
+msgstr "Hebdomadaires"
+
+#: generateTopWebPage.py:84
+msgid "Monthly"
+msgstr "Mensuels"
+
+#: generateTopWebPage.py:87
+msgid "Yearly"
+msgstr "Annuels"
+
+#: generateTopWebPage.py:95
+msgid "Clusters"
+msgstr "Grappes"
+
+#: generateTopWebPage.py:111
+msgid "Requests"
+msgstr "Requêtes"
+
+#: generateTopWebPage.py:113
+msgid "Glossary"
+msgstr "Glossaire"
+
