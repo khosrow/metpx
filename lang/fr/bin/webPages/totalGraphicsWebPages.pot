@@ -1,0 +1,176 @@
+msgid  "Mon"
+msgstr "Lun"
+
+msgid  "Tue"
+msgstr "Mar"
+
+msgid  "Wed"
+msgstr "Mer"
+
+msgid  "Thu"
+msgstr "Jeu"
+
+msgid  "Fri"
+msgstr "Ven"
+
+msgid  "Sat"
+msgstr "Sam"
+
+msgid  "Sun"
+msgstr "Dim"
+
+
+
+
+
+
+msgid  "January"
+msgstr "Janvier"
+
+msgid  "February"
+msgstr "Février"
+
+msgid  "March"
+msgstr "Mars"
+
+msgid  "April"
+msgstr "Avril"
+
+msgid  "May"
+msgstr "Mai"
+
+msgid  "June"
+msgstr "Juin"
+
+msgid  "July"
+msgstr "Juillet"
+
+msgid  "August"
+msgstr "Aout"
+
+msgid  "Spetember"
+msgstr "Septembre"
+
+msgid  "October"
+msgstr "Octobre"
+
+msgid  "Novembre"
+msgstr "November"
+
+msgid  "December"
+msgstr "Décembre"
+
+
+
+
+
+
+
+
+
+
+#: totalGraphicsWebPages.py:189 totalGraphicsWebPages.py:190
+msgid "errors"
+msgstr "Erreurs"
+
+#: totalGraphicsWebPages.py:189 totalGraphicsWebPages.py:190
+msgid "filecount"
+msgstr "nombre de fichiers"
+
+#: totalGraphicsWebPages.py:190
+msgid "filesOverMaxLatency"
+msgstr "fichiers avec latence innacceptable "
+
+#: totalGraphicsWebPages.py:190
+msgid "latency"
+msgstr "latence"
+
+msgid "Latency"
+msgstr "Latence"
+
+msgid "Files Over Max. Lat."
+msgstr "Fichier avec latence innacceptable"
+
+
+
+
+#: totalGraphicsWebPages.py:192
+msgid "(upd. hourly)"
+msgstr "(M.À.J à l'heure.)"
+
+#: totalGraphicsWebPages.py:192
+msgid "(upd. monthly)"
+msgstr "(M.À.J mensuel.)"
+
+#: totalGraphicsWebPages.py:192
+msgid "(upd. weekly)"
+msgstr "(M.À.J hebdomadaire.)"
+
+#: totalGraphicsWebPages.py:192
+msgid "daily"
+msgstr "Journaliers"
+
+#: totalGraphicsWebPages.py:192
+msgid "monthly"
+msgstr "Mensuels"
+
+#: totalGraphicsWebPages.py:192
+msgid "weekly"
+msgstr "Hebdomadaires"
+
+#: totalGraphicsWebPages.py:192
+msgid "yearly"
+msgstr "Annuels"
+
+#: totalGraphicsWebPages.py:247
+msgid "RX totals for"
+msgstr "Totaux des réceptions(RX) pour"
+
+#: totalGraphicsWebPages.py:255
+msgid "ByteCount"
+msgstr "Nombre de bytes"
+
+#: totalGraphicsWebPages.py:255
+msgid "Display the total of bytes received by all sources."
+msgstr "Afficher le nombre de bytes transférés à tous les clients."
+
+#: totalGraphicsWebPages.py:257
+msgid "Display the total of files received by all sources."
+msgstr "Afficher le total de fichiers reçus par toutes les sources."
+
+#: totalGraphicsWebPages.py:257
+msgid "FileCount"
+msgstr "Nombre de fichiers"
+
+#: totalGraphicsWebPages.py:259
+msgid "Display the total of errors that occured during all the receptions."
+msgstr "Afficher le total d'erreurs qui se sont produites durant les réceptions."
+
+#: totalGraphicsWebPages.py:259
+msgid "Errors"
+msgstr "Erreurs"
+
+#: totalGraphicsWebPages.py:323
+msgid "TX totals for"
+msgstr "Totaux des transmissions(TX) pour"
+
+#: totalGraphicsWebPages.py:330
+msgid "Display the average latency of file transfers for all clients."
+msgstr "Afficher la latence moyenne pour tous les transferts."
+
+#: totalGraphicsWebPages.py:332
+msgid "Display the number of files for wich the latency was over 15 seconds for all clients."
+msgstr "Afficher le nombre de fichiers pour lesquels la latence tait de 15 secondes ou plus."
+
+#: totalGraphicsWebPages.py:334
+msgid "Display number of bytes transfered to all clients."
+msgstr "Afficher le nombre de bytes transférés à tous les clients."
+
+#: totalGraphicsWebPages.py:336
+msgid "Display the number of files transferred every day to all clients."
+msgstr "Afficher le nombre de fichiers transférés à tous les clients." 
+
+#: totalGraphicsWebPages.py:338
+msgid "Display the total of errors that occured during the file transfers to allclients."
+msgstr "Afficher le total des erreurs qui se sont produites durant la transmissions des fichers aux clients."
+
