@@ -1,0 +1,12 @@
+2005-07-28 AMB
+
+Add "All log files" in pxReceiver and pxSender log selection
+Add search in DB (not activated the moment)
+
+2005-08-12 DDB
+
+Verify that the the bulletins were correctly resent by parsing their log
+Add time period to the MaxSettings file for the queue length
+AMB wanted to change the circuit type name
+Add a send to all client in the resending tool
+Fix the 50 bug (see pxSearchResult.py for details)
