@@ -1,0 +1,78 @@
+msgid "Definition of 'source'"
+msgstr "Definition of 'source'"
+
+msgid "Definition of 'byteCount'"
+msgstr "Definition of 'byteCount'"
+
+msgid "Definition of 'client'"
+msgstr "Definition of 'client'"
+
+msgid "Definition of 'errors'"
+msgstr "Definition of 'errors'"
+
+msgid "Definition of 'filecount'"
+msgstr "Definition of 'filecount'"
+
+msgid "Definition of 'filesOverMaxLatency'"
+msgstr "Definition of 'filesOverMaxLatency'"
+
+msgid "Definition of 'latency'"
+msgstr "Definition of 'latency'"
+
+msgid "Monthly graphics for RX sources from MetPx."
+msgstr "Weekly graphics for RX sources from MetPx."
+
+msgid "*updated weekly"
+msgstr "*updated weekly"
+
+msgid "Sources"
+msgstr "Sources"
+
+msgid "Display the total of bytes received every day of the week for each sources."
+msgstr "Display the total of bytes received every day of the week for each sources."
+
+msgid "Bytecount"
+msgstr "Bytecount"
+
+msgid "Display the total of files received every day of the week for each sources."
+msgstr "Display the total of files received every day of the week for each sources."
+
+msgid "Filecount"
+msgstr "Filecount"
+
+msgid "Display the total of errors that occured during the receptions for every day of the week for each sources."
+msgstr "Display the total of errors that occured during the receptions for every day of the week for each sources."
+
+msgid "Errors"
+msgstr "Errors"
+
+msgid "Months"
+msgstr "Months"
+
+msgid "Monthly graphics for TX clients from MetPx."
+msgstr "Monthly graphics for TX clients from MetPx."
+
+msgid "Clients"
+msgstr "Clients"
+
+msgid "Display the average latency of file transfers for every day of the week for each clients."
+msgstr "Display the average latency of file transfers for every day of the week for each clients."
+
+msgid "Latency"
+msgstr "Latency"
+
+msgid "Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients."
+msgstr "Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients."
+
+msgid "Files Over Max. Lat."
+msgstr "Files Over Max. Lat."
+
+msgid "Display the total of bytes transfered every day of the week for each clients."
+msgstr "Display the total of bytes transfered every day of the week for each clients."
+
+msgid "Display the total of files transferred every day of the week for each clients."
+msgstr "Display the total of files transferred every day of the week for each clients."
+
+msgid "Display the total of errors that occured during file transfers every day of the week for each clients."
+msgstr "Display the total of errors that occured during file transfers every day of the week for each clients."
+
