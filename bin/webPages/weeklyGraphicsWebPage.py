@@ -7,17 +7,17 @@ named COPYING in the root of the source directory tree.
 ##############################################################################
 ##
 ##
-## Name   : generateGraphics.py 
+## Name   : weeklyGraphicsWebPage.py 
 ##
 ##
-## Author : Nicholas Lemay
+## @author:  Nicholas Lemay
 ##
-## Date   : 22-11-2006 
+## @since:  22-11-2006 ,last updated on 2007-10-23 
 ##
 ##
-## Description : Generates a web pages that gives access to user 
-##               to the weekly graphics of the last 5 weeks for all rx sources 
-##               and tx clients.
+## @summary : Generates a web pages that gives access to user 
+##            to the weekly graphics of the last 5 weeks for all rx sources 
+##            and tx clients.
 ##
 ##
 ##############################################################################
@@ -25,7 +25,7 @@ named COPYING in the root of the source directory tree.
 """
     Small function that adds pxlib to the environment path.  
 """
-import os, time, sys
+import gettext, os, time, sys
 sys.path.insert(1, sys.path[0] + '/../../../')
 
 try:
@@ -111,16 +111,38 @@ def getStartEndOfWebPage():
     
     
     
-def generateWebPage( rxNames, txNames, weekNumbers ):
+def generateWebPage( rxNames, txNames, weekNumbers, language = "en" ):
     """
-        Generates a web page based on all the 
-        rxnames and tx names that have run during
-        the pas x weeks. 
+        @summary : Generates a web page based on all the 
+                   rxnames and tx names that have run during
+                   the past x weeks. 
+                
+        @param rxNames: List of sources for which to write 
+                        links to their weekly graphics.         
         
-        Only links to available graphics will be 
-        displayed.
+        @param txNames: List of clients for which to write 
+                        links to their weekly graphics.  
         
+        @param weekNumbers: List of weeks to search graphics for 
+                            look up.
+        
+        @param language: Language in which to display the web page.
+        
+        @notes :   Only links to available graphics will be 
+                   displayed.
+        
+        @return : None
+    
     """  
+    
+    if language == 'fr':
+        fileName = StatsPaths.STATSLANGFRBINWEBPAGES + "weeklyGraphicsWebPage" 
+    elif language == 'en':
+        fileName = StatsPaths.STATSLANGENBINWEBPAGES + "weeklyGraphicsWebPage"      
+    
+    translator = gettext.GNUTranslations(open(fileName))
+    _ = translator.gettext    
+   
     
     rxNamesArray = rxNames.keys()
     txNamesArray = txNames.keys()
@@ -131,11 +153,10 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
     #Redirect output towards html page to generate.   
     if not os.path.isdir( StatsPaths.STATSWEBPAGESHTML ):
         os.makedirs(  StatsPaths.STATSWEBPAGESHTML )      
-    fileHandle = open( "%sweeklyGraphs.html" % StatsPaths.STATSWEBPAGESHTML , 'w' )
+    fileHandle = open( "%sweeklyGraphs_%s.html" % (StatsPaths.STATSWEBPAGESHTML, language) , 'w' )
 
 
     fileHandle.write(  """
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
    
@@ -186,7 +207,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
                 }
                 
                 div.tableContainer {
-                    width: 95%;        /* table width will be 99% of this*/
+                    width: 95%%;        /* table width will be 99%% of this*/
                     height: 275px;     /* must be greater than tbody*/
                     overflow: auto;
                     margin: 0 auto;
@@ -195,7 +216,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
 
                 
                 table.cssTable {
-                    width: 99%;        /*100% of container produces horiz. scroll in Mozilla*/
+                    width: 99%%;        /*100%% of container produces horiz. scroll in Mozilla*/
                     border: none;
                     background-color: #f7f7f7;
                     table-layout: fixed;
@@ -264,39 +285,40 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
                 }   
             </script>                 
             
+            
             <script>
                 function showSourceHelpPage(){
-                   var sourceHelpPage = dhtmlwindow.open("sourceHelpPage", "iframe", "helpPages/source.html", "Definition of 'source'", "width=875px,height=100px,resize=1,scrolling=1,center=1", "recal")
+                   var sourceHelpPage = dhtmlwindow.open("sourceHelpPage", "iframe", "helpPages/source_%s.html" """ %language + """, " """ + _("Definition of 'source'") + """", "width=875px,height=100px,resize=1,scrolling=1,center=1", "recal")
                    sourceHelpPage.moveTo("middle", "middle"); 
                 }
                 
                 function showBytecountHelpPage(){
-                   var byteCountHelpPage = dhtmlwindow.open("byteCount", "iframe", "helpPages/byteCount.html", "Definition of 'byteCount'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
+                   var byteCountHelpPage = dhtmlwindow.open("byteCount", "iframe", "helpPages/byteCount_%s.html" """ %language + """, " """ +_( "Definition of 'byteCount'") + """", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
                     byteCountHelpPage.moveTo("middle", "middle");
                 }
                 
                 function showClientHelpPage(){
-                   var clientHelpPage = dhtmlwindow.open("client", "iframe", "helpPages/client.html", "Definition of 'client'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
+                   var clientHelpPage = dhtmlwindow.open("client", "iframe", "helpPages/client_%s.html" """ %language + """, " """ +_( "Definition of 'client'") + """", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
                     .moveTo("middle", "middle");
                 }
                 
                 function showErrorsHelpPage(){
-                   var errorsHelpPage = dhtmlwindow.open("errors", "iframe", "helpPages/errors.html", "Definition of 'errors'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
+                   var errorsHelpPage = dhtmlwindow.open("errors", "iframe", "helpPages/errors_%s.html" """ %language + """, " """ +_( "Definition of 'errors'") +"""", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
                     errorsHelpPage.moveTo("middle", "middle");
                 }
                 
                 function showFilecountHelpPage(){
-                   var fileCountHelpPage = dhtmlwindow.open("fileCount", "iframe", "helpPages/fileCount.html", "Definition of 'filecount'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
+                   var fileCountHelpPage = dhtmlwindow.open("fileCount", "iframe", "helpPages/fileCount_%s.html" """ %language + """, " """ +_("Definition of 'filecount'") + """", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
                     fileCountHelpPage.moveTo("middle", "middle");
                 }
                           
                 function showFilesOverMaxLatencyHelpPage(){
-                   var filesOverMaxLatencyHelpPage = dhtmlwindow.open("filesOverMaxLatency", "iframe", "helpPages/filesOverMaxLatency.html", "Definition of 'filesOverMaxLatency'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
+                   var filesOverMaxLatencyHelpPage = dhtmlwindow.open("filesOverMaxLatency", "iframe", "helpPages/filesOverMaxLatency_%s.html" """ %language + """, " """ +_("Definition of 'filesOverMaxLatency'") + """", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
                     filesOverMaxLatencyHelpPage.moveTo("middle", "middle");
                 }
                 
                 function showLatencyHelpPage(){
-                   var latencyHelpPage = dhtmlwindow.open("latency", "iframe", "helpPages/latency.html", "Definition of 'latency'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
+                   var latencyHelpPage = dhtmlwindow.open("latency", "iframe", "helpPages/latency_%s.html" """ %language + """, " """ + _("Definition of 'latency'") + """" , "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
                     latencyHelpPage.moveTo("middle", "middle");
                 }
                                
@@ -309,7 +331,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
         <br>
         <table width = "100%">
             <tr width = "100%">
-                <div class="left"><b><font size="5"> Weekly graphics for RX sources from MetPx. </font><font size = "2">*updated hourly</font></b></div> 
+                <div class="left"><b><font size="5"> """ + _("Weekly graphics for RX sources from MetPx.") +""" </font><font size = "2">""" + _("*updated hourly") + """</font></b></div> 
     
     """)
 
@@ -323,7 +345,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
         currentWeek = time.strftime("%W", time.gmtime(weekNumber))
         file = "/apps/px/pxStats/data/csvFiles/weekly/" + 'rx' "/%s/%s/%s.csv" %( machinesStr, currentYear, currentWeek ) 
         webLink = "csvFiles/weekly/" + 'rx' +  "/%s/%s/%s.csv" %( machinesStr, currentYear, currentWeek ) 
-        print file
+        
         if os.path.isfile( file ):
             if oneFileFound == False:
                 fileHandle.write(  "<div class='right'><font size='2' color='black'>CSV files&nbsp;:&nbsp; " )
@@ -355,7 +377,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
                     
                         <font color = "white">                            
                             <center>
-                                Sources     
+                                """ + _('Sources') + """     
                                 <br>                       
                                 <a target ="popup" href="#" onClick="showSourceHelpPage(); return false;">
                                     ?
@@ -365,11 +387,11 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
                    
                 </td>
                 
-                <td bgcolor="#006699" class="cssTable" title = "Display the total of bytes received every day of the week for each sources.">
+                <td bgcolor="#006699" class="cssTable" title =" """ + _("Display the total of bytes received every day of the week for each sources.") + """">
                     
                         <font color = "white">
                             <center>
-                                Bytecount
+                                """ + _('Bytecount') + """   
                                 <br>
                                 <a target ="popup" href="#" onClick="showBytecountHelpPage(); return false;">                                
                                     ?
@@ -379,11 +401,11 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
                     
                 </td>
                 
-                <td bgcolor="#006699" class="cssTable" title = "Display the total of files received every day of the week for each sources.">
+                <td bgcolor="#006699" class="cssTable" title =" """ + _("Display the total of files received every day of the week for each sources.") + """">
                    
                         <font color = "white">
                             <center>
-                                Filecount
+                                """ + _('Filecount') + """
                                 <br>
                                 <a target ="popup" href="#" onClick="showFilecountHelpPage(); return false;">                            
                                     ?                          
@@ -393,11 +415,11 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
                                   
                 </td>
                 
-                <td bgcolor="#006699" class="cssTable" title = "Display the total of errors that occured during the receptions for every day of the week for each sources.">
+                <td bgcolor="#006699" class="cssTable" title =" """+ _("Display the total of errors that occured during the receptions for every day of the week for each sources.") + """">
                     
                         <font color = "white">
                             <center>
-                                Errors
+                                """ + _('Errors') + """
                                 <br>
                                 <a target ="popup"  href="#" onClick="showErrorsHelpPage(); return false;">
                                     ?
@@ -420,11 +442,11 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
         
         if rxNames[rxName] == "" :
             fileHandle.write( """ <tr> <td bgcolor="#99FF99" class="cssTable"> %s </td> """ %(rxName))
-            fileHandle.write( """<td bgcolor="#66CCFF"> Weeks&nbsp;:&nbsp;""" )
+            fileHandle.write( """<td bgcolor="#66CCFF"> """+ _("Weeks") + """&nbsp;:&nbsp;""" )
         else:
             machineName = getMachineNameFromDescription( rxNames[rxName] )
             fileHandle.write( """ <tr> <td bgcolor="#99FF99" class="cssTable"><div class="left"> %s </div> <div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false"><font color="black">?</font></a></div><br>(%s)</td> """ %(rxName, rxNames[rxName].replace("'","").replace('"',''), machineName ) )
-            fileHandle.write( """<td bgcolor="#66CCFF">  Weeks&nbsp;:&nbsp;""" )        
+            fileHandle.write( """<td bgcolor="#66CCFF">  """+ _("Weeks") + """&nbsp;:&nbsp;""" )        
         
         
         for week in weekNumbers:
@@ -440,7 +462,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
     
     
         
-        fileHandle.write(  """ <td bgcolor="#66CCFF" class="cssTable" >Weeks&nbsp;:&nbsp;""" )
+        fileHandle.write(  """ <td bgcolor="#66CCFF" class="cssTable" >"""+ _("Weeks") + """&nbsp;:&nbsp;""" )
         
         for week in weekNumbers:
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
@@ -454,7 +476,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
         fileHandle.write( "</td>" ) 
         
         
-        fileHandle.write(  """ <td bgcolor="#66CCFF" class="cssTable">Weeks&nbsp;:&nbsp;""" )
+        fileHandle.write(  """ <td bgcolor="#66CCFF" class="cssTable">"""+ _("Weeks") + """&nbsp;:&nbsp;""" )
         
         for week in weekNumbers:
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
@@ -477,7 +499,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
         <br>
         <table width = "100%">            
             <tr width = "100%">
-                <div class="left"><b><font size="5"> Weekly graphics for TX clients from MetPx. </font><font size = "2">*updated hourly</font></b></div> 
+                <div class="left"><b><font size="5"> """ + _("Weekly graphics for TX clients from MetPx.") + """ </font><font size = "2">""" +_("*updated hourly") +"""</font></b></div> 
     
     """)
 
@@ -492,7 +514,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
         file = "/apps/px/pxStats/data/csvFiles/weekly/" +  "tx" + "/%s/%s/%s.csv" %( machinesStr, currentYear, currentWeek ) 
         webLink = "csvFiles/weekly/" + 'tx' +  "/%s/%s/%s.csv" %( machinesStr, currentYear, currentWeek ) 
         
-        #print file
+        
         if os.path.isfile( file ):
             if oneFileFound == False:
                 fileHandle.write(  "<div class='right'><font size='2' color='black'> CSV files&nbsp;:&nbsp; " )
@@ -526,7 +548,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
                             
                                 <font color = "white">
                                     <center>
-                                        Clients
+                                        """ + _('Clients') + """
                                         <br>
                                         <a target ="popup" href="#" onClick="showClientHelpPage(); return false;">
                                             ?
@@ -536,11 +558,11 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
                            
                         </td>
                     
-                        <td bgcolor="#006699" class="cssTable" title = "Display the taverage latency of file transfers for every day of the week for each clients.">
+                        <td bgcolor="#006699" class="cssTable" title = " """ + _("Display the average latency of file transfers for every day of the week for each clients.") + """">
                             
                                 <font color = "white">
                                     <center>
-                                        Latency
+                                        """ + _('Latency') + """
                                         <br>
                                         <a target ="popup" href="#" onClick="showLatencyHelpPage(); return false;">
                                             ?
@@ -550,11 +572,11 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
                            
                         </td>
                     
-                        <td bgcolor="#006699"  class="cssTable" title = "Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients.">
+                        <td bgcolor="#006699"  class="cssTable" title = " """ + _("Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients.") +"""">
                             
                                 <font color = "white">
                                     <center>
-                                        Files Over Max. Lat.
+                                        """ + _('Files Over Max. Lat.') + """
                                         <br>
                                         <a target ="popup" href="#" onClick="showFilesOverMaxLatencyHelpPage(); return false;">
                                             ?
@@ -564,11 +586,11 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
                                             
                         </td>
                     
-                        <td bgcolor="#006699" class="cssTable" title = "Display the total of bytes transfered every day of the week for each clients.">
+                        <td bgcolor="#006699" class="cssTable" title = " """ +_("Display the total of bytes transfered every day of the week for each clients.") + """">
                             
                                 <font color = "white">    
                                     <center>
-                                        Bytecount
+                                        """ + _('Bytecount') + """
                                         <br>
                                         <a target ="popup" href="#" onClick="showBytecountHelpPage(); return false;">
                                             ?
@@ -578,11 +600,11 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
                             
                         </td>
                         
-                        <td bgcolor="#006699" class="cssTable" title = "Display the total of files transferred every day of the week for each clients.">
+                        <td bgcolor="#006699" class="cssTable" title = " """ +_("Display the total of files transferred every day of the week for each clients.") + """">
                             
                                 <font color = "white">
                                     <center>
-                                        Filecount
+                                        """ + _('Filecount') + """
                                         <br>
                                         <a target ="popup" href="#" onClick="showFilecountHelpPage(); return false;">
                                             ?
@@ -592,11 +614,11 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
                                            
                         </td>
                         
-                        <td bgcolor="#006699" class="cssTable" title = "Display the total of errors that occured during file transfers every day of the week for each clients.">
+                        <td bgcolor="#006699" class="cssTable" title = " """ + _("Display the total of errors that occured during file transfers every day of the week for each clients.") +"""">
                             
                                 <font color = "white">
                                     <center>
-                                        Errors
+                                        """ + _('Errors') + """
                                         <br>
                                         <a target ="popup" href="#" onClick="showErrorsHelpPage(); return false;">
                                             ?
@@ -617,11 +639,11 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
     for txName in txNamesArray :      
         if txNames[txName] == "" :
             fileHandle.write( """<tr> <td bgcolor="#99FF99" class="cssTable"> %s </td> """ %(txName))
-            fileHandle.write( """<td bgcolor="#66CCFF" class="cssTable">Weeks&nbsp;:&nbsp;""" )
+            fileHandle.write( """<td bgcolor="#66CCFF" class="cssTable">""" +_("Weeks") + """&nbsp;:&nbsp;""" )
         else:
             machineName = getMachineNameFromDescription( txNames[txName] )
             fileHandle.write( """<tr> <td bgcolor="#99FF99" class="cssTable"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false"><font color="black">?</font></a></div><br>(%s)</td> """ %(txName, txNames[txName].replace("'","").replace('"',''), machineName ))
-            fileHandle.write( """<td bgcolor="#66CCFF" class="cssTable">Weeks&nbsp;:&nbsp;""" ) 
+            fileHandle.write( """<td bgcolor="#66CCFF" class="cssTable">""" +_("Weeks") + """&nbsp;:&nbsp;""" ) 
           
         
         for week in weekNumbers:
@@ -636,7 +658,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
         fileHandle.write( "</td>" )
         
 
-        fileHandle.write(  """ <td bgcolor="#66CCFF" class="cssTable">Weeks&nbsp;:&nbsp;""" )
+        fileHandle.write(  """ <td bgcolor="#66CCFF" class="cssTable">""" +_("Weeks") + """&nbsp;:&nbsp;""" )
         
         for week in weekNumbers:
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
@@ -652,7 +674,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
         fileHandle.write( "</td>" )  
         
         
-        fileHandle.write(  """ <td bgcolor="#66CCFF" class="cssTable">Weeks&nbsp;:&nbsp;""" )
+        fileHandle.write(  """ <td bgcolor="#66CCFF" class="cssTable">""" +_("Weeks") + """&nbsp;:&nbsp;""" )
         
         for week in weekNumbers:
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
@@ -666,7 +688,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
         
         fileHandle.write( "</td>" )    
         
-        fileHandle.write(  """<td bgcolor="#66CCFF" class="cssTable">Weeks&nbsp;:&nbsp;""" )
+        fileHandle.write(  """<td bgcolor="#66CCFF" class="cssTable">""" +_("Weeks") + """&nbsp;:&nbsp;""" )
         
         for week in weekNumbers:
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
@@ -680,7 +702,7 @@ def generateWebPage( rxNames, txNames, weekNumbers ):
         
         fileHandle.write( "</td>" )   
         
-        fileHandle.write(  """ <td bgcolor="#66CCFF" class="cssTable">Weeks&nbsp;:&nbsp;""" )
+        fileHandle.write(  """ <td bgcolor="#66CCFF" class="cssTable">""" +_("Weeks") + """&nbsp;:&nbsp;""" )
         
         for week in weekNumbers:
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
