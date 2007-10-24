@@ -1,0 +1,114 @@
+msgid  "January"
+msgstr "Janvier"
+
+msgid  "February"
+msgstr "Février"
+
+msgid  "March"
+msgstr "Mars"
+
+msgid  "April"
+msgstr "Avril"
+
+msgid  "May"
+msgstr "Mai"
+
+msgid  "June"
+msgstr "Juin"
+
+msgid  "July"
+msgstr "Juillet"
+
+msgid  "August"
+msgstr "Aout"
+
+msgid  "Spetember"
+msgstr "Septembre"
+
+msgid  "October"
+msgstr "Octobre"
+
+msgid  "Novembre"
+msgstr "November"
+
+msgid  "December"
+msgstr "Décembre"
+
+msgid "Definition of 'source'"
+msgstr "Définition de 'source'"
+
+msgid "Definition of 'byteCount'"
+msgstr "Définition de 'nombre de bytes'."
+
+msgid "Definition of 'client'"
+msgstr "Définition de 'client'."
+
+msgid "Definition of 'errors'"
+msgstr "Définition d'erreurs."
+
+msgid "Definition of 'filecount'"
+msgstr "Définition de 'nombre de fichiers'."
+
+msgid "Definition of 'filesOverMaxLatency'"
+msgstr "Définition de 'Latences au dessus de 15 secondes'."
+
+msgid "Definition of 'latency'"
+msgstr "Définition de latence."
+
+msgid "Monthly graphics for RX sources from MetPx."
+msgstr "Graphiques mensuels pour toutes les sources(RX) de MetPx."
+
+msgid "*updated weekly"
+msgstr "*M-à-j hebdomadaire."
+
+msgid "Sources"
+msgstr "Sources"
+
+msgid "Display the total of bytes received every day of the week for each sources."
+msgstr "Afficher le nombre total de bytes reçus à tous les jours de la semaine par toutes les sources."
+
+msgid "Bytecount"
+msgstr "Nombre de bytes"
+
+msgid "Display the total of files received every day of the week for each sources."
+msgstr "afficher le total de fichiers reçus à tous les jours de la semaine par toutes les sources."
+
+msgid "Filecount"
+msgstr "Nombre de fichiers"
+
+msgid "Display the total of errors that occured during the receptions for every day of the week for each sources."
+msgstr "Afficher le total d'erreurs s'étant produite lors de la réception de fichiers à tous les jours de la semaines pour toutes les sources."
+
+msgid "Errors"
+msgstr "Erreurs"
+
+msgid "Months"
+msgstr "Mois"
+
+msgid "Monthly graphics for TX clients from MetPx."
+msgstr "Graphiques mensuels pour tous les clients(TX) de MetPx."
+
+msgid "Clients"
+msgstr "Clients"
+
+msgid "Display the average latency of file transfers for every day of the week for each clients."
+msgstr "Afficher la latence moyenne pour tous les fichiers envoyés à tous les clients pour chaque jour de la semaine."
+
+msgid "Latency"
+msgstr "Latence"
+
+msgid "Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients."
+msgstr "Afficher, pour chaque jour de la semaine, le nombre total de fichiers envoyés à tous les clients pour lesquels la latence fut au delà de 15 secondes."
+
+msgid "Files Over Max. Lat."
+msgstr "Latences innacceptables."
+
+msgid "Display the total of bytes transfered every day of the week for each clients."
+msgstr "Afficher,pour chaque jour de la semaine, le nombre total de bytes envoyés à tous les clients."
+
+msgid "Display the total of files transferred every day of the week for each clients."
+msgstr "Afficher, pour chaque jour de la semaine, le nombre total de fichiers envoyés à tous les clients."
+
+msgid "Display the total of errors that occured during file transfers every day of the week for each clients."
+msgstr "Afficher,pour chaque jour de la semaine, le nombre total d'erreurs qui se sont produites durant l'envois de fichiers à tous les clients."
+
