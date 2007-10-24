@@ -24,7 +24,7 @@ named COPYING in the root of the source directory tree.
 """
 
 
-import os, time, sys
+import gettext, os, time, sys
 sys.path.insert(1, sys.path[0] + '/../../../')
 """
     Small function that adds pxlib to the environment path.  
@@ -123,7 +123,15 @@ def generateWebPage( rxNames, txNames, years ):
         Only links to available graphics will be 
         displayed.
         
-    """   
+    """       
+   
+    if language == 'fr':
+        fileName = StatsPaths.STATSLANGFRBINWEBPAGES + "yearlyGraphicsWebPage" 
+    elif language == 'en':
+        fileName = StatsPaths.STATSLANGENBINWEBPAGES + "yearlyGraphicsWebPage"      
+    
+    translator = gettext.GNUTranslations(open(fileName))
+    _ = translator.gettext
     
     rxNamesArray = rxNames.keys()
     txNamesArray = txNames.keys()
@@ -181,83 +189,44 @@ def generateWebPage( rxNames, txNames, years ):
             </script>              
  
             
-            <script>
+             <script>
                 function showSourceHelpPage(){
-                   var sourceHelpPage = dhtmlwindow.open("sourceHelpPage", "iframe", "helpPages/source.html", "Definition of 'source'", "width=875px,height=100px,resize=1,scrolling=1,center=1", "recal")
+                   var sourceHelpPage = dhtmlwindow.open("sourceHelpPage", "iframe", "helpPages/source_%s.html" """ %language + """, " """ + _("Definition of 'source'") + """", "width=875px,height=100px,resize=1,scrolling=1,center=1", "recal")
                    sourceHelpPage.moveTo("middle", "middle"); 
                 }
                 
                 function showBytecountHelpPage(){
-                   var byteCountHelpPage = dhtmlwindow.open("byteCount", "iframe", "helpPages/byteCount.html", "Definition of 'byteCount'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
+                   var byteCountHelpPage = dhtmlwindow.open("byteCount", "iframe", "helpPages/byteCount_%s.html" """ %language + """, " """ +_( "Definition of 'byteCount'") + """", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
                     byteCountHelpPage.moveTo("middle", "middle");
                 }
                 
                 function showClientHelpPage(){
-                   var clientHelpPage = dhtmlwindow.open("client", "iframe", "helpPages/client.html", "Definition of 'client'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
+                   var clientHelpPage = dhtmlwindow.open("client", "iframe", "helpPages/client_%s.html" """ %language + """, " """ +_( "Definition of 'client'") + """", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
                     .moveTo("middle", "middle");
                 }
                 
                 function showErrorsHelpPage(){
-                   var errorsHelpPage = dhtmlwindow.open("errors", "iframe", "helpPages/errors.html", "Definition of 'errors'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
+                   var errorsHelpPage = dhtmlwindow.open("errors", "iframe", "helpPages/errors_%s.html" """ %language + """, " """ +_( "Definition of 'errors'") +"""", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
                     errorsHelpPage.moveTo("middle", "middle");
                 }
                 
                 function showFilecountHelpPage(){
-                   var fileCountHelpPage = dhtmlwindow.open("fileCount", "iframe", "helpPages/fileCount.html", "Definition of 'filecount'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
+                   var fileCountHelpPage = dhtmlwindow.open("fileCount", "iframe", "helpPages/fileCount_%s.html" """ %language + """, " """ +_("Definition of 'filecount'") + """", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
                     fileCountHelpPage.moveTo("middle", "middle");
                 }
                           
                 function showFilesOverMaxLatencyHelpPage(){
-                   var filesOverMaxLatencyHelpPage = dhtmlwindow.open("filesOverMaxLatency", "iframe", "helpPages/filesOverMaxLatency.html", "Definition of 'filesOverMaxLatency'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
+                   var filesOverMaxLatencyHelpPage = dhtmlwindow.open("filesOverMaxLatency", "iframe", "helpPages/filesOverMaxLatency_%s.html" """ %language + """, " """ +_("Definition of 'filesOverMaxLatency'") + """", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
                     filesOverMaxLatencyHelpPage.moveTo("middle", "middle");
                 }
                 
                 function showLatencyHelpPage(){
-                   var latencyHelpPage = dhtmlwindow.open("byteCount", "iframe", "helpPages/latency.html", "Definition of 'latency'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
-                    latencyHelpPages.moveTo("middle", "middle");
-                }
-                               
-                
-            </script>
-            
-            <script>
-                function showSourceHelpPage(){
-                   var sourceHelpPage = dhtmlwindow.open("sourceHelpPage", "iframe", "helpPages/source.html", "Definition of 'source'", "width=875px,height=100px,resize=1,scrolling=1,center=1", "recal")
-                   sourceHelpPage.moveTo("middle", "middle"); 
-                }
-                
-                function showBytecountHelpPage(){
-                   var byteCountHelpPage = dhtmlwindow.open("byteCount", "iframe", "helpPages/byteCount.html", "Definition of 'byteCount'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
-                    byteCountHelpPage.moveTo("middle", "middle");
-                }
-                
-                function showClientHelpPage(){
-                   var clientHelpPage = dhtmlwindow.open("client", "iframe", "helpPages/client.html", "Definition of 'client'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
-                    .moveTo("middle", "middle");
-                }
-                
-                function showErrorsHelpPage(){
-                   var errorsHelpPage = dhtmlwindow.open("errors", "iframe", "helpPages/errors.html", "Definition of 'errors'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
-                    errorsHelpPage.moveTo("middle", "middle");
-                }
-                
-                function showFilecountHelpPage(){
-                   var fileCountHelpPage = dhtmlwindow.open("fileCount", "iframe", "helpPages/fileCount.html", "Definition of 'filecount'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
-                    fileCountHelpPage.moveTo("middle", "middle");
-                }
-                          
-                function showFilesOverMaxLatencyHelpPage(){
-                   var filesOverMaxLatencyHelpPage = dhtmlwindow.open("filesOverMaxLatency", "iframe", "helpPages/filesOverMaxLatency.html", "Definition of 'filesOverMaxLatency'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
-                    filesOverMaxLatencyHelpPage.moveTo("middle", "middle");
-                }
-                
-                function showLatencyHelpPage(){
-                   var latencyHelpPage = dhtmlwindow.open("byteCount", "iframe", "helpPages/latency.html", "Definition of 'latency'", "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
+                   var latencyHelpPage = dhtmlwindow.open("latency", "iframe", "helpPages/latency_%s.html" """ %language + """, " """ + _("Definition of 'latency'") + """" , "width=875px,height=150px,resize=1,scrolling=1,center=1", "recal")
                     latencyHelpPage.moveTo("middle", "middle");
                 }
                                
                 
-            </script>            
+            </script>              
             
             <STYLE>
                 <!--
@@ -342,7 +311,7 @@ def generateWebPage( rxNames, txNames, years ):
             <br>
             <table width = "100%">
                 <tr width = "100%">
-                    <div class="left"><b><font size="5"> Yearly graphics for RX sources from MetPx. </font><font size = "2">*updated monthly</font></b></div> 
+                    <div class="left"><b><font size="5">""" + _("Yearly graphics for RX sources from MetPx.") + """ </font><font size = "2">""" +_("*updated monthly") + """</font></b></div> 
     
     """)
     
@@ -386,7 +355,7 @@ def generateWebPage( rxNames, txNames, years ):
                             
                                 <font color = "white">                            
                                     <center>
-                                        Sources     
+                                        """ +_("Sources") + """     
                                         <br>                       
                                         <a target ="popup" href="#" onClick="showSourceHelpPage(); return false;">
                                             ?
@@ -396,11 +365,11 @@ def generateWebPage( rxNames, txNames, years ):
                            
                         </td>
                         
-                        <td bgcolor="#006699" class="cssTable" title = "Display the total of bytes received every day of the week for each sources.">
+                        <td bgcolor="#006699" class="cssTable" title =" """ + _( "Display the total of bytes received every day of the week for each sources.") + """ ">
                             
                                 <font color = "white">
                                     <center>
-                                        Bytecount
+                                        """ +_("Bytecount") + """
                                         <br>
                                         <a target ="popup" href="#" onClick="showBytecountHelpPage(); return false;">                                
                                             ?
@@ -410,11 +379,11 @@ def generateWebPage( rxNames, txNames, years ):
                             
                         </td>
                         
-                        <td bgcolor="#006699" class="cssTable" title = "Display the total of files received every day of the week for each sources.">
+                        <td bgcolor="#006699" class="cssTable" title =" """ + _( "Display the total of files received every day of the week for each sources.") + """ ">
                            
                                 <font color = "white">
                                     <center>
-                                        Filecount
+                                        """ +_("Filecount") +"""
                                         <br>
                                         <a target ="popup" href="#" onClick="showFilecountHelpPage(); return false;">                            
                                             ?                          
@@ -424,11 +393,11 @@ def generateWebPage( rxNames, txNames, years ):
                                           
                         </td>
                         
-                        <td bgcolor="#006699" class="cssTable" title = "Display the total of errors that occured during the receptions for every day of the week for each sources.">
+                        <td bgcolor="#006699" class="cssTable" title = " """ + _( "Display the total of errors that occured during the receptions for every day of the week for each sources.") + """ ">
                             
                                 <font color = "white">
                                     <center>
-                                        Errors
+                                        """ +_("Errors") + """
                                         <br>
                                         <a target ="popup"  href="#" onClick="showErrorsHelpPage(); return false;">
                                             ?
@@ -448,11 +417,11 @@ def generateWebPage( rxNames, txNames, years ):
     for rxName in rxNamesArray :
         if rxNames[rxName] == "" :
             fileHandle.write( """<tr> <td bgcolor="#99FF99" class="cssTable"> %s </td> """ %(rxName))
-            fileHandle.write( """<td bgcolor="#66CCFF" class="cssTable">Years&nbsp;:&nbsp;""" )
+            fileHandle.write( """<td bgcolor="#66CCFF" class="cssTable">""" + _("Years") + """&nbsp;:&nbsp;""" )
         else:
             machineName = getMachineNameFromDescription( rxNames[rxName] )
             fileHandle.write( """<tr> <td bgcolor="#99FF99" class="cssTable"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false"><font color="black">?</font></a></div><br>(%s)</td> """ %(rxName, rxNames[rxName].replace("'","").replace('"',''), machineName))
-            fileHandle.write( """<td bgcolor="#66CCFF" class="cssTable">Years&nbsp;:&nbsp;""" )
+            fileHandle.write( """<td bgcolor="#66CCFF" class="cssTable">""" + _("Years") + """&nbsp;:&nbsp;""" )
                    
         for year in years:
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )   
@@ -465,7 +434,7 @@ def generateWebPage( rxNames, txNames, years ):
         
         fileHandle.write( "</td>" )      
     
-        fileHandle.write(  """ <td bgcolor="#66CCFF" class="cssTable">Years&nbsp;:&nbsp;""" )
+        fileHandle.write(  """ <td bgcolor="#66CCFF" class="cssTable">""" + _("Years") + """&nbsp;:&nbsp;""" )
         
         
         
@@ -481,7 +450,7 @@ def generateWebPage( rxNames, txNames, years ):
         fileHandle.write( "</td>" )    
         
         
-        fileHandle.write(  """ <td bgcolor="#66CCFF" class="cssTable">Years&nbsp;:&nbsp;""" )
+        fileHandle.write(  """ <td bgcolor="#66CCFF" class="cssTable">""" + _("Years") + """&nbsp;:&nbsp;""" )
         
         for year in years:
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )            
@@ -502,7 +471,7 @@ def generateWebPage( rxNames, txNames, years ):
         <br>
         <table width = "100%">            
             <tr width = "100%">
-                <div class="left"><b><font size="5"> Yearly graphics for TX clients from MetPx. </font><font size = "2">*updated monthly</font></b></div> 
+                <div class="left"><b><font size="5">""" +_("Yearly graphics for TX clients from MetPx.") + """ </font><font size = "2">""" + _("*updated monthly") + """</font></b></div> 
     
     """)
     
@@ -533,7 +502,8 @@ def generateWebPage( rxNames, txNames, years ):
     
     
     
-    fileHandle.write("""   
+    fileHandle.write( """ 
+      
                         </tr>
                     </td>
                  </table>   
@@ -548,7 +518,7 @@ def generateWebPage( rxNames, txNames, years ):
                             
                                 <font color = "white">
                                     <center>
-                                        Clients
+                                        """ +  _("Clients") + """
                                         <br>
                                         <a target ="popup" href="#" onClick="showClientHelpPage(); return false;">
                                             ?
@@ -558,11 +528,11 @@ def generateWebPage( rxNames, txNames, years ):
                            
                         </td>
                     
-                        <td bgcolor="#006699" class="cssTable" title = "Display the taverage latency of file transfers for every day of the week for each clients.">
+                        <td bgcolor="#006699" class="cssTable" title =" """ +_("Display the taverage latency of file transfers for every day of the week for each clients.") + """>
                             
                                 <font color = "white">
                                     <center>
-                                        Latency
+                                        """ + _("Latency") + """
                                         <br>
                                         <a target ="popup" href="#" onClick="showLatencyHelpPage(); return false;">
                                             ?
@@ -572,11 +542,11 @@ def generateWebPage( rxNames, txNames, years ):
                            
                         </td>
                     
-                        <td bgcolor="#006699" class="cssTable" title = "Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients.">
+                        <td bgcolor="#006699" class="cssTable" title =" """+_("Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients.") + """>
                             
                                 <font color = "white">
                                     <center>
-                                        Files Over Max. Lat.
+                                        """ + _("Files Over Max. Lat.") + """
                                         <br>
                                         <a target ="popup" href="#" onClick="showFilesOverMaxLatencyHelpPage(); return false;">
                                             ?
@@ -586,11 +556,11 @@ def generateWebPage( rxNames, txNames, years ):
                                             
                         </td>
                     
-                        <td bgcolor="#006699" class="cssTable" title = "Display the total of bytes transfered every day of the week for each clients.">
+                        <td bgcolor="#006699" class="cssTable" title =" """+_("Display the total of bytes transfered every day of the week for each clients.") + """>
                             
                                 <font color = "white">    
                                     <center>
-                                        Bytecount
+                                        """ + _("Bytecount") + """
                                         <br>
                                         <a target ="popup" href="#" onClick="showBytecountHelpPage(); return false;">
                                             ?
@@ -600,11 +570,11 @@ def generateWebPage( rxNames, txNames, years ):
                             
                         </td>
                         
-                        <td bgcolor="#006699" class="cssTable" title = "Display the total of files transferred every day of the week for each clients.">
+                        <td bgcolor="#006699" class="cssTable" title =" """+_("Display the total of files transferred every day of the week for each clients.") + """>
                             
                                 <font color = "white">
                                     <center>
-                                        Filecount
+                                        """ + _("Filecount") + """
                                         <br>
                                         <a target ="popup" href="#" onClick="showFilecountHelpPage(); return false;">
                                             ?
@@ -614,11 +584,11 @@ def generateWebPage( rxNames, txNames, years ):
                                            
                         </td>
                         
-                        <td bgcolor="#006699" class="cssTable" title = "Display the total of errors that occured during file transfers every day of the week for each clients.">
+                        <td bgcolor="#006699" class="cssTable" title =" """+_("Display the total of errors that occured during file transfers every day of the week for each clients.") + """>
                             
                                 <font color = "white">
                                     <center>
-                                        Errors
+                                        """ + _("Errors") + """
                                         <br>
                                         <a target ="popup" href="#" onClick="showErrorsHelpPage(); return false;">
                                             ?
@@ -633,16 +603,16 @@ def generateWebPage( rxNames, txNames, years ):
             <tbody>
          
     
-    """)          
+    """ )          
         
     for txName in txNamesArray : 
         if txNames[txName] == "" :
             fileHandle.write( """ <tr> <td bgcolor="#99FF99" class="cssTable">%s</td> """ %(txName))
-            fileHandle.write( """<td bgcolor="#66CCFF" class="cssTable">Years&nbsp;:&nbsp;""" )
+            fileHandle.write( """<td bgcolor="#66CCFF" class="cssTable">""" + _("Years") + """&nbsp;:&nbsp;""" )
         else:
             machineName = getMachineNameFromDescription( txNames[txName] )
             fileHandle.write( """<tr> <td bgcolor="#99FF99" class="cssTable"><div class="left"> %s </div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false"><font color="black">?</font></a></div><br>(%s)</td> """ %(txName, txNames[txName].replace("'","").replace('"',''), machineName ))
-            fileHandle.write( """<td bgcolor="#66CCFF" class="cssTable">Years&nbsp;:&nbsp;""" )
+            fileHandle.write( """<td bgcolor="#66CCFF" class="cssTable">""" + _("Years") + """&nbsp;:&nbsp;""" )
             
        
         for year in years:
@@ -655,7 +625,7 @@ def generateWebPage( rxNames, txNames, years ):
         
         fileHandle.write( "</td>" )
         
-        fileHandle.write(  """ <td bgcolor="#66CCFF" class="cssTable" >Years&nbsp;:&nbsp;""" )
+        fileHandle.write(  """ <td bgcolor="#66CCFF" class="cssTable" >""" + _("Years") + """&nbsp;:&nbsp;""" )
         
         for year in years:
             
@@ -670,7 +640,7 @@ def generateWebPage( rxNames, txNames, years ):
         
         fileHandle.write( "</td>" )
         
-        fileHandle.write(  """ <td bgcolor="#66CCFF" class="cssTable" >Years&nbsp;:&nbsp;""" )
+        fileHandle.write(  """ <td bgcolor="#66CCFF" class="cssTable" >""" + _("Years") + """&nbsp;:&nbsp;""" )
         
         for year in years:
             
@@ -683,7 +653,7 @@ def generateWebPage( rxNames, txNames, years ):
         
         fileHandle.write( "</td>" )
         
-        fileHandle.write(  """ <td bgcolor="#66CCFF">Years&nbsp;:&nbsp;""" )
+        fileHandle.write(  """ <td bgcolor="#66CCFF">""" + _("Years") + """&nbsp;:&nbsp;""" )
         
         for year in years:
             
