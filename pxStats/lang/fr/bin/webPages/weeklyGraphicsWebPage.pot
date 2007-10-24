@@ -1,0 +1,110 @@
+
+#: weeklyGraphicsWebPage.py:291
+msgid "Definition of 'source'"
+msgstr "Définition de 'source'"
+
+#: weeklyGraphicsWebPage.py:296
+msgid "Definition of 'byteCount'"
+msgstr "Définition de 'nombre de bytes'."
+
+#: weeklyGraphicsWebPage.py:301
+msgid "Definition of 'client'"
+msgstr "Définition de 'client'."
+
+#: weeklyGraphicsWebPage.py:306
+msgid "Definition of 'errors'"
+msgstr "Définition d'erreurs."
+
+#: weeklyGraphicsWebPage.py:311
+msgid "Definition of 'filecount'"
+msgstr "Définition de 'nombre de fichiers'."
+
+#: weeklyGraphicsWebPage.py:316
+msgid "Definition of 'filesOverMaxLatency'"
+msgstr "Définition de 'Latences au dessus de 15 secondes'."
+
+#: weeklyGraphicsWebPage.py:321
+msgid "Definition of 'latency'"
+msgstr "Définition de latence."
+
+#: weeklyGraphicsWebPage.py:334
+msgid "Weekly graphics for RX sources from MetPx."
+msgstr "Graphiques hebdomadaires pour toutes les sources(RX) de MetPx."
+
+#: weeklyGraphicsWebPage.py:334 weeklyGraphicsWebPage.py:502
+msgid "*updated hourly"
+msgstr "*M-à-j à chaques heures."
+
+#: weeklyGraphicsWebPage.py:380
+msgid "Sources"
+msgstr "Sources"
+
+
+#: weeklyGraphicsWebPage.py:390
+msgid "Display the total of bytes received every day of the week for each sources."
+msgstr "Afficher le nombre total de bytes reçus à tous les jours de la semaine par toutes les sources."
+
+#: weeklyGraphicsWebPage.py:394 weeklyGraphicsWebPage.py:593
+msgid "Bytecount"
+msgstr "Nombre de bytes"
+
+#: weeklyGraphicsWebPage.py:404
+msgid "Display the total of files received every day of the week for each sources."
+msgstr "afficher le total de fichiers reçus à tous les jours de la semaine par toutes les sources."
+
+#: weeklyGraphicsWebPage.py:408 weeklyGraphicsWebPage.py:607
+msgid "Filecount"
+msgstr "Nombre de fichiers"
+
+#: weeklyGraphicsWebPage.py:418
+msgid "Display the total of errors that occured during the receptions for every day of the week for each sources."
+msgstr "Afficher le total d'erreurs s'étant produite lors de la réception de fichiers à tous les jours de la semaines pour toutes les sources."
+
+#: weeklyGraphicsWebPage.py:422 weeklyGraphicsWebPage.py:621
+msgid "Errors"
+msgstr "Erreurs"
+
+#: weeklyGraphicsWebPage.py:445 weeklyGraphicsWebPage.py:449
+#: weeklyGraphicsWebPage.py:465 weeklyGraphicsWebPage.py:479
+#: weeklyGraphicsWebPage.py:642 weeklyGraphicsWebPage.py:646
+#: weeklyGraphicsWebPage.py:661 weeklyGraphicsWebPage.py:677
+#: weeklyGraphicsWebPage.py:691 weeklyGraphicsWebPage.py:705
+msgid "Weeks"
+msgstr "Semaines"
+
+#: weeklyGraphicsWebPage.py:502
+msgid "Weekly graphics for TX clients from MetPx."
+msgstr "Graphiques hebdomadaires pour tous les clients(TX) de MetPx."
+
+#: weeklyGraphicsWebPage.py:551
+msgid "Clients"
+msgstr "Clients"
+
+#: weeklyGraphicsWebPage.py:561
+msgid "Display the average latency of file transfers for every day of the week for each clients."
+msgstr "Afficher la latence moyenne pour tous les fichiers envoyés à tous les clients pour chaque jour de la semaine."
+
+#: weeklyGraphicsWebPage.py:565
+msgid "Latency"
+msgstr "Latence"
+
+#: weeklyGraphicsWebPage.py:575
+msgid "Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients."
+msgstr "Afficher, pour chaque jour de la semaine, le nombre total de fichiers envoyés à tous les clients pour lesquels la latence fut au delà de 15 secondes."
+
+#: weeklyGraphicsWebPage.py:579
+msgid "Files Over Max. Lat."
+msgstr "Latences innacceptables."
+
+#: weeklyGraphicsWebPage.py:589
+msgid "Display the total of bytes transfered every day of the week for each clients."
+msgstr "Afficher,pour chaque jour de la semaine, le nombre total de bytes envoyés à tous les clients."
+
+#: weeklyGraphicsWebPage.py:603
+msgid "Display the total of files transferred every day of the week for each clients."
+msgstr "Afficher, pour chaque jour de la semaine, le nombre total de fichiers envoyés à tous les clients."
+
+#: weeklyGraphicsWebPage.py:617
+msgid "Display the total of errors that occured during file transfers every day of the week for each clients."
+msgstr "Afficher,pour chaque jour de la semaine, le nombre total d'erreurs qui se sont produites durant l'envois de fichiers à tous les clients."
+
