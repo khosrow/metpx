@@ -57,7 +57,7 @@ class senderAm(gateway.gateway):
         self.set_maxLength( self.client.maxLength )
 
     def set_maxLength(self,value):
-        if value <= 0  : value = 32 * 1024
+        if value <= 0  : value = 32 * 1000
         self.maxLength = value
 
     def shutdown(self):
@@ -247,7 +247,8 @@ class senderAm(gateway.gateway):
 
         limit   = self.maxLength - 128 - (lheader + 4)
         blocks  = TextSplitter(data[lheader:], limit ).breakMarker()
-        self.logger.info("Bulletin %s segmented in %d parts" % (path,len(blocks)))
+        self.logger.info("(%i Bytes) Bulletin %s  delivered segmented in %d parts" % (len(data),os.path.basename(path),len(blocks)))
+        self.logger.debug("Bulletin is \n%s" % data)
                     
         i       =  0
         totSent =  0
@@ -258,16 +259,20 @@ class senderAm(gateway.gateway):
         alpha=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
 
         for part in blocks :
-            rawSegment  = header + " P" + alpha[i/24] + alpha[i%24] + '\n' + part
-            i = i + 1
+            l1 = alpha[i/24]
+            l2 = alpha[i%24]
+            i  = i + 1
+            if i == len(blocks) : l1 = 'Z'
+            rawSegment = header + " P" + l1 + l2 + '\n' + part
 
             if self.client.nodups and priority != '0' and self.in_cache( rawSegment, False, None ) :
                continue
 
             succes, nbBytesSent = self.write_data(rawSegment)
             if succes :
-               tallyBytes(nbBytesSent)
-               self.logger.info("(%i Bytes) Bulletin Segment number %d sent" % (nbBytesSent,i))
+               self.tallyBytes(nbBytesSent)
+               self.logger.info("(%i Bytes) Bulletin Segment number %d sent (%s)" % (nbBytesSent,i,header + " P" + l1 + l2))
+               self.logger.debug("Bulletin is \n%s" % rawSegment)
             else :
                return (False, totSent)
 
