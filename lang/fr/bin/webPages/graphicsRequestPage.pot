@@ -1,0 +1,413 @@
+
+#: graphicsRequestPage.py:58 graphicsRequestPage.py:60
+msgid "bytecount"
+msgstr "nbreDeBytes"
+
+#: graphicsRequestPage.py:58 graphicsRequestPage.py:60
+msgid "bytecount,errors"
+msgstr "nbreDeBytes,erreurs"
+
+#: graphicsRequestPage.py:58 graphicsRequestPage.py:60
+msgid "bytecount,filecount"
+msgstr "nbreDeBytes,nbreDeFichiers"
+
+#: graphicsRequestPage.py:58 graphicsRequestPage.py:60
+msgid "errors"
+msgstr "erreurs"
+
+#: graphicsRequestPage.py:58 graphicsRequestPage.py:60
+msgid "filecount"
+msgstr "nbreDeFichers"
+
+#: graphicsRequestPage.py:58 graphicsRequestPage.py:60
+msgid "filecount,errors"
+msgstr "nbreDeFichiers,erreurs"
+
+#: graphicsRequestPage.py:58 graphicsRequestPage.py:61
+msgid "bytecount,filecount,errors"
+msgstr "nbreDeBytes,nbreDeFichiers,erreurs"
+
+#: graphicsRequestPage.py:60
+msgid "latency"
+msgstr "latence"
+
+#: graphicsRequestPage.py:60
+msgid "latency, bytecount"
+msgstr "latence,nbreDeBytes"
+
+#: graphicsRequestPage.py:60
+msgid "latency,errors"
+msgstr "latence,erreurs"
+
+#: graphicsRequestPage.py:61
+msgid "latency,bytecount,errors"
+msgstr "latence,nbreDeBytes,erreurs"
+
+#: graphicsRequestPage.py:61
+msgid "latency,bytecount,filecount"
+msgstr "latence,nbreDeBytes,nbreDeFichiers"
+
+#: graphicsRequestPage.py:61
+msgid "latency,bytecount,filecount,errors"
+msgstr "latence,nbreDeBytes,nbreDeFichiers,erreurs"
+
+#: graphicsRequestPage.py:61
+msgid "latency,filecount"
+msgstr "latence,nbreDeFichiers"
+
+#: graphicsRequestPage.py:64 graphicsRequestPage.py:68
+msgid "monthly"
+msgstr "mensuel"
+
+#: graphicsRequestPage.py:64 graphicsRequestPage.py:68
+msgid "weekly"
+msgstr "hebdomadaire"
+
+#: graphicsRequestPage.py:64 graphicsRequestPage.py:68
+msgid "yearly"
+msgstr "annuel"
+
+#: graphicsRequestPage.py:64 graphicsRequestPage.py:68
+#: graphicsRequestPage.py:2214
+msgid "daily"
+msgstr "journalier"
+
+#: graphicsRequestPage.py:66 graphicsRequestPage.py:70
+msgid "fixedCurrent"
+msgstr "fixeCourante"
+
+#: graphicsRequestPage.py:66 graphicsRequestPage.py:70
+msgid "fixedPrevious"
+msgstr "fixePrecedente"
+
+#: graphicsRequestPage.py:212
+msgid "Client(s)/Source(s)"
+msgstr "Clients(s)/Sources(s)"
+
+#: graphicsRequestPage.py:228 graphicsRequestPage.py:2068
+msgid "Add Clients"
+msgstr "Ajouter clients"
+
+#: graphicsRequestPage.py:229
+msgid "Delete client"
+msgstr "Supprimer clients."
+
+#: graphicsRequestPage.py:239
+msgid "Client(s)/Source(s) : "
+msgstr "Clients(s)/Source(s)"
+
+#: graphicsRequestPage.py:241 graphicsRequestPage.py:2176
+msgid "File type required to enable this."
+msgstr "Specifiez un type de fichier pour activer ce champs."
+
+#: graphicsRequestPage.py:242 graphicsRequestPage.py:2187
+msgid "Machine is required to enable this."
+msgstr "Specifiez une machine pour activer ce champs."
+
+#: graphicsRequestPage.py:247
+msgid "Add Sourlients"
+msgstr "Ajouter sourlients."
+
+#: graphicsRequestPage.py:249
+msgid "Delete Sourlients"
+msgstr "Supprimer sourlients"
+
+#: graphicsRequestPage.py:318
+msgid "Application status : Updating list of sources and clients."
+msgstr "Statut de l'application : Mise-à-jour de la liste de sources et de clients."
+
+#: graphicsRequestPage.py:322
+msgid "Application status : Executing the graphics creation request..."
+msgstr "Statut de l'application : Traitement de la requête e création de graphiques."
+
+#: graphicsRequestPage.py:327
+msgid "Application status : Updating Database(s)."
+msgstr "Status de l'applicaiton : Mise-à-jour des bases de données."
+
+#: graphicsRequestPage.py:331
+msgid "Application status : Generating image web page.(s)."
+msgstr "Statut de l'application : Génération de la page web d'images."
+
+#: graphicsRequestPage.py:373 graphicsRequestPage.py:377
+#: graphicsRequestPage.py:1470 graphicsRequestPage.py:1583
+#: graphicsRequestPage.py:1684
+msgid "Application status : Awaiting request(s)."
+msgstr "Status de l'application : attente de requêtes."
+
+#: graphicsRequestPage.py:420 graphicsRequestPage.py:771
+msgid "Now showing image"
+msgstr "Affiche maintenant l'image "
+
+#: graphicsRequestPage.py:420 graphicsRequestPage.py:771
+msgid "of"
+msgstr "de"
+
+#: graphicsRequestPage.py:644 graphicsRequestPage.py:1950
+msgid "Error. Please select a filetype."
+msgstr "Erreur.Veuillez specifier un type de fichier."
+
+#: graphicsRequestPage.py:647 graphicsRequestPage.py:1953
+msgid "Error. Please select a machine."
+msgstr "Erreur. Veuillez specifier une machine."
+
+#: graphicsRequestPage.py:650
+msgid "Error. Please select a stats type."
+msgstr "Erreur. Veuillez specifier un type de donnée."
+
+#: graphicsRequestPage.py:653
+msgid "Error. Cannot specify fixed span without determined span."
+msgstr "Erreur. Impossible de specifier un laps fixe sans specifier un type de laps de temps."
+
+#: graphicsRequestPage.py:657
+msgid "Error. Please add a client/source to the list or specify a group name."
+msgstr "Erreur. Veuillez ajouter un client ou une source ou specifier un nom de groupe."
+
+#: graphicsRequestPage.py:669
+msgid "Error. Span value must be between 1 and 50000."
+msgstr "Erreur. Le laps de temps doit être en 1 et 50000"
+
+#: graphicsRequestPage.py:673
+msgid "Error. Span value must be a NUMERICAL value between 1 and 48."
+msgstr "Erreur. La valeur du laps doit etre une valeur NUMÉRIQUE comprise entre 1 et 48."
+
+#: graphicsRequestPage.py:679 graphicsRequestPage.py:687
+msgid "Error. Specify a determined span or use the span option in the advanced options."
+msgstr "Erreur. Veuillez specifier un laps de temps déterminé ou l'option laps de tmeps dans les options avancées."
+
+#: graphicsRequestPage.py:889
+msgid "Previous image result."
+msgstr "Image précédente."
+
+#: graphicsRequestPage.py:890
+msgid "View all images"
+msgstr "Voir toutes les images."
+
+#: graphicsRequestPage.py:891
+msgid "Next image result."
+msgstr "Prochaine image"
+
+#: graphicsRequestPage.py:918
+msgid "Group name:"
+msgstr "Groupe:"
+
+#: graphicsRequestPage.py:955
+msgid "Products:"
+msgstr "Produits:"
+
+#: graphicsRequestPage.py:996
+msgid "Span(in hours):"
+msgstr "Lap de temps(en heure)"
+
+#: graphicsRequestPage.py:1021
+msgid "FileType:"
+msgstr "Type de fichier"
+
+#: graphicsRequestPage.py:1023
+msgid "Select a file type..."
+msgstr "Choisissez un type..."
+
+#: graphicsRequestPage.py:1061
+msgid "Determined spans : "
+msgstr "Types de laps."
+
+#: graphicsRequestPage.py:1063
+msgid "Select a span..."
+msgstr "Choisissez un laps..."
+
+#: graphicsRequestPage.py:1096
+msgid "Fixed spans : "
+msgstr "Laps de temps fixes"
+
+#: graphicsRequestPage.py:1098 graphicsRequestPage.py:2160
+msgid "Select fixed span..."
+msgstr "Choisissez un laps fixe."
+
+#: graphicsRequestPage.py:1131
+msgid "Machine(s):"
+msgstr "Machines(s):"
+
+#: graphicsRequestPage.py:1133
+msgid "Select machine(s)..."
+msgstr "Choisissez les machines..."
+
+#: graphicsRequestPage.py:1134
+msgid "Main machine(s):"
+msgstr "Machines principales:"
+
+#: graphicsRequestPage.py:1151
+msgid "Other machine(s):"
+msgstr "Autres machines : "
+
+#: graphicsRequestPage.py:1201
+msgid "Stats type(s):"
+msgstr "Types de données :"
+
+#: graphicsRequestPage.py:1203
+msgid "Select stats types."
+msgstr "Choisissez un type de données."
+
+#: graphicsRequestPage.py:1244 graphicsRequestPage.py:1249
+msgid "Having run."
+msgstr "Ayant fonctionné"
+
+#: graphicsRequestPage.py:1273
+msgid "Individual machines( Not yet implemented )."
+msgstr "Machines individuelles(Non-implanté)"
+
+#: graphicsRequestPage.py:1279
+msgid "Individual machines( Not yet implemented)."
+msgstr "Machines individuelles(Non-implanté)"
+
+#: graphicsRequestPage.py:1304 graphicsRequestPage.py:1309
+msgid "Total."
+msgstr "Total."
+
+#: graphicsRequestPage.py:1337 graphicsRequestPage.py:1347
+msgid "Combine source(s)/client(s)."
+msgstr "Combiner source(s)/client(s)."
+
+#: graphicsRequestPage.py:1371
+msgid "Click Here to Pick up the date"
+msgstr "Cliquez ici pour sélectionner une date."
+
+#: graphicsRequestPage.py:1403
+msgid "Required fields"
+msgstr "Champs requis."
+
+#: graphicsRequestPage.py:1434 graphicsRequestPage.py:1548
+#: graphicsRequestPage.py:1650 graphicsRequestPage.py:2131
+msgid "Show advanced options..."
+msgstr "Afficher les options avancées."
+
+#: graphicsRequestPage.py:1469 graphicsRequestPage.py:1582
+#: graphicsRequestPage.py:1683
+msgid "Generate graphic(s)"
+msgstr "Générer les graphiques."
+
+#: graphicsRequestPage.py:1478 graphicsRequestPage.py:1590
+msgid "Get Help"
+msgstr "Aide"
+
+#: graphicsRequestPage.py:1521
+msgid "RRD fields"
+msgstr "Champs rrd."
+
+#: graphicsRequestPage.py:1623
+msgid "Input fields"
+msgstr "Formulaire à remplir"
+
+#: graphicsRequestPage.py:1949 graphicsRequestPage.py:2213
+#: graphicsRequestPage.py:2229
+msgid "Select"
+msgstr "Choisir"
+
+#: graphicsRequestPage.py:2061
+msgid "Add Sources   "
+msgstr "Ajouter sources"
+
+#: graphicsRequestPage.py:2062
+msgid "Delete Sources"
+msgstr "Supprimer sources"
+
+#: graphicsRequestPage.py:2063
+msgid "Combine source(s)."
+msgstr "Combiner source(s)."
+
+#: graphicsRequestPage.py:2064
+msgid "Sources : "
+msgstr "Sources : "
+
+#: graphicsRequestPage.py:2069
+msgid "Delete Clients"
+msgstr "Supprimer clients"
+
+#: graphicsRequestPage.py:2070
+msgid "Combine client(s)."
+msgstr "Combiner client(s)."
+
+#: graphicsRequestPage.py:2071
+msgid "Clients : "
+msgstr "Clients : "
+
+#: graphicsRequestPage.py:2074
+msgid "Add"
+msgstr "Ajouter"
+
+#: graphicsRequestPage.py:2075
+msgid "Delete"
+msgstr "Supprimer"
+
+#: graphicsRequestPage.py:2076
+msgid "Combine sources/clients."
+msgstr "Combiner sources/clients."
+
+#: graphicsRequestPage.py:2077
+msgid "Client(s)/Source(s) :"
+msgstr "Clients(s)/Sources(s) : "
+
+#: graphicsRequestPage.py:2124
+msgid "Hide advanced options..."
+msgstr "Cacher les options avancées."
+
+#: graphicsRequestPage.py:2140
+msgid "Past 24 hours"
+msgstr "24 dernières heures."
+
+#: graphicsRequestPage.py:2141
+msgid "Current day."
+msgstr "Journée courante."
+
+#: graphicsRequestPage.py:2142
+msgid "Previous day."
+msgstr "Journée précédente."
+
+#: graphicsRequestPage.py:2145
+msgid "Past 7 days."
+msgstr "Derniers 7 jours"
+
+#: graphicsRequestPage.py:2146
+msgid "Current week."
+msgstr "Semaine courante"
+
+#: graphicsRequestPage.py:2147
+msgid "Previous week."
+msgstr "Semaine précédente"
+
+#: graphicsRequestPage.py:2150
+msgid "Past 30 days."
+msgstr "Derniers 30 jours."
+
+#: graphicsRequestPage.py:2151
+msgid "Current month."
+msgstr "Mois courant."
+
+#: graphicsRequestPage.py:2152
+msgid "Previous month."
+msgstr "Mois précédent."
+
+#: graphicsRequestPage.py:2155
+msgid "Past 365 days."
+msgstr "Derniers 365 jours."
+
+#: graphicsRequestPage.py:2156
+msgid "Current year."
+msgstr "Année courante."
+
+#: graphicsRequestPage.py:2157
+msgid "Previous year."
+msgstr "Année précédente."
+
+#: graphicsRequestPage.py:2161
+msgid "Current"
+msgstr "Courante."
+
+#: graphicsRequestPage.py:2162
+msgid "Previous"
+msgstr "Précédente"
+
+#: graphicsRequestPage.py:2249
+msgid "image"
+msgstr "image"
+
+msgid "End Time Date:"
+msgstr "Date de fin :"
