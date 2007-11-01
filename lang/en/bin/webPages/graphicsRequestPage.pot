@@ -1,0 +1,413 @@
+
+#: graphicsRequestPage.py:58 graphicsRequestPage.py:60
+msgid "bytecount"
+msgstr "bytecount"
+
+#: graphicsRequestPage.py:58 graphicsRequestPage.py:60
+msgid "bytecount,errors"
+msgstr "bytecount,errors"
+
+#: graphicsRequestPage.py:58 graphicsRequestPage.py:60
+msgid "bytecount,filecount"
+msgstr "bytecount,filecount"
+
+#: graphicsRequestPage.py:58 graphicsRequestPage.py:60
+msgid "errors"
+msgstr "errors"
+
+#: graphicsRequestPage.py:58 graphicsRequestPage.py:60
+msgid "filecount"
+msgstr "filecount"
+
+#: graphicsRequestPage.py:58 graphicsRequestPage.py:60
+msgid "filecount,errors"
+msgstr "filecount,errors"
+
+#: graphicsRequestPage.py:58 graphicsRequestPage.py:61
+msgid "bytecount,filecount,errors"
+msgstr "bytecount,filecount,errors"
+
+#: graphicsRequestPage.py:60
+msgid "latency"
+msgstr "latency"
+
+#: graphicsRequestPage.py:60
+msgid "latency, bytecount"
+msgstr "latency, bytecount"
+
+#: graphicsRequestPage.py:60
+msgid "latency,errors"
+msgstr "latency,errors"
+
+#: graphicsRequestPage.py:61
+msgid "latency,bytecount,errors"
+msgstr "latency,bytecount,errors"
+
+#: graphicsRequestPage.py:61
+msgid "latency,bytecount,filecount"
+msgstr "latency,bytecount,filecount"
+
+#: graphicsRequestPage.py:61
+msgid "latency,bytecount,filecount,errors"
+msgstr "latency,bytecount,filecount,errors"
+
+#: graphicsRequestPage.py:61
+msgid "latency,filecount"
+msgstr "latency,filecount"
+
+#: graphicsRequestPage.py:64 graphicsRequestPage.py:68
+msgid "monthly"
+msgstr "monthly"
+
+#: graphicsRequestPage.py:64 graphicsRequestPage.py:68
+msgid "weekly"
+msgstr "weekly"
+
+#: graphicsRequestPage.py:64 graphicsRequestPage.py:68
+msgid "yearly"
+msgstr "yearly"
+
+#: graphicsRequestPage.py:64 graphicsRequestPage.py:68
+#: graphicsRequestPage.py:2214
+msgid "daily"
+msgstr "daily"
+
+#: graphicsRequestPage.py:66 graphicsRequestPage.py:70
+msgid "fixedCurrent"
+msgstr "fixedCurrent"
+
+#: graphicsRequestPage.py:66 graphicsRequestPage.py:70
+msgid "fixedPrevious"
+msgstr "fixedPrevious"
+
+#: graphicsRequestPage.py:212
+msgid "Client(s)/Source(s)"
+msgstr "Client(s)/Source(s)"
+
+#: graphicsRequestPage.py:228 graphicsRequestPage.py:2068
+msgid "Add Clients"
+msgstr "Add Clients"
+
+#: graphicsRequestPage.py:229
+msgid "Delete client"
+msgstr "Delete client"
+
+#: graphicsRequestPage.py:239
+msgid "Client(s)/Source(s) : "
+msgstr "Client(s)/Source(s) : " 
+
+#: graphicsRequestPage.py:241 graphicsRequestPage.py:2176
+msgid "File type required to enable this."
+msgstr "File type required to enable this."
+
+#: graphicsRequestPage.py:242 graphicsRequestPage.py:2187
+msgid "Machine is required to enable this."
+msgstr "Machine is required to enable this."
+
+#: graphicsRequestPage.py:247
+msgid "Add Sourlients"
+msgstr "Add Sourlients"
+
+#: graphicsRequestPage.py:249
+msgid "Delete Sourlients"
+msgstr "Delete Sourlients"
+
+#: graphicsRequestPage.py:318
+msgid "Application status : Updating list of sources and clients."
+msgstr "Application status : Updating list of sources and clients."
+
+#: graphicsRequestPage.py:322
+msgid "Application status : Executing the graphics creation request..."
+msgstr "Application status : Executing the graphics creation request..."
+
+#: graphicsRequestPage.py:327
+msgid "Application status : Updating Database(s)."
+msgstr "Application status : Updating Database(s)."
+
+#: graphicsRequestPage.py:331
+msgid "Application status : Generating image web page.(s)."
+msgstr "Application status : Generating image web page.(s)."
+
+#: graphicsRequestPage.py:373 graphicsRequestPage.py:377
+#: graphicsRequestPage.py:1470 graphicsRequestPage.py:1583
+#: graphicsRequestPage.py:1684
+msgid "Application status : Awaiting request(s)."
+msgstr "Application status : Awaiting request(s)."
+
+#: graphicsRequestPage.py:420 graphicsRequestPage.py:771
+msgid "Now showing image"
+msgstr "Now showing image"
+
+#: graphicsRequestPage.py:420 graphicsRequestPage.py:771
+msgid "of"
+msgstr "of"
+
+#: graphicsRequestPage.py:644 graphicsRequestPage.py:1950
+msgid "Error. Please select a filetype."
+msgstr "Error. Please select a filetype."
+
+#: graphicsRequestPage.py:647 graphicsRequestPage.py:1953
+msgid "Error. Please select a machine."
+msgstr "Error. Please select a machine."
+
+#: graphicsRequestPage.py:650
+msgid "Error. Please select a stats type."
+msgstr "Error. Please select a stats type."
+
+#: graphicsRequestPage.py:653
+msgid "Error. Cannot specify fixed span without determined span."
+msgstr "Error. Cannot specify fixed span without determined span."
+
+#: graphicsRequestPage.py:657
+msgid "Error. Please add a client/source to the list or specify a group name."
+msgstr "Error. Please add a client/source to the list or specify a group name."
+
+#: graphicsRequestPage.py:669
+msgid "Error. Span value must be between 1 and 50000."
+msgstr "Error. Span value must be between 1 and 50000."
+
+#: graphicsRequestPage.py:673
+msgid "Error. Span value must be a NUMERICAL value between 1 and 48."
+msgstr "Error. Span value must be a NUMERICAL value between 1 and 48."
+
+#: graphicsRequestPage.py:679 graphicsRequestPage.py:687
+msgid "Error. Specify a determined span or use the span option in the advanced options."
+msgstr "Error. Specify a determined span or use the span option in the advanced options."
+
+#: graphicsRequestPage.py:889
+msgid "Previous image result."
+msgstr "Previous image result."
+
+#: graphicsRequestPage.py:890
+msgid "View all images"
+msgstr "View all images"
+
+#: graphicsRequestPage.py:891
+msgid "Next image result."
+msgstr "Next image result."
+
+#: graphicsRequestPage.py:918
+msgid "Group name:"
+msgstr "Group name:"
+
+#: graphicsRequestPage.py:955
+msgid "Products:"
+msgstr "Products:"
+
+#: graphicsRequestPage.py:996
+msgid "Span(in hours):"
+msgstr "Span(in hours):"
+
+#: graphicsRequestPage.py:1021
+msgid "FileType:"
+msgstr "FileType:"
+
+#: graphicsRequestPage.py:1023
+msgid "Select a file type..."
+msgstr "Select a file type..."
+
+#: graphicsRequestPage.py:1061
+msgid "Determined spans : "
+msgstr "Determined spans : "
+
+#: graphicsRequestPage.py:1063
+msgid "Select a span..."
+msgstr "Select a span..."
+
+#: graphicsRequestPage.py:1096
+msgid "Fixed spans : "
+msgstr "Fixed spans : "
+
+#: graphicsRequestPage.py:1098 graphicsRequestPage.py:2160
+msgid "Select fixed span..."
+msgstr "Select fixed span..."
+
+#: graphicsRequestPage.py:1131
+msgid "Machine(s):"
+msgstr "Machine(s):"
+
+#: graphicsRequestPage.py:1133
+msgid "Select machine(s)..."
+msgstr "Select machine(s)..."
+
+#: graphicsRequestPage.py:1134
+msgid "Main machine(s):"
+msgstr "Main machine(s):"
+
+#: graphicsRequestPage.py:1151
+msgid "Other machine(s):"
+msgstr "Other machine(s):"
+
+#: graphicsRequestPage.py:1201
+msgid "Stats type(s):"
+msgstr "Stats type(s):"
+
+#: graphicsRequestPage.py:1203
+msgid "Select stats types."
+msgstr "Select stats types."
+
+#: graphicsRequestPage.py:1244 graphicsRequestPage.py:1249
+msgid "Having run."
+msgstr "Having run."
+
+#: graphicsRequestPage.py:1273
+msgid "Individual machines( Not yet implemented )."
+msgstr "Individual machines( Not yet implemented )."
+
+#: graphicsRequestPage.py:1279
+msgid "Individual machines( Not yet implemented)."
+msgstr "Individual machines( Not yet implemented)."
+
+#: graphicsRequestPage.py:1304 graphicsRequestPage.py:1309
+msgid "Total."
+msgstr "Total."
+
+#: graphicsRequestPage.py:1337 graphicsRequestPage.py:1347
+msgid "Combine source(s)/client(s)."
+msgstr "Combine source(s)/client(s)."
+
+#: graphicsRequestPage.py:1371
+msgid "Click Here to Pick up the date"
+msgstr "Click Here to Pick up the date"
+
+#: graphicsRequestPage.py:1403
+msgid "Required fields"
+msgstr "Required fields"
+
+#: graphicsRequestPage.py:1434 graphicsRequestPage.py:1548
+#: graphicsRequestPage.py:1650 graphicsRequestPage.py:2131
+msgid "Show advanced options..."
+msgstr "Show advanced options..."
+
+#: graphicsRequestPage.py:1469 graphicsRequestPage.py:1582
+#: graphicsRequestPage.py:1683
+msgid "Generate graphic(s)"
+msgstr "Generate graphic(s)"
+
+#: graphicsRequestPage.py:1478 graphicsRequestPage.py:1590
+msgid "Get Help"
+msgstr "Get Help"
+
+#: graphicsRequestPage.py:1521
+msgid "RRD fields"
+msgstr "RRD fields"
+
+#: graphicsRequestPage.py:1623
+msgid "Input fields"
+msgstr "Input fields"
+
+#: graphicsRequestPage.py:1949 graphicsRequestPage.py:2213
+#: graphicsRequestPage.py:2229
+msgid "Select"
+msgstr "Select"
+
+#: graphicsRequestPage.py:2061
+msgid "Add Sources   "
+msgstr "Add Sources   "
+
+#: graphicsRequestPage.py:2062
+msgid "Delete Sources"
+msgstr "Delete Sources"
+
+#: graphicsRequestPage.py:2063
+msgid "Combine source(s)."
+msgstr "Combine source(s)."
+
+#: graphicsRequestPage.py:2064
+msgid "Sources : "
+msgstr "Sources : "
+
+#: graphicsRequestPage.py:2069
+msgid "Delete Clients"
+msgstr "Delete Clients"
+
+#: graphicsRequestPage.py:2070
+msgid "Combine client(s)."
+msgstr "Combine client(s)."
+
+#: graphicsRequestPage.py:2071
+msgid "Clients : "
+msgstr "Clients : "
+
+#: graphicsRequestPage.py:2074
+msgid "Add"
+msgstr "Add"
+
+#: graphicsRequestPage.py:2075
+msgid "Delete"
+msgstr "Delete"
+
+#: graphicsRequestPage.py:2076
+msgid "Combine sources/clients."
+msgstr "Combine sources/clients."
+
+#: graphicsRequestPage.py:2077
+msgid "Client(s)/Source(s) :"
+msgstr "Client(s)/Source(s) :"
+
+#: graphicsRequestPage.py:2124
+msgid "Hide advanced options..."
+msgstr "Hide advanced options..."
+
+#: graphicsRequestPage.py:2140
+msgid "Past 24 hours"
+msgstr "Past 24 hours"
+
+#: graphicsRequestPage.py:2141
+msgid "Current day."
+msgstr "Current day."
+
+#: graphicsRequestPage.py:2142
+msgid "Previous day."
+msgstr "Previous day."
+
+#: graphicsRequestPage.py:2145
+msgid "Past 7 days."
+msgstr "Past 7 days."
+
+#: graphicsRequestPage.py:2146
+msgid "Current week."
+msgstr "Current week."
+
+#: graphicsRequestPage.py:2147
+msgid "Previous week."
+msgstr "Previous week."
+
+#: graphicsRequestPage.py:2150
+msgid "Past 30 days."
+msgstr "Past 30 days."
+
+#: graphicsRequestPage.py:2151
+msgid "Current month."
+msgstr "Current month."
+
+#: graphicsRequestPage.py:2152
+msgid "Previous month."
+msgstr "Previous month."
+
+#: graphicsRequestPage.py:2155
+msgid "Past 365 days."
+msgstr "Past 365 days."
+
+#: graphicsRequestPage.py:2156
+msgid "Current year."
+msgstr "Current year."
+
+#: graphicsRequestPage.py:2157
+msgid "Previous year."
+msgstr "Previous year."
+
+#: graphicsRequestPage.py:2161
+msgid "Current"
+msgstr "Current"
+
+#: graphicsRequestPage.py:2162
+msgid "Previous"
+msgstr "Previous"
+
+#: graphicsRequestPage.py:2249
+msgid "image"
+msgstr "image"
+
+msgid "End Time Date:"
+msgstr "End Time Date:"
