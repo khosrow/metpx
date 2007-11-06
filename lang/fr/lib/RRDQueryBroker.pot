@@ -1,0 +1,24 @@
+#: RRDQueryBroker.py:388
+msgid "daily"
+msgstr "journalier"
+
+#: RRDQueryBroker.py:390
+msgid "weekly"
+msgstr "hebdomadaire"
+
+#: RRDQueryBroker.py:392
+msgid "monthly"
+msgstr "mensuel"
+
+#: RRDQueryBroker.py:394
+msgid "yearly"
+msgstr "annuel"
+
+#: RRDQueryBroker.py:405
+msgid "current"
+msgstr "courante"
+
+#: RRDQueryBroker.py:407
+msgid "previous"
+msgstr "précédente"
+
