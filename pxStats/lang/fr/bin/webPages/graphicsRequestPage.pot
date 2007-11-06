@@ -98,19 +98,19 @@ msgstr "Clients(s)/Source(s)"
 
 #: graphicsRequestPage.py:241 graphicsRequestPage.py:2176
 msgid "File type required to enable this."
-msgstr "Specifiez un type de fichier pour activer ce champs."
+msgstr "Specifiez un type de fichier."
 
 #: graphicsRequestPage.py:242 graphicsRequestPage.py:2187
 msgid "Machine is required to enable this."
-msgstr "Specifiez une machine pour activer ce champs."
+msgstr "Specifiez une machine."
 
 #: graphicsRequestPage.py:247
 msgid "Add Sourlients"
-msgstr "Ajouter sourlients."
+msgstr "Ajouter"
 
 #: graphicsRequestPage.py:249
 msgid "Delete Sourlients"
-msgstr "Supprimer sourlients"
+msgstr "Supprimer"
 
 #: graphicsRequestPage.py:318
 msgid "Application status : Updating list of sources and clients."
@@ -175,15 +175,15 @@ msgid "Error. Specify a determined span or use the span option in the advanced o
 msgstr "Erreur. Veuillez specifier un laps de temps déterminé ou l'option laps de tmeps dans les options avancées."
 
 #: graphicsRequestPage.py:889
-msgid "Previous image result."
-msgstr "Image précédente."
+msgid "Previous image result"
+msgstr "Image précédente"
 
 #: graphicsRequestPage.py:890
 msgid "View all images"
-msgstr "Voir toutes les images."
+msgstr "Voir toutes les images"
 
 #: graphicsRequestPage.py:891
-msgid "Next image result."
+msgid "Next image result"
 msgstr "Prochaine image"
 
 #: graphicsRequestPage.py:918
@@ -196,7 +196,7 @@ msgstr "Produits:"
 
 #: graphicsRequestPage.py:996
 msgid "Span(in hours):"
-msgstr "Lap de temps(en heure)"
+msgstr "Durée(en heure)"
 
 #: graphicsRequestPage.py:1021
 msgid "FileType:"
@@ -208,7 +208,7 @@ msgstr "Choisissez un type..."
 
 #: graphicsRequestPage.py:1061
 msgid "Determined spans : "
-msgstr "Types de laps."
+msgstr "Types de laps :"
 
 #: graphicsRequestPage.py:1063
 msgid "Select a span..."
@@ -268,7 +268,7 @@ msgstr "Combiner source(s)/client(s)."
 
 #: graphicsRequestPage.py:1371
 msgid "Click Here to Pick up the date"
-msgstr "Cliquez ici pour sélectionner une date."
+msgstr "Cliquez ici pour sélectionner une date"
 
 #: graphicsRequestPage.py:1403
 msgid "Required fields"
@@ -282,7 +282,7 @@ msgstr "Afficher les options avancées."
 #: graphicsRequestPage.py:1469 graphicsRequestPage.py:1582
 #: graphicsRequestPage.py:1683
 msgid "Generate graphic(s)"
-msgstr "Générer les graphiques."
+msgstr "Générer"
 
 #: graphicsRequestPage.py:1478 graphicsRequestPage.py:1590
 msgid "Get Help"
@@ -347,19 +347,19 @@ msgstr "Clients(s)/Sources(s) : "
 
 #: graphicsRequestPage.py:2124
 msgid "Hide advanced options..."
-msgstr "Cacher les options avancées."
+msgstr "Cacher les options avancées"
 
 #: graphicsRequestPage.py:2140
 msgid "Past 24 hours"
-msgstr "24 dernières heures."
+msgstr "24 dernières heures"
 
 #: graphicsRequestPage.py:2141
 msgid "Current day."
-msgstr "Journée courante."
+msgstr "Journée courante"
 
 #: graphicsRequestPage.py:2142
 msgid "Previous day."
-msgstr "Journée précédente."
+msgstr "Journée précédente"
 
 #: graphicsRequestPage.py:2145
 msgid "Past 7 days."
@@ -411,3 +411,7 @@ msgstr "image"
 
 msgid "End Time Date:"
 msgstr "Date de fin :"
+
+msgid "Resulting graphic(s)"
+msgstr "Graphiques obtenus"
+

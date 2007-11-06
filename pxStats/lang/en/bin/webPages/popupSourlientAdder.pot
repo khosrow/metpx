@@ -1,0 +1,28 @@
+#: popupSourlientAdder.py:190
+msgid "Available"
+msgstr "Available"
+
+#: popupSourlientAdder.py:192
+msgid "Selected"
+msgstr "Selected"
+
+#: popupSourlientAdder.py:209
+msgid "Groups:"
+msgstr "Groups:"
+
+#: popupSourlientAdder.py:224
+msgid "TX clients :"
+msgstr "TX clients :"
+
+#: popupSourlientAdder.py:229
+msgid "RX sources :"
+msgstr "RX sources :"
+
+#: popupSourlientAdder.py:233
+msgid "Sourlients :"
+msgstr "Sourlients :"
+
+#: popupSourlientAdder.py:255
+msgid "Done"
+msgstr "Done"
+
