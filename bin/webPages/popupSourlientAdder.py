@@ -23,7 +23,7 @@ named COPYING in the root of the source directory tree.
 ##############################################################################
 """
 
-import cgi, os, time, sys
+import cgi, gettext, os, time, sys
 import cgitb; cgitb.enable()
 
 sys.path.insert(1, sys.path[0] + '/../../')
@@ -36,7 +36,7 @@ LOCAL_MACHINE = os.uname()[1]
 
 
 
-def generateWebPage( sourlientNames, groups, fileType, outputFileName ):
+def generateWebPage( sourlientNames, groups, fileType, outputFileName, language = 'en' ):
     """
     
         
@@ -55,6 +55,17 @@ def generateWebPage( sourlientNames, groups, fileType, outputFileName ):
         @return : None
     
     """
+     
+    
+    if language == 'fr':
+        fileName = StatsPaths.STATSLANGFRBINWEBPAGES + "popupSourlientAdder" 
+    elif language == 'en':
+        fileName = StatsPaths.STATSLANGENBINWEBPAGES + "popupSourlientAdder"      
+    
+    
+    translator = gettext.GNUTranslations(open(fileName))
+    _ = translator.gettext
+        
     
     if not  os.path.isdir( os.path.dirname(outputFileName) ):
         os.makedirs( os.path.dirname(outputFileName) )
@@ -175,9 +186,9 @@ def generateWebPage( sourlientNames, groups, fileType, outputFileName ):
                     <tr>
                         <font color ="white">
     
-                            <td bgcolor="#006699" width="300" >Available</td>
+                            <td bgcolor="#006699" width="300" >""" + _("Available") + """</td>
                             <td bgcolor="#006699" >&nbsp;</td>
-                            <td bgcolor="#006699" width="300" >Selected</td>
+                            <td bgcolor="#006699" width="300" >""" + _("Selected") + """</td>
                         </font>    
                     </tr>
                     
@@ -194,7 +205,7 @@ def generateWebPage( sourlientNames, groups, fileType, outputFileName ):
     if len(groups) > 0 :
         
         print """
-                                        <optgroup label="Groups:">Groups:</optgroup>
+                                        <optgroup label=""" + '"' + _("Groups:") + """">""" + _("Groups:") + """</optgroup>
         """
         
         for i in range(len(groups)):
@@ -209,16 +220,16 @@ def generateWebPage( sourlientNames, groups, fileType, outputFileName ):
         
         if fileType == "tx":
             print """
-                                        <optgroup label="TX clients : ">TX clients : </optgroup>
+                                        <optgroup label=""" + '"'+ _("TX clients :") + """">""" + _("TX clients :") + """ </optgroup>
             """  
             
         elif fileType == "rx":
             print """
-                                        <optgroup label="RX sources : ">RX sources : </optgroup>
+                                        <optgroup label=""" + '"'+ _("RX sources :") + """">""" + _("RX sources :") + """ </optgroup>
             """
         else:
             print """
-                                        <optgroup label="Sourlients : ">Sourlients : </optgroup>
+                                        <optgroup label=""" + '"'+ _("Sourlients :") + """">""" + _("Sourlients :") +""" </optgroup>
             """       
         
         for i in range(len(sourlientNames)):
@@ -240,7 +251,7 @@ def generateWebPage( sourlientNames, groups, fileType, outputFileName ):
                             <br><br>
                             <input type="button" value=" << " style="font: 14px;" onclick="javascript:deleteFromList( document.forms['adderForm'].elements['destList'] );">
                             <br><br> 
-                            <input type="button" value="Done" style="font: 14px;" onClick ="javascript:window.opener.copyLists(document.forms['adderForm'].elements['destList'], window.opener.document.forms['inputForm'].elements['sourlientList']);javascript:closeWindow();">  
+                            <input type="button" value=""" + '"' + _("Done") + '"' + """ style="font: 14px;" onClick ="javascript:window.opener.copyLists(document.forms['adderForm'].elements['destList'], window.opener.document.forms['inputForm'].elements['sourlientList']);javascript:closeWindow();">  
                         </td>
                         
                         <td bgcolor="#7ACC7A" width="300">               
@@ -310,6 +321,8 @@ def main():
         
     """
     
+    language = 'en'
+    
     newForm = {}
     
     form = cgi.FieldStorage()
@@ -349,11 +362,13 @@ def main():
         groups = getGroups( fileType, machine )
     
     if fileType == "tx":
-        generateWebPage(txNames, groups, fileType, "../../html/popUps/%s%sPopUpSourlientAdder.html" %( fileType, machines ) )
+        generateWebPage(txNames, groups, fileType, "../../html/popUps/%s%sPopUpSourlientAdder_%s.html" %( fileType, machines, language ) )
     elif fileType == "rx":
-        generateWebPage(rxNames, groups, fileType, "../../html/popUps/%s%sPopUpSourlientAdder.html" %( fileType, machines ) )
+        generateWebPage(rxNames, groups, fileType, "../../html/popUps/%s%sPopUpSourlientAdder_%s.html" %( fileType, machines, language ) )
     
     returnReply('') 
+        
+        
         
 if __name__ == '__main__':
     main()
