@@ -27,7 +27,9 @@ named COPYING in the root of the source directory tree.
 ##
 ##############################################################################
 """
-import cgi, os, sys
+
+
+import cgi, gettext, os, sys
 import cgitb; cgitb.enable()
 sys.path.insert(1, sys.path[0] + '/../../')
 
@@ -64,6 +66,42 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
         self.queryParameters = queryParameters
         self.graphicProducer = graphicProducer
         self.replyParameters = replyParameters
+    
+        GnuQueryBroker.setGlobalLanguageParameters()
+    
+    
+    
+    def  setGlobalLanguageParameters( language = 'en'):
+        """
+            @summary : Sets up all the needed global language 
+                       variables so that they can be used 
+                       everywhere in this program.
+            
+            
+            @param language: Language that is to be 
+                             outputted by this program. 
+         
+            @return: None
+            
+        """
+        
+        global LANGUAGE 
+        global translator
+        global _ 
+    
+        
+        LANGUAGE = language 
+        
+        if language == 'fr':
+            fileName = StatsPaths.STATSLANGFRLIB + "RRDQueryBroker" 
+        elif language == 'en':
+            fileName = StatsPaths.STATSLANGENLIB + "RRDQueryBroker"        
+    
+            translator = gettext.GNUTranslations(open(fileName))
+        _ = translator.gettext
+        
+        
+    setGlobalLanguageParameters = staticmethod(setGlobalLanguageParameters)
     
     
     
@@ -142,6 +180,24 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
         """  
         x =2 
         
+    
+    #----------------------------------- def translateStatsTypes( statsTypes ) :
+        #------------------------------------------------------------------- """
+            #------------------------------- @summary : Takes a list of statypes
+#------------------------------------------------------------------------------ 
+            #--------------------- @return : The list of translated stats types.
+#------------------------------------------------------------------------------ 
+        #------------------------------------------------------------------- """
+#------------------------------------------------------------------------------ 
+        #---------------------------------------------- translatedStatTypes = []
+#------------------------------------------------------------------------------ 
+        # statsTypesTranslations = { _("latency"):"latency", _("bytecount"):"bytecount", _("filecount"):"filecount", _("errors"):"errors" }
+#------------------------------------------------------------------------------ 
+        #--------------------------------- for i in range( len( statsTypes ) ) :
+            # translatedStatTypes.append( statsTypesTranslations[ statsTypes[i] ] )
+#------------------------------------------------------------------------------ 
+        #-------------------------------------------- return translatedStatTypes
+        
         
         
     def getParametersFromForm( self, form ):
@@ -195,6 +251,7 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
         except:
             machines = []
         
+
         if groupName != '' and ( sourLients == [] or sourlients == [''] ) :
             configParameters = StatsConfigParameters( )
             configParameters.getAllParameters()
@@ -244,6 +301,9 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
             statsTypes = form["statsTypes"].split(',')
         except:
             statsTypes = []
+       
+        #statsTypes = translateStatsTypes( statsTypes )      
+            
         try:
             span        = form["span"].replace("'", "").replace('"','')
             if str(span).replace( ' ', '' ) == '':

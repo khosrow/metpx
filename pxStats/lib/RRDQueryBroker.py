@@ -28,7 +28,7 @@ named COPYING in the root of the source directory tree.
 ##############################################################################
 """
 
-import cgi, commands, os, sys
+import cgi, commands, gettext, os, sys
 import cgitb; cgitb.enable()
 sys.path.insert(1, sys.path[0] + '/../../')
 
@@ -47,6 +47,9 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
         wich implement the GraphicsQueryBroker.
           
     """
+    
+    
+    
     
     def __init__(self,  query=None, reply = None, queryParameters = None, replyParameters = None, graphicProducer = None ):
         """
@@ -68,6 +71,42 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
         self.query = query
         self.replyParameters = replyParameters
         self.reply = reply 
+        RRDQueryBroker.setGlobalLanguageParameters()
+    
+    
+    
+    def  setGlobalLanguageParameters( language = 'fr'):
+        """
+            @summary : Sets up all the needed global language 
+                       variables so that they can be used 
+                       everywhere in this program.
+            
+            
+            @param language: Language that is to be 
+                             outputted by this program. 
+         
+            @return: None
+            
+        """
+        
+        global LANGUAGE 
+        global translator
+        global _ 
+    
+        
+        LANGUAGE = language 
+        
+        if language == 'fr':
+            fileName = StatsPaths.STATSLANGFRLIB + "RRDQueryBroker" 
+        elif language == 'en':
+            fileName = StatsPaths.STATSLANGENLIB + "RRDQueryBroker"     
+        
+        translator = gettext.GNUTranslations(open(fileName))
+        
+        _ = translator.gettext    
+    
+    
+    setGlobalLanguageParameters = staticmethod(setGlobalLanguageParameters)
     
     
     
@@ -231,6 +270,8 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
             statsTypes   = form["statsTypes"].split(',')
         except:
             statsTypes = []
+            
+        #statsTypes = translateStatsTypes( statsTypes ) 
         
         try:
             span = form["span"]
@@ -250,7 +291,26 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
         self.queryParameters = RRDQueryBroker._QueryParameters(fileTypes, sourLients, groupName, machines, havingRun, individual, total, endTime, products, statsTypes, span, specificSpan, fixedSpan)
         self.replyParameters = RRDQueryBroker._ReplyParameters(querier, plotter, image, fileTypes, sourLients, groupName, machines, havingRun, individual, total, endTime, products, statsTypes, span, specificSpan, fixedSpan, error = '' )
         
-        
+    
+    #----------------------------------- def translateStatsTypes( statsTypes ) :
+        #------------------------------------------------------------------- """
+            #------------------------------- @summary : Takes a list of statypes
+#------------------------------------------------------------------------------ 
+            #--------------------- @return : The list of translated stats types.
+#------------------------------------------------------------------------------ 
+        #------------------------------------------------------------------- """
+#------------------------------------------------------------------------------ 
+        #---------------------------------------------- translatedStatTypes = []
+#------------------------------------------------------------------------------ 
+        # statsTypesTranslations = { _("latency"):"latency", _("bytecount"):"bytecount", _("filecount"):"filecount", _("errors"):"errors" }
+#------------------------------------------------------------------------------ 
+        #--------------------------------- for i in range( len( statsTypes ) ) :
+            # translatedStatTypes.append( statsTypesTranslations[ statsTypes[i] ] )
+#------------------------------------------------------------------------------ 
+        #-------------------------------------------- return translatedStatTypes
+    
+    
+    
     def getParameters(self, parser, form):
         """
             @summary : Get parameters from either a form or a parser. 
@@ -364,13 +424,15 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
         machines = '--machines %s' %( combinedMachineName )
         
         #optional option
-        if self.queryParameters.specificSpan == "daily":
+        
+        print "self.queryParameters.specificSpan ", self.queryParameters.specificSpan, _("daily"), _("weekly"), _("monthly"), _("yearly")
+        if self.queryParameters.specificSpan == _("daily"):
             specificSpan = "-d"
-        elif self.queryParameters.specificSpan == "weekly":
+        elif self.queryParameters.specificSpan == _("weekly"):
             specificSpan = "-w"        
-        elif self.queryParameters.specificSpan == "monthly":
+        elif self.queryParameters.specificSpan == _("monthly"):
             specificSpan = "-m"
-        elif self.queryParameters.specificSpan == "yearly":
+        elif self.queryParameters.specificSpan == _("yearly"):
             specificSpan = "-y"
         else:
             specificSpan = ""    
@@ -381,9 +443,9 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
             span = ""
         
         
-        if "current"  in str(self.queryParameters.fixedSpan).lower() :
+        if _("current")  in str(self.queryParameters.fixedSpan).lower() :
             fixedSpan = "--fixedCurrent"
-        elif "previous" in str(self.queryParameters.fixedSpan).lower():
+        elif _("previous") in str(self.queryParameters.fixedSpan).lower():
             fixedSpan = "--fixedPrevious"     
         else:
             fixedSpan = ""
@@ -449,7 +511,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
             @SIDE-EFECT : Will set the name of the generated images in self.replyparameters.image
             
         """
-        #print self.query
+        print self.query
         status, output = commands.getstatusoutput( self.query )  
        
         self.replyParameters.image = self.getImagesFromQueryOutput(output)
