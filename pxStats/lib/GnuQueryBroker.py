@@ -29,7 +29,7 @@ named COPYING in the root of the source directory tree.
 """
 
 
-import cgi, gettext, os, sys
+import cgi, os, sys
 import cgitb; cgitb.enable()
 sys.path.insert(1, sys.path[0] + '/../../')
 
@@ -66,45 +66,9 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
         self.queryParameters = queryParameters
         self.graphicProducer = graphicProducer
         self.replyParameters = replyParameters
+  
     
-        GnuQueryBroker.setGlobalLanguageParameters()
-    
-    
-    
-    def  setGlobalLanguageParameters( language = 'en'):
-        """
-            @summary : Sets up all the needed global language 
-                       variables so that they can be used 
-                       everywhere in this program.
-            
-            
-            @param language: Language that is to be 
-                             outputted by this program. 
-         
-            @return: None
-            
-        """
-        
-        global LANGUAGE 
-        global translator
-        global _ 
-    
-        
-        LANGUAGE = language 
-        
-        if language == 'fr':
-            fileName = StatsPaths.STATSLANGFRLIB + "RRDQueryBroker" 
-        elif language == 'en':
-            fileName = StatsPaths.STATSLANGENLIB + "RRDQueryBroker"        
-    
-            translator = gettext.GNUTranslations(open(fileName))
-        _ = translator.gettext
-        
-        
-    setGlobalLanguageParameters = staticmethod(setGlobalLanguageParameters)
-    
-    
-    
+      
     class _QueryParameters(object):
        
         def __init__( self, fileType, sourLients, groupName, machines, combine, endTime,  products, statsTypes,  span ):
