@@ -1,0 +1,382 @@
+
+#: generateRRDGraphics.py:90
+msgid "other"
+msgstr "other"
+
+#: generateRRDGraphics.py:119
+msgid "Error. Only one of the daily, weekly and yearly options can be use at a time "
+msgstr "Error. Only one of the daily, weekly and yearly options can be use at a time "
+
+#: generateRRDGraphics.py:120 generateRRDGraphics.py:126
+#: generateRRDGraphics.py:133 generateRRDGraphics.py:140
+#: generateRRDGraphics.py:149 generateRRDGraphics.py:155
+#: generateRRDGraphics.py:167 generateRRDGraphics.py:229
+msgid "Use -h for help."
+msgstr "Use -h for help."
+
+#: generateRRDGraphics.py:121 generateRRDGraphics.py:127
+#: generateRRDGraphics.py:134 generateRRDGraphics.py:141
+#: generateRRDGraphics.py:150 generateRRDGraphics.py:156
+#: generateRRDGraphics.py:168 generateRRDGraphics.py:230
+#: generateRRDGraphics.py:237 generateRRDGraphics.py:245
+#: generateRRDGraphics.py:297 generateRRDGraphics.py:313
+#: generateRRDGraphics.py:321 generateRRDGraphics.py:328
+msgid "Program terminated."
+msgstr "Program terminated."
+
+#: generateRRDGraphics.py:125
+msgid "Error. When using the daily, the weekly or the yearly options timespan cannot be specified. "
+msgstr "Error. When using the daily, the weekly or the yearly options timespan cannot be specified. "
+
+#: generateRRDGraphics.py:132
+msgid "Error. When using one of the fixed options, please use either the -d -m -w or -y options. "
+msgstr "Error. When using one of the fixed options, please use either the -d -m -w or -y options. "
+
+#: generateRRDGraphics.py:139
+msgid "Error. Copying can only be used with the -m -w or -y options. "
+msgstr "Error. Copying can only be used with the -m -w or -y options. "
+
+#: generateRRDGraphics.py:148
+msgid "Error. Please use only one of the fixed options,either fixedPrevious or fixedCurrent. "
+msgstr "Error. Please use only one of the fixed options,either fixedPrevious or fixedCurrent. "
+
+#: generateRRDGraphics.py:154
+msgid "Error. Please use only one of the group options,either individual or totals. "
+msgstr "Error. Please use only one of the group options,either individual or totals. "
+
+#: generateRRDGraphics.py:166
+msgid "Error. The date format must be YYYY-MM-DD HH:MM:SS"
+msgstr "Error. The date format must be YYYY-MM-DD HH:MM:SS"
+
+#: generateRRDGraphics.py:175 generateRRDGraphics.py:190
+#: generateRRDGraphics.py:207 generateRRDGraphics.py:1041
+#: generateRRDGraphics.py:1078 generateRRDGraphics.py:1140
+msgid "daily"
+msgstr "daily"
+
+#: generateRRDGraphics.py:178 generateRRDGraphics.py:193
+#: generateRRDGraphics.py:210 generateRRDGraphics.py:1076
+#: generateRRDGraphics.py:1131
+msgid "weekly"
+msgstr "weekly"
+
+#: generateRRDGraphics.py:181 generateRRDGraphics.py:196
+#: generateRRDGraphics.py:213 generateRRDGraphics.py:1074
+#: generateRRDGraphics.py:1134 generateRRDGraphics.py:1314
+msgid "monthly"
+msgstr "monthly"
+
+#: generateRRDGraphics.py:184 generateRRDGraphics.py:199
+#: generateRRDGraphics.py:216 generateRRDGraphics.py:1072
+#: generateRRDGraphics.py:1137
+msgid "yearly"
+msgstr "yearly"
+
+#: generateRRDGraphics.py:228
+msgid "Error. The timespan value needs to be an integer one above 0."
+msgstr "Error. The timespan value needs to be an integer one above 0."
+
+#: generateRRDGraphics.py:234
+msgid "Error. File type must be either tx or rx."
+msgstr "Error. File type must be either tx or rx."
+
+#: generateRRDGraphics.py:235
+msgid "Multiple types are not accepted."
+msgstr "Multiple types are not accepted."
+
+#: generateRRDGraphics.py:236 generateRRDGraphics.py:244
+#: generateRRDGraphics.py:296 generateRRDGraphics.py:312
+#: generateRRDGraphics.py:320 generateRRDGraphics.py:327
+msgid "Use -h for additional help."
+msgstr "Use -h for additional help."
+
+#: generateRRDGraphics.py:242
+msgid "Error. Cannot use the havingRun option while specifying client/source names."
+msgstr "Error. Cannot use the havingRun option while specifying client/source names."
+
+#: generateRRDGraphics.py:243
+msgid "To use havingRun, do not use -c|--client option."
+msgstr "To use havingRun, do not use -c|--client option."
+
+#: generateRRDGraphics.py:248 generateRRDGraphics.py:418
+msgid "ALL"
+msgstr "ALL"
+
+#: generateRRDGraphics.py:253 generateRRDGraphics.py:1145
+msgid "totalForMachine"
+msgstr "totalForMachine"
+
+#: generateRRDGraphics.py:256
+msgid "group"
+msgstr "group"
+
+#: generateRRDGraphics.py:258 generateRRDGraphics.py:269
+msgid "tx"
+msgstr "tx"
+
+#: generateRRDGraphics.py:266
+msgid "regular"
+msgstr "regular"
+
+#: generateRRDGraphics.py:271 generateRRDGraphics.py:282
+#: generateRRDGraphics.py:923 generateRRDGraphics.py:1226
+#: generateRRDGraphics.py:1297
+msgid "bytecount"
+msgstr "bytecount"
+
+#: generateRRDGraphics.py:271 generateRRDGraphics.py:282
+#: generateRRDGraphics.py:955 generateRRDGraphics.py:1229
+#: generateRRDGraphics.py:1297 generateRRDGraphics.py:1887
+msgid "filecount"
+msgstr "filecount"
+
+#: generateRRDGraphics.py:271 generateRRDGraphics.py:282
+#: generateRRDGraphics.py:959 generateRRDGraphics.py:1232
+msgid "errors"
+msgstr "errors"
+
+#: generateRRDGraphics.py:271 generateRRDGraphics.py:509
+#: generateRRDGraphics.py:961 generateRRDGraphics.py:966
+#: generateRRDGraphics.py:976 generateRRDGraphics.py:1220
+#: generateRRDGraphics.py:1287 generateRRDGraphics.py:1931
+msgid "latency"
+msgstr "latency"
+
+#: generateRRDGraphics.py:271 generateRRDGraphics.py:957
+#: generateRRDGraphics.py:990 generateRRDGraphics.py:1223
+#: generateRRDGraphics.py:1292
+msgid "filesOverMaxLatency"
+msgstr "filesOverMaxLatency"
+
+#: generateRRDGraphics.py:273
+msgid "All"
+msgstr "All"
+
+#: generateRRDGraphics.py:294
+msgid "Error. With %s fileType, possible data types values are : %s."
+msgstr "Error. With %s fileType, possible data types values are : %s."
+
+#: generateRRDGraphics.py:295
+msgid "For multiple types use this syntax : -t 'type1','type2'"
+msgstr "For multiple types use this syntax : -t 'type1','type2'"
+
+#: generateRRDGraphics.py:310 generateRRDGraphics.py:318
+msgid "Error. No client/sources were found that matched the specified parameters"
+msgstr "Error. No client/sources were found that matched the specified parameters"
+
+#: generateRRDGraphics.py:311 generateRRDGraphics.py:319
+msgid "Verify parameters used, especially the machines parameter."
+msgstr "Verify parameters used, especially the machines parameter."
+
+#: generateRRDGraphics.py:325
+msgid "Error. Cannot use totals option with only one client/source name."
+msgstr "Error. Cannot use totals option with only one client/source name."
+
+#: generateRRDGraphics.py:326
+msgid "Either remove --total option or use more than one client/source.."
+msgstr "Either remove --total option or use more than one client/source.."
+
+#: generateRRDGraphics.py:345
+msgid ""
+msgstr ""
+
+#: generateRRDGraphics.py:419
+msgid "Clients' names"
+msgstr "Clients' names"
+
+#: generateRRDGraphics.py:421
+msgid "Create daily graph(s)."
+msgstr "Create daily graph(s)."
+
+#: generateRRDGraphics.py:423
+msgid "Decide end time of graphics. Usefull for testing."
+msgstr "Decide end time of graphics. Usefull for testing."
+
+#: generateRRDGraphics.py:425
+msgid "Type of log files wanted."
+msgstr "Type of log files wanted."
+
+#: generateRRDGraphics.py:427
+msgid "Do not use floating weeks|days|months|years. Use previous fixed interval found."
+msgstr "Do not use floating weeks|days|months|years. Use previous fixed interval found."
+
+#: generateRRDGraphics.py:429
+msgid "Do not use floating weeks|days|months|years. Use current fixed interval found."
+msgstr "Do not use floating weeks|days|months|years. Use current fixed interval found."
+
+#: generateRRDGraphics.py:431
+msgid "Do not use only the currently running client/sources. Use all that have run between graphic(s) start and end instead."
+msgstr "Do not use only the currently running client/sources. Use all that have run between graphic(s) start and end instead."
+
+#: generateRRDGraphics.py:433
+msgid "Dont combine data from specified machines. Create graphs for every machine independently"
+msgstr "Dont combine data from specified machines. Create graphs for every machine independently"
+
+#: generateRRDGraphics.py:435
+msgid "Create a copy file for the generated image."
+msgstr "Create a copy file for the generated image."
+
+#: generateRRDGraphics.py:437
+msgid "Create monthly graph(s)."
+msgstr "Create monthly graph(s)."
+
+#: generateRRDGraphics.py:439
+msgid "Machines for wich you want to collect data."
+msgstr "Machines for wich you want to collect data."
+
+#: generateRRDGraphics.py:441
+msgid "timespan( in hours) of the graphic."
+msgstr "timespan( in hours) of the graphic."
+
+#: generateRRDGraphics.py:443
+msgid "Types of data to look for."
+msgstr "Types of data to look for."
+
+#: generateRRDGraphics.py:445
+msgid "Create graphics based on the totals of all the values found for all specified clients or for a specific file type( tx, rx )."
+msgstr "Create graphics based on the totals of all the values found for all specified clients or for a specific file type( tx, rx )."
+
+#: generateRRDGraphics.py:447
+msgid "Turn off the logger"
+msgstr "Turn off the logger"
+
+#: generateRRDGraphics.py:449
+msgid "Create weekly graph(s)."
+msgstr "Create weekly graph(s)."
+
+#: generateRRDGraphics.py:451
+msgid "Create yearly graph(s)."
+msgstr "Create yearly graph(s)."
+
+#: generateRRDGraphics.py:478 generateRRDGraphics.py:861
+msgid "hours"
+msgstr "hours"
+
+#: generateRRDGraphics.py:482
+msgid "year(s)"
+msgstr "year(s)"
+
+#: generateRRDGraphics.py:486
+msgid "month(s)"
+msgstr "month(s)"
+
+#: generateRRDGraphics.py:490
+msgid "day(s)"
+msgstr "day(s)"
+
+#: generateRRDGraphics.py:495
+msgid "for"
+msgstr "for"
+
+#: generateRRDGraphics.py:495
+msgid "for a span of "
+msgstr "for a span of "
+
+#: generateRRDGraphics.py:512
+msgid "minute(s) averages."
+msgstr "minute(s) averages."
+
+#: generateRRDGraphics.py:512 generateRRDGraphics.py:515
+msgid "Graphics generated using "
+msgstr "Graphics generated using "
+
+#: generateRRDGraphics.py:515
+msgid "hour(s) averages."
+msgstr "hour(s) averages."
+
+#: generateRRDGraphics.py:556 generateRRDGraphics.py:601
+#: generateRRDGraphics.py:650
+msgid "Error in generateRRDGraphics.getOverallMin. Unable to read "
+msgstr "Error in generateRRDGraphics.getOverallMin. Unable to read "
+
+#: generateRRDGraphics.py:865
+msgid "years"
+msgstr "years"
+
+#: generateRRDGraphics.py:869
+msgid "months"
+msgstr "months"
+
+#: generateRRDGraphics.py:873
+msgid "days"
+msgstr "days"
+
+#: generateRRDGraphics.py:956 generateRRDGraphics.py:991
+msgid "Files"
+msgstr "Files"
+
+#: generateRRDGraphics.py:958
+msgid "F"
+msgstr "F"
+
+#: generateRRDGraphics.py:960
+msgid "Errors"
+msgstr "Errors"
+
+#: generateRRDGraphics.py:962
+msgid "Avg"
+msgstr "Avg"
+
+#: generateRRDGraphics.py:1016 generateRRDGraphics.py:1031
+msgid "k on the y axis stands for kilo, meaning x thousands."
+msgstr "k on the y axis stands for kilo, meaning x thousands."
+
+#: generateRRDGraphics.py:1018 generateRRDGraphics.py:1029
+msgid "M on the y axis stands for Mega, meaning x millions."
+msgstr "M on the y axis stands for Mega, meaning x millions."
+
+#: generateRRDGraphics.py:1020 generateRRDGraphics.py:1027
+msgid "G on the y axis stats for giga, meaning x billions."
+msgstr "G on the y axis stats for giga, meaning x billions."
+
+#: generateRRDGraphics.py:1033
+msgid "m on the y axis stands for milli, meaning x thousandths."
+msgstr "m on the y axis stands for milli, meaning x thousandths."
+
+#: generateRRDGraphics.py:1221
+msgid "Averaged latency per minute"
+msgstr "Averaged latency per minute"
+
+#: generateRRDGraphics.py:1222
+msgid "Latency(seconds)"
+msgstr "Latency(seconds)"
+
+#: generateRRDGraphics.py:1224
+msgid "Latencies over 15 seconds"
+msgstr "Latencies over 15 seconds"
+
+#: generateRRDGraphics.py:1225 generateRRDGraphics.py:1230
+#: generateRRDGraphics.py:1231
+msgid "Files/Minute"
+msgstr "Files/Minute"
+
+#: generateRRDGraphics.py:1227 generateRRDGraphics.py:1228
+msgid "Bytes/Minute"
+msgstr "Bytes/Minute"
+
+#: generateRRDGraphics.py:1233 generateRRDGraphics.py:1234
+msgid "Errors/Minute"
+msgstr "Errors/Minute"
+
+#: generateRRDGraphics.py:1284
+msgid "Note(s):"
+msgstr "Note(s):"
+
+#: generateRRDGraphics.py:1295 generateRRDGraphics.py:1300
+#: generateRRDGraphics.py:1305
+msgid "Total: "
+msgstr "Total: "
+
+#: generateRRDGraphics.py:1319 generateRRDGraphics.py:1326
+#: generateRRDGraphics.py:1343
+msgid "Error : Could not generate "
+msgstr "Error : Could not generate "
+
+#: generateRRDGraphics.py:1320 generateRRDGraphics.py:1327
+msgid "Error was : "
+msgstr "Error was : "
+
+#: generateRRDGraphics.py:1338 generateRRDGraphics.py:1340
+msgid "Plotted : "
+msgstr "Plotted : "
+
