@@ -1,0 +1,207 @@
+#: generateGraphics.py:49 generateGraphics.py:138 generateGraphics.py:147
+#: generateGraphics.py:262 generateGraphics.py:266
+msgid "All"
+msgstr "Tous"
+
+#: generateGraphics.py:99
+msgid "Error. The date format must be YYYY-MM-DD HH:MM:SS"
+msgstr "Erreur.Le format de date doit être AAAA-MM-JJ HH:MM:SS"
+
+#: generateGraphics.py:100 generateGraphics.py:112
+msgid "Use -h for help."
+msgstr "Utilisez -h pour de l'aide."
+
+#: generateGraphics.py:101 generateGraphics.py:113 generateGraphics.py:121
+#: generateGraphics.py:129 generateGraphics.py:160
+msgid "Program terminated."
+msgstr "Programme terminé."
+
+#: generateGraphics.py:111
+msgid "Error. The timespan value needs to be an integer one above 0."
+msgstr "Erreur. La valeur de la durée doit être un entier supérieur à 0."
+
+#: generateGraphics.py:118
+msgid "Error. File type must be either tx or rx."
+msgstr "Erreur. Le type de fichier doit être rx ou tx."
+
+#: generateGraphics.py:119
+msgid "Multiple types are not accepted."
+msgstr "Les types multiples ne sont pas acceptés."
+
+#: generateGraphics.py:120 generateGraphics.py:128 generateGraphics.py:159
+msgid "Use -h for additional help."
+msgstr "Utilisez -h pour de l'aide supplémentaire."
+
+#: generateGraphics.py:126
+msgid "Error. -g|--groupeName option requires the --combineClients options."
+msgstr "Erreur. L'option -groupName est requise avec l'option --combineClient."
+
+#: generateGraphics.py:127
+msgid "Group names are otherwise irrelevant."
+msgstr "Les noms de groupes sont autrement inintéressants."
+
+#: generateGraphics.py:136
+msgid "latency"
+msgstr "latence"
+
+#: generateGraphics.py:136 generateGraphics.py:145
+msgid "bytecount"
+msgstr "nbreDebytes"
+
+#: generateGraphics.py:136 generateGraphics.py:145
+msgid "errors"
+msgstr "erreurs"
+
+#: generateGraphics.py:136 generateGraphics.py:145
+msgid "filecount"
+msgstr "nbreDeFichiers"
+
+#: generateGraphics.py:157
+msgid "Error. With %s fileType, possible data types values are : %s."
+msgstr "Erreur. Avec le type de fichier %s, les type de données possibles sont : %s"
+
+#: generateGraphics.py:158
+msgid "For multiple types use this syntax : -t \"type1,type2\""
+msgstr "Pour des types multiples, veuillez utiliser la syntaxe suivante : -t \"type1,type2\""
+
+#: generateGraphics.py:185
+msgid ""
+"\n"
+"\n"
+"%prog [options]\n"
+"********************************************\n"
+"* See doc.txt for more details.            *\n"
+"********************************************\n"
+"Notes :\n"
+"- Now option not yet implemented.    \n"
+"\n"
+"Defaults :\n"
+"\n"
+"- Default Client name does not exist.\n"
+"- Default Date is current system time.  \n"
+"- Default Types value is latency.\n"
+"- Default span is 12 hours.\n"
+"- Accepted values for types are : errors,latency,bytecount\n"
+"  -To use mutiple types, use -t|--types \"type1,type2\"\n"
+"\n"
+"\n"
+"Options:\n"
+" \n"
+"    - With -c|--clients you can specify the clients names on wich you want to collect data. \n"
+"    - With --combineClients you can specify that you want to combine the data from all \n"
+"      the specified client into a single graph.\n"
+"    - With -d|--date you can specify the time of the request.( Usefull for past days and testing. )\n"
+"    - With -f|--fileType you can specify the file type of the log fiels that will be used.  \n"
+"    - With -g|--groupName you can specify a name to give to a group of clients you want to combine.     \n"
+"    - With -copy you can specify that you want a copy of the file to be move in the daily\n"
+"      section of the client's webGraphics.\n"
+"    - With -n|--collectUpToNow you can specify that data must be collected right up to the minute of the call. \n"
+"    - With -p|--products you can specify the products for wich the data is to come from.\n"
+"    - With -s|--span you can specify the time span to be used to create the graphic \n"
+"    - With -t|--types you can specify what data types need to be collected\n"
+"    \n"
+"      \n"
+"WARNING: - Client name MUST be specified,no default client exists. \n"
+"          \n"
+"            \n"
+"Ex1: %prog                                   --> All default values will be used. Not recommended.  \n"
+"Ex2: %prog -c satnet                         --> All default values, for client satnet. \n"
+"Ex3: %prog -c satnet -d '2006-06-30 05:15:00'--> Client satnet, Date of call 2006-06-30 05:15:00.\n"
+"Ex4: %prog -c satnet -t \"errors,latency\"     --> Uses current time, client satnet and collect those 2 types.\n"
+"********************************************\n"
+"* See /doc.txt for more details.           *\n"
+"********************************************"
+msgstr ""
+"\n"
+"\n"
+"%prog [options]\n"
+"********************************************\n"
+"* Visitez doc.txt pour plus de détails.    *\n"
+"********************************************\n"
+"Notes :\n"
+"- l'option now n'est pas encore supporté.    \n"
+"\n"
+"Valeurs par défauts :\n"
+"\n"
+"- Le client n'a pas de vlaeur par défaut.\n"
+"- La date par défaut est la date courante du système.  \n"
+"- Les types par défauts sont : \"nbreDeBytes\", \"erreurs\", \"nbreDeFichiers\" pour les rx et \n"
+"  \"latence\", \"nbreDeBytes\", \"erreurs\", \"fichiersAvecLatenceInnacceptable\", \"filecount\"\n"
+"  pour les tx.\n\n"
+"- La valer du laps de tmeps par défaut est de 12 heurs.\n"
+"- Les valeurs acceptées pour les types sont les mêmes que les valeurs par défauts.\n"
+"-Pour utiliser plusieurs types, vous devez précéder ainsi : t|--types \"type1,type2\"\n"
+"\n"
+"\n"
+"Options:\n"
+" \n"
+"    - Avec -c|--clients vous pouvez spéficier pour quel client(ou source) vous voulez collectionner les données. \n"
+"    - Avec --combineClients vous pouvez speficier que vous voulez un seul graphique par type de données\n"
+"      en utilisant les données combinées de plusieurs clients/sources au lieu de créés un  \n"
+"      tel graphique pour chacuns des clients/sources.\n"
+"    - Avec -d|--date vous pouvez spéficier la date de la requête.( Utile pour tester et pour des dates spécifiques. )\n"
+"    - Avec -f|--fileType vous pouvez spéficier le type de fichier(rx ou tx) qui doit être utilisé.  \n"
+"    - Avec -g|--groupName vous pouvez spéficier un nom à donner au groupes de données à combiner.     \n"
+"    - Avec -copy vous pouvez spéficier que vous voulez copier le graphique produit dans la section journalière\n"
+"      des graphiques web du client/source/groupe spécifié.\n"
+"    - Avec -n|--collectUpToNow vous pouvez spéficier de rechercher les données jusqu'à la minute près de l'appel. \n"
+"    - Avec -p|--products vous pouvez spéficier à quel produits spécifiquesnous devons nous intéresser.\n"
+"    - Avec -s|--span vous pouvez spéficier le laps de temps en heures couvert par le graphique demandé.\n"
+"    - Avec -t|--types vous pouvez spéficier le type de données à rechercher.\n"
+"    \n"
+"      \n"
+"ATTENTION: - Le nom de client DOIT être spécifié. Aucune valeur par défaut n'existe pour cette option. \n"
+"          \n"
+"            \n"
+"Ex1: %prog                                   --> Utilise que les valeurs par défaut. N'est pas recommandé.  \n"
+"Ex2: %prog -c xyz                            --> Toutes les valeurs par défaut pour un client xyz. \n"
+"Ex3: %prog -c xyz -d '2006-06-30 05:15:00'   --> Client xyz, date de la requête:  2006-06-30 05:15:00.\n"
+"Ex4: %prog -c xyz -t \"errors,latency\"      --> Utilise le temps courant, le client xyz, mais que 2 types.\n"
+"********************************************\n"
+"* Visitez /doc.txt pour plus de détails    *\n"
+"********************************************"
+
+#: generateGraphics.py:245
+msgid "Clients' names"
+msgstr "Nom des clients"
+
+#: generateGraphics.py:247
+msgid "Create a copy file for the generated image."
+msgstr "Crée une copie du fichier généré."
+
+#: generateGraphics.py:249
+msgid "Combine the data of all client into a single graphics for each graphic type."
+msgstr "Combine les données de tous les clients pour obtenir un seul graphique par type de données."
+
+#: generateGraphics.py:251
+msgid "Decide current time. Usefull for testing."
+msgstr "Permet de spécifier le temps de requête. Utile pour tester et pour des graphiques spécifiques."
+
+#: generateGraphics.py:253
+msgid "Type of log files wanted."
+msgstr "Type de fichier de journalisation voulues."
+
+#: generateGraphics.py:256
+msgid "Specify a name for the combined graphics of numerous client/sources. Note : requires the --combinedClients options to work."
+msgstr "Permet de spécifier un nom pour les graphiques combinés de plusieurs clients/sources. Note : requiert l'utilisation de l'option --combinedClients."
+
+#: generateGraphics.py:258
+msgid "Machines for wich you want to collect data."
+msgstr "Machines sur lesquels résident les clients/sources spécifiées. "
+
+#: generateGraphics.py:260
+msgid "Collect data up to current second."
+msgstr "Rechercher des données à la minute près de la requête."
+
+#: generateGraphics.py:262
+msgid "Specific product types to look for in the data collected."
+msgstr "Premet de spécifier des types de données spécifiques."
+
+#: generateGraphics.py:264
+msgid "timespan( in hours) of the graphic."
+msgstr "Laps de temps(en heures) couvert par le graphique."
+
+#: generateGraphics.py:266
+msgid "Types of data to look for."
+msgstr "Types de données à rechercher."
+
