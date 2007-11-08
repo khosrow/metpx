@@ -1,0 +1,32 @@
+msgid ""
+msgstr ""
+
+
+#: ClientGraphicProducer.py:177
+msgid "Call to mergeHourlyPickles."
+msgstr "Call to mergeHourlyPickles."
+
+#: ClientGraphicProducer.py:178
+msgid "Parameters used : %s %s %s"
+msgstr "Parameters used : %s %s %s"
+
+#: ClientGraphicProducer.py:268
+msgid "All"
+msgstr "All"
+
+#: ClientGraphicProducer.py:268
+msgid "all"
+msgstr "all"
+
+#: ClientGraphicProducer.py:273
+msgid "Call to StatsPlotter :Clients:%s, timespan:%s, currentTime:%s, statsTypes:%s, productTypes:%s :"
+msgstr "Call to StatsPlotter :Clients:%s, timespan:%s, currentTime:%s, statsTypes:%s, productTypes:%s :"
+
+#: ClientGraphicProducer.py:281
+msgid "Returns from StatsPlotter."
+msgstr "Returns from StatsPlotter."
+
+#: ClientGraphicProducer.py:283
+msgid "Created Graphics for following call : Clients : %s, timespan : %s, currentTime : %s, statsTypes : %s, productTypes : %s :"
+msgstr "Created Graphics for following call : Clients : %s, timespan : %s, currentTime : %s, statsTypes : %s, productTypes : %s :"
+
