@@ -1,0 +1,179 @@
+#: StatsPlotter.py:202
+msgid "Call to getXtics received"
+msgstr "Appel à getXtics reçu."
+
+#: StatsPlotter.py:244
+msgid "Call to getPairs received."
+msgstr "Appel à getPairs reçu."
+
+#: StatsPlotter.py:271 StatsPlotter.py:405 StatsPlotter.py:411
+#: StatsPlotter.py:416 StatsPlotter.py:572
+msgid "latency"
+msgstr "latence"
+
+#: StatsPlotter.py:274 StatsPlotter.py:284 StatsPlotter.py:319
+#: StatsPlotter.py:576
+msgid "bytecount"
+msgstr "nbreDeBytes"
+
+#: StatsPlotter.py:278 StatsPlotter.py:284 StatsPlotter.py:568
+msgid "errors"
+msgstr "erreurs"
+
+#: StatsPlotter.py:289 StatsPlotter.py:298 StatsPlotter.py:580
+msgid "filecount"
+msgstr "nbreDefichiers"
+
+#: StatsPlotter.py:332
+msgid "Error in getPairs."
+msgstr "Erreur dans la méthode getPairs."
+
+#: StatsPlotter.py:333
+msgid "The %s stat type was not found in previously collected data."
+msgstr "Le type de donnée %s n'a pas été trouvé dans les types de donnés pris en charge."
+
+#: StatsPlotter.py:417
+msgid "With values rounded for every minutes."
+msgstr "Avec des valeurs arrondies pour chaques minutes."
+
+#: StatsPlotter.py:419
+msgid "With the total value of every minutes."
+msgstr "Avec les valeurs totales de chaques minutes."
+
+#: StatsPlotter.py:428
+msgid "%s for %s for a span of %s hours ending at %s"
+msgstr "%s pour %s ppour une durée de %s heures se terminant le %s"
+
+#: StatsPlotter.py:428
+msgid "MAX: "
+msgstr "MAX: "
+
+#: StatsPlotter.py:428
+msgid "MEAN: "
+msgstr "MOYENNE: "
+
+#: StatsPlotter.py:428
+msgid "MIN: "
+msgstr "MIN:"
+
+#: StatsPlotter.py:534
+msgid "time (hours)"
+msgstr "temps(en heures)"
+
+#: StatsPlotter.py:640
+msgid "latency (seconds)"
+msgstr "latence(en secondes)"
+
+#: StatsPlotter.py:642
+msgid "\"%s : %s\""
+msgstr "\"%s : %s\""
+
+#: StatsPlotter.py:644 StatsPlotter.py:726 StatsPlotter.py:797
+#: StatsPlotter.py:855
+msgid "\"Machines : %s\""
+msgstr "\"Machines : %s\""
+
+#: StatsPlotter.py:646 StatsPlotter.py:728 StatsPlotter.py:857
+msgid "\"Product type(s) : %s\""
+msgstr "\"Types de produits : %s\""
+
+#: StatsPlotter.py:648
+msgid "\"Absolute max. lat. : %s seconds\""
+msgstr "\"Max. abs. latence : %s seconds\""
+
+#: StatsPlotter.py:650
+msgid "\"Time of max. lat. : %s\""
+msgstr "\"Temps de la max. lat. : %s\""
+
+#: StatsPlotter.py:653
+msgid "\"File with max. lat. :%s\""
+msgstr "\"Fichier avec la max. lat. :%s\""
+
+#: StatsPlotter.py:656
+msgid "\"File with max. lat. :\""
+msgstr "\"Fichier avec la max. lat. :%s\""
+
+#: StatsPlotter.py:660 StatsPlotter.py:744
+msgid "\"# of files : %s \""
+msgstr "\"# de fichiers : %s \""
+
+#: StatsPlotter.py:662
+msgid "\"# of files over %s seconds: %s \""
+msgstr "\"# de fichier au dela de %s secondes: %s \""
+
+#: StatsPlotter.py:664
+msgid "\"%% of files over %s seconds: %3.2f %%\""
+msgstr "\"%% de fichiers au dela de %s seconds: %3.2f %%\""
+
+#: StatsPlotter.py:706
+msgid "%s Bytes"
+msgstr "%s Bytes"
+
+#: StatsPlotter.py:709
+msgid "%.2f kiloBytes"
+msgstr "%.2f kiloBytes"
+
+#: StatsPlotter.py:712
+msgid "%.2f MegaBytes"
+msgstr "%.2f MegaBytes"
+
+#: StatsPlotter.py:714
+msgid "%.2f GigaBytes"
+msgstr "%.2f GigaBytes"
+
+#: StatsPlotter.py:722
+msgid "Bytes/Minute"
+msgstr "Bytes/Minute"
+
+#: StatsPlotter.py:732
+msgid "\"Largest file : %s\""
+msgstr "\"Plus gros fichier : %s\""
+
+#: StatsPlotter.py:735
+msgid "\"Largest file : \""
+msgstr "\"Plus gros fichier : \""
+
+#: StatsPlotter.py:740
+msgid "\"Size of largest file : %s Bytes\""
+msgstr "\"Taille du plus gros fichier : %s Bytes\""
+
+#: StatsPlotter.py:742
+msgid "\"Time of largest file : %s\""
+msgstr "\"Temps du plus gros fichier : %s\""
+
+#: StatsPlotter.py:746
+msgid "\"# of Bytes: %s \""
+msgstr "\"# de Bytes: %s \""
+
+#: StatsPlotter.py:793
+msgid "Errors/Minute"
+msgstr "Erreurs/Minute"
+
+#: StatsPlotter.py:799
+msgid "\"Product type(s) + : %s\""
+msgstr "\"Types de produits + : %s\""
+
+#: StatsPlotter.py:801
+msgid "\"Max error/%s : %s\""
+msgstr "\"Maximum d'erreurs/%s : %s\""
+
+#: StatsPlotter.py:803 StatsPlotter.py:861
+msgid "\"Time of max. : %s\""
+msgstr "\"Temps du maximum : %s\""
+
+#: StatsPlotter.py:805
+msgid "\"# of errors : %.f\""
+msgstr "\"# d'erreurs : %.f\""
+
+#: StatsPlotter.py:851
+msgid "Files/Minute"
+msgstr "Fichiers/Minute"
+
+#: StatsPlotter.py:859
+msgid "\"Max files/%s : %s\""
+msgstr "\"Maximum de fichiers/%s : %s\""
+
+#: StatsPlotter.py:863
+msgid "\"# of files : %s\""
+msgstr "\"# de fichiers : %s\""
+
