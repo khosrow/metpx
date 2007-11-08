@@ -1,0 +1,115 @@
+msgid ""
+msgstr ""
+
+
+#: generateGraphics.py:49 generateGraphics.py:138 generateGraphics.py:147
+#: generateGraphics.py:262 generateGraphics.py:266
+msgid "All"
+msgstr "All"
+
+#: generateGraphics.py:99
+msgid "Error. The date format must be YYYY-MM-DD HH:MM:SS"
+msgstr "Error. The date format must be YYYY-MM-DD HH:MM:SS"
+
+#: generateGraphics.py:100 generateGraphics.py:112
+msgid "Use -h for help."
+msgstr "Use -h for help."
+
+#: generateGraphics.py:101 generateGraphics.py:113 generateGraphics.py:121
+#: generateGraphics.py:129 generateGraphics.py:160
+msgid "Program terminated."
+msgstr "Program terminated."
+
+#: generateGraphics.py:111
+msgid "Error. The timespan value needs to be an integer one above 0."
+msgstr "Error. The timespan value needs to be an integer one above 0."
+
+#: generateGraphics.py:118
+msgid "Error. File type must be either tx or rx."
+msgstr "Error. File type must be either tx or rx."
+
+#: generateGraphics.py:119
+msgid "Multiple types are not accepted."
+msgstr "Multiple types are not accepted."
+
+#: generateGraphics.py:120 generateGraphics.py:128 generateGraphics.py:159
+msgid "Use -h for additional help."
+msgstr "Use -h for additional help."
+
+#: generateGraphics.py:126
+msgid "Error. -g|--groupeName option requires the --combineClients options."
+msgstr "Error. -g|--groupeName option requires the --combineClients options."
+
+#: generateGraphics.py:127
+msgid "Group names are otherwise irrelevant."
+msgstr "Group names are otherwise irrelevant."
+
+#: generateGraphics.py:136
+msgid "latency"
+msgstr "latency"
+
+#: generateGraphics.py:136 generateGraphics.py:145
+msgid "bytecount"
+msgstr "bytecount"
+
+#: generateGraphics.py:136 generateGraphics.py:145
+msgid "errors"
+msgstr "errors"
+
+#: generateGraphics.py:136 generateGraphics.py:145
+msgid "filecount"
+msgstr "filecount"
+
+#: generateGraphics.py:157
+msgid "Error. With %s fileType, possible data types values are : %s."
+msgstr "Error. With %s fileType, possible data types values are : %s."
+
+#: generateGraphics.py:158
+msgid "For multiple types use this syntax : -t \"type1,type2\""
+msgstr "For multiple types use this syntax : -t \"type1,type2\""
+
+
+#: generateGraphics.py:245
+msgid "Clients' names"
+msgstr "Clients' names"
+
+#: generateGraphics.py:247
+msgid "Create a copy file for the generated image."
+msgstr "Create a copy file for the generated image."
+
+#: generateGraphics.py:249
+msgid "Combine the data of all client into a single graphics for each graphic type."
+msgstr "Combine the data of all client into a single graphics for each graphic type."
+
+#: generateGraphics.py:251
+msgid "Decide current time. Usefull for testing."
+msgstr "Decide current time. Usefull for testing."
+
+#: generateGraphics.py:253
+msgid "Type of log files wanted."
+msgstr "Type of log files wanted."
+
+#: generateGraphics.py:256
+msgid "Specify a name for the combined graphics of numerous client/sources. Note : requires the --combinedClients options to work."
+msgstr "Specify a name for the combined graphics of numerous client/sources. Note : requires the --combinedClients options to work."
+
+#: generateGraphics.py:258
+msgid "Machines for wich you want to collect data."
+msgstr "Machines for wich you want to collect data."
+
+#: generateGraphics.py:260
+msgid "Collect data up to current second."
+msgstr "Collect data up to current second."
+
+#: generateGraphics.py:262
+msgid "Specific product types to look for in the data collected."
+msgstr "Specific product types to look for in the data collected."
+
+#: generateGraphics.py:264
+msgid "timespan( in hours) of the graphic."
+msgstr "timespan( in hours) of the graphic."
+
+#: generateGraphics.py:266
+msgid "Types of data to look for."
+msgstr "Types of data to look for."
+
