@@ -436,7 +436,7 @@ msgstr "Moy"
 
 #: generateRRDGraphics.py:1016 generateRRDGraphics.py:1031
 msgid "k on the y axis stands for kilo, meaning x thousands."
-msgstr "k sur l'axe des y ségnifie kilo, donc x milliers."
+msgstr "k sur l'axe des y signifie kilo, donc x milliers."
 
 #: generateRRDGraphics.py:1018 generateRRDGraphics.py:1029
 msgid "M on the y axis stands for Mega, meaning x millions."
@@ -482,7 +482,7 @@ msgstr "Note(s):"
 #: generateRRDGraphics.py:1295 generateRRDGraphics.py:1300
 #: generateRRDGraphics.py:1305
 msgid "Total: "
-msgstr "Total"
+msgstr "Total: "
 
 #: generateRRDGraphics.py:1319 generateRRDGraphics.py:1326
 #: generateRRDGraphics.py:1343
@@ -497,3 +497,14 @@ msgstr "Erreur était : "
 msgid "Plotted : "
 msgstr "Dessiné :"
 
+msgid "ending at"
+msgstr "se terminant le"
+
+msgid "Min: " 
+msgstr "Min: "
+
+msgid "Max: "
+msgstr "Max: "
+
+msgid "Mean: "
+msgstr "Moyenne: "
