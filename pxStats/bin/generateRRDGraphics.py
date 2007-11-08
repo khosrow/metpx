@@ -2,7 +2,6 @@
 """
 MetPX Copyright (C) 2004-2006  Environment Canada
 MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
 
 
 #######################################################################################
@@ -22,7 +21,7 @@ named COPYING in the root of the source directory tree.
 #######################################################################################
 """
 
-import os, time, getopt, rrdtool, shutil, sys
+import gettext, os, time, getopt, rrdtool, shutil, sys
 
 """
     Small function that adds pxlib to the environment path.  
@@ -45,7 +44,7 @@ from   Logger import *
 from   optparse  import OptionParser
 
 from pxStats.lib.StatsDateLib import StatsDateLib
-from pxStats.lib.RrdUtilities import RrdUtilities
+from pxStats.lib.RrdUtilitiesTest import RrdUtilities
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.StatsPaths import StatsPaths      
 
@@ -87,7 +86,7 @@ def getOptionsFromParser( parser ):
     """ 
     
     date   = []
-    graphicType = "other"
+    graphicType = _("other")
     mergerType = ""
     
     ( options, args )= parser.parse_args()        
@@ -116,44 +115,44 @@ def getOptionsFromParser( parser ):
             counter = counter + 1 
             
     if counter > 1 :
-        print "Error. Only one of the daily, weekly and yearly options can be use at a time " 
-        print "Use -h for help."
-        print "Program terminated."
+        print _("Error. Only one of the daily, weekly and yearly options can be use at a time ")
+        print _("Use -h for help.")
+        print _("Program terminated.")
         sys.exit()
     
     elif counter == 1 and timespan != None :
-        print "Error. When using the daily, the weekly or the yearly options timespan cannot be specified. " 
-        print "Use -h for help."
-        print "Program terminated."
+        print _("Error. When using the daily, the weekly or the yearly options timespan cannot be specified. " )
+        print _("Use -h for help.")
+        print _("Program terminated.")
         sys.exit()
         
     elif counter == 0:    
         if fixedPrevious or fixedCurrent:
-            print "Error. When using one of the fixed options, please use either the -d -m -w or -y options. " 
-            print "Use -h for help."
-            print "Program terminated."
+            print _("Error. When using one of the fixed options, please use either the -d -m -w or -y options. " )
+            print _("Use -h for help.")
+            print _("Program terminated.")
             sys.exit()
         
         if copy :
             if daily or not( weekly or monthly or yearly ):
-                print "Error. Copying can only be used with the -m -w or -y options. " 
-                print "Use -h for help."
-                print "Program terminated."        
+                print _("Error. Copying can only be used with the -m -w or -y options. ") 
+                print _("Use -h for help.")
+                print _("Program terminated.")
             
                 
     if counter == 0 and timespan == None :
         timespan = 12
         
     if fixedPrevious and fixedCurrent:
-        print "Error. Please use only one of the fixed options,either fixedPrevious or fixedCurrent. " 
-        print "Use -h for help."
-        print "Program terminated."
+        print _("Error. Please use only one of the fixed options,either fixedPrevious or fixedCurrent. ") 
+        print _("Use -h for help.")
+        print _("Program terminated.")
         sys.exit()  
     
     if individual and totals:
-        print "Error. Please use only one of the group options,either individual or totals. " 
-        print "Use -h for help."
-        print "Program terminated."
+        print _("Error. Please use only one of the group options,either individual or totals. ")
+        print _("Use -h for help.")
+        print _("Program terminated.")
         sys.exit()  
     
     try: # Makes sure date is of valid format. 
@@ -163,40 +162,40 @@ def getOptionsFromParser( parser ):
         date = "%s %s" %( split[0], split[1] )
 
     except:    
-        print "Error. The date format must be YYYY-MM-DD HH:MM:SS" 
-        print "Use -h for help."
-        print "Program terminated."
+        print _("Error. The date format must be YYYY-MM-DD HH:MM:SS")
+        print _("Use -h for help.")
+        print _("Program terminated.")
         sys.exit()         
         
          
     #TODO :fixStartEnd method???    
     if fixedPrevious :
         if daily :
-            graphicType = "daily"
+            graphicType = _("daily")
             start, end = StatsDateLib.getStartEndFromPreviousDay( date )             
         elif weekly:
-            graphicType = "weekly"
+            graphicType = _("weekly")
             start, end = StatsDateLib.getStartEndFromPreviousWeek( date )
         elif monthly:
-            graphicType = "monthly"
+            graphicType = _("monthly")
             start, end = StatsDateLib.getStartEndFromPreviousMonth( date )
         elif yearly:
-            graphicType = "yearly" 
+            graphicType = _("yearly") 
             start, end = StatsDateLib.getStartEndFromPreviousYear( date )
         timespan = int( StatsDateLib.getSecondsSinceEpoch( end ) - StatsDateLib.getSecondsSinceEpoch( start ) ) / 3600
              
     elif fixedCurrent:
         if daily :
-            graphicType = "daily"
+            graphicType = _("daily")
             start, end = StatsDateLib.getStartEndFromCurrentDay( date )   
         elif weekly:
-            graphicType = "weekly"
+            graphicType = _("weekly")
             start, end = StatsDateLib.getStartEndFromCurrentWeek( date )
         elif monthly:
-            graphicType = "monthly"
+            graphicType = _("monthly")
             start, end = StatsDateLib.getStartEndFromCurrentMonth( date )    
         elif yearly:
-            graphicType = "yearly" 
+            graphicType = _("yearly") 
             start, end = StatsDateLib.getStartEndFromCurrentYear( date ) 
         timespan = int( StatsDateLib.getSecondsSinceEpoch( end ) - StatsDateLib.getSecondsSinceEpoch( start ) ) / 3600
         
@@ -204,16 +203,16 @@ def getOptionsFromParser( parser ):
         #TODO fix timeSpan method???   
         if daily :
             timespan = 24  
-            graphicType = "daily"      
+            graphicType = _("daily")      
         elif weekly:
             timespan = 24 * 7  
-            graphicType = "weekly"  
+            graphicType = _("weekly")  
         elif monthly:
             timespan = 24 * 30 
-            graphicType = "monthly"       
+            graphicType = _("monthly")       
         elif yearly:            
             timespan = 24 * 365
-            graphicType = "yearly"  
+            graphicType = _("yearly")  
             
         start = StatsDateLib.getIsoFromEpoch( StatsDateLib.getSecondsSinceEpoch( date ) - timespan*60*60 ) 
         end   = date                       
@@ -225,37 +224,38 @@ def getOptionsFromParser( parser ):
                 
     except:
         
-        print "Error. The timespan value needs to be an integer one above 0." 
-        print "Use -h for help."
-        print "Program terminated."
+        print _("Error. The timespan value needs to be an integer one above 0.") 
+        print _("Use -h for help.")
+        print _("Program terminated.")
         sys.exit()        
          
-    if fileType != "tx" and fileType != "rx":
-        print "Error. File type must be either tx or rx."
-        print 'Multiple types are not accepted.' 
-        print "Use -h for additional help."
-        print "Program terminated."
+    if fileType != "tx" and fileType != "rx":        
+        print _("Error. File type must be either tx or rx.")
+        print  "Specified file type was : ", fileType
+        print _("Multiple types are not accepted.") 
+        print _("Use -h for additional help.")
+        print _("Program terminated.")
         sys.exit()            
         
                 
     if havingRun == True and clientNames[0] != "ALL":
-        print "Error. Cannot use the havingRun option while specifying client/source names."
-        print 'To use havingRun, do not use -c|--client option.' 
-        print "Use -h for additional help."
-        print "Program terminated."    
+        print _("Error. Cannot use the havingRun option while specifying client/source names.")
+        print _("To use havingRun, do not use -c|--client option.")
+        print _("Use -h for additional help.")
+        print _("Program terminated.")
         sys.exit()
     
-    if clientNames[0] == "ALL":
+    if clientNames[0] == _("ALL"):
         # Get all of the client/sources that have run between graph's start and end. 
         if totals == True or havingRun == True :          
             #print start, end, machines       
             rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNamesHavingRunDuringPeriod( start, end, machines,None, havingrunOnAllMachines = True )
-            mergerType = "totalForMachine"
+            mergerType = _("totalForMachine")
         else:#Build graphs only for currently runningclient/sources.      
             rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machines[0] )
-            mergerType = "group"
+            mergerType = _("group")
                      
-        if fileType == "tx":    
+        if fileType == _("tx"):    
             clientNames = txNames  
             #print clientNames
         else:
@@ -263,39 +263,40 @@ def getOptionsFromParser( parser ):
             
     else:
         if totals == True :  
-            mergerType = "regular"
-    try :
+            mergerType = _("regular")
+    #--------------------------------------------------------------------- try :
             
-        if fileType == "tx":       
+    if fileType == _("tx"):       
+    
+        validTypes = [ _("latency"), _("bytecount"), _("errors"), _("filesOverMaxLatency"), _("filecount") ]
         
-            validTypes = [ "latency", "bytecount", "errors", "filesOverMaxLatency", "filecount" ]
-            
-            if types[0] == "All":
-                types = validTypes
-            else :
-                for t in types :
-                    if t not in validTypes:
-                        raise Exception("")
-                        
-        else:      
-            
-            validTypes = [ "bytecount", "errors", "filecount" ]
-            
-            if types[0] == "All":
-                types = validTypes
-            
-            else :
-                for t in types :
-                    if t not in validTypes:
+        if types[0] == _("All") :
+            types = validTypes
+        else :
+            for t in types :
+                if t not in validTypes:
+                    print t
+                    raise Exception("")
+                    
+    else:      
+        
+        validTypes = [ _("bytecount"), _("errors"), _("filecount") ]
+        
+        if types[0] == _("All"):
+            types = validTypes
+        
+        else :
+            for t in types :
+                if t not in validTypes:
                         raise Exception("")
 
-    except:    
-
-        print "Error. With %s fileType, possible data types values are : %s." %( fileType, validTypes )
-        print 'For multiple types use this syntax : -t "type1,type2"' 
-        print "Use -h for additional help."
-        print "Program terminated."
-        sys.exit()
+    #------------------------------------------------------------------- except:
+        #----------------------------------------------------------- print types
+        # print _("Error. With %s fileType, possible data types values are : %s.") %( fileType, validTypes )
+        #---- print _("For multiple types use this syntax : -t 'type1','type2'")
+        #-------------------------------- print _("Use -h for additional help.")
+        #---------------------------------------- print _("Program terminated.")
+        #------------------------------------------------------------ sys.exit()
   
             
     if individual != True :        
@@ -307,25 +308,25 @@ def getOptionsFromParser( parser ):
          
                 
     if len(clientNames) <1:
-        print "Error. No client/sources were found that matched the specified parameters" %( fileType, validTypes )
-        print 'Verify parameters used, especially the machines parameter.' 
-        print "Use -h for additional help."
-        print "Program terminated."
+        print _("Error. No client/sources were found that matched the specified parameters") %( fileType, validTypes )
+        print _("Verify parameters used, especially the machines parameter.")
+        print _("Use -h for additional help.")
+        print _("Program terminated.")
         sys.exit()
 
 
     if len(clientNames) <1:
-        print "Error. No client/sources were found that matched the specified parameters" 
-        print 'Verify parameters used, especially the machines parameter.' 
-        print "Use -h for additional help."
-        print "Program terminated."
+        print _("Error. No client/sources were found that matched the specified parameters")
+        print _("Verify parameters used, especially the machines parameter.")
+        print _("Use -h for additional help.")
+        print _("Program terminated.")
         sys.exit()  
     
     elif len(clientNames) == 1 and totals == True:   
-        print "Error. Cannot use totals option with only one client/source name."
-        print 'Either remove --total option or use more than one client/source..' 
-        print "Use -h for additional help."
-        print "Program terminated."
+        print _("Error. Cannot use totals option with only one client/source name.")
+        print _("Either remove --total option or use more than one client/source..")
+        print _("Use -h for additional help.")
+        print _("Program terminated.")
         sys.exit()          
     
     end = StatsDateLib.getIsoWithRoundedHours( end )
@@ -335,13 +336,14 @@ def getOptionsFromParser( parser ):
     return infos                       
 
 
+
 def createParser( ):
     """ 
         Builds and returns the parser 
     
     """
     
-    usage = """
+    usage = _("""
 
 %prog [options]
 ********************************************
@@ -374,7 +376,7 @@ Options:
       based on the fixed dates of the calendar.
     - With --havingRun you can specify that you want to use all the client/sources that have run between 
       the graphics start and end instead of the currently running client/sources. 
-    - With --individual you can specify that you want to genrate graphics for each machine 
+    - With --individual you can specify that you want to generate graphics for each machine 
       and not the combined data of two machines when numerous machiens are specified.
     - With -m|--monthly you can specify you want monthly graphics.
     - With   |--machines you can specify from wich machine the data is to be used.
@@ -399,7 +401,7 @@ Ex3: %prog -e "2006-10-10 15:13:00" -y
                                                                                                 
 ********************************************
 * See /doc.txt for more details.           *
-********************************************"""   
+********************************************""")   
     
     parser = OptionParser( usage )
     addOptions( parser )
@@ -414,40 +416,40 @@ def addOptions( parser ):
         
     """  
         
-    parser.add_option("-c", "--clients", action="store", type="string", dest="clients", default="ALL",
-                        help="Clients' names")
+    parser.add_option("-c", "--clients", action="store", type="string", dest="clients", default=_("ALL"),
+                        help=_("Clients' names") )
     
-    parser.add_option("-d", "--daily", action="store_true", dest = "daily", default=False, help="Create daily graph(s).")
+    parser.add_option("-d", "--daily", action="store_true", dest = "daily", default=False, help=_("Create daily graph(s).") )
     
-    parser.add_option( "--date", action="store", type="string", dest="date", default=StatsDateLib.getIsoFromEpoch( time.time() ), help="Decide end time of graphics. Usefull for testing.")
+    parser.add_option( "--date", action="store", type="string", dest="date", default=StatsDateLib.getIsoFromEpoch( time.time() ), help=_("Decide end time of graphics. Usefull for testing.") )
     
-    parser.add_option("-f", "--fileType", action="store", type="string", dest="fileType", default='tx', help="Type of log files wanted.")                     
+    parser.add_option("-f", "--fileType", action="store", type="string", dest="fileType", default='tx', help=_("Type of log files wanted."))                     
     
-    parser.add_option( "--fixedPrevious", action="store_true", dest="fixedPrevious", default=False, help="Do not use floating weeks|days|months|years. Use previous fixed interval found.")
+    parser.add_option( "--fixedPrevious", action="store_true", dest="fixedPrevious", default=False, help=_("Do not use floating weeks|days|months|years. Use previous fixed interval found."))
    
-    parser.add_option( "--fixedCurrent", action="store_true", dest="fixedCurrent", default=False, help="Do not use floating weeks|days|months|years. Use current fixed interval found.")
+    parser.add_option( "--fixedCurrent", action="store_true", dest="fixedCurrent", default=False, help=_("Do not use floating weeks|days|months|years. Use current fixed interval found."))
             
-    parser.add_option( "--havingRun", action="store_true", dest="havingRun", default=False, help="Do not use only the currently running client/sources. Use all that have run between graphic(s) start and end instead.")
+    parser.add_option( "--havingRun", action="store_true", dest="havingRun", default=False, help=_("Do not use only the currently running client/sources. Use all that have run between graphic(s) start and end instead."))
     
-    parser.add_option("-i", "--individual", action="store_true", dest = "individual", default=False, help="Dont combine data from specified machines. Create graphs for every machine independently")
+    parser.add_option("-i", "--individual", action="store_true", dest = "individual", default=False, help=_("Dont combine data from specified machines. Create graphs for every machine independently") )
     
-    parser.add_option( "--copy", action="store_true", dest = "copy", default=False, help="Create a copy file for the generated image.")
+    parser.add_option( "--copy", action="store_true", dest = "copy", default=False, help=_("Create a copy file for the generated image.") )
         
-    parser.add_option("-m", "--monthly", action="store_true", dest = "monthly", default=False, help="Create monthly graph(s).")
+    parser.add_option("-m", "--monthly", action="store_true", dest = "monthly", default=False, help=_("Create monthly graph(s).") )
      
-    parser.add_option( "--machines", action="store", type="string", dest="machines", default=LOCAL_MACHINE, help = "Machines for wich you want to collect data." )   
+    parser.add_option( "--machines", action="store", type="string", dest="machines", default=LOCAL_MACHINE, help = _("Machines for wich you want to collect data." )   )
        
-    parser.add_option("-s", "--span", action="store",type ="int", dest = "timespan", default=None, help="timespan( in hours) of the graphic.")
+    parser.add_option("-s", "--span", action="store",type ="int", dest = "timespan", default=None, help=_("timespan( in hours) of the graphic.") )
        
-    parser.add_option("-t", "--types", type="string", dest="types", default="All",help="Types of data to look for.")   
+    parser.add_option("-t", "--types", type="string", dest="types", default=_("All"),help=_("Types of data to look for.") )  
     
-    parser.add_option("--totals", action="store_true", dest = "totals", default=False, help="Create graphics based on the totals of all the values found for all specified clients or for a specific file type( tx, rx ).")
+    parser.add_option("--totals", action="store_true", dest = "totals", default=False, help=_("Create graphics based on the totals of all the values found for all specified clients or for a specific file type( tx, rx )."))
     
-    parser.add_option("--turnOffLogging", action="store_true", dest = "turnOffLogging", default=False, help="Turn off the logger")
+    parser.add_option("--turnOffLogging", action="store_true", dest = "turnOffLogging", default=False, help=_("Turn off the logger"))
     
-    parser.add_option("-w", "--weekly", action="store_true", dest = "weekly", default=False, help="Create weekly graph(s).")
+    parser.add_option("-w", "--weekly", action="store_true", dest = "weekly", default=False, help=_("Create weekly graph(s)."))
     
-    parser.add_option("-y", "--yearly", action="store_true", dest = "yearly", default=False, help="Create yearly graph(s).")
+    parser.add_option("-y", "--yearly", action="store_true", dest = "yearly", default=False, help=_("Create yearly graph(s)."))
     
     
         
@@ -474,24 +476,24 @@ def buildTitle( type, client, endTime, timespan, minimum, maximum, mean):
     """    
     
     span        = timespan
-    timeMeasure = "hours"
+    timeMeasure = _("hours")
     
     if span%(365*24) == 0 :
         span = span/(365*24)
-        timeMeasure = "year(s)" 
+        timeMeasure = _("year(s)" )
     
     elif span%(30*24) == 0 :
         span = span/(30*24)
-        timeMeasure = "month(s)" 
+        timeMeasure = _("month(s)") 
     
     elif span%24 == 0 :
         span = span/24
-        timeMeasure = "day(s)" 
+        timeMeasure = _( "day(s)" )
     
     type = type[0].upper() + type[1:]    
 
     
-    return  "%s for %s for a span of %s %s ending at %s." %( type, client, span, timeMeasure, endTime )    
+    return  "%s "%type + _("for") +" %s "%(client) + _("for a span of ") + "%s %s "%( span, timeMeasure ) + _("ending at") + " %s."%( endTime )    
 
     
     
@@ -505,13 +507,13 @@ def getGraphicsNote( interval, type ):
     
     graphicsNote = ""
     
-    if type != "latency":
+    if type != _("latency"):
     
         if interval < 60 :    
-            graphicsNote = "Graphics generated using %s minute(s) averages." %( int(interval) )
+            graphicsNote = _("Graphics generated using ") + str(int(interval)) + " " + _( "minute(s) averages.")
         
         else:    
-            graphicsNote = "Graphics generated using %s hour(s) averages." %( int(interval/60) )
+            graphicsNote =_("Graphics generated using ") + str( int(interval/60) ) + " " + _("hour(s) averages.")
 
     
     return graphicsNote    
@@ -552,7 +554,7 @@ def getAbsoluteMin( databaseName, startTime, endTime, logger = None ):
     except :
     
         if logger != None:
-            logger.error( "Error in generateRRDGraphics.getOverallMin. Unable to read %s" %databaseName )
+            logger.error( _("Error in generateRRDGraphics.getOverallMin. Unable to read " ) + str(databaseName) )
         pass    
         
     return minimum
@@ -597,7 +599,7 @@ def getAbsoluteMax( databaseName, startTime, endTime, logger = None ):
     
     except :
         if logger != None:
-            logger.error( "Error in generateRRDGraphics.getOverallMin. Unable to read %s" %databaseName )
+            logger.error( _("Error in generateRRDGraphics.getOverallMin. Unable to read ") + str( databaseName ) )
         pass    
     
     return maximum 
@@ -646,7 +648,7 @@ def getAbsoluteMean( databaseName, startTime, endTime, logger = None  ):
     
     except :
         if logger != None:
-            logger.error( "Error in generateRRDGraphics.getOverallMin. Unable to read %s" %databaseName )
+            logger.error( _( "Error in generateRRDGraphics.getOverallMin. Unable to read ") + str(databaseName) )
         pass    
             
     return avg 
@@ -857,19 +859,19 @@ def buildImageName(  type, client, machine, infos, logger = None ):
     """
 
     span = infos.timespan
-    timeMeasure = "hours"
+    timeMeasure = _("hours")
     
     if infos.timespan%(365*24) == 0 :
         span = int(infos.timespan/(365*24))
-        timeMeasure = "years" 
+        timeMeasure = _("years") 
     
     elif infos.timespan%(30*24) == 0 :
         span = int(infos.timespan/(30*24))
-        timeMeasure = "months" 
+        timeMeasure = _("months") 
     
     elif infos.timespan%24 == 0 :
         span = int(infos.timespan/24)
-        timeMeasure = "days" 
+        timeMeasure = _("days") 
        
                     
     date = infos.endTime.replace( "-","" ).replace( " ", "_")
@@ -919,7 +921,7 @@ def formatMinMaxMeanTotal( minimum, maximum, mean, total, type, averageOrTotal =
     values = [ minimum, maximum, mean, total ]
     nbEntries = len(values)
     
-    if type == "bytecount" :
+    if type == _("bytecount") :
         
         for i in range( nbEntries ):
             
@@ -951,18 +953,18 @@ def formatMinMaxMeanTotal( minimum, maximum, mean, total, type, averageOrTotal =
         
     else:
     
-        if type == "filecount":
-            tag = "Files"
-        elif type == "filesOverMaxLatency":
-            tag = "F" 
-        elif type == "errors":
-            tag = "Errors"
-        elif type == "latency":
-            tag = "Avg"
+        if type == _("filecount"):
+            tag = _("Files")
+        elif type == _("filesOverMaxLatency"):
+            tag = _("F") 
+        elif type == _("errors"):
+            tag = _("Errors")
+        elif type == _("latency"):
+            tag = _("Avg")
             
         
         if minimum != None :
-            if type == "latency" or averageOrTotal == "average":
+            if type == _("latency") or averageOrTotal == "average":
                 if minimum > 1:
                     minimum = "%.2f %s/Min" %( minimum, tag )
                 else: 
@@ -972,7 +974,7 @@ def formatMinMaxMeanTotal( minimum, maximum, mean, total, type, averageOrTotal =
                 minimum = "%s" %int( minimum )
                    
         if maximum != None :
-            if type == "latency" or averageOrTotal == "average":    
+            if type == _("latency") or averageOrTotal == "average":    
                 if maximum > 1:
                     maximum = "%.2f %s/Min" %( maximum, tag ) 
                 else:    
@@ -986,8 +988,8 @@ def formatMinMaxMeanTotal( minimum, maximum, mean, total, type, averageOrTotal =
             else:    
                 mean = "%.4f %s/Min" %( mean, tag ) 
         
-        if type == "filesOverMaxLatency":    
-            tag = "Files"
+        if type == _("filesOverMaxLatency"):    
+            tag = _("Files")
             
         total = "%s %s" %( int(total), tag )           
                     
@@ -1012,24 +1014,24 @@ def getGraphicsLegend( maximum ):
    
      
     if "KB" in str(maximum):
-        legend = "k on the y axis stands for kilo, meaning x thousands."
+        legend = _("k on the y axis stands for kilo, meaning x thousands.")
     elif "MB" in str(maximum):
-        legend = "M on the y axis stands for Mega, meaning x millions."
+        legend = _("M on the y axis stands for Mega, meaning x millions.")
     elif "GB" in str(maximum):
-        legend = "G on the y axis stats for giga, meaning x billions."
+        legend = _("G on the y axis stats for giga, meaning x billions.")
     else:
         
         try:
             maximum = float( str(maximum).split(" ")[0] )          
             
             if maximum > 1000000000:
-                legend = "G on the y axis stats for giga, meaning x billions."
+                legend = _("G on the y axis stats for giga, meaning x billions.")
             elif maximum > 1000000:
-                legend = "M on the y axis stands for Mega, meaning x millions."
+                legend = _("M on the y axis stands for Mega, meaning x millions.")
             elif maximum > 1000:    
-                legend = "k on the y axis stands for kilo, meaning x thousands."
+                legend = _("k on the y axis stands for kilo, meaning x thousands.")
             elif maximum < .1000:
-                legend = "m on the y axis stands for milli, meaning x thousandths."
+                legend = _("m on the y axis stands for milli, meaning x thousandths.")
                
         except:            
             pass
@@ -1037,7 +1039,7 @@ def getGraphicsLegend( maximum ):
     return legend
             
             
-def getInterval( startTime, timeOfLastUpdate, graphicType = "daily", goal = "fetchData"  ):    
+def getInterval( startTime, timeOfLastUpdate, graphicType = None, goal = "fetchData"  ):    
     """         
         @summary : Returns the interval that was used 
                   for data consolidation. 
@@ -1064,17 +1066,21 @@ def getInterval( startTime, timeOfLastUpdate, graphicType = "daily", goal = "fet
        @return : The calculated interval
        
     """ 
+    
+    if graphicType == None:
+        graphicType = _("daily")
+        
     #432000 is 5 days in seconds
     #1209600 is 14 days in seconds
     #21024000 is 243 days in seconds    
         
-    if graphicType == "yearly" and  (timeOfLastUpdate - startTime ):
+    if graphicType == _("yearly") and  (timeOfLastUpdate - startTime ):
         interval = 1440
-    elif graphicType == "monthly" and (timeOfLastUpdate - startTime ) < (21024000):
+    elif graphicType == _("monthly") and (timeOfLastUpdate - startTime ) < (21024000):
         interval = 240
-    elif graphicType == "weekly"  and (timeOfLastUpdate - startTime ) < (1209600):
+    elif graphicType == _("weekly")  and (timeOfLastUpdate - startTime ) < (1209600):
         interval = 60  
-    elif graphicType == "daily"  and (timeOfLastUpdate - startTime ) < (432000):
+    elif graphicType == _("daily")  and (timeOfLastUpdate - startTime ) < (432000):
         if goal == "fetchData":
             interval = 1                     
         else :
@@ -1127,21 +1133,21 @@ def getArchiveCopyDestination( type, client, machine, infos ):
     currentWeek = time.strftime( "%W", time.gmtime( startTimeInSeconds ) )
     
        
-    if infos.graphicType == "weekly":
+    if infos.graphicType == _("weekly"):
         endOfDestination =  "%s/%s/%s.png" %( currentYear, type, currentWeek )
     
-    elif infos.graphicType == "monthly":
+    elif infos.graphicType == _("monthly"):
         endOfDestination =  "%s/%s/%s.png" %( currentYear,type, currentMonth )
     
-    elif infos.graphicType == "yearly":
+    elif infos.graphicType == _("yearly"):
         endOfDestination =  "%s/%s.png" %( type, currentYear )
     
-    elif infos.graphicType == "daily":
+    elif infos.graphicType == _("daily"):
         endOfDestination = "%s/%s/%s/%s.png" %( currentYear, currentMonth, type, currentDay )
         
         #destination = "%s/%s/%s/%s" %( StatsPaths.STATSGRAPHSARCHIVES, infos.graphicType, infos.fileType, label, infos.graphicType, endOfDestination )
     if infos.totals == True:
-        if infos.mergerType == 'totalForMachine':
+        if infos.mergerType == _('totalForMachine'):
             destination ="%s%s/%s/%s/%s/%s"  %( StatsPaths.STATSGRAPHSARCHIVES, infos.graphicType, "totals", machine, infos.fileType, endOfDestination  )
         else:
             destination =  "%s%s/%s/%s/%s" %( StatsPaths.STATSGRAPHSARCHIVES, infos.graphicType, infos.fileType, client, endOfDestination )   
@@ -1216,26 +1222,49 @@ def formatedTypesForLables( type ):
     formatedTitle  = type 
     formatedYLabel = type
     
-    if type == "latency":
-        formatedTitle = "Averaged latency per minute"   
-        formatedYLabel = "Latency(seconds)"    
-    elif type== "filesOverMaxLatency":
-        formatedTitle  = "Latencies over 15 seconds"   
-        formatedYLabel = "Files/Minute"
-    elif type== "bytecount":
-        formatedTitle = "Bytes/Minute"     
-        formatedYLabel = "Bytes/Minute"    
-    elif type== "filecount":
-        formatedTitle = "Files/Minute"     
-        formatedYLabel = "Files/Minute"   
-    elif type== "errors":
-        formatedTitle = "Errors/Minute" 
-        formatedYLabel = "Errors/Minute"        
+    if type == _("latency"):
+        formatedTitle = _("Averaged latency per minute")   
+        formatedYLabel = _("Latency(seconds)")    
+    elif type== _("filesOverMaxLatency"):
+        formatedTitle  = _("Latencies over 15 seconds")   
+        formatedYLabel = _("Files/Minute")
+    elif type== _("bytecount"):
+        formatedTitle = _("Bytes/Minute")     
+        formatedYLabel = _("Bytes/Minute")    
+    elif type== _("filecount"):
+        formatedTitle = _("Files/Minute")     
+        formatedYLabel = _("Files/Minute")   
+    elif type== _("errors"):
+        formatedTitle = _("Errors/Minute") 
+        formatedYLabel = _("Errors/Minute")        
             
     return formatedTitle, formatedYLabel
     
+
+def translateDataType( type ):
+    """
+        @summary : Takes a type of the currently used language 
+                   and returns the english version of that type.
+        
+        @param type : Type to be translated, written in the currently 
+                      used language.
+        
+        @return : Returns the translated type.                         
+                    
+    """
     
+    knownTypes= { _("bytecount"):"bytecount", _("filecount"):"filecount", _("errors"):"errors", _("latency"):"latency", _("filesOverMaxLatency"):"filesOverMaxLatency"}
     
+    translatedType = ""
+    
+    if type in knownTypes:  
+        translatedType = knownTypes[type]
+    else :
+        translatedType = type      
+    
+    return translatedType
+
+
         
 def plotRRDGraph( databaseName, type, fileType, client, machine, infos, logger = None ):
     """
@@ -1280,28 +1309,28 @@ def plotRRDGraph( databaseName, type, fileType, client, machine, infos, logger =
     if graphicsNote == "" and graphicsLegeng == "":
         comment = ""
     else:
-        comment = "Note(s):"
+        comment = _("Note(s):")
         
             
-    if type == "latency" :
+    if type == _("latency") :
         innerColor = "cd5c5c"
         outerColor = "8b0000"
         total = ""
         
-    elif type == "filesOverMaxLatency":
+    elif type == _("filesOverMaxLatency"):
         innerColor = "cd5c5c"
         outerColor = "8b0000"
-        total = "Total: %s" %total                
+        total = _("Total: ") + str( total )                
         
-    elif type == "bytecount" or type == "filecount" :
+    elif type == _("bytecount") or type == _("filecount") :
         innerColor = "019EFF"
         outerColor = "080166"#"4D9AA9"  
-        total = "Total: %s" %total
+        total = _("Total: ") + str(total)
         
     else:
         innerColor = "54DE4F"
         outerColor = "1C4A1A"     
-        total = "Total: %s" %total   
+        total = _("Total: ") + str(total)
         
     title = buildTitle( formatedTitleType, client, infos.endTime, infos.timespan, minimum, maximum, mean )   
        
@@ -1310,20 +1339,22 @@ def plotRRDGraph( databaseName, type, fileType, client, machine, infos, logger =
     #note : in CDEF:realValue the i value can be changed from 1 to value of the interval variable
     #       in order to get the total displayed instead of the mean.
     
-    if infos.graphicType != "monthly":
+    translatedType = translateDataType(type)
+    
+    if infos.graphicType != _("monthly"):
         try:
-            rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '800','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end),'--step','%s' %(interval*60), '--vertical-label', '%s' %formatedYLabelType,'--title', '%s'%title, '--lower-limit','0','DEF:%s=%s:%s:AVERAGE'%( type, databaseName, type), 'CDEF:realValue=%s,%i,*' %( type, 1), 'AREA:realValue#%s:%s' %( innerColor, type ),'LINE1:realValue#%s:%s'%( outerColor, type ), 'COMMENT: Min: %s   Max: %s   Mean: %s   %s\c' %( minimum, maximum, mean,total ), 'COMMENT:%s %s %s\c' %( comment, graphicsNote, graphicsLegeng )  )
+            rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '800','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end),'--step','%s' %(interval*60), '--vertical-label', '%s' %formatedYLabelType,'--title', '%s'%title, '--lower-limit','0','DEF:%s=%s:%s:AVERAGE'%( translatedType, databaseName, translatedType), 'CDEF:realValue=%s,%i,*' %( translatedType, 1), 'AREA:realValue#%s:%s' %( innerColor, translatedType ),'LINE1:realValue#%s:%s'%( outerColor, translatedType ), "COMMENT: " + _("Min: ") + str(minimum) + "   " + _("Max: ") + str(maximum) + "   " + _( "Mean: " ) + str(mean) + "   " +  str(total) + "\c", 'COMMENT:%s %s %s\c' %( comment, graphicsNote, graphicsLegeng )  )
         except Exception, inst:
             errorOccured = True
-            print "Error : Could not generate %s " %imageName
-            print "Error was : %s" %inst
+            print _("Error : Could not generate ") + str(imageName)
+            print _("Error was : ") + str(inst)
     else:#With monthly graphics, we force the use the day of month number as the x label.       
         try:
-            rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '800','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end),'--step','%s' %(interval*60), '--vertical-label', '%s' %formatedYLabelType,'--title', '%s'%title, '--lower-limit','0','DEF:%s=%s:%s:AVERAGE'%( type, databaseName, type), 'CDEF:realValue=%s,%i,*' %( type, 1), 'AREA:realValue#%s:%s' %( innerColor, type ),'LINE1:realValue#%s:%s'%( outerColor, type ), '--x-grid', 'HOUR:24:DAY:1:DAY:1:0:%d','COMMENT: Min: %s   Max: %s   Mean: %s   %s\c' %( minimum, maximum, mean, total ), 'COMMENT:%s %s %s\c' %(comment,graphicsNote, graphicsLegeng)  )    
+            rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '800','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end),'--step','%s' %(interval*60), '--vertical-label', '%s' %formatedYLabelType,'--title', '%s'%title, '--lower-limit','0','DEF:%s=%s:%s:AVERAGE'%( translatedType, databaseName, translatedType), 'CDEF:realValue=%s,%i,*' %( translatedType, 1), 'AREA:realValue#%s:%s' %( innerColor, translatedType ),'LINE1:realValue#%s:%s'%( outerColor, translatedType ), '--x-grid', 'HOUR:24:DAY:1:DAY:1:0:%d',"COMMENT: " + _("Min: ") + str(minimum) + "   " + _("Max: ") + str(maximum) + "   " + _( "Mean: " ) + str(mean) + "   " +  str(total) + "\c", 'COMMENT:%s %s %s\c' %(comment,graphicsNote, graphicsLegeng)  )    
         except Exception, inst:
             errorOccured = True
-            print "Error : Could not generate %s " %imageName
-            print "Error was : %s" %inst
+            print _("Error : Could not generate ") + str( imageName )
+            print _("Error was : ") + str(inst)
             
     if errorOccured == False:
         try:
@@ -1334,13 +1365,14 @@ def plotRRDGraph( databaseName, type, fileType, client, machine, infos, logger =
         if infos.copy == True:
             createCopy( client, type, machine, imageName, infos )
         
-        print "Plotted : %s" %imageName
+        print _("Plotted : ") + str(imageName)
         if logger != None:
-            logger.info(  "Plotted : %s" %imageName )
+            logger.info(  _("Plotted : ") + str(imageName) )
     else:
         if logger != None:
-            logger.error(  "Error : Could not generate %s " %imageName)     
+            logger.error(  _("Error : Could not generate ") + str( imageName ) )     
         
+
 
 def createNewMergedDatabase( infos, dataType,  machine, start, interval    ) :       
     """
@@ -1373,24 +1405,24 @@ def createNewMergedDatabase( infos, dataType,  machine, start, interval    ) :
         #print "daily 240 "
         start = start - 60
         #print "^^^^^^^^^^^", rrdFilename, '--start','%s' %( start ), '--step', '60', 'DS:%s:GAUGE:60:U:U' %dataType,'RRA:AVERAGE:0:1:7200','RRA:MIN:0:1:7200', 'RRA:MAX:0:1:7200'
-        rrdtool.create( rrdFilename, '--start','%s' %( start ), '--step', '60', 'DS:%s:GAUGE:60:U:U' %dataType,'RRA:AVERAGE:0:1:7200','RRA:MIN:0:1:7200', 'RRA:MAX:0:1:7200' )
+        rrdtool.create( rrdFilename, '--start','%s' %( start ), '--step', '60', 'DS:%s:GAUGE:60:U:U' %translateDataType( dataType ),'RRA:AVERAGE:0:1:7200','RRA:MIN:0:1:7200', 'RRA:MAX:0:1:7200' )
     
     
     elif interval == 60:#weekly :
         start = start - (60*60)
-        rrdtool.create( rrdFilename, '--start','%s' %( start ), '--step', '3600', 'DS:%s:GAUGE:3600:U:U' %dataType,'RRA:AVERAGE:0:1:336','RRA:MIN:0:1:336', 'RRA:MAX:0:1:336' )
+        rrdtool.create( rrdFilename, '--start','%s' %( start ), '--step', '3600', 'DS:%s:GAUGE:3600:U:U' %translateDataType( dataType ),'RRA:AVERAGE:0:1:336','RRA:MIN:0:1:336', 'RRA:MAX:0:1:336' )
         #print "weekly 240 "
     
     elif interval == 240:#monthly
         #print "monthly 240 "
         start = start - (240*60)
-        rrdtool.create( rrdFilename, '--start','%s' %( start ), '--step', '14400', 'DS:%s:GAUGE:14400:U:U' %dataType, 'RRA:AVERAGE:0:1:1460','RRA:MIN:0:1:1460','RRA:MAX:0:1:1460' )
+        rrdtool.create( rrdFilename, '--start','%s' %( start ), '--step', '14400', 'DS:%s:GAUGE:14400:U:U' %translateDataType( dataType ), 'RRA:AVERAGE:0:1:1460','RRA:MIN:0:1:1460','RRA:MAX:0:1:1460' )
     
     
     else:#yearly
         #print "yearly 1440 "
         start = start - (1440*60)
-        rrdtool.create( rrdFilename, '--start','%s' %( start ), '--step', '86400', 'DS:%s:GAUGE:86400:U:U' %dataType, 'RRA:AVERAGE:0:1:3650','RRA:MIN:0:1:3650','RRA:MAX:0:1:3650' )
+        rrdtool.create( rrdFilename, '--start','%s' %( start ), '--step', '86400', 'DS:%s:GAUGE:86400:U:U' %translateDataType( dataType ), 'RRA:AVERAGE:0:1:3650','RRA:MIN:0:1:3650','RRA:MAX:0:1:3650' )
     
     try:
         os.chmod( rrdFilename, 0777 )
@@ -1883,7 +1915,7 @@ def getPairsFromDatabases( type, machine, start, end, infos, logger=None, mergeW
     
     if mergeWithProportions == True :
         
-        fileCounts = getDataForAllSourlients(infos, "filecount" )
+        fileCounts = getDataForAllSourlients(infos, _("filecount") )
         
         for sourlient in fileCounts.keys():
             if len( fileCounts[sourlient]) != desirableArrayLength:
@@ -1927,7 +1959,7 @@ def getPairsFromAllDatabases( type, machine, start, end, infos, logger=None ):
     
     pairs = []
     
-    if type == "latency":
+    if type == _("latency"):
         pairs = getPairsFromDatabases( type, machine, start, end, infos, mergeWithProportions = True ) 
         #pairs = getPairsFromDatabasesWithoutProportions( type, machine, start, end, infos, logger=None )       
     else :
@@ -2027,15 +2059,47 @@ def generateRRDGraphics( infos, logger = None ):
                         databaseName = RrdUtilities.buildRRDFileName( dataType = type, groupName=client, machines = [machine], fileType = infos.fileType, usage = "group" )
                     
                     plotRRDGraph( databaseName, type, infos.fileType, client, machine, infos,logger = logger )
-                
+ 
+ 
+ 
+def  setGlobalLanguageParameters( language = 'fr'):
+    """
+        @summary : Sets up all the needed global language 
+                   variables so that they can be used 
+                   everywhere in this program.
+        
+        
+        @param language: Language that is to be 
+                         outputted by this program. 
+     
+        @return: None
+        
+    """
+    
+    global LANGUAGE 
+    global translator
+    global _ 
 
-
+    LANGUAGE = language 
+    
+    if language == 'fr':
+        fileName = StatsPaths.STATSLANGFRBIN + "generateRRDGraphics" 
+    elif language == 'en':
+        fileName = StatsPaths.STATSLANGENBIN + "generateRRDGraphics"      
+    
+    translator = gettext.GNUTranslations(open(fileName))
+    _ = translator.gettext
+        
+    
+ 
 def main():
     """
         @summary : Gathers options, then makes call to generateRRDGraphics   
     
     """        
-        
+    
+    setGlobalLanguageParameters()    
+    
     if not os.path.isdir( StatsPaths.STATSLOGGING  ):
         os.makedirs( StatsPaths.STATSLOGGING  , mode=0777 )
     
