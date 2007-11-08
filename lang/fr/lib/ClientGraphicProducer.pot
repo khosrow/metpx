@@ -5,7 +5,7 @@ msgstr "Appel à mergeHourlyPickles."
 
 #: ClientGraphicProducer.py:178
 msgid "Parameters used : %s %s %s"
-msgstr "Paramètres utilisés"
+msgstr "Paramètres utilisés : %s %s %s"
 
 #: ClientGraphicProducer.py:268
 msgid "All"
