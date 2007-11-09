@@ -46,7 +46,7 @@ msgstr "latence"
 
 #: generateGraphics.py:136 generateGraphics.py:145
 msgid "bytecount"
-msgstr "nbreDebytes"
+msgstr "nbreDeBytes"
 
 #: generateGraphics.py:136 generateGraphics.py:145
 msgid "errors"
