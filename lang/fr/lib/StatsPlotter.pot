@@ -22,7 +22,7 @@ msgstr "erreurs"
 
 #: StatsPlotter.py:289 StatsPlotter.py:298 StatsPlotter.py:580
 msgid "filecount"
-msgstr "nbreDefichiers"
+msgstr "nbreDeFichiers"
 
 #: StatsPlotter.py:332
 msgid "Error in getPairs."
@@ -42,7 +42,7 @@ msgstr "Avec les valeurs totales de chaques minutes."
 
 #: StatsPlotter.py:428
 msgid "%s for %s for a span of %s hours ending at %s"
-msgstr "%s pour %s ppour une durée de %s heures se terminant le %s"
+msgstr "%s pour %s pour une durée de %s heures se terminant le %s"
 
 #: StatsPlotter.py:428
 msgid "MAX: "
@@ -54,7 +54,7 @@ msgstr "MOYENNE: "
 
 #: StatsPlotter.py:428
 msgid "MIN: "
-msgstr "MIN:"
+msgstr "MIN: "
 
 #: StatsPlotter.py:534
 msgid "time (hours)"
@@ -91,7 +91,7 @@ msgstr "\"Fichier avec la max. lat. :%s\""
 
 #: StatsPlotter.py:656
 msgid "\"File with max. lat. :\""
-msgstr "\"Fichier avec la max. lat. :%s\""
+msgstr "\"Fichier avec la max. lat. :\""
 
 #: StatsPlotter.py:660 StatsPlotter.py:744
 msgid "\"# of files : %s \""
@@ -99,11 +99,11 @@ msgstr "\"# de fichiers : %s \""
 
 #: StatsPlotter.py:662
 msgid "\"# of files over %s seconds: %s \""
-msgstr "\"# de fichier au dela de %s secondes: %s \""
+msgstr "\"# de latences au dela de %s secondes: %s \""
 
 #: StatsPlotter.py:664
 msgid "\"%% of files over %s seconds: %3.2f %%\""
-msgstr "\"%% de fichiers au dela de %s seconds: %3.2f %%\""
+msgstr "\"%% de latences au dela de %s seconds: %3.2f %%\""
 
 #: StatsPlotter.py:706
 msgid "%s Bytes"
