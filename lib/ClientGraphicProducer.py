@@ -23,7 +23,7 @@ named COPYING in the root of the source directory tree.
 ##############################################################################
 """
 
-import os, time, sys
+import gettext, os, time, sys
 sys.path.insert(1, sys.path[0] + '/../../')
 """
     Small function that adds pxlib to the environment path.  
@@ -48,7 +48,7 @@ from pxStats.lib.ClientStatsPickler import ClientStatsPickler
 from pxStats.lib.FileStatsCollector import FileStatsCollector
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.PickleMerging import PickleMerging
-from pxStats.lib.StatsPlotter import StatsPlotter
+from pxStats.lib.StatsPlotterTest import StatsPlotter
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 
 
@@ -57,7 +57,7 @@ LOCAL_MACHINE = os.uname()[1]
 
 class ClientGraphicProducer:
         
-    def __init__( self, directory, fileType, clientNames = None , groupName = "",  timespan = 12, currentTime = None, productTypes = ["All"], logger = None, logging = True, machines = ["pds000"]  ):
+    def __init__( self, directory, fileType, clientNames = None , groupName = "",  timespan = 12, currentTime = None, productTypes = None, logger = None, logging = True, machines = None  ):
         """
             ClientGraphicProducer constructor. 
             
@@ -79,12 +79,12 @@ class ClientGraphicProducer:
             
         self.directory    = directory          # Directory where log files are located. 
         self.fileType     = fileType           # Type of log files to be used.    
-        self.machines     = machines           # Machines for wich to collect data. 
+        self.machines     = machines or []     # Machines for wich to collect data. 
         self.clientNames  = clientNames or []  # Client name we need to get the data from.
         self.groupName    = groupName          # Name for a group of clients to be combined.
         self.timespan     = timespan           # Number of hours we want to gather the data from. 
         self.currentTime  = currentTime        # Time when stats were queried.
-        self.productTypes  = productTypes      # Specific data types on wich we'll collect the data.
+        self.productTypes  = productTypes or ["All"] # Specific data types on wich we'll collect the data.
         self.loggerName   = 'graphs'           # Name of the logger
         self.logger       = logger             # Logger to use is logging == true.
         self.logging      = logging            # Whether or not to enable logging. 
@@ -99,7 +99,44 @@ class ClientGraphicProducer:
             self.logger = None        
     
     
+        ClientGraphicProducer.setGlobalLanguageParameters()
+    
+    
+    def  setGlobalLanguageParameters( language = 'fr'):
+        """
+            @summary : Sets up all the needed global language 
+                       variables so that they can be used 
+                       everywhere in this program.
             
+            
+            @param language: Language that is to be 
+                             outputted by this program. 
+         
+            @return: None
+            
+        """
+        
+        global LANGUAGE 
+        global translator
+        global _ 
+    
+        
+        LANGUAGE = language 
+        
+        if language == 'fr':
+            fileName = StatsPaths.STATSLANGFRLIB + "ClientGraphicProducer" 
+        elif language == 'en':
+            fileName = StatsPaths.STATSLANGENLIB + "ClientGraphicProducer"     
+        
+        translator = gettext.GNUTranslations(open(fileName))
+        
+        _ = translator.gettext    
+    
+    
+    setGlobalLanguageParameters = staticmethod(setGlobalLanguageParameters)  
+    
+            
+                
     def getStartTimeAndEndTime( self, collectUptoNow = False ):
         """
             Warning : collectUptoNow not yet supported in program !
@@ -131,17 +168,14 @@ class ClientGraphicProducer:
             
         """
         
-        
-        
-        dataCollection = [] 
-        
+        dataCollection = []         
          
         for client in self.clientNames : # 
                
             #Gather data from all previously created pickles....      
             if self.logger != None :                 
-                self.logger.debug( "Call to mergeHourlyPickles." )
-                self.logger.debug( "Parameters used : %s %s %s" %( startTime, endTime, client ) )
+                self.logger.debug( _("Call to mergeHourlyPickles." ) )
+                self.logger.debug( _("Parameters used : %s %s %s") %( startTime, endTime, client ) )
             
             if len( self.machines ) > 1 :   
                 clientArray = []
@@ -195,9 +229,7 @@ class ClientGraphicProducer:
             
             Usefull when using a specific productType 
         """
-        
-        
-        
+                
         for item in dataCollection: 
                 item.statsCollection.setMinMaxMeanMedians(  productTypes = self.productTypes, startingBucket = 0 , finishingBucket = len(item.statsCollection.fileEntries) -1 )
                 
@@ -233,12 +265,12 @@ class ClientGraphicProducer:
         #print startTime, endTime, types, self.clientNames, self.directory, self.fileType,self.groupName,self.machines, self.productTypes
                        
                    
-        if self.productTypes[0] != "All" and self.productTypes[0] != "all" and self.productTypes[0] != "*":
+        if self.productTypes[0] != _("All") and self.productTypes[0] != _("all") and self.productTypes[0] != "*":
              
             dataCollection = self.recalculateData( dataCollection )               
         
         if self.logger != None :         
-            self.logger.debug( "Call to StatsPlotter :Clients:%s, timespan:%s, currentTime:%s, statsTypes:%s, productTypes:%s :" %( self.clientNames, self.timespan, self.currentTime, types, self.productTypes ) )
+            self.logger.debug( _("Call to StatsPlotter :Clients:%s, timespan:%s, currentTime:%s, statsTypes:%s, productTypes:%s :") %( self.clientNames, self.timespan, self.currentTime, types, self.productTypes ) )
         
        
         plotter = StatsPlotter( stats = dataCollection, clientNames = self.clientNames, groupName = self.groupName, timespan = self.timespan, currentTime = endTime, now = False, statsTypes = types, productTypes = self.productTypes, logger = self.logger,logging = self.logging,  machines = self.machines, fileType = self.fileType  )
@@ -246,11 +278,12 @@ class ClientGraphicProducer:
         plotter.plot( createCopy )
                                              
         if self.logger != None :
-            self.logger.debug( "Returns from StatsPlotter." )
+            self.logger.debug( _("Returns from StatsPlotter.") )
             
-            self.logger.info ("Created Graphics for following call : Clients : %s, timespan : %s, currentTime : %s, statsTypes : %s, productTypes : %s :" %( self.clientNames, self.timespan, self.currentTime, types, self.productTypes ) )         
+            self.logger.info ( _("Created Graphics for following call : Clients : %s, timespan : %s, currentTime : %s, statsTypes : %s, productTypes : %s :") %( self.clientNames, self.timespan, self.currentTime, types, self.productTypes ) )         
             
         return plotter.buildImageName()   
+
       
 
 if __name__ == "__main__":
