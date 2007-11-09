@@ -31,7 +31,7 @@ named COPYING in the root of the source directory tree.
 
 """ IMPORTS """
 
-import os, time, sys
+import gettext, os, time, sys
 import cgi, cgitb; cgitb.enable()
 sys.path.insert(1, sys.path[0] + '/../../')
 sys.path.insert(2, sys.path[0] + '/../../..')
@@ -48,29 +48,14 @@ from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 
 
-
-"""
-   Define constants to be used for filling out the different select boxes. 
 """
 
-SUPPORTED_FILETYPES = [ "rx","tx"]
+    NOTES : CONSTANTS AND GLOBAL VARIABLES WHICH ARE USAUALLY DEFINED HERE ARE DEFINED IN 
+    THE setGlobalLanguageParameters METHOD.....
 
-RX_DATATYPES = [ "bytecount", "filecount","errors", "bytecount,errors", "bytecount,filecount", "filecount,errors", "bytecount,filecount,errors" ]
 
-TX_DATATYPES = [ "latency","bytecount","filecount", "errors", "bytecount,errors", "bytecount,filecount", "latency, bytecount", "filecount,errors", "latency,errors",
-                 "latency,filecount", "bytecount,filecount,errors", "latency,bytecount,filecount", "latency,bytecount,errors","latency,bytecount,filecount,errors"]
-                
+"""
 
-FIXED_TIMESPANS = [ "daily" , "weekly", "monthly", "yearly" ] 
-
-FIXED_PARAMETERS =  [ "fixedCurrent", "fixedPrevious" ] 
-
-PRE_DETERMINED_SPANS = [ 'daily', 'weekly', 'monthly',  'yearly' ]
-
-FIXED_SPANS = [ 'fixedCurrent', 'fixedPrevious' ]
-
-MAIN_MACHINES   = []
-OTHER_MACHINES  = []
 
 
 
@@ -131,7 +116,7 @@ def getAvailableMachines():
         @summary : Based on the list of machines found within the 
                    config files, returns the list of avaiable machines.
                    
-        @return: returns the list of avaiable machines.             
+        @return: returns the list of available machines.             
     
     """
     
@@ -206,7 +191,7 @@ def printChoiceOfSourlients( form ):
         print """
                      
                             <td>
-                                 <div name="sourlientListLabel" id="sourlientListLabel">Client(s)/Source(s) :</div>
+                                 <div name="sourlientListLabel" id="sourlientListLabel"> + """ +_("Client(s)/Source(s)") + """ :</div>
                                  <select size=5 name="sourlientList" id="sourlientList" style="font: 14px;width: 300px;"height: 20px;" multiple>
         """
         
@@ -222,8 +207,8 @@ def printChoiceOfSourlients( form ):
                                                             
                                 <br>   
                         
-                                <input type=button class="button" name="addButton" id="addButton" value="Add Clients" onclick ="javascript:handleAddSourlientsRequest();"></input>    
-                                <input type=button class="button" name="deleteButton" id="deleteButton" value="Delete client" onclick ="javascript:deleteFromList(sourlientList);"></input> 
+                                <input type=button class="button" name="addButton" id="addButton" value=""" + '"' +  _("Add Clients") + '"' + """ onclick ="javascript:handleAddSourlientsRequest();"></input>    
+                                <input type=button class="button" name="deleteButton" id="deleteButton" value=""" + '"' + _("Delete client") + '"' + """ onclick ="javascript:deleteFromList(sourlientList);"></input> 
                                    
             """
     else:
@@ -233,17 +218,17 @@ def printChoiceOfSourlients( form ):
 
                     <td>
                         
-                        <div name="sourlientListLabel" id="sourlientListLabel">Client(s)/Source(s) :</div>
+                        <div name="sourlientListLabel" id="sourlientListLabel">""" + _("Client(s)/Source(s) : ") + """</div>
                         <select size=5 name="sourlientList" id="sourlientList" style="font: 14px;width: 300px;"height: 20px;" multiple>
-                            <option value="File type required to enable this."">File type required to enable this.</option>
-                             <option value="Machine is required to enable this.">File type required to enable this.</option>
+                            <option value="File type required to enable this."">""" + _("File type required to enable this.") + """</option>
+                             <option value="Machine is required to enable this.">""" + _("Machine is required to enable this.") + """</option>
                         </select>                   
                
                         <br>               
                     
-                        <input type=button name="addButton" id="addButton" class="button" value="Add Sourlients" onclick ="javascript:handleAddSourlientsRequest();" DISABLED ></input> 
+                        <input type=button name="addButton" id="addButton" class="button" value=""" + '"' + _("Add Sourlients") + '"' + """ onclick ="javascript:handleAddSourlientsRequest();" DISABLED ></input> 
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        <input type=button name="deleteButton" id="deleteButton" class="button" value="Delete Sourlients" onclick ="javascript:deleteFromList(sourlientList);" DISABLED></input> 
+                        <input type=button name="deleteButton" id="deleteButton" class="button" value=""" + '"' +_("Delete Sourlients") + '"' + """ onclick ="javascript:deleteFromList(sourlientList);" DISABLED></input> 
        
                     </td>
                     
@@ -312,20 +297,20 @@ def printAjaxRequestsScript():
                    
                    if( strURL == 'popupSourlientAdder.py'){ 
                         parameters = getParametersForPopups();
-                        document.getElementById("errorLabel").innerHTML = '<font color="#FFFFFF">Application status : Updating list of sources and clients.</font>'
+                        document.getElementById("errorLabel").innerHTML = "<font color='#FFFFFF'>""" +_("Application status : Updating list of sources and clients.") + """</font>";
                         errors = searchFormForPopUpErrors(); 
                      
                    }else if( strURL == 'graphicsRequestBroker.py' ){
-                        document.getElementById("errorLabel").innerHTML = '<font color="#FFFFFF">Application status : Executing the graphics creation request...</font>';
+                        document.getElementById("errorLabel").innerHTML = "<font color='#FFFFFF'>""" +_("Application status : Executing the graphics creation request...") + """</font>";
                         parameters = getParametersForGraphicsRequests();
                         errors = searchFormForErrors();
                         
                    }else if( strURL == 'updateWordsInDB.py'){
-                       document.getElementById("errorLabel").innerHTML = '<font color="#FFFFFF">Application status : Updating Database(s).</font>'
+                       document.getElementById("errorLabel").innerHTML = "<font color='#FFFFFF'>""" +_("Application status : Updating Database(s).") + """</font>"
                        parameters = getParametersForWordUpdate( callingObject );
                    
                    }else if ( strURL == "generateImageWebPage.py"){
-                       document.getElementById("errorLabel").innerHTML = '<font color="#FFFFFF">Application status : Generating image web page.(s).</font>'
+                       document.getElementById("errorLabel").innerHTML = "<font color='#FFFFFF'>""" +_("Application status : Generating image web page.(s).") + """</font>"
                        parameters = getParametersForImageWebPage( );
                    
                    }                 
@@ -367,11 +352,11 @@ def printAjaxRequestsScript():
 
                             var actionPart = response.split(';')[2];
                             var action = actionPart.split("action=")[1];
-                            document.getElementById("errorLabel").innerHTML = '<font color="#FFFFFF">Application status : Awaiting request(s).</font>';
+                            document.getElementById("errorLabel").innerHTML = "<font color='#FFFFFF'>""" + _("Application status : Awaiting request(s).") + """</font>";
                             executeAjaxReplyAction( action );
                         
                         }else{
-                            document.getElementById("errorLabel").innerHTML = '<font color="#FFFFFF">Application status : Awaiting request(s).</font>';
+                            document.getElementById("errorLabel").innerHTML = "<font color='#FFFFFF'>""" + _("Application status : Awaiting request(s).") + """</font>";
                         }
                         
                         if( image !="''" && image != '"' && image != '""' && image != '' && image!= null && image.length >1 ){
@@ -414,7 +399,7 @@ def printAjaxRequestsScript():
                            }     
                            
                            
-                           document.getElementById('imageCounter').innerHTML = '<font color="FFFFFF"> Now showing image ' + (which+1) + ' of ' + realImageListLength +'.</font>' ;          
+                           document.getElementById('imageCounter').innerHTML = "<font color='FFFFFF'> """ +_("Now showing image") + """ ' + (which+1) + ' """ +_("of") + """ ' + realImageListLength +'.</font>" ;          
 
     """
         
@@ -562,7 +547,7 @@ def printAjaxRequestsScript():
                      }
 
                     qstr = '?querier=escape("graphicsRequestPage.py")&endTime=' + escape(endTime) +  '&span=' + escape(span);//'&groupName=' + escape(groupName) +
-                    qstr = qstr + '&fileType=' + escape(fileType) + '&machines=' + escape(machines) +'&statsTypes=' + escape(statsTypes);
+                    qstr = qstr + '&fileType=' + escape(fileType) + '&machines=' + machines  +'&statsTypes=' + escape(statsTypes);
                     qstr = qstr + '&preDeterminedSpan=' + escape(preDeterminedSpan) + '&fixedSpan=' + escape(fixedSpan);
                     qstr = qstr + '&sourLients=' + escape( sourlients );
                     qstr = qstr  + '&combineSourlients=' + escape( combineSourlients );//+ '&individual=' + escape( individual )
@@ -638,20 +623,20 @@ def printAjaxRequestsScript():
                     
                     
                     if( fileType.match('Select') !=null ){
-                        errors= 'Error. Please select a filetype.'
+                        errors= '""" +_("Error. Please select a filetype.") + """'
                     
                     }else if(machines.match('Select') !=null ){
-                         errors = 'Error. Please select a machine.'
+                         errors = '""" + _("Error. Please select a machine.") + """'
                          
                     }else if(statsTypes.match('Select') !=null ){
-                         errors = 'Error. Please select a stats type.'
+                         errors = '""" +_("Error. Please select a stats type.") +"""'
                     
                     }else if( fixedSpan.match('Select') == null && determinedSpan.match('Pre') != null  ){
-                        errors = 'Error. Cannot specify fixed span without determined span.';
+                        errors = '""" +_("Error. Cannot specify fixed span without determined span.") + """';
                     
                     
                     }else if( sourlients.length == 0 ){
-                       errors = 'Error. Please add a client/source to the list or specify a group name.';
+                       errors = '""" + _("Error. Please add a client/source to the list or specify a group name.") + """';
                     
                     //}else if( sourlients.length != 0 && groupName != '' ){
                     //    errors = 'Error. Group name and specific clients/sources names cannot be used at the same time.';
@@ -663,17 +648,17 @@ def printAjaxRequestsScript():
                         if( span != ''){
                             if ( isInt(span) == true ){
                                 if( span < 1 || span > 50000 ){
-                                    errors = 'Error. Span value must be between 1 and 50000.'
+                                    errors = '""" +_("Error. Span value must be between 1 and 50000.") + """'
                             }
                         
                             }else{
-                                errors = 'Error. Span value must be a NUMERICAL value between 1 and 48.'
+                                errors = '""" + _("Error. Span value must be a NUMERICAL value between 1 and 48.") + """'
                             }
                         
                         }else{
                         
                             if( determinedSpan.match('Select') != null ){
-                                errors = 'Error. Specify a determined span or use the span option in the advanced options.'
+                                errors = """ + '"' + _("Error. Specify a determined span or use the span option in the advanced options.") + """"
                             }
                         
                         }
@@ -681,7 +666,7 @@ def printAjaxRequestsScript():
                         
                     }else if(optionalOptionsVisibility =='hidden'){
                         if( determinedSpan.match('Select') != null ){
-                            errors = 'Error. Specify a determined span or use the span option in the advanced options.'
+                            errors = """ + '"'+ _("Error. Specify a determined span or use the span option in the advanced options.") + """"
                         }
                     
                     }
@@ -765,7 +750,7 @@ def printSlideShowScript( images ):
                 }
                 
                 function keeptrack(){
-                    document.getElementById('imageCounter').innerHTML = '<font color="FFFFFF"> Now showing image ' + (which+1) + ' of ' + realImageListLength +'.</font>' ; 
+                    document.getElementById('imageCounter').innerHTML = "<font color='FFFFFF'> """ +_("Now showing image") +"""' + (which+1) + ' """ + _("of") + """ ' + realImageListLength +'.</font>" ; 
                 }
                 
                 
@@ -865,7 +850,7 @@ def printImageFieldSet( form ):
     
     print """
          <fieldset class="imgFieldset">
-            <legend class="legendLevel1">Resulting graphic(s)</legend>
+            <legend class="legendLevel1">""" + _("Resulting graphic(s)") + """</legend>
             <table border="0" cellspacing="0" cellpadding="0">
                 <tr>
                     <td>
@@ -883,9 +868,9 @@ def printImageFieldSet( form ):
         </fieldset>
 
         <fieldset class="fieldSetaction">
-             <input type=button class="largeButton"  value="Previous image result." onclick ="backward();return false;"></input> 
-             <input type=button class="button"  value="View all images" onclick ="showAllImages(); return false;"></input> 
-             <input type=button class="largeButton"  value="Next image result."     onclick ="forward();return false;" ></input> 
+             <input type=button class="largeButton"  value=""" + '"' +_("Previous image result") + '"' + """ onclick ="backward();return false;"></input> 
+             <input type=button class="largeButton"  value=""" + '"' + _("View all images") + '"' + """ onclick ="showAllImages(); return false;"></input> 
+             <input type=button class="largeButton"  value=""" + '"' + _("Next image result") + '"' + """ onclick ="forward();return false;" ></input> 
              <div name="imageCounter" id ="imageCounter" style="display:inline;"></div>
         </fieldset>
 
@@ -912,7 +897,7 @@ def printGroupTextBox( form ):
     
     print """
                         <td width = 210>
-                            <label for="groupName">Group name:</label><br>
+                            <label for="groupName">""" +  _("Group name:") + """</label><br>
                              <INPUT TYPE="TEXT" class="text" NAME="groupName" value="%s" id="groupName" style="font: 14px;" >
                              <div id="autosuggest"><ul></ul></div>
                              <script language="Javascript">
@@ -949,7 +934,7 @@ def printProductsTextBox( form ):
         
     print """
                         <td width = 210>
-                            <label for="products">Products:</label><br>
+                            <label for="products">""" + _("Products:") + """</label><br>
                              <INPUT TYPE="TEXT"  NAME="products" value="%s" id="products" style="font: 14px;" >
                              <div id="autosuggest"><ul></ul></div>
                              <script language="Javascript">                                 
@@ -990,7 +975,7 @@ def printSpanTextBox( form ):
     
     print """
                         <td width = 210>    
-                            <label for="span">Span(in hours):</label><br>
+                            <label for="span">""" +_("Span(in hours):") + """</label><br>
                             <INPUT TYPE=TEXT class="text" NAME="span" id="span" value = "%s" style="font: 14px;">     
                         </td>    
     """%( span ) 
@@ -1015,9 +1000,9 @@ def printFileTypeComboBox( form ):
     
     print """
                         <td width = 210>
-                            <label for="fileType">FileType:</label><br>
+                            <label for="fileType">""" + _("FileType:") + """</label><br>
                             <select class="dropDownBox" name="fileType" id="fileType" OnChange="JavaScript:executeAjaxRequest( 'popupSourlientAdder.py', '' );Javascript:updateStatsTypes( document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].text );Javascript:updateLabelsOnFileTypeChange();javascript:clearSourlientsList(); javascript:enableOrDisableSourlientsAdder();">
-                                <option>Select a file type...</option>
+                                <option>""" + _("Select a file type...") + """</option>
     """
     
     
@@ -1055,9 +1040,9 @@ def printSpecificSpanComboBox( form ):
     
     print """
                         <td width = 210px> 
-                            <label for="preDeterminedSpan">Determined spans : </label><br>
+                            <label for="preDeterminedSpan">""" + _("Determined spans : ") + """</label><br>
                             <select class="dropDownBox" name="preDeterminedSpan" id="preDeterminedSpan" onClick="JavaScript:enableOrDisableSpan();enableOrDisableProducts();JavaScript:updateFixedSpans();">     
-                            <option>Select a span...</option>               
+                            <option>""" + _("Select a span...") + """</option>               
     """
     
     
@@ -1090,9 +1075,9 @@ def printFixedSpanComboBox( form ):
     
     print """
                         <td width = 210px> 
-                            <label for="fixedSpan">Fixed spans : </label><br>
+                            <label for="fixedSpan">""" +_("Fixed spans : ") + """</label><br>
                             <select class="dropDownBox" name="fixedSpan" >     
-                            <option>Select fixed span...</option>               
+                            <option>""" + _("Select fixed span...") + """</option>               
     """
     
     for span in FIXED_SPANS:
@@ -1125,10 +1110,10 @@ def printMachinesComboBox( form ):
     #"javascript: this.style.width='auto';" onblur="javascript: this.style.width=125;"
     print """
                         <td width = 210px> 
-                            <label for="machines">Machine(s):</label><br>
+                            <label for="machines">""" + _("Machine(s):") + """</label><br>
                             <select class="dropDownBox"  name="machines" id="machines" OnClick="JavaScript:executeAjaxRequest( 'popupSourlientAdder.py', '' ); JavaScript:clearSourlientsList();javascript:enableOrDisableSourlientsAdder(); ">     
-                            <option style="width:500px">Select machine(s)...</option>
-                            <optgroup  style="width:500px" bgcolor="#7092B9" label="Main machine(s):">Main machine(s):</optgroup>                
+                            <option style="width:500px">""" + _("Select machine(s)...") + """</option>
+                            <optgroup  style="width:500px" bgcolor="#7092B9" label=""" + '"' + _("Main machine(s):") + '"' + """>"""+ _("Main machine(s):") + """</optgroup>                
     """
     
     for machines in MAIN_MACHINES:
@@ -1145,7 +1130,7 @@ def printMachinesComboBox( form ):
     
     
     print """
-                            <optgroup style="width:300px"bgcolor="#7092B9" label="Other machine(s):">Other machine(s):</optgroup> 
+                            <optgroup style="width:300px"bgcolor="#7092B9" label=""" +'"' + _("Other machine(s):") + '"' + """>""" +_("Other machine(s):") + """ </optgroup> 
     
     """
     
@@ -1163,6 +1148,8 @@ def printMachinesComboBox( form ):
                             </select>
                        </td>     
     """
+    
+    
     
 def printStatsTypesComboBox(  form ):
     """    
@@ -1195,9 +1182,9 @@ def printStatsTypesComboBox(  form ):
         
     print """
                         <td width = 210px> 
-                            <label for="statsTypes">Stats type(s):</label><br>
+                            <label for="statsTypes">""" + _("Stats type(s):") + """</label><br>
                             <select class="dropDownBox" name="statsTypes" class="statsTypes">     
-                                <option>Select stats types.</option>               
+                                <option>""" + _("Select stats types.") +"""</option>               
     """
     
     for choice in listOfChoices:
@@ -1238,14 +1225,15 @@ def printCombineHavingrunCheckbox( form ):
     if havingRun == "true" :
             print """
                                     
-                            <INPUT TYPE="checkbox" NAME="havingRun"  CHECKED>Having run.
+                            <INPUT TYPE="checkbox" NAME="havingRun"  CHECKED>""" + _("Having run.") + """
                          
             """  
     else:
         print """                                    
-                            <INPUT TYPE="checkbox" NAME="havingRun">Having run.                          
+                            <INPUT TYPE="checkbox" NAME="havingRun">""" + _("Having run.") + """                          
         """    
      
+
 
 def printIndividualCheckbox( form ):
     """    
@@ -1266,13 +1254,13 @@ def printIndividualCheckbox( form ):
     if individual == "true" :
             print """
                             <td>        
-                                <INPUT TYPE="checkbox" name="individual"  checked DISABLED>Individual machines( Not yet implemented ).
+                                <INPUT TYPE="checkbox" name="individual"  checked DISABLED>""" + _("Individual machines( Not yet implemented ).") + """
                             </td. 
             """  
     else:
         print """               
                             <td>
-                                <INPUT TYPE="checkbox" name="individual" DISABLED>Individual machines( Not yet implemented).                          
+                                <INPUT TYPE="checkbox" name="individual" DISABLED>""" +_("Individual machines( Not yet implemented).") + """                          
                             </td>
         """     
 
@@ -1297,12 +1285,12 @@ def printTotalCheckbox( form ):
     if total == "true" :
             print """
                             <td>        
-                                <INPUT TYPE="checkbox" NAME="total"  CHECKED>Total.
+                                <INPUT TYPE="checkbox" NAME="total"  CHECKED>""" + _("Total.") + """
                              </td>
             """  
     else:
         print """           <td>                         
-                                <INPUT TYPE="checkbox" NAME="total">Total.                          
+                                <INPUT TYPE="checkbox" NAME="total">""" + _("Total.") + """                          
                             </td>
         """ 
 
@@ -1330,7 +1318,7 @@ def printCombineSourlientsCheckbox( form ):
                          <td>   
                             <br> 
                             <INPUT TYPE="checkbox" NAME="combineSourlients"  CHECKED>
-                            <div id="combineSourlientsLabel" style="display:inline;">Combine source(s)/client(s).</div>
+                            <div id="combineSourlientsLabel" style="display:inline;">""" +_("Combine source(s)/client(s).") + """</div>
                          </td>   
                          
             """  
@@ -1340,7 +1328,7 @@ def printCombineSourlientsCheckbox( form ):
                         <td>       
                             <br> 
                             <INPUT TYPE="checkbox" NAME="combineSourlients"  >
-                            <div id="combineSourlientsLabel" style="display:inline;">Combine source(s)/client(s).</div>
+                            <div id="combineSourlientsLabel" style="display:inline;">""" +_("Combine source(s)/client(s).") + """</div>
                         </td>     
                           
         """    
@@ -1362,9 +1350,9 @@ def printEndTime( form ):
         
     print  """         
                         <td bgcolor="#FFFFFF" valign="top" width = 210>
-                            <label for="endTime">End Time Date:</label><br>
+                            <label for="endTime">""" + _("End Time Date:") + """</label><br>
                             <input type="Text" class="text" name="endTime"  value="%s" width = 150 style="font: 14px;">
-                            <a href="javascript:cal1.popup();"><img src="../../images/cal.gif" width="16" height="16" border="0" alt="Click Here to Pick up the date"></a>
+                            <a href="javascript:cal1.popup();"><img src="../../images/cal.gif" width="16" height="16" border="0" alt="""%( endTime )  + '"' + _("Click Here to Pick up the date") + '"' + """></a>
                         
                             <script language="JavaScript">
                                 <!-- // create calendar object(s) just after form tag closed -->
@@ -1376,7 +1364,7 @@ def printEndTime( form ):
                             </script>                            
                         </td>
                 
-    """ %( endTime )     
+    """     
     
    
     
@@ -1396,7 +1384,7 @@ def printGnuPlotInputForm(  form   ):
         
     print """   
             <fieldset class="fieldsetLevel1">
-                <legend class="legendLevel1">Required fields</legend>
+                <legend class="legendLevel1">""" +_("Required fields") + """</legend>
                
                 <table bgcolor="#FFF4E5">
                                            
@@ -1427,7 +1415,7 @@ def printGnuPlotInputForm(  form   ):
         
         <fieldset class="fieldSetOptional" >
             <div name="advancedOptionsLinkDiv" id="advancedOptionsLinkDiv" class="left">
-               <a href="JavaScript:showAdvancedOptions();" name="advancedOptionsLink" id="advancedOptionsLink">Show advanced options...</a>
+               <a href="JavaScript:showAdvancedOptions();" name="advancedOptionsLink" id="advancedOptionsLink">""" +_("Show advanced options...") +"""</a>
             </div>
             <br>
     """
@@ -1462,8 +1450,8 @@ def printGnuPlotInputForm(  form   ):
     print """
             <fieldset class="fieldSetAction">     
                 <div class="left" >
-                    <input type="button"  class="largeButton"  name="generateGraphics" value="Generate graphic(s)" onclick="JavaScript:executeAjaxRequest('graphicsRequestBroker.py')" ></input> 
-                    <div id="errorLabel" style="display:inline;"> <font color="#FFFFFF">&nbsp;&nbsp;&nbsp; Application status : Awaiting request(s).</font></div>     
+                    <input type="button"  class="largeButton"  name="generateGraphics" value=""" + '"' + _("Generate graphic(s)") + '"' + """ onclick="JavaScript:executeAjaxRequest('graphicsRequestBroker.py')" ></input> 
+                    <div id="errorLabel" style="display:inline;"> <font color="#FFFFFF">&nbsp;&nbsp;&nbsp; """ + _("Application status : Awaiting request(s).") + """</font></div>     
                 </div>         
                                     
     """
@@ -1471,7 +1459,7 @@ def printGnuPlotInputForm(  form   ):
 
     print """
                 <div class="right">
-                      <input type=button  class="button"   name="help "value="Get Help" onclick ="wopen( '../../html/helpPages/gnuplotHelp.html', 'popup', 800, 670 );"></input>
+                      <input type=button  class="button"   name="help "value=""" + '"' + _("Get Help") + '"'  + """ onclick ="wopen( '../../html/helpPages/gnuplotHelp.html', 'popup', 800, 670 );"></input>
                 </div>
     """
     
@@ -1514,7 +1502,7 @@ def printRRDInputForm(  form   ):
     print """
         <form name="inputForm"  method="post" class="fieldset legend">
             <fieldset class="fieldSetLevel1">
-                <legend class="legendLevel1">RRD fields</legend>
+                <legend class="legendLevel1">""" + _("RRD fields") + """</legend>
                 
                 <table>
                     <tr>
@@ -1541,7 +1529,7 @@ def printRRDInputForm(  form   ):
         
         <fieldset class="fieldSetOptional" >
             <div name="advancedOptionsLinkDiv" id="advancedOptionsLinkDiv">
-               <a href="JavaScript:showAdvancedOptions();" name="advancedOptionsLink" id="advancedOptionsLink"> Show advanced options...</a>
+               <a href="JavaScript:showAdvancedOptions();" name="advancedOptionsLink" id="advancedOptionsLink">""" +_("Show advanced options...") + """</a>
             </div>
     """
     
@@ -1575,15 +1563,15 @@ def printRRDInputForm(  form   ):
     print """
             <fieldset class="fieldSetAction">
                 <div class="left" >     
-                     <input type="button"  class="largeButton"  name="generateGraphics" value="Generate graphic(s)" onclick="JavaScript:executeAjaxRequest('graphicsRequestBroker.py')"></input> 
-                     <div name="errorLabel "id="errorLabel" style="display:inline;"><font color="#FFFFFF">&nbsp;&nbsp;&nbsp; Application status : Awaiting request(s).</font></div> 
+                     <input type="button"  class="largeButton"  name="generateGraphics" value=""" + '"' + _("Generate graphic(s)") + '"' + """ onclick="JavaScript:executeAjaxRequest('graphicsRequestBroker.py')"></input> 
+                     <div name="errorLabel "id="errorLabel" style="display:inline;"><font color="#FFFFFF">&nbsp;&nbsp;&nbsp; """ + _("Application status : Awaiting request(s).") + """</font></div> 
                 </div>    
     """
 
 
     print"""
              <div class="right">
-                <input type=button  class="button"   name="help "value="Get Help" onclick ="wopen( '../../html/helpPages/rrdHelp.html', 'popup', 830, 1100 );">
+                <input type=button  class="button"   name="help "value=""" + '"' + _("Get Help") + """ onclick ="wopen( '../../html/helpPages/rrdHelp.html', 'popup', 830, 1100 );">
             </div>
             
 
@@ -1616,7 +1604,7 @@ def printInputForm( form ):
     print """
         <form name="inputForm"  method="post" class="fieldset legend">
             <fieldset class="fieldSetLevel1">
-                <legend class="legendLevel1">Input fields</legend>
+                <legend class="legendLevel1">""" + _("Input fields") + """</legend>
                 
                 <table>
                     <tr>
@@ -1643,7 +1631,7 @@ def printInputForm( form ):
         
         <fieldset class="fieldSetOptional" >
             <div name="advancedOptionsLinkDiv" id="advancedOptionsLinkDiv">
-               <a href="JavaScript:showAdvancedOptions();" name="advancedOptionsLink" id="advancedOptionsLink"> Show advanced options...</a>
+               <a href="JavaScript:showAdvancedOptions();" name="advancedOptionsLink" id="advancedOptionsLink"> """ + _("Show advanced options...") + """</a>
             </div>
     """
     
@@ -1676,19 +1664,19 @@ def printInputForm( form ):
     print """
             <fieldset class="fieldSetAction">
                 <div class="left" >     
-                     <input type="button"  class="largeButton"  name="generateGraphics" value="Generate graphic(s)" onclick="JavaScript:executeAjaxRequest('graphicsRequestBroker.py')"></input> 
-                     <div name="errorLabel "id="errorLabel" style="display:inline;"><font color="#FFFFFF">&nbsp;&nbsp;&nbsp; Application status : Awaiting request(s).</font></div> 
+                     <input type="button"  class="largeButton"  name="generateGraphics" value=""" + '"' + _("Generate graphic(s)") + '"' +  """ onclick="JavaScript:executeAjaxRequest('graphicsRequestBroker.py')"></input> 
+                     <div name="errorLabel "id="errorLabel" style="display:inline;"><font color="#FFFFFF">&nbsp;&nbsp;&nbsp; """ + _("Application status : Awaiting request(s).") + """</font></div> 
                 </div>    
     """
 
 
     print"""
              <div class="right">
-                <input type=button  class="button"   name="help "value="Get Help" onclick ="wopen( '../../html/helpPages/requestHelp.html', 'popup', 830, 1100 );">
+                <input type=button  class="button"   name="help "value=""" +'"' + _("Get Help") + '"' + """ onclick ="wopen( '../../html/helpPages/requestHelp_%s.html', 'popup', 830, 1100 );">
             </div>
-            
-
-    """
+    
+        
+    """%(LANGUAGE)
 
     print """
             </fieldset>
@@ -1891,7 +1879,7 @@ def printHead( form ):
     """
     
         
-    print """
+    print ("""
             <!--Java scripts sources -->
             <script language="Javascript" src="../js/autosuggest.js"></script>
             <script src="../js/calendar1.js"></script>
@@ -1942,11 +1930,11 @@ def printHead( form ):
                     var fileType   = document.getElementById('fileType')[document.getElementById('fileType').selectedIndex].text;
                     var machines   = document.getElementById('machines')[document.getElementById('machines').selectedIndex].text;
                 
-                    if( fileType.match('Select') !=null ){
-                        errors= 'Error. Please select a filetype.'
+                    if( fileType.match(""" + "'" + _("Select") + "'" + """) !=null ){
+                        errors= """ + "'" + _("Error. Please select a filetype.") + "'" + """
                     
                     }else if(machines.match('Select') !=null ){
-                         errors = 'Error. Please select a machine.'
+                         errors = """ + "'" + _("Error. Please select a machine.") + "'" + """
                          
                     }
                 
@@ -2054,23 +2042,23 @@ def printHead( form ):
                 
                     if ( document.inputForm.fileType[document.inputForm.fileType.selectedIndex].value == 'rx' ){
                         
-                       document.inputForm.addButton.value    = 'Add Sources   ';
-                       document.inputForm.deleteButton.value = 'Delete Sources';
-                       document.getElementById( 'combineSourlientsLabel').innerHTML = 'Combine source(s).&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
-                       document.getElementById( 'sourlientListLabel').innerHTML = 'Sources : ';
+                       document.inputForm.addButton.value    = """ + "'" + _("Add Sources   ") + "'" + """;
+                       document.inputForm.deleteButton.value = """ + "'" + _("Delete Sources") + "'" + """;
+                       document.getElementById( 'combineSourlientsLabel').innerHTML = """ + "'" + _("Combine source(s).") +  """&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+                       document.getElementById( 'sourlientListLabel').innerHTML = """ + "'" + _("Sources : ") + "'" + """;
                         
                     }else if( document.inputForm.fileType[document.inputForm.fileType.selectedIndex].value == 'tx' ){
                         
-                        document.inputForm.addButton.value    = 'Add Clients';
-                        document.inputForm.deleteButton.value = 'Delete Clients';
-                        document.getElementById( 'combineSourlientsLabel').innerHTML = 'Combine client(s).&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
-                        document.getElementById( 'sourlientListLabel').innerHTML = 'Clients : ';
+                        document.inputForm.addButton.value    = """ + "'" + _("Add Clients") + "'" + """; 
+                        document.inputForm.deleteButton.value = """ + "'" + _("Delete Clients") + "'" + """;
+                        document.getElementById( 'combineSourlientsLabel').innerHTML = """ + "'" +_("Combine client(s).") +  """&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+                        document.getElementById( 'sourlientListLabel').innerHTML = """ + "'" + _("Clients : ") + "'"  +""";
                         
                     }else{
-                        document.inputForm.addButton.value    = 'Add ';
-                        document.inputForm.deleteButton.value = 'Delete';
-                        document.getElementById( 'combineSourlientsLabel').innerHTML = 'Combine sources/clients.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
-                        document.getElementById( 'sourlientListLabel').innerHTML = 'Client(s)/Source(s) :';
+                        document.inputForm.addButton.value    = """ + "'" + _("Add") + "'" +""";
+                        document.inputForm.deleteButton.value = """ + "'" + _("Delete") + "'" +""";
+                        document.getElementById( 'combineSourlientsLabel').innerHTML = """ + "'" + _("Combine sources/clients.") + """&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+                        document.getElementById( 'sourlientListLabel').innerHTML = """ + "'" + _("Client(s)/Source(s) :") + """';
                     
                     }
                 }
@@ -2078,7 +2066,7 @@ def printHead( form ):
                 
             </script>           
                        
-    """
+    """ )
     
     
     rxStatsTypes = RX_DATATYPES
@@ -2117,45 +2105,45 @@ def printHead( form ):
         </script>          
         <script language="JavaScript">
                  function showAdvancedOptions(){
-                     document.getElementById("advancedOptionsLinkDiv").innerHTML = "<a href='JavaScript:hideAdvancedOptions();' name='advancedOptionsLink' id='advancedOptionsLink'> Hide advanced options...</a>";
+                     document.getElementById("advancedOptionsLinkDiv").innerHTML = "<a href='JavaScript:hideAdvancedOptions();' name='advancedOptionsLink' id='advancedOptionsLink'> """ +_("Hide advanced options...") + """</a>";
                      document.getElementById("advancedOptions").style.visibility = "visible";
                      
                  }     
                  
                  function hideAdvancedOptions(){
                      document.getElementById("advancedOptions").style.visibility = "hidden";
-                     document.getElementById("advancedOptionsLinkDiv").innerHTML= "<a href='JavaScript:showAdvancedOptions();' name='advancedOptionsLink' id='advancedOptionsLink> Show advanced options...</a>";
+                     document.getElementById("advancedOptionsLinkDiv").innerHTML= "<a href='JavaScript:showAdvancedOptions();' name='advancedOptionsLink' id='advancedOptionsLink> """ + _("Show advanced options...") + """</a>";
                  }
                  
                  
                  function updateFixedSpans(){
                      
-                     determinedSpan= document.inputForm.preDeterminedSpan[ document.inputForm.preDeterminedSpan.selectedIndex ].text;;
+                     determinedSpan= document.inputForm.preDeterminedSpan[ document.inputForm.preDeterminedSpan.selectedIndex ].text;
                          document.inputForm.fixedSpan.options[0].selected=true;
-                     if( determinedSpan == "daily"){
-                         document.inputForm.fixedSpan.options[0].text = "Past 24 hours";
-                         document.inputForm.fixedSpan.options[1].text = "Current day.";
-                         document.inputForm.fixedSpan.options[2].text = "Previous day.";                     
+                     if( determinedSpan == """ + '"' + _("daily") + '"' + """ ){
+                         document.inputForm.fixedSpan.options[0].text =""" + '"' + _("Past 24 hours") + '"' + """;
+                         document.inputForm.fixedSpan.options[1].text =""" + '"' + _("Current day.") + '"' + """;
+                         document.inputForm.fixedSpan.options[2].text =""" + '"' + _( "Previous day.") + '"' + """;                     
                      
-                     }else if( determinedSpan == "weekly" ){
-                         document.inputForm.fixedSpan.options[0].text = "Past 7 days.";
-                         document.inputForm.fixedSpan.options[1].text = "Current week.";
-                         document.inputForm.fixedSpan.options[2].text = "Previous week.";                        
+                     }else if( determinedSpan == """ + '"' + _("weekly") + '"' + """  ){
+                         document.inputForm.fixedSpan.options[0].text =""" + '"' + _( "Past 7 days.") + '"' + """;
+                         document.inputForm.fixedSpan.options[1].text =""" + '"' + _( "Current week.") + '"' + """;
+                         document.inputForm.fixedSpan.options[2].text =""" + '"' + _("Previous week.") + '"' + """;                        
                      
-                     }else if( determinedSpan == "monthly" ){
-                         document.inputForm.fixedSpan.options[0].text = "Past 30 days.";
-                         document.inputForm.fixedSpan.options[1].text  = "Current month.";
-                         document.inputForm.fixedSpan.options[2].text  = "Previous month.";
+                     }else if( determinedSpan == """ + '"' + _("monthly") + '"' + """  ){
+                         document.inputForm.fixedSpan.options[0].text  =""" + '"' + _("Past 30 days.") + '"' + """;
+                         document.inputForm.fixedSpan.options[1].text  =""" + '"' + _( "Current month.") + '"' + """;
+                         document.inputForm.fixedSpan.options[2].text  =""" + '"' + _( "Previous month.") + '"' + """;
                      
-                     }else if( determinedSpan == "yearly" ){
-                         document.inputForm.fixedSpan.options[0].text = "Past 365 days.";
-                         document.inputForm.fixedSpan.options[1].text = "Current year.";
-                         document.inputForm.fixedSpan.options[2].text = "Previous year.";                   
+                     }else if( determinedSpan == """ + '"' + _("yearly") + '"' + """  ){
+                         document.inputForm.fixedSpan.options[0].text =""" + '"' + _( "Past 365 days.") + '"' + """;
+                         document.inputForm.fixedSpan.options[1].text =""" + '"' + _( "Current year.") + '"' + """;
+                         document.inputForm.fixedSpan.options[2].text =""" + '"' + _("Previous year.") + '"' + """;                   
                      
                      }else{
-                         document.inputForm.fixedSpan.options[0].text = "Select fixed span...";
-                         document.inputForm.fixedSpan.options[1].text = "Current";
-                         document.inputForm.fixedSpan.options[2].text = "Previous";
+                         document.inputForm.fixedSpan.options[0].text =""" + '"' + _( "Select fixed span...") + '"' + """;
+                         document.inputForm.fixedSpan.options[1].text =""" + '"' + _( "Current") + '"' + """;
+                         document.inputForm.fixedSpan.options[2].text =""" + '"' + _( "Previous")+ '"' + """;
                      }
                  
                  
@@ -2169,7 +2157,7 @@ def printHead( form ):
                      if( document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].text.match('elect') != null){
                          
                          
-                         document.getElementById("sourlientList").options[errorCounter] = new Option("File type required to enable this.");
+                         document.getElementById("sourlientList").options[errorCounter] = new Option(""" +'"' +_("File type required to enable this.") + '")' + """;
                          errorCounter = errorCounter + 1;
                          
                      }else{
@@ -2180,7 +2168,7 @@ def printHead( form ):
                        
                      if( document.inputForm.machines[ document.inputForm.machines.selectedIndex ].text.match('elect') != null){
                          
-                         document.getElementById("sourlientList").options[errorCounter] = new Option("Machine is required to enable this.");
+                         document.getElementById("sourlientList").options[errorCounter] = new Option(""" + '"' + _("Machine is required to enable this.") + '"' + """);
                          errorCounter = errorCounter + 1;
                      }else{
                      
@@ -2206,8 +2194,8 @@ def printHead( form ):
                  
                  function enableOrDisableProducts(){
                      
-                     if( document.inputForm.preDeterminedSpan[ document.inputForm.preDeterminedSpan.selectedIndex ].text.match('Pre') != null  ||
-                        document.inputForm.preDeterminedSpan[ document.inputForm.preDeterminedSpan.selectedIndex ].text.match('daily') != null ){
+                     if( document.inputForm.preDeterminedSpan[ document.inputForm.preDeterminedSpan.selectedIndex ].text.match(""" + "'" + _("Select") + "'" + """) != null  ||
+                        document.inputForm.preDeterminedSpan[ document.inputForm.preDeterminedSpan.selectedIndex ].text.match(""" + "'" + _("daily") + "'" + """) != null ){
                      
                          document.getElementById("products").disabled = false;
                     
@@ -2222,7 +2210,7 @@ def printHead( form ):
                  
                  function enableOrDisableSpan(){
                      
-                     if( document.inputForm.preDeterminedSpan[ document.inputForm.preDeterminedSpan.selectedIndex ].text.match('Select') != null  ){
+                     if( document.inputForm.preDeterminedSpan[ document.inputForm.preDeterminedSpan.selectedIndex ].text.match(""" + "'" + _("Select") + "'" + """) != null  ){
                      
                          document.getElementById("span").disabled = false;
                     
@@ -2242,7 +2230,7 @@ def printHead( form ):
     
        
     try:
-        printSlideShowScript( form["image"][0].split(';') )
+        printSlideShowScript( form[_("image")][0].split(';') )
     except:#no specified image 
         printSlideShowScript( [] )
             
@@ -2322,11 +2310,80 @@ def getForm():
     
 
 
+def  setGlobalLanguageParameters( language = 'en'):
+    """
+        @summary : Sets up all the needed global language 
+                   variables so that they can be used 
+                   everywhere in this program.
+        
+        
+        @param language: Language that is to be 
+                         outputted by this program. 
+     
+        @return: None
+        
+    """
+    
+    global LANGUAGE 
+    global translator
+    global _ 
+    global SUPPORTED_FILETYPES
+    global RX_DATATYPES
+    global TX_DATATYPES
+    global FIXED_TIMESPANS
+    global FIXED_PARAMETERS
+    global PRE_DETERMINED_SPANS
+    global FIXED_SPANS
+    global MAIN_MACHINES
+    global OTHER_MACHINES
+    
+    LANGUAGE = language 
+    
+    if language == 'fr':
+        fileName = StatsPaths.STATSLANGFRBINWEBPAGES + "graphicsRequestPage" 
+    elif language == 'en':
+        fileName = StatsPaths.STATSLANGENBINWEBPAGES + "graphicsRequestPage"      
+    
+    translator = gettext.GNUTranslations(open(fileName))
+    _ = translator.gettext
+        
+    
+    SUPPORTED_FILETYPES = [ "rx","tx"]
+
+    RX_DATATYPES = [ _("bytecount"), _("filecount"), _("errors"), _("bytecount,errors"), _("bytecount,filecount"), _("filecount,errors"), _("bytecount,filecount,errors") ]
+    
+    TX_DATATYPES = [ _("latency"),_("bytecount"),_("filecount"), _("errors"), _("bytecount,errors"), _("bytecount,filecount"), _("latency, bytecount"), _("filecount,errors") , _("latency,errors") ,
+                     _("latency,filecount"), _("bytecount,filecount,errors"), _("latency,bytecount,filecount"), _("latency,bytecount,errors") ,_("latency,bytecount,filecount,errors") ]
+                    
+    
+    FIXED_TIMESPANS = [ _("daily") , _("weekly"), _("monthly"), _("yearly") ] 
+    
+    FIXED_PARAMETERS =  [ _("fixedCurrent"), _("fixedPrevious") ] 
+    
+    PRE_DETERMINED_SPANS = [ _('daily'), _('weekly'), _('monthly'),  _('yearly') ]
+    
+    FIXED_SPANS = [ _('fixedCurrent'), _('fixedPrevious') ]
+    
+    MAIN_MACHINES   = []
+    OTHER_MACHINES  = []
+    
+
+    print translator._catalog
+
+
+
+
+
+
+
+
 def main():
     """
         @summary : Displays the content of the page based 
                    on parameters.  
     """    
+    
+    setGlobalLanguageParameters( language = 'fr')
     
     getAvailableMachines()
     
