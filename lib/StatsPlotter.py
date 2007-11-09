@@ -21,7 +21,7 @@ named COPYING in the root of the source directory tree.
 
 """
 
-import os, sys, statvfs
+import gettext, os, sys, statvfs
 """
     Small function that adds pxlib to the environment path.  
 """
@@ -57,7 +57,7 @@ class StatsPlotter:
             StatsPlotter constructor. 
             
         """                                                                    
-   
+        StatsPlotter.setGlobalLanguageParameters()
         
         #TODO Verify if all theses fileds are really necessary.    
         machines = "%s" %machines
@@ -108,8 +108,74 @@ class StatsPlotter:
                 self.logger = self.logger.getLogger()
             
         self.xtics       = self.getXTics( )        # Seperators on the x axis.
+
+
+        
+    
+
+    
+    def  setGlobalLanguageParameters( language = 'fr'):
+        """
+            @summary : Sets up all the needed global language 
+                       variables so that they can be used 
+                       everywhere in this program.
+            
+            
+            @param language: Language that is to be 
+                             outputted by this program. 
+         
+            @return: None
+            
+        """
+        
+        global LANGUAGE 
+        global translator
+        global _ 
+    
+        
+        LANGUAGE = language 
+        
+        if language == 'fr':
+            fileName = StatsPaths.STATSLANGFRLIB + "StatsPlotter" 
+        elif language == 'en':
+            fileName = StatsPaths.STATSLANGENLIB + "StatsPlotter"     
+        
+        translator = gettext.GNUTranslations(open(fileName))
+        
+        _ = translator.gettext    
     
     
+    setGlobalLanguageParameters = staticmethod(setGlobalLanguageParameters)
+        
+        
+        
+    def translateDataType( type ):
+        """
+            @summary : Takes a type of the currently used language 
+                       and returns the english version of that type.
+            
+            @param type : Type to be translated, written in the currently 
+                          used language.
+            
+            @return : Returns the translated type.                         
+                        
+        """
+        
+        knownTypes= { _("bytecount"):"bytecount", _("filecount"):"filecount", _("errors"):"errors", _("latency"):"latency", _("filesOverMaxLatency"):"filesOverMaxLatency"}
+        
+        translatedType = ""
+        
+        if type in knownTypes:  
+            translatedType = knownTypes[type]
+        else :
+            translatedType = type      
+        
+        return translatedType
+
+    translateDataType = staticmethod(translateDataType)
+
+
+
     def initialiseArrays( self ):
         """
             Used to set the size of the numerous arrays needed in StatsPlotter
@@ -199,7 +265,7 @@ class StatsPlotter:
         """
         #print "get x tics"
         if self.logger != None :
-            self.logger.debug( "Call to getXtics received" )
+            self.logger.debug( _("Call to getXtics received") )
         
         nbBuckets = ( len( self.stats[0].statsCollection.timeSeperators ) )
         xtics = ''
@@ -241,7 +307,7 @@ class StatsPlotter:
         """
         
         if self.logger != None: 
-            self.logger.debug( "Call to getPairs received." )
+            self.logger.debug( _("Call to getPairs received.") )
         
         k = 0 
         pairs = []
@@ -286,7 +352,7 @@ class StatsPlotter:
                                                
                             #print    StatsDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), self.stats[clientCount].statsCollection.fileEntries[k].totals[statType]                        
                         
-                        elif statType == 'filecount':
+                        elif statType == "filecount":
                             pairs.append( [StatsDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), self.stats[clientCount].statsCollection.fileEntries[k].nbFiles ]  )
                         
                         else:#latency uses means
@@ -295,7 +361,7 @@ class StatsPlotter:
                             
                             #print self.stats[clientCount].statsCollection.timeSeperators[k], self.stats[clientCount].statsCollection.fileEntries[k].means[statType]
                         
-                        if statType == 'filecount':
+                        if statType == "filecount":
                             
                             if self.stats[clientCount].statsCollection.fileEntries[k].nbFiles > self.maximums[clientCount][typeCount] :
                                 self.maximums[clientCount][typeCount] =  self.stats[clientCount].statsCollection.fileEntries[k].nbFiles
@@ -329,8 +395,8 @@ class StatsPlotter:
                 
                 except KeyError:
                     
-                    self.logger.error( "Error in getPairs." )
-                    self.logger.error( "The %s stat type was not found in previously collected data." %statType )    
+                    self.logger.error( _("Error in getPairs.") )
+                    self.logger.error( _("The %s stat type was not found in previously collected data.") %statType )    
                     pairs.append( [ StatsDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), 0.0 ] )
                     pass    
                 
@@ -402,21 +468,21 @@ class StatsPlotter:
         minimum = self.getMinPairValue( pairs )
         
         if maximum != None :
-            if statType == "latency":
+            if statType == _("latency"):
                 maximum = "%.2f" %maximum
             else:
                 maximum = int(maximum)
             
         if minimum != None :
-            if statType == "latency":
+            if statType == _("latency"):
                 minimum = "%.2f" %minimum
             else:
                 minimum = int(minimum)
                 
-        if statType == "latency":
-            explanation = "With values rounded for every minutes."
+        if statType == _("latency"):
+            explanation = _("With values rounded for every minutes.")
         else:
-            explanation = "With the total value of every minutes."
+            explanation = _("With the total value of every minutes.")
                         
         statType = statType[0].upper() + statType[1:]             
               
@@ -425,7 +491,7 @@ class StatsPlotter:
         else:          
             entityName = self.groupName
             
-        title =  "%s for %s for a span of %s hours ending at %s\\n%s\\n\\nMAX: %s  MEAN: %3.2f MIN: %s " %( statType, entityName, self.timespan, self.currentTime, explanation, maximum, self.means[clientIndex][typeCount], minimum )     
+        title =  _("%s for %s for a span of %s hours ending at %s")%(statType, entityName, self.timespan, self.currentTime) +"\\n%s\\n\\n" %explanation +_("MAX: ") + str(maximum) + " " + _("MEAN: ") + "%3.2f"%(self.means[clientIndex][typeCount]) + " " + _("MIN: ") +str(minimum)     
         
         return title
         
@@ -466,9 +532,19 @@ class StatsPlotter:
             
             
             if not os.path.isdir( os.path.dirname( destination ) ):
-                os.makedirs(  os.path.dirname( destination ), 0777 )                                                      
-                os.chmod( os.path.dirname( destination ), 0777 )
-            
+                os.makedirs(  os.path.dirname( destination ), 0777 )   
+                dirname = os.path.dirname( destination )                                                  
+                
+                while( dirname != StatsPaths.STATSGRAPHSARCHIVES[:-1] ):#[:-1] removes the last / character 
+                    
+                    try:
+                        os.chmod( dirname, 0777 )
+                    except:
+                        pass
+                    
+                    dirname = os.path.dirname(dirname)
+                    
+                            
             shutil.copy( src, destination ) 
             
             try:
@@ -480,7 +556,6 @@ class StatsPlotter:
         
         
         if copyToColumbo == True : 
-            
             destination = StatsPaths.STATSGRAPHS + "webGraphics/columbo/%s.png" %clientName
             if not os.path.isdir( os.path.dirname( destination ) ):
                 os.makedirs(  os.path.dirname( destination ), 0777 )                                                      
@@ -522,7 +597,7 @@ class StatsPlotter:
         
         self.graph( 'set linestyle 4 ')
         
-        self.graph.xlabel( 'time (hours)' ) #, offset = ( "0.0"," -2.5" )
+        self.graph.xlabel( _('time (hours)') ) #, offset = ( "0.0"," -2.5" )
         
         self.graph( 'set grid')
         self.graph( 'set format y "%10.0f"' )
@@ -552,23 +627,23 @@ class StatsPlotter:
                        
             for statsTypeIndex in range ( len ( self.statsTypes ) ):
                 
-                pairs        = self.getPairs( clientCount = clientIndex , statType= self.statsTypes[statsTypeIndex], typeCount = statsTypeIndex )
+                pairs        = self.getPairs( clientCount = clientIndex , statType= StatsPlotter.translateDataType(self.statsTypes[statsTypeIndex]), typeCount = statsTypeIndex )
                 maxPairValue = self.getMaxPairValue( pairs )
                 self.maxLatency = self.stats[clientIndex].statsCollection.maxLatency
                 
-                if self.statsTypes[statsTypeIndex] == "errors" :
+                if self.statsTypes[statsTypeIndex] == _("errors") :
                     color =4 #purple                    
                     self.addErrorsLabelsToGraph(  clientIndex , statsTypeIndex, nbGraphs, maxPairValue )
                 
-                elif self.statsTypes[statsTypeIndex] == "latency" :
+                elif self.statsTypes[statsTypeIndex] == _("latency") :
                     color =1 #red                    
                     self.addLatencyLabelsToGraph(  clientIndex , statsTypeIndex, nbGraphs,  maxPairValue )
                 
-                elif self.statsTypes[statsTypeIndex] == "bytecount" :
+                elif self.statsTypes[statsTypeIndex] == _("bytecount") :
                     color =2 #blue 
                     self.addBytesLabelsToGraph(  clientIndex , statsTypeIndex, nbGraphs,  maxPairValue )
                 
-                elif self.statsTypes[statsTypeIndex] == "filecount" :
+                elif self.statsTypes[statsTypeIndex] == _("filecount") :
                     color =3 #green
                     self.addFilecountLabelsToGraph(clientIndex, statsTypeIndex, nbGraphs, maxPairValue)
                      
@@ -580,6 +655,7 @@ class StatsPlotter:
         
                 
         try:
+            #print self.imageName
             os.chmod( self.imageName, 0777 )            
         except:
             pass
@@ -628,31 +704,31 @@ class StatsPlotter:
         
         self.graph( 'set origin 0, %3.2f' %( ((nbGraphs)*.40)  ) )
 
-        self.graph.ylabel( 'latency (seconds)' )
+        self.graph.ylabel( _('latency (seconds)') )
         
-        self.graph( 'set label "%s : %s" at screen .545, screen %3.2f' % ( entityType, entityName,(.26+(nbGraphs) *.40)  ))
+        self.graph( 'set label ' + _( '"%s : %s"' )%( entityType, entityName) + ' at screen .545, screen %3.2f' % ((.26+(nbGraphs) *.40)  ))
         
-        self.graph( 'set label "Machines : %s" at screen .545, screen %3.2f' % ( self.machines,(.24+(nbGraphs) *.40)  ) )
+        self.graph( 'set label ' + _( '"Machines : %s"' )%(self.machines) + ' at screen .545, screen %3.2f' % ( (.24+(nbGraphs) *.40)  ) )
         
-        self.graph( 'set label "Product type(s) : %s" at screen .545, screen %3.2f' % ( formatedProductTypes,(.22+(nbGraphs) *.40)  ) )
+        self.graph( 'set label ' + _( '"Product type(s) : %s"' )%(formatedProductTypes) + ' at screen .545, screen %3.2f' % ( (.22+(nbGraphs) *.40)  ) )
         
-        self.graph( 'set label "Absolute max. lat. : %s seconds" at screen .545, screen %3.2f' % ( maximum, (.20+(nbGraphs) *.40) ) )
+        self.graph( 'set label ' + _( '"Absolute max. lat. : %s seconds"' )%(maximum) + ' at screen .545, screen %3.2f' % (  (.20+(nbGraphs) *.40) ) )
         
-        self.graph( 'set label "Time of max. lat. : %s" at screen .545, screen %3.2f' % ( ( timeOfMax, (.18+(nbGraphs) *.40)  )))
+        self.graph( 'set label ' + _( '"Time of max. lat. : %s"' )%(timeOfMax) +  ' at screen .545, screen %3.2f' % ( ( (.18+(nbGraphs) *.40)  )))
         
         if len ( self.filesWhereMaxOccured[clientIndex][statsTypeIndex] ) <= 50 :
-            self.graph( 'set label "File with max. lat. :%s" at screen .545, screen %3.2f' % ( self.filesWhereMaxOccured[clientIndex][statsTypeIndex], (.16+(nbGraphs) *.40) ))     
+            self.graph( 'set label ' + _( '"File with max. lat. :%s"' )%(self.filesWhereMaxOccured[clientIndex][statsTypeIndex]) + ' at screen .545, screen %3.2f' % (  (.16+(nbGraphs) *.40) ))     
         
         else:
-            self.graph( 'set label "File with max. lat. :" at screen .545, screen %3.2f' % ( (.16+(nbGraphs) *.40) ))  
+            self.graph( 'set label ' + _( '"File with max. lat. :"' ) + ' at screen .545, screen %3.2f' % ( (.16+(nbGraphs) *.40) ))  
             
             self.graph( 'set label "%s" at screen .545, screen %3.2f' % ( self.filesWhereMaxOccured[clientIndex][statsTypeIndex], (.14+(nbGraphs) *.40 ) ))          
         
-        self.graph( 'set label "# of files : %s " at screen .545, screen %3.2f' % ( self.nbFiles[clientIndex] , (.12+(nbGraphs) *.40) ) )
+        self.graph( 'set label ' + _( '"# of files : %s "' )% self.nbFiles[clientIndex] + ' at screen .545, screen %3.2f' % ( (.12+(nbGraphs) *.40) ) )
         
-        self.graph( 'set label "# of files over %s seconds: %s " at screen .545, screen %3.2f' % ( self.maxLatency, self.nbFilesOverMaxLatency[clientIndex], ( .10+(nbGraphs) *.40 ) ) )
+        self.graph( 'set label ' +  _( '"# of files over %s seconds: %s "' )%(self.maxLatency, self.nbFilesOverMaxLatency[clientIndex]) + ' at screen .545, screen %3.2f' % (  ( .10+(nbGraphs) *.40 ) ) )
         
-        self.graph( 'set label "%% of files over %s seconds: %3.2f %%" at screen .545, screen %3.2f' % (  self.maxLatency, self.ratioOverLatency[clientIndex] , ( .08 + (nbGraphs) *.40 ) ) )
+        self.graph( 'set label '  + _( '"%% of files over %s seconds: %3.2f %%"' )%(self.maxLatency, self.ratioOverLatency[clientIndex] ) + ' at screen .545, screen %3.2f' % (  ( .08 + (nbGraphs) *.40 ) ) )
         
                 
     
@@ -694,15 +770,15 @@ class StatsPlotter:
         
        
         if self.totalNumberOfBytes[clientIndex] < 1000:#less than a k
-            totalNumberOfBytes = "%s Bytes" %int( self.totalNumberOfBytes[clientIndex] )
+            totalNumberOfBytes = _("%s Bytes") %int( self.totalNumberOfBytes[clientIndex] )
             
         elif self.totalNumberOfBytes[clientIndex] < 1000000:#less than a meg 
-            totalNumberOfBytes = "%.2f kiloBytes"  %( self.totalNumberOfBytes[clientIndex]/1000.0 )
+            totalNumberOfBytes =  _("%.2f kiloBytes")  %( self.totalNumberOfBytes[clientIndex]/1000.0 )
         
         elif self.totalNumberOfBytes[clientIndex] < 1000000000:#less than a gig      
-            totalNumberOfBytes = "%.2f MegaBytes"  %( self.totalNumberOfBytes[clientIndex]/1000000.0 )
+            totalNumberOfBytes =  _("%.2f MegaBytes")  %( self.totalNumberOfBytes[clientIndex]/1000000.0 )
         else:#larger than a gig
-            totalNumberOfBytes = "%.2f GigaBytes"  %( self.totalNumberOfBytes[clientIndex]/1000000000.0 )
+            totalNumberOfBytes =  _("%.2f GigaBytes")  %( self.totalNumberOfBytes[clientIndex]/1000000000.0 )
          
         formatedProductTypes = "%-25s" %( (str)( self.productTypes ) ).replace('[','' ).replace( ']', '' ).replace("'","") 
             
@@ -710,31 +786,31 @@ class StatsPlotter:
         
         self.graph( 'set origin 0, %3.2f' %( ((nbGraphs)*.40)  ))
         
-        self.graph.ylabel( 'Bytes/Minute' )
+        self.graph.ylabel( _('Bytes/Minute') )
         
         self.graph( 'set label "%s : %s" at screen .545, screen %3.2f' % ( entityType, entityName,(.26+(nbGraphs) *.40)  ))
         
-        self.graph( 'set label "Machines : %s" at screen .545, screen %3.2f' % ( self.machines,(.24+(nbGraphs) *.40)  ) )
+        self.graph( 'set label ' + _('"Machines : %s"')%self.machines + ' at screen .545, screen %3.2f' % ( (.24+(nbGraphs) *.40)  ) )
         
-        self.graph( 'set label "Product type(s) : %s" at screen .545, screen %3.2f' % ( formatedProductTypes,(.22+(nbGraphs) *.40)  ) )
+        self.graph( 'set label '+ _('"Product type(s) : %s"')%formatedProductTypes + ' at screen .545, screen %3.2f' % ((.22+(nbGraphs) *.40)  ) )
         
         
         if len ( self.filesWhereMaxOccured[clientIndex][statsTypeIndex] ) <= 65 :            
-            self.graph( 'set label "Largest file : %s" at screen .545, screen %3.2f' % ( self.filesWhereMaxOccured[clientIndex][statsTypeIndex], (.20+(nbGraphs) *.40) ))
+            self.graph( 'set label ' + _('"Largest file : %s"')%self.filesWhereMaxOccured[clientIndex][statsTypeIndex] + ' at screen .545, screen %3.2f' % (  (.20+(nbGraphs) *.40) ))
             x = .20
         else:
-            self.graph( 'set label "Largest file : " at screen .545, screen %3.2f' % ( ( .20 + ( nbGraphs ) *.40) ) )
+            self.graph( 'set label ' + _('"Largest file : "') + ' at screen .545, screen %3.2f' % ( ( .20 + ( nbGraphs ) *.40) ) )
             
             self.graph( 'set label "%s" at screen .545, screen %3.2f' % ( self.filesWhereMaxOccured[clientIndex][statsTypeIndex], (.18+(nbGraphs) *.40) ))
             x = .18
                     
-        self.graph( 'set label "Size of largest file : %s Bytes" at screen .545, screen %3.2f' % ( maximum, (x -.02+(nbGraphs) *.40) ) )       
+        self.graph( 'set label ' + _('"Size of largest file : %s Bytes"')%maximum + ' at screen .545, screen %3.2f' % (  (x -.02+(nbGraphs) *.40) ) )       
                 
-        self.graph( 'set label "Time of largest file : %s" at screen .545, screen %3.2f' % ( ( timeOfMax, (x -.04+(nbGraphs) *.40)  )))     
+        self.graph( 'set label ' + _('"Time of largest file : %s"')%timeOfMax + ' at screen .545, screen %3.2f' % ( (  (x -.04+(nbGraphs) *.40)  )))     
         
-        self.graph( 'set label "# of files : %s " at screen .545, screen %3.2f' % ( self.nbFiles[clientIndex] , ( x-.06+(nbGraphs) *.40) ) )
+        self.graph( 'set label ' + _('"# of files : %s "')%self.nbFiles[clientIndex] + ' at screen .545, screen %3.2f' % (  ( x-.06+(nbGraphs) *.40) ) )
     
-        self.graph( 'set label "# of Bytes: %s " at screen .545, screen %s' % (  totalNumberOfBytes,( x -.08 +(nbGraphs) *.40 ) ) )
+        self.graph( 'set label ' + _('"# of Bytes: %s "')%totalNumberOfBytes + ' at screen .545, screen %s' % (  ( x -.08 +(nbGraphs) *.40 ) ) )
                 
 
     
@@ -781,19 +857,19 @@ class StatsPlotter:
         
         self.graph( 'set origin 0, %3.2f' %( ((nbGraphs)*.40)  ))
         
-        self.graph.ylabel( 'Errors/Minute' )
+        self.graph.ylabel( _('Errors/Minute') )
         
         self.graph( 'set label "%s : %s" at screen .545, screen %3.2f' % ( entityType, entityName,(.26+(nbGraphs) *.40)  ))
         
-        self.graph( 'set label "Machines : %s" at screen .545, screen %3.2f' % ( self.machines,(.24+(nbGraphs) *.40)  ) )
+        self.graph( 'set label ' + _('"Machines : %s"')%self.machines + ' at screen .545, screen %3.2f' % ((.24+(nbGraphs) *.40)  ) )
         
-        self.graph( 'set label "Product type(s) : %s" at screen .545, screen %3.2f' % ( formatedProductTypes,(.22+(nbGraphs) *.40)  ) )
+        self.graph( 'set label ' + _('"Product type(s) : %s"')%formatedProductTypes + ' at screen .545, screen %3.2f' % ( (.22+(nbGraphs) *.40)  ) )
         
-        self.graph( 'set label "Max error/%s : %s" at screen .545, screen %3.2f' % ( self.entryType, maximum, (.20+(nbGraphs) *.40) ))        
+        self.graph( 'set label ' + _('"Max error/%s : %s"') %( self.entryType, maximum) + ' at screen .545, screen %3.2f' % ( (.20+(nbGraphs) *.40) ))        
         
-        self.graph( 'set label "Time of max. : %s" at screen .545, screen %3.2f' % ( ( timeOfMax, (.18+(nbGraphs) *.40)  )))
+        self.graph( 'set label ' + _('"Time of max. : %s"')%timeOfMax + ' at screen .545, screen %3.2f' % ( (  (.18+(nbGraphs) *.40)  )))
         
-        self.graph( 'set label "# of errors : %.f" at screen .545, screen %3.2f' % ( self.nbErrors[clientIndex], (.16+(nbGraphs) *.40) ) )
+        self.graph( 'set label ' + _('"# of errors : %.f"')%self.nbErrors[clientIndex] + ' at screen .545, screen %3.2f' % (  (.16+(nbGraphs) *.40) ) )
       
       
                 
@@ -839,19 +915,19 @@ class StatsPlotter:
         
         self.graph( 'set origin 0, %3.2f' %( ((nbGraphs)*.40)  ))
         
-        self.graph.ylabel( 'Files/Minute' )
+        self.graph.ylabel( _('Files/Minute') )
         
         self.graph( 'set label "%s : %s" at screen .545, screen %3.2f' % ( entityType, entityName,(.26+(nbGraphs) *.40)  ))
         
-        self.graph( 'set label "Machines : %s" at screen .545, screen %3.2f' % ( self.machines,(.24+(nbGraphs) *.40)  ) )
+        self.graph( 'set label '+_('"Machines : %s"')%self.machines + ' at screen .545, screen %3.2f' % ( (.24+(nbGraphs) *.40)  ) )
         
-        self.graph( 'set label "Product type(s) : %s" at screen .545, screen %3.2f' % ( formatedProductTypes,(.22+(nbGraphs) *.40)  ) )
+        self.graph( 'set label '+_('"Product type(s) : %s"')%formatedProductTypes +' at screen .545, screen %3.2f' % ( (.22+(nbGraphs) *.40)  ) )
         
-        self.graph( 'set label "Max files/%s : %s" at screen .545, screen %3.2f' % ( self.entryType, maximum, (.20+(nbGraphs) *.40) ))        
+        self.graph( 'set label '+_('"Max files/%s : %s"')%(self.entryType, maximum) +' at screen .545, screen %3.2f' % (  (.20+(nbGraphs) *.40) ))        
         
-        self.graph( 'set label "Time of max. : %s" at screen .545, screen %3.2f' % ( ( timeOfMax, (.18+(nbGraphs) *.40)  )))
+        self.graph( 'set label '+_('"Time of max. : %s"')%timeOfMax +' at screen .545, screen %3.2f' % ( (  (.18+(nbGraphs) *.40)  )))
         
-        self.graph( 'set label "# of files : %s" at screen .545, screen %3.2f' % (  self.nbFiles[clientIndex], (.16+(nbGraphs) *.40) ) )                
+        self.graph( 'set label '+_('"# of files : %s"')%self.nbFiles[clientIndex] + ' at screen .545, screen %3.2f' % (   (.16+(nbGraphs) *.40) ) )                
             
 
 
