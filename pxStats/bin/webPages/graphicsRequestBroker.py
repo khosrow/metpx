@@ -29,7 +29,7 @@ named COPYING in the root of the source directory tree.
 ##############################################################################
 """
 
-import cgi, os, sys
+import cgi, gettext, os, sys
 import cgitb; cgitb.enable()
 
 sys.path.insert(1, sys.path[0] + '/../../')
@@ -41,7 +41,13 @@ from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.GnuQueryBroker import GnuQueryBroker
 from pxStats.lib.RRDQueryBroker import RRDQueryBroker
 from cgi import escape
+
+
+
 LOCAL_MACHINE = os.uname()[1]
+
+EXPECTED_PARAMETERS = ['querier','endTime','groupName','span','fileType','machines','statsTypes','preDeterminedSpan','sourlients','combineSourlients','products']
+
 
 
 def returnToQueriersLocationWithReply( querier, reply ):
@@ -62,7 +68,10 @@ def returnToQueriersLocationWithReply( querier, reply ):
         Content-type: text/plain
 
     """   
-    print """%s"""  %( escape(reply) )
+    print """
+            %s
+    
+    """  %( escape(reply) )
     
     
  
@@ -102,29 +111,29 @@ def handlePlotRequest( form ):
     else:
         queryBroker = None    
     
-    try:
-        if queryBroker != None :#if valid plotter
-            queryBroker.getParametersFromForm( form )
-            error = queryBroker.searchForParameterErrors()
-            
-            if error == "" :
-                queryBroker.prepareQuery( )
-                queryBroker.executeQuery( )
-                reply = queryBroker.getReplyToSendToquerier()
-                returnToQueriersLocationWithReply( querier , reply )
-                
-            else: #An error was located within the call.
-                queryBroker.replyParameters.error = error
-                reply = queryBroker.getReplyToSendToquerier()
-                returnToQueriersLocationWithReply( querier , reply )
+    #---------------------------------------------------------------------- try:
+    if queryBroker != None :#if valid plotter
+        queryBroker.getParametersFromForm( form )
+        error = queryBroker.searchForParameterErrors()
         
-        else:#other
-            reply = "images=;error=Cannot execute query.Unknown plotter.Plotter was %s" %plotter
+        if error == "" :
+            queryBroker.prepareQuery( )
+            queryBroker.executeQuery( )
+            reply = queryBroker.getReplyToSendToquerier()
             returnToQueriersLocationWithReply( querier , reply )
-         
-    except Exception,inst:
-        reply = "images=;error=Unexpected error : %s." %(inst)
+            
+        else: #An error was located within the call.
+            queryBroker.replyParameters.error = error
+            reply = queryBroker.getReplyToSendToquerier()
+            returnToQueriersLocationWithReply( querier , reply )
+    
+    else:#other
+        reply = "images=;error=" + _("Cannot execute query.Unknown plotter.Plotter was %s") %plotter
         returnToQueriersLocationWithReply( querier , reply )
+         
+    #---------------------------------------------------- except Exception,inst:
+        #---------------- reply = "images=;error=Unexpected error : %s." %(inst)
+        #------------------ returnToQueriersLocationWithReply( querier , reply )
    
    
 def getPlotterType( form ): 
@@ -133,11 +142,22 @@ def getPlotterType( form ):
     
         @return : Returns the plotter type.
          
-    """    
-    try:
-        plotter = form["plotter"]
-    except:
-        plotter = ""
+    """   
+    
+    #---------------------------------------------------------------------- try:
+    if (  form["preDeterminedSpan"] == _("daily") ) : 
+        plotter = "gnuplot"
+    else:
+        try:
+            if int( form["span"] )<= 36 :
+                plotter = "gnuplot"
+            else:
+                plotter = "rrd"        
+        except:        
+            plotter = "rrd"    
+                
+        #------------------------------------------------------------------- except:
+        #---------------------------------------------------------- plotter = ""
         
     return plotter 
  
@@ -157,8 +177,9 @@ def getForm():
     
     newForm = {}
     form = cgi.FieldStorage()
-    
+    #print form
     for key in form.keys():
+     #   print key
         value = form.getvalue(key, "")
         if isinstance(value, list):
             # Multiple username fields specified
@@ -167,10 +188,47 @@ def getForm():
             newvalue = value
         
         newForm[key.replace("?","")]= newvalue
-          
+    
+    for param in EXPECTED_PARAMETERS:
+        if param not in  newForm.keys():
+            newForm[param]   = ''
+            
+              
     form = newForm
+    
+    #print form 
            
     return  form
+     
+
+     
+def  setGlobalLanguageParameters( language = 'en'):
+    """
+        @summary : Sets up all the needed global language 
+                   variables so that they can be used 
+                   everywhere in this program.
+        
+        
+        @param language: Language that is to be 
+                         outputted by this program. 
+     
+        @return: None
+        
+    """
+    
+    global LANGUAGE 
+    global translator
+    global _ 
+
+    LANGUAGE = language 
+    
+    if language == 'fr':
+        fileName = StatsPaths.STATSLANGFRBINWEBPAGES + "graphicsRequestBroker" 
+    elif language == 'en':
+        fileName = StatsPaths.STATSLANGFRBINWEBPAGES + "graphicsRequestBroker"      
+    
+    translator = gettext.GNUTranslations(open(fileName))
+    _ = translator.gettext     
      
      
  
@@ -180,14 +238,23 @@ def main():
                   executes query using a broker that's specific to 
                   the said plotter.
     """
+       
     
-    form = getForm()
-    
-    plotterType = getPlotterType( form )
-    
-    handlePlotRequest(form)
-          
+    try:
         
+        setGlobalLanguageParameters()
+        
+        form = getForm()
+        
+        plotterType = getPlotterType( form )
+        
+        handlePlotRequest(form)
     
+    except Exception, instance :   
+        fileHandle= open('out','w')
+        fileHandle.write( str(instance) )
+        fileHandle.close()
+        
+        
 if __name__ == '__main__':
     main()
