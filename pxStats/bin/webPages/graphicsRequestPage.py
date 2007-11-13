@@ -399,7 +399,7 @@ def printAjaxRequestsScript():
                            }     
                            
                            
-                           document.getElementById('imageCounter').innerHTML = "<font color='FFFFFF'> """ +_("Now showing image") + """ ' + (which+1) + ' """ +_("of") + """ ' + realImageListLength +'.</font>" ;          
+                           document.getElementById('imageCounter').innerHTML = "<font color='FFFFFF'> """  +_("Now showing image") + """ "  + (which+1) +  " """ +_("of") + """ "  + realImageListLength +".</font>" ;          
 
     """
         
@@ -750,7 +750,7 @@ def printSlideShowScript( images ):
                 }
                 
                 function keeptrack(){
-                    document.getElementById('imageCounter').innerHTML = "<font color='FFFFFF'> """ +_("Now showing image") +"""' + (which+1) + ' """ + _("of") + """ ' + realImageListLength +'.</font>" ; 
+                    document.getElementById('imageCounter').innerHTML = "<font color='FFFFFF'> """  +_("Now showing image") + """ "  + (which+1) +  " """ +_("of") + """ "  + realImageListLength +".</font>" ;
                 }
                 
                 
@@ -1953,7 +1953,7 @@ def printHead( form ):
                  var errors = searchFormForPopUpErrors();
                  
                  if( errors == ""){
-                     popupAddingWindow( '../../html/popUps/' + document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].text + document.inputForm.machines[ document.inputForm.machines.selectedIndex ].text.replace( /,/g , '' ) + 'PopUpSourlientAdder.html' );
+                     popupAddingWindow( '../../html/popUps/' + document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].text + document.inputForm.machines[ document.inputForm.machines.selectedIndex ].text.replace( /,/g , '' ) + 'PopUpSourlientAdder_%s.html' );""" %LANGUAGE + """
                 }else{
                     document.getElementById("errorLabel").innerHTML = '<font color="#C11B17">' + errors + '</font>';
                 }
