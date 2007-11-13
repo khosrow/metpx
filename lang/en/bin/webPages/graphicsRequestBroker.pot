@@ -1,0 +1,9 @@
+
+#: graphicsRequestBroker.py:131
+msgid "Cannot execute query.Unknown plotter.Plotter was %s"
+msgstr "Cannot execute query.Unknown plotter.Plotter was %s"
+
+#: graphicsRequestBroker.py:148
+msgid "daily"
+msgstr "daily"
+
