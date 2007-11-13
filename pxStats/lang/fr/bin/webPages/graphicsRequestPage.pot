@@ -118,11 +118,11 @@ msgstr "Statut de l'application : Mise-à-jour de la liste de sources et de clien
 
 #: graphicsRequestPage.py:322
 msgid "Application status : Executing the graphics creation request..."
-msgstr "Statut de l'application : Traitement de la requête e création de graphiques."
+msgstr "Statut de l'application : Traitement de la requête de création de graphiques."
 
 #: graphicsRequestPage.py:327
 msgid "Application status : Updating Database(s)."
-msgstr "Status de l'applicaiton : Mise-à-jour des bases de données."
+msgstr "Status de l'application : Mise-à-jour des bases de données."
 
 #: graphicsRequestPage.py:331
 msgid "Application status : Generating image web page.(s)."
@@ -144,7 +144,7 @@ msgstr "de"
 
 #: graphicsRequestPage.py:644 graphicsRequestPage.py:1950
 msgid "Error. Please select a filetype."
-msgstr "Erreur.Veuillez specifier un type de fichier."
+msgstr "Erreur.Veuillez spécifier un type de fichier."
 
 #: graphicsRequestPage.py:647 graphicsRequestPage.py:1953
 msgid "Error. Please select a machine."
@@ -156,11 +156,11 @@ msgstr "Erreur. Veuillez specifier un type de donnée."
 
 #: graphicsRequestPage.py:653
 msgid "Error. Cannot specify fixed span without determined span."
-msgstr "Erreur. Impossible de specifier un laps fixe sans specifier un type de laps de temps."
+msgstr "Erreur. Impossible de specifier un laps fixe sans spécifier un type de laps de temps."
 
 #: graphicsRequestPage.py:657
 msgid "Error. Please add a client/source to the list or specify a group name."
-msgstr "Erreur. Veuillez ajouter un client ou une source ou specifier un nom de groupe."
+msgstr "Erreur. Veuillez ajouter un client ou une source ou spécifier un nom de groupe."
 
 #: graphicsRequestPage.py:669
 msgid "Error. Span value must be between 1 and 50000."
@@ -168,11 +168,11 @@ msgstr "Erreur. Le laps de temps doit être en 1 et 50000"
 
 #: graphicsRequestPage.py:673
 msgid "Error. Span value must be a NUMERICAL value between 1 and 48."
-msgstr "Erreur. La valeur du laps doit etre une valeur NUMÉRIQUE comprise entre 1 et 48."
+msgstr "Erreur. La valeur du laps doit être une valeur NUMÉRIQUE comprise entre 1 et 48."
 
 #: graphicsRequestPage.py:679 graphicsRequestPage.py:687
 msgid "Error. Specify a determined span or use the span option in the advanced options."
-msgstr "Erreur. Veuillez specifier un laps de temps déterminé ou l'option laps de tmeps dans les options avancées."
+msgstr "Erreur. Veuillez spécifier un laps de temps déterminé ou l'option laps de temps dans les options avancées."
 
 #: graphicsRequestPage.py:889
 msgid "Previous image result"
