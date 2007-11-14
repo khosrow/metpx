@@ -13,7 +13,7 @@ named COPYING in the root of the source directory tree.
 #
 #
 # Author        : Nicholas Lemay
-# Last Update   : March 22nd 2007
+# Last Update   : October 16th 2007
 #
 ################################################################################
 
@@ -80,10 +80,13 @@ Section 1.1 Requirements
            log files. Right now the machine with the most data takes up 6gb
            but that number could keep on growing in the future.
            
-           This space will be needed under /apps/px/stats/log/ if pickling is done 
-           on the machine where orgininal logs reside. 
+           This space will be needed under ...pxstats/data/logFiles/ 
+           if pickling is done on the machine where orgininal logs reside. 
            
-           Otherwise it will be under /apps/px/stats/log/originalMachineName/
+           Otherwise it will be under ...pxstats/data/logFiles/ if it is 
+           being done on a machine between the graphic producing machine and 
+           the log producing machine or if it is being done directly on the
+           graphic producing machine.
             
             
         -> At least 1gb of disk space for graphics. Current cleaner configuration
@@ -92,7 +95,7 @@ Section 1.1 Requirements
            indefinatly based on cleaner settings and a grwoing number of
            client/sources.
            
-           This space will be needed under /apps/px/stats/graphs/
+           This space will be needed under ...pxstats/data/graphics/
         
            
         -> At least 500 megs of disk space for databases. Right now the different 
@@ -100,7 +103,7 @@ Section 1.1 Requirements
            or a growing number of client/sources could make this number climb up
            greatly.
            
-           This space will be needed under /apps/px/stats/databases/
+           This space will be needed under ...pxstats/data/databases/currentDatabases
            
                 
         -> At least 6gb of disk space for database backups. We currently keep 20
@@ -109,7 +112,7 @@ Section 1.1 Requirements
            limited number of backups while keeping the gap between backups small 
            enough to hopefully keep data recevery times low.
            
-           This space will be needed under /apps/px/stats/databases_backups/
+           This space will be needed under .../pxStats/data/databases/databasesBackups
            
             
         -> At least 10 gb of disk space per machine for wich you want to keep the
@@ -119,7 +122,7 @@ Section 1.1 Requirements
            40gigs/(21/10)/3 machines = 6.6 gigs, thus 10 gigs would be a good 
            preventive minimum.
            
-           This space will be needed under /apps/px/stats/pickles/
+           This space will be needed under ../pxStats/data/pickles/
         
            
         -> Some parts of the software were developped with a multi-processor 
@@ -136,9 +139,9 @@ Section 2  : Installing as the first machine.
    
     Section 2.1 Required Files
     ----------------------------------------------------------------------------    
-        -> All the found under the /apps/px/lib/stats/ folder 
+        -> All the found under the .../pxStats/ folder 
            wich can be downloaded here 
-           https://svn.sourceforge.net/svnroot/metpx/trunk/sundew/lib/stats/
+           https://metpx.svn.sourceforge.net/svnroot/metpx/trunk/pxStats
         
         -> Python-rrd  : a Python package.
         
@@ -158,39 +161,32 @@ Section 2  : Installing as the first machine.
     
         Section 2.2.1 Configuring the library
         ------------------------------------------------------------------------
-            -> Go to the /apps/px/stats/ folder.
+            -> Go to the .../pxstats/etc folder.
             
             -> Download the config file template from
-               https://metpx.svn.sourceforge.net/svnroot/metpx/trunk/sundew/stats/
+               https://metpx.svn.sourceforge.net/svnroot/metpx/trunk/sundew/stats/etc
             
             -> Follow instructions found within file header.
         
         Section 2.2.2 Configuring the cleaners
         ------------------------------------------------------------------------
             
-            Section 2.2.2.1 Setting up /apps/px/etc/clean.conf
+            Section 2.2.2.1 Setting up .../pxstats/etc/clean.conf
             --------------------------------------------------------------------
-                -> Go to the /apps/px/etc/ folder.
+                -> Go to the .../pxstats/etc/ folder.
                 -> Download the clean.conf file template from
-                    https://metpx.svn.sourceforge.net/svnroot/metpx/trunk/
-                    sundew/etc/                 
+                   https://metpx.svn.sourceforge.net/svnroot/metpx/trunk/
+                   pxStats/etc/              
                 -> Follow instructions found within file header.     
                 
                 Notes on the times used within the template : 
                 ---------------------------------------------------------------        
-                -> Daily graphics are supposed to remain available for 7 days 
-                   through the daily graphics web page.
-                -> Weekly graphics are supposed to remain available for the past
-                   3 weeks through the weekly graphics web pages.
-                -> Monthly graphics are supposed to remain available for 
-                   3 months through the monthly graphics web page.
-                -> Yearly graphics are suppsoed to remain avaiable 
-                   for 3 years through the yearly graphics web page.                       
-                -> Daily, weekly, monthly and yearly total graphics need to be 
-                   available for the same amount of time as their individual graphics
-                   counterpart.     
-                -> Graphics in the other section can be cleaned as often as 
-                   desired.
+                -> The only graphics wich should be cleaned up on a regular basis 
+                   are the ones found under .../pxstats/data/graphics/others.     
+                
+                -> Graphics in the other section should be kept since they are 
+                   part of those to be used within columbo's interface or
+                   within the web archives.
             
             
             Section 2.2.2.1 Setting up the pickle Cleaner.
@@ -205,16 +201,16 @@ Section 2  : Installing as the first machine.
         
         Section 2.2.3 Configuring the statsMonitor
         ------------------------------------------------------------------------
-            -> Go to the /apps/px/stats/statsMonitoring folder.
+            -> Go to the .../pxstats/etc/ folder.
             -> Download the statsMonitoring.conf file template from
-               https://metpx.svn.sourceforge.net/svnroot/metpx/trunk/sundew/
-               stats/statsMonitoring/
+              https://metpx.svn.sourceforge.net/svnroot/metpx/trunk/
+              pxStats/etc/
             -> Follow instructions found within file header.
             
             
     Section 2.3 Setting up ssh
     -----------------------------------------------------------------------------
-        When setting up the config file in the apps/px/stats/ folder
+        When setting up the config file in the .../pxstats/etc/ folder
         ( section 2.2.1 ) you can set up things so that different machine do 
         different tasks. 
         
@@ -232,12 +228,9 @@ Section 2  : Installing as the first machine.
     Section 2.4 Setting up Crontabs      
     -----------------------------------------------------------------------------
         Here is a sample of a crontab file that's currently being run on 
-        the Logan2 machine :
+        a development machine :
        
-        7 * * * * /apps/px/lib/stats/launchGraphCreation.py > /dev/null 2>&1
-        20 1 * * * /apps/px/lib/stats/pickleCleaner.py 21 > /dev/null 2>&1        
-        35 */12 * * *  /apps/px/lib/stats/backupRRDDatabases.py > /dev/null 2>&1       
-        45 18 * * * /apps/px/lib/stats/clean_dir.plx /apps/px/etc/clean.conf > /dev/null 2>&1
+        2  * * * * /apps/px/pxStats/bin/pxStatsStartup.py  > /dev/null 2>&1
 
         To obtain the listing of all the entries in the crontab of the machine 
         you are setting up, type crontab -l.
@@ -292,7 +285,7 @@ Section 2  : Installing as the first machine.
             
             
             
-        2.4.4 /apps/px/lib/stats/clean_dir.plx
+        2.4.4 .../pxStats/bin/tools/clean_dir.plx
         -------------------------------------------------------------------------
             This is the main cleaner used for cleanign all the artifacts created 
             by the stats library.

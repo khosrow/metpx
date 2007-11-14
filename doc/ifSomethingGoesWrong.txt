@@ -115,7 +115,7 @@ Step 2 - Correct the cause of the error. First check if it comes from a missing
          PickleUpdater, ClientStatsPickler, and FileStatsCollector files in that order
          to find the cause of the error. 
 
-Step 3- Run the ssetTimeOfLastUpdates.py program. This file can be used to set back
+Step 3- Run the setTimeOfLastUpdates.py program. This file can be used to set back
         the time of the last pickle update prior to the time if the error. 
            
 Step 4 - Resume pickling either manually, or by letting the 

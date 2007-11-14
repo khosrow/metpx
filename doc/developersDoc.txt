@@ -3,26 +3,26 @@ MetPX Copyright (C) 2004-2006  Environment Canada
 MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
 named COPYING in the root of the source directory tree.
 """
-################################################################################
-#      _                _                          ______           
-#     | |              | |                         |  _  \          
-#   __| | _____   _____| | ___  _ __   ___ _ __ ___| | | |___   ___ 
-#  / _` |/ _ \ \ / / _ \ |/ _ \| '_ \ / _ \ '__/ __| | | / _ \ / __|
-# | (_| |  __/\ V /  __/ | (_) | |_) |  __/ |  \__ \ |/ / (_) | (__ 
-#  \__,_|\___| \_/ \___|_|\___/| .__/ \___|_|  |___/___/ \___/ \___|
-#                              | |                                  
-#                              |_| 
-#                             
-#
-# Author          : Nicholas Lemay
-# Last Updated    : August 14th 2007
-#
-#
-################################################################################
+=================================================================================
+=      _                _                          ______           
+=     | |              | |                         |  _  \          
+=   __| | _____   _____| | ___  _ __   ___ _ __ ___| | | |___   ___ 
+=  / _` |/ _ \ \ / / _ \ |/ _ \| '_ \ / _ \ '__/ __| | | / _ \ / __|
+= | (_| |  __/\ V /  __/ | (_) | |_) |  __/ |  \__ \ |/ / (_) | (__ 
+=  \__,_|\___| \_/ \___|_|\___/| .__/ \___|_|  |___/___/ \___/ \___|
+=                              | |                                  
+=                              |_| 
+=                             
+=
+= Author          : Nicholas Lemay
+= Last Updated    : August 14th 2007
+=
+=
+==================================================================================
 
 
 About this document :
---------------------------------------------------------------------------------
+==================================================================================
 
 This file was written for anyone using the stats library who might be interested 
 in it's inner workings. Developers and end-users alike will be able to 
@@ -38,7 +38,7 @@ development.
 
 
 pxStats package primer :
---------------------------------------------------------------------------------
+==================================================================================
 The stats package's main goal is to manage stats regarding MetxPx's different 
 clients/sources and to add the possibility to to draw graphics based on said 
 stats.
@@ -48,7 +48,7 @@ MetPx wich can be remotely located.
 
 
 DEVELOPMENT REQUIREMENTS :
---------------------------------------------------------------------------------
+==================================================================================
 
 - The package has to be able to gather log files from remote locations( machines ). 
 
@@ -114,7 +114,7 @@ DEVELOPMENT REQUIREMENTS :
   
   
 GUIDING PRINCIPLES
---------------------------------------------------------------------------------
+==================================================================================
 - Log files for a specific source/client are often stored on many different
   machines.  
 
@@ -187,10 +187,10 @@ GUIDING PRINCIPLES
 
 
 IMPLEMENTATION :
---------------------------------------------------------------------------------
+==================================================================================
 
 Remote file handling ( rsync )
-----------------------
+------------------------------------------------------------------
 
 On our current configuration data collection was not made directly on the machines 
 containing the logfiles. Therefore log files were downloaded to another machine 
@@ -326,9 +326,8 @@ Dealing with remote machines
   will needto be filled in order to make all the machiens work properly.
    
   
-- remotely executed commands using ssh need to be run from the 
-  graphic producing machine.
-  ***See howTo.txt    
+- remotely executed commands using ssh need to be run from the graphic producing machine.
+    
 
 - The graphic producing machine also needed access to all the pickles created
   remotely as to generate graphics. This prompted the implementation of a rsync
@@ -344,59 +343,55 @@ Dealing with remote machines
 
 
 Graphic interface :
---------------------------------------------------------------
+------------------------------------------------------------------
 
-    -- > Columbo  
-    --------------------------------------------------------
-        Up to date, 24 hours wide graphics are made available 
-        to users using a simple link represented by a small
-        graphic image within Columbo's PX Circuits tab. 
+Columbo  
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Up to date, 24 hours wide graphics are made available 
+    to users using a simple link represented by a small
+    graphic image within Columbo's PX Circuits tab. 
 
-        
-    --> Daily, weekly, monthly and yearly web pages.
-    ----------------------------------------------------- 
-        The other graphics are avaible on the following web 
-        pages : dailyGraphs.html, weeklyGraphs.html, 
-        monthlyGraphs.html and yearlyGraphs.html.
-        
-        Since these web page only need to be updated 
-        upon graphics updates, we (re)generate these 
-        web pages every time the pxStatsStartup.py  
-        script is being run.
     
-        - Daily graphs gives users the acces to the daily 
-        graphics of the past 7 days. 
-        - Weekly graphs gives users the access to the
-        weekly graphs of the past 5 weeks.
-        - Monthly graphs gives users the access to the 
-        monthly graphs of the past 3 months.
-        - Yearly graphs gives users the access to the
-        yearly graphs of the past 3 years.
+--> Daily, weekly, monthly and yearly web pages.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+    The other graphics are avaible on the following web 
+    pages : dailyGraphs.html, weeklyGraphs.html, 
+    monthlyGraphs.html and yearlyGraphs.html.
+    
+    Since these web page only need to be updated 
+    upon graphics updates, we (re)generate these 
+    web pages every time the pxStatsStartup.py  
+    script is being run.
 
-    --> Combined data web pages
-    -------------------------------------------------------
-        A special section is given to every machine group that 
-        are found within the configuration file. For each of 
-        these groups, a web page is generated wich displays 
-        graphics based on the combined data of all the sources
-        or clients wich are currently running on that machine group.
-        
-        These pages are also statically produced every time 
-        the pxStatsStartup.py script is being run. 
+    -Daily graphs gives users the acces to the daily graphics of the past 7 days. 
+    -Weekly graphs gives users the access to the weekly graphs of the past 5 weeks.
+    -Monthly graphs gives users the access to the monthly graphs of the past 3 months.
+    -Yearly graphs gives users the access to the yearly graphs of the past 3 years.
+
+--> Combined data web pages
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    A special section is given to every machine group that 
+    are found within the configuration file. For each of 
+    these groups, a web page is generated wich displays 
+    graphics based on the combined data of all the sources
+    or clients wich are currently running on that machine group.
     
+    These pages are also statically produced every time 
+    the pxStatsStartup.py script is being run. 
+
+
+--> Request interface
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    A special cgi webPage named graphicsRequestPage.py 
+    was designed to allow users to generate graphics 
+    on the fly.
     
-    --> Request interface
-    ---------------------------------------------------------
-        A special cgi webPage named graphicsRequestPage.py 
-        was designed to allow users to generate graphics 
-        on the fly.
-        
-        This interface contains a form that displays all 
-        the options available for producing graphics based
-        on the selected plotter.
-        
-        Graphics are then generated using Ajax requests 
-        and shown at the bottom of the very same web page.
+    This interface contains a form that displays all 
+    the options available for producing graphics based
+    on the selected plotter.
+    
+    Graphics are then generated using Ajax requests 
+    and shown at the bottom of the very same web page.
 
 
 Monitoring the library's activities :
@@ -418,9 +413,14 @@ to make the needed modifications.
 
 List of files and folders included in the package are :
 --------------------------------------------------------------
+.. image:: arbo.png
+.. image:: python.png
+.. image:: lib.png
+.. image:: web.png
+
 
 .../bin
---------------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     __init__.py     
     generateGraphics.py                     
     generateRRDGraphics.py     
@@ -430,42 +430,42 @@ List of files and folders included in the package are :
     statsMonitor.py  
     transferPickleToRRD.py       
    
-    .../bin/debugTools
-    ----------------------------------------------------------
-        _init__.py  
-        pickleViewer.py
-        picklesTimeOfUpdatesViewer.py
-        setTimeOfLastUpdates.py
+.../bin/debugTools
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    _init__.py  
+    pickleViewer.py
+    picklesTimeOfUpdatesViewer.py
+    setTimeOfLastUpdates.py
+
+
+.../bin/webPages
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    dailyGraphicsWebPage.py  
+    getGraphicsForWebPages.py 
+    generateTopWebPage.py    
+    graphicsRequestBroker.py   
+    graphicsRequestPage.py 
+    monthlyGraphicsWebPage.py 
+    totalGraphicsWebPages.py   
+    weeklyGraphicsWebPage.py
+    yearlyGraphicsWebPage.py
     
-    
-    .../bin/webPages
-    ----------------------------------------------------------
-        dailyGraphicsWebPage.py  
-        getGraphicsForWebPages.py 
-        generateTopWebPage.py    
-        graphicsRequestBroker.py   
-        graphicsRequestPage.py 
-        monthlyGraphicsWebPage.py 
-        totalGraphicsWebPages.py   
-        weeklyGraphicsWebPage.py
-        yearlyGraphicsWebPage.py
-        
-    .../bin/tools
-    ----------------------------------------------------------
-        __init__.py
-        archiveGraphicFiles.py  
-        backupRRDDatabases.py
-        clean_dir.plx                     
-        fileRenamer.py     
-        fileVersionsAndAccessCleaners.py
-        pickleCleaner.py  
-        pickleSynchroniser.py
-        restoreRoundRobinDatabases.py
-        retreiveDataFromMachine.py
+.../bin/tools
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    __init__.py
+    archiveGraphicFiles.py  
+    backupRRDDatabases.py
+    clean_dir.plx                     
+    fileRenamer.py     
+    fileVersionsAndAccessCleaners.py
+    pickleCleaner.py  
+    pickleSynchroniser.py
+    restoreRoundRobinDatabases.py
+    retreiveDataFromMachine.py
     
         
 .../data
---------------------------------------------------------------        
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        
         databases        
         fileAccessVersions
         graphics 
@@ -479,7 +479,7 @@ List of files and folders included in the package are :
         
          
 .../doc
---------------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     developersDoc.txt
     howTo.txt
     ifSomethingGoesWrong.txt
@@ -490,7 +490,7 @@ List of files and folders included in the package are :
     
            
 .../etc
---------------------------------------------------------------    
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     clean_dir.conf
     config 
     configForMachines
@@ -499,7 +499,7 @@ List of files and folders included in the package are :
     
     
 .../lib
---------------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     __init__.py
     BackwardReader.py                                                                                         ClientGraphicProducer.py         
     ClientStatsPickler.py                     
@@ -526,31 +526,31 @@ List of files and folders included in the package are :
     TimeParameters.py
 
 .../man
--------------------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    .../man/man1/
-    ---------------------------------------------------------------
-        backupRRDDatabases.1
-        dailyGraphicsWebPage.1   
-        generateGraphics.1                          
-        generateRRDGraphics.1
-        getGraphicsForWebPages.1
-        launchGraphCreation.1                   
-        monthlyGraphicsWebPage.1          
-        pickleCleaner.1 
-        pickledTimesViewer.1
-        pickleSynchroniser.1 
-        pickleUpdater.1    
-        pickleViewer.1   
-        restoreRoundRobinDatabases.1
-        statsMonitoringConfiguration.1
-        setTimeOfLastUpdate.1     
-        statsConfig.1  
-        statsConfigFormachines.1
-        statsMonitor.1               
-        transferPickleToRRD.1
-        weeklyGraphicsWebPage.1
-        yearlyGraphicsWebPage.1
+.../man/man1/
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::
+    backupRRDDatabases.1
+    dailyGraphicsWebPage.1   
+    generateGraphics.1                          
+    generateRRDGraphics.1
+    getGraphicsForWebPages.1
+    launchGraphCreation.1                   
+    monthlyGraphicsWebPage.1          
+    pickleCleaner.1 
+    pickledTimesViewer.1
+    pickleSynchroniser.1 
+    pickleUpdater.1    
+    pickleViewer.1   
+    restoreRoundRobinDatabases.1
+    statsMonitoringConfiguration.1
+    setTimeOfLastUpdate.1     
+    statsConfig.1  
+    statsConfigFormachines.1
+    statsMonitor.1               
+    transferPickleToRRD.1
+    weeklyGraphicsWebPage.1
+    yearlyGraphicsWebPage.1
 
 
 Note : Exception notwithstanding, files that start with a lower case
@@ -581,40 +581,8 @@ File interaction ():
 --------------------------------------------------------------------------------
 
 Main program :
--------------------------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                                    
-                                   PickleVersionChecker
-                                              /\
-                          FileStatsCollector  |     StatsPlotter  
-                                 /\      /\   |             /\
-DirectoryFilecollector           |       |    |             | 
-                   /\            |   pickleMerging          |
-                   |             |                /\        | 
-                   |             |                |         |
- gzippickle<--ClientStatsPickler<-----------ClientGraphicProducer           
-              /\    /\    /\                       /\
-               |    |     |                        |
-               |    |     |                        | 
-transferPickleToRRD |  pickleUpdater      generateGraphics
-                    |                              /\         
-                    |                              |
-     generateRRDGraphics            generateAllGraphsForServer                
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~    
-                               / \
-                                |
-                                |
-|------------------------|      | 
-| getGraphicsForWebPages |      | 
-| weeklyGraphicsWebPage  |      |
-| monthlyGraphicsWebPage |      |                    
-| dailyGraphicsWebPage   |/_____|
-| yearlyGraphicsWebPage  |\     |        
-|------------------------|      |                          
-                                |
-                                |
-                                |                
-                         launchGraphCreation   
-       
      
 --Note : x-->y means x uses y            
 
@@ -622,33 +590,15 @@ transferPickleToRRD |  pickleUpdater      generateGraphics
 
 
 Structure of the graphics requests : 
--------------------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-                                     GraphicsQueryInterface               
-                                               /|
-                                              / |
-                                             /  |
-                                            /   |       
-  graphicsRequestBroker --->RRDQueryBroker /    | 
-          /\        \                           | 
-          |          \------------>GnuqueryBroker
-          | 
-          |
-  graphicsRequestPage 
-
-  
-  
-  
-  
-  
 
 Quick File Overview 
 ----------------------------                
    
 backwardReader.py
------------------
-
+~~~~~~~~~~~~~~~~~
     Contains two usefull methods for this library and possibly for other.
                      
     Has a readlineBackwards method that is similar to readline but that reads
@@ -660,8 +610,7 @@ backwardReader.py
 
                          
 ClientGraphicProducer.py
-------------------------
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~
     This file contains methods to be used when a user of this class wants 
     to produce a graphic.
                                 
@@ -674,7 +623,7 @@ ClientGraphicProducer.py
 
                             
 ClientStatsPickler.py
-----------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Collects stats from all the files needed to cover a certain timespace.
                             
@@ -688,7 +637,7 @@ ClientStatsPickler.py
                               
     
 cpickleWrapper.py
-------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  
     very small wrapper that allows for directory creation if the path to the 
     file name saved does not exist.
@@ -697,7 +646,7 @@ cpickleWrapper.py
                  
                      
 dailyGraphicsWebPage.py 
-------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     Generate a web page named dailyGraphs.html that gives users acces
     to the daily graphics of the past seven days of all the sources and
@@ -705,7 +654,7 @@ dailyGraphicsWebPage.py
                             
                                                      
 DirectoryFileCollector.py 
---------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     This file is used to gather all the interesting files present in 
     a specific directory.  
@@ -715,7 +664,7 @@ DirectoryFileCollector.py
                                
                                
 FileStatsCollector.py 
----------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     This file contains all the methods needed to collect data from files and
     produce stats using said data.
@@ -734,14 +683,14 @@ FileStatsCollector.py
                       
                                 
 generateGraphics.py
---------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
        
     This file offers to the user a command line interface so he can easily
     use the functionalities offered by ClientGraphicProducer.py. 
 
                            
 generateAllGraphsForServer.py
------------------------------ 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Serves as a wrapper for generate graphics by adding the possibility
     to generate a graphic for each and every client found on a specified 
@@ -750,7 +699,7 @@ generateAllGraphsForServer.py
     
                            
 generateRRDGraphics.py
------------------------    
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RRD implementation of generateGraphics/generateAllGraphsForServer that
     is made different by using rrd databases as data sources and rrdgraph 
     to produce graphics instead of gnuplot.
@@ -761,7 +710,7 @@ generateRRDGraphics.py
                              
                                     
 getGraphicsForWebPages.py 
---------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     This program is to be called hourly within a crontab or through another
     program like launchGraphCreation.py. It was built to ensure that through
@@ -769,14 +718,14 @@ getGraphicsForWebPages.py
 
     
 GnuqueryBroker.py
--------------------------    
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     This class implements the GraphicsQueryBrokerInterface
     and allows to execute queries towards the gnuplot graphics
     creator from a web interface.    
 
     
 graphicsRequestPage.py
--------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     This file is to be hosted on a cgi-enabled web server as to 
     generate a dynamic python/cgi web page. That web page will 
@@ -785,14 +734,14 @@ graphicsRequestPage.py
     
     
 GraphicsQueryBrokerInterface.py    
--------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     This interfaces lists the methods that need to be implemented 
     by any GraphicsQueryBroker class.
                  
     
                  
 monthlyGraphicsWebPage.py 
--------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Generate a web page named monthlyGraphs.html that gives users acces
     to the monthly graphics of the past 3 months of all the sources and
@@ -800,7 +749,7 @@ monthlyGraphicsWebPage.py
                      
                              
 MyDateLib.py
--------------     
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     Temporary file wich contains date manipulation methods I have been working
     on.They probably should be addded to the regular DateLib.py once they are
@@ -808,7 +757,7 @@ MyDateLib.py
                                   
                                          
 pickleMerging.py 
------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     This file contains the methods needed to combine data found in different 
     pickle files that are covering the same time period. Example : Data that 
@@ -827,20 +776,20 @@ pickleMerging.py
                                                    
     
 pickledTimesViewer.py
----------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Allows users to see clearly the content of the pickled times file. 
     Might be found usefull for debuging purpouses. 
                          
 
 pickleSynchroniser 
-------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  
     Implementation of an rsync system. Allos a machine to synchronise the
     content of it's pickle folder with the one located on a remote machine. 
                       
 pickleUpdater.py 
-------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     This program is the one to be used to make automated data updates.
     Recommended usage is to call this program every hours to create the hourly 
@@ -848,7 +797,7 @@ pickleUpdater.py
                                              
 
 PickleVersionChecker.py  
-------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     This class is used in the library to keep track of the changes made
     within files.
@@ -858,7 +807,7 @@ PickleVersionChecker.py
 
                                                     
 pickleViewer.py 
-----------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     Allows user to view the content of a cpickle file that contains a
     FileStatsCollector instance. Output can be directed to a text file if wanted. 
@@ -869,7 +818,7 @@ pickleViewer.py
 
     
 restoreRoundRobinDatabases.py
-------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     This program is to be used to restore the backed up databases 
     from a certain date and use them as the main databases. This is
@@ -879,14 +828,14 @@ restoreRoundRobinDatabases.py
     problems. 
     
 RRDQueryBroker.py
------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     This class implements the GraphicsQueryBrokerInterface
     and allows to execute queries towards the rrd graphics
     creator from a web interface.  
     
     
 setTimeOfLastUpdates.py
--------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     This program is to be used in case of a problem with pickleUpdater. It is used
     to set back the time of the the last updates prior to the errors. That way 
@@ -895,7 +844,7 @@ setTimeOfLastUpdates.py
 
 
 statsMonitor.py
----------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     This file is to be used to monitor the different activities that are done with 
     the the stats library. The report build throughout the different monitoring
@@ -903,7 +852,7 @@ statsMonitor.py
                    
       
 StatsPlotter.py
----------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     This file contains the methods to plot a gnuplot graphic once the data has
     been collected using the previously described files. This is very similar 
@@ -911,14 +860,14 @@ StatsPlotter.py
 
 
 transferPickleToRRD.py
-------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     This files contains all the methods needed to transfer pickled data
     that was saved using pickleUpdater.py into an rrd database.
     In turn, the rrd database can be used to plot graphics using rrdTool.            
                     
 weeklyGraphicsWebPage.py 
---------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Generate a web page named weeklyGraphs.html that gives users acces
     to the weekly graphics of the past five days of all the sources and
@@ -926,7 +875,7 @@ weeklyGraphicsWebPage.py
                            
      
 yearlyGraphicsWebPage.py 
----------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     Generate a web page named yearlyGraphs.html that gives users acces
     to the yearly graphics of the past three years of all the sources and
@@ -938,10 +887,10 @@ File system
  
 
 Pickle Files :
----------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 pxStats/data/picklesTimeOfUpdates/fileTypeClientNameMachineName
--------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     This is a folder created to contain all the last pickle updates times 
     from each of the different sources/clients. The files within
@@ -952,13 +901,13 @@ pxStats/data/picklesTimeOfUpdates/fileTypeClientNameMachineName
 
 
 pxStats/data/fileAccessVersions/clientName_machineName:
-------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Contains a list of file update time saved by PickleVersionChecker.
 See PickleVersionChecker.py for details.
 
 
 pxStats/data/pickles/clientOrSourceName/YYYYMMDD/fileType/machineName_hh
--------------------------------------------------------------------- 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 These file are created to save the data collected for the period covering
 the hour specified in the file's name.  This file contains a FileStatsCollector
@@ -969,45 +918,14 @@ These files will be grouped in a folder named pickles. This folder will contain
 many subfolder, all of wich named after a certain source/client name. These 
 folders will contain all the pickle files of that source/client.  
              
-             ---------
-Example :   | pxStats |
-             ---------
-                 |
-              --------   
-             | data   |
-              --------
-                 |  
-            ------------
-            | pickles  |
-            ------------
-          /            \
-         /              \
-       ------          ----------
-    | client1 |      | client2 |
-       ------          ----------
-       /                    \
-      /                      \
-  ----------           -------------   
- | 20060712 |         |  20060712   |      
-  ----------           -------------
-      /                       \
-     /                         \
-  ------                     ------
- |  rx  |                   |  tx  |
-  ------                     ------  
-    /                           \
-   /                             \
-machine1_17                   machine2_19
-   
-
 
 
 Gnuplot Graphics :
---------------------------------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 pxStats/graphics/others/gnuplot/clientName/
 fileType_clientName_YYYYMMDD_HH:MM:SS_dataTypes_XXhours_on_server_products.png
---------------------------------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The files are created everytime a graphic is asked for by a user. This will be 
 the png image containing all the graphics asked for by the user during his 
@@ -1019,29 +937,6 @@ many subfolder, all of wich named after a certain source/client name. These
 folders will contain all the image files of that client.
 
 
-               ---------
-Example :     | pxStats |
-               ---------
-                  |
-               --------
-              |graphics|
-               --------
-                 |
-              --------
-             | others | 
-              --------
-                  |
-            ---------
-           | gnuplot |
-            ---------  
-            /            
-           /              
-       ------         
-      | amis |        
-       ------          
-       /                    
-      /                      
-tx_xyz_20060801_05:00:00_'latency','errors','bytecount'_12hours_on_lvs1-dev_forAllProducts.png
    
 
    
@@ -1081,43 +976,22 @@ Databases
 ----------
 
 pxStats/data/databases/currentDatabases/type/client_machinename
---------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 These files are created when user asks for data to be transferred from pickle
 files to an rrd database. Type will be either bytecount, errors, filecount,
 filesOverMaxLatency or latency.
       
-                 --------
-Example :       | pxStats |
-                 --------
-                   /
-               ------    
-              | data |
-               ------
-                 /               
-             -----------
-            | databases |
-             -----------
-                 /               
-         ------------------
-        | currentDatabases |
-         ------------------           
-           /                        
-       --------         
-      | errors |        
-       --------          
-        /                    
-       /
-clientName_machineName
+
 
 
 /apps/px/pxStats/databases/currentDatabasesTimeOfUpdates/fileType/client_machineName
-------------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 These files are pickle files containing the time of the last database update
 of the databases of a certain client/sources. 
 
 
 Important notes ( Specifics )
---------------------------------------------------------------------------------
+------------------------------
 
 When using the pickleUpdater to make automatic updates, data collection will 
 start where the last data Collection was made. If no pickling at all was made 
