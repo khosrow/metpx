@@ -21,12 +21,16 @@ class Bufr:
     def __init__(self,stringBulletin):
         self.set(stringBulletin)
 
+
     def set(self,stringBulletin):
         self.bulletin  = stringBulletin
 
         self.array = array.array('B',self.bulletin)
         self.size  = len(self.bulletin)
         self.valid = True
+
+        self.begin = 0
+        self.last  = self.size
 
         if self.bulletin == None :
            self.valid    =  False
@@ -40,8 +44,6 @@ class Bufr:
 
         if self.valid == False : return
 
-        self.begin = self.s0
-        self.last  = self.s0 + self.length
 
     def checkEOB(self):
         """check that the end is ok and return its position
@@ -95,6 +97,9 @@ class Bufr:
         self.s0 = self.bulletin.find('BUFR')
         if self.s0 == -1 : return
 
+        self.begin = self.s0
+        self.last  = self.size - self.s0
+
         b0  = self.s0
         b4  = self.s0 + 4
         b7  = self.s0 + 7
@@ -103,6 +108,8 @@ class Bufr:
         if self.length > self.size-self.s0 : return
 
         self.version = long(self.array[b7])
+
+        self.last  = self.s0 + self.length
 
         self.valid = True
 
@@ -113,6 +120,17 @@ class Bufr:
     def section1(self):
 
         self.valid = False
+
+        # for now version <= 4 the few first bytes are
+        #             bytes  0 1 2      length of section 1
+        #             bytes  3          bufr master table
+        self.s1 = self.s0 + 8
+
+        if self.s1+17 > self.size : return
+
+        b0  = self.s1
+        self.s1_length = self.integer3bytes(b0)
+        if self.s1_length > self.size-self.s1 : return
 
         # section 1   DESCRIPTION DE LA VERSION 2 ET 3
         #             bytes  0 1 2      length of section 1
@@ -132,13 +150,7 @@ class Bufr:
         #             byte  16          min
         #             byte  17          reserved
         if self.version <= 3 :
-           self.s1 = self.s0 + 8
 
-           if self.s1+17 > self.size : return
-
-           b0  = self.s1
-           self.s1_length = self.integer3bytes(b0)
-           if self.s1_length > self.size-self.s1 : return
 
            # uncomment anything you need
 
@@ -158,6 +170,12 @@ class Bufr:
            self.s1_day                 = long(self.array[b0+14])
            self.s1_hour                = long(self.array[b0+15])
            self.s1_min                 = long(self.array[b0+16])
+
+           if self.s1_century < 0 or self.s1_century > 99 : return
+           if self.s1_month   < 1 or self.s1_month   > 12 : return
+           if self.s1_day     < 1 or self.s1_day     > 31 : return
+           if self.s1_hour    < 0 or self.s1_hour    > 23 : return
+           if self.s1_min     < 0 or self.s1_min     > 59 : return
 
         # section 1   DESCRIPTION DE LA VERSION 4
         #             bytes  0 1 2      length of section 1
@@ -206,6 +224,12 @@ class Bufr:
            self.s1_hour                   = long(self.array[b0+19])
            self.s1_min                    = long(self.array[b0+20])
            self.s1_sec                    = long(self.array[b0+21])
+
+           if self.s1_month   < 1 or self.s1_month   > 12 : return
+           if self.s1_day     < 1 or self.s1_day     > 31 : return
+           if self.s1_hour    < 0 or self.s1_hour    > 23 : return
+           if self.s1_min     < 0 or self.s1_min     > 59 : return
+           if self.s1_sec     < 0 or self.s1_sec     > 59 : return
 
         self.valid = True
 
