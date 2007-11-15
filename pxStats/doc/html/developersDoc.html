@@ -1,0 +1,561 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.3.7: http://docutils.sourceforge.net/" />
+<title></title>
+<link rel="stylesheet" href="default.css" type="text/css" />
+</head>
+<body>
+<div class="document">
+<div class="image"><img alt="images/logo.png" src="images/logo.png" /></div>
+<div class="contents topic" id="contents">
+<p class="topic-title first"><a name="contents">Contents</a></p>
+<ul class="simple">
+<li><a class="reference" href="#front-matter" id="id1" name="id1">Front Matter</a></li>
+<li><a class="reference" href="#about-this-document" id="id2" name="id2">About this document :</a></li>
+<li><a class="reference" href="#pxstats-primer" id="id3" name="id3">pxStats primer :</a></li>
+<li><a class="reference" href="#development-requirements" id="id4" name="id4">DEVELOPMENT REQUIREMENTS :</a></li>
+<li><a class="reference" href="#guiding-principles" id="id5" name="id5">GUIDING PRINCIPLES</a></li>
+<li><a class="reference" href="#implementation" id="id6" name="id6">IMPLEMENTATION :</a><ul>
+<li><a class="reference" href="#data-collection" id="id7" name="id7">Data collection :</a></li>
+<li><a class="reference" href="#dealing-with-remote-machines" id="id8" name="id8">Dealing with remote machines</a></li>
+<li><a class="reference" href="#designing-the-web-requests-interface" id="id9" name="id9">Designing the web requests interface.</a><ul>
+<li><a class="reference" href="#design-principles" id="id10" name="id10">Design principles.</a></li>
+<li><a class="reference" href="#designing-the-user-interface" id="id11" name="id11">Designing the user interface.</a></li>
+<li><a class="reference" href="#designing-the-request-architecture" id="id12" name="id12">Designing the request architecture.</a></li>
+</ul>
+</li>
+<li><a class="reference" href="#resulting-python-packages" id="id13" name="id13">Resulting python packages</a><ul>
+<li><a class="reference" href="#lib" id="id14" name="id14">Lib</a></li>
+<li><a class="reference" href="#bin" id="id15" name="id15">Bin</a></li>
+<li><a class="reference" href="#bin-debugtools" id="id16" name="id16">Bin/debugTools</a></li>
+<li><a class="reference" href="#bin-tools" id="id17" name="id17">bin/tools</a></li>
+<li><a class="reference" href="#bin-webpages" id="id18" name="id18">bin/webPages</a></li>
+</ul>
+</li>
+<li><a class="reference" href="#resulting-file-arborenscence" id="id19" name="id19">Resulting file arborenscence</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="front-matter">
+<h1><a class="toc-backref" href="#id1" name="front-matter">Front Matter</a></h1>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Authors:</th><td class="field-body">Nicholas Lemay</td>
+</tr>
+<tr class="field"><th class="field-name">Copyright:</th><td class="field-body">MetPX Copyright (C) 2004-2007 Environment Canada</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="about-this-document">
+<h1><a class="toc-backref" href="#id2" name="about-this-document">About this document :</a></h1>
+<p>This file was written for anyone using the stats library who might be interested 
+in it's inner workings. Developers and end-users alike will be able to 
+understand the principles behind the development of this package.</p>
+<p>Special care was given to describing the requirements and observations that were 
+made during development as to guide someone who might be interested in contributing
+to pxStats.</p>
+<p>Hopefully this will explain why things were done a certain way and keep
+the developper from doing the same errors that were made during initial 
+development.</p>
+</div>
+<div class="section" id="pxstats-primer">
+<h1><a class="toc-backref" href="#id3" name="pxstats-primer">pxStats primer :</a></h1>
+<p>The stats package's main goal is to manage stats regarding MetxPx's different 
+clients/sources and to add the possibility to to draw graphics based on said 
+stats.</p>
+<p>The graphic's data is based on the data calculated from log files produced by
+MetPx wich can be remotely located.</p>
+</div>
+<div class="section" id="development-requirements">
+<h1><a class="toc-backref" href="#id4" name="development-requirements">DEVELOPMENT REQUIREMENTS :</a></h1>
+<ul class="simple">
+<li>The package has to be able to gather log files from remote locations( machines ).</li>
+<li>The package has to be able to read a specific format of log files.</li>
+<li>The package must allow user to collect data from log files wich are constantly 
+growing, changing names, etc...</li>
+<li>The package must permit data collection of log files that contains information
+about the same source/client but that comes from numerous machine sources. 
+Each can be remotely located.</li>
+<li>The package must have a way to save the collected data.
+Data needs to be stored in an efficient manner so that 
+we can keep data for up to 10 years.</li>
+<li>Minimally the package must be able to collect the following data types: errors, 
+bytecount and latency.</li>
+<li>With these data types, the packages must be able to compute the totals or mean 
+of each types. It must also keep count count of the number of files handled.
+Of that number of files it also must keep count of the number of files for
+wich the latency exceeds a certain maximum.</li>
+<li>The package must have a way to save wich product type is associated with 
+each line collected.</li>
+<li>Data collection and saving must be done as quickly as possible. This must also
+be done without affecting the machine on wich it is being run too much.</li>
+<li>The package must be able to produce graphics of the .png format based on the 
+saved data.</li>
+<li>The package must be able to display such graphic to a user within an
+acceptable time frame.( &lt; 40 sec )</li>
+<li>The package must give access to graphics through the Columbo web interface.</li>
+<li>The package must allow user to specify the following options for data
+collection and graphics production : machine name, current time, 
+source/client name, file type, product type.</li>
+<li>The package must allow the user to creates client or source groups wich are
+based on existing clients and sources. The package must be able to treat 
+the groups just like individuals client/sources and allow all of the 
+available functionalities to be used with the groups.</li>
+<li>Library must be built in such a way that all the above action can be done
+on an automated basis i.e. be called by crontabs.</li>
+<li>Library must have mechanisms that allow data collection to be reverted in 
+case errors are found.</li>
+<li>Library must have a monitoring tool that limits the number of verifications
+made by the administrators to a bare minimum.</li>
+<li>Library must give access to the archives of produced graphics through a 
+web page.</li>
+<li>Library must allow users to generate graphics on the fly via a web
+form.</li>
+</ul>
+</div>
+<div class="section" id="guiding-principles">
+<h1><a class="toc-backref" href="#id5" name="guiding-principles">GUIDING PRINCIPLES</a></h1>
+<ul>
+<li><p class="first">Log files for a specific source/client are often stored on many different
+machines.</p>
+</li>
+<li><p class="first">Log file for a single day from a single machine can be quite large. 
+( average~ &gt;30 megs )</p>
+</li>
+<li><p class="first">Log file names aren't reliable. Even if a file has a certain date in it's
+name it doesn't necessarily mean it will contain data for that day. File 
+content still needs to be investigated to make sure it does or doesn't contain
+usefull info.</p>
+</li>
+<li><p class="first">Having every machine perform the collection of the data found in the files
+that are present in it's own space makes the application more scalable
+in the event that more machines and or sources/clients are to be added. 
+It also speeds up the collection since log files do not require to be 
+transferred.</p>
+</li>
+<li><p class="first">On the other hand, collecting the data on the machines producing the log files 
+instead of downloading the log files into another machine can impact the machine
+to a much greater degree.</p>
+</li>
+<li><p class="first">Collecting a whole days worth of data and producing stats according to data
+collected is very long. Therefore, more frequent data collection should be made.
+Hourly collection seems optimal for logical and performance reasons.</p>
+</li>
+<li><p class="first">Disk access is very slow. Anything that has to be loaded or saved on the disk
+slows down the entire process quite a lot.</p>
+</li>
+<li><p class="first">For instance, even with some optimizations, on a users machine the time 
+taken to pickle a single hour of data using a single pickle file every day
+went from three seconds ( maximum ) for the first few hours to almost 
+10 seconds( maximum ) for the last hours of the day.</p>
+</li>
+<li><p class="first">Because of the preceding, we've found out that using a single daily file 
+would make it impossible to meet the above requirements.</p>
+</li>
+<li><p class="first">Pickling done during the final hour of the day on a machine containing 150
+sources/clients would mean roughly 150 * 10 sec = 1500 sec ~ 25 minutes
+This was way too much time dedicated to collecting data.</p>
+</li>
+<li><p class="first">Saving pickled data into hourly files makes sure that time used for pickling
+remains stable throughout the day. It also makes the total amount of time 
+much more acceptable.</p>
+<p>On a normal machine it would mean ~3 sec * 150 = 450 450/60 = 7.5 minutes
+( worst case scenario )</p>
+</li>
+<li><p class="first">On more performant dev machines where the app is being tested, it takes a 
+maximum of less than 2 second to update a single source/client.</p>
+<p>Currently, with tests on 2 developments machines, wich have  70 active
+sources/clients it takes less than 2 minutes to create all the hourly pickles
+for the 70 sources/clients.</p>
+</li>
+<li><p class="first">These test machine all have numerous processors. Since data collection times 
+have been brought down to very quick times it has been decided not to launch 
+any more process to try and speed up the collecting since it might slow down
+other applications for a minimal performance boost.</p>
+</li>
+<li><p class="first">Gnuplot graphics are generated rather quickly but still take a few seconds
+each( &lt; 5seconds ).</p>
+</li>
+<li><p class="first">Therefore it has been decided that multi-processing would be usefull when 
+producing graphics. Number of simultaneously ran process' can be modified as
+to not increase machine load too much.</p>
+</li>
+<li><p class="first">For the same reasons multi-processing has been implemented on transfers from 
+pickle files to rrd databases.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="implementation">
+<h1><a class="toc-backref" href="#id6" name="implementation">IMPLEMENTATION :</a></h1>
+<div class="section" id="data-collection">
+<h2><a class="toc-backref" href="#id7" name="data-collection">Data collection :</a></h2>
+<div class="image"><img alt="images/dataCollectionDiagram.png" src="images/dataCollectionDiagram.png" /></div>
+<ul>
+<li><p class="first">To speed up data collection and stats production, data collected is saved 
+in a pickle files. This way, data for a specific timeframe only has to be
+collected and calculated once. This can save enormous amounts of time on 
+graphic production if the timespan of the graphic asked by the user is of any
+importance.</p>
+<p>FilesStatsCollector.py, DirecToryStatsCollector.py, pickleUpdater.py and 
+cpickleWrapper.py all contain methods to deal with data pickling and pickled data.</p>
+</li>
+<li><p class="first">Because of disk access times, data pickling can be rather slow. To speed it up
+cpickle has been added to the library. cpickle is a c based implementation of 
+pickle that has much faster methods than the usual pickle.</p>
+</li>
+<li><p class="first">Data collection can be done on an automated basis using crontab to call 
+pickleUpdater. Note : Main script named pxStatsStartup does call pickleUpdater.</p>
+</li>
+<li><p class="first">Data colection can be made on growing files. This is true as long as the top 
+of the file remains intact and that data is only appended at the end of the 
+log files. If top of the file is modified, the saved positioning of the file 
+will be corrupted and reading the file will probably produce errors.</p>
+</li>
+<li><p class="first">File positioning of the last read file is saved for every sources/clients in 
+the /apps/px/pxStats/logfileAccess pickle file.</p>
+</li>
+<li><p class="first">By default all data types are collected. This is done so that there will be no 
+problem if a user wants to produce any kind of graphic for a certain 
+source/client.</p>
+</li>
+<li><p class="first">User can specify wich data types he wants collected but that will limit user
+choices for graphics.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="dealing-with-remote-machines">
+<h2><a class="toc-backref" href="#id8" name="dealing-with-remote-machines">Dealing with remote machines</a></h2>
+<p>In this section, we will present 3 of the most common installation
+solutions that allow pxStats to deal with remotly located machines.</p>
+<p>Notes of interest for all 3 solutions :</p>
+<ul>
+<li><p class="first">Some sources/clients have their data stored on different machines, 
+which groups of machines are referred to as clusters. The 
+pickleMerging.py application has been  introduced to make merging of 
+different machines pickles possible.</p>
+</li>
+<li><p class="first">Since the graphic producing machine is at the heart of the library, it is 
+this machine that will launch all the updates on the remote machines 
+containing the log files.</p>
+<p>It will also be the file containing all the configuration files that
+will needto be filled in order to make all the machiens work properly.</p>
+</li>
+<li><p class="first">remotely executed commands using ssh need to be run from the graphic 
+producing machine.</p>
+</li>
+<li><p class="first">When remote pickling machines are used, the graphic producing machine
+needs to be able to access to all the pickles created remotely to 
+generate graphics. This prompted the implementation of a rsync
+system (pickleSynchroniser.py) that allows pickled data found on numerous 
+machines to be brought back in a single folder of a specific machine if needed.</p>
+</li>
+<li><p class="first">The graphics machine has no way of knowing if it is using the right version of 
+the pickle files. Therefore we have implemented a file version checking program
+that uses the time of creation of the pickle files to see if a newer version has
+appeared on the pickleCreation machine. If so the graphic generation program
+will use the new file next time a graphic using this pickle file is asked 
+for by a user.</p>
+</li>
+</ul>
+<p>-All 3 of the following solutions use 2 main graphics producing machines. 
+This choice was made to stay coherent with the principles elaborated 
+within metPX where everything is doubled to make sure the risk of complete
+system failure is kept to a minimum.</p>
+<div class="image"><img alt="images/remoteAccessDiagram.png" src="images/remoteAccessDiagram.png" /></div>
+<p>Fig x presents 3 of the most common installation solutions that allow 
+pxStats to deal with remotly located machines.</p>
+<p><strong>Solutions 1 proposes the following :</strong></p>
+<ul class="simple">
+<li>A pickling machine for each graphic producing machine.</li>
+<li>This way, the load of the source machiens is not impacted. The only impact on the source machines is the traffic of the log files between the source and pickling machines.</li>
+<li>This way, all of the pickling machines can do their work at the same time, which would be impossible if all the work was done on the graphic producing machines.</li>
+<li>This solution is the solution that requires the most machines.</li>
+<li>Therefore, this solution is also the one with the biggest amount of machine interaction and data tranfer.</li>
+</ul>
+<p><strong>Solution 2 proposes the following :</strong></p>
+<ul class="simple">
+<li>Doing the pickling directly on the source machines.</li>
+<li>This way log files need not to be transfered. Only pickle file. This might reduce data transfers and the total amount of disk space used by all machines.</li>
+<li>This method allows all the pickling/source machien to do their work at the same time, which would be impossible if all the work was done on the graphic producing machines.</li>
+<li>This technique puts some load on the source machines, which may or may not be desirable</li>
+</ul>
+<p><strong>Solution 3 proposes the following :</strong></p>
+<ul class="simple">
+<li>Doing the pickling directly on the graphics machines.</li>
+<li>This way, very few machines are needed.</li>
+<li>There is also no load on the source machines other than the transfer of the log files which in itself is a very good thing since the source machine might not have been choosen in a way to be able to handle both metPx and pxStats at the same time.</li>
+<li>This method makes it impossible for the pickling of all the source machines data to be done at the same time.</li>
+<li>This technique puts all the the load on the machine hosting pxStats, making it hard to be scalable in case the number of clients/sources and or source machines increases rapidly.</li>
+</ul>
+</div>
+<div class="section" id="designing-the-web-requests-interface">
+<h2><a class="toc-backref" href="#id9" name="designing-the-web-requests-interface">Designing the web requests interface.</a></h2>
+<div class="section" id="design-principles">
+<h3><a class="toc-backref" href="#id10" name="design-principles">Design principles.</a></h3>
+<ul class="simple">
+<li>The web interface must be designed to be as user friendly as possible.</li>
+<li>Web interface must allow to generate any of the graphics that the system is 
+capable of producing from the command line.</li>
+<li>The choice of plotter used to draw the graphics must transparent to the user.</li>
+<li>Therefore, all the available options for both rrd and gnu plotters must be 
+presented to user. Options which can only be used for one of the two plotters
+must be enabled or disabled based on the other choices made by the user.</li>
+<li>Web interface must allow user to request graphics but must also allow user to 
+see the produced graphics wihtout having to swotch pages.</li>
+</ul>
+</div>
+<div class="section" id="designing-the-user-interface">
+<h3><a class="toc-backref" href="#id11" name="designing-the-user-interface">Designing the user interface.</a></h3>
+<div class="image"><img alt="images/requestPageScreenshot.png" src="images/requestPageScreenshot.png" /></div>
+<p>fig x  Screenshot of the graphisRequestPage being used to generate graphics.</p>
+<ul class="simple">
+<li>The screen is divided horizontally in two sections : the form to fill out and 
+the result section.</li>
+<li>The form section is cut in half itself as to seperate the basic options form the 
+advanced options. Advanced options can be enabled/disabled by hiding or showing 
+them.</li>
+<li>A special label was inserted between the generate graphics and help buttons. This 
+label is used to tell the user about the status of the application. This was done 
+to take out the guesswork as to what the application is currently doing.</li>
+<li>The resulting graphics section was sized this was as to allow only one graphic to 
+be shown at any time. A slide-show like feature was developped to allow the user 
+to browse through the different graphics that were produced.</li>
+<li>A graphics combining function was also developped to allow the user to see all 
+the graphics on a single page if he desires to do so.</li>
+</ul>
+</div>
+<div class="section" id="designing-the-request-architecture">
+<h3><a class="toc-backref" href="#id12" name="designing-the-request-architecture">Designing the request architecture.</a></h3>
+<div class="image"><img alt="images/web.png" src="images/web.png" /></div>
+<p>fig x  request architecture.</p>
+<ul class="simple">
+<li>Request made my the user are made using the ajax principles. This way, all the 
+requests made to the broker or to other tools do not affect(refresh) the web page
+where the user is currently working.</li>
+<li>A broker was introduced which serves as a bridge between the request interface and
+the &quot;backend&quot; softwares.</li>
+<li>A GraphicsQueryBrokerInterface was introduced in an effort to give a minimal list of 
+methods a query broker must support in order to work with the graphicsRequestBroker
+program. This way, if plotters are to be vhanged one day or if others are to be added,
+the transition will be done more easily.</li>
+<li>RRDQueryBroker and GnuQueryBrokers were both introduced as to allow graphic request to use 
+the most appropriate plotter of the two.</li>
+<li>Both of these brokers use the required backend programs in order to produce the requried 
+graphics.</li>
+<li>The result of the request, whether graphcis were generated or errors happened, is thus sent
+back in chain from the backend to the user interface through the brokers.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="resulting-python-packages">
+<h2><a class="toc-backref" href="#id13" name="resulting-python-packages">Resulting python packages</a></h2>
+<div class="image"><img alt="images/python.png" src="images/python.png" /></div>
+<p>Figure x shows the way the python files are split up.</p>
+<ul class="simple">
+<li>The bin section includes binary files which are all executable.</li>
+<li>The main bin folder contains the main scripts of the package.</li>
+<li>The other folders found under the bin folder contain task specific scripts.</li>
+<li>The lib section contains library files. These classes are to be viewed as tools to be called by executable binary(bin) files.</li>
+</ul>
+<div class="section" id="lib">
+<h3><a class="toc-backref" href="#id14" name="lib">Lib</a></h3>
+<p>The lib section contains library files. These classes are to be 
+viewed as tools to be called by executable binary(bin) files.</p>
+<div class="image"><img alt="libDiagram.png" src="libDiagram.png" /></div>
+<p>Here are the different files found in this section :</p>
+<dl class="docutils">
+<dt>-<strong>ClientGraphicProducer.py</strong></dt>
+<dd><p class="first">This file contains methods to be used when a user of this class wants 
+to produce a graphic.</p>
+<p>It first takes the previously collected data, then adds up the data 
+produced between the last collection and the time of the call.</p>
+<p class="last">After that it calls StatsPlotter.py with the collected data and uses it
+to produce the graphic.</p>
+</dd>
+<dt>-<strong>ClientStatsPickler.py</strong></dt>
+<dd><p class="first">Collects stats from all the files needed to cover a certain timespace.</p>
+<blockquote class="last">
+<p>File names are gathered using DirectoryFileCollector.py.</p>
+<p>Data for each file is collected using the methods found in
+FileStatsCollector.</p>
+<p>Introduces the pickling principle to the library.</p>
+</blockquote>
+</dd>
+<dt>-<strong>FileStatsCollector.py</strong> </dt>
+<dd><p class="first">This file contains all the methods needed to collect data from files and
+produce stats using said data.</p>
+<p>The general principle behind the data collection made here is that it's
+always spit up into entries /apps/px/lib/stats/generateAllGraphsForServer.py
+-m 'pds,pds' -c  -l 'pds,pds' of a certain length.</p>
+<p class="last">File entries are of a timespan selected by the user. Entries will
+have the same width all throughout the total width the user has decided 
+to collect data upon.                        
+Once data has been collected, stats will be created for each buckets. 
+This means that every bucket will have it's own min, max, median and 
+mean values.</p>
+</dd>
+<dt>-<strong>GraphicsQueryBrokerInterface.py</strong>    </dt>
+<dd>This interfaces lists the methods that need to be implemented 
+by any GraphicsQueryBroker class.</dd>
+</dl>
+<p>-<strong>GnuqueryBroker.py</strong></p>
+<blockquote>
+This class implements the GraphicsQueryBrokerInterface
+and allows to execute queries towards the gnuplot graphics
+creator from a web interface.</blockquote>
+<dl class="docutils">
+<dt>-<strong>pickleMerging.py</strong> </dt>
+<dd><p class="first">This file contains the methods needed to combine data found in different 
+pickle files that are covering the same time period. Example : Data that 
+comes from the same source/client but from different machines.</p>
+<p>It also has the possibility to merge pickles covering a certain time 
+frame. Forexample you could merge data coming from 12 pickles containing an
+hour's worth of data each into a single pickle file covering the entire 12 
+hours.</p>
+<p>This will be very usefull if some pickles for the same source/client are 
+produced on different machines and some operation concerning all the data 
+must be done on a specific machine.</p>
+<p class="last">Ex : See Clientgraphicproducer...</p>
+</dd>
+<dt>-<strong>RRDQueryBroker.py</strong></dt>
+<dd>This class implements the GraphicsQueryBrokerInterface
+and allows to execute queries towards the rrd graphics
+creator from a web interface.</dd>
+<dt>-<strong>StatsDateLib.py</strong></dt>
+<dd>Temporary file wich contains date manipulation methods I have been working
+on.They probably should be addded to the regular DateLib.py once they are
+found to be usefull and reliable.</dd>
+<dt>-<strong>StatsPlotter.py</strong></dt>
+<dd>This file contains the methods to plot a gnuplot graphic once the data has
+been collected using the previously described files. This is very similar 
+to the Plotter.py allready found in the library.</dd>
+</dl>
+</div>
+<div class="section" id="bin">
+<h3><a class="toc-backref" href="#id15" name="bin">Bin</a></h3>
+<div class="image"><img alt="images/binDiagram.png" src="images/binDiagram.png" /></div>
+<p>The bin section includes binary files which are all executable.
+Here are the files found under this section :</p>
+<dl class="docutils">
+<dt>-<strong>generateGraphics.py</strong></dt>
+<dd>This file offers to the user a command line interface so he can easily
+use the functionalities offered by ClientGraphicProducer.py.</dd>
+<dt>-<strong>generateAllGraphsForServer.py</strong></dt>
+<dd>Serves as a wrapper for generate graphics by adding the possibility
+to generate a graphic for each and every client found on a specified 
+server. Very usefull in cron jobs to produce timely graphics.</dd>
+<dt>-<strong>generateRRDGraphics.py</strong></dt>
+<dd><p class="first">RRD implementation of generateGraphics/generateAllGraphsForServer that
+is made different by using rrd databases as data sources and rrdgraph 
+to produce graphics instead of gnuplot.</p>
+<p class="last">Otherwise it is similar to generateGraphics and generateAllGraphsForServer
+as it allow to create graphs from command line and for as many sources/clients
+as desired.</p>
+</dd>
+<dt>-<strong>pickleUpdater.py</strong> </dt>
+<dd>This program is the one to be used to make automated data updates.
+Recommended usage is to call this program every hours to create the hourly 
+pickles the contain stats on a source/client.</dd>
+<dt>-<strong>statsMonitor.py</strong></dt>
+<dd>This file is to be used to monitor the different activities that are done with 
+the the stats library. The report build throughout the different monitoring
+methods will be emailed to the chosen recipients.</dd>
+<dt>-<strong>transferPickleToRRD.py</strong></dt>
+<dd>This files contains all the methods needed to transfer pickled data
+that was saved using pickleUpdater.py into an rrd database.
+In turn, the rrd database can be used to plot graphics using rrdTool.</dd>
+</dl>
+</div>
+<div class="section" id="bin-debugtools">
+<h3><a class="toc-backref" href="#id16" name="bin-debugtools">Bin/debugTools</a></h3>
+<div class="image"><img alt="images/debugToolsDiagram.png" src="images/debugToolsDiagram.png" /></div>
+<p>The debugTools section includes binary files which are to be 
+used to find or correct bugs within pxStats.
+Here are the files found under this section :</p>
+<dl class="docutils">
+<dt>-<strong>pickledTimesViewer.py</strong></dt>
+<dd>Allows users to see clearly the content of the pickled times file. 
+Might be found usefull for debuging purpouses.</dd>
+<dt>-<strong>pickleViewer.py</strong></dt>
+<dd><p class="first">Allows user to view the content of a cpickle file that contains a
+FileStatsCollector instance. Output can be directed to a text file if wanted.</p>
+<p class="last">Very usefull for debugging, making sure data collected is stored at the right
+place,and comparing it to the graphics produced to see if there are any
+differences.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="bin-tools">
+<h3><a class="toc-backref" href="#id17" name="bin-tools">bin/tools</a></h3>
+<div class="image"><img alt="images/toolsDiagram.png" src="images/toolsDiagram.png" /></div>
+<p>The tools section contains a series of utility scripts 
+to be used by pxStats or directly by a user.
+Here are the files found under this section :</p>
+<dl class="docutils">
+<dt>-<strong>pickleSynchroniser</strong> </dt>
+<dd>Implementation of an rsync system. Allos a machine to synchronise the
+content of it's pickle folder with the one located on a remote machine.</dd>
+<dt>-<strong>restoreRoundRobinDatabases.py</strong></dt>
+<dd>This program is to be used to restore the backed up databases 
+from a certain date and use them as the main databases. This is
+very usefull if an error is detected within the data and that we 
+have a backup preceding the error. The error can then be corrected 
+and the corrected data can be appended to the database without any 
+problems.</dd>
+<dt>-<strong>setTimeOfLastUpdates.py</strong></dt>
+<dd>This program is to be used in case of a problem with pickleUpdater. It is used
+to set back the time of the the last updates prior to the errors. That way 
+at the next update the pickling will be redone for and might produce the right
+pickles if the problem was corrected.</dd>
+</dl>
+</div>
+<div class="section" id="bin-webpages">
+<h3><a class="toc-backref" href="#id18" name="bin-webpages">bin/webPages</a></h3>
+<div class="image"><img alt="images/webPagesDiagram.png" src="images/webPagesDiagram.png" /></div>
+<p>The tools section contains a series of file that are needed 
+to produce the pxStats' web interface.to be used by pxStats or directly by a user.
+Here are the files found under this section :</p>
+<dl class="docutils">
+<dt>-<strong>dailyGraphicsWebPage.py</strong> </dt>
+<dd>Generate a web page named dailyGraphs.html that gives users acces
+to the daily graphics of the past seven days of all the sources and
+clients of the current machines.</dd>
+<dt>-<strong>getGraphicsForWebPages.py</strong> </dt>
+<dd>This program is to be called hourly within a crontab or through another
+program like launchGraphCreation.py. It was built to ensure that through
+time the graphics required by the different web pages present or updated.</dd>
+<dt>-<strong>graphicsRequestPage.py</strong></dt>
+<dd>This file is to be hosted on a cgi-enabled web server as to 
+generate a dynamic python/cgi web page. That web page will 
+allow users to fill out forms and getappropriate graphics
+based on the parameters filled within the forms.</dd>
+<dt>-<strong>monthlyGraphicsWebPage.py</strong> </dt>
+<dd>Generate a web page named monthlyGraphs.html that gives users acces
+to the monthly graphics of the past 3 months of all the sources and
+clients of the current machines.</dd>
+<dt>-<strong>weeklyGraphicsWebPage.py</strong> </dt>
+<dd>Generate a web page named weeklyGraphs.html that gives users acces
+to the weekly graphics of the past five days of all the sources and
+clients of the current machines.</dd>
+<dt>-<strong>yearlyGraphicsWebPage.py</strong> </dt>
+<dd>Generate a web page named yearlyGraphs.html that gives users acces
+to the yearly graphics of the past three years of all the sources and
+clients of the current machines.</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="resulting-file-arborenscence">
+<h2><a class="toc-backref" href="#id19" name="resulting-file-arborenscence">Resulting file arborenscence</a></h2>
+<div class="image"><img alt="images/arbo.png" src="images/arbo.png" /></div>
+</div>
+</div>
+</div>
+</body>
+</html>
