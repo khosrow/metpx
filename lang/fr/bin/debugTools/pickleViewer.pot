@@ -1,0 +1,99 @@
+#: pickleViewer.py:60
+msgid "Pickle used : %s"
+msgstr "Fichier pickle utilisé : %s"
+
+#: pickleViewer.py:61
+msgid ""
+"\n"
+"\n"
+"Files used : %s"
+msgstr ""
+"\n"
+"\n"
+"Fichiers sources utilisés: %s"
+
+#: pickleViewer.py:62
+msgid "Starting date: %s"
+msgstr "Date de début : %s"
+
+#: pickleViewer.py:64
+msgid "Interval: %s"
+msgstr "Interval :%s"
+
+#: pickleViewer.py:65
+msgid "End time : %s"
+msgstr "Temps de fin  : %s"
+
+#: pickleViewer.py:66
+msgid "nbEntries : %s"
+msgstr "nombre d'entrées : %s"
+
+#: pickleViewer.py:70
+msgid ""
+"\n"
+"Entry's interval : %s - %s "
+msgstr ""
+"\n"
+"Interval de l'entrée : %s - %s "
+
+
+#: pickleViewer.py:71
+msgid "Files : "
+msgstr "Fichiers : "
+
+#: pickleViewer.py:73
+msgid "Products : "
+msgstr "Produits : "
+
+#: pickleViewer.py:75
+msgid "Values :"
+msgstr "Valeurs :"
+
+#: pickleViewer.py:77
+msgid "Means :"
+msgstr "Moyennes :"
+
+#: pickleViewer.py:79
+msgid "Medians"
+msgstr "Médianes"
+
+#: pickleViewer.py:81
+msgid "Minimums"
+msgstr "Minimums"
+
+#: pickleViewer.py:83
+msgid "Maximums"
+msgstr "Maximums"
+
+#: pickleViewer.py:85
+msgid "Time where max occured :"
+msgstr "Temps où le maximum s'est produit"
+
+#: pickleViewer.py:87
+msgid "Total"
+msgstr "Total"
+
+#: pickleViewer.py:89
+msgid "Files over maximum latency"
+msgstr "Fichiers avec latence innacceptable"
+
+#: pickleViewer.py:151
+msgid "Error. Invalid picklename."
+msgstr "Erreur. Non de fichier de pickle invalide."
+
+#: pickleViewer.py:152
+msgid "***Note : Pickle name must be an absolute file name."
+msgstr "***Note : Le nom du fichier de pickle doit être un nom de fichier absolu."
+
+#: pickleViewer.py:157
+msgid "Program must receive one or two arguments."
+msgstr "Le programme doit recevoir un ou deux arguments."
+
+#: pickleViewer.py:158
+msgid "usage1  : python pickleViewer.py pickleName "
+msgstr "Utilisation 1 : python pickleViewers nomDuFichierDePickle"
+
+#: pickleViewer.py:159
+msgid "usage2  : python pickleViewer.py pickleName output_file_name "
+msgstr "Utilisation 2 : python pickleViewer.py nomDuFichierDePickle nomDufichierDeSortie"
+

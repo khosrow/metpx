@@ -1,0 +1,84 @@
+#: pickleViewer.py:60
+msgid "Pickle used : %s"
+msgstr "Pickle used : %s"
+
+#: pickleViewer.py:61
+msgid ""
+msgstr ""
+
+#: pickleViewer.py:62
+msgid "Starting date: %s"
+msgstr "Starting date: %s"
+
+#: pickleViewer.py:64
+msgid "Interval: %s"
+msgstr "Interval: %s"
+
+#: pickleViewer.py:65
+msgid "End time : %s"
+msgstr "End time : %s"
+
+#: pickleViewer.py:66
+msgid "nbEntries : %s"
+msgstr "nbEntries : %s"
+
+#: pickleViewer.py:71
+msgid "Files : "
+msgstr "Files : "
+
+#: pickleViewer.py:73
+msgid "Products : "
+msgstr "Products : "
+
+#: pickleViewer.py:75
+msgid "Values :"
+msgstr "Values :"
+
+#: pickleViewer.py:77
+msgid "Means :"
+msgstr "Means :"
+
+#: pickleViewer.py:79
+msgid "Medians"
+msgstr "Medians"
+
+#: pickleViewer.py:81
+msgid "Minimums"
+msgstr "Minimums"
+
+#: pickleViewer.py:83
+msgid "Maximums"
+msgstr "Maximums"
+
+#: pickleViewer.py:85
+msgid "Time where max occured :"
+msgstr "Time where max occured :"
+
+#: pickleViewer.py:87
+msgid "Total"
+msgstr "Total"
+
+#: pickleViewer.py:89
+msgid "Files over maximum latency"
+msgstr "Files over maximum latency"
+
+#: pickleViewer.py:151
+msgid "Error. Invalid picklename."
+msgstr "Error. Invalid picklename."
+
+#: pickleViewer.py:152
+msgid "***Note : Pickle name must be an absolute file name."
+msgstr "***Note : Pickle name must be an absolute file name."
+
+#: pickleViewer.py:157
+msgid "Program must receive one or two arguments."
+msgstr "Program must receive one or two arguments."
+
+#: pickleViewer.py:158
+msgid "usage1  : python pickleViewer.py pickleName "
+msgstr "usage1  : python pickleViewer.py pickleName "
+
+#: pickleViewer.py:159
+msgid "usage2  : python pickleViewer.py pickleName output_file_name "
+msgstr "usage2  : python pickleViewer.py pickleName output_file_name "
+
