@@ -32,8 +32,6 @@ class TransceiverAFTN:
     connected by the AFTN provider. If this does not happen rapidly enough (before 
     the timeout expires), the subscriber will try to connect (port 5160) to the 
     provider.
-
-    Subscriber IP: 192.168.250.10 255.255.255.0
     """
     def __init__(self, sourlient):
 
@@ -417,7 +415,7 @@ class TransceiverAFTN:
                             ##############################################################################################
                             suffix = 'SVC'
                             self.logger.info("SVC Message Received(%s): %s (%s)" % (mm.messageIn.getTransmitID(), str(mm.messageIn.getTextLines()), MessageParser.names.get(mp.serviceType,
-                                              "The service type of this message is unknown. Contact Ron Knight")))
+                                              "The service type of this message is unknown. Contact NavCanada")))
 
                             #if mp.serviceType in [8, 9]:
                             #    self.logger.info("*********************** SERVICE MESSAGE *****************************")
