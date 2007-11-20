@@ -3,7 +3,6 @@
 MetPX Copyright (C) 2004-2006  Environment Canada
 MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
 named COPYING in the root of the source directory tree.
-"""
 
 
 #############################################################################################
@@ -26,16 +25,17 @@ named COPYING in the root of the source directory tree.
 #
 #
 ##############################################################################################
+"""
 
 
-
-import os,sys
+import gettext, os, sys
 sys.path.insert(1, sys.path[0] + '/../../../')
 
 from pxStats.lib.CpickleWrapper import CpickleWrapper
 from pxStats.lib.FileStatsCollector import FileStatsCollector
 from pxStats.lib.FileStatsCollector import _FileStatsEntry
 from pxStats.lib.FileStatsCollector import _ValuesDictionary 
+from pxStats.lib.StatsPaths import StatsPaths 
  
  
 def printPickle( pickle, outputFile = "" ):
@@ -57,39 +57,73 @@ def printPickle( pickle, outputFile = "" ):
     
     statsCollection = CpickleWrapper.load( pickle )
     
-    print "Pickle used : %s" %pickle
-    print "\n\nFiles used : %s" %statsCollection.files
-    print "Starting date: %s" % statsCollection.startTime
+    print _("Pickle used : %s" )%pickle
+    print _("\n\nFiles used : %s" ) %statsCollection.files
+    print _("Starting date: %s" ) % statsCollection.startTime
                                 
-    print "Interval: %s" %statsCollection.interval
-    print "End time : %s" %statsCollection.endTime
-    print "nbEntries : %s" %statsCollection.nbEntries
+    print _("Interval: %s" ) %statsCollection.interval
+    print _("End time : %s" ) %statsCollection.endTime
+    print _("nbEntries : %s" ) %statsCollection.nbEntries
     
     for j in range( statsCollection.nbEntries ):
         
-        print "\nEntry's interval : %s - %s " %( statsCollection.fileEntries[j].startTime, statsCollection.fileEntries[j].endTime  )
-        print "Products : "
+        print _("\nEntry's interval : %s - %s " ) %( statsCollection.fileEntries[j].startTime, statsCollection.fileEntries[j].endTime  )
+        print _("Files : " )
+        print statsCollection.fileEntries[j].files
+        print _("Products : " )
         print statsCollection.fileEntries[j].values.productTypes
-        print "Values :"
+        print _("Values :" )
         print statsCollection.fileEntries[j].values.dictionary
-        print "Means :"
+        print _("Means :" )
         print statsCollection.fileEntries[j].means
-        print "Medians"    
+        print _("Medians" )    
         print statsCollection.fileEntries[j].medians
-        print "Minimums"
+        print _("Minimums" )
         print statsCollection.fileEntries[j].minimums
-        print "Maximums"
+        print _("Maximums" )
         print statsCollection.fileEntries[j].maximums
-        print "Total"
+        print _("Time where max occured :" )
+        print statsCollection.fileEntries[j].timesWhereMaxOccured
+        print _("Total" )
         print statsCollection.fileEntries[j].totals
-        print "Files over maximum latency"
+        print _("Files over maximum latency" )
         print statsCollection.fileEntries[j].filesOverMaxLatency
         
     if outputFile != "":
         fileHandle.close()      
         sys.stdout = old_stdout #resets standard output 
     
-
+    
+    
+def  setGlobalLanguageParameters( language = 'en'):
+    """
+        @summary : Sets up all the needed global language 
+                   variables so that they can be used 
+                   everywhere in this program.
+        
+        
+        @param language: Language that is to be 
+                         outputted by this program. 
+     
+        @return: None
+        
+    """
+    
+    global LANGUAGE 
+    global translator
+    global _ 
+    
+    LANGUAGE = language 
+    
+    if language == 'fr':
+        fileName = StatsPaths.STATSLANGFRBINDEBUGTOOLS + "pickleViewer" 
+    elif language == 'en':
+        fileName = StatsPaths.STATSLANGENBINDEBUGTOOLS + "pickleViewer"    
+    
+    translator = gettext.GNUTranslations(open(fileName))
+    _ = translator.gettext
+        
+        
         
 def main(): 
     """
@@ -97,6 +131,10 @@ def main():
         printPickle method. 
     
     """
+    
+    language = 'en'
+    
+    setGlobalLanguageParameters(language)
     
     outputFileName = ""
     
@@ -110,18 +148,17 @@ def main():
             printPickle( pickle, outputFileName )      
                     
         else:
-            print "Error. Invalid picklename."
-            print "***Note : Pickle name ust be an absolute file name."
+            print _( "Error. Invalid picklename." )
+            print _( "***Note : Pickle name must be an absolute file name." )
             sys.exit()        
     
     else:
         
-        print "Program must receive one or two arguments."
-        print "usage1  : python pickleViewer.py pickleName " 
-        print "usage2  : python pickleViewer.py pickleName output_file_name "
+        print _( "Program must receive one or two arguments." )
+        print _( "usage1  : python pickleViewer.py pickleName " ) 
+        print _( "usage2  : python pickleViewer.py pickleName output_file_name " )        
         sys.exit()    
 
- 
  
  
 if __name__ == "__main__":
