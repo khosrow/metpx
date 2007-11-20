@@ -1,0 +1,77 @@
+msgid ""
+msgstr ""
+
+
+#: fileCommitDependencyChecker.py:69
+msgid "Error. This program needs to be called with at least one file name."
+msgstr "Error. This program needs to be called with at least one file name."
+
+#: fileCommitDependencyChecker.py:70
+msgid "Example %s filetoCommit."
+msgstr "Example %s filetoCommit."
+
+#: fileCommitDependencyChecker.py:71 fileCommitDependencyChecker.py:85
+#: fileCommitDependencyChecker.py:100 fileCommitDependencyChecker.py:232
+msgid "Program terminated."
+msgstr "Program terminated."
+
+#: fileCommitDependencyChecker.py:83 fileCommitDependencyChecker.py:98
+msgid "Error. One of the specified filenames was not found."
+msgstr "Error. One of the specified filenames was not found."
+
+#: fileCommitDependencyChecker.py:84 fileCommitDependencyChecker.py:99
+msgid "%s did not exist."
+msgstr "%s did not exist."
+
+#: fileCommitDependencyChecker.py:142
+msgid "%s dependency file did not exist. Please create it."
+msgstr "%s dependency file did not exist. Please create it."
+
+#: fileCommitDependencyChecker.py:162
+msgid "***************The following dependencies were found***************"
+msgstr "***************The following dependencies were found***************"
+
+#: fileCommitDependencyChecker.py:163 fileCommitDependencyChecker.py:171
+msgid "---------------------------------------------------------------------------------------------------------------"
+msgstr "---------------------------------------------------------------------------------------------------------------"
+
+#: fileCommitDependencyChecker.py:170
+msgid "%s has the following dependencies : "
+msgstr "%s has the following dependencies : "
+
+#: fileCommitDependencyChecker.py:176
+msgid "Could not find any dependencies for %s"
+msgstr "Could not find any dependencies for %s"
+
+#: fileCommitDependencyChecker.py:192
+msgid "n"
+msgstr "n"
+
+#: fileCommitDependencyChecker.py:192
+msgid "no"
+msgstr "no"
+
+#: fileCommitDependencyChecker.py:192
+msgid "yes"
+msgstr "yes"
+
+#: fileCommitDependencyChecker.py:192 fileCommitDependencyChecker.py:202
+msgid "y"
+msgstr "y"
+
+#: fileCommitDependencyChecker.py:196
+msgid "Have you reviewed the file dependencies and do you still wish to commit files ? "
+msgstr "Have you reviewed the file dependencies and do you still wish to commit files ? "
+
+#: fileCommitDependencyChecker.py:200
+msgid "Error.You must enter one of these valid answers : %s"
+msgstr "Error.You must enter one of these valid answers : %s"
+
+#: fileCommitDependencyChecker.py:230
+msgid "You have chosen not to commit the files."
+msgstr "You have chosen not to commit the files."
+
+#: fileCommitDependencyChecker.py:231
+msgid "The files will be left unchanged and uncommited until you decide to commit them."
+msgstr "The files will be left unchanged and uncommited until you decide to commit them."
+
