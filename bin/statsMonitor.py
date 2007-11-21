@@ -525,11 +525,11 @@ def sendReportByEmail( parameters, report  ) :
     
     subject = getEmailSubject( parameters.endTime, report )
     message = mailLib.createhtmlmail(html, text, subject)
-    server = smtplib.SMTP("smtp.cmc.ec.gc.ca")
+    server = smtplib.SMTP( parameters.smtpServer )
     server.set_debuglevel(0)
 
     receivers = parameters.emails
-    server.sendmail('nicholas.lemay@ec.gc.ca', receivers, message)
+    server.sendmail(parameters.sender, receivers, message)
     server.quit() 
     
     
