@@ -25,7 +25,7 @@ named COPYING in the root of the source directory tree.
 """
     Small function that adds pxlib to the environment path.  
 """
-import os, sys, commands, fnmatch, glob, pickle 
+import os, sys, commands, fnmatch, gettext, glob, pickle 
 sys.path.insert(1, sys.path[0] + '/../../')
 try:
     pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
@@ -161,12 +161,12 @@ def buildReportHeader( parameters ):
     """
     
     reportHeader = "\n\n"
-    reportHeader = reportHeader + "Stats monitor results\n----------------------------------------------------------------------------------------------------------------------------------\n"
-    reportHeader = reportHeader + "Time of test : %s\n" %parameters.endTime
-    reportHeader = reportHeader + "Time of previous test : %s\n" %parameters.startTime
-    reportHeader = reportHeader + "Machine name      : %s\n" %(LOCAL_MACHINE)
-    reportHeader = reportHeader + "Config file  used : %s\n" %( StatsPaths.STATSETC + "monitoringConf" )
-    reportHeader = reportHeader + "Stats monitor help file can be found here : %s" %( StatsPaths.STATSDOC )
+    reportHeader = reportHeader + _("Stats monitor results\n----------------------------------------------------------------------------------------------------------------------------------\n")
+    reportHeader = reportHeader + _("Time of test : %s\n") %parameters.endTime
+    reportHeader = reportHeader + _("Time of previous test : %s\n") %parameters.startTime
+    reportHeader = reportHeader + _("Machine name      : %s\n") %(LOCAL_MACHINE)
+    reportHeader = reportHeader + _("Config file  used : %s\n") %( StatsPaths.STATSETC + "monitoringConf" )
+    reportHeader = reportHeader + _("Stats monitor help file can be found here : %s") %( StatsPaths.STATSDOC )
     
     
     return reportHeader
@@ -181,28 +181,28 @@ def getPresenceOfWarningsOrErrorsWithinReport( report ):
     
     results = ""
     
-    if "The following disk usage warnings have been found" in report :
-        results = "disk usage errors"
+    if _("The following disk usage warnings have been found") in report :
+        results = _("disk usage errors")
     
-    if "The following data gaps were not found in error log file" in report:
+    if _("The following data gaps were not found in error log file") in report:
         if results == "":
-            results = "data gaps errors"    
+            results = _("data gaps errors")    
         else:
-            results = results + ",data gaps errors"
+            results = results + _(",data gaps errors")
     
     if results == "":
         
-        if "Crontab entries were modified since" in report:
-            results = "warnings"
+        if _("Crontab entries were modified since") in report:
+            results = _("warnings")
 
-        elif "Missing files were found" in report :
-            results = "warnings"
+        elif _("Missing files were found") in report :
+            results = _("warnings")
         
-        elif "The following" in report:
-            results = "warnings"
+        elif _("The following") in report:
+            results = _("warnings")
         
         else:
-            results = "no warnings."
+            results = _("no warnings.")
     
     return results
     
@@ -217,7 +217,7 @@ def getEmailSubject( currentTime, report ):
     
     
     warningsOrErrorsPresent = getPresenceOfWarningsOrErrorsWithinReport( report )
-    subject = "[Stats Library Monitoring] %s with %s." %( LOCAL_MACHINE, warningsOrErrorsPresent )
+    subject = _("[Stats Library Monitoring] %s with %s.") %( LOCAL_MACHINE, warningsOrErrorsPresent )
     
     return subject    
     
@@ -250,18 +250,18 @@ def verifyFreeDiskSpace( parameters, report ):
             
             if int(diskUsage) > parameters.maxUsages[i]:    
                 onediskUsageIsAboveMax = True
-                reportLines = reportLines +  "Error : Disk usage for %s is %s %%.Please investigate cause.\n" %(foldersToVerify[i],diskUsage)   
+                reportLines = reportLines +  _("Error : Disk usage for %s is %s %%.Please investigate cause.\n") %(foldersToVerify[i],diskUsage)   
         else:
             onediskUsageIsAboveMax = True
-            reportLines = reportLines +  "Error : Disk usage for %s was unavailable.Please investigate cause.\n"       %(foldersToVerify[i])
+            reportLines = reportLines +  _("Error : Disk usage for %s was unavailable.Please investigate cause.\n")       %(foldersToVerify[i])
     
     
     if onediskUsageIsAboveMax == True:
-        header = "\n\nThe following disk usage warnings have been found : \n"         
-        helpLines = "\nDisk usage errors can either be cause by missing folders or disk usage percentage \nabove allowed percentage.\n If folder is missing verify if it is requiered.\n If it is not remove it from the folders section of the config file.\n If disk usage is too high verify if %s is configured properly.\n" %(StatsPaths.PXETC + "clean.conf")  
+        header = _("\n\nThe following disk usage warnings have been found : \n")         
+        helpLines = _("\nDisk usage errors can either be cause by missing folders or disk usage percentage \nabove allowed percentage.\n If folder is missing verify if it is requiered.\n If it is not remove it from the folders section of the config file.\n If disk usage is too high verify if %s is configured properly.\n") %(StatsPaths.PXETC + "clean.conf")  
         
     else:
-        header = "\n\nNo disk usage warning has been found.\n"
+        header = _("\n\nNo disk usage warning has been found.\n")
         helpLines = ""
          
     header = header + "----------------------------------------------------------------------------------------------------------------------------------\n"    
@@ -320,10 +320,10 @@ def verifyCrontab( report ):
     status, currentCrontab = commands.getstatusoutput( "crontab -l" )
     
     if currentCrontab != previousCrontab :
-        report = report + "\nCrontab entries were modified since last monitoring job.\n"
-        report = report + "\nModified crontab entries should not be viewed as a problem per se.\nIt can be usefull to spot problems wich could stem from someone modifying the crontab.\nSee help file for details\n"
+        report = report + _("\nCrontab entries were modified since last monitoring job.\n")
+        report = report + _("\nModified crontab entries should not be viewed as a problem per se.\nIt can be usefull to spot problems wich could stem from someone modifying the crontab.\nSee help file for details\n")
     else:
-        report = report + "\nCrontab entries were not modified since last monitoring job.\n"
+        report = report + _("\nCrontab entries were not modified since last monitoring job.\n")
     report = report + "----------------------------------------------------------------------------------------------------------------------------------"    
     
     saveCurrentCrontab( currentCrontab )       
@@ -489,7 +489,7 @@ def verifyStatsLogs( parameters, report ,logger = None ):
         if logs == [] and verificationTimeSpan >= 1:#if at least an hour between start and end 
             
             warningsWereFound = True
-            newReportLines = newReportLines + "\nWarning : Not a single log entry within %s log files was found between %s and %s. Please investigate.\n "%( logFileType, parameters.startTime, parameters.endTime )
+            newReportLines = newReportLines + _("\nWarning : Not a single log entry within %s log files was found between %s and %s. Please investigate.\n ") %( logFileType, parameters.startTime, parameters.endTime )
          
         elif logs != []:   
             hoursWithNoEntries = findHoursWithNoEntries( logs, parameters.startTime, parameters.endTime )
@@ -497,16 +497,16 @@ def verifyStatsLogs( parameters, report ,logger = None ):
             if hoursWithNoEntries != []:
                warningsWereFound = True
                
-               newReportLines = newReportLines + "\nWarning : Not a single log entry within %s log files was found for these hours : %s. Please investigate.\n " %( logFileType, str(hoursWithNoEntries).replace( "[", "").replace( "]", "") )
+               newReportLines = newReportLines + _("\nWarning : Not a single log entry within %s log files was found for these hours : %s. Please investigate.\n ") %( logFileType, str(hoursWithNoEntries).replace( "[", "").replace( "]", "") )
                        
              
     if warningsWereFound :
-        report = report + "\n\nThe following stats log files warnings were found : \n"
+        report = report + _("\n\nThe following stats log files warnings were found : \n")
         report = report + "----------------------------------------------------------------------------------------------------------------------------------\n"            
         report = report + newReportLines 
-        report = report + "\nMissing log files can be attributed to the following causes : log files too small, stopped cron or program errors.\nInvestigate cause. See help files for details."
+        report = report + _("\nMissing log files can be attributed to the following causes : log files too small, stopped cron or program errors.\nInvestigate cause. See help files for details.")
     else:
-        report = report + "\n\nNo stats log files warnings were found.\n"
+        report = report + _("\n\nNo stats log files warnings were found.\n")
         report = report + "----------------------------------------------------------------------------------------------------------------------------------\n"          
     
     return report
@@ -649,7 +649,7 @@ def verifyPicklePresence( parameters, report ):
                 
             if clientIsMissingFiles == True : 
                 
-                newReportLines = newReportLines + "\n%s had the following files and folders missing : \n"%txName
+                newReportLines = newReportLines + _("\n%s had the following files and folders missing : \n") %txName
                 newReportLines = newReportLines + clientLines
                 
             clientLines = ""
@@ -685,7 +685,7 @@ def verifyPicklePresence( parameters, report ):
                 folderIsMissingFiles = False       
                                     
             if clientIsMissingFiles == True : 
-                newReportLines = newReportLines + "\n%s had the following files and folders missing : \n" %txName
+                newReportLines = newReportLines + _("\n%s had the following files and folders missing : \n") %txName
                 newReportLines = newReportLines + clientLines
                 
             clientLines = ""
@@ -697,15 +697,15 @@ def verifyPicklePresence( parameters, report ):
     
     if missingFiles :
         
-        report = report + "\n\nMissing files were found on this machine.\n"
+        report = report + _("\n\nMissing files were found on this machine.\n")
         report = report + "----------------------------------------------------------------------------------------------------------------------------------\n"
         report = report + newReportLines
-        report = report + "\n\nIf pickle files are missing verify if source/client is new.\n If it's new, some missing files are to be expected.\nIf source/client is not new, verify if %s is configured properly.\nOtherwise investigate cause.( Examples : stopped cron, deleted by user, program bug, etc...)\nSee help file for details.\n" %(StatsPaths.PXETC + "clean.conf")
+        report = report + _("\n\nIf pickle files are missing verify if source/client is new.\n If it's new, some missing files are to be expected.\nIf source/client is not new, verify if %s is configured properly.\nOtherwise investigate cause.( Examples : stopped cron, deleted by user, program bug, etc...)\nSee help file for details.\n") %(StatsPaths.PXETC + "clean.conf")
         
         
         
     else:
-        report = report + "\n\nThere were no missing pickle files found on this machine.\n"  
+        report = report + _("\n\nThere were no missing pickle files found on this machine.\n" ) 
         report = report + "----------------------------------------------------------------------------------------------------------------------------------\n"          
     
     return report 
@@ -846,7 +846,7 @@ def getPickleAnalysis( files, name, lastValidEntry, maximumGap, errorLog ):
                             if gapInErrorLog( name, lastValidEntry,  fcs.fileEntries[entry].startTime, errorLog ) == False:
                                 gapFound = False  
                                                     
-                                reportLines = reportLines + "No data was found between %s and %s.\n" %( lastValidEntry, fcs.fileEntries[entry].startTime )
+                                reportLines = reportLines + _("No data was found between %s and %s.\n") %( lastValidEntry, fcs.fileEntries[entry].startTime )
                                                 
                         #set time of the last correct entry to the time of the current entry were data was actually found.
                         if ( gapPresent == True and gapFound == True) or ( nbEntries != 0 and nbEntries != nbErrors ) :                                                
@@ -854,7 +854,7 @@ def getPickleAnalysis( files, name, lastValidEntry, maximumGap, errorLog ):
                             gapPresent = False 
                             gapFound   = False
             else:
-                print "Problematic file : %s" %file     
+                print _("Problematic file : %s") %file     
                         
     if reportLines != "":     
         header = "\n%s.\n" %name
@@ -905,10 +905,10 @@ def verifyPickleContent( parameters, report ):
             savelastValidEntry( txName, lastValidEntry )
     
     if newReportLines != "":
-        header = "\n\nThe following data gaps were not found in error log file :\n" 
-        helpLines = "\nErrors found here are probably caused by the program.\n Check out the help file for the detailed procedure on how to fix this error.\n"
+        header = _("\n\nThe following data gaps were not found in error log file :\n" )
+        helpLines = _("\nErrors found here are probably caused by the program.\n Check out the help file for the detailed procedure on how to fix this error.\n")
     else:
-        header = "\n\nAll the data gaps were found within the error log file.\n" 
+        header = _("\n\nAll the data gaps were found within the error log file.\n") 
         helpLines = ""
         
     header = header + "----------------------------------------------------------------------------------------------------------------------------------\n"       
@@ -1033,7 +1033,7 @@ def verifyFileVersions( parameters, report  ):
     
     for file in absentFiles:
         unequalChecksumsFound = True
-        newReportLines = newReportLines + "%s could not be found." %file
+        newReportLines = newReportLines + _("%s could not be found.") %file
     
     for file in presentFiles:
         
@@ -1041,17 +1041,17 @@ def verifyFileVersions( parameters, report  ):
         
         if file not in previousFileChecksums:
             unequalChecksumsFound = True
-            newReportLines = newReportLines + "%s has been added.\n" %file
+            newReportLines = newReportLines + _("%s has been added.\n") %file
         elif currentChecksums[file] != previousFileChecksums[ file ]:
             unequalChecksumsFound = True
-            newReportLines = newReportLines + "Checksum for %s has changed since last monitoring job.\n" %file    
+            newReportLines = newReportLines + _("Checksum for %s has changed since last monitoring job.\n") %file    
     
      
     if unequalChecksumsFound :        
-        header = "\n\n\nThe following warning(s) were found while monitoring file cheksums : \n"   
-        helpLines = "\nModified checksums should not be viewed as a problem per se.\nIt can be usefull to spot problems wich could stem from someone modifying a file used by the program.\n"       
+        header = _("\n\n\nThe following warning(s) were found while monitoring file cheksums : \n")
+        helpLines = _("\nModified checksums should not be viewed as a problem per se.\nIt can be usefull to spot problems wich could stem from someone modifying a file used by the program.\n" )      
     else:        
-        header = "\n\n\nNo warnings were found while monitoring file checksums.\n"        
+        header = _("\n\n\nNo warnings were found while monitoring file checksums.\n")        
         helpLines = ""
         
     header = header + "----------------------------------------------------------------------------------------------------------------------------------\n"           
@@ -1083,13 +1083,13 @@ def verifyWebPages( parameters, report ):
         
         if ( currentTime - timeOfUpdate ) / ( 60*60 ) >1 :
             outdatedPageFound = True 
-            newReportLines = newReportLines + "%s was not updated since %s.\n" %( file, StatsDateLib.getIsoFromEpoch( timeOfUpdate )) 
+            newReportLines = newReportLines + _("%s was not updated since %s.\n") %( file, StatsDateLib.getIsoFromEpoch( timeOfUpdate )) 
     
     if outdatedPageFound :
-        header = "\n\nThe following web page warning were found :\n"
-        helpLines = "\nWeb pages should be updated every hour.\nInvestigate why they are outdated.(Ex:stopped cron)\nSee help file for detail.\n"
+        header = _("\n\nThe following web page warning were found :\n")
+        helpLines = _("\nWeb pages should be updated every hour.\nInvestigate why they are outdated.(Ex:stopped cron)\nSee help file for detail.\n")
     else:        
-        header = "\n\nAll web pages were found to be up to date.\n"    
+        header = _("\n\nAll web pages were found to be up to date.\n")    
         helpLines = ""
     header = header + "----------------------------------------------------------------------------------------------------------------------------------\n"
     
@@ -1128,17 +1128,17 @@ def verifyGraphs( parameters, report ):
             
             if ( currentTime - os.path.getmtime( image ) ) / ( 60*60 ) >1 :
                 outdatedGraphsFound = True 
-                newReportLines = newReportLines + "%s's daily image was not updated since %s\n" %( name, StatsDateLib.getIsoFromEpoch(os.path.getmtime( image ) ) )
+                newReportLines = newReportLines + _("%s's daily image was not updated since %s\n") %( name, StatsDateLib.getIsoFromEpoch(os.path.getmtime( image ) ) )
         
         else:
             outdatedGraphsFound = True 
-            newReportLines = newReportLines + "%s was not found." %( image )   
+            newReportLines = newReportLines + _("%s was not found.") %( image )   
         
     if outdatedGraphsFound :
-        header = "\n\nThe following daily graphics warnings were found :\n"
-        helpLines = "\nDaily graphics should be updated every hour.\nInvestigate why they are outdated.(Ex:stopped cron)\nSee help file for detail.\n"
+        header = _("\n\nThe following daily graphics warnings were found :\n")
+        helpLines = _("\nDaily graphics should be updated every hour.\nInvestigate why they are outdated.(Ex:stopped cron)\nSee help file for detail.\n")
     else:        
-        header = "\n\nAll daily graphics were found to be up to date.\n"    
+        header = _("\n\nAll daily graphics were found to be up to date.\n")    
         helpLines = ""
     header = header + "----------------------------------------------------------------------------------------------------------------------------------\n"
     
@@ -1174,12 +1174,42 @@ def validateParameters( parameters ):
     """       
     
     if len(parameters.folders) != len(parameters.maxUsages):
-        print "Critical error found."
-        print "The number of specified max usages must be equal to the number of folders to monitor."
-        print "Program terminated."
+        print _("Critical error found.")
+        print _("The number of specified max usages must be equal to the number of folders to monitor.")
+        print _("Program terminated.")
         sys.exit()
     
+    
+    
+def  setGlobalLanguageParameters( language = 'en'):
+    """
+        @summary : Sets up all the needed global language 
+                   variables so that they can be used 
+                   everywhere in this program.
         
+        
+        @param language: Language that is to be 
+                         outputted by this program. 
+     
+        @return: None
+        
+    """
+    
+    global LANGUAGE 
+    global translator
+    global _ 
+    
+    LANGUAGE = language 
+    
+    if language == 'fr':
+        fileName = StatsPaths.STATSLANGFRBIN + "statsMonitor" 
+    elif language == 'en':
+        fileName = StatsPaths.STATSLANGENBIN + "statsMonitor"    
+    
+    translator = gettext.GNUTranslations( open(fileName) )
+    _ = translator.gettext        
+    
+    
               
 def main():
     """
@@ -1191,6 +1221,10 @@ def main():
     """ 
     
     report = ""
+    
+    
+    language = 'en'
+    setGlobalLanguageParameters( language )
     
     generalParameters = StatsConfigParameters( )
     generalParameters.getAllParameters()
