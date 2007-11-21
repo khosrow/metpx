@@ -408,7 +408,7 @@ msgstr ""
 
 #: generateRRDGraphics.py:865
 msgid "years"
-msgstr "années"
+msgstr "annees"
 
 #: generateRRDGraphics.py:869
 msgid "months"
