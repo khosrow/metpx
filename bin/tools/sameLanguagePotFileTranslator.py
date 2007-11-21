@@ -51,13 +51,33 @@ def translateFile( inputfileName, outputFileName ):
     inputFileHandle = open(inputfileName, 'r')  
     
     lines = inputFileHandle.readlines()
+    newSection = []
     
     for line in lines :
-        if str(line).startswith( "#:" ) or str(line).startswith( " " ) or str(line).startswith( "\n" ) :
-            outputLines.append(line)
-        elif str(line).startswith( "msgid" ):
-            outputLines.append(line)
-            outputLines.append( line.replace("msgid"  ,"msgstr" ) )                
+        
+        if  str(line).startswith('#') == True or (newSection == [] and str(line).startswith('"') == True):
+            pass   
+        
+        else:    
+
+                if 'msgstr' not in line :
+                    #print line
+                    outputLines.append(line)                
+                if "msgid" in line:#new section
+                    newSection.append( line.replace("msgid"  ,"msgstr" ) )
+                
+                elif 'msgstr' in line:
+                    outputLines.extend( newSection )
+                    newSection = []             
+                else:
+                    if newSection !=[]:
+                        newSection.append(line)
+        
+
+
+               
+                
+                         
          
     inputFileHandle.close()
     
