@@ -22,3 +22,8 @@ msgstr "courante"
 msgid "previous"
 msgstr "précédente"
 
+msgid "Plotted :"
+msgstr "Dessiné :"
+
+msgid "Plotted"
+msgstr "Dessiné"
