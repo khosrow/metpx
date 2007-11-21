@@ -1,0 +1,458 @@
+#: statsMonitor.py:164
+msgid ""
+"Stats monitor results\n"
+"----------------------------------------------------------------------------------------------------------------------------------\n"
+msgstr ""
+"Résultats de l'exercice de surveillance.\n"
+"----------------------------------------------------------------------------------------------------------------------------------\n"
+
+
+#: statsMonitor.py:165
+msgid ""
+"Time of test : %s\n"
+msgstr "Temps où le test a eu lieu : %s\n"
+
+#: statsMonitor.py:166
+msgid ""
+"Time of previous test : %s\n"
+msgstr ""
+"Temps ou le test précédent a eu lieu : %s\n"
+
+#: statsMonitor.py:167
+msgid ""
+"Machine name      : %s\n"
+msgstr ""
+"Nom de la machine : %s\n"
+
+#: statsMonitor.py:168
+msgid ""
+"Config file  used : %s\n"
+msgstr ""
+"Fichier de configuration utilisé : %s\n"
+
+#: statsMonitor.py:169
+msgid "Stats monitor help file can be found here : %s"
+msgstr "Le fichier d'aide pour l'outil de surveillance peut être trouvé ici : %s"
+
+#: statsMonitor.py:184
+msgid "The following disk usage warnings have been found"
+msgstr "Les avertissements relatifs à l'utilisation des disques suivants ont été trouvés"
+
+#: statsMonitor.py:185
+msgid "disk usage errors"
+msgstr "erreur d'utilisation des disques"
+
+#: statsMonitor.py:187
+msgid "The following data gaps were not found in error log file"
+msgstr "Les écarts de données suivant n'ont pas été trouvés dans le fichier de journalisation des erreurs."
+
+#: statsMonitor.py:189
+msgid "data gaps errors"
+msgstr "erreur d'écart de données"
+
+#: statsMonitor.py:191
+msgid ",data gaps errors"
+msgstr ",erreur d'écart de données"
+
+#: statsMonitor.py:195
+msgid "Crontab entries were modified since"
+msgstr "Les entrée des crontabs on été modifiés depuis "
+
+#: statsMonitor.py:196 statsMonitor.py:199 statsMonitor.py:202
+msgid "warnings"
+msgstr "avertissements"
+
+#: statsMonitor.py:198
+msgid "Missing files were found"
+msgstr "Des fichiers manquants ont été répertoriés"
+
+#: statsMonitor.py:201
+msgid "The following"
+msgstr "Les "
+
+#: statsMonitor.py:205
+msgid "no warnings."
+msgstr "aucun avertissement"
+
+#: statsMonitor.py:220
+msgid "[Stats Library Monitoring] %s with %s."
+msgstr "[Surveillance de pxStats] %s avec %s"
+
+#: statsMonitor.py:253
+msgid ""
+"Error : Disk usage for %s is %s %%.Please investigate cause.\n"
+msgstr ""
+"Erreur : L'utilisation du disque pour %s est de %s %%. Veuillez en trouver la cause.\n"
+
+
+#: statsMonitor.py:256
+msgid ""
+"Error : Disk usage for %s was unavailable.Please investigate cause.\n"
+msgstr ""
+"Erreur : L'utilisation du disque pour %s n'est pas disponbile. Veuillez en trouver la cause.\n"
+
+#: statsMonitor.py:260
+msgid ""
+"\n"
+"\n"
+"The following disk usage warnings have been found : \n"
+msgstr ""
+"\n"
+"\n"
+"Les avertissements d'utilisation des disques suivants ont été trouvés : \n"
+
+
+#: statsMonitor.py:261
+msgid ""
+"\n"
+"Disk usage errors can either be cause by missing folders or disk usage percentage \n"
+"above allowed percentage.\n"
+" If folder is missing verify if it is requiered.\n"
+" If it is not remove it from the folders section of the config file.\n"
+" If disk usage is too high verify if %s is configured properly.\n"
+msgstr ""
+"\n"
+"Les erreur d'utilisation des disques peuvent être causées par des disques trop plein \n"
+"par rapport au pourcentage permis ou à des dossiers absents.\n"
+"Si le dossier est manquant, verifiez s'il est nécessaire..\n"
+"S'il ne l'est pas, veuillez le retirer de la liste des dossiers à verifier dans le fichier de configuration.\n"
+"Si le disque est trop utilisé, veuillez vérifier si  %s est configuré de façon appropriée.\n"
+
+
+
+#: statsMonitor.py:264
+msgid ""
+"\n"
+"\n"
+"No disk usage warning has been found.\n"
+msgstr ""
+"\n"
+"\n"
+"Aucun avertissement d'utilisation innacceptable des disques n'a été trouvé.\n"
+
+#: statsMonitor.py:323
+msgid ""
+"\n"
+"Crontab entries were modified since last monitoring job.\n"
+msgstr ""
+"\n"
+"Les entrées du crontab ont été modifiés depuis le dernier exercice de surveillance.\n"
+
+
+#: statsMonitor.py:324
+msgid ""
+"\n"
+"Modified crontab entries should not be viewed as a problem per se.\n"
+"It can be usefull to spot problems wich could stem from someone modifying the crontab.\n"
+"See help file for details\n"
+msgstr ""
+"\n"
+"Des entrées de crontab modifiés ne devraient pas être vu comme un problême en sois.\n"
+"Par contre, il peut s'agir d'une piste à vérifier pusique certains problêmes pourraient provenir de ce changement.\n"
+"Veuillez consulter le fichier d'aide pour plus de détails.\n"
+
+#: statsMonitor.py:326
+msgid ""
+"\n"
+"Crontab entries were not modified since last monitoring job.\n"
+msgstr ""
+"\n"
+"Les entrées du crontab ont été modifiés depuis le dernier exercice de surveillance.\n"
+
+#: statsMonitor.py:492
+msgid ""
+"\n"
+"Warning : Not a single log entry within %s log files was found between %s and %s. Please investigate.\n"
+" "
+msgstr ""
+"\n"
+"Avertissement : Aucune entrée dans le fichier de journalisation  %s n'a été répertoriée entre le %s et le  %s. Veuillez en vérifier la cause.\n"
+" "
+
+
+#: statsMonitor.py:500
+msgid ""
+"\n"
+"Warning : Not a single log entry within %s log files was found for these hours : %s. Please investigate.\n"
+" "
+msgstr ""
+"\n"
+"Avertissement : Aucune entrée dans le fichier de journalisation  %s n'a été trouvée pour ces heures : %s. Veuillez en trouver la cause.\n"
+" "
+
+#: statsMonitor.py:504
+msgid ""
+"\n"
+"\n"
+"The following stats log files warnings were found : \n"
+msgstr ""
+"\n"
+"\n"
+"Les erreurs provenant de fichiers de journalisations suivantes ont été trouvées : \n"
+
+
+
+#: statsMonitor.py:507
+msgid ""
+"\n"
+"Missing log files can be attributed to the following causes : log files too small, stopped cron or program errors.\n"
+"Investigate cause. See help files for details."
+msgstr ""
+"\n"
+"Des manques dans la journalisation peuvent être attribués aux causes suivantes : fichier de journalisation trop petit, crontab arrêté ou des problèmes logiciel.\n"
+"Veuillez en rechercher la cause. Visitez le fichier d'aide pour plus de détails."
+
+
+
+#: statsMonitor.py:509
+msgid ""
+"\n"
+"\n"
+"No stats log files warnings were found.\n"
+msgstr ""
+"\n"
+"\n"
+"Aucun avertissement relatif aux fichiers de journalisation n'a été trouvé.\n"
+
+#: statsMonitor.py:652 statsMonitor.py:688
+msgid ""
+"\n"
+"%s had the following files and folders missing : \n"
+msgstr ""
+"\n"
+"%s avait les dossiers et fichiers suivant manquants  : \n"
+
+
+#: statsMonitor.py:700
+msgid ""
+"\n"
+"\n"
+"Missing files were found on this machine.\n"
+msgstr ""
+"\n"
+"\n"
+"Des fichiers manquants ont été répertoriés sur cette machine.\n"
+
+
+#: statsMonitor.py:703
+msgid ""
+"\n"
+"\n"
+"If pickle files are missing verify if source/client is new.\n"
+" If it's new, some missing files are to be expected.\n"
+"If source/client is not new, verify if %s is configured properly.\n"
+"Otherwise investigate cause.( Examples : stopped cron, deleted by user, program bug, etc...)\n"
+"See help file for details.\n"
+msgstr ""
+"\n"
+"\n"
+"Si des pickles sont manquants, vérifiez si le client/source est nouveau.\n"
+"S'il est nouveau, le manque de fichiers est normal.\n"
+"S'il n'est pas nouveau, verifiez si %s est configuré correctement.\n"
+"Sinon, veuillez en rechercher la cause.( Exemples : cron arrêtés, fichiers supprimés par un utilisateur, bug, etc...)\n"
+"Consultez l'aide pour plus de détails.\n"
+
+
+
+
+#: statsMonitor.py:708
+msgid ""
+"\n"
+"\n"
+"There were no missing pickle files found on this machine.\n"
+msgstr ""
+"\n"
+"\n"
+"Certains fichiers pickle sont manquants sur cette machine.\n"
+
+#: statsMonitor.py:849
+msgid ""
+"No data was found between %s and %s.\n"
+msgstr ""
+"Aucune donnée n'a été trouvé entre le %s et le %s.\n"
+
+#: statsMonitor.py:857
+msgid "Problematic file : %s"
+msgstr "Fichier problématique : %s"
+
+#: statsMonitor.py:908
+msgid ""
+"\n"
+"\n"
+"The following data gaps were not found in error log file :\n"
+msgstr ""
+"\n"
+"\n"
+"Les écarts de données suivant n'ont pas été trouvés dans le ficher de journalisation des erreurs :\n"
+
+
+#: statsMonitor.py:909
+msgid ""
+"\n"
+"Errors found here are probably caused by the program.\n"
+" Check out the help file for the detailed procedure on how to fix this error.\n"
+msgstr ""
+"\n"
+"Les erreurs se trouvant ici sont habituellement dues à un problème provenant du logiciel.\n"
+"Veuillez ocnsulter les fichiers d'aide pour vous permettre de cerner le problème.\n"
+
+
+#: statsMonitor.py:911
+msgid ""
+"\n"
+"\n"
+"All the data gaps were found within the error log file.\n"
+msgstr ""
+"\n"
+"\n"
+"Tous les écarts de données ont été trouvés dans le fichier de journalisation des erreurs.\n"
+
+
+#: statsMonitor.py:1036
+msgid "%s could not be found."
+msgstr "%s n'a pu être trouvé."
+
+#: statsMonitor.py:1044
+msgid ""
+"%s has been added.\n"
+msgstr ""
+"%s a été ajouté.\n"
+
+
+#: statsMonitor.py:1047
+msgid ""
+"Checksum for %s has changed since last monitoring job.\n"
+msgstr ""
+"Le checksum de %s a changé depuis le dernier exercice de surveillance.\n"
+#: statsMonitor.py:1051
+msgid ""
+"\n"
+"\n"
+"\n"
+"The following warning(s) were found while monitoring file cheksums : \n"
+msgstr ""
+"\n"
+"\n"
+"\n"
+"Les avertissements suivant ont été répertoriés en surveillant les checksums des fichiers : \n"
+
+
+
+#: statsMonitor.py:1052
+msgid ""
+"\n"
+"Modified checksums should not be viewed as a problem per se.\n"
+"It can be usefull to spot problems wich could stem from someone modifying a file used by the program.\n"
+msgstr ""
+"\n"
+"Les checksums des fichiers ne devraient pas être vu comme un problème en sois.\n"
+"Ils peuvent pas contre être utilisé pour cerner un problème provenant d'un fichier qui aurait été modifié.\n"
+
+#: statsMonitor.py:1054
+msgid ""
+"\n"
+"\n"
+"\n"
+"No warnings were found while monitoring file checksums.\n"
+msgstr ""
+"\n"
+"\n"
+"\n"
+"Aucun avertissement n'a été trouvé en surveillant les checksums des fichiers.\n"
+
+
+#: statsMonitor.py:1086
+msgid ""
+"%s was not updated since %s.\n"
+msgstr "%s n'a pas été mis-à-jour depuis le %s.\n"
+
+#: statsMonitor.py:1089
+msgid ""
+"\n"
+"\n"
+"The following web page warning were found :\n"
+msgstr ""
+"\n"
+"\n"
+"Les avertissements relatifs au pages webs suivants ont été répertoriés :\n"
+
+#: statsMonitor.py:1090
+msgid ""
+"\n"
+"Web pages should be updated every hour.\n"
+"Investigate why they are outdated.(Ex:stopped cron)\n"
+"See help file for detail.\n"
+msgstr ""
+"\n"
+"Les pages web devraient être mis-à-jour à chaque heure.\n"
+"Veuillez rechercher pourquoi elles ne sont pas à jours.(Ex: cron arrêté)\n"
+"Veuillez consulter le fichier d'aide pour plus de détails.\n"
+
+#: statsMonitor.py:1092
+msgid ""
+"\n"
+"\n"
+"All web pages were found to be up to date.\n"
+msgstr ""
+"\n"
+"\n"
+"Toutes les pages web sont à jour.\n"
+
+
+#: statsMonitor.py:1131
+msgid ""
+"%s's daily image was not updated since %s\n"
+msgstr ""
+"L'image journalière de  %s n'a pas été mis-à-jour depuis le  %s\n"
+
+#: statsMonitor.py:1135
+msgid "%s was not found."
+msgstr "%s n'a pas été trouvé"
+
+#: statsMonitor.py:1138
+msgid ""
+"\n"
+"\n"
+"The following daily graphics warnings were found :\n"
+msgstr ""
+"\n"
+"\n"
+"Les avertissements relatifs au graphiques journaliers suivants ont été répertoriés  :\n"
+
+
+#: statsMonitor.py:1139
+msgid ""
+"\n"
+"Daily graphics should be updated every hour.\n"
+"Investigate why they are outdated.(Ex:stopped cron)\n"
+"See help file for detail.\n"
+msgstr ""
+"\n"
+"Les graphiques journaliers devraient être mis-à-jour à chaques heures.\n"
+"Veuillez rechercher pourquoi ils ne sont pas à jour.(Ex: cron arrêté.)\n"
+"Veuillez consulter le fichier d'aide pour plus de détails.\n"
+
+
+#: statsMonitor.py:1141
+msgid ""
+"\n"
+"\n"
+"All daily graphics were found to be up to date.\n"
+msgstr ""
+"\n"
+"\n"
+"Tous les graphiques journaliers étaient à jour.\n"
+
+
+#: statsMonitor.py:1177
+msgid "Critical error found."
+msgstr "Des erreurs critiques ont été trouvées."
+
+#: statsMonitor.py:1178
+msgid "The number of specified max usages must be equal to the number of folders to monitor."
+msgstr "Le nombre d'utilisation maximale de disque doit être égale au nombre de dossiers spécifiés."
+
+#: statsMonitor.py:1179
+msgid "Program terminated."
+msgstr "Programme terminé."
+
