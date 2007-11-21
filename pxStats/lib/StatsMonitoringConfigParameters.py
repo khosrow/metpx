@@ -47,17 +47,18 @@ class StatsMonitoringConfigParameters:
     
     '''
     
-    def __init__(self, emails = None, machines = None , files = None, folders = None, maxUsages = None, errorsLogFile = None, maxSettingsFile = None, startTime = None, endTime = None, maximumGaps = None):
-        '''
-        
-        @param emails: Emails to whom the stats monitoring resultats will be sent
-        @param machines: machines to monitor
-        @param files: program files to monitor for version changes
-        @param folders: folders to verify for disk usage
-        @param maxUsages: max disk usage for each specified folders 
-        @param errorsLogFile: path to px error log files.
-        @param maxSettingsFile: path to max setting config fileassociated with the px error file.
-        
+    def __init__(self, emails = None, machines = None , files = None, folders = None, maxUsages = None, errorsLogFile = None, maxSettingsFile = None, startTime = None, endTime = None, maximumGaps = None, sender = None, smtpServer = None):
+        '''           
+            @param emails: Emails to whom the stats monitoring resultats will be sent
+            @param machines: machines to monitor
+            @param files: program files to monitor for version changes
+            @param folders: folders to verify for disk usage
+            @param maxUsages: max disk usage for each specified folders 
+            @param errorsLogFile: path to px error log files.
+            @param maxSettingsFile: path to max setting config fileassociated with the px error file.
+            @param sender :  Email sender....
+            @param smtpServer : Server to use to send the email.
+             
         '''
         
         self.emails = emails
@@ -70,8 +71,8 @@ class StatsMonitoringConfigParameters:
         self.startTime = startTime
         self.endTime = endTime       
         self.maximumGaps = maximumGaps            
- 
-   
+        self.sender = sender
+        self.smtpServer = smtpServer
    
    
    
@@ -109,12 +110,15 @@ class StatsMonitoringConfigParameters:
             config.readfp( file ) 
             
             self.emails        = config.get( 'statsMonitoring', 'emails' ).split( ";" )
+            self.sender        = config.get( 'statsMonitoring', 'sender' )
+            self.smtpServer    = config.get( 'statsMonitoring', 'smtpServer' )
             self.machines      = config.get( 'statsMonitoring', 'machines' ).split( ";" )
             self.files         = config.get( 'statsMonitoring', 'files' ).split( ";" )
             self.folders       = config.get( 'statsMonitoring', 'folders' ).split( ";" )
             self.maxUsages     = config.get( 'statsMonitoring', 'maxUsages' ).split( ";" )
             self.errorsLogFile = config.get( 'statsMonitoring', 'errorsLogFile' )
             self.maxSettingsFile=config.get( 'statsMonitoring', 'maxSettingsFile' )
+                   
             self.endTime = StatsDateLib.getIsoWithRoundedHours( StatsDateLib.getIsoFromEpoch( time.time() ) )            
             self.startTime = self.getPreviousMonitoringJob(self.endTime)
             self.maximumGaps = self.getMaximumGaps( )
@@ -215,6 +219,7 @@ class StatsMonitoringConfigParameters:
             previousMonitoringJob = StatsDateLib.getIsoTodaysMidnight( currentTime )
             
         print previousMonitoringJob   
+        
         return previousMonitoringJob        
         
         
