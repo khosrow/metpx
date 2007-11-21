@@ -263,7 +263,7 @@ msgid ""
 msgstr ""
 "\n"
 "\n"
-"Certains fichiers pickle sont manquants sur cette machine.\n"
+"Aucun fichiers pickle n'est présentement manquants sur cette machine.\n"
 
 #: statsMonitor.py:849
 msgid ""
