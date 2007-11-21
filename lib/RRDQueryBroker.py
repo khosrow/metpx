@@ -75,7 +75,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
     
     
     
-    def  setGlobalLanguageParameters( language = 'fr'):
+    def  setGlobalLanguageParameters( language = 'en'):
         """
             @summary : Sets up all the needed global language 
                        variables so that they can be used 
@@ -425,7 +425,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
         
         #optional option
         
-        print "self.queryParameters.specificSpan ", self.queryParameters.specificSpan, _("daily"), _("weekly"), _("monthly"), _("yearly")
+        #print "self.queryParameters.specificSpan ", self.queryParameters.specificSpan, _("daily"), _("weekly"), _("monthly"), _("yearly")
         if self.queryParameters.specificSpan == _("daily"):
             specificSpan = "-d"
         elif self.queryParameters.specificSpan == _("weekly"):
@@ -492,9 +492,9 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
         lines = output.splitlines()
         
         for line in lines :
-            if  "Plotted" in line:
+            if  _("Plotted") in line:
                 #print line 
-                imageName = line.replace( "Plotted :", "").replace( " ", "")
+                imageName = line.replace( _("Plotted :"), "").replace( " ", "")
                 imageName = '../../pxStats' + imageName.split( 'pxStats' )[1] 
                 images = images + imageName + '+'
                 
@@ -511,7 +511,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
             @SIDE-EFECT : Will set the name of the generated images in self.replyparameters.image
             
         """
-        print self.query
+        #print self.query
         status, output = commands.getstatusoutput( self.query )  
        
         self.replyParameters.image = self.getImagesFromQueryOutput(output)
