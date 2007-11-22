@@ -49,13 +49,17 @@
 ##             maxSettingsFile : Specify where the config file containing the maximum 
 ##                               timer values are set. 
 ##             
+##             smtpServer : Adress of the smtp server from which to send the emails.
 ##
+##             sender     : Email adress of the sender of the monitoring emails.
 ##
 ##
 #######################################################################################
 
 [statsMonitoring]
-emails   = bob@hotmail.com
+sender   = bob@hotmail.com
+smtpServer=smtp.xyz.qc.ca
+emails   = bob@hotmail.com;jon@gmail.com
 machines = tag1;tag2
 files    = /apps/px/stats/lib;/apps/px/bin/
 folders  = /apps/px/stats/data/graphics;/apps/px/stats/data/pickles/;
