@@ -170,7 +170,7 @@ def printFileDependencies( fileDependencies ):
                 print _("%s has the following dependencies : ") %file
                 print _("---------------------------------------------------------------------------------------------------------------")      
                 for i in range( len( dependencies ) ):
-                    print "%s- %s" %( i, str(dependencies[i]).replace("\n", "" ) )
+                    print "%s- %s" %( i, str(dependencies[i]).replace("\n", "" ).replace(".../pxStats/",StatsPaths.STATSROOT) )
                             
             else : 
                 print _("Could not find any dependencies for %s") %file
@@ -217,7 +217,7 @@ def commitFiles( fileNames ):
     """
     
     print "svn commit %s" %( str(fileNames).replace( '[', '' ).replace(']','').replace(',',' ') )
-    #commands.getstatusoutput("svn commit %s" %( str(fileNames).replace( '[', '' ).replace(']','').replace(',',' ') )) 
+    os.system("svn commit %s" %( str(fileNames).replace( '[', '' ).replace(']','').replace(',',' ') )) 
     
 
     
@@ -234,11 +234,43 @@ def greetAndQuit():
     sys.exit()
       
       
+def  setGlobalLanguageParameters( language = 'fr'):
+    """
+        @summary : Sets up all the needed global language 
+                   variables so that they can be used 
+                   everywhere in this program.
+        
+        
+        @param language: Language that is to be 
+                         outputted by this program. 
+     
+        @return: None
+        
+    """
+    
+    global LANGUAGE 
+    global translator
+    global _ 
+    
+    LANGUAGE = language 
+    
+    if language == 'fr':
+        fileName = StatsPaths.STATSLANGFRBINTOOLS + "fileCommitDependencyChecker" 
+    elif language == 'en':
+        fileName = StatsPaths.STATSLANGENBINTOOLS + "fileCommitDependencyChecker"    
+    
+    translator = gettext.GNUTranslations( open(fileName) )
+    _ = translator.gettext         
+      
         
 def main():
     """
         @summary 
     """
+    
+    language = 'en'
+    setGlobalLanguageParameters( language )
+    
     
     fileNames       = []
     fileDependencies = {}
