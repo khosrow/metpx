@@ -25,7 +25,8 @@ named COPYING in the root of the source directory tree.
 """
     Small function that adds pxlib to the environment path.  
 """
-import os, sys, time, getopt, pickle, rrdtool
+import os, sys, time, getopt, gettext, pickle, rrdtool
+
 sys.path.insert(1, sys.path[0] + '/../../')
 try:
     pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
@@ -79,7 +80,7 @@ def createParser( ):
     
     """   
     
-    usage = """
+    usage = _( """
 
 %prog [options]
 ********************************************
@@ -109,7 +110,7 @@ Ex3: %prog -m machine1 -d '2006-06-30 05:15:00'--> Machine1, Date of call 2006-0
 Ex4: %prog -s 24                               --> Uses current time, default machine and 24 hours span.
 ********************************************
 * See /doc.txt for more details.           *
-********************************************"""   
+********************************************"""   )
     
     parser = OptionParser( usage )
     addOptions( parser )
@@ -124,17 +125,17 @@ def addOptions( parser ):
         
     """        
    
-    parser.add_option( "-c", "--clients", action="store", type="string", dest="clients", default="ALL", help = "Clients for wich we need to tranfer the data." ) 
+    parser.add_option( "-c", "--clients", action="store", type="string", dest="clients", default=_("ALL"), help = _( "Clients for wich we need to tranfer the data." ) ) 
     
-    parser.add_option( "-e", "--end", action="store", type="string", dest="end", default=StatsDateLib.getIsoFromEpoch( time.time() ), help="Decide ending time of the update.") 
+    parser.add_option( "-e", "--end", action="store", type="string", dest="end", default=StatsDateLib.getIsoFromEpoch( time.time() ), help=_( "Decide ending time of the update.")  )
     
-    parser.add_option( "-f", "--fileTypes", action="store", type="string", dest="fileTypes", default="", help="Specify the data type for each of the clients." )
+    parser.add_option( "-f", "--fileTypes", action="store", type="string", dest="fileTypes", default="", help=_( "Specify the data type for each of the clients." ) )
         
-    parser.add_option( "-g", "--group", action="store", type="string", dest = "group", default="", help="Transfer the combined data of all the specified clients/sources into a grouped database.")
+    parser.add_option( "-g", "--group", action="store", type="string", dest = "group", default="", help=_( "Transfer the combined data of all the specified clients/sources into a grouped database.") )
     
-    parser.add_option( "-m", "--machines", action="store", type="string", dest="machines", default=LOCAL_MACHINE, help ="Specify on wich machine the clients reside." ) 
+    parser.add_option( "-m", "--machines", action="store", type="string", dest="machines", default=LOCAL_MACHINE, help =_( "Specify on wich machine the clients reside." ) )
   
-    parser.add_option( "-p", "--products",action="store", type="string", dest="products", default="ALL", help ="Specify wich product you are interested in.")
+    parser.add_option( "-p", "--products",action="store", type="string", dest="products", default=_("ALL"), help =_( "Specify wich product you are interested in.") )
     
     
   
@@ -166,9 +167,9 @@ def getOptionsFromParser( parser, logger = None  ):
         currentTime = "%s %s" %( split[0], split[1] )
 
     except:    
-        print "Error. The endind date format must be YYYY-MM-DD HH:MM:SS" 
-        print "Use -h for help."
-        print "Program terminated."
+        print _( "Error. The endind date format must be YYYY-MM-DD HH:MM:SS" )
+        print _( "Use -h for help." )
+        print _( "Program terminated." )
         sys.exit()    
      
     #round ending hour to match pickleUpdater.     
@@ -179,10 +180,10 @@ def getOptionsFromParser( parser, logger = None  ):
         if machine != LOCAL_MACHINE:
             GeneralStatsLibraryMethods.updateConfigurationFiles( machine, "pds" )
     
-    if products[0] != "ALL" and group == "" :
-        print "Error. Products can only be specified when using special groups." 
-        print "Use -h for help."
-        print "Program terminated."
+    if products[0] != _("ALL") and group == "" :
+        print _( "Error. Products can only be specified when using special groups." )
+        print _( "Use -h for help." )
+        print _( "Program terminated." )
         sys.exit()        
     
      
@@ -192,19 +193,19 @@ def getOptionsFromParser( parser, logger = None  ):
         for i in range(1,len(clients) ):
             fileTypes.append(fileTypes[0])
         
-    if clients[0] == "ALL" and fileTypes[0] != "":
-        print "Error. Filetypes cannot be specified when all clients are to be updated." 
-        print "Use -h for help."
-        print "Program terminated."
+    if clients[0] == _( "ALL" ) and fileTypes[0] != "":
+        print _( "Error. Filetypes cannot be specified when all clients are to be updated." )
+        print _( "Use -h for help." )
+        print _( "Program terminated." )
         sys.exit()        
     
-    elif clients[0] != "ALL" and len(clients) != len( fileTypes ) :
-        print "Error. Specified filetypes must be either 1 for all the group or of the exact same lenght as the number of clients/sources." 
-        print "Use -h for help."
-        print "Program terminated."
+    elif clients[0] != _( "ALL" ) and len(clients) != len( fileTypes ) :
+        print _( "Error. Specified filetypes must be either 1 for all the group or of the exact same lenght as the number of clients/sources." )
+        print _( "Use -h for help." )
+        print _( "Program terminated." )
         sys.exit()          
     
-    elif clients[0] == 'ALL' :        
+    elif clients[0] == _( 'ALL' ) :        
         rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machines[0] )
 
         clients = []
@@ -213,9 +214,9 @@ def getOptionsFromParser( parser, logger = None  ):
         
         fileTypes = []
         for txName in txNames:
-            fileTypes.append( "tx" )
+            fileTypes.append( _( "tx" ) )
         for rxName in rxNames:
-            fileTypes.append( "rx" )                 
+            fileTypes.append( _( "rx" ) )                 
     
      
     clients = GeneralStatsLibraryMethods.filterClientsNamesUsingWilcardFilters( end, 1000, clients, machines, fileTypes= fileTypes )  
@@ -265,45 +266,51 @@ def getPairsFromMergedData( statType, mergedData, logger = None  ):
     pairs = []        
     nbEntries = len( mergedData.statsCollection.timeSeperators ) - 1     
     
+    def convertTimeSeperator( seperator ) : return int( StatsDateLib.getSecondsSinceEpoch(seperator)  + 60 )
+    
+    timeSeperators = map( convertTimeSeperator, mergedData.statsCollection.timeSeperators )
+    fileEntries = mergedData.statsCollection.fileEntries
+    
     if nbEntries !=0:        
        
-        for i in range( 0, nbEntries ):
+         
+        for i in xrange( 0, nbEntries ):
             
             try :
                     
                 if len( mergedData.statsCollection.fileEntries[i].means ) >=1 :
                     
                     if statType == "filesOverMaxLatency" :
-                        pairs.append( [ int(StatsDateLib.getSecondsSinceEpoch( mergedData.statsCollection.timeSeperators[i]))+60, mergedData.statsCollection.fileEntries[i].filesOverMaxLatency ] )                      
+                        pairs.append( [ timeSeperators[i], fileEntries[i].filesOverMaxLatency ] )                      
                     
                     elif statType == "errors":
                         
-                        pairs.append( [int(StatsDateLib.getSecondsSinceEpoch( mergedData.statsCollection.timeSeperators[i])) +60, mergedData.statsCollection.fileEntries[i].totals[statType]] )
+                        pairs.append( [ timeSeperators[i], fileEntries[i].totals[statType]] )
                     
                     elif statType == "bytecount":
                     
-                        pairs.append( [ int(StatsDateLib.getSecondsSinceEpoch(mergedData.statsCollection.timeSeperators[i])) +60, mergedData.statsCollection.fileEntries[i].totals[statType]] )
+                        pairs.append( [ timeSeperators[i], fileEntries[i].totals[statType]] )
                         
                     elif statType == "latency":
                     
-                        pairs.append( [ int(StatsDateLib.getSecondsSinceEpoch(mergedData.statsCollection.timeSeperators[i])) +60, mergedData.statsCollection.fileEntries[i].means[statType]] )                          
+                        pairs.append( [ timeSeperators[i], fileEntries[i].means[statType]] )                          
                     
                     elif statType == "filecount":
-                        pairs.append( [ int(StatsDateLib.getSecondsSinceEpoch(mergedData.statsCollection.timeSeperators[i])) +60, len(mergedData.statsCollection.fileEntries[i].values.productTypes)] )
+                        pairs.append( [ timeSeperators[i], len( fileEntries[i].values.productTypes ) ] )
                     
                     else:
 
-                        pairs.append( [ int(StatsDateLib.getSecondsSinceEpoch(mergedData.statsCollection.timeSeperators[i])) +60, 0.0 ])                    
+                        pairs.append( [ timeSeperators[i], 0.0 ])                    
                 
                 else:      
                                                       
-                    pairs.append( [ int(StatsDateLib.getSecondsSinceEpoch(mergedData.statsCollection.timeSeperators[i])) +60, 0.0 ] )
+                    pairs.append( [ timeSeperators[i], 0.0 ] )
             
             
             except KeyError:
                 if logger != None :                    
-                    logger.error( "Error in getPairs." )
-                    logger.error( "The %s stat type was not found in previously collected data." %statType )    
+                    logger.error( _("Error in getPairs.") )
+                    logger.error( _("The %s stat type was not found in previously collected data.") %statType )    
                 pairs.append( [ int(StatsDateLib.getSecondsSinceEpoch(mergedData.statsCollection.timeSeperators[i])) +60, 0.0 ] )
                 sys.exit()    
             
@@ -324,7 +331,7 @@ def getMergedData( clients, fileType,  machines, startTime, endTime, groupName =
     else:
         types = [ "errors","bytecount" ]
     
-    print startTime, endTime
+    #print startTime, endTime
     if len( machines ) > 1 or len( clients) > 1:   
         
         statsCollection = PickleMerging.mergePicklesFromDifferentSources( logger = logger , startTime = startTime, endTime = endTime, clients = clients, fileType = fileType, machines = machines, groupName = groupName )                           
@@ -379,9 +386,11 @@ def updateRoundRobinDatabases(  client, machines, fileType, endTime, logger = No
     
     tempRRDFileName = RrdUtilities.buildRRDFileName( dataType = "errors", clients = [client], machines = machines, fileType = fileType)
     startTime   = RrdUtilities.getDatabaseTimeOfUpdate(  tempRRDFileName, fileType ) 
-   
+    
     if  startTime == 0 :
         startTime = StatsDateLib.getSecondsSinceEpoch( StatsDateLib.getIsoTodaysMidnight( endTime ) )
+        
+    
     endTime     = StatsDateLib.getSecondsSinceEpoch( endTime )           
         
     timeSeperators = getTimeSeperatorsBasedOnAvailableMemory(StatsDateLib.getIsoFromEpoch( startTime ), StatsDateLib.getIsoFromEpoch( endTime ), [client], fileType, machines ) 
@@ -408,14 +417,14 @@ def updateRoundRobinDatabases(  client, machines, fileType, endTime, logger = No
                     rrdtool.update( rrdFileName, '%s:%s' %( int( dataPairs[ dataType ][k][0] ),  dataPairs[ dataType ][k][1] ) )
                     
                 if logger != None :
-                     logger.info( "Updated  %s db for %s in db named : %s" %( dataType, client, rrdFileName ) )
+                     logger.info( _( "Updated  %s db for %s in db named : %s" ) %( dataType, client, rrdFileName ) )
 
             else:
                 if logger != None :
-                     logger.warning( "This database was not updated since it's last update was more recent than specified date : %s" %rrdFileName )
+                     logger.warning( _( "This database was not updated since it's last update was more recent than specified date : %s" ) %rrdFileName )
         
                 
-    RrdUtilities.setDatabaseTimeOfUpdate(  rrdFileName, fileType, endTime )  
+            RrdUtilities.setDatabaseTimeOfUpdate(  rrdFileName, fileType, endTime )  
 
 
  
@@ -461,8 +470,7 @@ def getTimeSeperatorsBasedOnAvailableMemory( startTime, endTime, clients, fileTy
     
     if totalSizeToloadInMemory >= currentlyAvailableMemory:
         seperatorsBasedOnAvailableMemory = MemoryManagement.getSeperatorsForHourlyTreatments( startTime, endTime, currentlyAvailableMemory, hourlyFileSizes  )
-    
-            
+          
     return seperatorsBasedOnAvailableMemory
               
     
@@ -482,17 +490,17 @@ def updateGroupedRoundRobinDatabases( infos, logger = None ):
    
     if startTime == 0 :        
         startTime = StatsDateLib.getSecondsSinceEpoch( StatsDateLib.getIsoTodaysMidnight( infos.endTime ) )
-    
+        
         
     timeSeperators = getTimeSeperatorsBasedOnAvailableMemory( StatsDateLib.getIsoFromEpoch( startTime ), StatsDateLib.getIsoFromEpoch( endTime ), infos.clients, infos.fileTypes[0], infos.machines )
     
     
-    print timeSeperators
+    #print timeSeperators
     
     for i in xrange(0, len( timeSeperators ),2 ):#timeseperators should always be coming in pairs
         
         startTime = StatsDateLib.getSecondsSinceEpoch( timeSeperators[i] )
-        dataPairs   = getPairs( infos.clients, infos.machines, infos.fileTypes[0], timeSeperators[i], timeSeperators[i+1], infos.group, logger )
+        dataPairs = getPairs( infos.clients, infos.machines, infos.fileTypes[0], timeSeperators[i], timeSeperators[i+1], infos.group, logger )
     
         for dataType in dataPairs:
             rrdFileName = RrdUtilities.buildRRDFileName( dataType = dataType, clients = infos.group, groupName = infos.group, machines =  infos.machines,fileType = infos.fileTypes[0], usage = "group" )
@@ -502,17 +510,17 @@ def updateGroupedRoundRobinDatabases( infos, logger = None ):
             if endTime >  startTime  :
                 j = 0 
                 while dataPairs[ dataType ][j][0] < startTime and j < len( dataPairs[ dataType ] ):
-                    print "going over : %s startime was :%s" %(dataPairs[ dataType ][j][0], startTime)
+                    #print "going over : %s startime was :%s" %(dataPairs[ dataType ][j][0], startTime)
                     j = j +1
                     
                 for k in range ( j, len( dataPairs[ dataType ] )  ):
-                    print "updating %s at %s" %(rrdFileName, int( dataPairs[ dataType ][k][0] ))
+                    #print "updating %s at %s" %(rrdFileName, int( dataPairs[ dataType ][k][0] ))
                     rrdtool.update( rrdFileName, '%s:%s' %( int( dataPairs[ dataType ][k][0] ),  dataPairs[ dataType ][k][1] ) )
 
             else:
-                print "endTime %s was not bigger than start time %s" %( endTime, startTime ) 
+                #print "endTime %s was not bigger than start time %s" %( endTime, startTime ) 
                 if logger != None :
-                    logger.warning( "This database was not updated since it's last update was more recent than specified date : %s" %rrdFileName )
+                    logger.warning( _( "This database was not updated since it's last update was more recent than specified date : %s" ) %rrdFileName )
         
     RrdUtilities.setDatabaseTimeOfUpdate( tempRRDFileName, infos.fileTypes[0], endTime )         
     
@@ -535,6 +543,7 @@ def transferPickleToRRD( infos, logger = None ):
     if infos.group == "" :    
         
         for i in range( len( infos.clients ) ):  
+            
             pid = os.fork() #create child process
             
             if pid == 0 :#if child 
@@ -579,14 +588,47 @@ def createPaths():
     if not os.path.isdir( StatsPaths.STATSCURRENTDBUPDATES + "rx" ):
         os.makedirs( StatsPaths.STATSCURRENTDBUPDATES + "rx" , mode=0777 )      
         
+
+
+def  setGlobalLanguageParameters( language = 'en'):
+    """
+        @summary : Sets up all the needed global language 
+                   variables so that they can be used 
+                   everywhere in this program.
+        
+        
+        @param language: Language that is to be 
+                         outputted by this program. 
+     
+        @return: None
+        
+    """
+    
+    global LANGUAGE 
+    global translator
+    global _ 
+    
+    LANGUAGE = language 
+    
+    if language == 'fr':
+        fileName = StatsPaths.STATSLANGFRBIN + "transferPickleToRRD" 
+    elif language == 'en':
+        fileName = StatsPaths.STATSLANGENBIN + "transferPickleToRRD"    
+    
+    translator = gettext.GNUTranslations( open(fileName) )
+    _ = translator.gettext 
                                
+
                
 def main():
     """
         Gathers options, then makes call to transferPickleToRRD   
     
     """
-
+    
+    language = 'fr'
+    
+    setGlobalLanguageParameters( language )
     
     createPaths()
     
@@ -604,5 +646,5 @@ def main():
 
 if __name__ == "__main__":
     
-    main()
+     main() 
                               
