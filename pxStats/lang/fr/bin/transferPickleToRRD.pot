@@ -1,0 +1,148 @@
+#: transferPickleToRRD.py:83
+msgid ""
+"\n"
+"\n"
+"%prog [options]\n"
+"********************************************\n"
+"* See doc.txt for more details.            *\n"
+"********************************************\n"
+"   \n"
+"\n"
+"Defaults :\n"
+"- Default endTime is currentTime.\n"
+"- Default startTime is a weel ago.\n"
+"- Default machine is LOCAL_MACHINE.  \n"
+"- Default client is all active clients.\n"
+"\n"
+"Options:\n"
+"    - With -c|--clients you can specify wich clients to transfer.  \n"
+"    - With -e|--end you can specify the ending time of the transfer.\n"
+"    - With -f|--fileTypes you can specify the files types of each clients.\n"
+"    - With -g|--group you can specify that you wan to group the data of the specified clients\n"
+"      together.\n"
+"    - With -m|--machines you can specify the list of machines on wich the data client resides.\n"
+"    - With -p|--products you can specify the list of products you are interested in. \n"
+"      Note : this option requires the group options to be enabled.    \n"
+"                \n"
+"Ex1: %prog                                     --> All default values will be used. Not recommended.  \n"
+"Ex2: %prog -m machine1                         --> All default values, for machine machine1. \n"
+"Ex3: %prog -m machine1 -d '2006-06-30 05:15:00'--> Machine1, Date of call 2006-06-30 05:15:00.\n"
+"Ex4: %prog -s 24                               --> Uses current time, default machine and 24 hours span.\n"
+"********************************************\n"
+"* See /doc.txt for more details.           *\n"
+"********************************************"
+msgstr ""
+"\n"
+"\n"
+"%prog [options]\n"
+"***********************************************\n"
+"* Veuillez consulter la doc pour plus détails *\n"
+"***********************************************\n"
+"   \n"
+"\n"
+"Valuers par défaut :\n"
+"- La valeur par défaut dela date de fin est la date courante.\n"
+"- La valeur par défaut du temps de début est la date de fin moins une semaine.\n"
+"- La machine par défaut est la machine locale.  \n"
+"- Les clients/sources par défauts sont tous les clients/sources présentements actifs.\n"
+"\n"
+"Options:\n"
+"    - Avec -c|--clients vous pouvez spécifier quel client transférer.  \n"
+"    - Avec -e|--end vous pouvez spcifier quand se termine les transferts.\n"
+"    - Avec -f|--fileTypes vous pouvez spécifier le type de fichier.\n"
+"    - Avec -g|--group vous pouvez spécifier que vous voulez grouper les données des clients/sources spécifiés.\n"
+"    - Avec -m|--machines vous pouvez spécifierl a liste des machines où les clients/sources résident.\n"
+"    - Avec -p|--products vous pouvez spécifier la liste des produits auquel vous êtes intéressés pour ce groupe.\n"
+"      Note : cet option requière l,utilisation de l,option de groupe.    \n"
+"                \n"
+"Ex1: %prog                                     --> Toutes les valeurs par défauts sont utilisées. Non recommandé.  \n"
+"Ex2: %prog -m machine1                         --> Toutes les valeurs par défauts, pour la machine1. \n"
+"Ex3: %prog -m machine1 -d '2006-06-30 05:15:00'--> Machine1, avec de l'appel =  2006-06-30 05:15:00.\n"
+"Ex4: %prog -s 24                               --> Utilise l'heure courante,la machine locale, et 24 heures de durée.\n"
+"***********************************************\n"
+"* Veuillez consulter la doc pour plus détails *\n"
+"***********************************************"
+
+
+
+
+#: transferPickleToRRD.py:128
+msgid "Clients for wich we need to tranfer the data."
+msgstr "Clients pour lesquels nous devons transférer les données."
+
+#: transferPickleToRRD.py:128 transferPickleToRRD.py:138
+#: transferPickleToRRD.py:183 transferPickleToRRD.py:196
+#: transferPickleToRRD.py:202 transferPickleToRRD.py:208
+msgid "ALL"
+msgstr "TOUS"
+
+#: transferPickleToRRD.py:130
+msgid "Decide ending time of the update."
+msgstr "Décidez le temps de fin de la mise-à-jour."
+
+#: transferPickleToRRD.py:132
+msgid "Specify the data type for each of the clients."
+msgstr "Spécifiez le type de donnée pour chacuns des clients."
+
+#: transferPickleToRRD.py:134
+msgid "Transfer the combined data of all the specified clients/sources into a grouped database."
+msgstr "Transfer les données combinées de tous les clients en une seule base de donnée de groupe."
+
+#: transferPickleToRRD.py:136
+msgid "Specify on wich machine the clients reside."
+msgstr "Spécifiez sur quelle machine réside les clients."
+
+#: transferPickleToRRD.py:138
+msgid "Specify wich product you are interested in."
+msgstr "Spécifiez quels produits vous intéressent."
+
+#: transferPickleToRRD.py:170
+msgid "Error. The endind date format must be YYYY-MM-DD HH:MM:SS"
+msgstr "Erreur. La format de la date de fin doit être le suivant : AAAA-MM-JJ HH:MM:SS"
+
+#: transferPickleToRRD.py:171 transferPickleToRRD.py:185
+#: transferPickleToRRD.py:198 transferPickleToRRD.py:204
+msgid "Use -h for help."
+msgstr "Utilisez -h pour l'aide"
+
+#: transferPickleToRRD.py:172 transferPickleToRRD.py:186
+#: transferPickleToRRD.py:199 transferPickleToRRD.py:205
+msgid "Program terminated."
+msgstr "Programme terminé."
+
+#: transferPickleToRRD.py:184
+msgid "Error. Products can only be specified when using special groups."
+msgstr "Erreur. Les produits ne peuvent être que sépcifiés que lorsuq'on utlise des groupes spéciaux."
+
+#: transferPickleToRRD.py:197
+msgid "Error. Filetypes cannot be specified when all clients are to be updated."
+msgstr "Erreurs. Les types de fichiers ne peuvent être spécifiés quand tous les clients doivent être mis-à-jour."
+
+#: transferPickleToRRD.py:203
+msgid "Error. Specified filetypes must be either 1 for all the group or of the exact same lenght as the number of clients/sources."
+msgstr "Erreur. Le nombre de types de fichier doit être 1 seul pour tout le groupe ou bien le même nombre que le nombre total de clients/sources."
+
+#: transferPickleToRRD.py:217
+msgid "tx"
+msgstr "tx"
+
+#: transferPickleToRRD.py:219
+msgid "rx"
+msgstr "rx"
+
+#: transferPickleToRRD.py:312
+msgid "Error in getPairs."
+msgstr "Erreur dans la méthode getPairs."
+
+#: transferPickleToRRD.py:313
+msgid "The %s stat type was not found in previously collected data."
+msgstr "Le type de donnée %s n'a pas été trouvé dans les données précédemment relevées."
+
+#: transferPickleToRRD.py:418
+msgid "Updated  %s db for %s in db named : %s"
+msgstr "Mis-à-jour de la bd %s pour %s dans une base de données nommée : %s"
+
+#: transferPickleToRRD.py:422 transferPickleToRRD.py:522
+msgid "This database was not updated since it's last update was more recent than specified date : %s"
+msgstr "Cette base de données ne peut être mise-à-jour puisque la dernière mise-à-jour est plus récente que la date de fin spécifiée : %s"
+
