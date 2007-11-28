@@ -17,7 +17,7 @@ named COPYING in the root of the source directory tree.
 ##############################################################################################
 """
 
-import os, sys
+import os,  sys
 """
     Small function that adds pxlib to the environment path.  
 """
@@ -50,6 +50,65 @@ LOCAL_MACHINE = os.uname()[1]
 
 class GeneralStatsLibraryMethods:
     
+
+    def createLockFile( processName ):
+        """
+            @summary : Creates a lock file associated with the 
+                       specified processName.
+                       
+            @param processName : Name of the process for which 
+                                 to create the lock file.
+            @return : None
+                                              
+        """
+        
+        fileName = StatsPaths.STATSTEMPLOCKFILES + str( processName ) + ".lock" 
+        
+        if not os.path.isdir( StatsPaths.STATSTEMPLOCKFILES ):
+            os.makedirs( StatsPaths.STATSTEMPLOCKFILES )
+        
+        os.system('touch %s' %fileName)
+    
+    
+    
+    def deleteLockFile( processName ):
+        """
+            @summary : Removes the lock file associated with 
+                       the specified processName.
+            
+            @param processName : Name of the process for which 
+                                 to remove the lock file.
+            @return : None
+           
+                       
+        """
+        
+        fileName = StatsPaths.STATSTEMPLOCKFILES + str( processName ) + ".lock" 
+        if os.path.isfile( fileName ):
+            os.remove( fileName )
+            
+    
+         
+    def processIsAlreadyRunning( processName ):
+        """
+            @summary : Returns whether or not the specified 
+                       process is allresdy running.
+            
+            @param processName: Name of the process to check for.
+            
+            @returns True or False
+            
+        """
+        
+        processIsAlreadyRunning = False
+        
+        fileName = StatsPaths.STATSTEMPLOCKFILES + str( processName ) + ".lock"
+        
+        if os.path.isfile( fileName ) :
+            processIsAlreadyRunning = True
+        
+        return processIsAlreadyRunning    
+
     
     def isRxTxOrOther( name, rxNames, txNames ):
         """
