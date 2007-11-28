@@ -100,6 +100,7 @@ class StatsPaths:
     STATSLIB     = STATSROOT + 'lib/'
     STATSLOGGING = STATSROOT + 'logs/'
     STATSMAN     = STATSROOT + 'man/'
+    STATSTEMP    = STATSROOT + "temp/"
     STATSTOOLS   = STATSBIN  + 'tools/'
     STATSDEBUGTOOLS = STATSBIN + 'debugTools/' 
     STATSWEBPAGESGENERATORS = STATSBIN + "webPages/"
@@ -155,6 +156,8 @@ class StatsPaths:
     
     STATSPICKLESTIMEOFUPDATES    = STATSDATA + 'picklesTimeOfUpdates/'
     STATSPREVIOUSMACHINEPARAMS   = STATSDATA + 'previousMachineParameters'
+    
+    STATSTEMPLOCKFILES = STATSTEMP + "lockFiles/"
     
     
     
