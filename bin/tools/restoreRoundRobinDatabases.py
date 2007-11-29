@@ -40,12 +40,12 @@ def restoreDatabases( timeToRestore, currentTime, nbBackupsToKeep ):
        Keep the limit number of backups to 5
     """
     
-    #Archive current Database
-    backupRRDDatabases.backupDatabases( currentTime, nbBackupsToKeep)
-       
-    #restore desired 
     source = StatsPaths.STATSDBBACKUPS + "/%s" %timeToRestore
     destination = StatsPaths.STATSCURRENTDB
+    
+    #Archive current Database
+    backupRRDDatabases.backupDatabases( currentTime, nbBackupsToKeep, foldersToPreserve = [ source ])
+       
     status, output = commands.getstatusoutput( "rm -r %s" %( destination ) )
     os.makedirs(destination)
     status, output = commands.getstatusoutput( "cp -r %s/* %s" %( source, destination ) )
@@ -59,12 +59,13 @@ def restoreDatabaseUpdateTimes( timeToRestore, currentTime, nbBackupsToKeep ):
         Limits the number of database backups to 3.
     """
     
-    #Archive current Database
-    backupRRDDatabases.backupDatabaseUpdateTimes( currentTime, nbBackupsToKeep )
-    
-    #restore desired 
     source = StatsPaths.STATSDBUPDATESBACKUPS + "/%s" %timeToRestore
     destination = StatsPaths.STATSCURRENTDBUPDATES
+    
+    #Archive current Database
+    backupRRDDatabases.backupDatabaseUpdateTimes( currentTime, nbBackupsToKeep, foldersToPreserve = [ source ] )
+    
+    #restore desired 
     status, output = commands.getstatusoutput( "rm -r %s" %( destination ) )
     os.makedirs(destination)
     status, output = commands.getstatusoutput( "cp -rf %s/* %s" %( source, destination ) )
