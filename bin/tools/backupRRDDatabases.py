@@ -35,7 +35,7 @@ from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
 
 
-def backupDatabases( timeOfBackup, backupsToKeep =20 ):
+def backupDatabases( timeOfBackup, backupsToKeep =20, foldersToPreserve = None ):
     """
        @summary: Copy all databases into a folder sporting the data of the backup.
        
@@ -45,6 +45,7 @@ def backupDatabases( timeOfBackup, backupsToKeep =20 ):
     
     """
     
+    foldersToPreserve = foldersToPreserve or []
     
     source = StatsPaths.STATSCURRENTDB
     destination = StatsPaths.STATSDBBACKUPS + "%s" %timeOfBackup
@@ -66,11 +67,12 @@ def backupDatabases( timeOfBackup, backupsToKeep =20 ):
     
         if len( newList) > backupsToKeep :
             for i in range( backupsToKeep, len(newList) ):
-                status, output = commands.getstatusoutput( "rm -r %s " %( newList[i] ) ) 
+                if newList[i] not in foldersToPreserve:
+                    status, output = commands.getstatusoutput( "rm -r %s " %( newList[i] ) ) 
     
     
     
-def backupDatabaseUpdateTimes( timeOfBackup, backupsToKeep = 20 ):
+def backupDatabaseUpdateTimes( timeOfBackup, backupsToKeep = 20, foldersToPreserve = None  ):
     """
     
        @summary: Copy all databases update times into a folder sporting
@@ -82,6 +84,8 @@ def backupDatabaseUpdateTimes( timeOfBackup, backupsToKeep = 20 ):
                               specified value.
     
     """
+    
+    foldersToPreserve = foldersToPreserve or []
     
     source = StatsPaths.STATSCURRENTDBUPDATES
     destination = StatsPaths.STATSDBUPDATESBACKUPS + "%s" %timeOfBackup
@@ -104,7 +108,8 @@ def backupDatabaseUpdateTimes( timeOfBackup, backupsToKeep = 20 ):
     
         if len( newList) > backupsToKeep :
             for i in range( backupsToKeep, len(newList) ):
-                status, output = commands.getstatusoutput( "rm -r %s " %( newList[i] ) )
+                if ( newList[i] ) not in foldersToPreserve:
+                    status, output = commands.getstatusoutput( "rm -r %s " %( newList[i] ) )
     
 
     
