@@ -554,7 +554,10 @@ def getAbsoluteMin( databaseName, startTime, endTime, logger = None ):
     except :
     
         if logger != None:
-            logger.error( _("Error in generateRRDGraphics.getOverallMin. Unable to read " ) + str(databaseName) )
+            try:
+                logger.error( _("Error in generateRRDGraphics.getOverallMin. Unable to read " ) + str(databaseName) )
+            except:
+                pass    
         pass    
         
     return minimum
@@ -599,7 +602,10 @@ def getAbsoluteMax( databaseName, startTime, endTime, logger = None ):
     
     except :
         if logger != None:
-            logger.error( _("Error in generateRRDGraphics.getOverallMin. Unable to read ") + str( databaseName ) )
+            try:
+                logger.error( _("Error in generateRRDGraphics.getOverallMin. Unable to read ") + str( databaseName ) )
+            except:
+                pass    
         pass    
     
     return maximum 
@@ -648,7 +654,10 @@ def getAbsoluteMean( databaseName, startTime, endTime, logger = None  ):
     
     except :
         if logger != None:
-            logger.error( _( "Error in generateRRDGraphics.getOverallMin. Unable to read ") + str(databaseName) )
+            try:
+                logger.error( _( "Error in generateRRDGraphics.getOverallMin. Unable to read ") + str(databaseName) )
+            except:
+                pass    
         pass    
             
     return avg 
@@ -1367,11 +1376,16 @@ def plotRRDGraph( databaseName, type, fileType, client, machine, infos, logger =
         
         print _("Plotted : ") + str(imageName)
         if logger != None:
-            logger.info(  _("Plotted : ") + str(imageName) )
+            try:
+                logger.info(  _("Plotted : ") + str(imageName) )
+            except:
+                pass    
     else:
         if logger != None:
-            logger.error(  _("Error : Could not generate ") + str( imageName ) )     
-        
+            try:
+                logger.error(  _("Error : Could not generate ") + str( imageName ) )     
+            except:
+                pass    
 
 
 def createNewMergedDatabase( infos, dataType,  machine, start, interval    ) :       
@@ -2109,7 +2123,7 @@ def main():
    
     infos = getOptionsFromParser( parser )
     if infos.turnOffLogging == False:
-        logger = Logger( StatsPaths.STATSLOGGING   + 'stats_'+'rrd_graphs' + '.log.notb', 'INFO', 'TX' + 'rrd_graphs', bytes = True  ) 
+        logger = Logger( StatsPaths.STATSLOGGING   + 'stats_'+'rrd_graphs' + '.log.notb', 'INFO', 'TX' + 'rrd_graphs', bytes = 10000000  ) 
         logger = logger.getLogger()
     else:
         logger = None    
