@@ -93,7 +93,7 @@ class ClientGraphicProducer:
             if self.logger is None: # Enable logging
                 if not os.path.isdir( StatsPaths.STATSLOGGING ):
                     os.makedirs( StatsPaths.STATSLOGGING , mode=0777 )
-                self.logger = Logger( StatsPaths.STATSLOGGING  + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
+                self.logger = Logger( StatsPaths.STATSLOGGING  + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = 10000000  ) 
                 self.logger = self.logger.getLogger()
         else:
             self.logger = None        
@@ -173,10 +173,13 @@ class ClientGraphicProducer:
         for client in self.clientNames : # 
                
             #Gather data from all previously created pickles....      
-            if self.logger != None :                 
-                self.logger.debug( _("Call to mergeHourlyPickles." ) )
-                self.logger.debug( _("Parameters used : %s %s %s") %( startTime, endTime, client ) )
-            
+            if self.logger != None :  
+                try:               
+                    self.logger.debug( _("Call to mergeHourlyPickles." ) )
+                    self.logger.debug( _("Parameters used : %s %s %s") %( startTime, endTime, client ) )
+                except:
+                    pass
+                    
             if len( self.machines ) > 1 :   
                 clientArray = []
                 clientArray.append(client) 
@@ -269,18 +272,23 @@ class ClientGraphicProducer:
              
             dataCollection = self.recalculateData( dataCollection )               
         
-        if self.logger != None :         
-            self.logger.debug( _("Call to StatsPlotter :Clients:%s, timespan:%s, currentTime:%s, statsTypes:%s, productTypes:%s :") %( self.clientNames, self.timespan, self.currentTime, types, self.productTypes ) )
-        
+        if self.logger != None :  
+            try:       
+                self.logger.debug( _("Call to StatsPlotter :Clients:%s, timespan:%s, currentTime:%s, statsTypes:%s, productTypes:%s :") %( self.clientNames, self.timespan, self.currentTime, types, self.productTypes ) )
+            except:
+                pass    
        
         plotter = StatsPlotter( stats = dataCollection, clientNames = self.clientNames, groupName = self.groupName, timespan = self.timespan, currentTime = endTime, now = False, statsTypes = types, productTypes = self.productTypes, logger = self.logger,logging = self.logging,  machines = self.machines, fileType = self.fileType  )
         
         plotter.plot( createCopy )
                                              
         if self.logger != None :
-            self.logger.debug( _("Returns from StatsPlotter.") )
-            
-            self.logger.info ( _("Created Graphics for following call : Clients : %s, timespan : %s, currentTime : %s, statsTypes : %s, productTypes : %s :") %( self.clientNames, self.timespan, self.currentTime, types, self.productTypes ) )         
+            try:
+                self.logger.debug( _("Returns from StatsPlotter.") )
+                
+                self.logger.info ( _("Created Graphics for following call : Clients : %s, timespan : %s, currentTime : %s, statsTypes : %s, productTypes : %s :") %( self.clientNames, self.timespan, self.currentTime, types, self.productTypes ) )         
+            except:
+                pass
             
         return plotter.buildImageName()   
 
