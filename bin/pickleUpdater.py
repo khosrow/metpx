@@ -283,8 +283,10 @@ def getOptionsFromParser( parser, logger = None  ):
         else:
             #print "This client was not updated since it's last update was more recent than specified date : %s" %client
             if logger != None :
-                logger.warning("This client was not updated since it's last update was more recent than specified date : %s" %client)      
-       
+                try:
+                    logger.warning("This client was not updated since it's last update was more recent than specified date : %s" %client)      
+                except :
+                    pass    
                 
     infos = _UpdaterInfos( currentDate = currentDate, clients = usefullClients, startTimes = startTimes, directories = directories ,types = types, collectUpToNow = collectUpToNow, fileType = fileType, machine = machine )
     
@@ -428,8 +430,10 @@ def updateHourlyPickles( infos, logger = None ):
                 #print " client : %s startTime : %s endTime : %s" %(infos.clients[i], startTime, endTime )
                 
                 if startTime >= endTime and logger != None :                                
-                    logger.warning("Startime used in updateHourlyPickles was greater or equal to end time.")    
-
+                    try:
+                        logger.warning("Startime used in updateHourlyPickles was greater or equal to end time.")    
+                    except:
+                        pass    
                 
                 cs.pickleName =  ClientStatsPickler.buildThisHoursFileName( client = infos.clients[i], currentTime =  startOfTheHour, machine = infos.machine, fileType = infos.fileType )
                  
@@ -443,8 +447,10 @@ def updateHourlyPickles( infos, logger = None ):
             startOfTheHour = StatsDateLib.getIsoWithRoundedHours( infos.startTimes[i] )
             #print " client : %s startTime : %s endTime : %s" %(infos.clients[i], startTime, endTime )               
             if startTime >= endTime and logger != None :#to be removed                
-                logger.warning( "Startime used in updateHourlyPickles was greater or equal to end time." )    
- 
+                try:
+                    logger.warning( "Startime used in updateHourlyPickles was greater or equal to end time." )    
+                except:
+                    pass    
                 
             cs.pickleName =   ClientStatsPickler.buildThisHoursFileName( client = infos.clients[i], currentTime = startOfTheHour, machine = infos.machine, fileType = infos.fileType )            
               
@@ -468,7 +474,7 @@ def main():
     if not os.path.isdir( StatsPaths.STATSLOGGING ):
         os.makedirs( StatsPaths.STATSLOGGING, mode=0777 )
     
-    logger = Logger( StatsPaths.STATSLOGGING + 'stats_' + 'pickling' + '.log.notb', 'INFO', 'TX' + 'pickling', bytes = True  ) 
+    logger = Logger( StatsPaths.STATSLOGGING + 'stats_' + 'pickling' + '.log.notb', 'INFO', 'TX' + 'pickling', bytes = 10000000  ) 
     logger = logger.getLogger()
    
     parser = createParser( )  #will be used to parse options 
