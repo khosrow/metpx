@@ -308,9 +308,12 @@ def getPairsFromMergedData( statType, mergedData, logger = None  ):
             
             
             except KeyError:
-                if logger != None :                    
-                    logger.error( _("Error in getPairs.") )
-                    logger.error( _("The %s stat type was not found in previously collected data.") %statType )    
+                if logger != None :  
+                    try:                  
+                        logger.error( _("Error in getPairs.") )
+                        logger.error( _("The %s stat type was not found in previously collected data.") %statType )    
+                    except:
+                        pass    
                 pairs.append( [ int(StatsDateLib.getSecondsSinceEpoch(mergedData.statsCollection.timeSeperators[i])) +60, 0.0 ] )
                 sys.exit()    
             
@@ -414,15 +417,28 @@ def updateRoundRobinDatabases(  client, machines, fileType, endTime, logger = No
                     j = j +1
                     
                 for k in range ( j, len( dataPairs[ dataType ] )  ):
-                    rrdtool.update( rrdFileName, '%s:%s' %( int( dataPairs[ dataType ][k][0] ),  dataPairs[ dataType ][k][1] ) )
+                    try:
+                        rrdtool.update( rrdFileName, '%s:%s' %( int( dataPairs[ dataType ][k][0] ),  dataPairs[ dataType ][k][1] ) )
+                    except:
+                        if logger != None:
+                            try:
+                                logger.warning( "Could not update %s. Last update was more recent than %s " %( rrdFileName,int( dataPairs[ dataType ][k][0] ) ) )
+                            except:
+                                pass    
+                        pass
+                    
                     
                 if logger != None :
-                     logger.info( _( "Updated  %s db for %s in db named : %s" ) %( dataType, client, rrdFileName ) )
-
+                    try:        
+                        logger.info( _( "Updated  %s db for %s in db named : %s" ) %( dataType, client, rrdFileName ) )
+                    except:
+                        pass        
             else:
                 if logger != None :
-                     logger.warning( _( "This database was not updated since it's last update was more recent than specified date : %s" ) %rrdFileName )
-        
+                     try:
+                         logger.warning( _( "This database was not updated since it's last update was more recent than specified date : %s" ) %rrdFileName )
+                     except:
+                         pass    
                 
             RrdUtilities.setDatabaseTimeOfUpdate(  rrdFileName, fileType, endTime )  
 
@@ -515,13 +531,24 @@ def updateGroupedRoundRobinDatabases( infos, logger = None ):
                     
                 for k in range ( j, len( dataPairs[ dataType ] )  ):
                     #print "updating %s at %s" %(rrdFileName, int( dataPairs[ dataType ][k][0] ))
-                    rrdtool.update( rrdFileName, '%s:%s' %( int( dataPairs[ dataType ][k][0] ),  dataPairs[ dataType ][k][1] ) )
-
+                    try:
+                        rrdtool.update( rrdFileName, '%s:%s' %( int( dataPairs[ dataType ][k][0] ),  dataPairs[ dataType ][k][1] ) )
+                    except:
+                        if logger != None:
+                            try:
+                                logger.warning( "Could not update %s. Last update was more recent than %s " %( rrdFileName,int( dataPairs[ dataType ][k][0] ) ) )
+                            except:
+                                pass    
+                        pass    
+            
             else:
                 #print "endTime %s was not bigger than start time %s" %( endTime, startTime ) 
                 if logger != None :
-                    logger.warning( _( "This database was not updated since it's last update was more recent than specified date : %s" ) %rrdFileName )
-        
+                    try:
+                        logger.warning( _( "This database was not updated since it's last update was more recent than specified date : %s" ) %rrdFileName )
+                    except:
+                        pass
+                        
     RrdUtilities.setDatabaseTimeOfUpdate( tempRRDFileName, infos.fileTypes[0], endTime )         
     
     
@@ -626,13 +653,13 @@ def main():
     
     """
     
-    language = 'fr'
+    language = 'en'
     
     setGlobalLanguageParameters( language )
     
     createPaths()
     
-    logger = Logger( StatsPaths.STATSLOGGING + 'stats_' + 'rrd_transfer' + '.log.notb', 'INFO', 'TX' + 'rrd_transfer', bytes = True  ) 
+    logger = Logger( StatsPaths.STATSLOGGING + 'stats_' + 'rrd_transfer' + '.log.notb', 'INFO', 'TX' + 'rrd_transfer', bytes = 10000000  ) 
     
     logger = logger.getLogger()
        
