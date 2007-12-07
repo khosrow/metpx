@@ -42,8 +42,29 @@ class StatsDateLib:
     MINUTES_PER_DAY = 24*60
     LIST_OF_MONTHS_3LETTER_FORMAT = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ]
        
-       
-       
+    def isValidIsoDate( isoDate ):
+        """   
+            @summary : Verifies whether or not the received 
+                       date is a valid iso format date.
+                  
+            @return  : Returns whether or not the received 
+                       date is a valid iso format date.
+                              
+        """
+        
+        isValid = True
+        
+        try:
+            StatsDateLib.getSecondsSinceEpoch( isoDate )    
+        except:
+            isValid = False
+            
+        return isValid 
+    
+    isValidIsoDate = staticmethod(isValidIsoDate)
+    
+    
+    
     def getYearMonthDayInStrfTime( timeInEpochFormat):
         """
             @summary : Return the year month day in strftime 
