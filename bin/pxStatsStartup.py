@@ -23,6 +23,7 @@ from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.MachineConfigParameters import MachineConfigParameters
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 from pxStats.lib.CpickleWrapper import CpickleWrapper
+from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 
 LOCAL_MACHINE = os.uname()[1]
             
@@ -157,8 +158,9 @@ def uploadGraphicFiles( parameters, machineParameters ):
     for uploadMachine in parameters.graphicsUpLoadMachines :
         status, output = commands.getstatusoutput( "scp %s* %s@%s:%s " %( StatsPaths.STATSCOLGRAPHS, machineParameters.getUserNameForMachine(uploadMachine), uploadMachine, StatsPaths.PDSCOLGRAPHS   ) )
         
-        print "scp %s* %s@%s:%s " %( StatsPaths.STATSCOLGRAPHS, machineParameters.getUserNameForMachine(uploadMachine),uploadMachine, StatsPaths.PDSCOLGRAPHS )
+        #print "scp %s* %s@%s:%s " %( StatsPaths.STATSCOLGRAPHS, machineParameters.getUserNameForMachine(uploadMachine),uploadMachine, StatsPaths.PDSCOLGRAPHS )
         #print output
+
 
         
 def transferToDatabaseAlreadyRunning():
@@ -179,8 +181,8 @@ def transferToDatabaseAlreadyRunning():
         
     return alreadyRuns
     
-    
-    
+
+        
 def updateDatabases( parameters, machineParameters ):
     """
         Updates all the required databases by transferring the
@@ -500,45 +502,50 @@ def main():
     
     """
     
-    currentTime = time.time()
-    
-    generalParameters = StatsConfigParameters()
-    
-    generalParameters.getAllParameters()
-                                                                
-    machineParameters = MachineConfigParameters()
-    machineParameters.getParametersFromMachineConfigurationFile()
-    
-    validateParameters( generalParameters, machineParameters, None  )
-    
-    tagsNeedingUpdates = getMachinesTagsNeedingUpdates( generalParameters, machineParameters )
-    if tagsNeedingUpdates == None : #no previous parameter found
-        saveCurrentMachineParameters( machineParameters  )
-    elif tagsNeedingUpdates != [] :
-        updateFilesAssociatedWithMachineTags( tagsNeedingUpdates, machineParameters )
-        saveCurrentMachineParameters( machineParameters  )
-           
-            
-    updatePickles( generalParameters, machineParameters )
-    
-    updateDatabases( generalParameters, machineParameters )
-    
-    backupRRDDatabases( generalParameters.timeParameters, currentTime, generalParameters.nbDbBackupsToKeep )
-    
-    updateCsvFiles( )
-    
-    getGraphicsForWebPages()
+    if GeneralStatsLibraryMethods.processIsAlreadyRunning( "pxStatsStartup" ) == False:
         
-    #archiveGraphics()
+        GeneralStatsLibraryMethods.createLockFile("pxStatsStartup")
+        
+        currentTime = time.time()
+        
+        generalParameters = StatsConfigParameters()
+        
+        generalParameters.getAllParameters()
+                                                                    
+        machineParameters = MachineConfigParameters()
+        machineParameters.getParametersFromMachineConfigurationFile()
+        
+        validateParameters( generalParameters, machineParameters, None  )
+        
+        tagsNeedingUpdates = getMachinesTagsNeedingUpdates( generalParameters, machineParameters )
+        if tagsNeedingUpdates == None : #no previous parameter found
+            saveCurrentMachineParameters( machineParameters  )
+        elif tagsNeedingUpdates != [] :
+            updateFilesAssociatedWithMachineTags( tagsNeedingUpdates, machineParameters )
+            saveCurrentMachineParameters( machineParameters  )
+               
+                
+        updatePickles( generalParameters, machineParameters )
+        
+        updateDatabases( generalParameters, machineParameters )
+        
+        backupRRDDatabases( generalParameters.timeParameters, currentTime, generalParameters.nbDbBackupsToKeep )
+        
+        updateCsvFiles( )
+        
+        getGraphicsForWebPages()
+            
+        #archiveGraphics()
+        
+        updateWebPages()
+        
+        uploadGraphicFiles( generalParameters, machineParameters )
+     
+        cleanUp( generalParameters.timeParameters, currentTime, generalParameters.daysOfPicklesToKeep )
     
-    updateWebPages()
-    
-    uploadGraphicFiles( generalParameters, machineParameters )
- 
-    cleanUp( generalParameters.timeParameters, currentTime, generalParameters.daysOfPicklesToKeep )
-
-    monitorActivities( generalParameters.timeParameters, currentTime )
-
+        monitorActivities( generalParameters.timeParameters, currentTime )
+        
+        GeneralStatsLibraryMethods.deleteLockFile( "pxStatsStartup" )
     print "Finished."
     
     
