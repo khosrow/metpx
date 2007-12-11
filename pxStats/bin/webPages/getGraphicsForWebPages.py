@@ -358,8 +358,50 @@ def setDailyGraphs( currentTime, machinePairs, machineParameters, configParamete
 
         status, output = commands.getstatusoutput( '%sgenerateRRDGraphics.py --copy --totals -f "tx" --machines "%s" -d --fixedCurrent --date "%s"' %( StatsPaths.STATSBIN, machinePair,currentTime ) )
       
+
+
+def getCurrentTime():
+    """       
+    
+        @summary : Retrieves the specified time of 
+                   call received as a parameter.
+                  
+                   If no parameters were used, 
+                   return the current system time.
+                   
+       @note : If program was called with more than
+               one parameter, the program will be 
+               terminated.            
        
+       @return : The current time in seconds 
+                 since epoch format.  
+                 
+    """
+    
+    currentTime = time.time()
+    
+    try:
         
+        if len( sys.argv ) == 1 : #program called without any parameters
+            currentTime = time.time()    
+        elif len( sys.argv ) == 2:
+            currentTime = StatsDateLib.getSecondsSinceEpoch( sys.argv[1] )
+        else:
+            raise
+        
+    except:
+        
+        print "Error. This program can only be called with one parameter."
+        print "This parameter MUST be a valid date written in the iso format."
+        print "Iso format is the following : YYYY-MM-DD HH:MM:SS"
+        print "Program terminated."
+        sys.exit()
+    
+    
+    return currentTime
+
+
+    
 def main():
     """
         Set up all the graphics required by 
@@ -378,7 +420,7 @@ def main():
     machineConfig.getParametersFromMachineConfigurationFile()
     machinePairs  = machineConfig.getPairedMachinesAssociatedWithListOfTags(configParameters.sourceMachinesTags)     
                 
-    currentTime = time.time()
+    currentTime = getCurrentTime()
      
     setDailyGraphs( currentTime, machinePairs, machineConfig, configParameters )
         
