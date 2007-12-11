@@ -65,20 +65,30 @@ def validateParameters( parameters, machineParameters, logger = None  ):
     
 
             
-def updatePickles( parameters, machineParameters ):
+def updatePickles( parameters, machineParameters, currentTimeInIsoFormat ):
     """
-        Updates the pickle files for all the specified log machines
-        so that they are available for graphic production.
+        @summary : Updates the pickle files for all the specified log machines
+                   so that they are available for graphic production.
         
-        Pickling is to be done on specified pickling machines.
+        @note : Pickling is to be done on specified pickling machines.
         
-        All the pickle files that are produced on remote machines will be 
-        downloaded on the local machine.
+                All the pickle files that are produced on remote machines will be 
+                downloaded on the local machine.
+                
+        
+        @param parameters: StatsConfigParameters instance containing 
+                           the parameters found in the config file.
+        
+        @param machineParameters: MachineConfigParameters instance containing 
+                                  the parameters found in the config file.
+        
+        @param currentTimeInIsoFormat : Time at which this program was originally 
+                                        called.        
     
+        
     """      
         
-    nbChildProcess = 0    
-     
+    nbChildProcess = 0        
     
    
     for tag in parameters.sourceMachinesTags:
@@ -108,31 +118,32 @@ def updatePickles( parameters, machineParameters ):
                    
                 if picklingMachine != LOCAL_MACHINE :#pickling to be done elsewhere,needs ssh             
                               
-                    status, output = commands.getstatusoutput( "ssh %s@%s 'python %spickleUpdater.py  -m %s -f rx'   " %( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine, StatsPaths.STATSBIN,  sourceMachines[i] ) ) 
+                    status, output = commands.getstatusoutput( """ssh %s@%s 'python %spickleUpdater.py  -m %s -f rx --date "%s" '   """ %( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine, StatsPaths.STATSBIN,  sourceMachines[i], currentTimeInIsoFormat ) ) 
                     #print "ssh %s@%s 'python %spickleUpdater.py  -m %s -f rx'   "  %( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine, StatsPaths.STATSBIN, sourceMachines[i] )
                     #print output
                     
-                    status, output = commands.getstatusoutput( "ssh %s@%s 'python %spickleUpdater.py -m %s -f tx'  "( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine , StatsPaths.STATSBIN, sourceMachines[i] ) )
+                    status, output = commands.getstatusoutput( """ssh %s@%s 'python %spickleUpdater.py -m %s -f tx --date "%s" '  """( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine , StatsPaths.STATSBIN, sourceMachines[i], currentTimeInIsoFormat ) )
                     #print "ssh %s@%s 'python %spickleUpdater.py -m %s -f tx'  "%( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine , StatsPaths.STATSBIN, sourceMachines[i] )
                     #print output
                     
-                    status, output = commands.getstatusoutput( "%spickleSynchroniser.py -l %s -m %s  "%( StatsPaths.STATSTOOLS, machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine ) )      
+                    status, output = commands.getstatusoutput( """%spickleSynchroniser.py -l %s -m %s  """%( StatsPaths.STATSTOOLS, machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine ) )      
                     #print "%spickleSynchroniser.py -l %s -m %s  " %( StatsPaths.STATSTOOLS, machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine )
                     #print output
                 
                     
                 else: # pickling is to be done locally. Log files may or may not reside elsewhere.
                     
-                    status, output = commands.getstatusoutput( "python %spickleUpdater.py -f rx -m %s "%( StatsPaths.STATSBIN, sourceMachines[i] ) )
+                    status, output = commands.getstatusoutput( """python %spickleUpdater.py -f rx -m %s --date "%s" """%( StatsPaths.STATSBIN, sourceMachines[i], currentTimeInIsoFormat ) )
                     #print output
                     #print "python %spickleUpdater.py -f rx -m %s " %( StatsPaths.STATSBIN, sourceMachines[i] )
                     
                     
-                    status, output = commands.getstatusoutput( "python %spickleUpdater.py -f tx -m %s "  %(  StatsPaths.STATSBIN, sourceMachines[i]) )
+                    status, output = commands.getstatusoutput( """python %spickleUpdater.py -f tx -m %s --date "%s" """  %(  StatsPaths.STATSBIN, sourceMachines[i], currentTimeInIsoFormat ) )
                     #print "python %spickleUpdater.py -f tx -m %s " %( StatsPaths.STATSBIN, sourceMachines[i] )
                     #print output
         
             sys.exit()            
+            
         elif nbChildProcess!=0 and nbChildProcess%3 == 0 :
             while True:#wait on all non terminated child process'
                 try:   #will raise exception when no child process remain.
@@ -183,10 +194,27 @@ def transferToDatabaseAlreadyRunning():
     
 
         
-def updateDatabases( parameters, machineParameters ):
+def updateDatabases( parameters, machineParameters, currentTimeInIsoFormat ):
     """
-        Updates all the required databases by transferring the
-        data found in the pickle files into rrd databases files.
+        @summary :  Updates all the required databases by transferring the
+                    data found in the pickle files into rrd databases files.
+                    
+                    First transfers all the pickles into databases for all the clusters.
+                    
+                    Then combines all the data required by the different groups found 
+                    within the config file.
+       
+        @param parameters: StatsConfigParameters instance containing 
+                           the parameters found in the config file.
+        
+        @param machineParameters: MachineConfigParameters instance containing 
+                                  the parameters found in the config file.
+        
+        @param currentTimeInIsoFormat : Time at which this program was originally 
+                                        called.    
+                                        
+        @return : None
+                                                
     """
            
     #Small safety measure in case another instance of the program is allready running.
@@ -195,7 +223,7 @@ def updateDatabases( parameters, machineParameters ):
         for tag in parameters.machinesToBackupInDb :
              machines = machineParameters.getMachinesAssociatedWith(tag)             
              machines = str( machines ).replace( "[", "" ).replace( "]", "" ).replace( " ", "" )
-             status, output = commands.getstatusoutput( "%stransferPickleToRRD.py -m '%s'" %(StatsPaths.STATSBIN, machines )  )
+             status, output = commands.getstatusoutput( "%stransferPickleToRRD.py -m '%s' -e '%s' " %( StatsPaths.STATSBIN, machines, currentTimeInIsoFormat )  )
              #print  "%stransferPickleToRRD.py -m '%s' " %( StatsPaths.STATSBIN, machines )
              #print "output:%s" %output
         
@@ -208,20 +236,24 @@ def updateDatabases( parameters, machineParameters ):
                 groupProducts = str( parameters.groupParameters.groupsProducts[group] ).replace( "[", "" ).replace( "]", "" ).replace( " ", "" )
                 groupFileTypes = str(parameters.groupParameters.groupFileTypes[group]).replace( "[", "" ).replace( "]", "" ).replace( " ", "" )
                
-                status, output = commands.getstatusoutput( "%stransferPickleToRRD.py -c '%s' -m '%s' -g '%s' -f %s -p '%s' " %( StatsPaths.STATSBIN, groupMembers, groupMachines, group, groupFileTypes, groupProducts  ) )
+                status, output = commands.getstatusoutput( "%stransferPickleToRRD.py -c '%s' -m '%s' -g '%s' -f %s -p '%s' -e '%s' " %( StatsPaths.STATSBIN, groupMembers, groupMachines, group, groupFileTypes, groupProducts, currentTimeInIsoFormat  ) )
                 #print   "%stransferPickleToRRD.py -c '%s' -m '%s' -g '%s' -f %s -p '%s' " %( StatsPaths.STATSBIN, groupMembers, groupMachines, group, groupFileTypes, groupProducts  )
                 #print output
  
  
  
-def getGraphicsForWebPages( ):
+def getGraphicsForWebPages( currentTimeInIsoFormat ):
     """
-        Launchs the getGraphicsForWebPages.py
-        program. 
-        
+        @summary : Launchs the getGraphicsForWebPages.py
+                   program. 
+                   
+        @param currentTimeInIsoFormat : Time at which this program was originally 
+                                        called. 
+        @return: None
+                                        
     """
     
-    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGESGENERATORS + "getGraphicsForWebPages.py" )
+    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGESGENERATORS + "getGraphicsForWebPages.py '%s' " %currentTimeInIsoFormat )
     #print StatsPaths.STATSWEBPAGESGENERATORS + "getGraphicsForWebPages.py"
     #print output                    
 
@@ -502,12 +534,14 @@ def main():
     
     """
     
+    
     if GeneralStatsLibraryMethods.processIsAlreadyRunning( "pxStatsStartup" ) == False:
         
-        GeneralStatsLibraryMethods.createLockFile("pxStatsStartup")
+        GeneralStatsLibraryMethods.createLockFile( "pxStatsStartup" )
         
         currentTime = time.time()
-        
+        currentTimeInIsoFormat = StatsDateLib.getIsoFromEpoch( currentTime )
+                
         generalParameters = StatsConfigParameters()
         
         generalParameters.getAllParameters()
@@ -525,15 +559,15 @@ def main():
             saveCurrentMachineParameters( machineParameters  )
                
                 
-        updatePickles( generalParameters, machineParameters )
+        updatePickles( generalParameters, machineParameters, currentTimeInIsoFormat )
         
-        updateDatabases( generalParameters, machineParameters )
+        updateDatabases( generalParameters, machineParameters, currentTimeInIsoFormat )
         
         backupRRDDatabases( generalParameters.timeParameters, currentTime, generalParameters.nbDbBackupsToKeep )
         
         updateCsvFiles( )
         
-        getGraphicsForWebPages()
+        getGraphicsForWebPages( currentTimeInIsoFormat )
             
         #archiveGraphics()
         
@@ -546,6 +580,7 @@ def main():
         monitorActivities( generalParameters.timeParameters, currentTime )
         
         GeneralStatsLibraryMethods.deleteLockFile( "pxStatsStartup" )
+        
     print "Finished."
     
     
