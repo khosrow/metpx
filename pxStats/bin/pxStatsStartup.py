@@ -105,13 +105,15 @@ def updatePickles( parameters, machineParameters, currentTimeInIsoFormat ):
                     
                     if parameters.detailedParameters.picklingMachines[tag][i] != LOCAL_MACHINE :#pickling to be done elsewhere
                         for j in range(3):#do 3 times in case of currently turning log files.
-                            status, output = commands.getstatusoutput( "ssh %s@%s 'rsync -avzr --delete-before -e ssh  %s@%s:%s/ %s%s/' "  %( machineParameters.getUserNameForMachine( picklingMachine), picklingMachine,machineParameters.getUserNameForMachine( sourceMachines[i] ) , sourceMachines[i] , StatsPaths.PXLOG, StatsPaths.STATSLOGS, sourceMachines[i] ) )
+                            remotePxLibPath = StatsPaths.getPXPathFromMachine(StatsPaths.PXLIB, sourceMachines[i], machineParameters.getUserNameForMachine( sourceMachines[i]))
+                            status, output = commands.getstatusoutput( "ssh %s@%s 'rsync -avzr --delete-before -e ssh  %s@%s:%s %s%s/' "  %( machineParameters.getUserNameForMachine( picklingMachine), picklingMachine,machineParameters.getUserNameForMachine( sourceMachines[i] ) , sourceMachines[i] , remotePxLibPath,  StatsPaths.STATSLOGS, sourceMachines[i] ) )
                             #print "ssh %s@%s 'rsync -avzr --delete-before -e ssh  %s@%s:%s %s%s/' "%( machineParameters.getUserNameForMachine( picklingMachine), picklingMachine,machineParameters.getUserNameForMachine( sourceMachines[i] ) , sourceMachines[i] , StatsPaths.PXLOG, StatsPaths.STATSLOGS, sourceMachines[i] ) 
                             #print output
                     else:
                         
                         for j in range(3):#do 3 times in case of currently turning log files.
-                            status, output = commands.getstatusoutput( "rsync -avzr --delete-before -e ssh %s@%s:%s   %s%s/ " %( machineParameters.getUserNameForMachine( sourceMachines[i] ), sourceMachines[i] , StatsPaths.PXLOG, StatsPaths.STATSLOGS, sourceMachines[i] ) )
+                            remotePxLibPath = StatsPaths.getPXPathFromMachine(StatsPaths.PXLIB, sourceMachines[i], machineParameters.getUserNameForMachine( sourceMachines[i]))
+                            status, output = commands.getstatusoutput( "rsync -avzr --delete-before -e ssh %s@%s:%s   %s%s/ " %( machineParameters.getUserNameForMachine( sourceMachines[i] ), sourceMachines[i] , remotePxLibPath,  StatsPaths.STATSLOGS, sourceMachines[i] ) )
                             #print "rsync -avzr --delete-before -e ssh %s@%s:%s   %s%s/ " %( machineParameters.getUserNameForMachine( sourceMachines[i] ), sourceMachines[i] , StatsPaths.PXLOG, StatsPaths.STATSLOGS, sourceMachines[i] )
                             #print output   
                                     
@@ -134,9 +136,8 @@ def updatePickles( parameters, machineParameters, currentTimeInIsoFormat ):
                 else: # pickling is to be done locally. Log files may or may not reside elsewhere.
                     
                     status, output = commands.getstatusoutput( """python %spickleUpdater.py -f rx -m %s --date "%s" """%( StatsPaths.STATSBIN, sourceMachines[i], currentTimeInIsoFormat ) )
-                    #print output
                     #print "python %spickleUpdater.py -f rx -m %s " %( StatsPaths.STATSBIN, sourceMachines[i] )
-                    
+                    #print output
                     
                     status, output = commands.getstatusoutput( """python %spickleUpdater.py -f tx -m %s --date "%s" """  %(  StatsPaths.STATSBIN, sourceMachines[i], currentTimeInIsoFormat ) )
                     #print "python %spickleUpdater.py -f tx -m %s " %( StatsPaths.STATSBIN, sourceMachines[i] )
@@ -499,8 +500,8 @@ def updateFilesAssociatedWithMachineTags( tagsNeedingUpdates, machineParameters 
         currentCombinedMachineNames = currentCombinedMachineNames.join( [ x for x in machineParameters.getMachinesAssociatedWith( tag ) ]) 
         
         status,output = commands.getstatusoutput( "%sfileRenamer.py -o %s  -n %s --overrideConfirmation" %( StatsPaths.STATSTOOLS, previousCombinedMachineNames, currentCombinedMachineNames  ) )
-        print "%sfileRenamer.py -o %s  -n %s --overrideConfirmation" %( StatsPaths.STATSTOOLS, previousCombinedMachineNames, currentCombinedMachineNames  )
-        print output 
+        #print "%sfileRenamer.py -o %s  -n %s --overrideConfirmation" %( StatsPaths.STATSTOOLS, previousCombinedMachineNames, currentCombinedMachineNames  )
+        #print output 
         
         
         
