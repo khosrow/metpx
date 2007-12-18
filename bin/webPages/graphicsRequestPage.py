@@ -2368,14 +2368,6 @@ def  setGlobalLanguageParameters( language = 'en'):
     OTHER_MACHINES  = []
     
 
-    print translator._catalog
-
-
-
-
-
-
-
 
 def main():
     """
