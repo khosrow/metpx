@@ -379,7 +379,7 @@ def cleanUp( timeParameters, currentTime, daysOfPicklesToKeep ):
     
     if needsToBeRun( timeParameters.pickleCleanerFrequency, currentTime ) :
         
-        status, output = commands.getstatusoutput( StatsPaths.STATSTOOLS + "pickleCleaner.py %s" %daysOfPicklesToKeep )
+        status, output = commands.getstatusoutput( StatsPaths.STATSTOOLS + "pickleCleaner.py %s" %int(daysOfPicklesToKeep) )
         #print StatsPaths.STATSTOOLS + "pickleCleaner.py" + " " + str( daysOfPicklesToKeep )
         
     if needsToBeRun( timeParameters.generalCleanerFrequency, currentTime ):
