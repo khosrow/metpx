@@ -21,7 +21,7 @@ named COPYING in the root of the source directory tree.
 #############################################################################################
 """
 
-import os, sys
+import commands, os, sys
 """
     Small function that adds pxlib to the environment path.  
 """
@@ -161,6 +161,78 @@ class StatsPaths:
     
     
     
+    def getPXROOTFromMachine( machine, userName = "" ):
+        """
+            
+            @summary : Returns the PXRootPath from the specified machine
+                       whether it is the local machine or not.
+        
+            @param machine : Name of the machine for which the PXROOT 
+                             value is required.
+            
+            @param userName : User name to use to connect to the machine
+                              if it is a distant machine. If no user name 
+                              is specified, user name used by the caller 
+                              of the application will be used.
+            
+        """
+        
+        pxroot = ""
+        
+        if userName == "" :
+            #print "ssh %s '. $HOME/.bash_profile;echo $PXROOT' " %( machine )
+            status, output = commands.getstatusoutput( "ssh %s '. $HOME/.bash_profile;echo $PXROOT' " %( machine ) )
+        else:
+            #print "ssh %s@%s '. $HOME/.bash_profile;echo $PXROOT' " %( userName, machine )
+            status, output = commands.getstatusoutput( "ssh %s@%s '. $HOME/.bash_profile;echo $PXROOT' " %( userName, machine ) )
+            
+            
+        if output == "":
+            pxroot = "/apps/px/"
+        else:    
+            pxroot = output
+            
+        return pxroot    
+    
+    getPXROOTFromMachine = staticmethod( getPXROOTFromMachine )
+    
+    
+    
+    def getPXPathFromMachine( path, machine, userName = "" ):
+        """
+            
+            @summary : Returns one of the available paths
+                       from this utility class, based on 
+                       the pxroot found on the machine  
+                       
+                       
+            @param path : Path that neeeds to be transformed 
+                          based on the specified machine.
+                          Ex: StatsPaths.PXLIB
+            
+            @param machine : Machine for which we want to know a certain path.
+            
+            @param userName : User name to connect to that machine.
+            
+            @return: Returns the path
+                        
+        """
+        
+        pathOnThatMachine = ""
+        
+        pxRootFromThatMachine = StatsPaths.getPXROOTFromMachine( machine = machine, userName = userName )
+        
+        if pxRootFromThatMachine[ -1: ] != "/" :
+            pxRootFromThatMachine = pxRootFromThatMachine + "/"
+                
+        pathOnThatMachine = str(path).replace( StatsPaths.PXROOT, pxRootFromThatMachine)
+    
+        return pathOnThatMachine
+    
+    getPXPathFromMachine = staticmethod( getPXPathFromMachine )
+    
+    
+    
 def main():
     """
         Small test case. 
@@ -216,6 +288,10 @@ def main():
     print "StatsPaths.STATSWEBPAGESWORDDBS %s" %StatsPaths.STATSWEBPAGESWORDDBS
     print "StatsPaths.STATSWEBPAGESHTML %s" %StatsPaths.STATSWEBPAGESHTML
     
+    print "PXROOT from some machine %s" %StatsPaths.getPXROOTFromMachine( "somemachine" )
+    print "PXLIB from some machine %s" %StatsPaths.getPXPathFromMachine( path = StatsPaths.PXLIB, machine = "somemachine", userName = "" )    
+        
+        
         
 if __name__ == "__main__":
     main()    
