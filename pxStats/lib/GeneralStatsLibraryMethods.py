@@ -69,6 +69,8 @@ class GeneralStatsLibraryMethods:
         
         os.system('touch %s' %fileName)
     
+    createLockFile = staticmethod( createLockFile )
+    
     
     
     def deleteLockFile( processName ):
@@ -87,7 +89,9 @@ class GeneralStatsLibraryMethods:
         if os.path.isfile( fileName ):
             os.remove( fileName )
             
-    
+    deleteLockFile = staticmethod( deleteLockFile )
+         
+         
          
     def processIsAlreadyRunning( processName ):
         """
@@ -109,6 +113,10 @@ class GeneralStatsLibraryMethods:
         
         return processIsAlreadyRunning    
 
+    
+    processIsAlreadyRunning = staticmethod( processIsAlreadyRunning )
+    
+    
     
     def isRxTxOrOther( name, rxNames, txNames ):
         """
