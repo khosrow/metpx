@@ -26,10 +26,28 @@ import commands, os, sys
     Small function that adds pxlib to the environment path.  
 """
 sys.path.insert(1, sys.path[0] + '/../../')
+LOCAL_MACHINE = os.uname()[1]
+
 try:
-    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
+    pxroot = ""
+    
+    #print "ssh %s@%s '. $HOME/.bash_profile;echo $PXROOT' " %( userName, machine )
+    status, output = commands.getstatusoutput( "ssh %s@%s '. $HOME/.bash_profile;echo $PXROOT' " %( "px", LOCAL_MACHINE ) )
+    fileHandle = open("out", 'w')
+    fileHandle.write(output)
+    fileHandle.close()    
+        
+    if output == "":
+        pxroot = "/apps/px/"
+    else:    
+        pxroot = output
+    
+    pxlib = pxroot + 'lib'    
+    #pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
 except KeyError:
     pxlib = '/apps/px/lib/'
+    
+    
 sys.path.append(pxlib)
 
 
@@ -39,6 +57,9 @@ sys.path.append(pxlib)
 """
  
 import PXPaths
+
+
+
 
 
 class StatsPaths:
@@ -175,26 +196,74 @@ class StatsPaths:
                               is specified, user name used by the caller 
                               of the application will be used.
             
+            @return : the PXRoot path
+        
         """
         
         pxroot = ""
         
         if userName == "" :
             #print "ssh %s '. $HOME/.bash_profile;echo $PXROOT' " %( machine )
-            status, output = commands.getstatusoutput( "ssh %s '. $HOME/.bash_profile;echo $PXROOT' " %( machine ) )
+            status, output = commands.getstatusoutput( "ssh %s '. $HOME/.bash_profile;source /etc/profile;echo $PXROOT' " %( machine ) )
         else:
             #print "ssh %s@%s '. $HOME/.bash_profile;echo $PXROOT' " %( userName, machine )
-            status, output = commands.getstatusoutput( "ssh %s@%s '. $HOME/.bash_profile;echo $PXROOT' " %( userName, machine ) )
+            status, output = commands.getstatusoutput( "ssh %s@%s '. $HOME/.bash_profile;source /etc/profile;echo $PXROOT' " %( userName, machine ) )
             
             
         if output == "":
             pxroot = "/apps/px/"
         else:    
             pxroot = output
-            
+        
+        
+        if str(pxroot)[-1:] != '':
+            pxroot = str( pxroot ) + '/'
+                       
         return pxroot    
     
     getPXROOTFromMachine = staticmethod( getPXROOTFromMachine )
+    
+    
+    
+    def getSTATSROOTFromMachine(  machine, userName  ):
+        """
+            @summary : returns the PXSTATSROOT path from the specified machine
+                       whether it is the local machine or not.
+            
+            @param machine : Name of the machine for which the PXSTATSROOT 
+                             value is required.
+            
+            @param userName : User name to use to connect to the machine
+                              if it is a distant machine. If no user name 
+                              is specified, user name used by the caller 
+                              of the application will be used.
+        
+            @return : the PXSTATSROOT path
+        """
+        
+        statsRoot = ""
+        
+        if userName == "" :
+            #print "ssh %s '. $HOME/.bash_profile;source /etc/profile;echo $PXSTATSROOT' " %( machine )
+            status, output = commands.getstatusoutput( "ssh %s '. $HOME/.bash_profile;source /etc/profile;echo $PXSTATSROOT' " %( machine ) )
+        else:
+            #print "ssh %s@%s '. $HOME/.bash_profile;source /etc/profile;echo $PXSTATSROOT' " %( userName, machine )
+            status, output = commands.getstatusoutput( "ssh %s@%s '. $HOME/.bash_profile;source /etc/profile;echo $PXSTATSROOT' " %( userName, machine ) )
+            
+            
+        if output == "":
+            statsRoot = "/apps/px/pxStats/"
+        else:    
+            statsRoot = output
+        
+        
+        if str(statsRoot)[-1:] != '/':
+            statsRoot = str( statsRoot ) + '/'
+                       
+        return statsRoot    
+   
+       
+    getSTATSROOTFromMachine = staticmethod( getSTATSROOTFromMachine )
     
     
     
