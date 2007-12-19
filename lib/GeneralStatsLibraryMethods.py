@@ -256,10 +256,11 @@ class GeneralStatsLibraryMethods:
         if not os.path.isdir( StatsPaths.STATSPXTRXCONFIGS + machine ):
             os.makedirs(  StatsPaths.STATSPXTRXCONFIGS + machine, mode=0777 )
     
+        rxConfigFilesSourcePath = StatsPaths.getPXPathFromMachine( StatsPaths.PXETCRX, machine, login )
+        status, output = commands.getstatusoutput( "rsync -avzr --delete-before -e ssh %s@%s:%s  %s%s/"  %( login, machine, rxConfigFilesSourcePath, StatsPaths.STATSPXRXCONFIGS, machine ) )
     
-        status, output = commands.getstatusoutput( "rsync -avzr --delete-before -e ssh %s@%s:%s  %s%s/"  %( login, machine, StatsPaths.PXETCRX, StatsPaths.STATSPXRXCONFIGS, machine ) )
-    
-        status, output = commands.getstatusoutput( "rsync -avzr  --delete-before -e ssh %s@%s:%s %s%s/"  %( login, machine, StatsPaths.PXETCTX, StatsPaths.STATSPXTXCONFIGS, machine ) )
+        txConfigFilesSourcePath = StatsPaths.getPXPathFromMachine( StatsPaths.PXETCTX, machine, login )
+        status, output = commands.getstatusoutput( "rsync -avzr  --delete-before -e ssh %s@%s:%s %s%s/"  %( login, machine, txConfigFilesSourcePath, StatsPaths.STATSPXTXCONFIGS, machine ) )
     
     updateConfigurationFiles = staticmethod( updateConfigurationFiles )    
         
