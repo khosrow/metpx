@@ -267,6 +267,39 @@ class StatsPaths:
     
     
     
+    def getStatsPathFromMachine( path, machine, userName = "" ):
+        """
+            
+            @summary : Returns one of the available paths
+                       from this utility class, based on 
+                       the pxroot found on the machine  
+                       
+                       
+            @param path : Path that neeeds to be transformed 
+                          based on the specified machine.
+                          Ex: StatsPaths.STATSBIN
+            
+            @param machine : Machine for which we want to know a certain path.
+            
+            @param userName : User name to connect to that machine.
+            
+            @return: Returns the path
+                        
+        """
+        
+        pathOnThatMachine = ""
+        
+        statsRootFromThatMachine = StatsPaths.getSTATSROOTFromMachine( machine = machine, userName = userName )
+        
+        pathOnThatMachine = str(path).replace( StatsPaths.STATSROOT, statsRootFromThatMachine )
+    
+        return pathOnThatMachine
+    
+    getStatsPathFromMachine = staticmethod( getStatsPathFromMachine )
+    
+    
+    
+    
     def getPXPathFromMachine( path, machine, userName = "" ):
         """
             
@@ -290,9 +323,6 @@ class StatsPaths:
         pathOnThatMachine = ""
         
         pxRootFromThatMachine = StatsPaths.getPXROOTFromMachine( machine = machine, userName = userName )
-        
-        if pxRootFromThatMachine[ -1: ] != "/" :
-            pxRootFromThatMachine = pxRootFromThatMachine + "/"
                 
         pathOnThatMachine = str(path).replace( StatsPaths.PXROOT, pxRootFromThatMachine)
     
