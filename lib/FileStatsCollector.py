@@ -310,28 +310,28 @@ class FileStatsCollector:
                         if( ( "errors" not in self.statsTypes ) or ( fileEntries[i].values.dictionary["errors"][row] == 0 ) ): 
                             fileEntries[i].nbFiles = fileEntries[i].nbFiles +1
                                                     
-                            for aType in self.statsTypes :                                                 
-                                currentValue = fileEntries[i].values.dictionary[aType][row]
-                                currentfile = fileEntries[i].files[row]
-                                currentTime = fileEntries[i].times[row]
-                                
-                                values[aType].append( currentValue )
-                                files[aType].append( currentfile )
-                                times[aType].append( currentTime )  
-                                
-                                if aType != "errors":
-                                                                 
-                                    if  currentValue < fileEntries[i].minimums[aType]:
-                                        fileEntries[i].minimums[aType] =   currentValue                                 
-                                        fileEntries[i].filesWhereMinOccured[aType] = currentfile
-                                        fileEntries[i].timesWhereMinOccured[aType] = currentTime              
-                                    if currentValue > fileEntries[i].maximums[aType]:    
-                                        fileEntries[i].maximums[aType]= currentValue
-                                        fileEntries[i].filesWhereMaxOccured[aType] = currentfile   
-                                        fileEntries[i].timesWhereMaxOccured[aType] = currentTime 
-                                    if aType == "latency":
-                                        if currentValue > self.maxLatency:
-                                            fileEntries[i].filesOverMaxLatency = fileEntries[i].filesOverMaxLatency + 1
+                        for aType in self.statsTypes :                                                 
+                            currentValue = fileEntries[i].values.dictionary[aType][row]
+                            currentfile = fileEntries[i].files[row]
+                            currentTime = fileEntries[i].times[row]
+                            
+                            values[aType].append( currentValue )
+                            files[aType].append( currentfile )
+                            times[aType].append( currentTime )  
+                            
+                            if aType != "errors":
+                                                             
+                                if  currentValue < fileEntries[i].minimums[aType]:
+                                    fileEntries[i].minimums[aType] =   currentValue                                 
+                                    fileEntries[i].filesWhereMinOccured[aType] = currentfile
+                                    fileEntries[i].timesWhereMinOccured[aType] = currentTime              
+                                if currentValue > fileEntries[i].maximums[aType]:    
+                                    fileEntries[i].maximums[aType]= currentValue
+                                    fileEntries[i].filesWhereMaxOccured[aType] = currentfile   
+                                    fileEntries[i].timesWhereMaxOccured[aType] = currentTime 
+                                if aType == "latency":
+                                    if currentValue > self.maxLatency:
+                                        fileEntries[i].filesOverMaxLatency = fileEntries[i].filesOverMaxLatency + 1
                                              
                                     
                 #calculate sum and means
@@ -339,7 +339,8 @@ class FileStatsCollector:
                     fileEntries[i].totals[aType] = float( sum( values[aType] ) )
                     if float( len(values[aType]) ) !=0.0:
                         if aType != "errors" and "errors" in self.statsTypes :
-                            fileEntries[i].means[aType] = float(fileEntries[i].totals[aType]) / (float( len(values[aType]) - values["errors"].count(1) ))     
+                            if (float( len(values[aType]) - values["errors"].count(1) )) != 0.0 :
+                                fileEntries[i].means[aType] = float(fileEntries[i].totals[aType]) / (float( len(values[aType]) - values["errors"].count(1) ))     
                         else:
                             fileEntries[i].means[aType] = float(fileEntries[i].totals[aType]) /float( len(values[aType]) )  
                                 
