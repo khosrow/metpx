@@ -159,7 +159,7 @@ class PXIgniter(Igniter):
             if self.type == 'collector' :
                self.reloadMode = True
 
-            if self.type == 'single-file' or self.type == 'bulletin-file':
+            if self.type == 'single-file' or self.type == 'bulletin-file' or self.type == 'script':
                self.reloadMode = True
 
             if self.type == 'pull-bulletin' or self.type == 'pull-file':
