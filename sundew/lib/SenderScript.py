@@ -213,7 +213,7 @@ class SenderScript(object):
             # add entry to file list
 
             if filelst == None : filelst = []
-            filelst.append( (file,destdir,destName) )
+            filelst.append( (file,destDir,destName) )
 
         # no file to process
 
