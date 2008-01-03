@@ -30,7 +30,7 @@ LOCAL_MACHINE = os.uname()[1]
 
 try:
     pxroot = os.path.normpath( os.environ['PXROOT'] ) 
-    pxlib = pxroot + 'lib'    
+    pxlib = pxroot + '/lib'    
     #
 except KeyError:
     pxlib = '/apps/px/lib/'
