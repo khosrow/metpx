@@ -29,21 +29,9 @@ sys.path.insert(1, sys.path[0] + '/../../')
 LOCAL_MACHINE = os.uname()[1]
 
 try:
-    pxroot = ""
-    
-    #print "ssh %s@%s '. $HOME/.bash_profile;echo $PXROOT' " %( userName, machine )
-    status, output = commands.getstatusoutput( "ssh %s@%s '. $HOME/.bash_profile;echo $PXROOT' " %( "px", LOCAL_MACHINE ) )
-    fileHandle = open("out", 'w')
-    fileHandle.write(output)
-    fileHandle.close()    
-        
-    if output == "":
-        pxroot = "/apps/px/"
-    else:    
-        pxroot = output
-    
+    pxroot = os.path.normpath( os.environ['PXROOT'] ) 
     pxlib = pxroot + 'lib'    
-    #pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
+    #
 except KeyError:
     pxlib = '/apps/px/lib/'
     
