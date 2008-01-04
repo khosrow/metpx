@@ -29,9 +29,13 @@ sys.path.insert(1, sys.path[0] + '/../../')
 LOCAL_MACHINE = os.uname()[1]
 
 try:
-    pxroot = os.path.normpath( os.environ['PXROOT'] ) 
-    pxlib = pxroot + '/lib'    
-    #
+        
+    pxroot = commands.getoutput( 'source /etc/profile;echo $PXROOT' )
+    if pxroot == "":      
+        pxroot = "/apps/px/"      
+    
+    pxlib = pxroot + '/lib/'
+    
 except KeyError:
     pxlib = '/apps/px/lib/'
     
