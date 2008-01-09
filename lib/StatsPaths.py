@@ -7,62 +7,138 @@ named COPYING in the root of the source directory tree.
 
 """
 #############################################################################################
-# Name: StatsPaths.py
+# @Name    : StatsPaths.py
 #
-# Author      : Nicholas Lemay, 
+# @author  :  Nicholas Lemay, 
 #
-# Date        : 2007-05-14
+# @since   : 2007-05-14, last updated on 2008-01-09
 #
-# Description : This class file contains all the needed paths within the differents 
-#               stats library programs. This will prevent the programs to have hard-coded 
-#               paths and make path changes simple by having to change a path that is used 
-#               x number of times only once. 
+# @summary : This class file contains all the needed paths within the differents 
+#            stats library programs. This will prevent the programs to have hard-coded 
+#            paths and make path changes simple by having to change a path that is used 
+#            x number of times only once. 
 # 
+# @todo    : Modify default PXROOT value to reflet default installation path used when using 
+#            a package to install METPX.
+#
+#
 #############################################################################################
 """
 
+"""
+
+    @summary : Required python files
+
+"""
 import commands, os, sys
-"""
-    Small function that adds pxlib to the environment path.  
-"""
-sys.path.insert(1, sys.path[0] + '/../../')
-LOCAL_MACHINE = os.uname()[1]
-
-try:
-        
-    pxroot = commands.getoutput( 'source /etc/profile;echo $PXROOT' )
-    if pxroot == "":      
-        pxroot = "/apps/px/"      
-    
-    pxlib = pxroot + '/lib/'
-    
-except KeyError:
-    pxlib = '/apps/px/lib/'
-    
-    
-sys.path.append(pxlib)
 
 
 """
-    Imports
-    PXPaths requires pxlib 
+    @note : PXPaths is found in PXLIB and required the above method,
+            or esle it will not be found.  
 """
  
-import PXPaths
 
+class COLPATHS :
+    """
+        @summary : Utility class used to find paths 
+                   relative to columbo.
+    """
+    
+    def getColumbosRootPath():
+        """
+                    @summary : Small method required to add PXLIB 
+                       to the list of paths searched.
+                       
+                       Returns the path to columbo's root.
+        
+        """
+        try:
+            try:
+                fileHandle = open( "/etc/px/px.conf", 'r' )
+                configLines = fileHandle.readlines()
+                for line in configLines:
+                    if "PXROOT" in line :
+                        pxroot = str(line).split( "=" )[1]
+                        
+                        break    
+            except:
+                pxroot = os.path.normpath( os.environ['COLROOT'] ) + '/lib/'        
+                    
+            if pxroot == "":      
+                raise Exception()
+               
+        except:
+            colroot = '/apps/pds/tools/Columbo/'
+        
+        return colroot    
 
+    getColumbosRootPath = staticmethod( getColumbosRootPath )    
+    
+    
+    
+class PXPATHS:
+    """
+        @Summary : Utility clas used to find the paths 
+                   relative to metpx.
+    
+    """
+    
+    def getPXLIBPath():
+        """
+            @summary : Small method required to add PXLIB 
+                       to the list of paths searched.
+                       
+                       Allows us to import files from that 
+                       folder.    
+        """
+        
+        pxroot = ""
+        
+        try:
+            try:
+                fileHandle = open( "/etc/px/px.conf", 'r' )
+                configLines = fileHandle.readlines()
+                for line in configLines:
+                    if "PXROOT" in line :
+                        pxroot = str(line).split( "=" )[1]
+                        break    
+            except Exception, instance:
+                pass
+            
+            if pxroot == "":
+                pxroot = os.path.normpath( os.environ['PXROOT'] )        
+                #print  os.environ 
+            
+                if pxroot != "":      
+                    pxlib = str(pxroot) +'/lib'
+                else:
+                    raise Exception()
+               
+        except Exception, instance:
+           pxlib = '/apps/px/lib/'
+    
+        return pxlib    
+    
+    getPXLIBPath = staticmethod( getPXLIBPath )    
 
 
 
 class StatsPaths:
     
+     
+    sys.path.append( PXPATHS.getPXLIBPath() )
     
+    import PXPaths
+
+    COLROOT = COLPATHS.getColumbosRootPath()
+
     """
-        PDS RELATED PATHS
+        PDS' columbo related paths
     """
-    PDSCOLGRAPHS = '/apps/pds/tools/Columbo/ColumboShow/graphs/'
-    PDSCOLLOGS   = '/apps/pds/tools/Columbo/ColumboShow/log/'
-    PDSCOLETC    = '/apps/pds/tools/Columbo/etc/'
+    PDSCOLGRAPHS = COLROOT + '/ColumboShow/graphs/'
+    PDSCOLLOGS   = COLROOT + '/ColumboShow/log/'
+    PDSCOLETC    = COLROOT + '/etc/'
     
     
     """
@@ -95,7 +171,7 @@ class StatsPaths:
         dirname =  os.path.dirname( dirname )
     
     if foundSymlink !='':
-        STATSROOT = associatedPath + '/'+ realPath.split( 'foundSymlink' )[1]
+        STATSROOT = associatedPath + '/'+ realPath.split( foundSymlink )[1]
     else:
         STATSROOT= realPath
     while(os.path.basename(STATSROOT) != "pxStats" ):
@@ -172,15 +248,15 @@ class StatsPaths:
     
     STATSTEMPLOCKFILES = STATSTEMP + "lockFiles/"
     
-    
-    
-    def getPXROOTFromMachine( machine, userName = "" ):
+
+    def getRootPathFromMachine( machine, userName = "", rootType = "PXROOT" ):
         """
             
-            @summary : Returns the PXRootPath from the specified machine
-                       whether it is the local machine or not.
-        
-            @param machine : Name of the machine for which the PXROOT 
+            @summary : Returns the root path from the specified machine
+    
+            @param rootType : PXROOT, COLROOT or STATSROOT
+            
+            @param machine : Name of the machine for which the root 
                              value is required.
             
             @param userName : User name to use to connect to the machine
@@ -192,70 +268,86 @@ class StatsPaths:
         
         """
         
-        pxroot = ""
+        defaults     = { "PXROOT" : "/apps/px/" , "COLROOT" : "/apps/pds/tools/columbo/" , "STATSROOT" : "/apps/px/pxStats" }
+        programNames = { "PXROOT" : "px" , "COLROOT" : "columbo" , "STATSROOT" : "pxStats" }
         
+        root = ""
+        
+        
+        # Search following config files for root values :
+        # /etc/px/px.conf, /etc/pxStats/pxStats.conf, /etc/columbo/columbo.conf
         if userName == "" :
             #print "ssh %s '. $HOME/.bash_profile;echo $PXROOT' " %( machine )
-            status, output = commands.getstatusoutput( "ssh %s '. $HOME/.bash_profile;source /etc/profile;echo $PXROOT' " %( machine ) )
+            output = commands.getoutput( "ssh %s 'cat /etc/%s/%s.conf' " %( machine, programNames[rootType], programNames[rootType] ) )
         else:
             #print "ssh %s@%s '. $HOME/.bash_profile;echo $PXROOT' " %( userName, machine )
-            status, output = commands.getstatusoutput( "ssh %s@%s '. $HOME/.bash_profile;source /etc/profile;echo $PXROOT' " %( userName, machine ) )
+            output = commands.getoutput( "ssh %s@%s 'cat /etc/%s/%s.conf' " %( userName, machine, programNames[rootType], programNames[rootType] ) )
+        
+        outputLines = str(output).splitlines()
+        try : 
+            for line in outputLines :
+                if rootType in line :
+                    root =  str( line ).split( "=" )[1]
+                    break
+        except : 
+            root = ""
+
+        
+        # Search for the root value  
+        # within environment variables.      
+        if root == "" :
+            if userName == "" :
+                #print "ssh %s '. $HOME/.bash_profile;echo $PXROOT' " %( machine )
+                output = commands.getoutput( "ssh %s '. $HOME/.bash_profile;source /etc/profile;echo $%s' " %( machine, rootType ) )
+            else:
+                #print "ssh %s@%s '. $HOME/.bash_profile;echo $PXROOT' " %( userName, machine )
+                output = commands.getoutput( "ssh %s@%s '. $HOME/.bash_profile;source /etc/profile;echo $%s' " %( userName, machine, rootType ) )
             
             
         if output == "":
-            pxroot = "/apps/px/"
+            root = defaults[ rootType ]
         else:    
-            pxroot = output
+            root = output
         
         
-        if str(pxroot)[-1:] != '':
-            pxroot = str( pxroot ) + '/'
+        if str(root)[-1:] != '' and str(root)[-1:] != '/':
+            root = str( root ) + '/'
                        
-        return pxroot    
+        return root    
     
-    getPXROOTFromMachine = staticmethod( getPXROOTFromMachine )
+    getRootPathFromMachine = staticmethod( getRootPathFromMachine )
     
-    
-    
-    def getSTATSROOTFromMachine(  machine, userName  ):
-        """
-            @summary : returns the PXSTATSROOT path from the specified machine
-                       whether it is the local machine or not.
-            
-            @param machine : Name of the machine for which the PXSTATSROOT 
-                             value is required.
-            
-            @param userName : User name to use to connect to the machine
-                              if it is a distant machine. If no user name 
-                              is specified, user name used by the caller 
-                              of the application will be used.
-        
-            @return : the PXSTATSROOT path
-        """
-        
-        statsRoot = ""
-        
-        if userName == "" :
-            #print "ssh %s '. $HOME/.bash_profile;source /etc/profile;echo $PXSTATSROOT' " %( machine )
-            status, output = commands.getstatusoutput( "ssh %s '. $HOME/.bash_profile;source /etc/profile;echo $PXSTATSROOT' " %( machine ) )
-        else:
-            #print "ssh %s@%s '. $HOME/.bash_profile;source /etc/profile;echo $PXSTATSROOT' " %( userName, machine )
-            status, output = commands.getstatusoutput( "ssh %s@%s '. $HOME/.bash_profile;source /etc/profile;echo $PXSTATSROOT' " %( userName, machine ) )
-            
-            
-        if output == "":
-            statsRoot = "/apps/px/pxStats/"
-        else:    
-            statsRoot = output
-        
-        
-        if str(statsRoot)[-1:] != '/':
-            statsRoot = str( statsRoot ) + '/'
+  
+  
+    def getColumbosPathFromMachine( path, machine, userName = "" ): 
+        """    
+            @summary : Returns one of the available paths
+                       from this utility class, based on 
+                       the pxroot found on the machine  
                        
-        return statsRoot    
-   
-       
-    getSTATSROOTFromMachine = staticmethod( getSTATSROOTFromMachine )
+                       
+            @param path : Path that neeeds to be transformed 
+                          based on the specified machine.
+                          Ex: StatsPaths.STATSBIN
+            
+            @param machine : Machine for which we want to know a certain path.
+            
+            @param userName : User name to connect to that machine.
+            
+            @return: Returns the path        
+        
+        
+        """
+        
+        pathOnThatMachine = ""
+        
+        statsRootFromThatMachine = StatsPaths.getRootPathFromMachine( machine = machine, userName = userName, rootType = "COLROOT" )
+        
+        pathOnThatMachine = str(path).replace( StatsPaths.COLROOT, statsRootFromThatMachine )
+    
+        return pathOnThatMachine
+    
+    getColumbosPathFromMachine = staticmethod( getColumbosPathFromMachine )        
     
     
     
@@ -281,14 +373,13 @@ class StatsPaths:
         
         pathOnThatMachine = ""
         
-        statsRootFromThatMachine = StatsPaths.getSTATSROOTFromMachine( machine = machine, userName = userName )
+        statsRootFromThatMachine = StatsPaths.getRootPathFromMachine( machine = machine, userName = userName, rootType = "STATSROOT" )
         
         pathOnThatMachine = str(path).replace( StatsPaths.STATSROOT, statsRootFromThatMachine )
     
         return pathOnThatMachine
     
     getStatsPathFromMachine = staticmethod( getStatsPathFromMachine )
-    
     
     
     
@@ -314,15 +405,17 @@ class StatsPaths:
         
         pathOnThatMachine = ""
         
-        pxRootFromThatMachine = StatsPaths.getPXROOTFromMachine( machine = machine, userName = userName )
-                
-        pathOnThatMachine = str(path).replace( StatsPaths.PXROOT, pxRootFromThatMachine)
+        pxRootFromThatMachine = StatsPaths.getRootPathFromMachine(  machine = machine, userName = userName, rootType ="PXROOT" )
+              
+        pathOnThatMachine = str(path).replace( StatsPaths.PXROOT, pxRootFromThatMachine )
     
         return pathOnThatMachine
     
+    
+    
     getPXPathFromMachine = staticmethod( getPXPathFromMachine )
     
-    
+
     
 def main():
     """
@@ -332,6 +425,10 @@ def main():
         
         Shows user wheter or not paths are
         what they are expected to be.
+    
+        Please run after modifications to make sure program still works. 
+        
+        If not, reveret changes or correct problems accordingly.
     
     """
     
@@ -379,8 +476,19 @@ def main():
     print "StatsPaths.STATSWEBPAGESWORDDBS %s" %StatsPaths.STATSWEBPAGESWORDDBS
     print "StatsPaths.STATSWEBPAGESHTML %s" %StatsPaths.STATSWEBPAGESHTML
     
-    print "PXROOT from some machine %s" %StatsPaths.getPXROOTFromMachine( "somemachine" )
-    print "PXLIB from some machine %s" %StatsPaths.getPXPathFromMachine( path = StatsPaths.PXLIB, machine = "somemachine", userName = "" )    
+    print "PXROOT from some machine %s" %StatsPaths.getRootPathFromMachine( "logan1", "px", "PXROOT" )
+    print "COLROOT from some machine %s" %StatsPaths.getRootPathFromMachine( "logan1", "px", "COLROOT" )
+    print "STATSROOT from some machine %s" %StatsPaths.getRootPathFromMachine( "logan1", "px", "STATSROOT" )
+    
+    
+    print "PXLIB from some machine %s" %StatsPaths.getPXPathFromMachine( machine = "logan1", userName = "px", path = StatsPaths.PXLIB )    
+    print "PDSCOLGRAPHS from some machine %s" %StatsPaths.getColumbosPathFromMachine( machine = "logan1", userName = "px", path = StatsPaths.PDSCOLGRAPHS )    
+    print "STATSLANGFR from some machine %s" %StatsPaths.getStatsPathFromMachine( machine = "logan1", userName = "px", path = StatsPaths.STATSLANGFR )          
+  
+   
+        
+        
+        
         
         
         
