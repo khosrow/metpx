@@ -1,0 +1,15 @@
+/etc/px/rx/am.conf
+/etc/px/rx/bulletin.conf
+/etc/px/rx/file.conf
+/etc/px/rx/wmo.conf
+/etc/px/rx/README
+/etc/px/rx/collectionScheduler.conf
+/etc/px/tx/am.conf
+/etc/px/tx/single-file_file.conf
+/etc/px/tx/wmo.conf
+/etc/px/tx/single-file_ftp.conf
+/etc/px/tx/README
+/etc/px/tx/amis.conf
+/etc/px/px.conf
+/etc/px/README
+/etc/cron.d/metpx-sundew
