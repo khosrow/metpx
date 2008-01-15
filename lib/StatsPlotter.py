@@ -21,38 +21,43 @@ named COPYING in the root of the source directory tree.
 
 """
 
-import gettext, os, sys, statvfs
+# General imports
+import os, sys, shutil, statvfs
+# Requires the gnuplot library to be installed.
+import Gnuplot, Gnuplot.funcutils 
+
+
 """
-    Small function that adds pxlib to the environment path.  
+    - Small function that adds pxStats to sys path.  
 """
 sys.path.insert(1, sys.path[0] + '/../../')
-try:
-    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
-except KeyError:
-    pxlib = '/apps/px/lib/'
-sys.path.append(pxlib)
 
-
-"""
-    Imports
-    Logger requires pxlib 
-""" 
-import sys, commands, copy, logging, shutil 
-import Gnuplot, Gnuplot.funcutils
-
-from   Logger  import *
-
+# These imports require pxStats.
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.ClientStatsPickler import ClientStatsPickler
 from pxStats.lib.StatsPaths import StatsPaths
+from pxStats.lib.LanguageTools import LanguageTools
 
+"""
+    - Small function that adds pxLib to sys path.
+"""
+sys.path.append( StatsPaths.PXLIB )
+
+# Logger requires pxlib
+from   Logger  import Logger
+
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) 
 
 LOCAL_MACHINE = os.uname()[1]
 
 
 class StatsPlotter:
 
-    def __init__( self, timespan,  stats = None, clientNames = None, groupName = "", type='lines', interval=1, imageName="gnuplotOutput", title = "Stats",currentTime = "",now = False, statsTypes = None, productTypes = ["All"], logger = None, logging = True, fileType = "tx", machines = "", entryType = "minute", maxLatency = 15 ):
+    def __init__( self, timespan,  stats = None, clientNames = None, groupName = "", type='lines',           \
+                  interval=1, imageName="gnuplotOutput", title = "Stats", currentTime = "",now = False,      \
+                  statsTypes = None, productTypes = ["All"], logger = None, logging = True, fileType = "tx", \
+                  machines = "", entryType = "minute", maxLatency = 15 ):
+        
         """
             StatsPlotter constructor. 
             
@@ -114,35 +119,23 @@ class StatsPlotter:
     
 
     
-    def  setGlobalLanguageParameters( language = 'fr'):
+    def  setGlobalLanguageParameters():
         """
             @summary : Sets up all the needed global language 
-                       variables so that they can be used 
+                       tranlator so that it can be used 
                        everywhere in this program.
             
+            @Note    : The scope of the global _ function 
+                       is restrained to this module only and
+                       does not cover the entire project.
             
-            @param language: Language that is to be 
-                             outputted by this program. 
-         
             @return: None
             
         """
         
-        global LANGUAGE 
-        global translator
         global _ 
-    
         
-        LANGUAGE = language 
-        
-        if language == 'fr':
-            fileName = StatsPaths.STATSLANGFRLIB + "StatsPlotter" 
-        elif language == 'en':
-            fileName = StatsPaths.STATSLANGENLIB + "StatsPlotter"     
-        
-        translator = gettext.GNUTranslations(open(fileName))
-        
-        _ = translator.gettext    
+        _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )    
     
     
     setGlobalLanguageParameters = staticmethod(setGlobalLanguageParameters)
