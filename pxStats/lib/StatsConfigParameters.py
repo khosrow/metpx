@@ -39,19 +39,37 @@ class StatsConfigParameters:
     """  
             
     
-    def __init__( self, sourceMachinesTags = None, picklingMachines = None , machinesToBackupInDb = None , graphicsUpLoadMachines = None, daysOfPicklesToKeep = None, nbDbBackupsToKeep = None,  timeParameters = None, detailedParameters = None, groupParameters = None  ):
+    def __init__( self, sourceMachinesTags = None, picklingMachines = None , machinesToBackupInDb = None , \
+                  graphicsUpLoadMachines = None, daysOfPicklesToKeep = None, nbDbBackupsToKeep = None,  \
+                  timeParameters = None, detailedParameters = None, groupParameters = None, language = 'en',\
+                  statsRoot = '/apps/px/pxStats/' ):
         """
         
-            @param sourceMachinesTags:
-            @param picklingMachines:
-            @param machinesToBackupInDb:
-            @param graphicsUpLoadMachines:
-            @param daysOfPickledtoKeep:
-            @param nbDbBackupsToKeep:
-            @param timeParameters:
-            @param detailedParameters:
-            @param groupParameters:
-        
+            @param sourceMachinesTags : Name tags used to depict the machine 
+                                        containing the data source.
+                                                    
+            @param picklingMachines : Machines where the pickling occurs.
+            
+            @param machinesToBackupInDb : Names of the machines whose data needs 
+                                          to be backed up in databases.
+            
+            @param graphicsUpLoadMachines : Machines to which graphics needs to be uploaded to.
+            
+            @param daysOfPickledtoKeep : Number of days worth of backups we need to preserve.
+            
+            @param nbDbBackupsToKeep : Number of database backups to keep. Span will be 
+                                       determined by this number and the frequecy of 
+                                       the backups. 
+            
+            @param timeParameters : TimeConfigParameters() instance. 
+            
+            @param detailedParameters : DetailedStatsParameters() instance.
+            
+            @param groupParameters : GroupConfigParameters oinstance.
+            
+            @param language : Language to use throughout the application.
+            
+            @param statsRoot : Root path of the stats library.
 
         """
         
@@ -64,7 +82,8 @@ class StatsConfigParameters:
         self.timeParameters = timeParameters
         self.detailedParameters = detailedParameters
         self.groupParameters = groupParameters
-        
+        self.language = language
+        self.statsRoot = statsRoot
 
         
         
@@ -121,7 +140,7 @@ class StatsConfigParameters:
                         
                             
         for dbMachine in self.machinesToBackupInDb:
-            dbMachines = machineParameters.getMachinesAssociatedWith(machine)            
+            dbMachines = machineParameters.getMachinesAssociatedWith(dbMachine)            
             if dbMachines !=[]:                               
                 for machine in dbMachines:
                     if machine not in self.detailedParameters.databaseMachines:
@@ -133,9 +152,13 @@ class StatsConfigParameters:
  
     def getGeneralParametersFromStatsConfigurationFile(self):
         """
-            Gather all the parameters from the  StatsPath.STATSETC/config file.
+            @summary : Gathers GENERAL parameters from the
+                       StatsPath.STATSETC/config file.
             
-            Returns all collected values in a  _StatsConfigParameters instance.
+            @note : Does not set groupParameters, time parameters 
+                    and detailed parameters.
+                    
+            @return : None
         
         """   
     
@@ -147,7 +170,9 @@ class StatsConfigParameters:
         self.sourceMachinesTags     = []   
         self.picklingMachines       = []
         self.machinesToBackupInDb   = []
-        self.graphicsUpLoadMachines = []        
+        self.graphicsUpLoadMachines = []     
+        self.language = config.get( 'generalConfig', 'language' )
+        self.statsRoot = config.get( 'generalConfig', 'statsRoot' )    
         self.sourceMachinesTags.extend( config.get( 'generalConfig', 'sourceMachinesTags' ).split(',') )
         self.picklingMachines.extend( config.get( 'generalConfig', 'picklingMachines' ).split(',') ) 
         self.machinesToBackupInDb.extend( config.get( 'generalConfig', 'machinesToBackupInDb' ).split(',') ) 
@@ -264,6 +289,8 @@ def main():
     print "test.machinesToBackupInDb %s" %test.machinesToBackupInDb
     print "test.daysOfPicklesToKeep %s" %test.daysOfPicklesToKeep
     print "test.nbDbBackupsToKeep %s" %test.nbDbBackupsToKeep
+    print "test.language %s        "  %test.language
+    print "test.statsRoot %s       " %test.statsRoot
     print "test.groupParameters %s " %test.groupParameters
     print "self.groups %s" %test.groupParameters.groups
     print "self.groupsMachines %s" %test.groupParameters.groupsMachines
