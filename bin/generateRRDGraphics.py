@@ -22,34 +22,29 @@ MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
 """
 
 import gettext, os, time, getopt, rrdtool, shutil, sys
-
+from   optparse  import OptionParser
 """
-    Small function that adds pxlib to the environment path.  
+    Small function that adds pxStats to the environment path.  
 """
 sys.path.insert(1, sys.path[0] + '/../../')
-try:
-    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
-except KeyError:
-    pxlib = '/apps/px/lib/'
-sys.path.append(pxlib)
 
+from pxStats.lib.StatsDateLib import StatsDateLib
+from pxStats.lib.RrdUtilities import RrdUtilities
+from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+from pxStats.lib.StatsPaths import StatsPaths  
+from pxStats.lib.LanguageTools import LanguageTools
 
 """
-    Imports
-    PXManager requires pxlib 
+    - Small function that adds pxLib to sys path.
 """
+sys.path.append( StatsPaths.PXLIB )
+
+#  These Imports require pxlib 
 from   PXManager import *
 from   Logger import *
 
-from   optparse  import OptionParser
-
-from pxStats.lib.StatsDateLib import StatsDateLib
-from pxStats.lib.RrdUtilitiesTest import RrdUtilities
-from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
-from pxStats.lib.StatsPaths import StatsPaths      
-
 LOCAL_MACHINE = os.uname()[1]
-    
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] )     
     
 class _GraphicsInfos:
 
@@ -85,7 +80,6 @@ def getOptionsFromParser( parser ):
     
     """ 
     
-    date   = []
     graphicType = _("other")
     mergerType = ""
     
@@ -772,7 +766,7 @@ def getGraphicsMinMaxMeanTotal( databaseName, startTime, endTime,graphicType, da
                 
                 if meanTuples[i][0] != 'None' and meanTuples[i][0] != None :
                     
-                    realValue = ( float(meanTuples[i][0]) * float(interval)/ nbEntriesPerPoint ) 
+                    realValue = ( float(meanTuples[i][0]) * float(dataInterval)/ nbEntriesPerPoint ) 
                     
                     if  realValue > max:
                         max = realValue
@@ -1654,10 +1648,10 @@ def getDataForAllSourlients( infos, dataType = "fileCount" ):
             timeOfLastUpdate = RrdUtilities.getDatabaseTimeOfUpdate(databaseName, "tx")
             interval = getInterval( StatsDateLib.getSecondsSinceEpoch(infos.startTime), timeOfLastUpdate, infos.graphicType, "")
             resolution = int(interval*60)
-            status, output = commands.getstatusoutput("rrdtool fetch %s  'AVERAGE' -r '%s' -s %s  -e %s" %(  databaseName, str(resolution), int(StatsDateLib.getSecondsSinceEpoch(infos.startTime)), int(StatsDateLib.getSecondsSinceEpoch(infos.endTime) ) ) )
+            output = commands.getoutput( "rrdtool fetch %s  'AVERAGE' -r '%s' -s %s  -e %s" %(  databaseName, str(resolution), int(StatsDateLib.getSecondsSinceEpoch(infos.startTime)), int(StatsDateLib.getSecondsSinceEpoch(infos.endTime) ) ) )
             
         else:    
-            status, output = commands.getstatusoutput("rrdtool fetch %s  'AVERAGE' -s %s  -e %s" %( databaseName, int(StatsDateLib.getSecondsSinceEpoch(infos.startTime)), int(StatsDateLib.getSecondsSinceEpoch(infos.endTime) ) ))
+            output = commands.getoutput("rrdtool fetch %s  'AVERAGE' -s %s  -e %s" %( databaseName, int(StatsDateLib.getSecondsSinceEpoch(infos.startTime)), int(StatsDateLib.getSecondsSinceEpoch(infos.endTime) ) ))
             
         #print output 
         clientsData = []
@@ -1891,24 +1885,11 @@ def getPairsFromDatabases( type, machine, start, end, infos, logger=None, mergeW
     
     """
     
-    #print "############Type %s ###################" %(type)
-    
-    data       = {}
     fileCounts = {}
-    timeStamps = [] 
-     
-    #databaseNames = getDatabaseNames(infos.clientNames, infos.fileType, type, infos.machines) 
-    #timeOfLastUpdate = getMostPopularTimeOfLastUpdate(dataBaseNames, infos.fileType )  
-    
-    #infos= _GraphicsInfos(fileType, types, totals, graphicType, clientNames, timespan, startTime, endTime, machines, copy, mergerType, turnOffLogging)
+
     timeStamps = getTimeStamps(start, end, infos.graphicType, infos.clientNames, infos.machines, infos.fileType, type)
     
-    data = getDataForAllSourlients(infos, type  )
-    
-    arrays = [data[sourLient] for sourLient in data.keys() ]
-     
-    #print arrays  
-    #desirableArrayLength =  getDesirableArrayLength( arrays ) 
+    data = getDataForAllSourlients( infos, type  )
     
     desirableArrayLength = len(timeStamps)
     
@@ -1998,7 +1979,6 @@ def createMergedDatabases( infos, logger = None ):
     """            
     i = 0
     lastUpdate = 0
-    dataPairs  = {}
     typeData   = {}
     start      = int( StatsDateLib.getSecondsSinceEpoch ( infos.startTime )  )
     end        = int( StatsDateLib.getSecondsSinceEpoch ( infos.endTime )    ) 
@@ -2076,35 +2056,25 @@ def generateRRDGraphics( infos, logger = None ):
  
  
  
-def  setGlobalLanguageParameters( language = 'fr'):
+def  setGlobalLanguageParameters():
     """
         @summary : Sets up all the needed global language 
-                   variables so that they can be used 
+                   tranlator so that it can be used 
                    everywhere in this program.
         
+        @Note    : The scope of the global _ function 
+                   is restrained to this module only and
+                   does not cover the entire project.
         
-        @param language: Language that is to be 
-                         outputted by this program. 
-     
         @return: None
         
     """
     
-    global LANGUAGE 
-    global translator
     global _ 
+    
+    _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )    
+    
 
-    LANGUAGE = language 
-    
-    if language == 'fr':
-        fileName = StatsPaths.STATSLANGFRBIN + "generateRRDGraphics" 
-    elif language == 'en':
-        fileName = StatsPaths.STATSLANGENBIN + "generateRRDGraphics"      
-    
-    translator = gettext.GNUTranslations(open(fileName))
-    _ = translator.gettext
-        
-    
  
 def main():
     """
