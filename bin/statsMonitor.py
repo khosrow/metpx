@@ -17,7 +17,7 @@ named COPYING in the root of the source directory tree.
 ##               will be mailed to the chosen recipients.
 ##
 ##  
-## Date   : November 29th 2006, last updated May 09th 2007
+## Date   : November 29th 2006, last updated Januray 16th 2008
 ##
 #############################################################################
 """
@@ -25,39 +25,31 @@ named COPYING in the root of the source directory tree.
 """
     Small function that adds pxlib to the environment path.  
 """
-import os, sys, commands, fnmatch, gettext, glob, pickle 
+import os, sys, commands, glob, pickle, time 
+
+
+"""
+    Small function that adds pxStats to the environment path.  
+"""
 sys.path.insert(1, sys.path[0] + '/../../')
-try:
-    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
-except KeyError:
-    pxlib = '/apps/px/lib/'
-sys.path.append(pxlib)
-
-"""
-    Imports
-    PXManager requires pxlib 
-"""
-import smtplib
-import mailLib
-
-
-from ConfigParser import ConfigParser
-from mailLib import *
-from PXManager import *
-
 from pxStats.lib.ClientStatsPickler import ClientStatsPickler
 from pxStats.lib.CpickleWrapper import CpickleWrapper
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.LogFileCollector import LogFileCollector
 from pxStats.lib.StatsPaths import StatsPaths
-from pxStats.lib.MachineConfigParameters import MachineConfigParameters
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.StatsMonitoringConfigParameters import StatsMonitoringConfigParameters
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
+from pxStats.lib.LanguageTools import LanguageTools
 
+"""
+    - Small function that adds pxLib to sys path.
+"""
+sys.path.append( StatsPaths.PXLIB )
+import smtplib, mailLib
 
-LOCAL_MACHINE = os.uname()[1]
-   
+LOCAL_MACHINE = os.uname()[1] 
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + os.path.basename(sys.argv[0])    
             
     
 def savePreviousMonitoringJob( parameters ) :
@@ -317,7 +309,7 @@ def verifyCrontab( report ):
     """
     
     previousCrontab = getPreviousCrontab()
-    status, currentCrontab = commands.getstatusoutput( "crontab -l" )
+    currentCrontab = commands.getoutput( "crontab -l" )
     
     if currentCrontab != previousCrontab :
         report = report + _("\nCrontab entries were modified since last monitoring job.\n")
@@ -722,7 +714,7 @@ def gapInErrorLog( name, start, end, errorLog )  :
     startFound = False 
     endFound = None 
     gapInErrorLog = False 
-    lastTimeThisGapWasfound = ""
+    
     
     for line in errorLog:
 #         try:
@@ -962,7 +954,7 @@ def getPresentAndAbsentFilesFromParameters( parameters ):
             presentFiles.extend( glob.glob( filePattern ) )
             
         elif os.path.isfile( file ) :
-            files.append( file )
+            presentFiles.append( file )
         
         else :
            absentFiles.append( file )
@@ -1160,9 +1152,9 @@ def updateRequiredfiles( parameters ):
         machine = parameters.detailedParameters.uploadMachines[0]
         login = parameters.detailedParameters.uploadMachinesLogins[machine]
     
-        status, output = commands.getstatusoutput( "scp %s@%s:%sPX_Errors.txt* %s >>/dev/null 2>&1" %(login, machine, StatsPaths.PDSCOLLOGS, StatsPaths.STATSMONITORING ) )
+        commands.getstatusoutput( "scp %s@%s:%sPX_Errors.txt* %s >>/dev/null 2>&1" %(login, machine, StatsPaths.PDSCOLLOGS, StatsPaths.STATSMONITORING ) )
         
-        status, output = commands.getstatusoutput( "scp %s@%s:%smaxSettings.conf %smaxSettings.conf >>/dev/null 2>&1" %(login, machine, StatsPaths.PDSCOLETC, StatsPaths.STATSMONITORING ) ) 
+        commands.getstatusoutput( "scp %s@%s:%smaxSettings.conf %smaxSettings.conf >>/dev/null 2>&1" %(login, machine, StatsPaths.PDSCOLETC, StatsPaths.STATSMONITORING ) ) 
     
 
 
@@ -1181,36 +1173,80 @@ def validateParameters( parameters ):
     
     
     
-def  setGlobalLanguageParameters( language = 'en'):
+def  setGlobalLanguageParameters():
     """
         @summary : Sets up all the needed global language 
-                   variables so that they can be used 
+                   tranlator so that it can be used 
                    everywhere in this program.
         
+        @Note    : The scope of the global _ function 
+                   is restrained to this module only and
+                   does not cover the entire project.
         
-        @param language: Language that is to be 
-                         outputted by this program. 
-     
         @return: None
         
     """
     
-    global LANGUAGE 
-    global translator
     global _ 
-    
-    LANGUAGE = language 
-    
-    if language == 'fr':
-        fileName = StatsPaths.STATSLANGFRBIN + "statsMonitor" 
-    elif language == 'en':
-        fileName = StatsPaths.STATSLANGENBIN + "statsMonitor"    
-    
-    translator = gettext.GNUTranslations( open(fileName) )
-    _ = translator.gettext        
+    print CURRENT_MODULE_ABS_PATH
+    _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )         
     
     
-              
+    
+def setMonitoringEndTime( parameters, endTime = "" ):         
+    """
+    
+        @summary : Sets the end time to either the one specified 
+                   during the call
+    
+    """
+    if endTime != "":
+        parameters.endTime = ""
+    else:    
+        parameters.endTime = StatsDateLib.getIsoWithRoundedHours( StatsDateLib.getIsoFromEpoch( time.time() ) )           
+    return parameters 
+    
+    
+    
+def getParameterValue():
+    """
+        @summary : Returns the value of the 
+                   parameter specified on the
+                   command line.
+        
+        @return :  The value of the 
+                   parameter specified on the
+                   command line.
+    """
+    
+    parameterValue = ""
+    
+    try:
+        if len( sys.argv ) == 1:
+            parameterValue = ""
+        elif len( sys.argv ) == 2:
+            if StatsDateLib.isValidIsoDate( sys.argv[1] ):
+                parameterValue = sys.argv[1]
+            else : 
+                raise()    
+        else:# More than one parameter specified.
+            raise()         
+    
+    except:
+        print "Help on using statsMonitor.py"
+        print ""
+        print "This program can only receive a single parameter."
+        print "This parameters is a date specified in the iso format"
+        print "which spcieficies the end time of the monitoring job to be done."
+        print "Iso format is the following : 'YYYY-MM-DD HH:MM:SS'. "
+        print "Please respect this format when specifiying a date."
+        print "If no parameter is specified, current time will be used."
+        sys.exit()
+                     
+    return parameterValue
+    
+    
+         
 def main():
     """
         Builds the entire report by 
@@ -1222,15 +1258,18 @@ def main():
     
     report = ""
     
+    endTime = getParameterValue()
     
-    language = 'en'
-    setGlobalLanguageParameters( language )
+    setGlobalLanguageParameters( )
     
     generalParameters = StatsConfigParameters( )
     generalParameters.getAllParameters()
    
     parameters = StatsMonitoringConfigParameters()
     parameters.getParametersFromMonitoringConfigurationFile()
+    
+    if endTime != "":#If a specific end time was specified at the moment of the call.
+        parameters = setMonitoringEndTime( parameters )
     
     updateRequiredfiles( generalParameters )               
 
