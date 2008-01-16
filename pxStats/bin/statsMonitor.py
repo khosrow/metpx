@@ -49,7 +49,7 @@ sys.path.append( StatsPaths.PXLIB )
 import smtplib, mailLib
 
 LOCAL_MACHINE = os.uname()[1] 
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + os.path.basename(sys.argv[0])    
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__   
             
     
 def savePreviousMonitoringJob( parameters ) :

@@ -44,7 +44,7 @@ from   PXManager import *
 from   Logger import *
 
 LOCAL_MACHINE = os.uname()[1]
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] )     
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__       
     
 class _GraphicsInfos:
 
