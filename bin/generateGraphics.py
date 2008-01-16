@@ -21,18 +21,19 @@ named COPYING in the root of the source directory tree.
 ##############################################################################
 """
 
-import gettext, os, time, sys
+import os, time, sys
 sys.path.insert(1, sys.path[0] + '/../../')
 
 from optparse import OptionParser
-from ConfigParser import ConfigParser
-from fnmatch import fnmatch
 from pxStats.lib.StatsDateLib import StatsDateLib
-from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
-from pxStats.lib.ClientGraphicProducerTest import ClientGraphicProducer
+from pxStats.lib.ClientGraphicProducer import ClientGraphicProducer
+from pxStats.lib.LanguageTools import LanguageTools
+
 
 LOCAL_MACHINE = os.uname()[1]
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__ 
+
 
 class _GraphicsInfos:
     
@@ -267,36 +268,23 @@ def addOptions( parser ):
 
          
 
-def  setGlobalLanguageParameters( language = 'fr'):
+def  setGlobalLanguageParameters():
     """
         @summary : Sets up all the needed global language 
-                   variables so that they can be used 
+                   tranlator so that it can be used 
                    everywhere in this program.
         
+        @Note    : The scope of the global _ function 
+                   is restrained to this module only and
+                   does not cover the entire project.
         
-        @param language: Language that is to be 
-                         outputted by this program. 
-     
         @return: None
         
     """
     
-    global LANGUAGE 
-    global translator
     global _ 
-
     
-    LANGUAGE = language 
-    
-    if language == 'fr':
-        fileName = StatsPaths.STATSLANGFRBIN + "generateGraphics" 
-    elif language == 'en':
-        fileName = StatsPaths.STATSLANGENBIN + "generateGraphics"     
-    
-    translator = gettext.GNUTranslations(open(fileName))
-    
-    _ = translator.gettext    
-    
+    _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )  
 
 
 def main():

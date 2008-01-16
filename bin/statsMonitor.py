@@ -1188,7 +1188,7 @@ def  setGlobalLanguageParameters():
     """
     
     global _ 
-    print CURRENT_MODULE_ABS_PATH
+    
     _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )         
     
     

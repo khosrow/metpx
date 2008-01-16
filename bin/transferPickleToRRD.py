@@ -26,22 +26,12 @@ named COPYING in the root of the source directory tree.
     Small function that adds pxlib to the environment path.  
 """
 import os, sys, time, getopt, gettext, pickle, rrdtool
-
-sys.path.insert(1, sys.path[0] + '/../../')
-try:
-    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
-except KeyError:
-    pxlib = '/apps/px/lib/'
-sys.path.append(pxlib)
-
-"""
-    Imports
-    PXManager requires pxlib 
-"""
-from   Logger    import * 
 from   optparse  import OptionParser
-from   PXManager import *
 
+"""
+    Small function that adds pxStats to the environment path.  
+"""
+sys.path.insert(1, sys.path[0] + '/../../')
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.PickleMerging import PickleMerging
@@ -49,9 +39,17 @@ from pxStats.lib.ClientStatsPickler import ClientStatsPickler
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.RrdUtilities import RrdUtilities
 from pxStats.lib.MemoryManagement import MemoryManagement
-   
-LOCAL_MACHINE = os.uname()[1]   
+from pxStats.lib.LanguageTools import LanguageTools
 
+"""
+    - Small function that adds pxLib to sys path.
+"""
+sys.path.append( StatsPaths.PXLIB )
+from   Logger    import * 
+from   PXManager import *
+
+LOCAL_MACHINE = os.uname()[1]   
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__ 
     
 #################################################################
 #                                                               #
@@ -617,33 +615,23 @@ def createPaths():
         
 
 
-def  setGlobalLanguageParameters( language = 'en'):
+def  setGlobalLanguageParameters():
     """
         @summary : Sets up all the needed global language 
-                   variables so that they can be used 
+                   tranlator so that it can be used 
                    everywhere in this program.
         
+        @Note    : The scope of the global _ function 
+                   is restrained to this module only and
+                   does not cover the entire project.
         
-        @param language: Language that is to be 
-                         outputted by this program. 
-     
         @return: None
         
     """
     
-    global LANGUAGE 
-    global translator
     global _ 
     
-    LANGUAGE = language 
-    
-    if language == 'fr':
-        fileName = StatsPaths.STATSLANGFRBIN + "transferPickleToRRD" 
-    elif language == 'en':
-        fileName = StatsPaths.STATSLANGENBIN + "transferPickleToRRD"    
-    
-    translator = gettext.GNUTranslations( open(fileName) )
-    _ = translator.gettext 
+    _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )  
                                
 
                
