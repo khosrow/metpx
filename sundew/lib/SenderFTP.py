@@ -58,7 +58,7 @@ class SenderFTP(object):
         self.timeout = self.client.timeout
         if self.timeout < 30 : self.timeout = 30
 
-        # instead of testing through out the code, overload function modules for ftp
+        # instead of testing through out the code, overwrite functions for ftp
         if self.client.protocol == 'ftp':
            self.ftp         = self.ftpConnect()
            self.chdir       = self.ftp.cwd
@@ -68,7 +68,7 @@ class SenderFTP(object):
            self.put         = self.ftp_put
            self.quit        = self.ftp.quit
 
-        # instead of testing through out the code, overload function modules for sftp
+        # instead of testing through out the code, overwrite functions for sftp
         if self.client.protocol == 'sftp':
            self.sftp        = self.sftpConnect()
            self.chdir       = self.sftp.chdir
@@ -78,9 +78,6 @@ class SenderFTP(object):
            self.Ochmod      = self.octal_perm(self.client.chmod)
            self.put         = self.sftp.put
            self.quit        = self.sftp_quit
-
-        # overload send_file module with appropriate module depending on client options
-        # all this function overload things is for code clarity and hopefully efficency
 
         # First put method : use a temporary filename = filename + lock extension
         if self.client.lock[0] == '.':
@@ -524,20 +521,10 @@ class SenderFTP(object):
 
                    # try to write the file to the client
                    try :
-                          ep_begin = time.time()
 
                           self.send_file( file, destName )
-
-                          ep_end = time.time()
-                          dif = ep_end - ep_begin
-
-                          if dif > 0 :
-                             bps = nbBytes / dif
-                             self.logger.info("(%i Bytes) File %s delivered in %f Sec (%f Bps)" % (nbBytes, file, dif, bps) )
-                          else :
-                             self.logger.info("(%i Bytes) File %s delivered in %f Sec " % (nbBytes, file, 0) )
-
                           os.unlink(file)
+
                           self.logger.info("(%i Bytes) File %s delivered to %s://%s@%s%s%s" % \
                                           (nbBytes, file, self.client.protocol, self.client.user, \
                                           self.client.host, destDirString, destName))
