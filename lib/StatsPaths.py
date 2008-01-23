@@ -34,10 +34,13 @@ import commands, os, sys
 
 
 """
-    @note : PXPaths is found in PXLIB and required the above method,
-            or esle it will not be found.  
+    - Small function that adds pxStats to sys path.  
 """
+sys.path.insert(1, sys.path[0] + '/../../')
+from pxStats.lib.Translatable import Translatable
  
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__
+
 
 class COLPATHS :
     """
@@ -124,129 +127,245 @@ class PXPATHS:
 
 
 
-class StatsPaths:
-    
-     
-    sys.path.append( PXPATHS.getPXLIBPath() )
-    
-    import PXPaths
-
-    COLROOT = COLPATHS.getColumbosRootPath()
-
-    """
-        PDS' columbo related paths
-    """
-    PDSCOLGRAPHS = COLROOT + '/ColumboShow/graphs/'
-    PDSCOLLOGS   = COLROOT + '/ColumboShow/log/'
-    PDSCOLETC    = COLROOT + '/etc/'
+class StatsPaths( Translatable ):
     
     
-    """
-        MetPX related paths
-    """
-    PXPaths.normalPaths()
-    PXROOT   = PXPaths.ROOT
-    PXLIB    = PXPaths.LIB
-    PXLOG    = PXPaths.LOG
-    PXETC    = PXPaths.ETC 
-    PXETCRX  = PXPaths.RX_CONF
-    PXETCTX  = PXPaths.TX_CONF
-    PXETCTRX = PXPaths.TRX_CONF
-    
-    
-    """
-        Stats specific paths.
-        pxStats must be checked-out in a pxStats folder.
-    """ 
-    realPath = os.path.realpath( __file__ )
-    foundSymlink = ''
-    associatedPath = ''
-    dirname =  os.path.dirname(realPath)
-    while( dirname != '/'):
+    def init( self  ):
+        """
+            @summary : Constructor.
+            
+            @warning: This constructor does not allow user to set his own values.
+            
+            @note: All values are set to None.
+                   Use the .setPaths( self, language = "" ) method
+                   for proper path setting.
+        """
         
-        if os.path.islink(os.path.dirname(realPath)):
-            foundSymlink =  os.path.dirname(realPath)
-            associatedPath = os.path.realpath( os.path.dirname(realPath)  )
-            break
-        dirname =  os.path.dirname( dirname )
+        self.COLROOT = None
     
-    if foundSymlink !='':
-        STATSROOT = associatedPath + '/'+ realPath.split( foundSymlink )[1]
-    else:
-        STATSROOT= realPath
-    while(os.path.basename(STATSROOT) != "pxStats" ):
-        STATSROOT = os.path.dirname(STATSROOT)
+        """
+            PDS' columbo related paths
+        """
+        self.PDSCOLGRAPHS = None
+        self.PDSCOLLOGS   = None
+        self.PDSCOLETC    = None
+        
+        
+        """
+            MetPX related paths
+        """
+        self.PXROOT   = None
+        self.PXLIB    = None
+        self.PXLOG    = None
+        self.PXETC    = None 
+        self.PXETCRX  = None
+        self.PXETCTX   = None
+        self.PXETCTRX = None
     
-    STATSROOT = STATSROOT + "/"   
-       
+    
+        self.STATSROOT = None   
+           
+         
+        self.STATSBIN     = None
+        self.STATSDATA    = None
+        self.STATSDEV     = None
+        self.STATSDOC     = None
+        self.STATSETC     = None
+        self.STATSLANG     = None
+        self.STATSLIB     = None
+        self.STATSLOGGING = None
+        self.STATSMAN     = None
+        self.STATSTEMP    = None
+        self.STATSTOOLS   = None
+        self.STATSDEBUGTOOLS = None
+        self.STATSWEBPAGESGENERATORS = None
+        
+        self.STATSPXCONFIGS    = None
+        self.STATSPXRXCONFIGS  = None
+        self.STATSPXTXCONFIGS  = None
+        self.STATSPXTRXCONFIGS = None
+        
+        self.STATSDEVDEPENDENCIES             = None
+        self.STATSDEVDEPENDENCIESBIN          = None
+        self.STATSDEVDEPENDENCIESBINTOOLS     = None
+        self.STATSDEVDEPENDENCIESBINDEBUGTOOLS= None
+        self.STATSDEVDEPENDENCIESBINWEBPAGES  = None
+        self.STATSDEVDEPENDENCIESLIB          = None
+        
+        self.STATSLANGFR              = None
+        self.STATSLANGFRBIN           = None
+        self.STATSLANGFRBINTOOLS      = None
+        self.STATSLANGFRBINDEBUGTOOLS = None
+        self.STATSLANGFRBINWEBPAGES   = None
+        self.STATSLANGFRLIB           = None
+         
+        self.STATSLANGEN              = None
+        self.STATSLANGENBIN           = None
+        self.STATSLANGENBINTOOLS      = None
+        self.STATSLANGENBINDEBUGTOOLS = None
+        self.STATSLANGENBINWEBPAGES   = None
+        self.STATSLANGENLIB           = None
+        
+        self.STATSLIBRARY = None
+        
+        self.STATSDB               = None
+        self.STATSCURRENTDB        = None
+        self.STATSCURRENTDBUPDATES = None
+        self.STATSDBBACKUPS        = None
+        self.STATSDBUPDATESBACKUPS = None
+        
+        
+        self.STATSFILEVERSIONS     = None
+        self.STATSLOGACCESS        = None
+        self.STATSMONITORING       = None
+        self.STATSPICKLES          = None
+        self.STATSLOGS             = None
+        self.STATSWEBPAGES         = None
+        self.STATSWEBPAGESHTML     = None       
+        self.STATSWEBPAGESWORDDBS  = None
+        self.STATSGRAPHS           = None
+        self.STATSWEBGRAPHS        = None
+        self.STATSGRAPHSARCHIVES   = None 
+        
+        self.STATSCOLGRAPHS        = None
+        
+        self.STATSPICKLESTIMEOFUPDATES    = None
+        self.STATSPREVIOUSMACHINEPARAMS   = None
+                                                          
+        self.STATSTEMPLOCKFILES = None
+    
+        global _ 
+        _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, None )
+    
+    
+    
+    def setPaths( self, language = None ):
+    
+        global _ 
+        _ = self.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, language)
      
-    STATSBIN     = STATSROOT + 'bin/'
-    STATSDATA    = STATSROOT + 'data/'
-    STATSDEV     = STATSROOT + 'dev/'
-    STATSDOC     = STATSROOT + 'doc/'
-    STATSETC     = STATSROOT + 'etc/'
-    STATSLANG    = STATSROOT + 'lang/'
-    STATSLIB     = STATSROOT + 'lib/'
-    STATSLOGGING = STATSROOT + 'logs/'
-    STATSMAN     = STATSROOT + 'man/'
-    STATSTEMP    = STATSROOT + "temp/"
-    STATSTOOLS   = STATSBIN  + 'tools/'
-    STATSDEBUGTOOLS = STATSBIN + 'debugTools/' 
-    STATSWEBPAGESGENERATORS = STATSBIN + "webPages/"
-    
-    STATSPXCONFIGS    = STATSETC + 'pxConfigFiles/' 
-    STATSPXRXCONFIGS  = STATSPXCONFIGS + 'rx/'
-    STATSPXTXCONFIGS  = STATSPXCONFIGS + 'tx/'
-    STATSPXTRXCONFIGS = STATSPXCONFIGS + 'trx/'
-    
-    STATSDEVDEPENDENCIES             = STATSDEV + 'fileDependencies/'
-    STATSDEVDEPENDENCIESBIN          = STATSDEVDEPENDENCIES + 'bin/'
-    STATSDEVDEPENDENCIESBINTOOLS     = STATSDEVDEPENDENCIESBIN + 'tools/'
-    STATSDEVDEPENDENCIESBINDEBUGTOOLS= STATSDEVDEPENDENCIESBIN + 'debugTools/'
-    STATSDEVDEPENDENCIESBINWEBPAGES  = STATSDEVDEPENDENCIESBIN + 'webPages/'
-    STATSDEVDEPENDENCIESLIB          = STATSDEVDEPENDENCIES + 'lib/'
-    
-    STATSLANGFR              = STATSLANG + 'fr/'
-    STATSLANGFRBIN           = STATSLANGFR + 'bin/'
-    STATSLANGFRBINTOOLS      = STATSLANGFRBIN + 'tools/'
-    STATSLANGFRBINDEBUGTOOLS = STATSLANGFRBIN + 'debugTools/'
-    STATSLANGFRBINWEBPAGES   = STATSLANGFRBIN + 'webPages/'
-    STATSLANGFRLIB           = STATSLANGFR + 'lib/'
      
-    STATSLANGEN             = STATSLANG + 'en/'
-    STATSLANGENBIN           = STATSLANGEN + 'bin/'
-    STATSLANGENBINTOOLS      = STATSLANGENBIN + 'tools/'
-    STATSLANGENBINDEBUGTOOLS = STATSLANGENBIN + 'debugTools/'
-    STATSLANGENBINWEBPAGES   = STATSLANGENBIN + 'webPages/'
-    STATSLANGENLIB           = STATSLANGEN + 'lib/'
+        sys.path.append( PXPATHS.getPXLIBPath() )
     
-    STATSLIBRARY = STATSLIB
+        import PXPaths
+        
+        self.COLROOT = COLPATHS.getColumbosRootPath()
     
-    STATSDB               = STATSDATA + 'databases/'
-    STATSCURRENTDB        = STATSDB   + 'currentDatabases/'
-    STATSCURRENTDBUPDATES = STATSDB   + 'currentDatabasesTimeOfUpdates/'
-    STATSDBBACKUPS        = STATSDB   + 'databasesBackups/'
-    STATSDBUPDATESBACKUPS = STATSDB   + 'databasesTimeOfUpdatesBackups/'    
-    
-    
-    STATSFILEVERSIONS     = STATSDATA + 'fileAcessVersions/'
-    STATSLOGACCESS        = STATSDATA + 'logFileAccess/'
-    STATSMONITORING       = STATSDATA + 'monitoring/'
-    STATSPICKLES          = STATSDATA + 'pickles/'
-    STATSLOGS             = STATSDATA + 'logFiles/'
-    STATSWEBPAGES         = STATSDATA + 'webPages/'
-    STATSWEBPAGESHTML     = STATSWEBPAGES + 'html/'        
-    STATSWEBPAGESWORDDBS  = STATSWEBPAGES  + 'wordDatabases/'    
-    STATSGRAPHS           = STATSDATA + 'graphics/'
-    STATSWEBGRAPHS        = STATSGRAPHS + 'webGraphics/'
-    STATSGRAPHSARCHIVES   = STATSWEBGRAPHS + 'archives/' 
-    
-    STATSCOLGRAPHS        = STATSWEBGRAPHS + 'columbo/'
-    
-    STATSPICKLESTIMEOFUPDATES    = STATSDATA + 'picklesTimeOfUpdates/'
-    STATSPREVIOUSMACHINEPARAMS   = STATSDATA + 'previousMachineParameters'
-    
-    STATSTEMPLOCKFILES = STATSTEMP + "lockFiles/"
+        """
+            PDS' columbo related paths
+        """
+        self.PXPATHSPDSCOLGRAPHS = self.COLROOT + '/ColumboShow/graphs/'
+        self.PDSCOLLOGS   = self.COLROOT + '/ColumboShow/log/'
+        self.PDSCOLETC    = self.COLROOT + '/etc/'
+        
+        
+        """
+            MetPX related paths
+        """
+        PXPaths.normalPaths()
+        self.PXROOT   = PXPaths.ROOT
+        self.PXLIB    = PXPaths.LIB
+        self.PXLOG    = PXPaths.LOG
+        self.PXETC    = PXPaths.ETC 
+        self.PXETCRX  = PXPaths.RX_CONF
+        self.PXETCTX  = PXPaths.TX_CONF
+        self.PXETCTRX = PXPaths.TRX_CONF
+        
+        
+        """
+            Stats specific paths.
+            pxStats must be checked-out in a pxStats folder.
+        """ 
+        realPath = os.path.realpath( __file__ )
+        foundSymlink = ''
+        associatedPath = ''
+        dirname =  os.path.dirname(realPath)
+        while( dirname != '/'):
+            
+            if os.path.islink(os.path.dirname(realPath)):
+                foundSymlink =  os.path.dirname(realPath)
+                associatedPath = os.path.realpath( os.path.dirname(realPath)  )
+                break
+            dirname =  os.path.dirname( dirname )
+        
+        if foundSymlink !='':
+            STATSROOT = associatedPath + '/'+ realPath.split( foundSymlink )[1]
+        else:
+            STATSROOT= realPath
+        while(os.path.basename(STATSROOT) != "pxStats" ):
+            STATSROOT = os.path.dirname(STATSROOT)
+        
+        self.STATSROOT = STATSROOT + "/"   
+           
+         
+        self.STATSBIN     = self.STATSROOT + _( 'bin/' )
+        self.STATSDATA    = self.STATSROOT + _( 'data/' )
+        self.STATSDEV     = self.STATSROOT + _( 'dev/' )
+        self.STATSDOC     = self.STATSROOT + _( 'doc/' )
+        self.STATSETC     = self.STATSROOT + _( 'etc/' )
+        self.STATSLANG    = self.STATSROOT + _( 'lang/' )
+        self.STATSLIB     = self.STATSROOT + _( 'lib/' )
+        self.STATSLOGGING = self.STATSROOT + _( 'logs/' )
+        self.STATSMAN     = self.STATSROOT + _( 'man/' )
+        self.STATSTEMP    = self.STATSROOT + _( "temp/" )
+        self.STATSTOOLS   = self.STATSBIN  + _( 'tools/' )
+        self.STATSDEBUGTOOLS = self.STATSBIN + _( 'debugTools/'  )
+        self.STATSWEBPAGESGENERATORS = self.STATSBIN + _( "webPages/"  )
+        
+        self.STATSPXCONFIGS    = self.STATSETC + _( 'pxConfigFiles/'  )
+        self.STATSPXRXCONFIGS  = self.STATSPXCONFIGS + _( 'rx/' )
+        self.STATSPXTXCONFIGS  = self.STATSPXCONFIGS + _( 'tx/' )
+        self.STATSPXTRXCONFIGS = self.STATSPXCONFIGS + _( 'trx/' )
+        
+        self.STATSDEVDEPENDENCIES             = self.STATSDEV + _( 'fileDependencies/' )
+        self.STATSDEVDEPENDENCIESBIN          = self.STATSDEVDEPENDENCIES + _( 'bin/' )
+        self.STATSDEVDEPENDENCIESBINTOOLS     = self.STATSDEVDEPENDENCIESBIN + _( 'tools/' )
+        self.STATSDEVDEPENDENCIESBINDEBUGTOOLS= self.STATSDEVDEPENDENCIESBIN + _( 'debugTools/' )
+        self.STATSDEVDEPENDENCIESBINWEBPAGES  = self.STATSDEVDEPENDENCIESBIN + _( 'webPages/' )
+        self.STATSDEVDEPENDENCIESLIB          = self.STATSDEVDEPENDENCIES + _( 'lib/' )
+        
+        self.STATSLANGFR              = self.STATSLANG + _( 'fr/' )
+        self.STATSLANGFRBIN           = self.STATSLANGFR + _( 'bin/' )
+        self.STATSLANGFRBINTOOLS      = self.STATSLANGFRBIN + _( 'tools/' )
+        self.STATSLANGFRBINDEBUGTOOLS = self.STATSLANGFRBIN + _( 'debugTools/' )
+        self.STATSLANGFRBINWEBPAGES   = self.STATSLANGFRBIN + _( 'webPages/' )
+        self.STATSLANGFRLIB           = self.STATSLANGFR + _( 'lib/' )
+         
+        self.STATSLANGEN              = self.STATSLANG + _( 'en/' )
+        self.STATSLANGENBIN           = self.STATSLANGEN + _( 'bin/' )
+        self.STATSLANGENBINTOOLS      = self.STATSLANGENBIN + _( 'tools/' )
+        self.STATSLANGENBINDEBUGTOOLS = self.STATSLANGENBIN + _( 'debugTools/' )
+        self.STATSLANGENBINWEBPAGES   = self.STATSLANGENBIN + _( 'webPages/' )
+        self.STATSLANGENLIB           = self.STATSLANGEN + _( 'lib/' )
+        
+        self.STATSLIBRARY = self.STATSLIB
+        
+        self.STATSDB               = self.STATSDATA + _( 'databases/' )
+        self.STATSCURRENTDB        = self.STATSDB   + _( 'currentDatabases/' )
+        self.STATSCURRENTDBUPDATES = self.STATSDB   + _( 'currentDatabasesTimeOfUpdates/' )
+        self.STATSDBBACKUPS        = self.STATSDB   + _( 'databasesBackups/' )
+        self.STATSDBUPDATESBACKUPS = self.STATSDB   + _( 'databasesTimeOfUpdatesBackups/' )
+        
+        
+        self.STATSFILEVERSIONS     = self.STATSDATA + _( 'fileAcessVersions/' )
+        self.STATSLOGACCESS        = self.STATSDATA + _( 'logFileAccess/' )
+        self.STATSMONITORING       = self.STATSDATA + _( 'monitoring/' )
+        self.STATSPICKLES          = self.STATSDATA + _( 'pickles/' )
+        self.STATSLOGS             = self.STATSDATA + _( 'logFiles/' )
+        self.STATSWEBPAGES         = self.STATSDATA + _( 'webPages/' )
+        self.STATSWEBPAGESHTML     = self.STATSWEBPAGES + _( 'html/' )       
+        self.STATSWEBPAGESWORDDBS  = self.STATSWEBPAGES  + _( 'wordDatabases/' )
+        self.STATSGRAPHS           = self.STATSDATA + _( 'graphics/' )
+        self.STATSWEBGRAPHS        = self.STATSGRAPHS + _( 'webGraphics/' )
+        self.STATSGRAPHSARCHIVES   = self.STATSWEBGRAPHS + _( 'archives/' ) 
+        
+        self.STATSCOLGRAPHS        = self.STATSWEBGRAPHS + _( 'columbo/' )
+        
+        self.STATSPICKLESTIMEOFUPDATES    = self.STATSDATA + _( 'picklesTimeOfUpdates/' )
+        self.STATSPREVIOUSMACHINEPARAMS   = self.STATSDATA + _( 'previousMachineParameters' )
+                                                          
+        self.STATSTEMPLOCKFILES = self.STATSTEMP + _( "lockFiles/" )
+          
     
 
     def getRootPathFromMachine( machine, userName = "", rootType = "PXROOT" ):
@@ -319,7 +438,7 @@ class StatsPaths:
     
   
   
-    def getColumbosPathFromMachine( path, machine, userName = "" ): 
+    def getColumbosPathFromMachine( self, path, machine, userName = "" ): 
         """    
             @summary : Returns one of the available paths
                        from this utility class, based on 
@@ -351,7 +470,7 @@ class StatsPaths:
     
     
     
-    def getStatsPathFromMachine( path, machine, userName = "" ):
+    def getStatsPathFromMachine( self, path, machine, userName = "" ):
         """
             
             @summary : Returns one of the available paths
@@ -383,7 +502,7 @@ class StatsPaths:
     
     
     
-    def getPXPathFromMachine( path, machine, userName = "" ):
+    def getPXPathFromMachine( self, path, machine, userName = "" ):
         """
             
             @summary : Returns one of the available paths
@@ -415,7 +534,92 @@ class StatsPaths:
     
     getPXPathFromMachine = staticmethod( getPXPathFromMachine )
     
-
+    
+    
+    def getAllPaths( self, language = '' ):
+        """
+            @summary : Returns all the paths named found within StatsPaths...
+            
+            @param language : Language in which we need to know 
+                              the different paths.
+                                          
+            @return : Returns all the paths found within StatsPaths...
+            
+        """         
+        
+        
+        return [].extend( StatsPaths.getAllPdsPaths(language) ).extend(StatsPaths.getAllPxPaths(language) ).extend( StatsPaths.getAllStatsPaths(language) ) 
+    
+    
+    getAllPaths = staticmethod( getAllPaths )
+    
+    
+    
+    def getAllStatsPaths( self, language = '' ):
+        """
+            @summary : Returns all the paths named Stats...
+            
+            @param language : Language in which we need to know 
+                              the different paths.
+                                          
+            @return : Returns all the paths named Stats
+            
+        """        
+        
+        return [ StatsPaths.STATSBIN, StatsPaths.STATSCOLGRAPHS, StatsPaths.STATSCURRENTDB, StatsPaths.STATSCURRENTDBUPDATES, \
+                 StatsPaths.STATSDATA, StatsPaths.STATSDB, StatsPaths.STATSDBBACKUPS, StatsPaths.STATSDBUPDATESBACKUPS, \
+                 StatsPaths.STATSDEBUGTOOLS, StatsPaths.STATSDEV, StatsPaths.STATSDEVDEPENDENCIES, StatsPaths.STATSDEVDEPENDENCIESBIN, \
+                 StatsPaths.STATSDEVDEPENDENCIESBINDEBUGTOOLS, StatsPaths.STATSDEVDEPENDENCIESBINTOOLS, StatsPaths.STATSDEVDEPENDENCIESBINWEBPAGES, \
+                 StatsPaths.STATSDEVDEPENDENCIESLIB, StatsPaths.STATSDOC,StatsPaths.STATSETC, StatsPaths.STATSFILEVERSIONS, StatsPaths.STATSGRAPHS,\
+                 StatsPaths.STATSGRAPHSARCHIVES, StatsPaths.STATSLANG, StatsPaths.STATSLANGEN, StatsPaths.STATSLANGENBIN, \
+                 StatsPaths.STATSLANGENBINDEBUGTOOLS, StatsPaths.STATSLANGENBINTOOLS, StatsPaths.STATSLANGENBINWEBPAGES, StatsPaths.STATSLANGENLIB, \
+                 StatsPaths.STATSLANGFR, StatsPaths.STATSLANGFRBIN, StatsPaths.STATSLANGFRBINDEBUGTOOLS, StatsPaths.STATSLANGFRBINTOOLS, \
+                 StatsPaths.STATSLANGFRBINWEBPAGES, StatsPaths.STATSLANGFRLIB,StatsPaths.STATSLIB, StatsPaths.STATSLIBRARY,StatsPaths.STATSLOGACCESS,\
+                 StatsPaths.STATSLOGGING, StatsPaths.STATSLOGS,StatsPaths.STATSMAN, StatsPaths.STATSMONITORING, StatsPaths.STATSPICKLES, \
+                 StatsPaths.STATSPICKLESTIMEOFUPDATES, StatsPaths.STATSPREVIOUSMACHINEPARAMS, StatsPaths.STATSPXCONFIGS, StatsPaths.STATSPXRXCONFIGS,\
+                 StatsPaths.STATSPXTRXCONFIGS, StatsPaths.STATSPXTXCONFIGS, StatsPaths.STATSROOT, StatsPaths.STATSTEMP, \
+                 StatsPaths.STATSTEMPLOCKFILES, StatsPaths.STATSTOOLS, StatsPaths.STATSWEBGRAPHS, StatsPaths.STATSWEBPAGES,\
+                 StatsPaths.STATSWEBPAGESGENERATORS, StatsPaths.STATSWEBPAGESHTML, StatsPaths.STATSWEBPAGESWORDDBS ]
+    
+    
+    getAllStatsPaths = staticmethod( getAllStatsPaths )
+    
+    
+    
+    def getAllPdsPaths( self, language = '' ):
+        """
+            @summary : Returns all the paths named pds...
+            
+            @param language : Language in which we need to know 
+                              the different paths.
+                                          
+            @return : Returns all the paths named pds...
+            
+        """ 
+        
+        return [StatsPaths.PDSCOLETC, StatsPaths.PDSCOLGRAPHS, StatsPaths.PDSCOLLOGS]
+        
+    getAllPdsPaths = staticmethod( getAllPdsPaths )    
+    
+    
+    
+    def getAllPxPaths( self, language = '' ):
+        """
+            @summary : Returns all the paths named px...
+            
+            @param language : Language in which we need to know 
+                              the different paths.
+                                          
+            @return : Returns all the paths named px...
+            
+        """     
+        
+        return [ StatsPaths.PXETC, StatsPaths.PXETCRX, StatsPaths.PXETCTRX, StatsPaths.PXETCTX , \
+                 StatsPaths.PXLIB, StatsPaths.PXLOG, StatsPaths.PXROOT ]
+    
+    getAllPxPaths = staticmethod( getAllPxPaths )
+    
+    
     
 def main():
     """
@@ -432,58 +636,62 @@ def main():
     
     """
     
+    
+    statsPaths = StatsPaths()
+    statsPaths.setPaths() 
+    
     print "pds/px pathssection : "
-    print "StatsPaths.PDSCOLETC :%s" %StatsPaths.PDSCOLETC
-    print "StatsPaths.PDSCOLGRAPHS :%s" %StatsPaths.PDSCOLGRAPHS
-    print "StatsPaths.PDSCOLLOGS :%s" %StatsPaths.PDSCOLLOGS
-    print "StatsPaths.PXETC :%s" %StatsPaths.PXETC
-    print "StatsPaths.PXETCRX :%s" %StatsPaths.PXETCRX
-    print "StatsPaths.PXETCTRX :%s" %StatsPaths.PXETCTRX
-    print "StatsPaths.PXETCTX :%s" %StatsPaths.PXETCTX
-    print "StatsPaths.PXLIB :%s" %StatsPaths.PXLIB
-    print "StatsPaths.PXLOG :%s" %StatsPaths.PXLOG
-    print "StatsPaths.PXROOT :%s" %StatsPaths.PXROOT
+    print "statsPaths.PDSCOLETC :%s" %statsPaths.PDSCOLETC
+    print "statsPaths.PDSCOLGRAPHS :%s" %statsPaths.PDSCOLGRAPHS
+    print "statsPaths.PDSCOLLOGS :%s" %statsPaths.PDSCOLLOGS
+    print "statsPaths.PXETC :%s" %statsPaths.PXETC
+    print "statsPaths.PXETCRX :%s" %statsPaths.PXETCRX
+    print "statsPaths.PXETCTRX :%s" %statsPaths.PXETCTRX
+    print "statsPaths.PXETCTX :%s" %statsPaths.PXETCTX
+    print "statsPaths.PXLIB :%s" %statsPaths.PXLIB
+    print "statsPaths.PXLOG :%s" %statsPaths.PXLOG
+    print "statsPaths.PXROOT :%s" %statsPaths.PXROOT
     
     print 
     print 
     print "Stats paths section : "
-    print "StatsPaths.STATSBIN %s" %StatsPaths.STATSBIN
-    print "StatsPaths.STATSCOLGRAPHS %s" %StatsPaths.STATSCOLGRAPHS
-    print "StatsPaths.STATSCURRENTDB %s" %StatsPaths.STATSCURRENTDB
-    print "StatsPaths.STATSCURRENTDBUPDATES %s" %StatsPaths.STATSCURRENTDBUPDATES
-    print "StatsPaths.STATSDATA %s" %StatsPaths.STATSDATA
-    print "StatsPaths.STATSDB %s" %StatsPaths.STATSDB
-    print "StatsPaths.STATSDBBACKUPS %s" %StatsPaths.STATSDBBACKUPS
-    print "StatsPaths.STATSDBUPDATESBACKUPS %s" %StatsPaths.STATSDBUPDATESBACKUPS
-    print "StatsPaths.STATSDOC %s" %StatsPaths.STATSDOC
-    print "StatsPaths.STATSETC %s" %StatsPaths.STATSETC
-    print "StatsPaths.STATSFILEVERSIONS %s" %StatsPaths.STATSFILEVERSIONS
-    print "StatsPaths.STATSGRAPHS %s" %StatsPaths.STATSGRAPHS
-    print "StatsPaths.STATSLIB %s" %StatsPaths.STATSLIB
-    print "StatsPaths.STATSLIBRARY %s" %StatsPaths.STATSLIBRARY
-    print "StatsPaths.STATSLOGS %s" %StatsPaths.STATSLOGS
-    print "StatsPaths.STATSLOGGING %s" %StatsPaths.STATSLOGGING
-    print "StatsPaths.STATSMAN %s" %StatsPaths.STATSMAN
-    print "StatsPaths.STATSMONITORING %s" %StatsPaths.STATSMONITORING
-    print "StatsPaths.STATSPICKLES %s" %StatsPaths.STATSPICKLES
-    print "StatsPaths.STATSPXCONFIGS %s" %StatsPaths.STATSPXCONFIGS
-    print "StatsPaths.STATSPXRXCONFIGS %s" %StatsPaths.STATSPXRXCONFIGS
-    print "StatsPaths.STATSPXTRXCONFIGS %s" %StatsPaths.STATSPXTRXCONFIGS
-    print "StatsPaths.STATSPXTXCONFIGS %s" %StatsPaths.STATSPXTXCONFIGS
-    print "StatsPaths.STATSROOT %s" %StatsPaths.STATSROOT
-    print "StatsPaths.STATSWEBGRAPHS %s" %StatsPaths.STATSWEBGRAPHS
-    print "StatsPaths.STATSWEBPAGES %s" %StatsPaths.STATSWEBPAGES
-    print "StatsPaths.STATSWEBPAGESWORDDBS %s" %StatsPaths.STATSWEBPAGESWORDDBS
-    print "StatsPaths.STATSWEBPAGESHTML %s" %StatsPaths.STATSWEBPAGESHTML
+    print "statsPaths.STATSBIN %s" %statsPaths.STATSBIN
+    print "statsPaths.STATSCOLGRAPHS %s" %statsPaths.STATSCOLGRAPHS
+    print "statsPaths.STATSCURRENTDB %s" %statsPaths.STATSCURRENTDB
+    print "statsPaths.STATSCURRENTDBUPDATES %s" %statsPaths.STATSCURRENTDBUPDATES
+    print "statsPaths.STATSDATA %s" %statsPaths.STATSDATA
+    print "statsPaths.STATSDB %s" %statsPaths.STATSDB
+    print "statsPaths.STATSDBBACKUPS %s" %statsPaths.STATSDBBACKUPS
+    print "statsPaths.STATSDBUPDATESBACKUPS %s" %statsPaths.STATSDBUPDATESBACKUPS
+    print "statsPaths.STATSDOC %s" %statsPaths.STATSDOC
+    print "statsPaths.STATSETC %s" %statsPaths.STATSETC
+    print "statsPaths.STATSFILEVERSIONS %s" %statsPaths.STATSFILEVERSIONS
+    print "statsPaths.STATSGRAPHS %s" %statsPaths.STATSGRAPHS
+    print "statsPaths.STATSLIB %s" %statsPaths.STATSLIB
+    print "statsPaths.STATSLIBRARY %s" %statsPaths.STATSLIBRARY
+    print "statsPaths.STATSLOGS %s" %statsPaths.STATSLOGS
+    print "statsPaths.STATSLOGGING %s" %statsPaths.STATSLOGGING
+    print "statsPaths.STATSMAN %s" %statsPaths.STATSMAN
+    print "statsPaths.STATSMONITORING %s" %statsPaths.STATSMONITORING
+    print "statsPaths.STATSPICKLES %s" %statsPaths.STATSPICKLES
+    print "statsPaths.STATSPXCONFIGS %s" %statsPaths.STATSPXCONFIGS
+    print "statsPaths.STATSPXRXCONFIGS %s" %statsPaths.STATSPXRXCONFIGS
+    print "statsPaths.STATSPXTRXCONFIGS %s" %statsPaths.STATSPXTRXCONFIGS
+    print "statsPaths.STATSPXTXCONFIGS %s" %statsPaths.STATSPXTXCONFIGS
+    print "statsPaths.STATSROOT %s" %statsPaths.STATSROOT
+    print "statsPaths.STATSWEBGRAPHS %s" %statsPaths.STATSWEBGRAPHS
+    print "statsPaths.STATSWEBPAGES %s" %statsPaths.STATSWEBPAGES
+    print "statsPaths.STATSWEBPAGESWORDDBS %s" %statsPaths.STATSWEBPAGESWORDDBS
+    print "statsPaths.STATSWEBPAGESHTML %s" %statsPaths.STATSWEBPAGESHTML
     
-    print "PXROOT from some machine %s" %StatsPaths.getRootPathFromMachine( "logan1", "px", "PXROOT" )
-    print "COLROOT from some machine %s" %StatsPaths.getRootPathFromMachine( "logan1", "px", "COLROOT" )
-    print "STATSROOT from some machine %s" %StatsPaths.getRootPathFromMachine( "logan1", "px", "STATSROOT" )
+    print "PXROOT from some machine %s" %statsPaths.getRootPathFromMachine( "logan1", "px", "PXROOT" )
+    print "COLROOT from some machine %s" %statsPaths.getRootPathFromMachine( "logan1", "px", "COLROOT" )
+    print "STATSROOT from some machine %s" %statsPaths.getRootPathFromMachine( "logan1", "px", "STATSROOT" )
     
     
-    print "PXLIB from some machine %s" %StatsPaths.getPXPathFromMachine( machine = "logan1", userName = "px", path = StatsPaths.PXLIB )    
-    print "PDSCOLGRAPHS from some machine %s" %StatsPaths.getColumbosPathFromMachine( machine = "logan1", userName = "px", path = StatsPaths.PDSCOLGRAPHS )    
-    print "STATSLANGFR from some machine %s" %StatsPaths.getStatsPathFromMachine( machine = "logan1", userName = "px", path = StatsPaths.STATSLANGFR )          
+    print "PXLIB from some machine %s" %statsPaths.getPXPathFromMachine( machine = "logan1", userName = "px", path = statsPaths.PXLIB )    
+    print "PDSCOLGRAPHS from some machine %s" %statsPaths.getColumbosPathFromMachine( machine = "logan1", userName = "px", path = statsPaths.PDSCOLGRAPHS )    
+    print "STATSLANGFR from some machine %s" %statsPaths.getStatsPathFromMachine( machine = "logan1", userName = "px", path = statsPaths.STATSLANGFR )          
   
    
         
