@@ -1,44 +1,35 @@
 #! /usr/bin/env python
-"""
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
-named COPYING in the root of the source directory tree.
 
+"""
 #############################################################################################
-# Name  : generalStatsLibraryMethods.py
 #
-# Author: Nicholas Lemay
 #
-# Date  : 2006-12-14, last updated on May 09th 2007
+# @name: generalStatsLibraryMethods.py
 #
-# Description: This file contains numerous methods helpfull to many programs within the 
-#              stats library. THey have been gathered here as to limit repetition. 
+# @author: Nicholas Lemay
 #
-##############################################################################################
+# @since: 2006-12-14, last updated on  2008-01-22
+#
+#
+# @license: MetPX Copyright (C) 2004-2007  Environment Canada
+#           MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+#           named COPYING in the root of the source directory tree.
+#
+# @summary: This file contains numerous methods helpfull to many programs within the 
+#           stats library. THey have been gathered here as to limit repetition 
+#
+# 
+#############################################################################################
 """
 
-import os,  sys
+import commands, glob,  os,  sys
+from fnmatch import fnmatch
+
+
 """
-    Small function that adds pxlib to the environment path.  
+    - Small function that adds pxStats to sys path.  
 """
 sys.path.insert(1, sys.path[0] + '/../../')
-try:
-    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
-except KeyError:
-    pxlib = '/apps/px/lib/'
-sys.path.append(pxlib)
-
-
-"""
-    Imports
-    PXManager requires pxlib 
-"""
-import commands, PXManager, commands, glob , fnmatch
-
-import PXPaths
-
-from fnmatch import fnmatch
-from PXManager import *
 
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
@@ -46,7 +37,26 @@ from pxStats.lib.MachineConfigParameters import  MachineConfigParameters
 from pxStats.lib.RrdUtilities import RrdUtilities
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 
+    
+"""
+    - Small function that adds pxLib to sys path.
+"""    
+sys.path.append(StatsPaths.PXLIB)
+
+
+"""
+    Imports which require pxlib 
+"""
+import PXManager
+import PXPaths
+from PXManager import *
+
+
+
+#Constants
 LOCAL_MACHINE = os.uname()[1]
+
+
 
 class GeneralStatsLibraryMethods:
     
@@ -257,10 +267,10 @@ class GeneralStatsLibraryMethods:
             os.makedirs(  StatsPaths.STATSPXTRXCONFIGS + machine, mode=0777 )
     
         rxConfigFilesSourcePath = StatsPaths.getPXPathFromMachine( StatsPaths.PXETCRX, machine, login )
-        status, output = commands.getstatusoutput( "rsync -avzr --delete-before -e ssh %s@%s:%s  %s%s/"  %( login, machine, rxConfigFilesSourcePath, StatsPaths.STATSPXRXCONFIGS, machine ) )
+        output = commands.getoutput( "rsync -avzr --delete-before -e ssh %s@%s:%s  %s%s/"  %( login, machine, rxConfigFilesSourcePath, StatsPaths.STATSPXRXCONFIGS, machine ) )
     
         txConfigFilesSourcePath = StatsPaths.getPXPathFromMachine( StatsPaths.PXETCTX, machine, login )
-        status, output = commands.getstatusoutput( "rsync -avzr  --delete-before -e ssh %s@%s:%s %s%s/"  %( login, machine, txConfigFilesSourcePath, StatsPaths.STATSPXTXCONFIGS, machine ) )
+        output = commands.getoutput( "rsync -avzr  --delete-before -e ssh %s@%s:%s %s%s/"  %( login, machine, txConfigFilesSourcePath, StatsPaths.STATSPXTXCONFIGS, machine ) )
     
     updateConfigurationFiles = staticmethod( updateConfigurationFiles )    
         
@@ -330,7 +340,7 @@ class GeneralStatsLibraryMethods:
                 
         return  result == [] 
         
-        filterGroupNames = staticmethod( filterGroupNames )
+       
     
     filterGroupNames = staticmethod( filterGroupNames )
     
@@ -560,13 +570,13 @@ class GeneralStatsLibraryMethods:
         for group in configParameters.groupParameters.groups:        
             #print group
             machines  = configParameters.groupParameters.groupsMachines[group]
-            machines  = str(machines ).replace( "[", "" ).replace( "]", "" ).replace( " ", "" )
+            machines  = str(machines ).replace( "[", "" ).replace( "]", "" ).replace( " ", "" ).replace(",",", ")
             members   = configParameters.groupParameters.groupsMembers[group]
-            members   = str( members ).replace( "[", "" ).replace( "]", "" ).replace( " ", "" )
+            members   = str( members ).replace( "[", "" ).replace( "]", "" ).replace( " ", "" ).replace(",",", ")
             fileTypes = configParameters.groupParameters.groupFileTypes[group]
-            fileTypes = str(fileTypes ).replace( "[", "" ).replace( "]", "" ).replace( " ", "" )
+            fileTypes = str(fileTypes ).replace( "[", "" ).replace( "]", "" ).replace( " ", "" ).replace(",",", ")
             products  = configParameters.groupParameters.groupsProducts[group]
-            products  = str( products ).replace( "[", "" ).replace( "]", "" ).replace( " ", "" )
+            products  = str( products ).replace( "[", "" ).replace( "]", "" ).replace( " ", "" ).replace(",",", ")
             
             description = "<font color='#008800'>--Group Name : </font> <font color='#006699'>%s</font>  <br>   <font color='#008800'>--Machine(s) : </font><font color='#006699'>%s</font>  <br>   <font color='#008800'>--Member(s) : </font><font color='#006699'>%s</font>  <br>    <font color='#008800'>--FileType : </font><font color='#006699'>%s</font>  <br>    <font color='#008800'>--Product(s) pattern(s) : </font><font color='#006699'>%s</font> " %(group, machines, members, fileTypes, products )
             
@@ -580,6 +590,7 @@ class GeneralStatsLibraryMethods:
         
     getRxTxNamesForWebPages = staticmethod(getRxTxNamesForWebPages  )
     
+ 
  
 def main():
     """
