@@ -41,8 +41,8 @@ class StatsConfigParameters:
     
     def __init__( self, sourceMachinesTags = None, picklingMachines = None , machinesToBackupInDb = None , \
                   graphicsUpLoadMachines = None, daysOfPicklesToKeep = None, nbDbBackupsToKeep = None,  \
-                  timeParameters = None, detailedParameters = None, groupParameters = None, language = 'en',\
-                  statsRoot = '/apps/px/pxStats/' ):
+                  timeParameters = None, detailedParameters = None, groupParameters = None, mainApplicationLanguage = 'en',\
+                  artifactsLanguages = None, webPagesLanguages = None, statsRoot = '/apps/px/pxStats/' ):
         """
         
             @param sourceMachinesTags : Name tags used to depict the machine 
@@ -67,7 +67,10 @@ class StatsConfigParameters:
             
             @param groupParameters : GroupConfigParameters oinstance.
             
-            @param language : Language to use throughout the application.
+            @param mainApplicationLanguage : Language to use throughout the application.
+            
+            @param webPagesLanguages : List containing the ( displayedLanguage, fileLanguage )
+                                       tuples detailing how the web pages are to be generated. 
             
             @param statsRoot : Root path of the stats library.
 
@@ -82,7 +85,9 @@ class StatsConfigParameters:
         self.timeParameters = timeParameters
         self.detailedParameters = detailedParameters
         self.groupParameters = groupParameters
-        self.language = language
+        self.mainApplicationLanguage = mainApplicationLanguage
+        self.artifactsLanguages = artifactsLanguages or []
+        self.webPagesLanguages = webPagesLanguages or []
         self.statsRoot = statsRoot
 
         
@@ -161,7 +166,7 @@ class StatsConfigParameters:
             @return : None
         
         """   
-    
+        
         CONFIG = StatsPaths.STATSETC + "config" 
         config = ConfigParser()
         file = open( CONFIG )
@@ -170,8 +175,16 @@ class StatsConfigParameters:
         self.sourceMachinesTags     = []   
         self.picklingMachines       = []
         self.machinesToBackupInDb   = []
-        self.graphicsUpLoadMachines = []     
-        self.language = config.get( 'generalConfig', 'language' )
+        self.graphicsUpLoadMachines = []   
+        self.artifactsLanguages     = []  
+        self.webPagesLanguages      = []
+        self.mainApplicationLanguage = config.get( 'generalConfig', 'mainApplicationLanguage' )
+        self.artifactsLanguages.extend( config.get( 'generalConfig', 'artifactsLanguages' ).split(',') )
+        
+        languages = config.get( 'generalConfig', 'webPagesLanguages' ).split(',')
+        for i in range(  len(languages), 2 ):
+            self.webPagesLanguages.append( languages[i].split(":")[0], languages[i].split(":")[0] )
+           
         self.statsRoot = config.get( 'generalConfig', 'statsRoot' )    
         self.sourceMachinesTags.extend( config.get( 'generalConfig', 'sourceMachinesTags' ).split(',') )
         self.picklingMachines.extend( config.get( 'generalConfig', 'picklingMachines' ).split(',') ) 
@@ -289,7 +302,9 @@ def main():
     print "test.machinesToBackupInDb %s" %test.machinesToBackupInDb
     print "test.daysOfPicklesToKeep %s" %test.daysOfPicklesToKeep
     print "test.nbDbBackupsToKeep %s" %test.nbDbBackupsToKeep
-    print "test.language %s        "  %test.language
+    print "test.mainApplicationLanguage %s"  %test.mainApplicationLanguage
+    print "test.artifactsLanguages %s"  %test.artifactsLanguages
+    print "test.webPagesLanguages %s"  %test.webPagesLanguages
     print "test.statsRoot %s       " %test.statsRoot
     print "test.groupParameters %s " %test.groupParameters
     print "self.groups %s" %test.groupParameters.groups
