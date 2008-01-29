@@ -1646,7 +1646,7 @@ def getDataForAllSourlients( infos, dataType = "fileCount" ):
         if infos.totals == True :#try and force all databases to give back data with the exact same resolution.
             
             timeOfLastUpdate = RrdUtilities.getDatabaseTimeOfUpdate(databaseName, "tx")
-            interval = getInterval( StatsDateLib.getSecondsSinceEpoch(infos.startTime), timeOfLastUpdate, infos.graphicType, "")
+            interval = getInterval( StatsDateLib.getSecondsSinceEpoch(infos.startTime), timeOfLastUpdate, infos.graphicType, "fetchData")
             resolution = int(interval*60)
             output = commands.getoutput( "rrdtool fetch %s  'AVERAGE' -r '%s' -s %s  -e %s" %(  databaseName, str(resolution), int(StatsDateLib.getSecondsSinceEpoch(infos.startTime)), int(StatsDateLib.getSecondsSinceEpoch(infos.endTime) ) ) )
             
@@ -1736,7 +1736,7 @@ def getTimeStamps( start, end, spanType, sourlients,machines, fileType, dataType
     
     databaseNames = getDatabaseNames( sourlients, fileType, dataType,machines )
     timeOfLastUpdate = getMostPopularTimeOfLastUpdate(databaseNames) 
-    interval = getInterval( start, timeOfLastUpdate, spanType, "")
+    interval = getInterval( start, timeOfLastUpdate, spanType, "fetchData")
     interval = interval * 60
     
     timeStamp = start
@@ -2009,6 +2009,7 @@ def createMergedDatabases( infos, logger = None ):
             for pair in pairs:
                 if pair[1] != None :
                     rrdtool.update( combinedDatabaseName, '%s:%s' %( int(pair[0]), pair[1] ) )
+                    
             try:            
                 RrdUtilities.setDatabaseTimeOfUpdate(combinedDatabaseName, infos.fileType, lastUpdate)
             except:
