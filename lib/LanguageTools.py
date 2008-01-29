@@ -23,11 +23,11 @@ named COPYING in the root of the source directory tree.
 ##            
 ##
 ##
-## @requires: StatsPaths.py 
+## @requires: StatsPaths.py and StatsConfigParameters.py
 ##
 ##############################################################################
 """
-import gettext, os, sys
+import gettext, os, shutil, sys
 
 
 
@@ -39,17 +39,26 @@ sys.path.insert(1, sys.path[0] + '/../')
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 
-"""
-    -Small function that adds pxLib to sys path.
-"""
-sys.path.append( StatsPaths.PXLIB )
 
-
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) 
 
 
 
 class LanguageTools :
+    
+    
+    def getSupportedLanguages():
+        """
+            @summary : Returns the list of languagessupported by the application.
+            
+            @return : The list of languagessupported by the application.
+            
+        """
+        
+        supportedLanguages = ['en','fr']
+    
+        return supportedLanguages
+    
+    getSupportedLanguages = staticmethod( getSupportedLanguages )    
     
     
     
@@ -159,6 +168,48 @@ class LanguageTools :
         
         
     getTranslatorForModule = staticmethod( getTranslatorForModule )    
+    
+    
+ 
+
+
+    def translateAllOfPxStatsPaths( formerLanguage, newLanguage ):
+        """
+            
+            @summary : Browses through all of pxStats paths and 
+                       translate(moves) all the original path from the 
+                       former language to new paths in accordance 
+                       to the specified path found in the new languages's
+                       translation file.
+            
+            
+            @param formerLanguage: Former language in which the application was running.
+            
+            @param newLanguage: language in which the application will be running.
+            
+            @return : None
+            
+            @warning: ***THIS method should NOT be used while the applicatio nis being used.***
+                      ***Make sure no process' are using any of pxStats applications prior to using.***
+        
+        """
+        
+        formerLanguagePaths = StatsPaths.getAllStatsPaths( formerLanguage )
+        newLanguagePaths    = StatsPaths.getAllStatsPaths( newLanguage )
+        combinedPaths = []
+        
+        for formerPath, newPath in formerLanguagePaths, newLanguagePaths:
+            combinedPaths.append( ( formerPath, newPath ) )
+        
+        combinedPaths.sort()
+        
+        for formerPath, newPath in combinedPaths:
+            destination = os.path.dirname( formerPath ) + os.path.basename( newPath )  
+            print "mv %s %s" %( formerPath, destination )
+            #shutil.move( formerPath, destination )
+
+
+    translateAllOfPxStatsPaths = staticmethod( translateAllOfPxStatsPaths )    
 
 
 
