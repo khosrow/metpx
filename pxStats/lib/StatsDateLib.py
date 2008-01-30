@@ -22,6 +22,20 @@ named COPYING in the root of the source directory tree.
 """
 
 import time, sys, os
+sys.path.insert(1, sys.path[0] + '/../../')
+
+from pxStats.lib.StatsPaths import StatsPaths
+from pxStats.lib.LanguageTools import LanguageTools
+ 
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__
+
+"""
+    - Small function that adds pxLib to sys path.
+"""
+STATSPATHS = StatsPaths( )
+STATSPATHS.setPaths( LanguageTools.getMainApplicationLanguage() )
+sys.path.append( STATSPATHS.PXLIB )
+
     
     
 """   
@@ -32,8 +46,14 @@ HOUR   = 60 * MINUTE
 DAY    = 24 * HOUR
 MINUTES_PER_DAY = 24*60
 
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__       
+
+
 
 class StatsDateLib:
+    
+    global _ 
+    _ =  LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, LanguageTools.getMainApplicationLanguage() )
     
     #Constants can be removed once we add methods to the datelibrary and include it 
     MINUTE = 60
@@ -41,6 +61,22 @@ class StatsDateLib:
     DAY    = 24 * HOUR
     MINUTES_PER_DAY = 24*60
     LIST_OF_MONTHS_3LETTER_FORMAT = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ]
+    LIST_OF_MONTHS=[ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ]
+
+    
+    def setLanguage( language ):
+        """
+            @summary : sets specified language as the 
+                       language used for translations 
+                       throughout the entire class. 
+        """
+        
+        if language in LanguageTools.getSupportedLanguages() :
+                global _ 
+                _ =  LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, language )
+        
+    setLanguage = staticmethod( setLanguage )     
+     
        
     def isValidIsoDate( isoDate ):
         """   
@@ -75,7 +111,7 @@ class StatsDateLib:
         month = time.strftime( '%B', time.gmtime(timeInEpochFormat)  )
         day   = time.strftime( '%d', time.gmtime(timeInEpochFormat)  )  
         
-        return year, month, day   
+        return year, _(month), day   
     
     getYearMonthDayInStrfTime = staticmethod(getYearMonthDayInStrfTime)   
     
@@ -357,8 +393,6 @@ class StatsDateLib:
 	
         return numberOfDays
     
-    
-    
     getNumberOfDaysBetween = staticmethod( getNumberOfDaysBetween )
     
     
@@ -487,14 +521,14 @@ class StatsDateLib:
             
             hoursSinceStartOfDay = int( splitDate[0] )  
             
-            return hourssSinceStartOfDay
+            return hoursSinceStartOfDay
         
         except:
         
             print "Cannot convert %s in getMinutesSinceStartOfDay. " %date 
             sys.exit()
     
-    
+    getHoursSinceStartOfDay = staticmethod(getHoursSinceStartOfDay)
     
     def isoDateDashed( date = "20060613162653" ):
         """
