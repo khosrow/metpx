@@ -62,6 +62,25 @@ class LanguageTools :
     
     
     
+    def getMainApplicationLanguage():
+        """
+            @summary : Reads and returns the main application 
+                       language form the config file. 
+            
+            @return  : Le main application language.
+            
+        """
+        
+        configParameters = StatsConfigParameters()
+        
+        configParameters.getAllParameters()
+        
+        return configParameters.mainApplicationLanguage
+        
+    getMainApplicationLanguage = staticmethod(getMainApplicationLanguage)
+        
+    
+    
     def getTranslationFileName( language = 'en', moduleAbsPath = 'module' ):
         """
             
@@ -88,7 +107,6 @@ class LanguageTools :
             
             
             if language == 'en' : 
-                print "path ?? ",StatsPaths.STATSLIB
                 correspondingPaths = { StatsPaths.STATSBIN : StatsPaths.STATSLANGENBIN, StatsPaths.STATSDEBUGTOOLS : StatsPaths.STATSLANGENBINDEBUGTOOLS \
                                       , StatsPaths.STATSTOOLS : StatsPaths.STATSLANGENBINTOOLS, StatsPaths.STATSWEBPAGESGENERATORS : StatsPaths.STATSLANGENBINWEBPAGES \
                                       , StatsPaths.STATSLIB : StatsPaths.STATSLANGENLIB  }
@@ -126,9 +144,11 @@ class LanguageTools :
         
         """
         
+        
         try:        
             translator = gettext.GNUTranslations( open( fileName ) )
-            translator = translator.gettext 
+            translator = translator.gettext
+            
         except:
             translator = None
         
@@ -165,7 +185,7 @@ class LanguageTools :
         translator = LanguageTools.getTranslator(fileName)
         
         return translator 
-        
+    
         
     getTranslatorForModule = staticmethod( getTranslatorForModule )    
     
@@ -213,6 +233,64 @@ class LanguageTools :
 
 
 
+    def translateTerm( term, originalLanguage, destinationLanguage, moduleFromWhichTermIsFrom ):
+        """
+            @summary : Takes a term of a certain language and translates it into 
+                       
+            @param term: Term to be translated 
+            
+            @param originalLanguage: Language in which the term is written.
+            
+            @param destinationLanguage: Language in which to translate the term.
+            
+            @param moduleFromWhichTermIsFrom: Module in which the term was found. 
+                                             Translation file used will be dependant on 
+                                             this.
+            
+            @return : The translated term.
+            
+        """
+        
+        translatedTerm = ""
+        foundKey = ""
+        
+        if originalLanguage == destinationLanguage:
+            translatedTerm = term 
+        
+        elif originalLanguage not in LanguageTools.getSupportedLanguages() :  
+            raise Exception( "Error in translateTerm method. The specified original language '%s' is not a supported language." %originalLanguage )
+        
+        elif destinationLanguage not in LanguageTools.getSupportedLanguages():
+            raise Exception( "Error in translateTerm method. The specified destination language '%s' is not a supported language." %destinationLanguage )
+        
+        else:    
+        
+            translator = gettext.GNUTranslations( open( LanguageTools.getTranslationFileName(originalLanguage, moduleFromWhichTermIsFrom) ) )
+            originalTranslations = translator._catalog
+            
+            translator = gettext.GNUTranslations( open( LanguageTools.getTranslationFileName(destinationLanguage, moduleFromWhichTermIsFrom) ) )
+            destinationTranslations = translator._catalog
+
+            for key in originalTranslations.keys():
+                if originalTranslations[key] == term :
+                    foundKey = key
+                    break
+                
+            if foundKey == "" :
+                raise Exception( "Error in translateTerm method. Term %s was not found for the following language %s" %(term, originalLanguage ) )
+                   
+            try:
+                translatedTerm = destinationTranslations[ foundKey ]   
+            except KeyError:
+                raise Exception( "Error in translateTerm method. Term %s was not found for the following language %s" %(term, destinationLanguage ) )
+                
+            
+        return translatedTerm
+                
+    translateTerm = staticmethod( translateTerm )
+    
+    
+    
 def main():
     """
         @summary : Small test case scenario allows 
@@ -239,6 +317,8 @@ def main():
     translator = LanguageTools.getTranslatorForModule( StatsPaths.STATSLIB + 'StatsPlotter', language )
     print "Translation for bytecount : %s" %( translator("bytecount") )
     
+    print "Test4 : Unless translation changes, this should print 'filecount' "
+    print "Result : ", LanguageTools.translateTerm("nbreDeFichiers", "fr", "en", StatsPaths.STATSLIB + "StatsPlotter.py" )
     
     
 if __name__ == '__main__':
