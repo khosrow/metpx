@@ -10,52 +10,42 @@
 #
 #############################################################################################
 """
-import os, os.path
+import sys, os, os.path
 
-def normalPaths():
+sys.path.insert(1, sys.path[0] + '/../../sundew/lib')
+import PXPaths
 
-    global ROOT, BIN, LIB, LOG, ETC, RXQ, TXQ, DB, RX_CONF, TX_CONF, TO_SEND, RECEIVED, SENT, \
-           TO_SEND_PRO, RECEIVED_PRO, SENT_PRO, SPECIAL_ORDERS, SPECIAL_ORDERS_PRO, STATE
+def normalPaths(name, rootPath=""):
+    
+    PXPaths.normalPaths(rootPath)
 
-    try:
-        envVar = os.path.normpath(os.environ['AFTNROOT'])
-    except KeyError:
-        envVar = '/apps/px/aftn'
+    global ROOT, LIB, TO_SEND, RECEIVED, SENT, SPECIAL_ORDERS,  STATE
 
-    ROOT = envVar + '/'
-    BIN = ROOT + 'bin/'
-    LIB = ROOT + 'lib/'
-    LOG = ROOT + 'log/'
-    ETC = ROOT + 'etc/'
-    RXQ = ROOT + 'rxq/'
-    TXQ = ROOT + 'txq/'
-    DB = ROOT + 'db/'
-    RX_CONF = ETC + 'rx/'
-    TX_CONF = ETC + 'tx/'
+    if rootPath:
+        if rootPath[-1] != '/': rootPath += '/'
+        envVar = rootPath
+    else:
+        try:
+            envVar = os.path.normpath(os.environ['PXROOT']) + '/'
+        except KeyError:
+            envVar = '/apps/px/'
 
-    TO_SEND = ROOT + 'toSendAFTN/'
-    RECEIVED = ROOT + 'receivedAFTN/'
-    SENT = ROOT + 'sentAFTN/'
-    SPECIAL_ORDERS = ROOT + 'specialOrders/'
+    ROOT = envVar
+    LIB = ROOT + 'lib/%s/' % name
 
-    TO_SEND_PRO = ROOT + 'toSendAFTN_pro/'
-    RECEIVED_PRO = ROOT + 'receivedAFTN_pro/'
-    SENT_PRO = ROOT + 'sentAFTN_pro/'
-    SPECIAL_ORDERS_PRO = ROOT + 'specialOrders_pro/'
+    RECEIVED = PXPaths.TXQ + name + '/.receivedAFTN/'
+    SENT = PXPaths.TXQ + name + '/.sentAFTN/'
+    SPECIAL_ORDERS = PXPaths.TXQ + name + '/.specialOrders/'
 
-    STATE = ROOT + 'state/state.obj'
+    STATE = PXPaths.TXQ + name + '/.state.obj'
 
-def drbdPaths(rootPath):
+if __name__ == "__main__":
+    normalPaths('toto')
+    print ROOT
+    print LIB
 
-    global ROOT, BIN, LIB, LOG, ETC, RXQ, TXQ, DB, RX_CONF, TX_CONF
+    print RECEIVED
+    print SENT
+    print SPECIAL_ORDERS
 
-    ROOT = os.path.normpath(rootPath) + '/'
-    BIN = ROOT + 'bin/'
-    LIB = ROOT + 'lib/'
-    LOG = '/apps/px/' + 'log/'
-    ETC = ROOT + 'etc/'
-    RXQ = ROOT + 'rxq/'
-    TXQ = ROOT + 'txq/'
-    DB = ROOT + 'db/'
-    RX_CONF = ETC + 'rx/'
-    TX_CONF = ETC + 'tx/'
+    print STATE

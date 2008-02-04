@@ -19,6 +19,7 @@ sys.path.insert(1,sys.path[0] + '/../../lib')
 sys.path.insert(1,sys.path[0] + '/../../lib/importedLibs')
 
 from DiskReader import DiskReader
+from SystemManager import SystemManager
 from MessageManager import MessageManager
 from MessageParser import MessageParser
 from MessageAFTN import MessageAFTN
@@ -35,8 +36,9 @@ class TransceiverAFTN:
     """
     def __init__(self, sourlient):
 
-        AFTNPaths.normalPaths()
+        AFTNPaths.normalPaths(sourlient.name)
         PXPaths.normalPaths()
+        self.sysman = SytemManager()                       # General system manager
         self.sourlient = sourlient                         # Sourlient (Source/Client) object containing configuration infos.
 
         self.logger = sourlient.logger                     # Logger object
@@ -56,14 +58,14 @@ class TransceiverAFTN:
         self.socket = None                                 # Socket object
         self.dataFromFiles = []                            # A list of tuples (content, filename) obtained from a DiskReader 
 
-        if self.subscriber:
-            self.writePath = AFTNPaths.RECEIVED            # Where we write messages we receive
-            self.archivePath = AFTNPaths.SENT              # Where we put sent messages
-            self.specialOrdersPath = AFTNPaths.SPECIAL_ORDERS
-        else:
-            self.writePath = AFTNPaths.RECEIVED_PRO        # Where we write messages we receive
-            self.archivePath = AFTNPaths.SENT_PRO          # Where we put sent messages
-            self.specialOrdersPath = AFTNPaths.SPECIAL_ORDERS_PRO
+        self.writePath = AFTNPaths.RECEIVED                # Where we write messages we receive
+        self.archivePath = AFTNPaths.SENT                  # Where we put sent messages
+        self.specialOrdersPath = AFTNPaths.SPECIAL_ORDERS  # Where we put special orders
+
+        # Paths creation
+        self.sysman.createDir(self.writePath)
+        self.sysman.createDir(self.archivePath)
+        self.sysman.createDir(self.specialOrdersPath)
 
         self.reader = DiskReader(PXPaths.TXQ + self.sourlient.name, self.sourlient.batch,
                                  self.sourlient.validation, self.sourlient.diskReaderPatternMatching,
@@ -600,10 +602,7 @@ class TransceiverAFTN:
 
                 # Archive State
                 mm.state.fill(mm)
-                if self.subscriber:
-                    mm.archiveObject(AFTNPaths.STATE, mm.state)
-                else:
-                    mm.archiveObject(AFTNPaths.STATE + 'PRO', mm.state)
+                mm.archiveObject(AFTNPaths.STATE, mm.state)
                 self.logger.debug("State has been archived")
 
                 message, type = mm.parseReadBuffer("") # Only to find if it is an AFTN (SVC included) or Ack message
@@ -775,10 +774,7 @@ class TransceiverAFTN:
 
                 # Archive State
                 mm.state.fill(mm)
-                if self.subscriber:
-                    mm.archiveObject(AFTNPaths.STATE, mm.state)
-                else:
-                    mm.archiveObject(AFTNPaths.STATE + 'PRO', mm.state)
+                mm.archiveObject(AFTNPaths.STATE, mm.state)
                 self.logger.debug("State has been archived")
 
                 # Log the fact that the message has been sent 
