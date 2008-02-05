@@ -77,7 +77,9 @@ class GeneralStatsLibraryMethods:
         if not os.path.isdir( StatsPaths.STATSTEMPLOCKFILES ):
             os.makedirs( StatsPaths.STATSTEMPLOCKFILES )
         
-        os.system('touch %s' %fileName)
+        fileHandle = open( fileName,'w' )
+        fileHandle.write( str( os.getpid() ) )
+        fileHandle.close()
     
     createLockFile = staticmethod( createLockFile )
     
@@ -119,8 +121,21 @@ class GeneralStatsLibraryMethods:
         fileName = StatsPaths.STATSTEMPLOCKFILES + str( processName ) + ".lock"
         
         if os.path.isfile( fileName ) :
-            processIsAlreadyRunning = True
-        
+            fileHandle = open( fileName, 'r' )
+            firstLine = fileHandle.readline()
+            pidOfTheLockFileCreator = str(firstLine).replace("\n", "")
+            currentlyRunningProcessList = commands.getoutput( "ps axww" )
+            for line in str(currentlyRunningProcessList).splitlines():
+                if pidOfTheLockFileCreator == line.split( " " )[0]:
+                    if processName in line:
+                        processIsAlreadyRunning = True
+                        break
+                    else:
+                        processIsAlreadyRunning = False
+                        GeneralStatsLibraryMethods.deleteLockFile(processName)
+                        break
+                    
+                    
         return processIsAlreadyRunning    
 
     
