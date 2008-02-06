@@ -179,7 +179,7 @@ class LanguageTools :
             configParameters = StatsConfigParameters()
             configParameters.getAllParameters()
             
-            language = configParameters.language 
+            language = configParameters.mainApplicationLanguage 
             
         fileName   = LanguageTools.getTranslationFileName(language, moduleAbsPath)    
         translator = LanguageTools.getTranslator(fileName)
