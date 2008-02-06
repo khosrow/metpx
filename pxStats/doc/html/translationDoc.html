@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.3.7: http://docutils.sourceforge.net/" />
+<title></title>
+<link rel="stylesheet" href="default.css" type="text/css" />
+</head>
+<body>
+<div class="document">
+<div class="image"><img alt="images/translationLogo.png" src="images/translationLogo.png" /></div>
+<div class="contents topic" id="contents">
+<p class="topic-title first"><a name="contents">Contents</a></p>
+<ul class="simple">
+<li><a class="reference" href="#front-matter" id="id1" name="id1">Front Matter</a></li>
+<li><a class="reference" href="#about-this-document" id="id2" name="id2">About this document :</a></li>
+<li><a class="reference" href="#background-on-the-need-for-multi-lingual-support" id="id3" name="id3">Background on the need for multi-lingual support :</a></li>
+<li><a class="reference" href="#requirements" id="id4" name="id4">Requirements :</a></li>
+<li><a class="reference" href="#guiding-principles" id="id5" name="id5">Guiding principles</a></li>
+<li><a class="reference" href="#implementation" id="id6" name="id6">Implementation :</a><ul>
+<li><a class="reference" href="#configuration-file-etc-config" id="id7" name="id7">Configuration file(.../etc/config)</a></li>
+<li><a class="reference" href="#supported-languages-lang" id="id8" name="id8">Supported languages(.../lang/)</a></li>
+<li><a class="reference" href="#explicit-translation-support-translatable-class" id="id9" name="id9">Explicit translation support( Translatable class )</a></li>
+<li><a class="reference" href="#non-explicit-translation-support" id="id10" name="id10">Non-explicit translation support</a></li>
+<li><a class="reference" href="#supporting-different-language-throughout-a-module" id="id11" name="id11">Supporting different language throughout a module</a></li>
+</ul>
+</li>
+<li><a class="reference" href="#steps-towards-translating-a-module" id="id12" name="id12">Steps towards translating a module</a></li>
+<li><a class="reference" href="#how-to" id="id13" name="id13">How-to</a><ul>
+<li><a class="reference" href="#adding-supported-languages" id="id14" name="id14">Adding supported languages</a></li>
+<li><a class="reference" href="#making-the-content-of-a-module-translatable" id="id15" name="id15">Making the content of a module translatable</a></li>
+<li><a class="reference" href="#generating-po-translation-files-from-a-translatable-module" id="id16" name="id16">Generating .po translation files from a translatable module</a></li>
+<li><a class="reference" href="#obtaining-a-completly-filled-po-for-the-same-languages-as-the-one-used-within-the-module" id="id17" name="id17">Obtaining a completly filled .po for the same languages as the one used within the module.</a></li>
+<li><a class="reference" href="#translating-a-po-file-into-a-different-language-than-the-one-used-within-the-module" id="id18" name="id18">Translating a .po file into a different language than the one used within the module.</a></li>
+<li><a class="reference" href="#generating-the-binary-translation-file-s-from-the-translated-po-file-s" id="id19" name="id19">Generating the binary translation file(s) from the translated .po file(s).</a></li>
+<li><a class="reference" href="#using-the-binary-translation-files-within-a-program" id="id20" name="id20">Using the binary translation files within a program</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="front-matter">
+<h1><a class="toc-backref" href="#id1" name="front-matter">Front Matter</a></h1>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Authors:</th><td class="field-body">Nicholas Lemay</td>
+</tr>
+<tr class="field"><th class="field-name">Copyright:</th><td class="field-body">MetPX Copyright (C) 2004-2008 Environment Canada</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="about-this-document">
+<h1><a class="toc-backref" href="#id2" name="about-this-document">About this document :</a></h1>
+<p>This file was written for anyone using the pxStats library who might be interested 
+on how the multi-lingual aspects were implemented.</p>
+</div>
+<div class="section" id="background-on-the-need-for-multi-lingual-support">
+<h1><a class="toc-backref" href="#id3" name="background-on-the-need-for-multi-lingual-support">Background on the need for multi-lingual support :</a></h1>
+<p>PxStats was originaly developped to fit the internal requirements within environment 
+Canada which required a bilingual approach to documentation and displayed languages.
+Languages used were english and french.</p>
+</div>
+<div class="section" id="requirements">
+<h1><a class="toc-backref" href="#id4" name="requirements">Requirements :</a></h1>
+<p>To implement the solution as described below the following were required :</p>
+<ul class="simple">
+<li>pygettext python module.</li>
+<li>pygettext software, which is the python equivalent to xgettext.</li>
+<li>msgfmt software which compiles the pygettext output to binary format</li>
+<li>sameLanguagePotFileTranslator.py a time-saving utility found within pxStats.</li>
+</ul>
+</div>
+<div class="section" id="guiding-principles">
+<h1><a class="toc-backref" href="#id5" name="guiding-principles">Guiding principles</a></h1>
+<ul class="simple">
+<li>Application was originally written in english, documentation was in english  
+and everything outputted, from graphcis to webPages to emails were in english.</li>
+<li>Translation support had to be added with as little code change as possible while 
+keeping code as readable as possible.</li>
+<li>Application had to be able to support as many languages as desired by users.</li>
+<li>Application had to be able to output artifacts in a different language than 
+the one used when calling the application.</li>
+<li>Web pages had to be able to present the artifact in languages the artifacts 
+might not even have been generated for. Example a french web page showing
+graphics whose content is in english.</li>
+</ul>
+</div>
+<div class="section" id="implementation">
+<h1><a class="toc-backref" href="#id6" name="implementation">Implementation :</a></h1>
+<div class="image"><img alt="images/translationFiles.png" src="images/translationFiles.png" /></div>
+<div class="section" id="configuration-file-etc-config">
+<h2><a class="toc-backref" href="#id7" name="configuration-file-etc-config">Configuration file(.../etc/config)</a></h2>
+<p>Everything starts here. This file is where you specify the following 
+parameters :</p>
+<ul>
+<li><p class="first">Main application language :</p>
+<p>This language will be the one used to set all the path towards the different 
+files produced by the application, the names of the pickles and pdatabases 
+produced and the application in which all the programs will be presented to 
+the user.</p>
+<dl class="docutils">
+<dt>Notes: There can be only one main application language.</dt>
+<dd><p class="first last">Language must be the first two letters of the language name. Ex : fr, en.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">Artifacts languages :</p>
+<p>These languages specify in which languages the different artifacts generated 
+by pxStats will be generated in. For example, a user might want to have french 
+as the main application language for it's administrator but english as the 
+artifacts language since the people who consult the artifacts speak english.</p>
+<dl class="docutils">
+<dt>Notes <span class="classifier-delimiter">:</span> <span class="classifier">Numerous languages can be specified here.</span></dt>
+<dd><p class="first last">Adding a second language will double the time spent producing artifacts and 
+so on for every other languages added.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">Web Pages languages.</p>
+<blockquote>
+<p>These languages specify in which languages the web pages need to be generated.
+Web page are generated very fast so adding more languages is not a problem.
+Web pages specified here must be specified in couples, stating A : the 
+language printed in the web pages and B the language in which the artifacts 
+in linked from inside the web page are in.</p>
+</blockquote>
+</li>
+</ul>
+</div>
+<div class="section" id="supported-languages-lang">
+<h2><a class="toc-backref" href="#id8" name="supported-languages-lang">Supported languages(.../lang/)</a></h2>
+<p>All the supported languages are found in the lang folder. Each folders found 
+there contains the translation files needed for that particular language. 
+To make things easier, the arborescence found under each language's folder is 
+the same as the file being translated. Example ...pxStats/bin/webPages/test.py
+would be found under ...pxStats/lang/bin/webPages/test</p>
+</div>
+<div class="section" id="explicit-translation-support-translatable-class">
+<h2><a class="toc-backref" href="#id9" name="explicit-translation-support-translatable-class">Explicit translation support( Translatable class )</a></h2>
+<p>Classes which want to support translation can inherit from the Translation class
+found in the lib folder.</p>
+<p>This will automatically add a getTranslatorForModule function to the 
+class. This way, each class does not have to delcare it's own translator and if 
+the translator method and if the translation themods are ever to change, we will
+only have to change it at a single place.</p>
+</div>
+<div class="section" id="non-explicit-translation-support">
+<h2><a class="toc-backref" href="#id10" name="non-explicit-translation-support">Non-explicit translation support</a></h2>
+<p>If you are working with a binary file(.../pxStats/bin/) you will probably want
+to translate part of you application, yet getting your module to derive from 
+the Translatable class would make little sens. In that case you will need to 
+use the language tools class found in the lib folder.</p>
+</div>
+<div class="section" id="supporting-different-language-throughout-a-module">
+<h2><a class="toc-backref" href="#id11" name="supporting-different-language-throughout-a-module">Supporting different language throughout a module</a></h2>
+<p>In the following sections, we will cover how to render a module translatable.
+The common approach to this problem, however, allows for only one language to 
+be used for translating text throughout the entire module.</p>
+<p>PXStats, however has some modules which are requried to support multiple 
+languages at the same time during the same execution.</p>
+<p>The simple workaround found to counter this was to add as many proterties or 
+parameters as needed to the classes which need to support more than one
+language. Throughout the application execution, the translator being used will
+be set to the language that needs to be usedat that point in time based on the
+properties that were added to the class.</p>
+<p>That way, a class or script could have as many translator as desired.</p>
+</div>
+</div>
+<div class="section" id="steps-towards-translating-a-module">
+<h1><a class="toc-backref" href="#id12" name="steps-towards-translating-a-module">Steps towards translating a module</a></h1>
+<p>Here is the series of steps to follow in order to get a module that is 
+translatable.Please refer to the how-to section for details on each section.</p>
+<p>1- Make sure language is supported by the application.</p>
+<p>2- Make the content of your module translatable</p>
+<p>3- Generate the .po file from your translatable module</p>
+<p>4- Fill out the .po file with the required translation strings.</p>
+<p>5- Generate a binary translation file from you .po file.</p>
+<p>6- Use the binary file properly within you code.</p>
+</div>
+<div class="section" id="how-to">
+<h1><a class="toc-backref" href="#id13" name="how-to">How-to</a></h1>
+<div class="section" id="adding-supported-languages">
+<h2><a class="toc-backref" href="#id14" name="adding-supported-languages">Adding supported languages</a></h2>
+<p>To add supported languages, you simply need to create a new folder in the 
+lang section( ex : sp for spanish ) and create the necessary subfolders 
+that reflect the pxStats arborescence.</p>
+</div>
+<div class="section" id="making-the-content-of-a-module-translatable">
+<h2><a class="toc-backref" href="#id15" name="making-the-content-of-a-module-translatable">Making the content of a module translatable</a></h2>
+<ul>
+<li><p class="first">A class from whom instances are created should usually inherit from the 
+translatable type.</p>
+</li>
+<li><p class="first">EVERY module should be modified as to conform to the folowing :
+- Every string that can be displayed to the user, be it a single-quoted or double quoted string sould be transformed in the following way :</p>
+<blockquote>
+<p>print &quot;Hello World&quot;
+print _(&quot;Hello World&quot;)</p>
+</blockquote>
+<ul>
+<li><p class="first">Triple quoted string should be split up in such a way that the translatable parts are conform to the aforementionned standard.</p>
+<p>Exemple : print &quot;&quot;&quot;</p>
+<blockquote>
+<p>&lt;html&gt;</p>
+<blockquote>
+<p>Hello world</p>
+</blockquote>
+<p>&lt;/html&gt;</p>
+<p>&quot;&quot;&quot;</p>
+</blockquote>
+<p>becomes : print &quot;&quot;&quot;</p>
+<blockquote>
+<p>&lt;html&gt;</p>
+<p>&quot;&quot;&quot; + _(&quot;Hello world&quot;) + </p>
+<p>&quot;&quot;&quot;</p>
+<p>&lt;/html&gt;</p>
+<p>&quot;&quot;&quot;</p>
+</blockquote>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="generating-po-translation-files-from-a-translatable-module">
+<h2><a class="toc-backref" href="#id16" name="generating-po-translation-files-from-a-translatable-module">Generating .po translation files from a translatable module</a></h2>
+<p>To generate a translation file from pygettext simply execute the following 
+command in a console</p>
+<p>pygettext moduleName</p>
+</div>
+<div class="section" id="obtaining-a-completly-filled-po-for-the-same-languages-as-the-one-used-within-the-module">
+<h2><a class="toc-backref" href="#id17" name="obtaining-a-completly-filled-po-for-the-same-languages-as-the-one-used-within-the-module">Obtaining a completly filled .po for the same languages as the one used within the module.</a></h2>
+<p>Use sameLanguagePotFileTranslator.py</p>
+</div>
+<div class="section" id="translating-a-po-file-into-a-different-language-than-the-one-used-within-the-module">
+<h2><a class="toc-backref" href="#id18" name="translating-a-po-file-into-a-different-language-than-the-one-used-within-the-module">Translating a .po file into a different language than the one used within the module.</a></h2>
+<p>To to this, you will need to open the .po file resulting from executing the 
+&quot;Generating .po translation&quot; step with a text editor. For every &quot;msgid&quot; found you 
+will need to fill the the following &quot;msgstr&quot; line with the appropriate translation.</p>
+<p>When updating a script, the new .po you will unfortunatly have to refill
+most of the .po file with translations form the previous version. A small utility 
+is in the works  that will copy the cotent of an old .po file into a new one to 
+save up some time.</p>
+</div>
+<div class="section" id="generating-the-binary-translation-file-s-from-the-translated-po-file-s">
+<h2><a class="toc-backref" href="#id19" name="generating-the-binary-translation-file-s-from-the-translated-po-file-s">Generating the binary translation file(s) from the translated .po file(s).</a></h2>
+<p>For all the generated .po file, do the following command  :
+msgfmt .poFile outputfileName</p>
+</div>
+<div class="section" id="using-the-binary-translation-files-within-a-program">
+<h2><a class="toc-backref" href="#id20" name="using-the-binary-translation-files-within-a-program">Using the binary translation files within a program</a></h2>
+<p>To use the translation file, you simply either have to get you class to derive 
+from the Translatable type, or call the LanguageTools metohods directly.</p>
+<p>If you would like to write up your own handling of translation files, you 
+simply need to add the following lines to your code:</p>
+<blockquote>
+<p>import gettext
+...
+translator = gettext.GNUTranslations( open( binaryTranslationFileName ) )</p>
+<p>_ = translator.gettext</p>
+<p>...
+print _(&quot;Hello world&quot;)</p>
+</blockquote>
+<p>If all steps were followed properly, this would print out a translated version of 
+the Hello world message.</p>
+</div>
+</div>
+</div>
+</body>
+</html>
