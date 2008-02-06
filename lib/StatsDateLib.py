@@ -26,6 +26,7 @@ sys.path.insert(1, sys.path[0] + '/../../')
 
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.LanguageTools import LanguageTools
+
  
 CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__
 
@@ -52,16 +53,16 @@ CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__
 
 class StatsDateLib:
     
-    global _ 
-    _ =  LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, LanguageTools.getMainApplicationLanguage() )
+    global _
+    _ =  LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )
     
     #Constants can be removed once we add methods to the datelibrary and include it 
     MINUTE = 60
     HOUR   = 60 * MINUTE
     DAY    = 24 * HOUR
     MINUTES_PER_DAY = 24*60
-    LIST_OF_MONTHS_3LETTER_FORMAT = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ]
-    LIST_OF_MONTHS=[ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ]
+    LIST_OF_MONTHS_3LETTER_FORMAT = [ _("Jan"),  _("Feb"),  _("Mar"),  _("Apr"),  _("May"),  _("Jun"),  _("Jul"),  _("Aug"),  _("Sep"),  _("Oct"),  _("Nov"),  _("Dec") ]
+    LIST_OF_MONTHS=[  _("January"),  _("February"),  _("March"),  _("April"),  _("May"),  _("June"),  _("July"),  _("August"),  _("September"),  _("October"),  _("November"),  _("December") ]
 
     
     def setLanguage( language ):
