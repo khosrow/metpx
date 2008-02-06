@@ -1,0 +1,118 @@
+
+General:
+Receivers write products received into a reception directory queue (/apps/px/rxq/<client>/*)
+They receive products using a selected protocol.  Configuration files must end in
+.conf, all other files are ignored by px.  For example, to disable a client, the
+convention is to stop the receiver, rename the configuration file to .off and restart px.
+
+See configuration files examples in /apps/px/etc.sample/rx/
+
+General Options:
+
+type (keyword, default: none  am|wmo|single-file|bulletin-file|collector)
+    am              - AM protocol socket
+    wmo             - WMO protocol socket
+    single-file     - Receive plain files (like a PDS)
+    bulletin-file   - receive bulletins in a file (ingested like from a socket)
+    collector       - receive bulletins in a file, create and ingest collections
+
+extension  (string, default:  MISSING:MISSING:MISSING:MISSING:)           
+extension tandem:-CCCC:-TT:-CIRCUIT:Direct
+extension ncp1:CWAO:SA:3:Direct
+    text to be added to the end of a file name to make it suitable for ingest into px.
+    Five fields separted by four colons.  Substitutions are done based on the incoming msg header: 
+    -CCCC       => will be replaced by the origin site
+    -TT         => will be replaced by bulletin type (first 2 letters)
+    -CIRCUIT    => will be replaced by priority found in header2clients.conf
+
+    In general, we choose the extension's fields to be:
+    originSystem:originSite:dataType:priority:dataFormat
+
+    This extension + a timestamp (20051116212028) will be added to the
+    ingested file or bulletin.
+
+emask <pattern>
+imask <pattern>
+	After determining the ingest_name, it is matched
+against the emask and imask patterns.  The default is for the
+bulletin to be accepted.  emask (exclusion) can be used to suppress
+reception of bulletins with a certain pattern.   
+messages suppressed are not ingested into the DB.
+
+feed (file receiver...)
+     a receiver can feed one or more others (like collectors)
+
+Socket Protocol options:
+
+port 5012   (integer, no default)
+    Port to bind for reception.
+
+AM Socket reception specific options:
+
+arrival CA 5 20
+arrival WO 20 40
+    Mapping of what the valid times to receive a given type of bulletin are.
+    In this example for CA's, -5 or +20 minutes versus the issue time is 
+    the valid interval. 
+
+AddSMHeader (boolean, Default: False)
+    True if a header is to be inserted at the beginning of a SM or SI bulletins.
+    The header is of the form: "AAXX jjhh4\\n". 
+
+
+file-reception specific options:
+
+batch 10000   (integer, default:100 )
+    The maximum number of files that will be read from disk in one cycle. 
+
+mtime 5
+    Number of seconds a file must not have been modified before we 
+    read it. If set to 0, this is equivalent to not checking the 
+    modification time. This option is useful for files received
+    by rcp, ftp, etc. Only used when type is single-file or bulletin-file.
+
+Collector Specific Options:
+
+header  SA 
+    Defines a header to collect
+
+issue all 7 5
+issue 0,6,12,18 12 5
+    Defines a the bulletin hours to collect 'all' or a comma separated list
+    Followed by the minute after the collect hour to issue the primary collection here 7 or 12
+    The last number is the cycle in minutes to issue the other bulletins received after the primary collection
+    here 5 means every 5 minutes issue collected retarded bulletins
+
+history 24                
+    The amount of time in hours for which it is valid to collect a bulletin
+
+future  40
+    Specified in minutes.  Maximum limit to consider valid a report dated in the future
+
+=========================================================================================
+Developer options: 
+=========================================================================================
+debug (boolean, default: True)
+    If we want sections with debug code (and logging informations)
+    to be executed.
+
+validation (boolean, Default: True)
+    Validate if the filename have the following form:
+    SACN43_CWAO_012000_CYOJ_41613:ncp1:CWAO:SA:3.A.I.E::20050201200339
+    The priority field and the timestamp field are checked for validity.
+    In practice, never used for sources.
+    
+patternMatching (boolean, Default: True)
+    Determine if the masks present in the source config. file will be used for 
+    routing files/bulletins.
+
+clientsPatternMatching (boolean, Default: True)
+    For receivers type that use direct routing (am, wmo, bulletin-file), 
+    determine if the masks presents in the clients config. files will be used for 
+    routing bulletins.
+
+sorter (keyword, default: MultiKeysStringSorter.  others: None, StandardSorter)
+    Determine which type of sorter will be used. Can be used only with type 
+    single-file and bulletin-file. In practice, never used for sources. 
+
+
