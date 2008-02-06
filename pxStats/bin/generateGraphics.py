@@ -37,7 +37,9 @@ CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__
 
 class _GraphicsInfos:
     
-    def __init__( self, directory, fileType, types, collectUpToNow,  clientNames = None ,  timespan = 12, currentTime = None, productTypes = None, machines = None, copy = False, combineClients = False, groupName = ""  ):
+    def __init__( self, directory, fileType, types, collectUpToNow, clientNames = None , \
+                 timespan = 12, currentTime = None, productTypes = None, machines = None, \
+                 copy = False, combineClients = False, groupName = "", outputLanguage = 'en'  ):
 
             
         self.directory      = directory         # Directory where log files are located. 
@@ -88,7 +90,7 @@ def getOptionsFromParser( parser ):
     combineClients   = options.combineClients
     productTypes     = options.productTypes.replace( ' ', '' ).split( ',' )     
     groupName        = options.groupName.replace( ' ','' ) 
-    
+    outputLanguage   = options.outputLanguage
     
     try: # Makes sure date is of valid format. 
          # Makes sure only one space is kept between date and hour.
@@ -161,12 +163,20 @@ def getOptionsFromParser( parser ):
         print _("Program terminated.")
         sys.exit()
     
-    
+    if outputLanguage not in LanguageTools.getSupportedLanguages():
+        print _("Error. %s is not one of the supproted languages")
+        print _("Use one of the following languages : %s" % str( LanguageTools.getSupportedLanguages() ).replace("[","").replace("]","") )
+        print _("Use -h for additional help.")
+        print _("Program terminated.")
+        
     clientNames = GeneralStatsLibraryMethods.filterClientsNamesUsingWilcardFilters( currentTime, timespan, clientNames, machines, [fileType])
     
     directory =  GeneralStatsLibraryMethods.getPathToLogFiles( LOCAL_MACHINE, machines[0] )
     
-    infos = _GraphicsInfos( collectUpToNow = collectUpToNow, currentTime = currentTime, clientNames = clientNames, groupName = groupName,  directory = directory , types = types, fileType = fileType, timespan = timespan, productTypes = productTypes, machines = machines, copy = copy, combineClients = combineClients )
+    infos = _GraphicsInfos( collectUpToNow = collectUpToNow, currentTime = currentTime, clientNames = clientNames,\
+                            groupName = groupName,  directory = directory , types = types, fileType = fileType, \
+                            timespan = timespan, productTypes = productTypes, machines = machines, copy = copy, \
+                            combineClients = combineClients, outputLanguage = outputLanguage )
     
     if collectUpToNow == False:
         infos.endTime = StatsDateLib.getIsoWithRoundedHours( infos.currentTime ) 
@@ -212,7 +222,8 @@ Options:
     - With -g|--groupName you can specify a name to give to a group of clients you want to combine.     
     - With -copy you can specify that you want a copy of the file to be move in the daily
       section of the client's webGraphics.
-    - With -n|--collectUpToNow you can specify that data must be collected right up to the minute of the call. 
+    - With -n|--collectUpToNow you can specify that data must be collected right up to the minute of the call.
+    - With -o|--outputLanguage you can specify the language in which the graphics will be outputted.  
     - With -p|--products you can specify the products for wich the data is to come from.
     - With -s|--span you can specify the time span to be used to create the graphic 
     - With -t|--types you can specify what data types need to be collected
@@ -247,20 +258,29 @@ def addOptions( parser ):
     
     parser.add_option( "--copy", action="store_true", dest = "copy", default=False, help=_("Create a copy file for the generated image.") )
    
-    parser.add_option( "--combineClients", action="store_true", dest = "combineClients", default=False, help=_("Combine the data of all client into a single graphics for each graphic type.") )
+    parser.add_option( "--combineClients", action="store_true", dest = "combineClients", default=False, \
+                       help=_("Combine the data of all client into a single graphics for each graphic type.") )
     
-    parser.add_option("-d", "--date", action="store", type="string", dest="currentTime", default=StatsDateLib.getIsoFromEpoch( time.time() ), help=_("Decide current time. Usefull for testing.") )
+    parser.add_option("-d", "--date", action="store", type="string", dest="currentTime", \
+                      default=StatsDateLib.getIsoFromEpoch( time.time() ), help=_("Decide current time. Usefull for testing.") )
     
-    parser.add_option("-f", "--fileType", action="store", type="string", dest="fileType", default='tx', help=_("Type of log files wanted.") )                     
+    parser.add_option("-f", "--fileType", action="store", type="string", dest="fileType", default='tx',\
+                       help=_("Type of log files wanted.") )                     
     
     parser.add_option( "-g", "--groupName", action="store", type="string", dest="groupName", default="",
                         help=_("Specify a name for the combined graphics of numerous client/sources. Note : requires the --combinedClients options to work." ) )       
     
-    parser.add_option( "-m", "--machines", action="store", type="string", dest="machines", default=LOCAL_MACHINE, help = _("Machines for wich you want to collect data.") ) 
+    parser.add_option( "-m", "--machines", action="store", type="string", dest="machines", default=LOCAL_MACHINE,\
+                        help = _("Machines for wich you want to collect data.") ) 
     
-    parser.add_option("-n", "--collectUpToNow", action="store_true", dest = "collectUpToNow", default=False, help=_("Collect data up to current second.") )
+    parser.add_option("-n", "--collectUpToNow", action="store_true", dest = "collectUpToNow", default=False, \
+                      help=_("Collect data up to current second.") )
     
-    parser.add_option("-p", "--products", action="store", type = "string", dest = "productTypes", default=_("All"), help=_("Specific product types to look for in the data collected.") )
+    parser.add_option("-o", "--outputLanguage", action="store", type="string", dest="outputLanguage",\
+                       default=LanguageTools.getMainApplicationLanguage(), help = _("Language in which the graphics are outputted.") ) 
+    
+    parser.add_option("-p", "--products", action="store", type = "string", dest = "productTypes", default=_("All"), \
+                      help=_("Specific product types to look for in the data collected.") )
     
     parser.add_option("-s", "--span", action="store",type ="int", dest = "timespan", default=12, help=_("timespan( in hours) of the graphic.") )
        
@@ -299,9 +319,12 @@ def main():
     
     infos = getOptionsFromParser( parser )          
     
-    gp = ClientGraphicProducer( clientNames = infos.clientNames, groupName = infos.groupName , timespan = infos.timespan, currentTime = infos.currentTime, productTypes = infos.productTypes, directory = infos.directory , fileType = infos.fileType, machines = infos.machines )  
+    gp = ClientGraphicProducer( clientNames = infos.clientNames, groupName = infos.groupName , timespan = infos.timespan,\
+                                currentTime = infos.currentTime, productTypes = infos.productTypes, directory = infos.directory ,\
+                                fileType = infos.fileType, machines = infos.machines, language = infos.outputLanguage )  
     
-    gp.produceGraphicWithHourlyPickles( types = infos.types, now = infos.collectUpToNow, createCopy = infos.copy, combineClients = infos.combineClients )
+    gp.produceGraphicWithHourlyPickles( types = infos.types, now = infos.collectUpToNow, createCopy = infos.copy,\
+                                        combineClients = infos.combineClients )
     
     #print "Done." # replace by logging later.
 
