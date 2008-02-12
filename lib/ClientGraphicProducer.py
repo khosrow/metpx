@@ -6,15 +6,15 @@ named COPYING in the root of the source directory tree.
 ##############################################################################
 ##
 ##
-## Name   : ClientGraphicProducer.py 
+## @name   : ClientGraphicProducer.py 
 ##
 ##
-## Author : Nicholas Lemay
+## @author :  Nicholas Lemay
 ##
-## Date   : 06-07-2006 
+## @since  :  06-07-2006, last updated on 2008-01-23 
 ##
 ##
-## Description : Contains all the usefull classes and methods to produce a graphic 
+## @summary : Contains all the usefull classes and methods to produce a graphic 
 ##               for a certain client. Main use is to build latency graphics
 ##               for one or many clients. Can also produce graphics on
 ##               bytecounts and errors found in log files. 
@@ -24,53 +24,61 @@ named COPYING in the root of the source directory tree.
 """
 
 import gettext, os, time, sys
+
+
+"""
+    - Small function that adds pxStats to sys path.  
+"""
 sys.path.insert(1, sys.path[0] + '/../../')
-"""
-    Small function that adds pxlib to the environment path.  
-"""
-sys.path.insert(1, sys.path[0] + '/../')
-try:
-    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
-except KeyError:
-    pxlib = '/apps/px/lib/'
-sys.path.append(pxlib)
 
-
-"""
-    Imports
-    Logger requires pxlib 
-"""
-import logging 
-
-from Logger import *
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.ClientStatsPickler import ClientStatsPickler
 from pxStats.lib.FileStatsCollector import FileStatsCollector
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.PickleMerging import PickleMerging
-from pxStats.lib.StatsPlotterTest import StatsPlotter
+from pxStats.lib.StatsPlotter import StatsPlotter
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+from pxStats.lib.Translatable import Translatable
+
+"""
+    These imports require pxlib 
+"""
+sys.path.append( StatsPaths.PXLIB )
+
+import logging 
+from Logger import *
 
 
 LOCAL_MACHINE = os.uname()[1]
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__  
 
 
-class ClientGraphicProducer:
+
+class ClientGraphicProducer( Translatable ):
+                
         
-    def __init__( self, directory, fileType, clientNames = None , groupName = "",  timespan = 12, currentTime = None, productTypes = None, logger = None, logging = True, machines = None  ):
+    def __init__( self, directory, fileType, clientNames = None , groupName = "",  timespan = 12,\
+                  currentTime = None, productTypes = None, logger = None, logging = True, machines = None,\
+                  workingLanguage = None, outputLanguage = None  ):
         """
-            ClientGraphicProducer constructor. 
+        
+            @summary  : ClientGraphicProducer constructor. 
             
-            CurrentTime format is ISO meaning "2006-06-8 00:00:00". Will use current
-            system time by default.   
-            
-            CurrentTime is to be used if a different time than sytem time is to be used. 
-            
-            Very usefull for testing or to implement graphic request where user can choose start 
-            time.  
-    
+                        CurrentTime format is ISO meaning 
+                        "2006-06-8 00:00:00". Will use 
+                        current system time by default.   
+                        
+                        CurrentTime is to be used if a different 
+                        time than sytem time is to be used. 
+                        
+                        Very usefull for testing or to implement graphic 
+                        request where user can choose start time.      
         
         """
+        
+        global _
+        _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, workingLanguage )
+        
         
         if currentTime != None :
             currentTime = currentTime 
@@ -88,55 +96,20 @@ class ClientGraphicProducer:
         self.loggerName   = 'graphs'           # Name of the logger
         self.logger       = logger             # Logger to use is logging == true.
         self.logging      = logging            # Whether or not to enable logging. 
+        self.outputLanguage = outputLanguage   # Language in which the graphic will be produced in.
         
         if logging == True:
             if self.logger is None: # Enable logging
                 if not os.path.isdir( StatsPaths.STATSLOGGING ):
                     os.makedirs( StatsPaths.STATSLOGGING , mode=0777 )
-                self.logger = Logger( StatsPaths.STATSLOGGING  + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = 10000000  ) 
+                self.logger = Logger( StatsPaths.STATSLOGGING  + 'stats_' + self.loggerName + '.log.notb', 'INFO',\
+                                      'TX' + self.loggerName, bytes = 10000000  ) 
                 self.logger = self.logger.getLogger()
         else:
             self.logger = None        
     
     
-        ClientGraphicProducer.setGlobalLanguageParameters()
-    
-    
-    def  setGlobalLanguageParameters( language = 'fr'):
-        """
-            @summary : Sets up all the needed global language 
-                       variables so that they can be used 
-                       everywhere in this program.
             
-            
-            @param language: Language that is to be 
-                             outputted by this program. 
-         
-            @return: None
-            
-        """
-        
-        global LANGUAGE 
-        global translator
-        global _ 
-    
-        
-        LANGUAGE = language 
-        
-        if language == 'fr':
-            fileName = StatsPaths.STATSLANGFRLIB + "ClientGraphicProducer" 
-        elif language == 'en':
-            fileName = StatsPaths.STATSLANGENLIB + "ClientGraphicProducer"     
-        
-        translator = gettext.GNUTranslations(open(fileName))
-        
-        _ = translator.gettext    
-    
-    
-    setGlobalLanguageParameters = staticmethod(setGlobalLanguageParameters)  
-    
-            
-                
     def getStartTimeAndEndTime( self, collectUptoNow = False ):
         """
             Warning : collectUptoNow not yet supported in program !
@@ -278,7 +251,10 @@ class ClientGraphicProducer:
             except:
                 pass    
        
-        plotter = StatsPlotter( stats = dataCollection, clientNames = self.clientNames, groupName = self.groupName, timespan = self.timespan, currentTime = endTime, now = False, statsTypes = types, productTypes = self.productTypes, logger = self.logger,logging = self.logging,  machines = self.machines, fileType = self.fileType  )
+        plotter = StatsPlotter( stats = dataCollection, clientNames = self.clientNames, groupName = self.groupName,\
+                                timespan = self.timespan, currentTime = endTime, now = False, statsTypes = types, \
+                                productTypes = self.productTypes, logger = self.logger,logging = self.logging,\
+                                machines = self.machines, fileType = self.fileType, outputLanguage = self.outputLanguage  )
         
         plotter.plot( createCopy )
                                              
