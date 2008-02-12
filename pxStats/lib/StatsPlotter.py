@@ -37,6 +37,7 @@ from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.ClientStatsPickler import ClientStatsPickler
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.LanguageTools import LanguageTools
+from pxStats.lib.Translatable import Translatable
 
 """
     - Small function that adds pxLib to sys path.
@@ -47,23 +48,23 @@ sys.path.append( StatsPaths.PXLIB )
 from   Logger  import Logger
 
 CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__   
-print CURRENT_MODULE_ABS_PATH
+
 
 LOCAL_MACHINE = os.uname()[1]
 
 
-class StatsPlotter:
+
+class StatsPlotter( Translatable ):
+
 
     def __init__( self, timespan,  stats = None, clientNames = None, groupName = "", type='lines',           \
                   interval=1, imageName="gnuplotOutput", title = "Stats", currentTime = "",now = False,      \
                   statsTypes = None, productTypes = ["All"], logger = None, logging = True, fileType = "tx", \
-                  machines = "", entryType = "minute", maxLatency = 15 ):
-        
+                  machines = "", entryType = "minute", maxLatency = 15, workingLanguage = None, outputLanguage = None ):
         """
-            StatsPlotter constructor. 
+            @summary : StatsPlotter constructor. 
             
         """                                                                    
-        StatsPlotter.setGlobalLanguageParameters()
         
         #TODO Verify if all theses fileds are really necessary.    
         machines = "%s" %machines
@@ -101,73 +102,43 @@ class StatsPlotter:
         self.loggerName       = 'statsPlotter'
         self.logger           = logger
         self.logging          = logging
-        
-        
-        if self.fileType == 'tx':
-            self.sourlient = "Client"
-        else:
-            self.sourlient = "Source"  
+        self.workingLanguage  = workingLanguage   # Language with whom we are currently working, in which the string parameters were specified.
+        self. outputLanguage  = outputLanguage    # Language in which the graphics will be produced.
         
         if self.logging == True:
             if self.logger == None: # Enable logging
-                self.logger = Logger( StatsPaths.STATSLOGGING +  'stats_' + self.loggerName + '.log', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
+                self.logger = Logger( StatsPaths.STATSLOGGING +  'stats_' + self.loggerName + '.log',\
+                                      'INFO', 'TX' + self.loggerName, bytes = True  ) 
                 self.logger = self.logger.getLogger()
+        
+        if self.workingLanguage == None:
+            self.workingLanguage = LanguageTools.getMainApplicationLanguage()
+        
+        if self.outputLanguage == None:    
+            self.outputLanguage = LanguageTools.getMainApplicationLanguage()
             
+        if self.workingLanguage not in LanguageTools.getSupportedLanguages():
+            if self.logging == True:
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.workingLanguage )
+                self.logger.error( _("Error. %s is not a supported working language." %( self.workingLanguage ) ) )
+                sys.exit()
+                
+        if self.outputLanguage not in LanguageTools.getSupportedLanguages():
+            if self.logging == True:
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.workingLanguage )
+                self.logger.error( _("Error. %s is not a supported output language." %( self.outputLanguage ) ) )        
+                sys.exit()
+                
+        
+        _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.outputLanguage )        
+        
+        if self.fileType == 'tx':
+            self.sourlient = _("Client")
+        else:
+            self.sourlient = _("Source")
+
         self.xtics       = self.getXTics( )        # Seperators on the x axis.
-
-
-        
-    
-
-    
-    def  setGlobalLanguageParameters():
-        """
-            @summary : Sets up all the needed global language 
-                       tranlator so that it can be used 
-                       everywhere in this program.
             
-            @Note    : The scope of the global _ function 
-                       is restrained to this module only and
-                       does not cover the entire project.
-            
-            @return: None
-            
-        """
-        
-        global _ 
-        
-        _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )    
-    
-    
-    setGlobalLanguageParameters = staticmethod(setGlobalLanguageParameters)
-        
-        
-        
-    def translateDataType( type ):
-        """
-            @summary : Takes a type of the currently used language 
-                       and returns the english version of that type.
-            
-            @param type : Type to be translated, written in the currently 
-                          used language.
-            
-            @return : Returns the translated type.                         
-                        
-        """
-        
-        knownTypes= { _("bytecount"):"bytecount", _("filecount"):"filecount", _("errors"):"errors", _("latency"):"latency", _("filesOverMaxLatency"):"filesOverMaxLatency"}
-        
-        translatedType = ""
-        
-        if type in knownTypes:  
-            translatedType = knownTypes[type]
-        else :
-            translatedType = type      
-        
-        return translatedType
-
-    translateDataType = staticmethod(translateDataType)
-
 
 
     def initialiseArrays( self ):
@@ -191,6 +162,7 @@ class StatsPlotter:
         self.maxFileNames= [ [0.0]*nbTypes  for x in range( nbClients ) ]
         self.filesWhereMaxOccured =  [ [0.0]*nbTypes  for x in range( nbClients ) ] 
             
+
         
     def buildImageName( self ):
         """
@@ -199,6 +171,9 @@ class StatsPlotter:
             If folder to file does not exists creates it.
         
         """ 
+        
+        _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.outputLanguage )
+        
         
         entityName = ""
         
@@ -216,7 +191,7 @@ class StatsPlotter:
         date = self.currentTime.replace( "-","" ).replace( " ", "_")
         
         if self.productTypes[0] == "All" or self.productTypes[0] == "*":
-            formattedProductName = "All" 
+            formattedProductName = _("All")
         else:
             combinedProductsName = ""
             for product in self.productTypes:
@@ -224,8 +199,14 @@ class StatsPlotter:
             
             formattedProductName = combinedProductsName[ :-1 ] #remove trailing _ character.    
         
-        folder =   StatsPaths.STATSGRAPHS + "others/gnuplot/%.50s/" %( entityName )      
-        fileName = folder + "%s_%s_%s_%s_%shours_on_%s_for_%s_products.png" %(  self.fileType, entityName, date, self.statsTypes, self.timespan, self.machines, formattedProductName )
+        folder =   StatsPaths.STATSGRAPHS + _("others/gnuplot/%.50s/") %( entityName )     
+        
+        translatedStatsTypes = [ LanguageTools.translateTerm(statsType, self.workingLanguage, self.outputLanguage, CURRENT_MODULE_ABS_PATH)\
+                                 for statsType in self.statsTypes ] 
+        
+        fileName = folder + _("%s_%s_%s_%s_%shours_on_%s_for_%s_products.png") %(  self.fileType, entityName, date, translatedStatsTypes,\
+                                                                                   self.timespan, self.machines, formattedProductName )
+        
         fileName = fileName.replace( '[', '').replace(']', '').replace(" ", "").replace( "'","" )     
         
         
@@ -234,10 +215,13 @@ class StatsPlotter:
             os.chmod(folder, 0777)
        
         if len( os.path.basename(fileName) ) > (os.statvfs( folder )[statvfs.F_NAMEMAX]): # length of file too long 
-            maximumLength = (os.statvfs( folder )[statvfs.F_NAMEMAX]) - ( 30 + len(date) + len( str(self.statsTypes)) + len( str( self.timespan ) ) )
+            maximumLength = (os.statvfs( folder )[statvfs.F_NAMEMAX]) - ( 30 + len(date) + len( str(translatedStatsTypes)) + len( str( self.timespan ) ) )
             maxIndyLength = maximumLength / 3 
             #reduce entityname, machine names and products wich are the only parts wich can cause us to bust the maximum filename size.
-            fileName = folder + ("%s_%." + str( maxIndyLength )+ "s_%s_%s_%shours_on_%." + str( maxIndyLength ) +"s_for_%." + str( maxIndyLength ) + "s_products.png") %(  self.fileType, entityName, date, self.statsTypes, self.timespan, self.machines, formattedProductName ) 
+            fileName = folder + ( "%s_%." + str( maxIndyLength )+ _("s_%s_%s_%shours_on_%.") + str( maxIndyLength ) + \
+                                 _("s_for_%.") + str( maxIndyLength ) + _("s_products.png") )  \
+                                 %(  self.fileType, entityName, date, translatedStatsTypes, self.timespan,\
+                                     self.machines, formattedProductName ) 
             
         
         return fileName 
@@ -257,6 +241,8 @@ class StatsPlotter:
             
             
         """
+        
+        _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.workingLanguage )
         #print "get x tics"
         if self.logger != None :
             self.logger.debug( _("Call to getXtics received") )
@@ -301,6 +287,7 @@ class StatsPlotter:
         """
         
         if self.logger != None: 
+            _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.outputLanguage )
             self.logger.debug( _("Call to getPairs received.") )
         
         k = 0 
@@ -328,25 +315,25 @@ class StatsPlotter:
                     if len( self.stats[clientCount].statsCollection.fileEntries[k].means ) >=1 :
                             
                         #special manipulation for each type                    
-                        if statType == "latency":
+                        if statType == _("latency"):
                             self.nbFilesOverMaxLatency[clientCount] = self.nbFilesOverMaxLatency[ clientCount ] + self.stats[clientCount].statsCollection.fileEntries[k].filesOverMaxLatency    
                     
-                        elif statType == "bytecount":
+                        elif statType == _("bytecount"):
                             self.totalNumberOfBytes[clientCount] =  self.totalNumberOfBytes[clientCount] +    self.stats[clientCount].statsCollection.fileEntries[k].totals[statType]
                         
                         
-                        elif statType == "errors":
+                        elif statType == _("errors"):
                                                     #calculate total number of errors
                             self.nbErrors[clientCount] = self.nbErrors[clientCount] + self.stats[clientCount].statsCollection.fileEntries[k].totals[statType] 
                         
                           
                         #add to pairs    
-                        if statType == "errors" or statType == "bytecount": #both use totals     
+                        if statType == _("errors") or statType == _("bytecount"): #both use totals     
                             pairs.append( [StatsDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), self.stats[clientCount].statsCollection.fileEntries[k].totals[statType]] )
                                                
                             #print    StatsDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), self.stats[clientCount].statsCollection.fileEntries[k].totals[statType]                        
                         
-                        elif statType == "filecount":
+                        elif statType == _("filecount"):
                             pairs.append( [StatsDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), self.stats[clientCount].statsCollection.fileEntries[k].nbFiles ]  )
                         
                         else:#latency uses means
@@ -355,7 +342,7 @@ class StatsPlotter:
                             
                             #print self.stats[clientCount].statsCollection.timeSeperators[k], self.stats[clientCount].statsCollection.fileEntries[k].means[statType]
                         
-                        if statType == "filecount":
+                        if statType == _("filecount"):
                             
                             if self.stats[clientCount].statsCollection.fileEntries[k].nbFiles > self.maximums[clientCount][typeCount] :
                                 self.maximums[clientCount][typeCount] =  self.stats[clientCount].statsCollection.fileEntries[k].nbFiles
@@ -376,7 +363,7 @@ class StatsPlotter:
                             
                         elif self.stats[clientCount].statsCollection.fileEntries[k].minimums[statType] < self.minimums[clientCount][typeCount] :      
                             
-                            if not ( statType == "bytecount" and  self.stats[clientCount].statsCollection.fileEntries[k].minimums[statType] == 0 ):
+                            if not ( statType == _("bytecount") and  self.stats[clientCount].statsCollection.fileEntries[k].minimums[statType] == 0 ):
                                 self.minimums[clientCount][typeCount] = self.stats[clientCount].statsCollection.fileEntries[k].minimums[statType]
                                                     
                         self.nbFiles[clientCount]  = self.nbFiles[clientCount]  + self.stats[clientCount].statsCollection.fileEntries[k].nbFiles   
@@ -388,7 +375,7 @@ class StatsPlotter:
                 
                 
                 except KeyError:
-                    
+                    _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.workingLanguage )
                     self.logger.error( _("Error in getPairs.") )
                     self.logger.error( _("The %s stat type was not found in previously collected data.") %statType )    
                     pairs.append( [ StatsDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), 0.0 ] )
@@ -457,6 +444,8 @@ class StatsPlotter:
                
         """  
         
+        _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.workingLanguage )
+        
         maximum = self.getMaxPairValue( pairs )
                
         minimum = self.getMinPairValue( pairs )
@@ -474,9 +463,12 @@ class StatsPlotter:
                 minimum = int(minimum)
                 
         if statType == _("latency"):
+            _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.outputLanguage )
             explanation = _("With values rounded for every minutes.")
         else:
+            _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.outputLanguage )
             explanation = _("With the total value of every minutes.")
+                        
                         
         statType = statType[0].upper() + statType[1:]             
               
@@ -484,14 +476,19 @@ class StatsPlotter:
             entityName = self.clientNames[clientIndex]
         else:          
             entityName = self.groupName
-            
-        title =  _("%s for %s for a span of %s hours ending at %s")%(statType, entityName, self.timespan, self.currentTime) +"\\n%s\\n\\n" %explanation +_("MAX: ") + str(maximum) + " " + _("MEAN: ") + "%3.2f"%(self.means[clientIndex][typeCount]) + " " + _("MIN: ") +str(minimum)     
+        
+        
+        _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.outputLanguage )    
+        title =  _("%s for %s for a span of %s hours ending at %s")\
+                 %( LanguageTools.translateTerm(statType, self.workingLanguage, self.outputLanguage, CURRENT_MODULE_ABS_PATH),\
+                    entityName, self.timespan, self.currentTime) + "\\n%s\\n\\n" %explanation +_("MAX: ") + str(maximum) + " " +\
+                    _("MEAN: ") + "%3.2f"%(self.means[clientIndex][typeCount]) + " " + _("MIN: ") +str(minimum)     
         
         return title
         
     
     
-    def createCopy( self, copyToArchive = True , copyToColumbo = True):
+    def createCopy( self, copyToArchive = True , copyToColumbo = True ):
         """
             Creates a copy of the created image file so that it
             easily be used in px's columbo or other daily image program. 
@@ -500,6 +497,8 @@ class StatsPlotter:
             please modify this method accordingly!
             
         """
+        
+        _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.outputLanguage )
         
         src = self.imageName
         
@@ -519,12 +518,15 @@ class StatsPlotter:
                     if name != self.clientNames[ len(self.clientNames) -1 ] :
                         clientName = clientName + "-" 
         
+        
+        StatsDateLib.setLanguage( self.outputLanguage ) # Makes sure month is in the right language.
         year, month, day = StatsDateLib.getYearMonthDayInStrfTime( StatsDateLib.getSecondsSinceEpoch( self.currentTime ) )        
+        StatsDateLib.setLanguage( self.workingLanguage )# Sets language back to working language.
+            
                                         
         if copyToArchive == True : 
-            destination = StatsPaths.STATSGRAPHSARCHIVES + "daily/%s/%s/"%( self.fileType, clientName ) + str(year) + "/" + str(month) + "/" + str(day) + ".png"
-            
-            
+            destination = StatsPaths.STATSGRAPHSARCHIVES + _("daily/%s/%s/") %( self.fileType, clientName ) + str(year) + "/" + str(month) + "/" + str(day) + ".png"
+                        
             if not os.path.isdir( os.path.dirname( destination ) ):
                 os.makedirs(  os.path.dirname( destination ), 0777 )   
                 dirname = os.path.dirname( destination )                                                  
@@ -573,8 +575,10 @@ class StatsPlotter:
             
         """
         
+        _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.workingLanguage ) 
+        
         if self.logger != None:
-            self.logger.debug( "Call to plot received" )
+            self.logger.debug( _("Call to plot received") )
         
         #Set general settings for graphs 
         color = 1
@@ -621,7 +625,8 @@ class StatsPlotter:
                        
             for statsTypeIndex in range ( len ( self.statsTypes ) ):
                 
-                pairs        = self.getPairs( clientCount = clientIndex , statType= StatsPlotter.translateDataType(self.statsTypes[statsTypeIndex]), typeCount = statsTypeIndex )
+                pairs        = self.getPairs( clientCount = clientIndex , statType= StatsPlotter.translateDataType(self.statsTypes[statsTypeIndex]),\
+                                             typeCount = statsTypeIndex )
                 maxPairValue = self.getMaxPairValue( pairs )
                 self.maxLatency = self.stats[clientIndex].statsCollection.maxLatency
                 
@@ -664,6 +669,8 @@ class StatsPlotter:
             Used to set proper labels for a graph relating to latencies. 
              
         """            
+        
+        _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.outputLanguage )
         
         if self.maximums[clientIndex][statsTypeIndex] != None and self.maximums[clientIndex][statsTypeIndex] !=0 :
             
@@ -732,6 +739,8 @@ class StatsPlotter:
             Used to set proper labels for a graph relating to bytes. 
              
         """            
+        
+        _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.outputLanguage )
         
         if self.maximums[clientIndex][statsTypeIndex] != None and self.maximums[clientIndex][statsTypeIndex] != 0 :
             
@@ -814,7 +823,9 @@ class StatsPlotter:
             Used to set proper labels for a graph relating to bytes. 
              
         """   
-                 
+        
+        _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.outputLanguage )         
+        
         if self.maximums[clientIndex][statsTypeIndex] !=None and self.maximums[clientIndex][statsTypeIndex] != 0 :
             
             timeOfMax =  self.timeOfMax[clientIndex][statsTypeIndex]
@@ -872,7 +883,9 @@ class StatsPlotter:
             @summary: Used to set proper labels for a graph relating to bytes. 
              
         """   
-                 
+        
+        _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.outputLanguage )         
+        
         if self.maximums[clientIndex][statsTypeIndex] !=None and self.maximums[clientIndex][statsTypeIndex] != 0 :
             
             timeOfMax =  self.timeOfMax[clientIndex][statsTypeIndex]
