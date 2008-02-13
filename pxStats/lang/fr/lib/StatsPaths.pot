@@ -1,0 +1,100 @@
+#: StatsPaths.py:376
+msgid "data/"
+msgstr "donnees/"
+
+#: StatsPaths.py:377
+msgid "doc/"
+msgstr "doc/"
+
+#: StatsPaths.py:378
+msgid "logs/"
+msgstr "journalisation/"
+
+#: StatsPaths.py:379
+msgid "man/"
+msgstr "man/"
+
+#: StatsPaths.py:380
+msgid "temp/"
+msgstr "temp/"
+
+#: StatsPaths.py:383
+msgid "databases/"
+msgstr "basesDeDonnees/"
+
+#: StatsPaths.py:384
+msgid "currentDatabases/"
+msgstr "basesDeDonneesCourantes/"
+
+#: StatsPaths.py:385
+msgid "currentDatabasesTimeOfUpdates/"
+msgstr "tempsMAJBasesDeDonneesCourantes/"
+
+#: StatsPaths.py:386
+msgid "databasesBackups/"
+msgstr "basesDeDonneesEmmagasinees/"
+
+#: StatsPaths.py:387
+msgid "databasesTimeOfUpdatesBackups/"
+msgstr "tempsMAJBdEmmagasinnees/"
+
+#: StatsPaths.py:390
+msgid "fileAcessVersions/"
+msgstr "versionsFichiersDacces/"
+
+#: StatsPaths.py:391
+msgid "logFileAccess/"
+msgstr "accesFichiersJournalisation/"
+
+#: StatsPaths.py:392
+msgid "monitoring/"
+msgstr "surveillance/"
+
+#: StatsPaths.py:393
+msgid "pickles/"
+msgstr "pickles/"
+
+#: StatsPaths.py:394
+msgid "logFiles/"
+msgstr "fichiersJournalisation/"
+
+#: StatsPaths.py:395
+msgid "webPages/"
+msgstr "pagesWeb/"
+
+#: StatsPaths.py:396
+msgid "html/"
+msgstr "html/"
+
+#: StatsPaths.py:397
+msgid "wordDatabases/"
+msgstr "banqueDeMots/"
+
+#: StatsPaths.py:398
+msgid "graphics/"
+msgstr "graphiques/"
+
+#: StatsPaths.py:399
+msgid "webGraphics/"
+msgstr "graphiquesWeb/"
+
+#: StatsPaths.py:400
+msgid "archives/"
+msgstr "archives/"
+
+#: StatsPaths.py:402
+msgid "columbo/"
+msgstr "columbo/"
+
+#: StatsPaths.py:404
+msgid "picklesTimeOfUpdates/"
+msgstr "tempsMAJPickles/"
+
+#: StatsPaths.py:405
+msgid "previousMachineParameters"
+msgstr "ancientsParametres"
+
+#: StatsPaths.py:407
+msgid "lockFiles/"
+msgstr "fichiersDeVerrou/"
+
