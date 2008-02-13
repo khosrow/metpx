@@ -1,0 +1,121 @@
+msgid ""
+msgstr ""
+
+
+msgid "bin/"
+msgstr "bin/"
+
+msgid "data/"
+msgstr "data/"
+
+msgid "dev/"
+msgstr "dev/"
+
+msgid "doc/"
+msgstr "doc/"
+
+msgid "etc/"
+msgstr "etc/"
+
+msgid "lang/"
+msgstr "lang/"
+
+msgid "lib/"
+msgstr "lib/"
+
+msgid "logs/"
+msgstr "logs/"
+
+msgid "man/"
+msgstr "man/"
+
+msgid "temp/"
+msgstr "temp/"
+
+msgid "tools/"
+msgstr "tools/"
+
+msgid "debugTools/"
+msgstr "debugTools/"
+
+msgid "webPages/"
+msgstr "webPages/"
+
+msgid "pxConfigFiles/"
+msgstr "pxConfigFiles/"
+
+msgid "rx/"
+msgstr "rx/"
+
+msgid "tx/"
+msgstr "tx/"
+
+msgid "trx/"
+msgstr "trx/"
+
+msgid "fileDependencies/"
+msgstr "fileDependencies/"
+
+msgid "fr/"
+msgstr "fr/"
+
+msgid "en/"
+msgstr "en/"
+
+msgid "databases/"
+msgstr "databases/"
+
+msgid "currentDatabases/"
+msgstr "currentDatabases/"
+
+msgid "currentDatabasesTimeOfUpdates/"
+msgstr "currentDatabasesTimeOfUpdates/"
+
+msgid "databasesBackups/"
+msgstr "databasesBackups/"
+
+msgid "databasesTimeOfUpdatesBackups/"
+msgstr "databasesTimeOfUpdatesBackups/"
+
+msgid "fileAcessVersions/"
+msgstr "fileAcessVersions/"
+
+msgid "logFileAccess/"
+msgstr "logFileAccess/"
+
+msgid "monitoring/"
+msgstr "monitoring/"
+
+msgid "pickles/"
+msgstr "pickles/"
+
+msgid "logFiles/"
+msgstr "logFiles/"
+
+msgid "html/"
+msgstr "html/"
+
+msgid "wordDatabases/"
+msgstr "wordDatabases/"
+
+msgid "graphics/"
+msgstr "graphics/"
+
+msgid "webGraphics/"
+msgstr "webGraphics/"
+
+msgid "archives/"
+msgstr "archives/"
+
+msgid "columbo/"
+msgstr "columbo/"
+
+msgid "picklesTimeOfUpdates/"
+msgstr "picklesTimeOfUpdates/"
+
+msgid "previousMachineParameters"
+msgstr "previousMachineParameters"
+
+msgid "lockFiles/"
+msgstr "lockFiles/"
+
