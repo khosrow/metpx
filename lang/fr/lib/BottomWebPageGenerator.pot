@@ -1,0 +1,4 @@
+#: BottomWebPageGenerator.py:88 BottomWebPageGenerator.py:153
+msgid "English version."
+msgstr "Version francaise."
+
