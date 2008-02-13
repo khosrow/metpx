@@ -37,9 +37,9 @@ import commands, os, sys
     - Small function that adds pxStats to sys path.  
 """
 sys.path.insert(1, sys.path[0] + '/../../')
-from pxStats.lib.Translatable import Translatable
+
  
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__.split(".")[-1:][0]
 
 
 class COLPATHS :
@@ -127,7 +127,7 @@ class PXPATHS:
 
 
 
-class StatsPaths( Translatable ):
+class StatsPaths:
     
     
     def init( self  ):
@@ -234,16 +234,109 @@ class StatsPaths( Translatable ):
                                                           
         self.STATSTEMPLOCKFILES = None
     
-        global _ 
-        _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, None )
     
     
+    def __getPXStatsRoot(self):
+        """
+            Stats specific paths.
+            pxStats must be checked-out in a pxStats folder.
     
+        """ 
+        
+        realPath = os.path.realpath( __file__ )
+        foundSymlink = ''
+        associatedPath = ''
+        dirname =  os.path.dirname(realPath)
+        while( dirname != '/'):
+            
+            if os.path.islink(os.path.dirname(realPath)):
+                foundSymlink =  os.path.dirname(realPath)
+                associatedPath = os.path.realpath( os.path.dirname(realPath)  )
+                break
+            dirname =  os.path.dirname( dirname )
+        
+        if foundSymlink !='':
+            STATSROOT = associatedPath + '/'+ realPath.split( foundSymlink )[1]
+        else:
+            STATSROOT= realPath
+        while(os.path.basename(STATSROOT) != "pxStats" ):
+            STATSROOT = os.path.dirname(STATSROOT)
+        
+        return STATSROOT
+        
+        
+    def setBasicPaths(self):
+        """
+            @summary : Sets basic paths which are not influenced by language.
+                       Use full for finding ot what language to use and to call
+                       self.setPaths( language ) later on.
+        
+            @note : SETS THE FOLLOWING PATHS :     
+                     STATSROOT , STATSBIN  
+                     STATSETC, STATSLIB
+                     STATSDEV, STATSLANG
+                     Ans the paths under them.
+                     
+                     
+            @note:          
+        """
+                
+        # Protected StatsPaths
+        # Paths without _() are protexted paths.  
+        # THEY, and the paths under them, MUST NOT BE TRANSLATED !        
+        self.STATSROOT = self.__getPXStatsRoot() + "/"
+        self.STATSBIN     = self.STATSROOT +  'bin/'  # Protected to ensure imports work !
+        self.STATSDEV     = self.STATSROOT +  'dev/'  # Protected to make sure dependencies work.
+        self.STATSETC     = self.STATSROOT +  'etc/'  # Protected as to always fin the config files.
+        self.STATSLANG    = self.STATSROOT +  'lang/' # Protected as to always be able to access languages files.
+        self.STATSLIB     = self.STATSROOT +  'lib/'  # Protected to ensure imports work !
+        
+        
+        # Paths under pxStats/bin/
+        self.STATSTOOLS   = self.STATSBIN  +  'tools/'
+        self.STATSDEBUGTOOLS = self.STATSBIN + 'debugTools/' 
+        self.STATSWEBPAGESGENERATORS = self.STATSBIN +  "webPages/" 
+        
+        # Paths under pxStats/etc/
+        self.STATSPXCONFIGS    = self.STATSETC +  'pxConfigFiles/' 
+        self.STATSPXRXCONFIGS  = self.STATSPXCONFIGS +  'rx/' 
+        self.STATSPXTXCONFIGS  = self.STATSPXCONFIGS +  'tx/' 
+        self.STATSPXTRXCONFIGS = self.STATSPXCONFIGS +  'trx/' 
+        
+        #Paths under pxStats/dev/
+        self.STATSDEVDEPENDENCIES             = self.STATSDEV +  'fileDependencies/'
+        self.STATSDEVDEPENDENCIESBIN          = self.STATSDEVDEPENDENCIES +  'bin/' 
+        self.STATSDEVDEPENDENCIESBINTOOLS     = self.STATSDEVDEPENDENCIESBIN +  'tools/' 
+        self.STATSDEVDEPENDENCIESBINDEBUGTOOLS= self.STATSDEVDEPENDENCIESBIN +  'debugTools/' 
+        self.STATSDEVDEPENDENCIESBINWEBPAGES  = self.STATSDEVDEPENDENCIESBIN +  'webPages/' 
+        self.STATSDEVDEPENDENCIESLIB          = self.STATSDEVDEPENDENCIES +  'lib/' 
+
+
+        #Paths under pxStats/lang/ (French paths )
+        self.STATSLANGFR              = self.STATSLANG +  'fr/' 
+        self.STATSLANGFRBIN           = self.STATSLANGFR +  'bin/' 
+        self.STATSLANGFRBINTOOLS      = self.STATSLANGFRBIN +  'tools/' 
+        self.STATSLANGFRBINDEBUGTOOLS = self.STATSLANGFRBIN +  'debugTools/' 
+        self.STATSLANGFRBINWEBPAGES   = self.STATSLANGFRBIN +  'webPages/' 
+        self.STATSLANGFRLIB           = self.STATSLANGFR +  'lib/' 
+        
+        #Paths under pxStats/lang/ (English paths ) 
+        self.STATSLANGEN              = self.STATSLANG +  'en/' 
+        self.STATSLANGENBIN           = self.STATSLANGEN +  'bin/' 
+        self.STATSLANGENBINTOOLS      = self.STATSLANGENBIN +  'tools/' 
+        self.STATSLANGENBINDEBUGTOOLS = self.STATSLANGENBIN +  'debugTools/' 
+        self.STATSLANGENBINWEBPAGES   = self.STATSLANGENBIN +  'webPages/' 
+        self.STATSLANGENLIB           = self.STATSLANGEN +  'lib/' 
+        
+        
+        
+        
     def setPaths( self, language = None ):
     
         global _ 
-        _ = self.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, language)
-     
+        from pxStats.lib.LanguageTools import LanguageTools
+        _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, language )
+        print CURRENT_MODULE_ABS_PATH, language
      
         sys.path.append( PXPATHS.getPXLIBPath() )
     
@@ -271,82 +364,29 @@ class StatsPaths( Translatable ):
         self.PXETCTX  = PXPaths.TX_CONF
         self.PXETCTRX = PXPaths.TRX_CONF
         
-        
-        """
-            Stats specific paths.
-            pxStats must be checked-out in a pxStats folder.
-        """ 
-        realPath = os.path.realpath( __file__ )
-        foundSymlink = ''
-        associatedPath = ''
-        dirname =  os.path.dirname(realPath)
-        while( dirname != '/'):
-            
-            if os.path.islink(os.path.dirname(realPath)):
-                foundSymlink =  os.path.dirname(realPath)
-                associatedPath = os.path.realpath( os.path.dirname(realPath)  )
-                break
-            dirname =  os.path.dirname( dirname )
-        
-        if foundSymlink !='':
-            STATSROOT = associatedPath + '/'+ realPath.split( foundSymlink )[1]
-        else:
-            STATSROOT= realPath
-        while(os.path.basename(STATSROOT) != "pxStats" ):
-            STATSROOT = os.path.dirname(STATSROOT)
-        
-        self.STATSROOT = STATSROOT + "/"   
            
-         
-        self.STATSBIN     = self.STATSROOT + _( 'bin/' )
-        self.STATSDATA    = self.STATSROOT + _( 'data/' )
-        self.STATSDEV     = self.STATSROOT + _( 'dev/' )
+        """
+            Sets all the paths that can not be translated.
+        """
+        self.setBasicPaths()
+
+        """
+            Translatable paths.
+        """
+        self.STATSDATA    = self.STATSROOT +  _('data/')
         self.STATSDOC     = self.STATSROOT + _( 'doc/' )
-        self.STATSETC     = self.STATSROOT + _( 'etc/' )
-        self.STATSLANG    = self.STATSROOT + _( 'lang/' )
-        self.STATSLIB     = self.STATSROOT + _( 'lib/' )
         self.STATSLOGGING = self.STATSROOT + _( 'logs/' )
         self.STATSMAN     = self.STATSROOT + _( 'man/' )
-        self.STATSTEMP    = self.STATSROOT + _( "temp/" )
-        self.STATSTOOLS   = self.STATSBIN  + _( 'tools/' )
-        self.STATSDEBUGTOOLS = self.STATSBIN + _( 'debugTools/'  )
-        self.STATSWEBPAGESGENERATORS = self.STATSBIN + _( "webPages/"  )
-        
-        self.STATSPXCONFIGS    = self.STATSETC + _( 'pxConfigFiles/'  )
-        self.STATSPXRXCONFIGS  = self.STATSPXCONFIGS + _( 'rx/' )
-        self.STATSPXTXCONFIGS  = self.STATSPXCONFIGS + _( 'tx/' )
-        self.STATSPXTRXCONFIGS = self.STATSPXCONFIGS + _( 'trx/' )
-        
-        self.STATSDEVDEPENDENCIES             = self.STATSDEV + _( 'fileDependencies/' )
-        self.STATSDEVDEPENDENCIESBIN          = self.STATSDEVDEPENDENCIES + _( 'bin/' )
-        self.STATSDEVDEPENDENCIESBINTOOLS     = self.STATSDEVDEPENDENCIESBIN + _( 'tools/' )
-        self.STATSDEVDEPENDENCIESBINDEBUGTOOLS= self.STATSDEVDEPENDENCIESBIN + _( 'debugTools/' )
-        self.STATSDEVDEPENDENCIESBINWEBPAGES  = self.STATSDEVDEPENDENCIESBIN + _( 'webPages/' )
-        self.STATSDEVDEPENDENCIESLIB          = self.STATSDEVDEPENDENCIES + _( 'lib/' )
-        
-        self.STATSLANGFR              = self.STATSLANG + _( 'fr/' )
-        self.STATSLANGFRBIN           = self.STATSLANGFR + _( 'bin/' )
-        self.STATSLANGFRBINTOOLS      = self.STATSLANGFRBIN + _( 'tools/' )
-        self.STATSLANGFRBINDEBUGTOOLS = self.STATSLANGFRBIN + _( 'debugTools/' )
-        self.STATSLANGFRBINWEBPAGES   = self.STATSLANGFRBIN + _( 'webPages/' )
-        self.STATSLANGFRLIB           = self.STATSLANGFR + _( 'lib/' )
-         
-        self.STATSLANGEN              = self.STATSLANG + _( 'en/' )
-        self.STATSLANGENBIN           = self.STATSLANGEN + _( 'bin/' )
-        self.STATSLANGENBINTOOLS      = self.STATSLANGENBIN + _( 'tools/' )
-        self.STATSLANGENBINDEBUGTOOLS = self.STATSLANGENBIN + _( 'debugTools/' )
-        self.STATSLANGENBINWEBPAGES   = self.STATSLANGENBIN + _( 'webPages/' )
-        self.STATSLANGENLIB           = self.STATSLANGEN + _( 'lib/' )
-        
-        self.STATSLIBRARY = self.STATSLIB
-        
+        self.STATSTEMP    = self.STATSROOT + _( "temp/" )       
+
+        #Databases related paths.
         self.STATSDB               = self.STATSDATA + _( 'databases/' )
         self.STATSCURRENTDB        = self.STATSDB   + _( 'currentDatabases/' )
         self.STATSCURRENTDBUPDATES = self.STATSDB   + _( 'currentDatabasesTimeOfUpdates/' )
         self.STATSDBBACKUPS        = self.STATSDB   + _( 'databasesBackups/' )
         self.STATSDBUPDATESBACKUPS = self.STATSDB   + _( 'databasesTimeOfUpdatesBackups/' )
         
-        
+        #Various paths under pxStats/data/
         self.STATSFILEVERSIONS     = self.STATSDATA + _( 'fileAcessVersions/' )
         self.STATSLOGACCESS        = self.STATSDATA + _( 'logFileAccess/' )
         self.STATSMONITORING       = self.STATSDATA + _( 'monitoring/' )
