@@ -7,12 +7,12 @@ named COPYING in the root of the source directory tree.
 ##############################################################################
 ##
 ##
-## Name   : weeklyGraphicsWebPage.py 
+## @name   : WeeklyGraphicsWebPageGenerator.py 
 ##
 ##
 ## @author:  Nicholas Lemay
 ##
-## @since:  22-11-2006 ,last updated on 2007-10-23 
+## @since    :  2006-11-22, last updated on 2008-02-19
 ##
 ##
 ## @summary : Generates a web pages that gives access to user 
@@ -52,9 +52,9 @@ LOCAL_MACHINE = os.uname()[1]
    
 NB_WEEKS_DISPLAYED = 3 
 
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__ 
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "WeeklyGraphicsWebPageGenerator.py" 
 
-class DailyGraphicsWebPageGenerator( WebPageGeneratorInterface ): 
+class WeeklyGraphicsWebPageGenerator( WebPageGeneratorInterface ): 
 
 
 
