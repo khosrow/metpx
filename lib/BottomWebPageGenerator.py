@@ -76,8 +76,7 @@ class BottomWebPageGenerator(Translatable):
             
             fileHandle.write( """
                 function %sVersionWasClicked(){
-                    document.getElementById("linksSection").innerHTML = ' """%(languageUsed)
-            )
+                    document.getElementById("linksSection").innerHTML = '  """%(languageUsed) )
             
             for i in range( len( otherLanguages ) ):
                 _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, otherLanguages[i] )
@@ -85,7 +84,7 @@ class BottomWebPageGenerator(Translatable):
                     fileHandle.write("""<a href="top_%s.html" target="top" onclick="JavaScript:%sVersionWasClicked()">"""%(otherLanguages[i],otherLanguages[i]) + _("English version.")+ """</a>""")
                 except:
                     print "Error.Unsupported language detected."
-                    print "Make sure %s is a supported language" %()
+                    print "Make sure %s is a supported language" %(otherLanguages[i])
                     print "Program terminated"
                     sys.exit()
                 if i !=  (len(otherLanguages ) -1):
@@ -93,15 +92,17 @@ class BottomWebPageGenerator(Translatable):
                 
                 
             fileHandle.write( """ ';    
-                
+                document.getElementById("logo").src = "images/mainLogo_%s.png"
                 }
-            """)
+            """ %(languageUsed))
         
         
         fileHandle.write( """            
         </script>
         
         """)
+        
+        
         
     def printWebPage( self ):
         """ 
@@ -129,11 +130,11 @@ class BottomWebPageGenerator(Translatable):
         
         fileHandle.write("""  
              <body bgcolor="#FFD684">
-                  <div style="position:absolute;top:20%;vertical-align: middle;text-align:center;left:15%;bottom:0%;">
-                     <img name="logo" id="logo" src="images/mainLogo.gif" ></img>
+                  <div style="position:absolute;top:20%%;vertical-align: middle;text-align:center;left:15%%;bottom:0%%;">
+                     <img name="logo" id="logo" src="images/mainLogo_%s.png" ></img>
      
                   </div>
-        """)
+        """ %self.mainLanguage)
         
             
         fileHandle.write( """
@@ -148,7 +149,7 @@ class BottomWebPageGenerator(Translatable):
                     fileHandle.write("""<a href="top_%s.html" target="top" onclick="JavaScript:%sVersionWasClicked()">"""%( self.otherLanguages[i],self.otherLanguages[i]) + _("English version.")+ """</a>""")
                 except:
                     print "Error.Unsupported language detected."
-                    print "Make sure %s is a supported language" %()
+                    print "Make sure %s is a supported language" %( self.otherLanguages[i] )
                     print "Program terminated"
                     sys.exit()
                     
