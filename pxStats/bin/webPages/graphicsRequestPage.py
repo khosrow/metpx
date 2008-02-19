@@ -13,7 +13,7 @@ named COPYING in the root of the source directory tree.
 ##
 ## @author :  Nicholas Lemay
 ##
-## @since  : 2007-06-28, last updated on  2007-08-07
+## @since  : 2007-06-28, last updated on  2008-02-19
 ##
 ##
 ## @summary : This file is to be hosted on a cgi-enabled web server as to 
@@ -31,32 +31,30 @@ named COPYING in the root of the source directory tree.
 
 """ IMPORTS """
 
-import gettext, os, time, sys
+import os, time, sys
 import cgi, cgitb; cgitb.enable()
+
+
+"""
+    Small method required to add pxStats to syspath.
+"""
 sys.path.insert(1, sys.path[0] + '/../../')
 sys.path.insert(2, sys.path[0] + '/../../..')
-try:
-    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
-except KeyError:
-    pxlib = '/apps/px/lib/'
-sys.path.append(pxlib)
-
-from PXManager import *
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
-from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
-
-
-"""
-
-    NOTES : CONSTANTS AND GLOBAL VARIABLES WHICH ARE USAUALLY DEFINED HERE ARE DEFINED IN 
-    THE setGlobalLanguageParameters METHOD.....
-
+from pxStats.lib.LanguageTools import LanguageTools
 
 """
+    Small method required to add pxLib to syspath.
+"""
+PATHS = StatsPaths()
+PATHS.setBasicPaths()
+sys.path.append( PATHS.PXLIB ) 
 
+from PXManager import * #Found within pxlib
 
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "graphicsRequestPage.py" 
 
 
 def getWordsFromFile( file ):
@@ -2309,13 +2307,38 @@ def getForm():
     return  form
     
 
+def getLanguage( form ):
+    """
+        @summary : Returns the language in which 
+                   the page should be generated.
+        
+        @param form: Form containing hte parameters 
+                     with whom this program was
+                     called.
+    
+    """
+    
+    language = ""
+    
+    try :
+        language = form["lang"]
+        
+        if language not in LanguageTools.getSupportedLanguages():
+            raise Exception( "Error. Unsupported language detected." )
+    except:
+        language = LanguageTools.getMainApplicationLanguage()
+    
+    return language 
 
-def  setGlobalLanguageParameters( language = 'en'):
+
+    
+def  setGlobalLanguageParameters( form ):
     """
         @summary : Sets up all the needed global language 
                    variables so that they can be used 
                    everywhere in this program.
         
+        @param form 
         
         @param language: Language that is to be 
                          outputted by this program. 
@@ -2324,9 +2347,10 @@ def  setGlobalLanguageParameters( language = 'en'):
         
     """
     
-    global LANGUAGE 
-    global translator
+    
     global _ 
+    global LANGUAGE 
+    global translator    
     global SUPPORTED_FILETYPES
     global RX_DATATYPES
     global TX_DATATYPES
@@ -2337,15 +2361,9 @@ def  setGlobalLanguageParameters( language = 'en'):
     global MAIN_MACHINES
     global OTHER_MACHINES
     
-    LANGUAGE = language 
+    language = getLanguage( form )     
     
-    if language == 'fr':
-        fileName = StatsPaths.STATSLANGFRBINWEBPAGES + "graphicsRequestPage" 
-    elif language == 'en':
-        fileName = StatsPaths.STATSLANGENBINWEBPAGES + "graphicsRequestPage"      
-    
-    translator = gettext.GNUTranslations(open(fileName))
-    _ = translator.gettext
+    _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, language )
         
     
     SUPPORTED_FILETYPES = [ "rx","tx"]
@@ -2375,11 +2393,13 @@ def main():
                    on parameters.  
     """    
     
-    setGlobalLanguageParameters( language = 'fr')
+    
     
     getAvailableMachines()
     
     form = getForm()
+    
+    setGlobalLanguageParameters( form )
     
     buildWebPageBasedOnReceivedForm( form )
       
