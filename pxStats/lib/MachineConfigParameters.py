@@ -57,7 +57,7 @@ class MachineConfigParameters:
             
             self.machinesForMachineTags = machinesForMachineTags
             self.machines = machines  
-            self.userNames = usersNames
+            self.userNames = userNames
                         
             for userName in userNames:
                 if userName not in self.machines:
@@ -230,8 +230,11 @@ class MachineConfigParameters:
                  containing all the found parameters.            
         
         '''
-                  
-        CONFIG = StatsPaths.STATSETC + "configForMachines"     
+        
+        paths = StatsPaths()          
+        paths.setBasicPaths()
+        
+        CONFIG = paths.STATSETC + "configForMachines"     
         
         if os.path.isfile( CONFIG ):
             
