@@ -13,7 +13,7 @@ named COPYING in the root of the source directory tree.
 ##
 ## @author :  Nicholas Lemay
 ##
-## @since  : 2007-06-28, last updated on  2007-07-17 
+## @since  : 2007-06-28, last updated on  2008-02-19 
 ##
 ##
 ## @summary : This file is to be used as a bridge between the graphics 
@@ -36,18 +36,18 @@ sys.path.insert(1, sys.path[0] + '/../../')
 sys.path.insert(2, sys.path[0] + '/../../..')
 
 from pxStats.lib.StatsPaths import StatsPaths
-from pxStats.lib.ClientGraphicProducer import ClientGraphicProducer
-from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.GnuQueryBroker import GnuQueryBroker
 from pxStats.lib.RRDQueryBroker import RRDQueryBroker
+from pxStats.lib.LanguageTools import LanguageTools
 from cgi import escape
 
 
 
 LOCAL_MACHINE = os.uname()[1]
 
-EXPECTED_PARAMETERS = ['querier','endTime','groupName','span','fileType','machines','statsTypes','preDeterminedSpan','sourlients','combineSourlients','products']
+EXPECTED_PARAMETERS = [ 'lang', 'querier','endTime','groupName','span','fileType','machines','statsTypes','preDeterminedSpan','sourlients','combineSourlients','products']
 
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "graphicsRequestBroker.py" 
 
 
 def returnToQueriersLocationWithReply( querier, reply ):
@@ -92,6 +92,7 @@ def getQuerierLocation( form ):
         
     return querier
     
+
     
 def handlePlotRequest( form ): 
     """
@@ -199,36 +200,49 @@ def getForm():
     #print form 
            
     return  form
-     
+
+
+
+def getLanguage( form ):
+    """
+        @summary : Returns the language in which 
+                   the page should be generated.
+        
+        @param form: Form containing hte parameters 
+                     with whom this program was
+                     called.
+    
+    """
+    
+    language = ""
+    
+    try :
+        language = form["lang"]
+        
+    except:
+        pass
+    
+    return language      
+
 
      
-def  setGlobalLanguageParameters( language = 'en'):
+def  setGlobalLanguageParameters( language ):
     """
         @summary : Sets up all the needed global language 
                    variables so that they can be used 
                    everywhere in this program.
         
         
-        @param language: Language that is to be 
-                         outputted by this program. 
+        @param language: language with whom this 
+                         script was called.
      
         @return: None
         
     """
     
-    global LANGUAGE 
-    global translator
     global _ 
 
-    LANGUAGE = language 
-    
-    if language == 'fr':
-        fileName = StatsPaths.STATSLANGFRBINWEBPAGES + "graphicsRequestBroker" 
-    elif language == 'en':
-        fileName = StatsPaths.STATSLANGFRBINWEBPAGES + "graphicsRequestBroker"      
-    
-    translator = gettext.GNUTranslations(open(fileName))
-    _ = translator.gettext     
+    _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, language)    
      
      
  
@@ -238,20 +252,35 @@ def main():
                   executes query using a broker that's specific to 
                   the said plotter.
     """
+    
        
     
-    try:
-        
-        setGlobalLanguageParameters()
+    try:              
         
         form = getForm()
         
-        plotterType = getPlotterType( form )
+        language = getLanguage( form )
         
-        handlePlotRequest(form)
+        
+        if language == "" : # unspecified language.
+            
+            querier = getQuerierLocation( form )
+            reply = "images=;error=" + _("Error in query broker. Cannot proceed with query. No language was specified.")
+            returnToQueriersLocationWithReply( querier, reply )
+        
+        elif language not in LanguageTools.getSupportedLanguages(): # unsupported language
+            
+            querier = getQuerierLocation( form )
+            reply = "images=;error=" + _("Error in query broker. Cannot proceed with query. %s is not a supported language.") %language
+            returnToQueriersLocationWithReply( querier, reply )
+                       
+        else: #params seem ok
+            
+            setGlobalLanguageParameters( language  )
+            handlePlotRequest(form)
     
-    except Exception, instance :   
-        fileHandle= open('out','w')
+    except Exception, instance :   #temp file helpfull for debugging!
+        fileHandle= open('graphicsRequestBrokerDebuggingOutput','w')
         fileHandle.write( str(instance) )
         fileHandle.close()
         
