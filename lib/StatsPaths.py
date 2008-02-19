@@ -330,16 +330,8 @@ class StatsPaths:
         
         
         
-        
-    def setPaths( self, language = None ):
-    
-        global _ 
-        from pxStats.lib.LanguageTools import LanguageTools
-        _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, language )
-        print CURRENT_MODULE_ABS_PATH, language
-     
         sys.path.append( PXPATHS.getPXLIBPath() )
-    
+        #print PXPATHS.getPXLIBPath()
         import PXPaths
         
         self.COLROOT = COLPATHS.getColumbosRootPath()
@@ -362,9 +354,17 @@ class StatsPaths:
         self.PXETC    = PXPaths.ETC 
         self.PXETCRX  = PXPaths.RX_CONF
         self.PXETCTX  = PXPaths.TX_CONF
-        self.PXETCTRX = PXPaths.TRX_CONF
+        self.PXETCTRX = PXPaths.TRX_CONF        
         
-           
+        
+        
+    def setPaths( self, language = None ):
+    
+        global _ 
+        from pxStats.lib.LanguageTools import LanguageTools
+        _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, language )
+        #print CURRENT_MODULE_ABS_PATH, language
+     
         """
             Sets all the paths that can not be translated.
         """
