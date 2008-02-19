@@ -27,7 +27,7 @@ from pxStats.lib.GroupConfigParameters   import GroupConfigParameters
 from pxStats.lib.MachineConfigParameters import MachineConfigParameters
 from pxStats.lib.StatsPaths              import StatsPaths
 from pxStats.lib.TimeParameters          import TimeConfigParameters
-
+#from pxStats.lib.LanguageTools           import LanguageTools  
 
 
 class StatsConfigParameters:
@@ -167,9 +167,12 @@ class StatsConfigParameters:
         
         """   
         
-        CONFIG = StatsPaths.STATSETC + "config" 
+        paths = StatsPaths()
+        paths.setBasicPaths()
+        
+        configFile = paths.STATSETC + "config" 
         config = ConfigParser()
-        file = open( CONFIG )
+        file = open( configFile )
         config.readfp( file ) 
                   
         self.sourceMachinesTags     = []   
@@ -224,8 +227,9 @@ class StatsConfigParameters:
         machineParameters = MachineConfigParameters()        
         machineParameters.getParametersFromMachineConfigurationFile()
         
-        
-        config = StatsPaths.STATSETC  + "config"
+        paths = StatsPaths()
+        paths.setBasicPaths()
+        config = paths.STATSETC  + "config"
         fileHandle = open( config, "r" )
         
         line = fileHandle.readline()#read until groups section, or EOF
