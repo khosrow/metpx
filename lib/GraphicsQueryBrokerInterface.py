@@ -13,7 +13,7 @@ named COPYING in the root of the source directory tree.
 ##
 ## @author :  Nicholas Lemay
 ##
-## @since  : 2007-06-28, last updated on 2007-07-17  
+## @since  : 2007-06-28, last updated on 2008-02-19  
 ##
 ##
 ## @summary : This interfaces lists the methods that need to be implemented 
@@ -26,8 +26,14 @@ named COPYING in the root of the source directory tree.
 ##############################################################################
 """
 
+import sys 
+sys.path.insert(1, sys.path[0] + '/../../')
 
-class GraphicsQueryBrokerInterface(object):
+from pxStats.lib.Translatable import Translatable
+
+
+
+class GraphicsQueryBrokerInterface( object, Translatable ):
     """
         Interface containing the list of methods
         wich need to be implemented by the class 
