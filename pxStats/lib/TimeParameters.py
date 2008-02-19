@@ -60,7 +60,9 @@ class TimeConfigParameters:
    
         readTimeUnits = []
         
-        CONFIG = StatsPaths.STATSETC + "config" 
+        paths = StatsPaths()
+        paths.setBasicPaths()
+        CONFIG = paths.STATSETC + "config" 
         config = ConfigParser()
         file = open( CONFIG )
         config.readfp( file ) 
@@ -140,10 +142,15 @@ class TimeConfigParameters:
             
         """        
         
+        paths = StatsPaths()
+        paths.setBasicPaths()
         
         crontabArray = ['*','*','*','*','*','']        
         frequency = attributeValue.keys()[0]
         timeUnit  =  attributeValue[ frequency ]
+        
+        
+        
         
         if timeUnit in TimeConfigParameters.validTimeUnits:
             if timeUnit != 'minutes':
@@ -157,15 +164,15 @@ class TimeConfigParameters:
             crontabArray[indexToModify] = crontabArray[indexToModify] + '/' + str(frequency)
                             
             if attribute == "pxStatsFrequency" :
-                crontabArray[5] = StatsPaths.STATSLIBRARY + 'pxStats.py'
+                crontabArray[5] = paths.STATSLIBRARY + 'pxStats.py'
             elif attribute == "monitoringFrequency" :
-                crontabArray[5] = StatsPaths.STATSLIBRARY + 'statsMonitor.py'
+                crontabArray[5] = paths.STATSLIBRARY + 'statsMonitor.py'
             elif attribute == "dbBackupsFrequency" :  
-                crontabArray[5] = StatsPaths.STATSLIBRARY + 'backupRRDDatabases.py'
+                crontabArray[5] = paths.STATSLIBRARY + 'backupRRDDatabases.py'
             elif attribute == "pickleCleanerFrequency" :
-                crontabArray[5] = StatsPaths.STATSLIBRARY + 'pickleCleaner.py'
+                crontabArray[5] = paths.STATSLIBRARY + 'pickleCleaner.py'
             elif attribute == "generalCleanerFrequency" :
-                crontabArray[5] = StatsPaths.STATSLIBRARY + 'clean_dir.plx'
+                crontabArray[5] = paths.STATSLIBRARY + 'clean_dir.plx'
                 
             crontabLine= ""            
             for item in crontabArray:
