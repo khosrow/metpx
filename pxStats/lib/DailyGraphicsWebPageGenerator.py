@@ -8,15 +8,15 @@ named COPYING in the root of the source directory tree.
 ##############################################################################
 ##
 ##
-## @Name     : DailyGraphicsWebPageGenerator.py 
+## @name     : DailyGraphicsWebPageGenerator.py 
 ##
 ##
 ## @author:  : Nicholas Lemay
 ##
-## @since    :  2006-11-22, last updated on 2008-01-23
+## @since    :  2006-11-22, last updated on 2008-02-19
 ##
 ##
-## Description : Generates a web pages that gives access to user 
+## @summary : Generates a web pages that gives access to user 
 ##               to the daily graphics of the last 7 days for all 
 ##               rx sources and tx clients.
 ##
@@ -45,7 +45,7 @@ from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 
 # Constants
 LOCAL_MACHINE = os.uname()[1]
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__             
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "DailyGraphicsWebPageGenerator.py"             
 NB_DAYS_DISPLAYED = 7 
     
 

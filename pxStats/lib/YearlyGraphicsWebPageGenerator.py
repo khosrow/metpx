@@ -7,17 +7,17 @@ named COPYING in the root of the source directory tree.
 ##############################################################################
 ##
 ##
-## Name   : generateGraphics.py 
+## @name   : YearlyGraphicsWebPageGenerator.py 
 ##
 ##
-## Author : Nicholas Lemay
+## @author:  : Nicholas Lemay
 ##
-## Date   : 22-11-2006 
+## @since    :  2006-11-22, last updated on 2008-02-19
 ##
 ##
-## Description : Generates a web pages that gives access to user 
-##               to the yearly graphics of the last 3 years for all rx sources 
-##               and tx clients.
+## @summary : Generates a web pages that gives access to user 
+##            to the yearly graphics of the last 3 years for all rx sources 
+##            and tx clients.
 ##
 ##
 ##############################################################################
@@ -50,9 +50,9 @@ from pxStats.lib.WeeklyGraphicsWebPageGenerator import WebPageGeneratorInterface
 LOCAL_MACHINE = os.uname()[1]
     
 NB_YEARS_DISPLAYED = 3
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__       
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "YearlyGraphicsWebPageGenerator.py"       
     
-class DailyGraphicsWebPageGenerator( WebPageGeneratorInterface ):    
+class YearlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):    
         
         
         

@@ -8,17 +8,17 @@ named COPYING in the root of the source directory tree.
 ##############################################################################
 ##
 ##
-## Name   : generateGraphics.py 
+## @name   : MonthlyGraphicsWebPageGenerator.py 
 ##
 ##
-## Author : Nicholas Lemay
+## @author :  Nicholas Lemay
 ##
-## Date   : 22-11-2006 
+## @since    :  2006-11-22, last updated on 2008-02-19
 ##
 ##
-## Description : Generates a web pages that givers access to user 
-##               to the monthly graphics of the last 3 months for all rx sources 
-##               and tx clients.
+## @summary : Generates a web pages that givers access to user 
+##            to the monthly graphics of the last 3 months for all rx sources 
+##            and tx clients.
 ##
 ##
 ##############################################################################
@@ -50,10 +50,10 @@ from pxStats.lib.WebPageGeneratorInterface import WebPageGeneratorInterface
 
 LOCAL_MACHINE  = os.uname()[1]    
 NB_MONTHS_DISPLAYED = 3 
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__           
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "MonthlyGraphicsWebPageGenerator.py"           
 
 
-class DailyGraphicsWebPageGenerator( WebPageGeneratorInterface ):   
+class MonthlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):   
 
 
 
@@ -132,7 +132,7 @@ class DailyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
         months.reverse()
             
         self.months =  months
-    
+        print months
     
     
     def getStartEndOfWebPage():
