@@ -1058,7 +1058,6 @@ class RRDGraphicProducer( Translatable ):
             if infos.copy == True:
                 self.createCopy( client, type, machine, imageName )
             
-            print _("Plotted : ") + str(imageName)
             if self.logger != None:
                 try:
                     self.logger.info(  _("Plotted : ") + str(imageName) )
@@ -1615,7 +1614,7 @@ class RRDGraphicProducer( Translatable ):
                         
                 
                 
-    def generateRRDGraphics( self ):
+    def generateRRDGraphics( self, verbose = False ):
         """
             @summary : This method generates all the graphics. 
                     
