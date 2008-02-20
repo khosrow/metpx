@@ -720,6 +720,68 @@ class StatsDateLib:
         return separators 
         
     getSeparatorsWithStartTime = staticmethod( getSeparatorsWithStartTime )
+ 
+ 
+ 
+    def getStartEndInIsoFormat( timeOfTheCall, span, spanType = "", fixedCurrent = False, fixedPrevious = False ):
+        """
+        
+            @summary : Calculates the start and end of a timespan based on specified parameters.
+            
+            @param timeOfTheCall: Time at which these graphics were requested. In format.
+                        
+            @param spanOfTheGraphics: Span in hours of the graphics.
+            
+            @param graphicType : daily | weekly | monthly | yearly
+            
+            @param fixedCurrent: Whether to use the fixedCurrent day, week month or year. 
+            
+            @param fixedPrevious: Whether to use the fixedPrevious day week month or year.
+            
+            
+        """
+        
+        #TODO :fixStartEnd method???    
+        if fixedPrevious :
+            if spanType == _("daily") :                
+                start, end = StatsDateLib.getStartEndFromPreviousDay( timeOfTheCall )    
+                         
+            elif spanType == _("weekly"):
+                
+                start, end = StatsDateLib.getStartEndFromPreviousWeek( timeOfTheCall )
+            elif spanType == _("monthly"):
+                
+                start, end = StatsDateLib.getStartEndFromPreviousMonth( timeOfTheCall )
+            elif spanType == _("yearly") :
+                
+                start, end = StatsDateLib.getStartEndFromPreviousYear( timeOfTheCall )
+            
+                 
+        elif fixedCurrent:
+            if spanType == _("daily") :
+                
+                start, end = StatsDateLib.getStartEndFromCurrentDay( timeOfTheCall )   
+            elif spanType ==_("weekly"):
+                
+                start, end = StatsDateLib.getStartEndFromCurrentWeek( timeOfTheCall )
+            elif spanType == _("monthly"):
+                
+                start, end = StatsDateLib.getStartEndFromCurrentMonth( timeOfTheCall )    
+            elif spanType == _("yearly"):
+                 
+                start, end = StatsDateLib.getStartEndFromCurrentYear( timeOfTheCall ) 
+                        
+        else:       
+            #TODO fix timeSpan method???   
+               
+            start = StatsDateLib.getIsoFromEpoch( StatsDateLib.getSecondsSinceEpoch( timeOfTheCall ) - span*60*60 ) 
+            end   = timeOfTheCall   
+ 
+            
+        return start, end 
+        
+    getStartEndInIsoFormat = staticmethod( getStartEndInIsoFormat )
+
 
 
 if __name__ == "__main__":
