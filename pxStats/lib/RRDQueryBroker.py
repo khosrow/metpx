@@ -36,22 +36,25 @@ sys.path.insert(1, sys.path[0] + '/../../')
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.GraphicsQueryBrokerInterface import GraphicsQueryBrokerInterface
+from pxStats.lib.RRDGraphicProducer import RRDGraphicProducer
+from pxStats.lib.LanguageTools import LanguageTools
+from pxStats.lib.StatsDateLib import StatsDateLib
+
 
 LOCAL_MACHINE = os.uname()[1]
+
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "RRDQueryBroker.py "
 
 
 class RRDQueryBroker(GraphicsQueryBrokerInterface):
     """
-        Interface containing the list of methods
-        wich need to be implemented by the class 
-        wich implement the GraphicsQueryBroker.
+         Class which implements the GraphicsQueryBrokerInterface and allows 
+         us to produce graphics using the RRDGraphicProducer class.
           
-    """
+    """    
     
-    
-    
-    
-    def __init__(self,  query=None, reply = None, queryParameters = None, replyParameters = None, graphicProducer = None ):
+    def __init__( self,  queryParameters = None, replyParameters = None,
+                  graphicProducer = None, querierLanguage = None ):
         """
             @summary: GnuQueryBroker constructor.
             
@@ -64,52 +67,24 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
             
             @query : Query to send to generateRRDGraphics.py
               
-        
+            @param querierLanguage : Language spoken by the qerier at the time of the query.
+            
         """       
         
+        
         self.queryParameters = queryParameters
-        self.query = query
         self.replyParameters = replyParameters
-        self.reply = reply 
-        RRDQueryBroker.setGlobalLanguageParameters()
-    
-    
-    
-    def  setGlobalLanguageParameters( language = 'en'):
-        """
-            @summary : Sets up all the needed global language 
-                       variables so that they can be used 
-                       everywhere in this program.
-            
-            
-            @param language: Language that is to be 
-                             outputted by this program. 
-         
-            @return: None
-            
-        """
+        self.graphicProducer = graphicProducer
+        self.querierLanguage = querierLanguage
         
-        global LANGUAGE 
-        global translator
-        global _ 
-    
+        if self.querierLanguage not in LanguageTools.getSupportedLanguages():
+            raise Exception( "Error. Unsupported language detected in GnuQueryBroker. %s is not a supported language."%( self.querierLanguage ) )
+        else:#language is supposed to be supported 
+            global _
+            _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.querierLanguage )
         
-        LANGUAGE = language 
+  
         
-        if language == 'fr':
-            fileName = StatsPaths.STATSLANGFRLIB + "RRDQueryBroker" 
-        elif language == 'en':
-            fileName = StatsPaths.STATSLANGENLIB + "RRDQueryBroker"     
-        
-        translator = gettext.GNUTranslations(open(fileName))
-        
-        _ = translator.gettext    
-    
-    
-    setGlobalLanguageParameters = staticmethod(setGlobalLanguageParameters)
-    
-    
-    
     class _QueryParameters(object):
         """
             List of parameters needed for queries.
@@ -117,7 +92,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
         
         
         
-        def __init__( self, fileType, sourLients, groupName, machines, havingRun, individual, total, endTime,  products, statsTypes,  span, specificSpan, fixedSpan ):
+        def __init__( self, fileType, sourLients, groupName, machines, havingRun, individual, combine, endTime,  products, statsTypes,  span, specificSpan, fixedSpan ):
             """
                 @summary : _QueryParameters parameters class constructor.                
                 
@@ -127,7 +102,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
                 @param machines : List of machine on wich the data resides.   
                 @param havingRun: Use the sourlients having run during period instead of those currently running.
                 @param individual: Whether or not to make individual graphics for every machines.
-                @param total : Whether or not to  make a total of all the data prior to plotting the graphics.               
+                @param combine : Whether or not to  make a combine of all the data prior to plotting the graphics.               
                 @param endTime: time of query of the graphics                
                 @param products: List of specific products for wich to plot graphics.                
                 @param statsTypes : List of stats types for wich to create the graphics.
@@ -143,7 +118,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
             self.machines     = machines
             self.havingRun    = havingRun
             self.individual   = individual
-            self.total        = total
+            self.combine      = combine
             self.endTime      = endTime
             self.products     = products
             self.statsTypes   = statsTypes
@@ -157,7 +132,8 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
             List of parameters required for replies.
         """
         
-        def __init__( self, querier, plotter, image, fileType, sourLients, groupName, machines, havingRun, individual, total, endTime,  products, statsTypes,  span, specificSpan, fixedSpan, error ):
+        def __init__( self, querier, plotter, image, fileType, sourLients, groupName, machines, havingRun, individual,
+                      combine, endTime,  products, statsTypes,  span, specificSpan, fixedSpan, error ):
             """
                 @summary : _QueryParameters parameters class constructor.    
                             
@@ -170,7 +146,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
                 @param machines : List of machine on wich the data resides.   
                 @param havingRun: Use the sourlients having run during period instead of those currently running.        
                 @param individual: Whether or not to make individual graphics for every machines.
-                @param total : Whether or not to  make a total of all the data prior to plotting the graphics.               
+                @param combine : Whether or not to  make a combine of all the data prior to plotting the graphics.               
                 @param endTime: time of query of the graphics                
                 @param products: List of specific products for wich to plot graphics.                
                 @param statsTypes : List of stats types for wich to create the graphics.
@@ -189,7 +165,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
             self.machines     = machines
             self.havingRun    = havingRun
             self.individual   = individual
-            self.total        = total
+            self.combine        = combine
             self.endTime      = endTime
             self.products     = products
             self.statsTypes   = statsTypes
@@ -250,9 +226,9 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
             individual = 'false'
         
         try:
-            total = form["combineSourlients"].replace(",", "").replace('"','')  
+            combine = form["combineSourlients"].replace(",", "").replace('"','')  
         except:
-            total = 'false'
+            combine = 'false'
             
         try:
             endTime = form["endTime"]
@@ -288,8 +264,8 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
         except:
             fixedSpan = ''
                 
-        self.queryParameters = RRDQueryBroker._QueryParameters(fileTypes, sourLients, groupName, machines, havingRun, individual, total, endTime, products, statsTypes, span, specificSpan, fixedSpan)
-        self.replyParameters = RRDQueryBroker._ReplyParameters(querier, plotter, image, fileTypes, sourLients, groupName, machines, havingRun, individual, total, endTime, products, statsTypes, span, specificSpan, fixedSpan, error = '' )
+        self.queryParameters = RRDQueryBroker._QueryParameters(fileTypes, sourLients, groupName, machines, havingRun, individual, combine, endTime, products, statsTypes, span, specificSpan, fixedSpan)
+        self.replyParameters = RRDQueryBroker._ReplyParameters(querier, plotter, image, fileTypes, sourLients, groupName, machines, havingRun, individual, combine, endTime, products, statsTypes, span, specificSpan, fixedSpan, error = '' )
         
     
     #----------------------------------- def translateStatsTypes( statsTypes ) :
@@ -338,46 +314,46 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
         try :
             
             if self.queryParameters.plotter != "rrd":
-                error = "Internal error. GnuQueryBroker was not called to plota gnuplot graphic."
+                error = _("Internal error. GnuQueryBroker was not called to plot a gnuplot graphic.")
                 raise
         
-            for filetype in self.queryParameters.fileTypes :
+            for fileType in self.queryParameters.fileTypes :
                 if fileType != "tx" and fileType != "rx":
-                    error = "Error. FileType needs to be either rx or tx."
+                    error = _("Error. FileType needs to be either rx or tx.")
                     raise
                 
             if self.queryParameters.sourLients == []:
-                error = "Error. At least one sourlient needs to be specified."
+                error = _("Error. At least one sourlient needs to be specified.")
                 raise 
             
             if self.queryParameters.machines == []:
-                error = "Error. At least one machine name needs to be specified."
+                error = _("Error. At least one machine name needs to be specified.")
                 raise
             
             if self.queryParameters.combine != 'true' and self.queryParameters.combine != 'false':
-                error = "Error. Combine sourlients option needs to be either true or false."  
+                error = _("Error. Combine sourlients option needs to be either true or false."  )
                 raise
             
             if self.queryParameters.statsTypes == []:
-                error = "Error. At Leat one statsType needs to be specified."   
+                error = _("Error. At Leat one statsType needs to be specified."  ) 
                 raise
             
             if self.queryParameters.groupName != "" and self.queryParameters.total != 'true':
-                error = "Error. Groupname needs to be used with total option."
+                error = _("Error. Groupname needs to be used with total option.")
                 raise 
             
             if self.queryParameters.groupName != "" and self.queryParameters.individual == 'true':
-                error = "Error. Groupname cannot be used with individual option."
+                error = _("Error. Groupname cannot be used with individual option.")
                 raise
             
             if self.queryParameters.fixedSpan != "" and self.specificSpan == "":
-                error = "Error. Fixed spans need to be used with a specific spans."
+                error = _("Error. Fixed spans need to be used with a specific spans.")
                 raise
             
             try:
                 int(self.queryParameters.span)
             except:
-                error = "Error. Span(in hours) value needs to be numeric."          
+                error = _("Error. Span(in hours) value needs to be numeric.")
                 raise
         except:
             
@@ -395,111 +371,71 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
             @SIDE_EFFECT :  modifies self.query value.
             
         """
-       
         
-        pathToGenerateRRDGraphs = StatsPaths.STATSBIN + "generateRRDGraphics.py"
-        
-        if self.queryParameters.groupName != '':
-            sourlients = '-c %s' %self.queryParameters.groupName
-        elif self.queryParameters.sourLients !=[] :
-            sourlients = '-c '
-            for sourLient in self.queryParameters.sourLients:
-                sourlients = sourlients + sourLient + ','
-            sourlients = sourlients[:-1]
+        if self.queryParameters.total == 'true':
+            totals = True
+            mergerType = "regular"
         else:
-            sourlients = ''
+            totals = False      
+            mergerType = ""
+            
+            
+        fixedCurrent  = False
+        fixedPrevious = False
         
-                
+        if _("current")  in str(self.queryParameters.fixedSpan).lower() :
+            fixedCurrent = True 
+        elif _("previous") in str(self.queryParameters.fixedSpan).lower():
+            fixedPrevious = True      
+        else:
+            fixedCurrent  = False
+            fixedPrevious = False 
+       
+
+            
         hour      = self.queryParameters.endTime.split(" ")[1]
         splitDate = self.queryParameters.endTime.split(" ")[0].split( '-' )
         
-        date = "--date '%s'" %( splitDate[2] + '-' + splitDate[1]  + '-' + splitDate[0]  + " " + hour )
-        
-        fileType = '-f %s' %( str( self.queryParameters.fileType).replace('[','').replace( ']', '' ) )
-        
-        combinedMachineName = ""
-        for machine in self.queryParameters.machines:
-            combinedMachineName = combinedMachineName + ','+ machine 
-        combinedMachineName = combinedMachineName[1:]    
-        machines = '--machines %s' %( combinedMachineName )
-        
-        #optional option
-        
-        #print "self.queryParameters.specificSpan ", self.queryParameters.specificSpan, _("daily"), _("weekly"), _("monthly"), _("yearly")
-        if self.queryParameters.specificSpan == _("daily"):
-            specificSpan = "-d"
-        elif self.queryParameters.specificSpan == _("weekly"):
-            specificSpan = "-w"        
-        elif self.queryParameters.specificSpan == _("monthly"):
-            specificSpan = "-m"
-        elif self.queryParameters.specificSpan == _("yearly"):
-            specificSpan = "-y"
+        date =  splitDate[2] + '-' + splitDate[1]  + '-' + splitDate[0]  + " " + hour 
+        if self.queryParameters.span == "": 
+            timespan = 0 
         else:
-            specificSpan = ""    
-              
-        if specificSpan == "":
-            span = "--span %s" %( self.queryParameters.span )
-        else:
-            span = ""
-        
-        
-        if _("current")  in str(self.queryParameters.fixedSpan).lower() :
-            fixedSpan = "--fixedCurrent"
-        elif _("previous") in str(self.queryParameters.fixedSpan).lower():
-            fixedSpan = "--fixedPrevious"     
-        else:
-            fixedSpan = ""
+            timespan = int(self.queryParameters.span )    
             
-        if self.queryParameters.havingRun == 'true':
-            havingRun = "--havingrun"
-        else:
-            havingRun = ""
+        startTime, endTime = StatsDateLib.getStartEndInIsoFormat(date, timespan, self.queryParameters.specificSpan, fixedCurrent, fixedPrevious )
+        timespan = int( StatsDateLib.getSecondsSinceEpoch( endTime ) - StatsDateLib.getSecondsSinceEpoch( startTime ) ) / 3600   
+       
+        #turns "string1,string2,string3" into [ "string1", "string2", "string3" ]
+        statsTypes =  self.queryParameters.statsTypes.split(",")
+        sourlients =  self.queryParameters.sourLients.split(",")
+        machines   =  self.queryParameters.machines.split(",") 
         
-        if self.queryParameters.individual == 'true':
-            individual = '--individual'
-        else:
-            individual = ''    
+        self.graphicProducer = RRDGraphicProducer( self.queryParameters.fileTypes[0], statsTypes ,\
+                                                   totals,  self.queryParameters.specificSpan,\
+                                                   sourlients, timespan,\
+                                                   startTime, endTime, machines, False,
+                                                   mergerType, True, self.querierLanguage, self.querierLanguage )
+       
         
-        if self.queryParameters.total == 'true' :
-            total = '--total'
-        else:
-            total = ''    
-        
-        if self.queryParameters.statsTypes !=[] and self.queryParameters.statsTypes != '':
-            statsTypes = '-t '
-            for type in self.queryParameters.statsTypes:
-                statsTypes = statsTypes + type + ','
-            types = statsTypes[:-1]
-                   
-        else:
-            types = ''
+  
             
-        self.query = "%s %s %s %s %s %s %s %s %s %s %s %s --turnOffLogging" %( pathToGenerateRRDGraphs, sourlients, machines, date, fileType, fixedSpan, specificSpan, havingRun, total, individual, types, span )
-            
-           
-            
-    def getImagesFromQueryOutput( self, output ):
+    def getImageListToReplyFromPlottedImageList( self, plottedImages ):
         """ 
-            @summary : Parses the output and retreives 
-                       the name of images that were plotted.
+            @summary : Transforms the list of plotted images in a string we can use 
+                       in the reply.
             
             @return: Returns the list of images
             
         """
         
         images = ''
-        
-        lines = output.splitlines()
-        
-        for line in lines :
-            if  _("Plotted") in line:
-                #print line 
-                imageName = line.replace( _("Plotted :"), "").replace( " ", "")
-                imageName = '../../pxStats' + imageName.split( 'pxStats' )[1] 
-                images = images + imageName + '+'
+                
+        for imageName in plottedImages :
+            images = images + imageName + '+'
                 
         images = images[:-1]    
         #print images
+        
         return images 
     
     
@@ -511,12 +447,12 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
             @SIDE-EFECT : Will set the name of the generated images in self.replyparameters.image
             
         """
-        #print self.query
-        status, output = commands.getstatusoutput( self.query )  
        
-        self.replyParameters.image = self.getImagesFromQueryOutput(output)
+        plottedImages = self.graphicProducer.generateRRDGraphics()
     
-        
+        self.replyParameters.image = self.getImageListToReplyFromPlottedImageList( plottedImages )
+    
+    
     
     def getReplyToSendToquerier(self):
         """
