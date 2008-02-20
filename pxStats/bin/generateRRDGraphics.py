@@ -450,8 +450,10 @@ def main():
     parser = createParser() 
     
     graphicsProducer = getGraphicProducerFromParserOptions( parser )
-    graphicsProducer.generateRRDGraphics()
+    plottedGraphics  = graphicsProducer.generateRRDGraphics()
     
+    for plottedGraphic in plottedGraphics:
+        print "Plotted : %s" %plottedGraphic
     
     
 if __name__ == "__main__":
