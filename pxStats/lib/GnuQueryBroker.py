@@ -34,14 +34,16 @@ import cgitb; cgitb.enable()
 sys.path.insert(1, sys.path[0] + '/../../')
 
 
-from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 from pxStats.lib.GraphicsQueryBrokerInterface import GraphicsQueryBrokerInterface
 from pxStats.lib.ClientGraphicProducer import ClientGraphicProducer
+from pxStats.lib.LanguageTools import LanguageTools
 
 LOCAL_MACHINE = os.uname()[1]
+
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "GnuQueryBroker.py "
 
 
 class GnuQueryBroker(GraphicsQueryBrokerInterface):
@@ -52,26 +54,38 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
     
     """    
     
-    def __init__(self, queryParameters = None, replyParameters = None, graphicProducer = None ):
+    def __init__(self, queryParameters = None, replyParameters = None, graphicProducer = None, querierLanguage = None ):
         """
             @summary: GnuQueryBroker constructor.
             
             @param queryParameters: _QueryParameters instance wich 
                                     contains the query parameters. 
             
-            @param graphicProducer:  
-        
+            @param replyParameters :
+            
+            @param graphicProducer :  
+            
+            @param querierLanguage : Language spoken by the qerier at the time of the query.
+            
         """
         
         self.queryParameters = queryParameters
         self.graphicProducer = graphicProducer
         self.replyParameters = replyParameters
-  
+        self.querierLanguage = querierLanguage 
+        
+        if self.querierLanguage not in LanguageTools.getSupportedLanguages():
+            raise Exception( "Error. Unsupported language detected in GnuQueryBroker. %s is not a supported language."%( self.querierLanguage ) )
+        else:#language is supposed to be supported 
+            global _
+            _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.querierLanguage )
+    
     
       
     class _QueryParameters(object):
        
-        def __init__( self, fileType, sourLients, groupName, machines, combine, endTime,  products, statsTypes,  span ):
+        def __init__( self, fileType, sourLients, groupName, machines, combine, endTime,\
+                      products, statsTypes,  span, language ):
             """
                 @summary : _QueryParameters parameters class constructor.                
                 
@@ -83,7 +97,8 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
                 @param endTime: time of query of the graphics                
                 @param products: List of specific products for wich to plot graphics.                
                 @param statsTypes : List of stats types for wich to create the graphics.
-                @param span: span in hoursof the graphic(s).            
+                @param span: span in hoursof the graphic(s).          
+                @param : Language in which the querier is expecting the graphic(s) to be.  
             
             """
             
@@ -96,12 +111,13 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
             self.products   = products
             self.statsTypes = statsTypes
             self.span       = span
-        
+            self.language   = language
         
             
     class _ReplyParameters( _QueryParameters ):   
         
-        def __init__( self, querier, plotter, image, fileType, sourLients, groupName, machines, combine, endTime,  products, statsTypes,  span, error ):    
+        def __init__( self, querier, plotter, image, fileType, sourLients, groupName, machines, combine,\
+                      endTime,  products, statsTypes,  span, error, language ):    
             """
                 @summary : _ReplyParameters parameters class constructor.                
                 
@@ -118,6 +134,7 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
                 @param statsTypes : List of stats types for wich to create the graphics.
                 @param span: span in hoursof the graphic(s). 
                 @param error  : error that has occured during query.
+                @param language : Language in which the graphic whould have been plotted.
                 
             """           
             
@@ -216,7 +233,7 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
             machines = []
         
 
-        if groupName != '' and ( sourLients == [] or sourlients == [''] ) :
+        if groupName != '' and ( sourLients == [] or sourLients == [''] ) :
             configParameters = StatsConfigParameters( )
             configParameters.getAllParameters()
             
@@ -245,10 +262,10 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
             splitDate = endTime.split(" ")[0].split( '-' )
             endTime = "%s" %( splitDate[2] + '-' + splitDate[1]  + '-' + splitDate[0]  + " " + hour )       
             
-            if "current" in str(form["fixedSpan"]).lower():
+            if _("current") in str(form["fixedSpan"]).lower():
                 start, endTime = StatsDateLib.getStartEndFromCurrentDay(endTime)
                 
-            elif "previous" in str(form["fixedSpan"]).lower():    
+            elif _("previous") in str(form["fixedSpan"]).lower():    
                 start, endTime = StatsDateLib.getStartEndFromPreviousDay( endTime )
                 
         except:
@@ -276,13 +293,19 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
                 
         except:
             span = 24
-            
-            
+        
+        try:
+            language = form["lang"].replace("'", "").replace('"','')
+        
+        except:
+            language = ""
+                
         sourLients = GeneralStatsLibraryMethods.filterClientsNamesUsingWilcardFilters( endTime, span, sourLients, machines, [fileTypes])    
             
-        self.queryParameters = GnuQueryBroker._QueryParameters( fileTypes, sourLients, groupName, machines, combine, endTime,  products, statsTypes,  span )
+        self.queryParameters = GnuQueryBroker._QueryParameters( fileTypes, sourLients, groupName, machines, combine, endTime,  products, statsTypes,  span, language )
         
-        self.replyParameters = GnuQueryBroker._ReplyParameters( querier, plotter, image, fileTypes, sourLients, groupName, machines, combine, endTime, products, statsTypes,  span, error = '' )
+        self.replyParameters = GnuQueryBroker._ReplyParameters( querier, plotter, image, fileTypes, sourLients, groupName, machines, combine, endTime, products, statsTypes,  
+                                                                span, '', language )
         
         
         
@@ -316,33 +339,38 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
         try :
             
             if self.queryParameters.plotter != "gnuplot":
-                error = "Internal error. GnuQueryBroker was not called to plota gnuplot graphic."
+                error = _("Internal error. GnuQueryBroker was not called to plota gnuplot graphic.")
                 raise
         
-            for filetype in self.queryParameters.fileTypes :
+            for fileType in self.queryParameters.fileTypes :
                 if fileType != "tx" and fileType != "rx":
-                    error = "Error. FileType needs to be either rx or tx."
+                    error = _("Error. FileType needs to be either rx or tx.")
                     raise
             
             if self.queryParameters.sourLients == []:
                 if self.queryParameters.groupName == "":
-                    error = "Error. At least one sourlient name needs to be specified."
+                    error = _("Error. At least one sourlient name needs to be specified.")
                 else:
-                    error = "Error. When specifying a group name without any sourlients names, the group must be a pre-existing group."
+                    error = _("Error. When specifying a group name without any sourlients names, the group must be a pre-existing group.")
                         
             if self.queryParameters.machines == []:
-                error = "Error. At least one machine name needs to be specified."
+                error = _("Error. At least one machine name needs to be specified.")
             
             if self.queryParameters.combine != 'true' and self.queryParameters.combine != 'false':
-                error = "Error. Combine sourlients option needs to be either true or false."  
+                error = _("Error. Combine sourlients option needs to be either true or false."  )
             
             if self.queryParameters.statsTypes == []:
-                error = "Error. At Leat one statsType needs to be specified."   
+                error = _("Error. At Leat one statsType needs to be specified.")
             
             try:
                 int(self.queryParameters.span)
             except:
-                error = "Error. Span(in hours) value needs to be numeric."          
+                error = _("Error. Span(in hours) value needs to be numeric.")          
+    
+            if self.queryParameters.language == "" :
+                error = _("Error. No language was specified by the querier. Please speciffy a language. Ex : lang=fr")
+            elif self.queryParameters.language not in LanguageTools.getSupportedLanguages() :
+                error = _("Error. Unsupported language detected in GnuQueryBroker. %s is not a supported language.")%( self.queryParameters.language) 
     
         except:
             
@@ -362,12 +390,13 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
         
         self.queryParameters.sourLients.reverse()
         
-        self.graphicProducer = ClientGraphicProducer( directory = directory, fileType = self.queryParameters.fileType,  
-                                                      clientNames = self.queryParameters.sourLients, 
-                                                      groupName = self.queryParameters.groupName, 
-                                                      timespan = int(self.queryParameters.span), currentTime = self.queryParameters.endTime,
-                                                      productTypes = self.queryParameters.products, logger= None, logging = False, 
-                                                      machines = self.queryParameters.machines )
+        self.graphicProducer = ClientGraphicProducer( directory = directory, fileType = self.queryParameters.fileType,\
+                                                      clientNames = self.queryParameters.sourLients, \
+                                                      groupName = self.queryParameters.groupName, \
+                                                      timespan = int(self.queryParameters.span), currentTime = self.queryParameters.endTime,\
+                                                      productTypes = self.queryParameters.products, logger= None, logging = False,\
+                                                      machines = self.queryParameters.machines, workingLanguage = self.queryParameters.language,\
+                                                      outputLanguage = self.queryParameters.language )
         
 
          
