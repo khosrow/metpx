@@ -41,7 +41,7 @@ from pxStats.lib.Translatable import Translatable
     - Small function that adds pxLib to sys path.
 """
 statsPaths = StatsPaths( )
-statsPaths.setPaths( LanguageTools.getMainApplicationLanguage() )
+statsPaths.setBasicPaths()
 sys.path.append( statsPaths.PXLIB )
 
 from   Logger import *
@@ -54,7 +54,7 @@ class RRDGraphicProducer( Translatable ):
     def __init__( self, fileType, types, totals, graphicType, clientNames = None ,\
                   timespan = 12, startTime = None, endTime = None, machines = ["machine1"],\
                   copy = False, mergerType = "", turnOffLogging = False, 
-                  outputLanguage = ""  ):            
+                  inputLanguage = "", outputLanguage = ""  ):            
         
         
         self.fileType     = fileType          # Type of log files to be used.    
@@ -69,7 +69,7 @@ class RRDGraphicProducer( Translatable ):
         self.graphicType  = graphicType       # daily, weekly, monthly yearly or other                
         self.mergerType   = mergerType        # Type of merger either "" for none or totalForMachine or group  
         self.turnOffLogging =turnOffLogging   # Whether to turn off logging or not 
-        self.inputLanguage = LanguageTools.getMainApplicationLanguage() # Language with whom this program was called. 
+        self.inputLanguage = inputLanguage    # Language in which the partameters will be written.
         
         if outputLanguage == "":
             self.outputLanguage = LanguageTools.getMainApplicationLanguage()
@@ -1071,6 +1071,9 @@ class RRDGraphicProducer( Translatable ):
                     self.logger.error(  _("Error : Could not generate ") + str( imageName ) )     
                 except:
                     pass    
+                
+        return  imageName           
+    
     
     
     def createNewMergedDatabase( self, dataType,  machine, start, interval    ) :       
@@ -1618,6 +1621,8 @@ class RRDGraphicProducer( Translatable ):
                     
         """    
             
+        plottedGraphics = []
+            
         if self.totals: #Graphics based on total values from a group of clients.
             #todo : Make 2 title options
             
@@ -1630,9 +1635,9 @@ class RRDGraphicProducer( Translatable ):
             for machine in self.machines:#in total graphics there should be only one iteration...
                 for type in self.types:
                     if self.mergerType == 'regular':
-                        self.plotRRDGraph( databaseNames[type], type, clientName, machine )
+                        plottedGraphics.append( self.plotRRDGraph( databaseNames[type], type, clientName, machine ) )
                     else:
-                        self.plotRRDGraph( databaseNames[type], type, self.fileType, machine )
+                        plottedGraphics.append(self.plotRRDGraph( databaseNames[type], type, self.fileType, machine ) )
                   
         else:
             
@@ -1646,10 +1651,10 @@ class RRDGraphicProducer( Translatable ):
                         if not os.path.isfile(databaseName):
                             databaseName = RrdUtilities.buildRRDFileName( dataType = type, groupName=client, machines = [machine], fileType = self.fileType, usage = "group" )
                         
-                        self.plotRRDGraph( databaseName, type, client, machine )        
+                        plottedGraphics.append( self.plotRRDGraph( databaseName, type, client, machine )        )
             
             
-            
+        return plottedGraphics   
             
             
             
