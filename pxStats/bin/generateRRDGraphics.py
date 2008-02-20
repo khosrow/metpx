@@ -156,55 +156,31 @@ def getGraphicProducerFromParserOptions( parser ):
         print _("Program terminated.")
         sys.exit()         
         
-         
-    #TODO :fixStartEnd method???    
-    if fixedPrevious :
-        if daily :
-            graphicType = _("daily")
-            start, end = StatsDateLib.getStartEndFromPreviousDay( date )             
-        elif weekly:
-            graphicType = _("weekly")
-            start, end = StatsDateLib.getStartEndFromPreviousWeek( date )
-        elif monthly:
-            graphicType = _("monthly")
-            start, end = StatsDateLib.getStartEndFromPreviousMonth( date )
-        elif yearly:
-            graphicType = _("yearly") 
-            start, end = StatsDateLib.getStartEndFromPreviousYear( date )
-        timespan = int( StatsDateLib.getSecondsSinceEpoch( end ) - StatsDateLib.getSecondsSinceEpoch( start ) ) / 3600
-             
-    elif fixedCurrent:
-        if daily :
-            graphicType = _("daily")
-            start, end = StatsDateLib.getStartEndFromCurrentDay( date )   
-        elif weekly:
-            graphicType = _("weekly")
-            start, end = StatsDateLib.getStartEndFromCurrentWeek( date )
-        elif monthly:
-            graphicType = _("monthly")
-            start, end = StatsDateLib.getStartEndFromCurrentMonth( date )    
-        elif yearly:
-            graphicType = _("yearly") 
-            start, end = StatsDateLib.getStartEndFromCurrentYear( date ) 
-        timespan = int( StatsDateLib.getSecondsSinceEpoch( end ) - StatsDateLib.getSecondsSinceEpoch( start ) ) / 3600
-        
-    else:       
-        #TODO fix timeSpan method???   
-        if daily :
-            timespan = 24  
-            graphicType = _("daily")      
-        elif weekly:
-            timespan = 24 * 7  
-            graphicType = _("weekly")  
-        elif monthly:
-            timespan = 24 * 30 
-            graphicType = _("monthly")       
-        elif yearly:            
+    
+    #Set graphic type based on parameters. Only one tpye is allowed at once based on previous validation.
+    if daily :
+        graphicType = _("daily")
+        if fixedPrevious == False and fixedCurrent == False :
+            timespan = 24
+    elif weekly:
+        graphicType = _("weekly")
+        if fixedPrevious == False and fixedCurrent == False :
+            timespan = 24 * 7
+    elif monthly:
+        graphicType = _("monthly")
+        if fixedPrevious == False and fixedCurrent == False :
+            timespan = 24 * 30
+    elif yearly:
+        graphicType = _("yearly")      
+        if fixedPrevious == False and fixedCurrent == False :
             timespan = 24 * 365
-            graphicType = _("yearly")  
-            
-        start = StatsDateLib.getIsoFromEpoch( StatsDateLib.getSecondsSinceEpoch( date ) - timespan*60*60 ) 
-        end   = date                       
+    
+    
+    start, end = StatsDateLib.getStartEndInIsoFormat(date, timespan, graphicType, fixedCurrent, fixedPrevious )
+    
+    
+    timespan = int( StatsDateLib.getSecondsSinceEpoch( end ) - StatsDateLib.getSecondsSinceEpoch( start ) ) / 3600    
+                     
             
     #print "timespan %s" %timespan                           
     try:    
