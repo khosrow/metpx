@@ -41,7 +41,8 @@ class StatsConfigParameters:
     
     def __init__( self, sourceMachinesTags = None, picklingMachines = None , machinesToBackupInDb = None , \
                   graphicsUpLoadMachines = None, daysOfPicklesToKeep = None, nbDbBackupsToKeep = None,  \
-                  timeParameters = None, detailedParameters = None, groupParameters = None, mainApplicationLanguage = 'en',\
+                  nbAutoUpdatesLogsToKeep = None, timeParameters = None, detailedParameters = None, \
+                  groupParameters = None, mainApplicationLanguage = 'en',\
                   artifactsLanguages = None, webPagesLanguages = None, statsRoot = '/apps/px/pxStats/' ):
         """
         
@@ -61,11 +62,13 @@ class StatsConfigParameters:
                                        determined by this number and the frequecy of 
                                        the backups. 
             
+            @param nbAutoUpdatesLogsToKeep : Number of automatic updates log files to keep.
+            
             @param timeParameters : TimeConfigParameters() instance. 
             
             @param detailedParameters : DetailedStatsParameters() instance.
             
-            @param groupParameters : GroupConfigParameters oinstance.
+            @param groupParameters : GroupConfigParameters instance.
             
             @param mainApplicationLanguage : Language to use throughout the application.
             
@@ -82,6 +85,7 @@ class StatsConfigParameters:
         self.graphicsUpLoadMachines = graphicsUpLoadMachines or []
         self.daysOfPickledtoKeep = daysOfPicklesToKeep
         self.nbDbBackupsToKeep = nbDbBackupsToKeep
+        self.nbAutoUpdatesLogsToKeep = nbAutoUpdatesLogsToKeep
         self.timeParameters = timeParameters
         self.detailedParameters = detailedParameters
         self.groupParameters = groupParameters
@@ -195,6 +199,7 @@ class StatsConfigParameters:
         self.graphicsUpLoadMachines.extend( config.get( 'generalConfig', 'graphicsUpLoadMachines' ).split(',') ) 
         self.daysOfPicklesToKeep = float( config.get( 'generalConfig', 'daysOfPicklesToKeep' ) )
         self.nbDbBackupsToKeep   = float( config.get( 'generalConfig', 'nbDbBackupsToKeep' ) )
+        self.nbAutoUpdatesLogsToKeep = float( config.get( 'generalConfig', 'nbAutoUpdatesLogsToKeep' ) )
         
         try:
             file.close()
@@ -306,6 +311,7 @@ def main():
     print "test.machinesToBackupInDb %s" %test.machinesToBackupInDb
     print "test.daysOfPicklesToKeep %s" %test.daysOfPicklesToKeep
     print "test.nbDbBackupsToKeep %s" %test.nbDbBackupsToKeep
+    print "test.nbAutoUpdatesLogsToKeep" %test.nbAutoUpdatesLogsToKeep
     print "test.mainApplicationLanguage %s"  %test.mainApplicationLanguage
     print "test.artifactsLanguages %s"  %test.artifactsLanguages
     print "test.webPagesLanguages %s"  %test.webPagesLanguages
