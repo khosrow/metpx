@@ -22,7 +22,7 @@
 #############################################################################################
 """
 
-import commands, os, sys 
+import commands, os, sys, time 
 
 
 """
@@ -30,9 +30,12 @@ import commands, os, sys
 """
 sys.path.insert(1, sys.path[0] + '/../../')
 
+from datetime import datetime
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.Translatable import Translatable
 from pxStats.lib.CpickleWrapper import CpickleWrapper
+from pxStats.lib.StatsDateLib import StatsDateLib
+
 
 class AutomaticUpdatesManager( Translatable ):
 
@@ -298,6 +301,187 @@ class AutomaticUpdatesManager( Translatable ):
        
        
         return changeWasMade, originalUpdateFrequency, newUpdateFrequency 
+ 
        
+ 
+    def getTimeSinceLastUpdate(self, currentTimeInIsoFormat = "" ):
+        """
+            @summary : returns the number of seconds between the last update
+                       and the currentTime  
+        
+            @param  currentTimeInIsoFormat: Current time specified in the ISO 
+                                            format
+                                            
+            @return :  the number of seconds between the last update
+                       and the currentTime                               
+        """
+        
+        timeBetweenUpdates = 0 
+        
+        if currentTimeInIsoFormat == "":
+            currentTimeInIsoFormat = StatsDateLib.getCurrentTimeInIsoformat()
+       
+        currentTimeInSSEFormat = StatsDateLib.getSecondsSinceEpoch( currentTimeInIsoFormat )   
+        lastUpdateInSSEFormat  =  StatsDateLib.getSecondsSinceEpoch( self.getTimeOfLastUpdateInLogs() )
+        
+        if currentTimeInSSEFormat > lastUpdateInSSEFormat :
+            timeBetweenUpdates = currentTimeInSSEFormat - lastUpdateInSSEFormat
+        
+        return timeBetweenUpdates
+    
+    
+    
+    def isFirstUpdateOfTheDay( self, timeOfUpdateInIsoFormat = "" ): 
+        """
+            @summary : Returns whether or not an update executed at 
+                       timeOfUpdateInIsoFormat would be the first update 
+                       of the day.
+                       
+            @timeOfUpdateInIsoFormat : Time at which the update would be executed.
+            
+            @return : True or False.
+                        
+        """
+        
+        isFirstUpdateOfTheDay = False
+        
+        lastUpdateISO = self.getTimeOfLastUpdateInLogs()
+        
+        if timeOfUpdateInIsoFormat > isFirstUpdateOfTheDay:
+            
+            lastUpdateDT    = datetime( int( lastUpdateISO.split("-")[0]),\
+                                      int( lastUpdateISO.split("-")[1]),\
+                                      int( lastUpdateISO.split("-")[1].split(" ")[0] )\
+                                    )
+       
+            currentUpdateDT = datetime( int( timeOfUpdateInIsoFormat.split("-")[0]),\
+                                      int( timeOfUpdateInIsoFormat.split("-")[1]),\
+                                      int( timeOfUpdateInIsoFormat.split("-")[1].split(" ")[0] )\
+                                    )
+        
+            timeBetweenBothDates = currentUpdateDT - lastUpdateDT
+            
+            if timeBetweenBothDates.days >= 1 :
+                isFirstUpdateOfTheDay = True
         
         
+        
+        return isFirstUpdateOfTheDay 
+        
+        
+        
+    def isFirstUpdateOfTheWeek( self, timeOfUpdateInIsoFormat = "" ): 
+        """
+            @summary : Returns whether or not an update executed at 
+                       timeOfUpdateInIsoFormat would be the first update 
+                       of the week.
+                       
+            @timeOfUpdateInIsoFormat : Time at which the update would be executed.
+            
+            @return : True or False.
+                        
+        """
+        
+        isFirstUpdateOfTheWeek = False
+        
+        lastUpdateISO = self.getTimeOfLastUpdateInLogs()
+        
+        if timeOfUpdateInIsoFormat == "" :
+            timeOfUpdateInIsoFormat = StatsDateLib.getCurrentTimeInIsoformat()
+            
+        if timeOfUpdateInIsoFormat >  lastUpdateISO :
+            lastUpdateDT    = datetime( int( lastUpdateISO.split("-")[0]),\
+                                        int( lastUpdateISO.split("-")[1]),\
+                                        int( lastUpdateISO.split("-")[1].split(" ")[0] )\
+                                       )
+       
+            currentUpdateDT = datetime( int( timeOfUpdateInIsoFormat.split("-")[0]),\
+                                        int( timeOfUpdateInIsoFormat.split("-")[1]),\
+                                        int( timeOfUpdateInIsoFormat.split("-")[1].split(" ")[0] )\
+                                       )
+            
+            weekNumberOfLastUpdate    = time.strftime( '%W', StatsDateLib.getSecondsSinceEpoch( lastUpdateISO ) )
+            weekNumberOfCurrentUpdate = time.strftime( '%W', StatsDateLib.getSecondsSinceEpoch( timeOfUpdateInIsoFormat ) )
+            
+            timeBetweenBothDates = currentUpdateDT - lastUpdateDT
+            daysBetween = timeBetweenBothDates.days
+            
+            if daysBetween < 7 and ( weekNumberOfLastUpdate == weekNumberOfCurrentUpdate ):  #<7 days prevents same week but from different years.
+                isFirstUpdateOfTheWeek = False
+            else:
+                isFirstUpdateOfTheWeek = True    
+                
+        
+        return isFirstUpdateOfTheWeek
+    
+    
+        
+    def isFirstUpdateOfTheMonth( self, timeOfUpdateInIsoFormat = "" ): 
+        """
+            @summary : Returns whether or not an update executed at 
+                       timeOfUpdateInIsoFormat would be the first update 
+                       of the month.
+                       
+            @timeOfUpdateInIsoFormat : Time at which the update would be executed.
+            
+            @return : True or False.
+                        
+        """
+        
+        
+        isFirstUpdateOfTheMonth = False
+        
+        lastUpdateISO = self.getTimeOfLastUpdateInLogs()
+        
+        if timeOfUpdateInIsoFormat == "" :
+            timeOfUpdateInIsoFormat = StatsDateLib.getCurrentTimeInIsoformat()
+            
+        if timeOfUpdateInIsoFormat >  lastUpdateISO :
+            
+            yearNumberOfLastUpdate    = lastUpdateISO.split("-")[0] 
+            yearNumberOfCurrentUpdate = timeOfUpdateInIsoFormat.split("-")[0]  
+            
+            if yearNumberOfLastUpdate != yearNumberOfCurrentUpdate:
+                isFirstUpdateOfTheMonth = True 
+            
+            else: 
+                monthOfLastUpdate    = lastUpdateISO.split("-")[1] 
+                monthOfCurrentUpdate = timeOfUpdateInIsoFormat.split("-")[1]         
+                
+                if monthOfLastUpdate != monthOfCurrentUpdate: 
+                    isFirstUpdateOfTheMonth = True 
+                               
+        
+        return isFirstUpdateOfTheMonth         
+ 
+ 
+ 
+    def isFirstUpdateOfTheYear( self, timeOfUpdateInIsoFormat = "" ): 
+        """
+            @summary : Returns whether or not an update executed at 
+                       timeOfUpdateInIsoFormat would be the first update 
+                       of the year.
+                       
+            @timeOfUpdateInIsoFormat : Time at which the update would be executed.
+            
+            @return : True or False.
+                        
+        """
+        
+        isFirstUpdateOfTheYear = False
+        
+        lastUpdateISO = self.getTimeOfLastUpdateInLogs()
+        
+        if timeOfUpdateInIsoFormat == "" :
+            timeOfUpdateInIsoFormat = StatsDateLib.getCurrentTimeInIsoformat()
+            
+        if timeOfUpdateInIsoFormat >  lastUpdateISO :
+            
+            yearNumberOfLastUpdate    = lastUpdateISO.split("-")[0] 
+            yearNumberOfCurrentUpdate = timeOfUpdateInIsoFormat.split("-")[0]  
+            
+            if yearNumberOfLastUpdate != yearNumberOfCurrentUpdate:
+                isFirstUpdateOfTheYear = True  
+        
+        
+        return isFirstUpdateOfTheYear
