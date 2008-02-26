@@ -30,14 +30,39 @@ class TimeConfigParameters:
     validTimeUnits = ['minutes','hours','days','months']
 
 
-    def  __init__(self, pxStatsFrequency = None, monitoringFrequency = None, dbBackupsFrequency = None, pickleCleanerFrequency = None , generalCleanerFrequency= None ):
+    def  __init__( self, pxStatsFrequency = None, monitoringFrequency = None, dbBackupsFrequency = None,\
+                   pickleCleanerFrequency = None , generalCleanerFrequency= None,\
+                   dailyWebPageFrequency = None, weeklyWebPageFrequency = None,\
+                   monthlyWebPageFrequency = None, yearlyWebPageFrequency = None,\
+                   totalWebPagesUpdatesFrequency = None ):
         """        
             @param pxStatsFrequency: Frequency at wich to run pxStats.
             @param monitoringFrequency: Frequency at wich to monitor pxStats.
             @param dbBackupsFrequency: Frequency at wich to backup the databases.
             @param pickleCleanerFrequency: Frequency at wich to clean the the pickles.
             @param generalCleanerFrequency: Frequency at wich to run the general cleaner.
+            
+            @note : valid update frenqencies for following parameters are : 
+                    'dailyWebPageFrequency','weeklyWebPageFrequency','monthlyWebPageFrequency','YearlyWebPageFrequency',
+                    'totalWebPagesUpdatesFrequency'
+                    
+            @param dailyWebPageFrequency : Frequency at which to update de daily web pages and 
+                                           it's graphics.
+                                           
+            @param weeklyWebPageFrequency : Frequency at which to update de weekly web pages and 
+                                           it's graphics.
+                                           
+            @param monthlyWebPageFrequency : Frequency at which to update de monthly web pages and 
+                                             it's graphics.
+            
+            @param yearlyWebPageFrequency : Frequency at which to update de yearly web pages and 
+                                            it's graphics.     
+            
+            @param  totalWebPagesUpdatesFrequency : Frequency at which to update de totals web pages and 
+                                                    it's graphics.    
+            
              
+        
         """
         
         self.pxStatsFrequency = pxStatsFrequency or {1:"hours"}
@@ -45,8 +70,14 @@ class TimeConfigParameters:
         self.dbBackupsFrequency = dbBackupsFrequency or {4:"hours"}
         self.pickleCleanerFrequency = pickleCleanerFrequency or {24:"hours"}
         self.generalCleanerFrequency = generalCleanerFrequency or {24:"hours"}
-
-           
+        
+        
+        self.dailyWebPageFrequency   = dailyWebPageFrequency   or "hourly"
+        self.weeklyWebPageFrequency  = weeklyWebPageFrequency  or "hourly"
+        self.monthlyWebPageFrequency = monthlyWebPageFrequency or "weekly"
+        self.yearlyWebPageFrequency  = yearlyWebPageFrequency  or "monthly"   
+            
+            
             
     def getTimeParametersFromConfigurationFile(self):
         """
@@ -103,6 +134,13 @@ class TimeConfigParameters:
                 raise Exception("Invalid time unit found in configuration file.")
         
         
+        self.dailyWebPageFrequency   =  config.get( 'timeConfig', 'dailyWebPageFrequency' ).replace( " ", "").replace( "'","" ).replace( '"','' )
+        self.weeklyWebPageFrequency  =  config.get( 'timeConfig', 'weeklyWebPageFrequency' ).replace( " ", "").replace( "'","" ).replace( '"','' )
+        self.monthlyWebPageFrequency =  config.get( 'timeConfig', 'monthlyWebPageFrequency' ).replace( " ", "").replace( "'","" ).replace( '"','' )
+        self.yearlyWebPageFrequency  =  config.get( 'timeConfig', 'yearlyWebPageFrequency' ).replace( " ", "").replace( "'","" ).replace( '"','' )
+        self.totalWebPagesUpdatesFrequency =  config.get( 'timeConfig', 'totalWebPagesUpdatesFrequency' ).replace( " ", "").replace( "'","" ).replace( '"','' )
+        
+             
         try:
             file.close() 
         except:
