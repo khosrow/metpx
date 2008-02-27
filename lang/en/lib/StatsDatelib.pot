@@ -1,0 +1,85 @@
+msgid ""
+msgstr ""
+
+
+msgid "Apr"
+msgstr "Apr"
+
+msgid "Aug"
+msgstr "Aug"
+
+msgid "Dec"
+msgstr "Dec"
+
+msgid "Feb"
+msgstr "Feb"
+
+msgid "Jan"
+msgstr "Jan"
+
+msgid "Jul"
+msgstr "Jul"
+
+msgid "Jun"
+msgstr "Jun"
+
+msgid "Mar"
+msgstr "Mar"
+
+msgid "Nov"
+msgstr "Nov"
+
+msgid "Oct"
+msgstr "Oct"
+
+msgid "Sep"
+msgstr "Sep"
+
+msgid "May"
+msgstr "May"
+
+msgid "April"
+msgstr "April"
+
+msgid "February"
+msgstr "February"
+
+msgid "January"
+msgstr "January"
+
+msgid "March"
+msgstr "March"
+
+msgid "August"
+msgstr "August"
+
+msgid "July"
+msgstr "July"
+
+msgid "June"
+msgstr "June"
+
+msgid "September"
+msgstr "September"
+
+msgid "December"
+msgstr "December"
+
+msgid "November"
+msgstr "November"
+
+msgid "October"
+msgstr "October"
+
+msgid "daily"
+msgstr "daily"
+
+msgid "weekly"
+msgstr "weekly"
+
+msgid "monthly"
+msgstr "monthly"
+
+msgid "yearly"
+msgstr "yearly"
+
