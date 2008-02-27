@@ -28,7 +28,7 @@ from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.LanguageTools import LanguageTools
 
  
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "StatsDateLib.py"
 
 """
     - Small function that adds pxLib to sys path.
@@ -47,7 +47,7 @@ HOUR   = 60 * MINUTE
 DAY    = 24 * HOUR
 MINUTES_PER_DAY = 24*60
 
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__       
+
 
 
 
@@ -77,7 +77,90 @@ class StatsDateLib:
                 _ =  LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, language )
         
     setLanguage = staticmethod( setLanguage )     
-     
+    
+    
+    
+    def addMonthsToIsoDate( isodate, monthstoAdd ):
+        """
+            
+            @summary : Add a certain number of months to a date.
+            
+            @param isodate: Date in iso format to which to add months.
+            
+            @param monthstoAdd: Number of months to add.( 0 or bigger)  
+            
+            @return : The resulting date. Will return the date received as a parameter
+                      if error occurs
+            
+        """
+        
+        monthsWith30Days = [4,6,9,11]    
+        
+        validDate = True 
+        
+        resultingDate = isodate
+        
+        try :
+            StatsDateLib.getSecondsSinceEpoch( isodate )
+        except:    
+            validDate = False
+            
+        if validDate == True :
+            
+            dayFromDate   = int(isodate.split( "-" )[2].split( " " )[0])
+            monthFromDate = int(isodate.split( "-" )[1])
+            yearFromDate  = int(isodate.split( "-" )[0])
+            hourFromDate  = isodate.split( " " )[1]
+            
+            
+            yearsToAdd , resultingMonth = divmod( ( monthFromDate + monthstoAdd ), 12 )  
+            
+            resultingYear  = yearFromDate +  yearsToAdd
+            
+            
+            if resultingMonth in monthsWith30Days and dayFromDate == 31 :
+                resultingDay = 30
+            elif resultingMonth == 2 and (dayFromDate == 30 or dayFromDate == 31):
+                if ( ( resultingYear%4 == 0 and resultingYear%100 !=0 ) or resultingYear%400 == 0  ):
+                    resultingDay = 29
+                else:
+                    resultingDay = 28    
+            else: 
+                resultingDay =  dayFromDate
+                
+            if len(str(resultingDay)) < 2:
+                resultingDay = '0' + str(resultingDay)        
+            
+            if len(str(resultingMonth)) < 2:
+                resultingMonth = '0' + str(resultingMonth)   
+                            
+            resultingDate = str( resultingYear ) + '-' + str( resultingMonth ) + '-' + str( resultingDay ) + ' ' + str( hourFromDate )
+            
+            
+        
+        return resultingDate            
+    
+    
+    
+    addMonthsToIsoDate = staticmethod( addMonthsToIsoDate )
+    
+    
+    
+    def getCurrentTimeInIsoformat():
+        """ 
+            @summary : Returns current system time in iso format. 
+            
+            @return  : Returns current system time in iso format.
+        
+        """
+        
+        currentTimeInEpochFormat = time.time()
+        
+        return StatsDateLib.getIsoFromEpoch( currentTimeInEpochFormat )
+    
+    getCurrentTimeInIsoformat = staticmethod( getCurrentTimeInIsoformat )
+    
+    
        
     def isValidIsoDate( isoDate ):
         """   
@@ -108,11 +191,17 @@ class StatsDateLib:
                        based on an epoch date.   
         """
     
+        months ={ "January": _("January"),  "February": _("February"),  "March":_("March"),  "April":_("April"),\
+                 "May":_("May"), "June":_("June"), "July":_("July"),  "August":_("August"),  "September":_("September"),\
+                 "October":_("October"),  "November":_("November"),  "December":_("December") }
+        
         year  = time.strftime( '%Y', time.gmtime(timeInEpochFormat)  )
         month = time.strftime( '%B', time.gmtime(timeInEpochFormat)  )
         day   = time.strftime( '%d', time.gmtime(timeInEpochFormat)  )  
         
-        return year, _(month), day   
+        month = months[month]
+        
+        return year, month, day   
     
     getYearMonthDayInStrfTime = staticmethod(getYearMonthDayInStrfTime)   
     
@@ -785,11 +874,58 @@ class StatsDateLib:
 
 
 if __name__ == "__main__":
-
-    print "StatsDateLib.getIsoFromEpoch() : %s" %StatsDateLib.getIsoFromEpoch( 0)
-    print "StatsDateLib.getNumberOfDaysBetween( ) : %s" %StatsDateLib.getNumberOfDaysBetween( '2005-08-31 00:00:01','2005-08-30 23:59:59' )
+    
+    print ""
+    print "" 
+    print "getIsoFromEpoch test #1 : "
+    print ""
+    print "StatsDateLib.getIsoFromEpoch(0) : " 
+    print "Expected result : %s " %("1970-01-01 00:00:00")
+    print "Obtained result : %s " %StatsDateLib.getIsoFromEpoch(0)
+    
+    if not StatsDateLib.getIsoFromEpoch(0) == "1970-01-01 00:00:00" : raise AssertionError("getIsoFromEpoch test #1 is broken.")
+        
+    print ""
+    print ""     
+    print "getNumberOfDaysBetween test #1 : "
+    print ""
+    print "StatsDateLib.getNumberOfDaysBetween( '2005-08-31 00:00:01','2005-08-30 23:59:59' ) : " 
+    print "Expected result : %s " %("1")
+    print "Obtained result : %s " %StatsDateLib.getNumberOfDaysBetween( '2005-08-31 00:00:01','2005-08-30 23:59:59' )
+    
+    if not StatsDateLib.getNumberOfDaysBetween( '2005-08-31 00:00:01','2005-08-30 23:59:59' ) == 1 : raise AssertionError("getNumberOfDaysBetween test #1 is broken.")
+       
+       
+    print ""
+    print ""     
+    print "addMonthsToIsoDate test #1(basic test) : "
+    print ""
+    print """StatsDateLib.addMonthsToIsoDate( "2007-10-15 12:00:00", 1) : """
+    print "Expected result : %s " %("2007-11-15 12:00:00")
+    print "Obtained result : %s " %StatsDateLib.addMonthsToIsoDate( "2007-10-15 12:00:00", 1)
+    
+    if not StatsDateLib.addMonthsToIsoDate( "2007-10-15 12:00:00", 1) == "2007-11-15 12:00:00" : raise AssertionError("addMonthsToIsoDate test #1 is broken.")
+     
+    print ""
+    print "" 
+    print "addMonthsToIsoDate test #2(test year increment): "
+    print ""
+    print """StatsDateLib.addMonthsToIsoDate( "2007-10-15 12:00:00", 15) : """
+    print "Expected result : %s " %("2009-01-15 12:00:00")
+    print "Obtained result : %s " %StatsDateLib.addMonthsToIsoDate( "2007-10-15 12:00:00", 15)
+    if not StatsDateLib.addMonthsToIsoDate( "2007-10-15 12:00:00", 15) == "2009-01-15 12:00:00" : raise AssertionError("addMonthsToIsoDate test #2 is broken.")
     
     
-    
-    
+    print ""
+    print ""  
+    print "addMonthsToIsoDate test #3 (test day number too high in bissextile year): "
+    print ""
+    print """StatsDateLib.addMonthsToIsoDate( "2008-01-31 12:00:00", 1) : """
+    print "Expected result : %s " %("2008-02-29 12:00:00")
+    print "Obtained result : %s " %StatsDateLib.addMonthsToIsoDate( "2008-01-31 12:00:00", 1)
+    if not StatsDateLib.addMonthsToIsoDate( "2008-01-31 12:00:00", 1) == "2008-02-29 12:00:00" : raise AssertionError("addMonthsToIsoDate test #3 is broken.")
+       
+       
+       
+       
        
