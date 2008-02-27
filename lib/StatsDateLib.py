@@ -115,6 +115,11 @@ class StatsDateLib:
             
             yearsToAdd , resultingMonth = divmod( ( monthFromDate + monthstoAdd ), 12 )  
             
+            if resultingMonth == 0:
+                resultingMonth = 12
+                yearsToAdd = yearsToAdd -1 
+                    
+            
             resultingYear  = yearFromDate +  yearsToAdd
             
             
