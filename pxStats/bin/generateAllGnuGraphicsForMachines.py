@@ -3,7 +3,7 @@
 
 #############################################################################################
 #
-# @name  : generateAllGraphsForServer.py
+# @name  : generateAllGnuGraphicsForMachines.py f.k.a generateAllGraphsForServer.py
 #
 # @author:  Nicholas Lemay
 #
@@ -12,20 +12,31 @@
 #           named COPYING in the root of the source directory tree.
 #
 #
-# @since: 2006-09-12 last updated on 2007-07-17
+# @since: 2006-09-12 last updated on 2008-02-28
 #
-# @summary: This program is to be used to create graphics of the same timespan for 
-#           one or many machines and for all their respective clients.
+# @summary: This program is to be used to create a series of Gnuplot graphics of the
+#            same timespan for  one or many machines and for all their respective clients or 
+#            sources.
 #                           
-#           Graphics can also be produce by merging the data from different machines.
+# @Note      Graphics can also be produce by merging the data from different machines.
+#
+#
+# @warning: This utility is designed to launch numerous process at the same time in an effort 
+#           to use a multi-processor achitecture properly. This will unavoidably raise 
+#           load on the machine this is run on. Please specify a number of simultaneously
+#           launched process' that is in tune with the power of your machine and
+#           the load that is avaiable for this program. 
+#
 #
 # @Usage:   This program can be called from command-line. Use -h for usage.
 #
 #
+# @todo   : Add option that allows to specify number of process to launch at the same time.
+#
 ##############################################################################################
 """
 
-import os, time, pwd, sys, getopt, commands, fnmatch, gettext, pickle
+import os, time,sys, commands
 from   optparse  import OptionParser
 
 
@@ -33,6 +44,7 @@ from   optparse  import OptionParser
     Small function that adds pxlib to the environment path.  
 """
 sys.path.insert(1, sys.path[0] + '/../../')
+
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
@@ -43,15 +55,17 @@ from pxStats.lib.LanguageTools import LanguageTools
     PXManager requires pxlib 
 """
 STATSPATHS = StatsPaths( )
-STATSPATHS.setPaths( LanguageTools.getMainApplicationLanguage() )
+STATSPATHS.setBasicPaths()
 sys.path.append( STATSPATHS.PXLIB )
 
-
+"""
+    These paths require pxlib
+"""
 from PXManager import *
 
 
 LOCAL_MACHINE  = os.uname()[1]
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__ 
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "generateGnuGraphicsForMachines.py" 
 
 #################################################################
 #                                                               #
@@ -268,7 +282,7 @@ def generateGraphsForIndividualMachines( infos ) :
             pid = os.fork()#create child process
             
             if pid == 0: #child process
-                output = commands.getoutput( "python %sgenerateGraphics.py -m '%s' -f tx -c '%s' -d '%s' -s %s --copy --outputLanguage %s" \
+                output = commands.getoutput( "python %sgenerateGnuGraphics.py -m '%s' -f tx -c '%s' -d '%s' -s %s --copy --outputLanguage %s" \
                                              %( StatsPaths.STATSBIN, infos.machines[i], txName, infos.date, infos.timespan, infos.outputLanguage  ) )               
                 print output 
                 sys.exit()
@@ -295,7 +309,7 @@ def generateGraphsForIndividualMachines( infos ) :
             pid = os.fork()#create child process
             
             if pid == 0 :#child process
-                output = commands.getoutput( "python %sgenerateGraphics.py -m '%s' -f rx -c '%s' -d '%s' -s %s --copy --outputLanguage %s"\
+                output = commands.getoutput( "python %sgenerateGnuGraphics.py -m '%s' -f rx -c '%s' -d '%s' -s %s --copy --outputLanguage %s"\
                                              %( StatsPaths.STATSBIN, infos.machines[i] , rxName, infos.date,infos.timespan, infos.outputLanguage ) )     
                 print output
                 sys.exit()
@@ -337,7 +351,7 @@ def generateGraphsForPairedMachines( infos ) :
         
         if pid == 0 :#child process
             
-            output = commands.getoutput( "python %sgenerateGraphics.py -m %s -f tx -c %s -d '%s' -s %s  --copy --outputLanguage %s"
+            output = commands.getoutput( "python %sgenerateGnuGraphics.py -m %s -f tx -c %s -d '%s' -s %s  --copy --outputLanguage %s"
                                          %( StatsPaths.STATSBIN, infos.combinedName, txName, infos.date, infos.timespan, infos.outputLanguage ) )
             print output
             sys.exit()    #terminate child process
@@ -364,7 +378,7 @@ def generateGraphsForPairedMachines( infos ) :
         pid = os.fork()#create child process
         
         if pid == 0:#child process            
-            output = commands.getoutput( "python %sgenerateGraphics.py -m %s -f rx -c %s -d '%s' -s %s  --copy --outputLanguage %s"\
+            output = commands.getoutput( "python %sgenerateGnuGraphics.py -m %s -f rx -c %s -d '%s' -s %s  --copy --outputLanguage %s"\
                                         %( StatsPaths.STATSBIN, infos.combinedName, rxName, infos.date, infos.timespan, infos.outputLanguage ) )     
             print output 
             sys.exit()
