@@ -1,23 +1,23 @@
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
-
 ##########################################################################
 ##
-## Name   : statsMonitoring.py 
+## @name   : statsMonitoring.py 
 ##  
-## Author : Nicholas Lemay  
+## @author : Nicholas Lemay  
 ##
-## Description : This file is to be used to monitor the different activities
-##               that are done with the the stats library. 
+## @summary : This file is to be used to monitor the different activities
+##            that are done with the the stats library. 
 ##
-##               The report build throughout the different monitoring methods
-##               will be mailed to the chosen recipients.
+##            The report build throughout the different monitoring methods
+##            will be mailed to the chosen recipients.
 ##
-##  
-## Date   : November 29th 2006, last updated Januray 16th 2008
+## @license : MetPX Copyright (C) 2004-2006  Environment Canada
+##            MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+##            named COPYING in the root of the source directory tree.  
+##
+##
+## Date   : November 29th 2006, last updated Frebruary 28th 2008
 ##
 #############################################################################
 """
@@ -32,7 +32,7 @@ import os, sys, commands, glob, pickle, time
     Small function that adds pxStats to the environment path.  
 """
 sys.path.insert(1, sys.path[0] + '/../../')
-from pxStats.lib.ClientStatsPickler import ClientStatsPickler
+from pxStats.lib.StatsPickler import StatsPickler
 from pxStats.lib.CpickleWrapper import CpickleWrapper
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.LogFileCollector import LogFileCollector
@@ -45,21 +45,25 @@ from pxStats.lib.LanguageTools import LanguageTools
 """
     - Small function that adds pxLib to sys path.
 """
-sys.path.append( StatsPaths.PXLIB )
+
+STATSPATHS = StatsPaths()
+STATSPATHS.setBasicPaths()
+sys.path.append( STATSPATHS.PXLIB )
+
 import smtplib, mailLib
 
 LOCAL_MACHINE = os.uname()[1] 
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__   
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "statsMonitor.py"   
             
     
-def savePreviousMonitoringJob( parameters ) :
+def savePreviousMonitoringJob( parameters, paths ) :
     """
         
-        Set current crontab as the previous crontab.
+        @summary : Set current crontab as the previous crontab.
     
     """
     
-    file  = "%spreviousMonitoringJob" %StatsPaths.STATSMONITORING
+    file  = "%spreviousMonitoringJob" %paths.STATSMONITORING
      
     if not os.path.isdir( os.path.dirname( file ) ):
         os.makedirs(  os.path.dirname( file ) )
@@ -72,7 +76,7 @@ def savePreviousMonitoringJob( parameters ) :
     
         
     
-def getlastValidEntry( name, startTime ):
+def getlastValidEntry( name, startTime, paths ):
     '''
     
     @param name: Name of the client/source for wich you 
@@ -90,7 +94,7 @@ def getlastValidEntry( name, startTime ):
                           
     '''      
     
-    file  = "%slastEntryFilledTimes" %StatsPaths.STATSMONITORING
+    file  = "%slastEntryFilledTimes" %paths.STATSMONITORING
     #lastValidEntry = ""
     
     if os.path.isfile( file ):
@@ -111,7 +115,7 @@ def getlastValidEntry( name, startTime ):
     
     
     
-def savelastValidEntry( name, lastValidEntry ):
+def savelastValidEntry( name, lastValidEntry, paths ):
     '''
     @summary: Saves the time of the last valid entry
               for the specified client/source.
@@ -126,7 +130,7 @@ def savelastValidEntry( name, lastValidEntry ):
     
     ''' 
       
-    file  = "%slastEntryFilledTimes" %StatsPaths.STATSMONITORING
+    file  = "%slastEntryFilledTimes" %paths.STATSMONITORING
        
     if os.path.isfile( file ):
         fileHandle      = open( file, "r" )
@@ -144,7 +148,7 @@ def savelastValidEntry( name, lastValidEntry ):
     
     
     
-def buildReportHeader( parameters ):
+def buildReportHeader( parameters, paths ):
     """
         
         Returns the header to eb used 
@@ -157,8 +161,8 @@ def buildReportHeader( parameters ):
     reportHeader = reportHeader + _("Time of test : %s\n") %parameters.endTime
     reportHeader = reportHeader + _("Time of previous test : %s\n") %parameters.startTime
     reportHeader = reportHeader + _("Machine name      : %s\n") %(LOCAL_MACHINE)
-    reportHeader = reportHeader + _("Config file  used : %s\n") %( StatsPaths.STATSETC + "monitoringConf" )
-    reportHeader = reportHeader + _("Stats monitor help file can be found here : %s") %( StatsPaths.STATSDOC )
+    reportHeader = reportHeader + _("Config file  used : %s\n") %( paths.STATSETC + "monitoringConf" )
+    reportHeader = reportHeader + _("Stats monitor help file can be found here : %s") %( paths.STATSDOC )
     
     
     return reportHeader
@@ -215,7 +219,7 @@ def getEmailSubject( currentTime, report ):
     
     
     
-def verifyFreeDiskSpace( parameters, report ):
+def verifyFreeDiskSpace( parameters, report, paths ):
     """
         This method verifies all the free disk 
         space for all the folders where the stats library. 
@@ -250,7 +254,7 @@ def verifyFreeDiskSpace( parameters, report ):
     
     if onediskUsageIsAboveMax == True:
         header = _("\n\nThe following disk usage warnings have been found : \n")         
-        helpLines = _("\nDisk usage errors can either be cause by missing folders or disk usage percentage \nabove allowed percentage.\n If folder is missing verify if it is requiered.\n If it is not remove it from the folders section of the config file.\n If disk usage is too high verify if %s is configured properly.\n") %(StatsPaths.PXETC + "clean.conf")  
+        helpLines = _("\nDisk usage errors can either be cause by missing folders or disk usage percentage \nabove allowed percentage.\n If folder is missing verify if it is requiered.\n If it is not remove it from the folders section of the config file.\n If disk usage is too high verify if %s is configured properly.\n") %(paths.PXETC + "clean.conf")  
         
     else:
         header = _("\n\nNo disk usage warning has been found.\n")
@@ -264,12 +268,12 @@ def verifyFreeDiskSpace( parameters, report ):
 
         
 
-def saveCurrentCrontab( currentCrontab ) :
+def saveCurrentCrontab( currentCrontab, paths ) :
     """
         Set current crontab as the previous crontab.
     """
     
-    file  = "%spreviousCrontab" %StatsPaths.STATSMONITORING
+    file  = "%spreviousCrontab" %paths.STATSMONITORING
      
     if not os.path.isdir( os.path.dirname( file ) ):
         os.makedirs(  os.path.dirname( file ) )
@@ -282,7 +286,7 @@ def saveCurrentCrontab( currentCrontab ) :
     
     
     
-def getPreviousCrontab():
+def getPreviousCrontab( paths):
     """
         Gets the previous crontab from the pickle file.
         
@@ -290,7 +294,7 @@ def getPreviousCrontab():
         
     """     
     
-    file  = "%spreviousCrontab" %StatsPaths.STATSMONITORING
+    file  = "%spreviousCrontab" %paths.STATSMONITORING
     previousCrontab = ""
     
     if os.path.isfile( file ):
@@ -302,13 +306,13 @@ def getPreviousCrontab():
 
     
     
-def verifyCrontab( report ):
+def verifyCrontab( report, paths ):
     """
         Verifies if crontab has been modified since last update. 
         
     """
     
-    previousCrontab = getPreviousCrontab()
+    previousCrontab = getPreviousCrontab( paths )
     currentCrontab = commands.getoutput( "crontab -l" )
     
     if currentCrontab != previousCrontab :
@@ -318,7 +322,7 @@ def verifyCrontab( report ):
         report = report + _("\nCrontab entries were not modified since last monitoring job.\n")
     report = report + "----------------------------------------------------------------------------------------------------------------------------------"    
     
-    saveCurrentCrontab( currentCrontab )       
+    saveCurrentCrontab( currentCrontab, paths )       
     
     return report
     
@@ -450,7 +454,7 @@ def findHoursWithNoEntries( logs, startTime, endTime ):
     
 
 
-def verifyStatsLogs( parameters, report ,logger = None ):    
+def verifyStatsLogs( parameters, report, paths, logger = None ):    
     """
     
         Verifies if any entries exists within all
@@ -472,7 +476,7 @@ def verifyStatsLogs( parameters, report ,logger = None ):
     
     for logFileType in logFileTypes:
         
-        lfc =  LogFileCollector( startTime  = parameters.startTime , endTime = parameters.endTime, directory = StatsPaths.STATSLOGGING, lastLineRead = "", logType = "stats", name = logFileType, logger = logger )    
+        lfc =  LogFileCollector( startTime  = parameters.startTime , endTime = parameters.endTime, directory = paths.STATSLOGGING, lastLineRead = "", logType = "stats", name = logFileType, logger = logger )    
         
         lfc.collectEntries()
         logs = lfc.entries                
@@ -542,7 +546,7 @@ def getFoldersAndFilesAssociatedWith( client, fileType, machines, startTime, end
     for machine in splitMachines:
             
         for hour in hours:
-            fileName = ClientStatsPickler.buildThisHoursFileName( client = client, currentTime = hour, fileType = fileType,machine = machine  )
+            fileName = StatsPickler.buildThisHoursFileName( client = client, currentTime = hour, fileType = fileType,machine = machine  )
             fileName = fileName.replace('"',"").replace( "'","")
             folder = os.path.dirname( os.path.dirname( fileName ) )
             if folder not in folders:
@@ -556,7 +560,7 @@ def getFoldersAndFilesAssociatedWith( client, fileType, machines, startTime, end
         combinedMachineName = getCombinedMachineName( machines )
             
         for hour in hours:            
-            fileName = ClientStatsPickler.buildThisHoursFileName( client = client, currentTime = hour, fileType = fileType,machine = combinedMachineName  ) 
+            fileName = StatsPickler.buildThisHoursFileName( client = client, currentTime = hour, fileType = fileType,machine = combinedMachineName  ) 
             fileName = fileName.replace('"',"").replace( "'","")
             folder = os.path.dirname( os.path.dirname( fileName ) )
             
@@ -589,7 +593,7 @@ def getCombinedMachineName( machines ):
             
             
     
-def verifyPicklePresence( parameters, report ):
+def verifyPicklePresence( parameters, report, paths ):
     """
         This fucntion verifies wheteher all the
         expected pickles for all the specified machiens
@@ -692,7 +696,7 @@ def verifyPicklePresence( parameters, report ):
         report = report + _("\n\nMissing files were found on this machine.\n")
         report = report + "----------------------------------------------------------------------------------------------------------------------------------\n"
         report = report + newReportLines
-        report = report + _("\n\nIf pickle files are missing verify if source/client is new.\n If it's new, some missing files are to be expected.\nIf source/client is not new, verify if %s is configured properly.\nOtherwise investigate cause.( Examples : stopped cron, deleted by user, program bug, etc...)\nSee help file for details.\n") %(StatsPaths.PXETC + "clean.conf")
+        report = report + _("\n\nIf pickle files are missing verify if source/client is new.\n If it's new, some missing files are to be expected.\nIf source/client is not new, verify if %s is configured properly.\nOtherwise investigate cause.( Examples : stopped cron, deleted by user, program bug, etc...)\nSee help file for details.\n") %(paths.PXETC + "clean.conf")
         
         
         
@@ -858,7 +862,7 @@ def getPickleAnalysis( files, name, lastValidEntry, maximumGap, errorLog ):
 
             
     
-def verifyPickleContent( parameters, report ):        
+def verifyPickleContent( parameters, report, paths ):        
     """
         Browses the content of the pickle files 
         associated with specified clients and sources.       
@@ -884,7 +888,7 @@ def verifyPickleContent( parameters, report ):
         for txName in txNames:
             
             files = []           
-            lastValidEntry = getlastValidEntry( txName, parameters.startTime )
+            lastValidEntry = getlastValidEntry( txName, parameters.startTime, paths )
             folders = getFoldersAndFilesAssociatedWith(txName,"tx", machine, lastValidEntry, parameters.endTime )
             
             for folder in folders: 
@@ -894,7 +898,7 @@ def verifyPickleContent( parameters, report ):
                
             newReportLines = newReportLines + brandNewReportLines
             
-            savelastValidEntry( txName, lastValidEntry )
+            savelastValidEntry( txName, lastValidEntry, paths )
     
     if newReportLines != "":
         header = _("\n\nThe following data gaps were not found in error log file :\n" )
@@ -964,14 +968,14 @@ def getPresentAndAbsentFilesFromParameters( parameters ):
     
     
     
-def getSavedFileChecksums():
+def getSavedFileChecksums( paths ):
     """
         Returns the checksums saved 
         from the last monitoring job.
         
     """    
     
-    file = "%spreviousFileChecksums" %StatsPaths.STATSMONITORING
+    file = "%spreviousFileChecksums" %paths.STATSMONITORING
     checksums = {}
         
     if os.path.isfile( file ):
@@ -984,15 +988,15 @@ def getSavedFileChecksums():
     
     
     
-def saveCurrentChecksums( currentChecksums ) :
+def saveCurrentChecksums( currentChecksums, paths ) :
     """
         Takes the current checksums and set them 
         as the previous checksums in a pickle file named 
-        StatsPaths.STATSMONITORING/previousFileChecksums
+        paths.STATSMONITORING/previousFileChecksums
         
     """   
     
-    file  = "%spreviousFileChecksums" %StatsPaths.STATSMONITORING
+    file  = "%spreviousFileChecksums" %paths.STATSMONITORING
      
     if not os.path.isdir( os.path.dirname( file ) ):
         os.makedirs(  os.path.dirname( file ) )
@@ -1005,7 +1009,7 @@ def saveCurrentChecksums( currentChecksums ) :
 
 
 
-def verifyFileVersions( parameters, report  ):
+def verifyFileVersions( parameters, report, paths  ):
     """
         This method is to be used to add the checksums warning 
         found to the report. 
@@ -1050,13 +1054,13 @@ def verifyFileVersions( parameters, report  ):
     
     report = report + header + newReportLines + helpLines
     
-    saveCurrentChecksums( currentChecksums )
+    saveCurrentChecksums( currentChecksums, paths )
     
     return report         
     
     
     
-def verifyWebPages( parameters, report ):
+def verifyWebPages( parameters, report, paths ):
     """
         This method verifies whether or not
         the different web pages and images are 
@@ -1066,7 +1070,7 @@ def verifyWebPages( parameters, report ):
     
     newReportLines = ""
     outdatedPageFound = False 
-    files = glob.glob( "%s*Graphs*.html" %StatsPaths.STATSWEBPAGESHTML )  
+    files = glob.glob( "%s*Graphs*.html" %paths.STATSWEBPAGESHTML )  
     currentTime = StatsDateLib.getSecondsSinceEpoch( parameters.endTime )
     
     
@@ -1091,7 +1095,7 @@ def verifyWebPages( parameters, report ):
         
     
     
-def verifyGraphs( parameters, report ):
+def verifyGraphs( parameters, report, paths ):
     """
         Verifies whether or not all daily 
         graphics seem up to date. 
@@ -1100,7 +1104,7 @@ def verifyGraphs( parameters, report ):
     
     newReportLines = ""
     outdatedGraphsFound = False 
-    folder = ( "%swebGraphics/columbo/" %StatsPaths.STATSGRAPHS )  
+    folder = ( "%swebGraphics/columbo/" %paths.STATSGRAPHS )  
     currentTime = StatsDateLib.getSecondsSinceEpoch( parameters.endTime )
     
     
@@ -1140,7 +1144,7 @@ def verifyGraphs( parameters, report ):
     
 
 
-def updateRequiredfiles( parameters ):
+def updateRequiredfiles( parameters, paths ):
     """
         This method is used to download 
         the latest version of all the required
@@ -1152,9 +1156,9 @@ def updateRequiredfiles( parameters ):
         machine = parameters.detailedParameters.uploadMachines[0]
         login = parameters.detailedParameters.uploadMachinesLogins[machine]
     
-        commands.getstatusoutput( "scp %s@%s:%sPX_Errors.txt* %s >>/dev/null 2>&1" %(login, machine, StatsPaths.PDSCOLLOGS, StatsPaths.STATSMONITORING ) )
+        commands.getstatusoutput( "scp %s@%s:%sPX_Errors.txt* %s >>/dev/null 2>&1" %(login, machine, paths.PDSCOLLOGS, paths.STATSMONITORING ) )
         
-        commands.getstatusoutput( "scp %s@%s:%smaxSettings.conf %smaxSettings.conf >>/dev/null 2>&1" %(login, machine, StatsPaths.PDSCOLETC, StatsPaths.STATSMONITORING ) ) 
+        commands.getstatusoutput( "scp %s@%s:%smaxSettings.conf %smaxSettings.conf >>/dev/null 2>&1" %(login, machine, paths.PDSCOLETC, paths.STATSMONITORING ) ) 
     
 
 
@@ -1256,6 +1260,9 @@ def main():
         
     """ 
     
+    paths = StatsPaths()
+    paths.setPaths()
+    
     report = ""
     
     endTime = getParameterValue()
@@ -1271,21 +1278,21 @@ def main():
     if endTime != "":#If a specific end time was specified at the moment of the call.
         parameters = setMonitoringEndTime( parameters )
     
-    updateRequiredfiles( generalParameters )               
+    updateRequiredfiles( generalParameters, paths )               
 
     validateParameters( parameters )
     
-    report = buildReportHeader( parameters )
-    report = verifyFreeDiskSpace( parameters, report )    
-    report = verifyPicklePresence( parameters, report )    
-    report = verifyPickleContent( parameters, report )        
-    report = verifyStatsLogs( parameters, report )    
-    report = verifyFileVersions( parameters, report  )    
-    report = verifyCrontab(  report  )   
-    report = verifyWebPages( parameters, report )
-    report = verifyGraphs( parameters, report ) 
+    report = buildReportHeader( parameters, paths )
+    report = verifyFreeDiskSpace( parameters, report, paths )    
+    report = verifyPicklePresence( parameters, report, paths )    
+    report = verifyPickleContent( parameters, report, paths )        
+    report = verifyStatsLogs( parameters, report, paths )    
+    report = verifyFileVersions( parameters, report, paths  )    
+    report = verifyCrontab(  report, paths  )   
+    report = verifyWebPages( parameters, report, paths )
+    report = verifyGraphs( parameters, report, paths ) 
      
-    savePreviousMonitoringJob( parameters  )    
+    savePreviousMonitoringJob( parameters, paths  )    
     
     sendReportByEmail( parameters, report  )
 
