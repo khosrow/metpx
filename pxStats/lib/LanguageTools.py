@@ -4,7 +4,7 @@
 MetPX Copyright (C) 2004-2006  Environment Canada
 MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
 named COPYING in the root of the source directory tree.
-
+t
 
 ##############################################################################
 ##
@@ -14,7 +14,7 @@ named COPYING in the root of the source directory tree.
 ##
 ## @author :  Nicholas Lemay
 ##
-## @since  : 2008-01-15, last updated on 2008-01-15 
+## @since  : 2008-01-15, last updated on 2008-02-28
 ##
 ##
 ## @summary : This class contains all the rerquired functions to deal  
@@ -34,12 +34,10 @@ import gettext, os, shutil, sys
 """
     - Small function that adds pxStats to sys path.  
 """
+
 sys.path.insert(1, sys.path[0] + '/../../')
-sys.path.insert(1, sys.path[0] + '/../')
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
-
-
 
 
 
@@ -105,17 +103,19 @@ class LanguageTools :
         
         try : 
             
-            
+            paths = StatsPaths()
+            paths.setBasicPaths()
+   
             if language == 'en' : 
-                correspondingPaths = { StatsPaths.STATSBIN : StatsPaths.STATSLANGENBIN, StatsPaths.STATSDEBUGTOOLS : StatsPaths.STATSLANGENBINDEBUGTOOLS \
-                                      , StatsPaths.STATSTOOLS : StatsPaths.STATSLANGENBINTOOLS, StatsPaths.STATSWEBPAGESGENERATORS : StatsPaths.STATSLANGENBINWEBPAGES \
-                                      , StatsPaths.STATSLIB : StatsPaths.STATSLANGENLIB  }
+                correspondingPaths = { paths.STATSBIN : paths.STATSLANGENBIN, paths.STATSDEBUGTOOLS : paths.STATSLANGENBINDEBUGTOOLS \
+                                      , paths.STATSTOOLS : paths.STATSLANGENBINTOOLS, paths.STATSWEBPAGESGENERATORS : paths.STATSLANGENBINWEBPAGES \
+                                      , paths.STATSLIB : paths.STATSLANGENLIB  }
                          
             elif language == 'fr': 
-                correspondingPaths = { StatsPaths.STATSBIN : StatsPaths.STATSLANGFRBIN, StatsPaths.STATSDEBUGTOOLS : StatsPaths.STATSLANGFRBINDEBUGTOOLS \
-                      , StatsPaths.STATSTOOLS : StatsPaths.STATSLANGFRBINTOOLS, StatsPaths.STATSWEBPAGESGENERATORS : StatsPaths.STATSLANGFRBINWEBPAGES \
-                      , StatsPaths.STATSLIB : StatsPaths.STATSLANGFRLIB  } 
-           
+                correspondingPaths = { paths.STATSBIN : paths.STATSLANGFRBIN, paths.STATSDEBUGTOOLS : paths.STATSLANGFRBINDEBUGTOOLS \
+                      , paths.STATSTOOLS : paths.STATSLANGFRBINTOOLS, paths.STATSWEBPAGESGENERATORS : paths.STATSLANGFRBINWEBPAGES \
+                      , paths.STATSLIB : paths.STATSLANGFRLIB  } 
+            
             
             modulePath = os.path.dirname( moduleAbsPath ) + '/'
             moduleBaseName =  str(os.path.basename( moduleAbsPath )).replace( ".py", "" )
@@ -149,7 +149,8 @@ class LanguageTools :
             translator = gettext.GNUTranslations( open( fileName ) )
             translator = translator.gettext
             
-        except:
+        except Exception,instance:
+            print instance
             translator = None
         
         return translator
@@ -182,6 +183,7 @@ class LanguageTools :
             language = configParameters.mainApplicationLanguage 
             
         fileName   = LanguageTools.getTranslationFileName(language, moduleAbsPath)    
+
         translator = LanguageTools.getTranslator(fileName)
         
         return translator 
@@ -226,7 +228,7 @@ class LanguageTools :
         for formerPath, newPath in combinedPaths:
             destination = os.path.dirname( formerPath ) + os.path.basename( newPath )  
             print "mv %s %s" %( formerPath, destination )
-            #shutil.move( formerPath, destination )
+            shutil.move( formerPath, destination )
 
 
     translateAllOfPxStatsPaths = staticmethod( translateAllOfPxStatsPaths )    
@@ -302,11 +304,13 @@ def main():
     configParameters.getAllParameters()
     language = configParameters.language
     
+    paths = StatsPaths()
+    paths.setBasicPaths()
     
     print "Language set in config file : %s" %language
     
     print "Test1 : (Should show that the proper translation file will be used) "
-    fileName =  LanguageTools.getTranslationFileName( language, StatsPaths.STATSLIB + 'StatsPlotter' )
+    fileName =  LanguageTools.getTranslationFileName( language, paths.STATSLIB + 'StatsPlotter' )
     print "Translation file to be used : %s " %( fileName ) 
     
     print "Test2 : (Should translate the word into the specified language) "
@@ -314,11 +318,11 @@ def main():
     print "Translation for bytecount : %s" %( translator("bytecount") )
     
     print "Test3 : (Should be the same result as test 2) "
-    translator = LanguageTools.getTranslatorForModule( StatsPaths.STATSLIB + 'StatsPlotter', language )
+    translator = LanguageTools.getTranslatorForModule( paths.STATSLIB + 'StatsPlotter', language )
     print "Translation for bytecount : %s" %( translator("bytecount") )
     
     print "Test4 : Unless translation changes, this should print 'filecount' "
-    print "Result : ", LanguageTools.translateTerm("nbreDeFichiers", "fr", "en", StatsPaths.STATSLIB + "StatsPlotter.py" )
+    print "Result : ", LanguageTools.translateTerm("nbreDeFichiers", "fr", "en", paths.STATSLIB + "StatsPlotter.py" )
     
     
 if __name__ == '__main__':
