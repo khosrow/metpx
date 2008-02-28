@@ -1,64 +1,67 @@
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
-named COPYING in the root of the source directory tree.
 
 #############################################################################################
-# Name  : pickleUpdater
+# @name   : pickleUpdater.py
 #
-# Author: Nicholas Lemay
+# @author : Nicholas Lemay
 #
-# Date  : 2006-06-15
+# @since  : 2006-06-15, last update 2008-02-28
 #
-# Description: 
+# @license: MetPX Copyright (C) 2004-2006  Environment Canada
+#           MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
+#           named COPYING in the root of the source directory tree.
 #
-#   Usage:   This program can be called from a crontab or from command-line. 
+# @summary: This script is to be called to update the hourly pickle files that contain
+#           the data gathered from log files. 
 #
-#   For informations about command-line:  PickleUpdater -h | --help
+# @usage  : This program can be called from a crontab or from command-line. 
+#
+# @see: For informations about command-line:  PickleUpdater -h | --help
 #
 #
 ##############################################################################################
 """
 
-import os,time, pwd, sys, getopt, commands, fnmatch, pickle
-
+import os,time, sys, pickle
+from optparse import OptionParser
 
 """
     Small function that adds pxlib to the environment path.  
 """
 sys.path.insert(1, sys.path[0] + '/../../')
-try:    
-    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
-except KeyError:
-    pxlib = '/apps/px/lib/'
-sys.path.append(pxlib)
 
-
-"""
-    Imports
-    PXManager, Logger both require pxlib 
-"""
-from Logger import * 
-from optparse import OptionParser
-from ConfigParser import ConfigParser
-
-from PXManager import * 
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
-from pxStats.lib.ClientStatsPickler import ClientStatsPickler
+from pxStats.lib.StatsPickler import StatsPickler
+from pxStats.lib.LanguageTools import LanguageTools
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
-   
+
+
+STATSPATHS = StatsPaths()
+STATSPATHS.setBasicPaths()
+sys.path.append( StatsPaths.PXLIB )
+
+"""
+    Imports which require pxlib 
+"""
+from Logger import * 
+from PXManager import * 
+
 
 LOCAL_MACHINE = os.uname()[1]   
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "pickleUpdater.py"     
+    
     
     
 class _UpdaterInfos:  
 
-    def __init__( self, clients, directories, types, startTimes,collectUpToNow, fileType, currentDate = '2005-06-27 13:15:00', interval = 1, hourlyPickling = True, machine = ""   ):
+    def __init__( self, clients, directories, types, startTimes,collectUpToNow, fileType,\
+                  currentDate = '2005-06-27 13:15:00', interval = 1, hourlyPickling = True,\
+                  machine = ""   ):
         
         """
-            Data structure used to contain all necessary info for a call to ClientStatsPickler. 
+            @summary Data structure used to contain all necessary info for a call to ClientStatsPickler. 
             
         """ 
         
@@ -77,20 +80,17 @@ class _UpdaterInfos:
 
 
 
-def setLastUpdate( machine, client, fileType, currentDate, collectUpToNow = False    ):
+def setLastUpdate( machine, client, fileType, currentDate, collectUpToNow = False ):
     """
-        This method set the clients last update to the date received in parameter. 
-        Creates new key if key doesn't exist.
-        Creates new PICKLED-TIMES file if it doesn't allready exist.   
-        
-        In final version this will need a better filename and a stable path....
-        
+        @summary : This method sets the clients or source last update into it"S last update file. 
+              
     """
     
     times = {}
     lastUpdate = {}
+    
     needToCreateNewFile = False 
-    fileName = fileName = "%s%s_%s_%s" %( StatsPaths.STATSPICKLESTIMEOFUPDATES, fileType, client, machine )   
+    fileName = "%s%s_%s_%s" %( StatsPaths.STATSPICKLESTIMEOFUPDATES, fileType, client, machine )   
     
     
     if collectUpToNow == False :
@@ -113,7 +113,7 @@ def setLastUpdate( machine, client, fileType, currentDate, collectUpToNow = Fals
     
     if needToCreateNewFile == True:        
         #create a new pickle file  
-        print "problematic file : %s" %fileName 
+        print _("problematic file : %s") %fileName 
         if not os.path.isdir( os.path.dirname( fileName ) ) :
             os.makedirs( os.path.dirname( fileName ) )
                     
@@ -125,14 +125,14 @@ def setLastUpdate( machine, client, fileType, currentDate, collectUpToNow = Fals
 
 def getLastUpdate( machine, client, fileType, currentDate, collectUpToNow = False ):
     """
-        This method gets the dictionnary containing all the last updates list.
-        From that dictionnary it returns the right value.         
+        @summary : Reads and returns the client's or source's last update.        
        
+        @return : The client's or sources last update.   
     """ 
     
     times = {}
     lastUpdate = {}
-    fileName = fileName = "%s%s_%s_%s" %( StatsPaths.STATSPICKLESTIMEOFUPDATES, fileType, client, machine )   
+    fileName = "%s%s_%s_%s" %( StatsPaths.STATSPICKLESTIMEOFUPDATES, fileType, client, machine )   
     
     if os.path.isfile( fileName ):
         try :
@@ -141,7 +141,7 @@ def getLastUpdate( machine, client, fileType, currentDate, collectUpToNow = Fals
             fileHandle.close()
             
         except:
-            print "problematic file in loading : %s" %fileName
+            print _("problematic file in loading : %s") %fileName
             lastUpdate = StatsDateLib.getIsoWithRoundedHours( StatsDateLib.getIsoFromEpoch( StatsDateLib.getSecondsSinceEpoch(currentDate ) - StatsDateLib.HOUR) )
             pass
             
@@ -173,12 +173,12 @@ def getLastUpdate( machine, client, fileType, currentDate, collectUpToNow = Fals
 def getOptionsFromParser( parser, logger = None  ):
     """
         
-        This method parses the argv received when the program was called
-        It takes the params wich have been passed by the user and sets them 
-        in the corresponding fields of the hlE variable.   
+        @summary : This method parses the argv received when the program was called
+                   It takes the params wich have been passed by the user and sets them 
+                   in the corresponding fields of the hlE variable.   
     
-        If errors are encountered in parameters used, it will immediatly terminate 
-        the application. 
+        @Warning : If errors are encountered in parameters used, it will immediatly terminate 
+                   the application. 
     
     """ 
     
@@ -207,9 +207,9 @@ def getOptionsFromParser( parser, logger = None  ):
         currentDate = "%s %s" %( split[0],split[1] )
 
     except:    
-        print "Error. The date format must be YYYY-MM-DD HH:MM:SS" 
-        print "Use -h for help."
-        print "Program terminated."
+        print _("Error. The date format must be YYYY-MM-DD HH:MM:SS" )
+        print _("Use -h for help.")
+        print _("Program terminated.")
         sys.exit()
             
         
@@ -219,28 +219,28 @@ def getOptionsFromParser( parser, logger = None  ):
     
     except:
         
-        print "Error. The interval value needs to be an integer one above 0." 
-        print "Use -h for help."
-        print "Program terminated."
+        print _("Error. The interval value needs to be an integer one above 0." )
+        print _("Use -h for help.")
+        print _("Program terminated.")
         sys.exit()
         
     
     if fileType != "tx" and fileType != "rx":
-        print "Error. File type must be either tx or rx."
-        print 'Multiple types are not accepted.' 
-        print "Use -h for additional help."
-        print "Program terminated."
+        print _("Error. File type must be either tx or rx.")
+        print _('Multiple types are not accepted.' )
+        print _("Use -h for additional help.")
+        print _("Program terminated.")
         sys.exit()    
         
     
     if fileType == "tx":       
-        validTypes = ["errors","latency","bytecount"]
+        validTypes = [ _("errors"), _("latency"), _("bytecount") ]
 
     else:
-        validTypes = ["errors","bytecount"]
+        validTypes = [ _("errors"), _("bytecount") ]
      
-     
-    if types[0] == "All":
+    
+    if types[0] == _("All"):
         types = validTypes
                      
     try :
@@ -250,14 +250,22 @@ def getOptionsFromParser( parser, logger = None  ):
 
     except:    
         
-        print "Error. With %s fileType, possible data types values are : %s." %(fileType,validTypes )
-        print 'For multiple types use this syntax : -t "type1,type2"' 
-        print "Use -h for additional help."
-        print "Program terminated."
+        print _("Error. With %s fileType, possible data types values are : %s.") %(fileType,validTypes )
+        print _('For multiple types use this syntax : -t "type1,type2"' )
+        print _("Use -h for additional help.")
+        print _("Program terminated.")
         sys.exit()
+
+
+
+    def translateType(typeToTranslate):
+        translations = { _("errors"):"errors", _("latency"):"latency", _("bytecount"):"bytecount" }
+        return translations[typeToTranslate]
+        
+    types = map( translateType, types )     
+
     
-    
-    if clients[0] == "All" :
+    if clients[0] == _("All") :
         rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machine )
        
         if fileType == "tx": 
@@ -284,11 +292,12 @@ def getOptionsFromParser( parser, logger = None  ):
             #print "This client was not updated since it's last update was more recent than specified date : %s" %client
             if logger != None :
                 try:
-                    logger.warning("This client was not updated since it's last update was more recent than specified date : %s" %client)      
+                    logger.warning( _("This client was not updated since it's last update was more recent than specified date : %s") %client)      
                 except :
                     pass    
                 
-    infos = _UpdaterInfos( currentDate = currentDate, clients = usefullClients, startTimes = startTimes, directories = directories ,types = types, collectUpToNow = collectUpToNow, fileType = fileType, machine = machine )
+    infos = _UpdaterInfos( currentDate = currentDate, clients = usefullClients, startTimes = startTimes, directories = directories ,\
+                           types = types, collectUpToNow = collectUpToNow, fileType = fileType, machine = machine )
     
     if collectUpToNow == False:
         infos.endTime = StatsDateLib.getIsoWithRoundedHours( infos.currentDate ) 
@@ -300,11 +309,11 @@ def getOptionsFromParser( parser, logger = None  ):
     
 def createParser( ):
     """ 
-        Builds and returns the parser 
+        @summary : Builds and returns the parser 
     
     """
     
-    usage = """
+    usage = _("""
 
 %prog [options]
 ********************************************
@@ -348,7 +357,7 @@ Ex3: %prog -c satnet -d '2006-06-30 05:15:00'--> Client satnet, Date of call 200
 Ex4: %prog -c satnet -t "errors,latency"     --> Uses current time, client satnet and collect those 2 types.
 ********************************************
 * See /doc.txt for more details.           *
-********************************************"""   
+********************************************""" )
     
     parser = OptionParser( usage )
     addOptions( parser )
@@ -359,25 +368,26 @@ Ex4: %prog -c satnet -t "errors,latency"     --> Uses current time, client satne
 
 def addOptions( parser ):
     """
-        This method is used to add all available options to the option parser.
+        @summary : This method is used to add all available options to the option parser.
         
     """
     
-    parser.add_option( "-c", "--clients", action="store", type="string", dest="clients", default="All",
-                        help="Clients' names" )
+    parser.add_option( "-c", "--clients", action="store", type="string", dest="clients", default=_("All"),
+                        help= _("Clients' names") )
 
-    parser.add_option( "-d", "--date", action="store", type="string", dest="currentDate", default=StatsDateLib.getIsoFromEpoch( time.time() ), help="Decide current time. Usefull for testing." ) 
+    parser.add_option( "-d", "--date", action="store", type="string", dest="currentDate", default=StatsDateLib.getIsoFromEpoch( time.time() ),\
+                       help= _("Decide current time. Usefull for testing.") ) 
                                             
     parser.add_option( "-i", "--interval", type="int", dest="interval", default=1,
-                        help="Interval (in minutes) for which a point will be calculated. Will 'smooth' the graph" )
+                        help=_("Interval (in minutes) for which a point will be calculated. Will 'smooth' the graph") )
     
-    parser.add_option( "-f", "--fileType", action="store", type="string", dest="fileType", default='tx', help="Type of log files wanted." )                     
+    parser.add_option( "-f", "--fileType", action="store", type="string", dest="fileType", default='tx', help=_("Type of log files wanted.") )                     
    
-    parser.add_option( "-m", "--machine", action="store", type="string", dest="machine", default=LOCAL_MACHINE, help = "Machine for wich we are running the update." ) 
+    parser.add_option( "-m", "--machine", action="store", type="string", dest="machine", default=LOCAL_MACHINE, help = _("Machine for wich we are running the update.") ) 
     
-    parser.add_option( "-n", "--now", action="store_true", dest = "collectUpToNow", default=False, help="Collect data up to current second." )
+    parser.add_option( "-n", "--now", action="store_true", dest = "collectUpToNow", default=False, help=_("Collect data up to current second.") )
        
-    parser.add_option( "-t", "--types", type="string", dest="types", default="All", help="Types of data to look for." )          
+    parser.add_option( "-t", "--types", type="string", dest="types", default=_("All"), help=_("Types of data to look for.") )          
 
 
 
@@ -385,7 +395,7 @@ def addOptions( parser ):
 
 def updateHourlyPickles( infos, logger = None ):
     """
-        This method is to be used when hourly pickling is done. -1 pickle per hour per client. 
+        @summary : This method is to be used when hourly pickling is done. -1 pickle per hour per client. 
         
         This method needs will update the pickles by collecting data from the time of the last 
         pickle up to the current date.(System time or the one specified by the user.)
@@ -405,13 +415,13 @@ def updateHourlyPickles( infos, logger = None ):
         
     """  
     
-    cs = ClientStatsPickler( logger = logger )
+    sp = StatsPickler( logger = logger )
     
     pathToLogFiles = GeneralStatsLibraryMethods.getPathToLogFiles( LOCAL_MACHINE, infos.machine )
     
     for i in range( len (infos.clients) ) :
         
-        cs.client = infos.clients[i]
+        sp.client = infos.clients[i]
         
         width = StatsDateLib.getSecondsSinceEpoch(infos.endTime) - StatsDateLib.getSecondsSinceEpoch( StatsDateLib.getIsoWithRoundedHours(infos.startTimes[i] ) ) 
         
@@ -431,13 +441,14 @@ def updateHourlyPickles( infos, logger = None ):
                 
                 if startTime >= endTime and logger != None :                                
                     try:
-                        logger.warning("Startime used in updateHourlyPickles was greater or equal to end time.")    
+                        logger.warning( _("Startime used in updateHourlyPickles was greater or equal to end time.") )    
                     except:
                         pass    
                 
-                cs.pickleName =  ClientStatsPickler.buildThisHoursFileName( client = infos.clients[i], currentTime =  startOfTheHour, machine = infos.machine, fileType = infos.fileType )
+                sp.pickleName =  StatsPickler.buildThisHoursFileName( client = infos.clients[i], currentTime =  startOfTheHour, machine = infos.machine, fileType = infos.fileType )
                  
-                cs.collectStats( types = infos.types, startTime = startTime , endTime = endTime, interval = infos.interval * StatsDateLib.MINUTE,  directory = pathToLogFiles, fileType = infos.fileType )                     
+                sp.collectStats( types = infos.types, startTime = startTime , endTime = endTime, interval = infos.interval * StatsDateLib.MINUTE,\
+                                 directory = pathToLogFiles, fileType = infos.fileType )                     
                            
                     
         else:      
@@ -448,18 +459,38 @@ def updateHourlyPickles( infos, logger = None ):
             #print " client : %s startTime : %s endTime : %s" %(infos.clients[i], startTime, endTime )               
             if startTime >= endTime and logger != None :#to be removed                
                 try:
-                    logger.warning( "Startime used in updateHourlyPickles was greater or equal to end time." )    
+                    logger.warning( _("Startime used in updateHourlyPickles was greater or equal to end time.") )    
                 except:
                     pass    
                 
-            cs.pickleName =   ClientStatsPickler.buildThisHoursFileName( client = infos.clients[i], currentTime = startOfTheHour, machine = infos.machine, fileType = infos.fileType )            
+            sp.pickleName = StatsPickler.buildThisHoursFileName( client = infos.clients[i], currentTime = startOfTheHour, machine = infos.machine, fileType = infos.fileType )            
               
-            cs.collectStats( infos.types, startTime = startTime, endTime = endTime, interval = infos.interval * StatsDateLib.MINUTE, directory = pathToLogFiles, fileType = infos.fileType   )        
+            sp.collectStats( infos.types, startTime = startTime, endTime = endTime, interval = infos.interval * StatsDateLib.MINUTE, directory = pathToLogFiles, fileType = infos.fileType )        
        
                          
         setLastUpdate( machine = infos.machine, client = infos.clients[i], fileType = infos.fileType, currentDate = infos.currentDate, collectUpToNow = infos.collectUpToNow )
+             
               
-   
+              
+def  setGlobalLanguageParameters():
+    """
+        @summary : Sets up all the needed global language 
+                   tranlator so that it can be used 
+                   everywhere in this program.
+        
+        @Note    : The scope of the global _ function 
+                   is restrained to this module only and
+                   does not cover the entire project.
+        
+        @return: None
+        
+    """
+    
+    global _ 
+    
+    _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )    
+    
+    
     
 def main():
     """
@@ -468,13 +499,15 @@ def main():
     
     """
     
+    setGlobalLanguageParameters()
+    
     if not os.path.isdir( StatsPaths.STATSPICKLES ):
         os.makedirs( StatsPaths.STATSPICKLES, mode=0777 )    
     
     if not os.path.isdir( StatsPaths.STATSLOGGING ):
         os.makedirs( StatsPaths.STATSLOGGING, mode=0777 )
     
-    logger = Logger( StatsPaths.STATSLOGGING + 'stats_' + 'pickling' + '.log.notb', 'INFO', 'TX' + 'pickling', bytes = 10000000  ) 
+    logger = Logger( StatsPaths.STATSLOGGING + _('stats_') + _('pickling') + '.log.notb', 'INFO', 'TX' + 'pickling', bytes = 10000000  ) 
     logger = logger.getLogger()
    
     parser = createParser( )  #will be used to parse options 
