@@ -1,21 +1,23 @@
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
 
 ##############################################################################
 ##
 ##
-## Name   : generateGraphics.py 
+## @name   : generateGnuGraphics.py f.k.a generateGraphics.py 
 ##
 ##
-## @author:  Nicholas Lemay
+## @author :  Nicholas Lemay
 ##
-## @since:  06-07-2006 last update on 2007-07-17 
+## @since  :  06-07-2006 last update on 2008-02-28 
+##
+## @lincense : MetPX Copyright (C) 2004-2006  Environment Canada
+##             MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+##             named COPYING in the root of the source directory tree.
 ##
 ##
-## Description : Small application usefull for generating specific graphics.
+## Description : Small cmmand-line interface usefull for generating 
+##               short span graphics graphics.(0-48 hours work best.)
 ##
 ##
 ##############################################################################
@@ -27,12 +29,12 @@ sys.path.insert(1, sys.path[0] + '/../../')
 from optparse import OptionParser
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
-from pxStats.lib.ClientGraphicProducer import ClientGraphicProducer
+from pxStats.lib.GnuGraphicProducer import GnuGraphicProducer
 from pxStats.lib.LanguageTools import LanguageTools
 
 
 LOCAL_MACHINE = os.uname()[1]
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__ 
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "generateGnuGraphics.py" 
 
 
 class _GraphicsInfos:
@@ -56,22 +58,20 @@ class _GraphicsInfos:
         self.groupName      = groupName         # Name given to the combined client/sources.
         
         
-#################################################################
-#                                                               #
-#############################PARSER##############################
-#                                                               #
-#################################################################   
 
 
 def getOptionsFromParser( parser ):
     """
         
-        This method parses the argv received when the program was called
-        It takes the params wich have been passed by the user and sets them 
-        in the corresponding fields of the infos variable.   
+        @summary : This method parses the argv received when 
+                   the program was called.
+        
+                   It takes the params wich have been passed by
+                   the user and sets them in the corresponding 
+                   fields of the infos variable.   
     
-        If errors are encountered in parameters used, it will immediatly terminate 
-        the application. 
+        @note :    If errors are encountered in parameters used, 
+                   it will immediatly terminate the application. 
     
     """ 
     
@@ -189,7 +189,7 @@ def getOptionsFromParser( parser ):
         
 def createAParser( ):
     """ 
-        Builds and returns the parser 
+        @summary : Builds and returns the parser 
     
     """
     
@@ -249,7 +249,7 @@ Ex4: %prog -c satnet -t "errors,latency"     --> Uses current time, client satne
 
 def addOptions( parser ):
     """
-        This method is used to add all available options to the option parser.
+        @summary : This method is used to add all available options to the option parser.
         
     """      
     
@@ -307,9 +307,10 @@ def  setGlobalLanguageParameters():
     _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )  
 
 
+
 def main():
     """
-        Creates graphics based on parameters used.
+        @summary : Creates graphics based on parameters received through the command-line.
         
     """
     
@@ -319,7 +320,7 @@ def main():
     
     infos = getOptionsFromParser( parser )          
     
-    gp = ClientGraphicProducer( clientNames = infos.clientNames, groupName = infos.groupName , timespan = infos.timespan,\
+    gp = GnuGraphicProducer( clientNames = infos.clientNames, groupName = infos.groupName , timespan = infos.timespan,\
                                 currentTime = infos.currentTime, productTypes = infos.productTypes, directory = infos.directory ,\
                                 fileType = infos.fileType, machines = infos.machines, language = infos.outputLanguage )  
     
