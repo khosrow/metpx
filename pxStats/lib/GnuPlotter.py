@@ -1,28 +1,40 @@
 #!/usr/bin/env python2
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
 
 #############################################################################################
-# Name: Plotter.py
 #
-# Author      : Nicholas Lemay, but the code is highly inspired by previously created file 
-#               named Plotter.py written by Daniel Lemay. This file can be found in the lib
-#               folder of this application. 
+# @name: GnuPlotter.py f.k.a StatsPlotter.py f.k.a Plotter.py
 #
-# Date        : 2006-06-06
+# @author      : Nicholas Lemay, but the code is highly inspired by previously created file 
+#                named Plotter.py written by Daniel Lemay. This file can be found in the lib
+#                folder of this application. 
 #
-# Description : This class contain the data structure and the methods used to plot a graphic 
-#               using previously collected data. The data should have been collected using 
-#               the data collecting class' and methods found in the stats library. 
+# @since        : 2006-06-06, last updated on 2008-02-28
+#
+#
+# @license: MetPX Copyright (C) 2004-2008  Environment Canada
+#           MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+#           named COPYING in the root of the source directory tree.
+#
+#
+#
+# @summary : This class contain the data structure and the methods used to plot a graphic 
+#            using previously collected data through the Gnuplot library. The data should
+#            have been collected using  the data collecting class' and methods found in 
+#            the stats library. 
 # 
+#
+#@requires: Requires the gnuplot library to have been installed.
+#
+#
+#
 #############################################################################################
+
 
 """
-
 # General imports
 import os, sys, shutil, statvfs
+
 # Requires the gnuplot library to be installed.
 import Gnuplot, Gnuplot.funcutils 
 
@@ -34,7 +46,6 @@ sys.path.insert(1, sys.path[0] + '/../../')
 
 # These imports require pxStats.
 from pxStats.lib.StatsDateLib import StatsDateLib
-from pxStats.lib.ClientStatsPickler import ClientStatsPickler
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.LanguageTools import LanguageTools
 from pxStats.lib.Translatable import Translatable
@@ -42,19 +53,24 @@ from pxStats.lib.Translatable import Translatable
 """
     - Small function that adds pxLib to sys path.
 """
-sys.path.append( StatsPaths.PXLIB )
+statsPaths = StatsPaths( )
+statsPaths.setBasicPaths()
+sys.path.append( statsPaths.PXLIB )
 
-# Logger requires pxlib
+"""
+    These imports require pxlib 
+"""
 from   Logger  import Logger
 
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__   
 
-
+"""
+    Globals
+"""
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "GnuPlotter.py"
 LOCAL_MACHINE = os.uname()[1]
 
 
-
-class StatsPlotter( Translatable ):
+class GnuPlotter( Translatable ):
 
 
     def __init__( self, timespan,  stats = None, clientNames = None, groupName = "", type='lines',           \
@@ -62,7 +78,8 @@ class StatsPlotter( Translatable ):
                   statsTypes = None, productTypes = ["All"], logger = None, logging = True, fileType = "tx", \
                   machines = "", entryType = "minute", maxLatency = 15, workingLanguage = None, outputLanguage = None ):
         """
-            @summary : StatsPlotter constructor. 
+        
+            @summary : GnuPlotter constructor. 
             
         """                                                                    
         
@@ -99,7 +116,7 @@ class StatsPlotter( Translatable ):
         self.const = len( self.stats ) -1          # Usefull constant
         self.productTypes = productTypes           # Type of product for wich the graph is being generated.  
         self.initialiseArrays()
-        self.loggerName       = 'statsPlotter'
+        self.loggerName       = 'gnuPlotter'
         self.logger           = logger
         self.logging          = logging
         self.workingLanguage  = workingLanguage   # Language with whom we are currently working, in which the string parameters were specified.
@@ -143,7 +160,7 @@ class StatsPlotter( Translatable ):
 
     def initialiseArrays( self ):
         """
-            Used to set the size of the numerous arrays needed in StatsPlotter
+            @summary : Used to set the size of the numerous arrays needed in GnuPlotter
         """
         
         #TODO Verify if really necessary
@@ -166,9 +183,9 @@ class StatsPlotter( Translatable ):
         
     def buildImageName( self ):
         """
-            Builds and returns the absolute fileName so that it can be saved 
+            @summary : Builds and returns the absolute fileName so that it can be saved 
             
-            If folder to file does not exists creates it.
+                       If folder to file does not exists creates it.
         
         """ 
         
@@ -231,13 +248,13 @@ class StatsPlotter( Translatable ):
     def getXTics( self ):
         """
            
-           This method builds all the xtics used to seperate data on the x axis.
+           @summary : This method builds all the xtics used to seperate data on the x axis.
             
-           Xtics values will are used in the plot method so they will be drawn on 
-           the graphic. 
+                      Xtics values will are used in the plot method so they will be drawn on 
+                      the graphic. 
            
-           Note : All xtics will be devided hourly. This means a new xtic everytime 
-                  another hour has passed since the starting point.  
+           @note:     All xtics will be devided hourly. This means a new xtic everytime 
+                      another hour has passed since the starting point.  
             
             
         """
@@ -272,17 +289,17 @@ class StatsPlotter( Translatable ):
     def getPairs( self, clientCount , statType, typeCount  ):
         """
            
-           This method is used to create the data couples used to draw the graphic.
-           Couples are a combination of the data previously gathered and the time
-           at wich data was produced.  
+           @summary : This method is used to create the data couples used to draw the graphic.
+                      Couples are a combination of the data previously gathered and the time
+                      at wich data was produced.  
            
-           Note : One point per pair will generally be drawn on the graphic but
-                  certain graph types might combine a few pairs before drawing only 
-                  one point for the entire combination.
+           @note:    One point per pair will generally be drawn on the graphic but
+                     certain graph types might combine a few pairs before drawing only 
+                     one point for the entire combination.
                   
-           Warning : If illegal statype is found program will be terminated here.       
+           @warning: If illegal statype is found program will be terminated here.       
            
-           #TODO Using dictionaries instead of arrays might speed thinga up a bit.
+           @todo: Using dictionaries instead of arrays might speed thinga up a bit.
             
         """
         
@@ -401,7 +418,7 @@ class StatsPlotter( Translatable ):
 
     def getMaxPairValue( self, pairs ):
         """
-            Returns the maximum value of a list of pairs. 
+            @summary : Returns the maximum value of a list of pairs. 
         
         """
         
@@ -420,7 +437,7 @@ class StatsPlotter( Translatable ):
         
     def getMinPairValue( self, pairs ):
         """
-            Returns the maximum value of a list of pairs. 
+            @summary : Returns the maximum value of a list of pairs. 
         """     
             
         minimum = None 
@@ -434,13 +451,15 @@ class StatsPlotter( Translatable ):
                     
         return  minimum         
     
+    
             
     def buildTitle( self, clientIndex, statType, typeCount, pairs ):
         """
-            This method is used to build the title we'll print on the graphic.
-            Title is built with the current time and the name of the client where
-            we collected the data. Also contains the mean and absolute min and max found 
-            in the data used to build the graphic.          
+            @summary : This method is used to build the title we'll print on the graphic.
+                       
+                       Title is built with the current time and the name of the client where
+                       we collected the data. Also contains the mean and absolute min and max 
+                       found in the data used to build the graphic.          
                
         """  
         
@@ -490,11 +509,11 @@ class StatsPlotter( Translatable ):
     
     def createCopy( self, copyToArchive = True , copyToColumbo = True ):
         """
-            Creates a copy of the created image file so that it
-            easily be used in px's columbo or other daily image program. 
+            @summary : Creates a copy of the created image file so that it
+                       easily be used in px's columbo or other daily image program. 
             
-            If copies are to be needed for graphcis other than daily graphs, 
-            please modify this method accordingly!
+            @summary : If copies are to be needed for graphcis other than daily graphs, 
+                       please modify this method accordingly!
             
         """
         
@@ -569,9 +588,9 @@ class StatsPlotter( Translatable ):
        
     def plot( self, createCopy = False  ):
         """
-            Used to plot gnuplot graphics. Settings used are
-            slighly modified but mostly based on Plotter.py's
-            plot function. 
+            @summary : To be used to plot gnuplot graphics. Settings used are
+                       slighly modified but mostly based on sundew's Plotter.py's    
+                       plot function. 
             
         """
         
@@ -585,7 +604,7 @@ class StatsPlotter( Translatable ):
         nbGraphs = 0
          
         totalSize  = ( 0.40 * len( self.stats )  * len( self.statsTypes ) )
-        totalHeight = ( 342 * len( self.stats )  * len( self.statsTypes ) )
+        #totalHeight = ( 342 * len( self.stats )  * len( self.statsTypes ) )
         
         self.graph( 'set terminal png size 1280,768 xffffff x000000 x404040 \
                       xff0000 x4169e1 x228b22 xa020f0 \
@@ -625,7 +644,7 @@ class StatsPlotter( Translatable ):
                        
             for statsTypeIndex in range ( len ( self.statsTypes ) ):
                 
-                pairs        = self.getPairs( clientCount = clientIndex , statType= StatsPlotter.translateDataType(self.statsTypes[statsTypeIndex]),\
+                pairs        = self.getPairs( clientCount = clientIndex , statType= self.statsTypes[statsTypeIndex],\
                                              typeCount = statsTypeIndex )
                 maxPairValue = self.getMaxPairValue( pairs )
                 self.maxLatency = self.stats[clientIndex].statsCollection.maxLatency
@@ -666,7 +685,7 @@ class StatsPlotter( Translatable ):
             
     def addLatencyLabelsToGraph( self, clientIndex, statsTypeIndex, nbGraphs, maxPairValue ):
         """
-            Used to set proper labels for a graph relating to latencies. 
+            @summary : Used to set proper labels for a graph relating to latencies. 
              
         """            
         
@@ -736,7 +755,7 @@ class StatsPlotter( Translatable ):
             
     def addBytesLabelsToGraph( self, clientIndex, statsTypeIndex, nbGraphs, maxPairValue ):
         """
-            Used to set proper labels for a graph relating to bytes. 
+            @summary : Used to set proper labels for a graph relating to bytes. 
              
         """            
         
@@ -820,7 +839,7 @@ class StatsPlotter( Translatable ):
     
     def addErrorsLabelsToGraph( self, clientIndex, statsTypeIndex, nbGraphs, maxPairValue ):
         """
-            Used to set proper labels for a graph relating to bytes. 
+            @summary : Used to set proper labels for a graph relating to bytes. 
              
         """   
         
