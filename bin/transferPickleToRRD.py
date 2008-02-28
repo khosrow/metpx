@@ -1,23 +1,26 @@
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
 #######################################################################################
 ##
-## Name   : transferPickleToRRD.py 
+## @name   : transferPickleToRRD.py 
 ##  
-## Author : Nicholas Lemay  
+## @author : Nicholas Lemay  
 ##
-## Date   : September 26th 2006, Last update May 8th 2007
+## @since  : September 26th 2006, Last update February 28th 2008
 ##
-## Goal   : This files contains all the methods needed to transfer pickled data 
-##          that was saved using pickleUpdater.py into an rrd database. 
-##          In turn, the rrd database can be used to plot graphics using rrdTool.
+##
+## @license: MetPX Copyright (C) 2004-2006  Environment Canada
+##           MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+##           named COPYING in the root of the source directory tree.
+##
+##
+## @summary  : This files contains all the methods needed to transfer pickled data 
+##             that was saved using pickleUpdater.py into an rrd database. 
+##             In turn, the rrd database can be used to plot graphics using rrdTool.
 ##          
 ##          
-## Note :  Any change in the file naming struture of the databses generated here 
-##         will impact generateRRDGraphics.py. Modify the other file accordingly. 
+## @note :  Any change in the file naming struture of the databses generated here 
+##          will impact generateRRDGraphics.py. Modify the other file accordingly. 
 ##
 #######################################################################################
 """
@@ -25,7 +28,7 @@ named COPYING in the root of the source directory tree.
 """
     Small function that adds pxlib to the environment path.  
 """
-import os, sys, time, getopt, gettext, pickle, rrdtool
+import os, sys, time, rrdtool
 from   optparse  import OptionParser
 
 """
@@ -35,7 +38,7 @@ sys.path.insert(1, sys.path[0] + '/../../')
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.PickleMerging import PickleMerging
-from pxStats.lib.ClientStatsPickler import ClientStatsPickler
+from pxStats.lib.StatsPickler import StatsPickler
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.RrdUtilities import RrdUtilities
 from pxStats.lib.MemoryManagement import MemoryManagement
@@ -44,12 +47,18 @@ from pxStats.lib.LanguageTools import LanguageTools
 """
     - Small function that adds pxLib to sys path.
 """
-sys.path.append( StatsPaths.PXLIB )
+STATSPATHS = StatsPaths()
+STATSPATHS.setBasicPaths()
+sys.path.append( STATSPATHS.PXLIB )
+
+"""
+    - These imports require PXLIB
+"""
 from   Logger    import * 
 from   PXManager import *
 
 LOCAL_MACHINE = os.uname()[1]   
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__ 
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "transferPickleToRRD.py" 
     
 #################################################################
 #                                                               #
@@ -60,7 +69,7 @@ class _Infos:
 
     def __init__( self, endTime, clients, fileTypes, machines, products = "all", group = "" ):
         """
-            Data structure to be used to store parameters within parser.
+            @summary : Data structure to be used to store parameters within parser.
         
         """    
         
@@ -70,6 +79,7 @@ class _Infos:
         self.fileTypes = fileTypes # Filetypes of each clients.        
         self.products  = products  # Products we are interested in.
         self.group     = group     # Whether or not we group data together.
+        
         
         
 def createParser( ):
@@ -347,7 +357,7 @@ def getMergedData( clients, fileType,  machines, startTime, endTime, groupName =
         combinedMachineName = combinedMachineName + machine
     
        
-    dataCollector =  ClientStatsPickler( client = clients[0], statsTypes = types, directory = "", statsCollection = statsCollection, machine = combinedMachineName, logger = logger )
+    dataCollector =  StatsPickler( client = clients[0], statsTypes = types, directory = "", statsCollection = statsCollection, machine = combinedMachineName, logger = logger )
     
     return dataCollector    
       
@@ -356,8 +366,8 @@ def getMergedData( clients, fileType,  machines, startTime, endTime, groupName =
 def getPairs( clients, machines, fileType, startTime, endTime, groupName = "", logger = None ):
     """
         
-        This method gathers all the data pairs needed to update the different 
-        databases associated with a client of a certain fileType.
+        @summary : This method gathers all the data pairs needed to update the different 
+                   databases associated with a client of a certain fileType.
         
     """
     
@@ -376,9 +386,9 @@ def getPairs( clients, machines, fileType, startTime, endTime, groupName = "", l
     
 def updateRoundRobinDatabases(  client, machines, fileType, endTime, logger = None ):
     """
-        This method updates every database linked to a certain client.
+        @summary : This method updates every database linked to a certain client.
         
-        Database types are linked to the filetype associated with the client.
+        @note : Database types are linked to the filetype associated with the client.
         
     """
             
@@ -491,8 +501,8 @@ def getTimeSeperatorsBasedOnAvailableMemory( startTime, endTime, clients, fileTy
         
 def updateGroupedRoundRobinDatabases( infos, logger = None ):    
     """
-        This method is to be used to update the database 
-        used to stored the merged data of a group.
+        @summary : This method is to be used to update the database 
+                   used to stored the merged data of a group.
          
     """
     
@@ -553,13 +563,13 @@ def updateGroupedRoundRobinDatabases( infos, logger = None ):
         
 def transferPickleToRRD( infos, logger = None ):
     """
-        This method is a higher level method to be used to update as many rrd's as 
-        is desired. 
+        @summary : This method is a higher level method to be used to update as many rrd's as 
+                   is desired. 
         
-        If data is not to be grouped, a new process will be launched 
-        for every client to be transferred.
+        @note : If data is not to be grouped, a new process will be launched 
+                for every client to be transferred.
            
-        Simultaneous number of launched process has been limited to 5 process' 
+                Simultaneous number of launched process has been limited to 5 process' 
         
     """    
     
@@ -594,9 +604,12 @@ def transferPickleToRRD( infos, logger = None ):
 
               
                         
-def createPaths():
+def createPaths( paths ):
     """
-        Create a series of required paths. 
+        @summary : Create a series of required paths. 
+        
+        @param paths : StatsPaths instance to use to find out paths.
+        
     """            
        
         
@@ -604,14 +617,14 @@ def createPaths():
     
         
     for dataType in dataTypes:
-        if not os.path.isdir( StatsPaths.STATSCURRENTDB + "%s/" %dataType ):
-            os.makedirs(StatsPaths.STATSCURRENTDB + "%s/" %dataType, mode=0777 )          
+        if not os.path.isdir( paths.STATSCURRENTDB + "%s/" %dataType ):
+            os.makedirs(paths.STATSCURRENTDB + "%s/" %dataType, mode=0777 )          
             
-    if not os.path.isdir( StatsPaths.STATSCURRENTDBUPDATES + "tx" ):
-        os.makedirs( StatsPaths.STATSCURRENTDBUPDATES + "tx", mode=0777 )
+    if not os.path.isdir( paths.STATSCURRENTDBUPDATES + "tx" ):
+        os.makedirs( paths.STATSCURRENTDBUPDATES + "tx", mode=0777 )
      
-    if not os.path.isdir( StatsPaths.STATSCURRENTDBUPDATES + "rx" ):
-        os.makedirs( StatsPaths.STATSCURRENTDBUPDATES + "rx" , mode=0777 )      
+    if not os.path.isdir( paths.STATSCURRENTDBUPDATES + "rx" ):
+        os.makedirs( paths.STATSCURRENTDBUPDATES + "rx" , mode=0777 )      
         
 
 
@@ -637,17 +650,20 @@ def  setGlobalLanguageParameters():
                
 def main():
     """
-        Gathers options, then makes call to transferPickleToRRD   
+        @summary : Gathers options, then makes call to transferPickleToRRD   
     
     """
+    
+    paths = STATSPATHS()
+    paths.setPaths()
     
     language = 'en'
     
     setGlobalLanguageParameters( language )
     
-    createPaths()
+    createPaths( paths )
     
-    logger = Logger( StatsPaths.STATSLOGGING + 'stats_' + 'rrd_transfer' + '.log.notb', 'INFO', 'TX' + 'rrd_transfer', bytes = 10000000  ) 
+    logger = Logger( paths.STATSLOGGING + 'stats_' + 'rrd_transfer' + '.log.notb', 'INFO', 'TX' + 'rrd_transfer', bytes = 10000000  ) 
     
     logger = logger.getLogger()
        
