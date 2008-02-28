@@ -1,12 +1,8 @@
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
-
 ##############################################################################
 ##
 ##
-## @name   : ClientGraphicProducer.py 
+## @name   : GnuGraphicProducer.py  f.k.a ClientGraphicProducer.py
 ##
 ##
 ## @author :  Nicholas Lemay
@@ -14,16 +10,22 @@ named COPYING in the root of the source directory tree.
 ## @since  :  06-07-2006, last updated on 2008-01-23 
 ##
 ##
-## @summary : Contains all the usefull classes and methods to produce a graphic 
-##               for a certain client. Main use is to build latency graphics
-##               for one or many clients. Can also produce graphics on
-##               bytecounts and errors found in log files. 
+## @license : MetPX Copyright (C) 2004-2006  Environment Canada
+##            MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+##            named COPYING in the root of the source directory tree.
+##
+##
+##
+## @summary : Contains all the usefull classes and methods to produce stats 
+##            graphic using GnuPlotter. Main use is to build latency, 
+##            bytecount, filecount and errors graphics for one or many source
+##            or clients. 
 ##
 ##
 ##############################################################################
 """
 
-import gettext, os, time, sys
+import os, time, sys
 
 
 """
@@ -33,28 +35,28 @@ sys.path.insert(1, sys.path[0] + '/../../')
 
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.ClientStatsPickler import ClientStatsPickler
-from pxStats.lib.FileStatsCollector import FileStatsCollector
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.PickleMerging import PickleMerging
-from pxStats.lib.StatsPlotter import StatsPlotter
+from pxStats.lib.GnuPlotter import GnuPlotter
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.Translatable import Translatable
 
 """
     These imports require pxlib 
 """
-sys.path.append( StatsPaths.PXLIB )
+statsPaths = StatsPaths( )
+statsPaths.setBasicPaths()
+sys.path.append( statsPaths.PXLIB )
 
 import logging 
-from Logger import *
+from Logger import Logger
 
 
 LOCAL_MACHINE = os.uname()[1]
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__  
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' +  "ClientGraphicProducer.py"
 
 
-
-class ClientGraphicProducer( Translatable ):
+class GnuGraphicProducer( Translatable ):
                 
         
     def __init__( self, directory, fileType, clientNames = None , groupName = "",  timespan = 12,\
@@ -98,11 +100,13 @@ class ClientGraphicProducer( Translatable ):
         self.logging      = logging            # Whether or not to enable logging. 
         self.outputLanguage = outputLanguage   # Language in which the graphic will be produced in.
         
+        paths = StatsPaths()
+        paths.setBasicPaths()
         if logging == True:
             if self.logger is None: # Enable logging
-                if not os.path.isdir( StatsPaths.STATSLOGGING ):
-                    os.makedirs( StatsPaths.STATSLOGGING , mode=0777 )
-                self.logger = Logger( StatsPaths.STATSLOGGING  + 'stats_' + self.loggerName + '.log.notb', 'INFO',\
+                if not os.path.isdir( paths.STATSLOGGING ):
+                    os.makedirs( paths.STATSLOGGING , mode=0777 )
+                self.logger = Logger( paths.STATSLOGGING  + 'stats_' + self.loggerName + '.log.notb', 'INFO',\
                                       'TX' + self.loggerName, bytes = 10000000  ) 
                 self.logger = self.logger.getLogger()
         else:
@@ -112,9 +116,12 @@ class ClientGraphicProducer( Translatable ):
             
     def getStartTimeAndEndTime( self, collectUptoNow = False ):
         """
-            Warning : collectUptoNow not yet supported in program !
+            @summary : Returns the startTime and endTime of the graphics.
             
-            Returns the startTime and endTime of the graphics.
+            @warning : collectUptoNow not yet supported in program !
+            
+            @return : the startTime and endTime of the graphics.
+            
         """
         
         
@@ -135,9 +142,11 @@ class ClientGraphicProducer( Translatable ):
         #find parameters
         
         """
-            Returns a list of ClientStatsPicklers
-            instances, each of wich contains data
-            for all the individual graphics.
+            @summary : Returns a list of ClientStatsPicklers
+                       instances, each of wich contains data
+                       for all the individual graphics.
+            
+            @return : List of ClientStatsPicklers instances.
             
         """
         
@@ -176,12 +185,13 @@ class ClientGraphicProducer( Translatable ):
     def collectDataForCombinedGraphics( self, startTime, endTime, types ):
         """
         
-            Returns a list of one ClientStatsPicklers
-            instance wich contains the combined data
-            of all the individual graphics.
+            @summary : Returns a list of one ClientStatsPicklers
+                       instance wich contains the combined data
+                       of all the individual graphics.
+                       
+            @return : Returns a list of ONE ClientStatsPicklers
             
-        """ 
-        
+        """         
         
         dataCollection = []        
         
@@ -200,10 +210,10 @@ class ClientGraphicProducer( Translatable ):
             
     def recalculateData( self, dataCollection ):
         """
-            Recalculates the mean max min and median 
-            of all the entries of the dataCollection.
+            @summary : Recalculates the mean max min and median 
+                       of all the entries of the dataCollection.
             
-            Usefull when using a specific productType 
+            @Note : Very usefull when using a specific productType 
         """
                 
         for item in dataCollection: 
@@ -247,11 +257,11 @@ class ClientGraphicProducer( Translatable ):
         
         if self.logger != None :  
             try:       
-                self.logger.debug( _("Call to StatsPlotter :Clients:%s, timespan:%s, currentTime:%s, statsTypes:%s, productTypes:%s :") %( self.clientNames, self.timespan, self.currentTime, types, self.productTypes ) )
+                self.logger.debug( _("Call to GnuPlotter :Clients:%s, timespan:%s, currentTime:%s, statsTypes:%s, productTypes:%s :") %( self.clientNames, self.timespan, self.currentTime, types, self.productTypes ) )
             except:
                 pass    
        
-        plotter = StatsPlotter( stats = dataCollection, clientNames = self.clientNames, groupName = self.groupName,\
+        plotter = GnuPlotter( stats = dataCollection, clientNames = self.clientNames, groupName = self.groupName,\
                                 timespan = self.timespan, currentTime = endTime, now = False, statsTypes = types, \
                                 productTypes = self.productTypes, logger = self.logger,logging = self.logging,\
                                 machines = self.machines, fileType = self.fileType, outputLanguage = self.outputLanguage  )
@@ -260,7 +270,7 @@ class ClientGraphicProducer( Translatable ):
                                              
         if self.logger != None :
             try:
-                self.logger.debug( _("Returns from StatsPlotter.") )
+                self.logger.debug( _("Returns from GnuPlotter.") )
                 
                 self.logger.info ( _("Created Graphics for following call : Clients : %s, timespan : %s, currentTime : %s, statsTypes : %s, productTypes : %s :") %( self.clientNames, self.timespan, self.currentTime, types, self.productTypes ) )         
             except:
@@ -272,13 +282,13 @@ class ClientGraphicProducer( Translatable ):
 
 if __name__ == "__main__":
     """
-        small test case to see proper use and see if everything works fine. 
+        @summary : small test case to see proper use and see if everything works fine. 
         
     """
     
     pathToLogFiles = GeneralStatsLibraryMethods.getPathToLogFiles( LOCAL_MACHINE, LOCAL_MACHINE )
     
-    gp = ClientGraphicProducer( clientNames = [ 'amis' ], timespan = 24, currentTime = "2006-08-01 18:15:00",productTypes = ["All"], directory = pathToLogFiles, fileType = "tx" )  
+    gp = GnuGraphicProducer( clientNames = [ 'amis' ], timespan = 24, currentTime = "2006-08-01 18:15:00",productTypes = ["All"], directory = pathToLogFiles, fileType = "tx" )  
     
     gp.produceGraphicWithHourlyPickles( types = [ "bytecount","latency","errors" ], now = False   )
     
