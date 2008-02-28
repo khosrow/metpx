@@ -11,8 +11,8 @@
 ##
 ##
 ## @license : MetPX Copyright (C) 2004-2006  Environment Canada
-##            MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-##            named COPYING in the root of the source directory tree.
+##            MetPX comes with ABSOLUTELY NO WARRANTY; For details type see 
+##            the file named COPYING in the root of the source directory tree.
 ##
 ##
 ##
@@ -34,7 +34,7 @@ import os, time, sys
 sys.path.insert(1, sys.path[0] + '/../../')
 
 from pxStats.lib.StatsPaths import StatsPaths
-from pxStats.lib.ClientStatsPickler import ClientStatsPickler
+from pxStats.lib.StatsPickler import StatsPickler
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.PickleMerging import PickleMerging
 from pxStats.lib.GnuPlotter import GnuPlotter
@@ -165,17 +165,22 @@ class GnuGraphicProducer( Translatable ):
             if len( self.machines ) > 1 :   
                 clientArray = []
                 clientArray.append(client) 
-                statsCollection = PickleMerging.mergePicklesFromDifferentSources( logger = None , startTime = startTime, endTime = endTime, clients = clientArray, fileType = self.fileType, machines = self.machines, groupName = self.groupName  )
+                statsCollection = PickleMerging.mergePicklesFromDifferentSources( logger = None , startTime = startTime, endTime = endTime,\
+                                                                                  clients = clientArray, fileType = self.fileType,\
+                                                                                  machines = self.machines, groupName = self.groupName  )
                                     
             else:#only one machine, only merge different hours together
                
-                statsCollection = PickleMerging.mergePicklesFromDifferentHours( logger = None , startTime = startTime, endTime = endTime, client = client, fileType = self.fileType, machine = self.machines[0] )
+                statsCollection = PickleMerging.mergePicklesFromDifferentHours( logger = None , startTime = startTime, endTime = endTime,\
+                                                                                client = client, fileType = self.fileType, machine = self.machines[0] )
                 
             
             combinedMachineName = ""
             combinedMachineName = combinedMachineName.join( [ machine for machine in self.machines] )
                 
-            dataCollection.append( ClientStatsPickler( client = self.clientNames, statsTypes = types, directory = self.directory, statsCollection = statsCollection, machine = combinedMachineName, logger = None, logging =False  ) )
+            dataCollection.append( StatsPickler( client = self.clientNames, statsTypes = types, directory = self.directory,\
+                                                 statsCollection = statsCollection, machine = combinedMachineName,\
+                                                 logger = None, logging =False  ) )
                             
         
         return dataCollection
@@ -196,13 +201,17 @@ class GnuGraphicProducer( Translatable ):
         dataCollection = []        
         
         
-        statsCollection = PickleMerging.mergePicklesFromDifferentSources( logger = None , startTime = startTime, endTime = endTime, clients = self.clientNames, fileType = self.fileType, machines =  self.machines, groupName = self.groupName )
+        statsCollection = PickleMerging.mergePicklesFromDifferentSources( logger = None , startTime = startTime, endTime = endTime,\
+                                                                          clients = self.clientNames, fileType = self.fileType,\
+                                                                          machines =  self.machines, groupName = self.groupName )
         
         combinedMachineName = ""
         combinedMachineName = combinedMachineName.join( [machine for machine in self.machines])
                 
         #Verifier params utiliser par cette ligne
-        dataCollection.append( ClientStatsPickler( client = self.clientNames, statsTypes = types, directory = self.directory, statsCollection = statsCollection, machine = combinedMachineName, logger = None, logging = False ) )
+        dataCollection.append( StatsPickler( client = self.clientNames, statsTypes = types, directory = self.directory,\
+                                             statsCollection = statsCollection, machine = combinedMachineName,\
+                                             logger = None, logging = False ) )
         
         return dataCollection
                
@@ -217,7 +226,8 @@ class GnuGraphicProducer( Translatable ):
         """
                 
         for item in dataCollection: 
-                item.statsCollection.setMinMaxMeanMedians(  productTypes = self.productTypes, startingBucket = 0 , finishingBucket = len(item.statsCollection.fileEntries) -1 )
+                item.statsCollection.setMinMaxMeanMedians(  productTypes = self.productTypes, startingBucket = 0 ,\
+                                                            finishingBucket = len(item.statsCollection.fileEntries) -1 )
                 
         return  dataCollection 
         
@@ -257,7 +267,8 @@ class GnuGraphicProducer( Translatable ):
         
         if self.logger != None :  
             try:       
-                self.logger.debug( _("Call to GnuPlotter :Clients:%s, timespan:%s, currentTime:%s, statsTypes:%s, productTypes:%s :") %( self.clientNames, self.timespan, self.currentTime, types, self.productTypes ) )
+                self.logger.debug( _("Call to GnuPlotter :Clients:%s, timespan:%s, currentTime:%s, statsTypes:%s, productTypes:%s :")\
+                                   %( self.clientNames, self.timespan, self.currentTime, types, self.productTypes ) )
             except:
                 pass    
        
@@ -272,7 +283,8 @@ class GnuGraphicProducer( Translatable ):
             try:
                 self.logger.debug( _("Returns from GnuPlotter.") )
                 
-                self.logger.info ( _("Created Graphics for following call : Clients : %s, timespan : %s, currentTime : %s, statsTypes : %s, productTypes : %s :") %( self.clientNames, self.timespan, self.currentTime, types, self.productTypes ) )         
+                self.logger.info ( _("Created Graphics for following call : Clients : %s, timespan : %s, currentTime : %s, statsTypes : %s, productTypes : %s :")\
+                                   %( self.clientNames, self.timespan, self.currentTime, types, self.productTypes ) )         
             except:
                 pass
             
