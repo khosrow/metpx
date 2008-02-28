@@ -80,7 +80,7 @@ class _UpdaterInfos:
 
 
 
-def setLastUpdate( machine, client, fileType, currentDate, collectUpToNow = False ):
+def setLastUpdate( machine, client, fileType, currentDate, paths, collectUpToNow = False ):
     """
         @summary : This method sets the clients or source last update into it"S last update file. 
               
@@ -90,7 +90,7 @@ def setLastUpdate( machine, client, fileType, currentDate, collectUpToNow = Fals
     lastUpdate = {}
     
     needToCreateNewFile = False 
-    fileName = "%s%s_%s_%s" %( StatsPaths.STATSPICKLESTIMEOFUPDATES, fileType, client, machine )   
+    fileName = "%s%s_%s_%s" %( paths.STATSPICKLESTIMEOFUPDATES, fileType, client, machine )   
     
     
     if collectUpToNow == False :
@@ -123,7 +123,7 @@ def setLastUpdate( machine, client, fileType, currentDate, collectUpToNow = Fals
 
 
 
-def getLastUpdate( machine, client, fileType, currentDate, collectUpToNow = False ):
+def getLastUpdate( machine, client, fileType, currentDate, paths, collectUpToNow = False ):
     """
         @summary : Reads and returns the client's or source's last update.        
        
@@ -132,7 +132,7 @@ def getLastUpdate( machine, client, fileType, currentDate, collectUpToNow = Fals
     
     times = {}
     lastUpdate = {}
-    fileName = "%s%s_%s_%s" %( StatsPaths.STATSPICKLESTIMEOFUPDATES, fileType, client, machine )   
+    fileName = "%s%s_%s_%s" %( paths.STATSPICKLESTIMEOFUPDATES, fileType, client, machine )   
     
     if os.path.isfile( fileName ):
         try :
@@ -170,7 +170,7 @@ def getLastUpdate( machine, client, fileType, currentDate, collectUpToNow = Fals
 #############################PARSER##############################
 #                                                               #
 #################################################################   
-def getOptionsFromParser( parser, logger = None  ):
+def getOptionsFromParser( parser, paths, logger = None  ):
     """
         
         @summary : This method parses the argv received when the program was called
@@ -281,7 +281,7 @@ def getOptionsFromParser( parser, logger = None  ):
     # since it's not needed, but other clients might be.
     usefullClients = []
     for client in clients :
-        startTime = getLastUpdate( machine = machine, client = client, fileType= fileType, currentDate =  currentDate , collectUpToNow = collectUpToNow )
+        startTime = getLastUpdate( machine = machine, client = client, fileType= fileType, currentDate =  currentDate , paths = paths, collectUpToNow = collectUpToNow )
                
         if currentDate > startTime:
             #print " client : %s currentDate : %s   startTime : %s" %( client, currentDate, startTime )
@@ -393,7 +393,7 @@ def addOptions( parser ):
 
 
 
-def updateHourlyPickles( infos, logger = None ):
+def updateHourlyPickles( infos, paths, logger = None ):
     """
         @summary : This method is to be used when hourly pickling is done. -1 pickle per hour per client. 
         
@@ -468,7 +468,7 @@ def updateHourlyPickles( infos, logger = None ):
             sp.collectStats( infos.types, startTime = startTime, endTime = endTime, interval = infos.interval * StatsDateLib.MINUTE, directory = pathToLogFiles, fileType = infos.fileType )        
        
                          
-        setLastUpdate( machine = infos.machine, client = infos.clients[i], fileType = infos.fileType, currentDate = infos.currentDate, collectUpToNow = infos.collectUpToNow )
+        setLastUpdate( machine = infos.machine, client = infos.clients[i], fileType = infos.fileType, currentDate = infos.currentDate, paths = paths, collectUpToNow = infos.collectUpToNow )
              
               
               
@@ -501,8 +501,11 @@ def main():
     
     setGlobalLanguageParameters()
     
-    if not os.path.isdir( StatsPaths.STATSPICKLES ):
-        os.makedirs( StatsPaths.STATSPICKLES, mode=0777 )    
+    paths = StatsPaths()
+    paths.setPaths()
+    
+    if not os.path.isdir( paths.STATSPICKLES ):
+        os.makedirs( paths.STATSPICKLES, mode=0777 )    
     
     if not os.path.isdir( StatsPaths.STATSLOGGING ):
         os.makedirs( StatsPaths.STATSLOGGING, mode=0777 )
@@ -511,8 +514,8 @@ def main():
     logger = logger.getLogger()
    
     parser = createParser( )  #will be used to parse options 
-    infos = getOptionsFromParser( parser, logger = logger )
-    updateHourlyPickles( infos, logger = logger )
+    infos = getOptionsFromParser( parser, paths, logger = logger )
+    updateHourlyPickles( infos, paths, logger = logger )
      
 
 
