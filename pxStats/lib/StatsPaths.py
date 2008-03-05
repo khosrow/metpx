@@ -167,17 +167,18 @@ class StatsPaths:
         self.STATSROOT = None   
            
          
-        self.STATSBIN     = None
-        self.STATSDATA    = None
-        self.STATSDEV     = None
-        self.STATSDOC     = None
-        self.STATSETC     = None
+        self.STATSBIN      = None
+        self.STATSCSVFILES = None
+        self.STATSDATA     = None
+        self.STATSDEV      = None
+        self.STATSDOC      = None
+        self.STATSETC      = None
         self.STATSLANG     = None
-        self.STATSLIB     = None
-        self.STATSLOGGING = None
-        self.STATSMAN     = None
-        self.STATSTEMP    = None
-        self.STATSTOOLS   = None
+        self.STATSLIB      = None
+        self.STATSLOGGING  = None
+        self.STATSMAN      = None
+        self.STATSTEMP     = None
+        self.STATSTOOLS    = None
         self.STATSDEBUGTOOLS = None
         self.STATSWEBPAGESGENERATORS = None
         
@@ -380,6 +381,9 @@ class StatsPaths:
         self.STATSMAN     = self.STATSROOT + _( 'man/' )
         self.STATSTEMP    = self.STATSROOT + _( "temp/" )       
 
+        #csvfiles 
+        self.STATSCSVFILES         = self.STATSDATA + _("csvFiles")
+        
         #Databases related paths.
         self.STATSDB               = self.STATSDATA + _( 'databases/' )
         self.STATSCURRENTDB        = self.STATSDB   + _( 'currentDatabases/' )
@@ -702,6 +706,7 @@ def main():
     print "statsPaths.STATSCURRENTDB %s" %statsPaths.STATSCURRENTDB
     print "statsPaths.STATSCURRENTDBUPDATES %s" %statsPaths.STATSCURRENTDBUPDATES
     print "statsPaths.STATSDATA %s" %statsPaths.STATSDATA
+    print "statsPaths.STATSCSVFILES %s" %statsPaths.STATSCSVFILES
     print "statsPaths.STATSDB %s" %statsPaths.STATSDB
     print "statsPaths.STATSDBBACKUPS %s" %statsPaths.STATSDBBACKUPS
     print "statsPaths.STATSDBUPDATESBACKUPS %s" %statsPaths.STATSDBUPDATESBACKUPS
