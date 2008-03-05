@@ -10,7 +10,7 @@ MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
 ##  
 ## @author:  Nicholas Lemay  
 ##
-## @since: October 2nd 2006, last updated on october 3rd 2007.
+## @since: October 2nd 2006, last updated on March 5th 2008.
 ##
 ## Goal   : This files contains all the methods needed to generate graphics using data  
 ##          found in RRD databases.
@@ -21,7 +21,7 @@ MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
 #######################################################################################
 """
 
-import gettext, os, time, getopt, rrdtool, shutil, sys
+import os, time, rrdtool, sys
 from   optparse  import OptionParser
 """
     Small function that adds pxStats to the environment path.  
@@ -48,7 +48,7 @@ from   PXManager import *
 from   Logger import *
 
 LOCAL_MACHINE = os.uname()[1]
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__       
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "generateRRDGraphics.py"      
     
        
      
