@@ -1,20 +1,36 @@
 #! /usr/bin/env python
-"""
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
+
 """
 ##########################################################################
 ##
-## Name   : pxStats.py 
+## @name    : pxStatsStartup.py 
 ##  
-## Author : Nicholas Lemay  
 ##
-## Date   : May 19th 2006, Last updated on May 07th 2007
+## @license : MetPX Copyright (C) 2004-2006  Environment Canada
+##            MetPX comes with ABSOLUTELY NO WARRANTY; For details type 
+##            see the file named COPYING in the root of the source directory tree.
+##
+##
+## @author  : Nicholas Lemay  
+##
+## @since   : May 19th 2006, Last updated on March 05th 2008
+##
+##
+## @summary : PXStats' main application file. Everything can be run
+##            automatically from here granted the configuration files
+##            are filled in properly. 
+##             
+##            Should be called by a crontab, but can be called from command 
+##           
 ##
 #############################################################################
+"""
 
 import os, sys, commands, time
+
+"""
+    Adds pxStats to sys.path
+"""
 sys.path.insert(1, sys.path[0] + '/../../')
 
 from pxStats.lib.StatsPaths import StatsPaths
@@ -24,24 +40,36 @@ from pxStats.lib.MachineConfigParameters import MachineConfigParameters
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 from pxStats.lib.CpickleWrapper import CpickleWrapper
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+from pxStats.lib.WebPageGraphicsGenerator import WebPageGraphicsGenerator
+from pxStats.lib.DailyGraphicsWebPageGenerator import DailyGraphicsWebPageGenerator
+from pxStats.lib.WeeklyGraphicsWebPageGenerator import WeeklyGraphicsWebPageGenerator
+from pxStats.lib.MonthlyGraphicsWebPageGenerator import MonthlyGraphicsWebPageGenerator
+from pxStats.lib.YearlyGraphicsWebPageGenerator import YearlyGraphicsWebPageGenerator
+from pxStats.lib.TotalsGraphicsWebPagesGenerator import TotalsGraphicsWebPageGenerator
+from pxStats.lib.AutomaticUpdatesManager import AutomaticUpdatesManager
+from pxStats.lib.LanguageTools import LanguageTools
+
 
 LOCAL_MACHINE = os.uname()[1]
-            
+
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "pxStatsStartup.py"             
+
+
 
 def validateParameters( parameters, machineParameters, logger = None  ):
     """
-        Validates parameters. 
+        @summary : Validates parameters. 
         
-        If a an illegal parameter is encountered application
-        will be terminated.     
+        @note    : If a an illegal parameter is encountered application
+                   will be terminated.     
           
     """   
     
     if len( parameters.picklingMachines ) != len(parameters.sourceMachinesTags ) :
     
         if logger != None:
-            logger.error("Error reading config file in launchGraphCreation program. Parameter number mismatch. Program was terminated abruptly.") 
-        print "Error reading config file in launchGraphCreation program. Parameter number mismatch. Program was terminated abruptly."       
+            logger.error( _("Error reading config file in launchGraphCreation program. Parameter number mismatch. Program was terminated abruptly.") ) 
+        print _( "Error reading config file in launchGraphCreation program. Parameter number mismatch. Program was terminated abruptly.")
         sys.exit()
         
         
@@ -49,18 +77,18 @@ def validateParameters( parameters, machineParameters, logger = None  ):
         
         if len( parameters.detailedParameters.sourceMachinesForTag[tag]) != len( parameters.detailedParameters.picklingMachines[tag] ):    
             if logger != None:
-                logger.error("Error reading config file in launchGraphCreation program. Parameter number mismatch. Program was terminated abruptly.") 
+                logger.error( _("Error reading config file in launchGraphCreation program. Parameter number mismatch. Program was terminated abruptly.")  )
             
-            print "Error reading config file. Parameter number mismatch between pickling machines and source machines associated with %s tag . Program was terminated abruptly." %tag    
-            print "source machines : %s  picklingmachines : %s " %(parameters.detailedParameters.sourceMachinesForTag[tag], parameters.detailedParameters.picklingMachines[tag] )
+            print _("Error reading config file. Parameter number mismatch between pickling machines and source machines associated with %s tag . Program was terminated abruptly.") %tag    
+            print _("source machines : %s  picklingmachines : %s ") %(parameters.detailedParameters.sourceMachinesForTag[tag], parameters.detailedParameters.picklingMachines[tag] )
             sys.exit()
                
         for machine in parameters.detailedParameters.sourceMachinesForTag[tag]:
             if machineParameters.getUserNameForMachine( machine ) == "":            
                         
                 if logger != None:
-                    logger.error("Error reading config file in launchGraphCreation program. Program was terminated abruptly.") 
-                print "Error reading config file in launchGraphCreation program. Program was terminated abruptly."    
+                    logger.error( _("Error reading config file in launchGraphCreation program. Program was terminated abruptly.") ) 
+                print _("Error reading config file in launchGraphCreation program. Program was terminated abruptly.")
                 sys.exit()
     
 
@@ -106,40 +134,40 @@ def updatePickles( parameters, machineParameters, currentTimeInIsoFormat ):
                     if parameters.detailedParameters.picklingMachines[tag][i] != LOCAL_MACHINE :#pickling to be done elsewhere
                         for j in range(3):#do 3 times in case of currently turning log files.
                             remotePxLibPath = StatsPaths.getPXPathFromMachine(StatsPaths.PXLIB, sourceMachines[i], machineParameters.getUserNameForMachine( sourceMachines[i]))
-                            status, output = commands.getstatusoutput( "ssh %s@%s 'rsync -avzr --delete-before -e ssh  %s@%s:%s %s%s/' "  %( machineParameters.getUserNameForMachine( picklingMachine), picklingMachine,machineParameters.getUserNameForMachine( sourceMachines[i] ) , sourceMachines[i] , remotePxLibPath,  StatsPaths.STATSLOGS, sourceMachines[i] ) )
+                            output = commands.getoutput( "ssh %s@%s 'rsync -avzr --delete-before -e ssh  %s@%s:%s %s%s/' "  %( machineParameters.getUserNameForMachine( picklingMachine), picklingMachine,machineParameters.getUserNameForMachine( sourceMachines[i] ) , sourceMachines[i] , remotePxLibPath,  StatsPaths.STATSLOGS, sourceMachines[i] ) )
                             #print "ssh %s@%s 'rsync -avzr --delete-before -e ssh  %s@%s:%s %s%s/' "%( machineParameters.getUserNameForMachine( picklingMachine), picklingMachine,machineParameters.getUserNameForMachine( sourceMachines[i] ) , sourceMachines[i] , StatsPaths.PXLOG, StatsPaths.STATSLOGS, sourceMachines[i] ) 
                             #print output
                     else:
                         
                         for j in range(3):#do 3 times in case of currently turning log files.
                             remotePxLibPath = StatsPaths.getPXPathFromMachine(StatsPaths.PXLIB, sourceMachines[i], machineParameters.getUserNameForMachine( sourceMachines[i]))
-                            status, output = commands.getstatusoutput( "rsync -avzr --delete-before -e ssh %s@%s:%s   %s%s/ " %( machineParameters.getUserNameForMachine( sourceMachines[i] ), sourceMachines[i] , remotePxLibPath,  StatsPaths.STATSLOGS, sourceMachines[i] ) )
+                            output = commands.getoutput( "rsync -avzr --delete-before -e ssh %s@%s:%s   %s%s/ " %( machineParameters.getUserNameForMachine( sourceMachines[i] ), sourceMachines[i] , remotePxLibPath,  StatsPaths.STATSLOGS, sourceMachines[i] ) )
                             #print "rsync -avzr --delete-before -e ssh %s@%s:%s   %s%s/ " %( machineParameters.getUserNameForMachine( sourceMachines[i] ), sourceMachines[i] , StatsPaths.PXLOG, StatsPaths.STATSLOGS, sourceMachines[i] )
                             #print output   
                                     
                    
                 if picklingMachine != LOCAL_MACHINE :#pickling to be done elsewhere,needs ssh             
                               
-                    status, output = commands.getstatusoutput( """ssh %s@%s 'python %spickleUpdater.py  -m %s -f rx --date "%s" '   """ %( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine, StatsPaths.STATSBIN,  sourceMachines[i], currentTimeInIsoFormat ) ) 
+                    output = commands.getoutput( """ssh %s@%s 'python %spickleUpdater.py  -m %s -f rx --date "%s" '   """ %( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine, StatsPaths.STATSBIN,  sourceMachines[i], currentTimeInIsoFormat ) ) 
                     #print "ssh %s@%s 'python %spickleUpdater.py  -m %s -f rx'   "  %( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine, StatsPaths.STATSBIN, sourceMachines[i] )
                     #print output
                     
-                    status, output = commands.getstatusoutput( """ssh %s@%s 'python %spickleUpdater.py -m %s -f tx --date "%s" '  """( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine , StatsPaths.STATSBIN, sourceMachines[i], currentTimeInIsoFormat ) )
+                    output = commands.getoutput( """ssh %s@%s 'python %spickleUpdater.py -m %s -f tx --date "%s" '  """( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine , StatsPaths.STATSBIN, sourceMachines[i], currentTimeInIsoFormat ) )
                     #print "ssh %s@%s 'python %spickleUpdater.py -m %s -f tx'  "%( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine , StatsPaths.STATSBIN, sourceMachines[i] )
                     #print output
                     
-                    status, output = commands.getstatusoutput( """%spickleSynchroniser.py -l %s -m %s  """%( StatsPaths.STATSTOOLS, machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine ) )      
+                    output = commands.getoutput( """%spickleSynchroniser.py -l %s -m %s  """%( StatsPaths.STATSTOOLS, machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine ) )      
                     #print "%spickleSynchroniser.py -l %s -m %s  " %( StatsPaths.STATSTOOLS, machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine )
                     #print output
                 
                     
                 else: # pickling is to be done locally. Log files may or may not reside elsewhere.
                     
-                    status, output = commands.getstatusoutput( """python %spickleUpdater.py -f rx -m %s --date "%s" """%( StatsPaths.STATSBIN, sourceMachines[i], currentTimeInIsoFormat ) )
+                    output = commands.getoutput( """python %spickleUpdater.py -f rx -m %s --date "%s" """%( StatsPaths.STATSBIN, sourceMachines[i], currentTimeInIsoFormat ) )
                     #print "python %spickleUpdater.py -f rx -m %s " %( StatsPaths.STATSBIN, sourceMachines[i] )
                     #print output
                     
-                    status, output = commands.getstatusoutput( """python %spickleUpdater.py -f tx -m %s --date "%s" """  %(  StatsPaths.STATSBIN, sourceMachines[i], currentTimeInIsoFormat ) )
+                    output = commands.getoutput( """python %spickleUpdater.py -f tx -m %s --date "%s" """  %(  StatsPaths.STATSBIN, sourceMachines[i], currentTimeInIsoFormat ) )
                     #print "python %spickleUpdater.py -f tx -m %s " %( StatsPaths.STATSBIN, sourceMachines[i] )
                     #print output
         
@@ -162,13 +190,13 @@ def updatePickles( parameters, machineParameters, currentTimeInIsoFormat ):
         
 def uploadGraphicFiles( parameters, machineParameters ):
     """
-        Takes all the created daily graphics dedicated to clumbo and 
-        uploads them to the machines specified in the parameters. 
+        @summary : Takes all the created daily graphics dedicated to clumbo and 
+                   uploads them to the machines specified in the parameters. 
     """
     
    
     for uploadMachine in parameters.graphicsUpLoadMachines :
-        status, output = commands.getstatusoutput( "scp %s* %s@%s:%s " %( StatsPaths.STATSCOLGRAPHS, machineParameters.getUserNameForMachine(uploadMachine), uploadMachine, StatsPaths.PDSCOLGRAPHS   ) )
+        output = commands.getoutput( "scp %s* %s@%s:%s " %( StatsPaths.STATSCOLGRAPHS, machineParameters.getUserNameForMachine(uploadMachine), uploadMachine, StatsPaths.PDSCOLGRAPHS   ) )
         
         #print "scp %s* %s@%s:%s " %( StatsPaths.STATSCOLGRAPHS, machineParameters.getUserNameForMachine(uploadMachine),uploadMachine, StatsPaths.PDSCOLGRAPHS )
         #print output
@@ -177,13 +205,13 @@ def uploadGraphicFiles( parameters, machineParameters ):
         
 def transferToDatabaseAlreadyRunning():
     """
-        Returns whether or not a transfer from pickle 
-        to rrd databases is allresdy running.
+        @summary : Returns whether or not a transfer from pickle 
+                   to rrd databases is allresdy running.
         
     """
     
     alreadyRuns = False 
-    status, output = commands.getstatusoutput( "ps -ax " ) 
+    output = commands.getoutput( "ps -ax " ) 
     lines = output.splitlines()
     
     for line in lines:        
@@ -224,7 +252,7 @@ def updateDatabases( parameters, machineParameters, currentTimeInIsoFormat ):
         for tag in parameters.machinesToBackupInDb :
              machines = machineParameters.getMachinesAssociatedWith(tag)             
              machines = str( machines ).replace( "[", "" ).replace( "]", "" ).replace( " ", "" )
-             status, output = commands.getstatusoutput( "%stransferPickleToRRD.py -m '%s' -e '%s' " %( StatsPaths.STATSBIN, machines, currentTimeInIsoFormat )  )
+             output = commands.getoutput( "%stransferPickleToRRD.py -m '%s' -e '%s' " %( StatsPaths.STATSBIN, machines, currentTimeInIsoFormat )  )
              #print  "%stransferPickleToRRD.py -m '%s' " %( StatsPaths.STATSBIN, machines )
              #print "output:%s" %output
         
@@ -237,48 +265,58 @@ def updateDatabases( parameters, machineParameters, currentTimeInIsoFormat ):
                 groupProducts = str( parameters.groupParameters.groupsProducts[group] ).replace( "[", "" ).replace( "]", "" ).replace( " ", "" )
                 groupFileTypes = str(parameters.groupParameters.groupFileTypes[group]).replace( "[", "" ).replace( "]", "" ).replace( " ", "" )
                
-                status, output = commands.getstatusoutput( "%stransferPickleToRRD.py -c '%s' -m '%s' -g '%s' -f %s -p '%s' -e '%s' " %( StatsPaths.STATSBIN, groupMembers, groupMachines, group, groupFileTypes, groupProducts, currentTimeInIsoFormat  ) )
+                output = commands.getoutput( "%stransferPickleToRRD.py -c '%s' -m '%s' -g '%s' -f %s -p '%s' -e '%s' " %( StatsPaths.STATSBIN, groupMembers, groupMachines, group, groupFileTypes, groupProducts, currentTimeInIsoFormat  ) )
                 #print   "%stransferPickleToRRD.py -c '%s' -m '%s' -g '%s' -f %s -p '%s' " %( StatsPaths.STATSBIN, groupMembers, groupMachines, group, groupFileTypes, groupProducts  )
                 #print output
  
  
  
-def getGraphicsForWebPages( currentTimeInIsoFormat ):
+def getGraphicsForWebPages( generalParameters, currentTimeInIsoFormat ):
     """
         @summary : Launchs the getGraphicsForWebPages.py
                    program. 
                    
+        @param generalParameters      : StatsConfigParameters instance. 
+        
         @param currentTimeInIsoFormat : Time at which this program was originally 
                                         called. 
         @return: None
                                         
     """
     
-    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGESGENERATORS + "getGraphicsForWebPages.py '%s' " %currentTimeInIsoFormat )
-    #print StatsPaths.STATSWEBPAGESGENERATORS + "getGraphicsForWebPages.py"
-    #print output                    
+    for language in generalParameters.artifactsLanguages:
+        graphicsGenerator = WebPageGraphicsGenerator( currentTimeInIsoFormat, language) 
+        graphicsGenerator.getGraphicsForAllSupportedWebPagesBasedOnFrequenciesFoundInConfig()
 
 
     
-def updateWebPages():
+def updateWebPages( generalParameters ):
     """
-        Lauchs all the programs that 
-        update the different web pages. 
+        @summary : Generates all the required web pages
+                   based on the language parameters found within
+                   the configuration files.
             
     """ 
+    
+    generalParameters = StatsConfigParameters()
+    
+    dailyWebPageGenerator  = DailyGraphicsWebPageGenerator()
+    weeklyWebPageGenerator = WeeklyGraphicsWebPageGenerator()
+    monthlyWebPageGenerator= MonthlyGraphicsWebPageGenerator()
+    yearlyWebPageGenerator = YearlyGraphicsWebPageGenerator()
+    totalWebPageGenerator  = TotalsGraphicsWebPageGenerator()
        
-    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGESGENERATORS + "dailyGraphicsWebPage.py" )  
-    #print StatsPaths.STATSWEBPAGESGENERATORS + "dailyGraphicsWebPage.py"
-    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGESGENERATORS + "weeklyGraphicsWebPage.py" )    
-    #print StatsPaths.STATSWEBPAGESGENERATORS + "weeklyGraphicsWebPage.py"
-    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGESGENERATORS + "monthlyGraphicsWebPage.py" )    
-    #print StatsPaths.STATSWEBPAGESGENERATORS + "monthlyGraphicsWebPage.py"
-    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGESGENERATORS + "yearlyGraphicsWebPage.py" )    
-    #print StatsPaths.STATSWEBPAGESGENERATORS + "yearlyGraphicsWebPage.py"
-    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGESGENERATORS + "totalGraphicsWebPages.py" )    
-    #print  StatsPaths.STATSWEBPAGESGENERATORS + "totalGraphicsWebPages.py"
-    status, output = commands.getstatusoutput( StatsPaths.STATSWEBPAGESGENERATORS + "generateTopWebPage.py" )
+    generators = [ dailyWebPageGenerator, weeklyWebPageGenerator, monthlyWebPageGenerator, yearlyWebPageGenerator, totalWebPageGenerator   ]   
+    
+    for languagePair in generalParameters.webPagesLanguages :
+        for generator in generators :
+            generator.displayedLanguage = languagePair[0]
+            generator.filesLanguage     = languagePair[1]
+            generator.generateWebPage()
+            
+    output = commands.getoutput( StatsPaths.STATSWEBPAGESGENERATORS + "generateTopWebPage.py" )
     #print StatsPaths.STATSWEBPAGESGENERATORS + "generateTopWebPage.py"   
+    
     
     
 def monitorActivities( timeParameters, currentTime ):
@@ -296,7 +334,7 @@ def monitorActivities( timeParameters, currentTime ):
    
     
     if needsToBeRun(timeParameters.monitoringFrequency, currentTime ):        
-        status, output = commands.getstatusoutput( StatsPaths.STATSBIN + "statsMonitor.py" )
+        output = commands.getoutput( StatsPaths.STATSBIN + "statsMonitor.py" )
         #print StatsPaths.STATSBIN + "statsMonitor.py"
         #print output
         
@@ -380,7 +418,7 @@ def cleanUp( timeParameters, currentTime, daysOfPicklesToKeep ):
     
     if needsToBeRun( timeParameters.pickleCleanerFrequency, currentTime ) :
         
-        status, output = commands.getstatusoutput( StatsPaths.STATSTOOLS + "pickleCleaner.py %s" %int(daysOfPicklesToKeep) )
+        output = commands.getoutput( StatsPaths.STATSTOOLS + "pickleCleaner.py %s" %int(daysOfPicklesToKeep) )
         #print StatsPaths.STATSTOOLS + "pickleCleaner.py" + " " + str( daysOfPicklesToKeep )
         
     if needsToBeRun( timeParameters.generalCleanerFrequency, currentTime ):
@@ -499,44 +537,60 @@ def updateFilesAssociatedWithMachineTags( tagsNeedingUpdates, machineParameters 
         currentCombinedMachineNames = ""
         currentCombinedMachineNames = currentCombinedMachineNames.join( [ x for x in machineParameters.getMachinesAssociatedWith( tag ) ]) 
         
-        status,output = commands.getstatusoutput( "%sfileRenamer.py -o %s  -n %s --overrideConfirmation" %( StatsPaths.STATSTOOLS, previousCombinedMachineNames, currentCombinedMachineNames  ) )
+        output = commands.getoutput( "%sfileRenamer.py -o %s  -n %s --overrideConfirmation" %( StatsPaths.STATSTOOLS, previousCombinedMachineNames, currentCombinedMachineNames  ) )
         #print "%sfileRenamer.py -o %s  -n %s --overrideConfirmation" %( StatsPaths.STATSTOOLS, previousCombinedMachineNames, currentCombinedMachineNames  )
         #print output 
+
+    
         
-        
-        
-def archiveGraphics():
-    """        
-        @summary : Runs the archiving utility as to allow 
-                   user to access old graphics.
-                   
-    """
-    
-    status,output = commands.getstatusoutput( "%sarchiveGraphicFiles.py" %StatsPaths.STATSTOOLS )
-    
-    
-    
 def updateCsvFiles():
     """    
+        
         @summary : Runs the csv file update utility.
+        
     """
     
-    status,output = commands.getstatusoutput( "%sgetCsvFilesforWebPages.py" %StatsPaths.STATSWEBPAGESGENERATORS )
+    output = commands.getoutput( "%sgetCsvFilesforWebPages.py" %StatsPaths.STATSWEBPAGESGENERATORS )
+    
+    
+    
+def  setGlobalLanguageParameters():
+    """
+        @summary : Sets up all the needed global language 
+                   tranlator so that it can be used 
+                   everywhere in this program.
+        
+        @Note    : The scope of the global _ function 
+                   is restrained to this module only and
+                   does not cover the entire project.
+        
+        @return: None
+        
+    """
+    
+    global _ 
+    
+    _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )      
     
     
     
 def main():
     """
-        Gets all the parameters from config file.
-        Updates pickle files.
-        Generates all the required graphics.
-        Updates the desired databases. 
-        Uploads graphics to the required machines. 
+        @summary : Gets all the parameters from config file.
+                   Updates pickle files.
+                   Generates all the required graphics.
+                   Generates therwuired csv files.
+                   Updates the different web pages.
+                   Updates the desired databases.                    
+                   Uploads graphics to the required machines. 
+                   Monitors the result of all the activities.
     
     """
     
     
     if GeneralStatsLibraryMethods.processIsAlreadyRunning( "pxStatsStartup" ) == False:
+        
+        setGlobalLanguageParameters()
         
         GeneralStatsLibraryMethods.createLockFile( "pxStatsStartup" )
         
@@ -569,10 +623,8 @@ def main():
         updateCsvFiles( )
         
         getGraphicsForWebPages( currentTimeInIsoFormat )
-            
-        #archiveGraphics()
-        
-        updateWebPages()
+                    
+        updateWebPages( generalParameters )
         
         uploadGraphicFiles( generalParameters, machineParameters )
      
@@ -580,9 +632,20 @@ def main():
     
         monitorActivities( generalParameters.timeParameters, currentTime )
         
+        updateManager = AutomaticUpdatesManager( generalParameters.nbAutoUpdatesLogsToKeep )
+        updateManager.addAutomaticUpdateToLogs( currentTimeInIsoFormat )
+        
         GeneralStatsLibraryMethods.deleteLockFile( "pxStatsStartup" )
         
-    print "Finished."
+        print _( "Finished." )
+    
+    else:
+        print _( "Error. An other instance of pxStatsStartup is allready running." )
+        print _( "Only one instance of this software can be run at once."  )
+        print _( "Please terminate the other instance or wait for it to end it's execution" )
+        print _( "before running this program again." )
+        print _( "Program terminated." )
+        sys.exit()
     
     
     
