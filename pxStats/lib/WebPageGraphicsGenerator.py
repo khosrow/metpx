@@ -20,50 +20,28 @@
 ##      
 ## @author:  Nicholas Lemay  
 ##
-## @since   : November 22nd 2006, last updated on February 26th 2008
+## @since   : November 22nd 2006, last updated on March 5th 2008
 ##
 ##
 #############################################################################
 """
 
-import os, sys, time, shutil, glob, commands
-sys.path.insert(1, sys.path[0] + '/../../../')
+import os, sys, commands
+sys.path.insert(1, sys.path[0] + '/../../')
 
-from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 from pxStats.lib.MachineConfigParameters import MachineConfigParameters
-from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.StatsPaths import StatsPaths
-from pxStats.lib.LanguageTools import LanguageTools
-from pxStats.lib.Translatable import Translatable
 from pxStats.lib.AutomaticUpdatesManager import AutomaticUpdatesManager
+from pxStats.lib.WebPageArtifactsGeneratorInterface import WebPageArtifactsGeneratorInterface
+
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "WebPageGraphicsGenerator"
 
 
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__.split(".")[-1:][0]
 
-
-
-class WebPageGraphicsGenerator( Translatable ):
-    
-    
-    def __init__( self, timeOfRequest, outputLanguage ):
-        """        
-        
-            @param timeOfRequest : Time at which the graphics are requested.
-        
-            @param outputLanguage : Language in which to output the graphics.
-        
-        """
-        
-        self.timeOfRequest  = timeOfRequest
-        self.outputLanguage = outputLanguage
-        
-        if outputLanguage not in LanguageTools.getSupportedLanguages() : 
-            raise Exception( "Usage of unsuported language detected in timeOfRequest constructor." )
-
-
+class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
             
-    def __getGraphicsForGroups( self, graphicType ):
+    def __generateAllGraphicsForGroups( self, graphicType ):
         """
             
             @summary : Generated groups graphics based on the 
@@ -81,13 +59,13 @@ class WebPageGraphicsGenerator( Translatable ):
         supportedGraphicTypes = { "daily": "-d", "weekly":"-w", "monthly":"-m", "yearly":"-y" }
         
         if graphicType not in supportedGraphicTypes:
-            raise Exception( "Unsupported graphicType detected in __getGraphicsForGroups" )
+            raise Exception( "Unsupported graphicType detected in __generateAllGraphicsForGroups" )
         
         else: 
             
             for group in configParameters.groupParameters.groups:
                 
-                groupMembers, groupMachines, groupProducts, groupFileTypes = configParameters.groupParameters.getAssociatedParametersInStringFormat( group )
+                groupMembers, groupMachines, groupProducts, groupFileTypes = configParameters.groupParameters.generateAllAssociatedParametersInStringFormat( group )
                 
                 if graphicType == "daily":
                     commands.getstatusoutput( '%sgenerateGraphics.py -g %s -c %s --combineClients --copy -d "%s"  -m %s -f %s -p %s  -s 24 --outputLanguage %s'\
@@ -99,7 +77,7 @@ class WebPageGraphicsGenerator( Translatable ):
          
          
          
-    def __getRRDGraphicsForWebPage( self, graphicType, generateTotalsGraphics = True  ):
+    def __generateAllRRDGraphicsForWebPage( self, graphicType, generateTotalsGraphics = True  ):
         """
     
             @summary : This method generates new rrd graphics 
@@ -114,7 +92,7 @@ class WebPageGraphicsGenerator( Translatable ):
         supportedGraphicTypes = { "daily": "-d", "weekly":"-w", "monthly":"-m", "yearly":"-y" }
         
         if graphicType not in supportedGraphicTypes:
-            raise Exception( "Unsupported graphicType detected in __getGraphicsForGroups" )
+            raise Exception( "Unsupported graphicType detected in __generateAllGraphicsForGroups" )
         
         
         configParameters = StatsConfigParameters( )
@@ -122,7 +100,7 @@ class WebPageGraphicsGenerator( Translatable ):
         
         machineConfig = MachineConfigParameters()
         machineConfig.getParametersFromMachineConfigurationFile()
-        machinePairs  = machineConfig.getPairedMachinesAssociatedWithListOfTags(configParameters.sourceMachinesTags)  
+        machinePairs  = machineConfig.generateAllPairedMachinesAssociatedWithListOfTags(configParameters.sourceMachinesTags)  
        
         
         for machinePair in machinePairs:
@@ -144,64 +122,78 @@ class WebPageGraphicsGenerator( Translatable ):
         
         
         
-    def __getMissingYearlyGraphicsSinceLasteUpdate(self):
+    def __generateAllMissingYearlyGraphicsSinceLasteUpdate(self):
         """
             @summary : Generates the monthly graphics that were not 
                        generated between last update and timeOfRequest
             
         """
         
-        missingYears = [] #get missing days
+        configParameters = StatsConfigParameters( )
+        configParameters.getAllParameters()    
+        updateManager = AutomaticUpdatesManager( configParameters.nbAutoUpdatesLogsToKeep )
+        
+        missingYears = updateManager.getMissingYearsBetweenUpdates( updateManager.getTimeOfLastUpdateInLogs(), self.timeOfRequest )
+        
         oldTimeOfRequest = self.timeOfRequest
         
         for missingYear in missingYears:
             self.timeOfRequest = missingYear
-            self.__getRRDGraphicsForWebPage( "yearly", True )
-            self.__getGraphicsForGroups( "yearly" )
+            self.__generateAllRRDGraphicsForWebPage( "yearly", True )
+            self.__generateAllGraphicsForGroups( "yearly" )
             
         self.timeOfRequest = oldTimeOfRequest 
         
         
             
-    def __getMissingMonthlyGraphicsSinceLasteUpdate(self):
+    def __generateAllMissingMonthlyGraphicsSinceLasteUpdate(self):
         """
             @summary : Generates the monthly graphics that were not 
                        generated between last update and timeOfRequest
             
         """
         
-        missingMonths = [] #get missing days
+        configParameters = StatsConfigParameters( )
+        configParameters.getAllParameters()    
+        updateManager = AutomaticUpdatesManager( configParameters.nbAutoUpdatesLogsToKeep )
+        
+        missingMonths = updateManager.getMissingMonthsBetweenUpdates( updateManager.getTimeOfLastUpdateInLogs(), self.timeOfRequest )
+        
         oldTimeOfRequest = self.timeOfRequest
         
         for missingMonth in missingMonths:
             self.timeOfRequest = missingMonth
-            self.__getRRDGraphicsForWebPage( "monthly", True )
-            self.__getGraphicsForGroups( "monthly" )
+            self.__generateAllRRDGraphicsForWebPage( "monthly", True )
+            self.__generateAllGraphicsForGroups( "monthly" )
             
         self.timeOfRequest = oldTimeOfRequest     
                  
                  
                  
-    def __getMissingWeeklyGraphicsSinceLasteUpdate(self):
+    def __generateAllMissingWeeklyGraphicsSinceLasteUpdate(self):
         """
             @summary : Generates the weekly graphics that were not 
                        generated between last update and timeOfRequest
             
         """
         
-        missingWeeks = [] #get missing days
+        configParameters = StatsConfigParameters( )
+        configParameters.getAllParameters()    
+        updateManager = AutomaticUpdatesManager( configParameters.nbAutoUpdatesLogsToKeep )
+        
+        missingWeeks = updateManager.getMissingWeeksBetweenUpdates( updateManager.getTimeOfLastUpdateInLogs(), self.timeOfRequest )        
         oldTimeOfRequest = self.timeOfRequest
         
         for missingWeek in missingWeeks:
             self.timeOfRequest = missingWeek
-            self.__getRRDGraphicsForWebPage( "weekly", True )
-            self.__getGraphicsForGroups( "weekly" )
+            self.__generateAllRRDGraphicsForWebPage( "weekly", True )
+            self.__generateAllGraphicsForGroups( "weekly" )
         
         self.timeOfRequest = oldTimeOfRequest    
                         
                         
                         
-    def __getMissingDailyGraphicsSinceLasteUpdate( self ):
+    def __generateAllMissingDailyGraphicsSinceLasteUpdate( self ):
         """
             @summary : generates the daily graphics that were not generated between 
                        last update and timeOfRequest.
@@ -209,18 +201,23 @@ class WebPageGraphicsGenerator( Translatable ):
                        
         """
         
-        missingDays = [] #get missing days
+        configParameters = StatsConfigParameters( )
+        configParameters.getAllParameters()    
+        updateManager = AutomaticUpdatesManager( configParameters.nbAutoUpdatesLogsToKeep )
+        
+        missingDays = updateManager.getMissingDaysBetweenUpdates( updateManager.getTimeOfLastUpdateInLogs(), self.timeOfRequest )
+        
         oldTimeOfRequest = self.timeOfRequest
         
         for missingDay in missingDays:
             self.timeOfRequest = missingDay
-            self.__getGraphicsForDailyWebPage( False, True )
+            self.__generateAllGraphicsForDailyWebPage( False, True )
         
         self.timeOfRequest = oldTimeOfRequest            
       
               
             
-    def __getGraphicsForDailyWebPage( self,  copyToColumbosFolder = True,
+    def __generateAllForDailyWebPage( self,  copyToColumbosFolder = True,
                                       generateTotalsGraphics = True  ):
         """
             @summary : Gets all the required daily graphs.
@@ -281,7 +278,7 @@ class WebPageGraphicsGenerator( Translatable ):
           
           
           
-    def getGraphicsForYearlyWebPage( self, getGraphicsMissingSinceLastUpdate = False, generateTotalsGraphics = True ): 
+    def generateAllForYearlyWebPage( self, getGraphicsMissingSinceLastUpdate = False, generateTotalsGraphics = True ): 
         """  
             @summary : Gets all the required weekly graphics
             
@@ -290,52 +287,49 @@ class WebPageGraphicsGenerator( Translatable ):
                                            not get generated since the 
                                            last update.
 
-            @
         """
         
-        self.__getRRDGraphicsForWebPage( "yearly", generateTotalsGraphics= True )
+        self.__generateAllRRDGraphicsForWebPage( "yearly", generateTotalsGraphics= True )
         
-        self.__getGraphicsForGroups( "yearly" )   
+        self.__generateAllGraphicsForGroups( "yearly" )   
 
 
     
-    def getGraphicsForMonthlyWebPage( self, getGraphicsMissingSinceLastUpdate = False, generateTotalsGraphics = True ): 
+    def generateAllForMonthlyWebPage( self, getGraphicsMissingSinceLastUpdate = False, generateTotalsGraphics = True ): 
         """  
             @summary : Gets all the required weekly graphics
             
             @param getGraphicsMissingSinceLastUpdate : Whether or not to generate 
-                                           the weekly graphics that did 
-                                           not get generated since the 
-                                           last update.
+                                                       the weekly graphics that did 
+                                                       not get generated since the 
+                                                       last update.
 
-            @
         """
         
-        self.__getRRDGraphicsForWebPage( "monthly", generateTotalsGraphics= True )
+        self.__generateAllRRDGraphicsForWebPage( "monthly", generateTotalsGraphics= True )
         
-        self.__getGraphicsForGroups( "monthly" )      
+        self.__generateAllGraphicsForGroups( "monthly" )      
     
     
            
-    def getGraphicsForWeeklyWebPage( self, getGraphicsMissingSinceLastUpdate = False, generateTotalsGraphics = True ): 
+    def generateAllForWeeklyWebPage( self, getGraphicsMissingSinceLastUpdate = False, generateTotalsGraphics = True ): 
         """  
             @summary : Gets all the required weekly graphics
             
             @param getGraphicsMissingSinceLastUpdate : Whether or not to generate 
-                                           the weekly graphics that did 
-                                           not get generated since the 
-                                           last update.
+                                                       the weekly graphics that did 
+                                                       not get generated since the 
+                                                       last update.
 
-            @
         """
         
-        self.__getRRDGraphicsForWebPage( "weekly", generateTotalsGraphics= True )
+        self.__generateAllRRDGraphicsForWebPage( "weekly", generateTotalsGraphics= True )
         
-        self.__getGraphicsForGroups( "weekly" )
+        self.__generateAllGraphicsForGroups( "weekly" )
         
         
         
-    def getGraphicsForDailyWebPage( self, getGraphicsMissingSinceLastUpdate = False, 
+    def generateAllForDailyWebPage( self, getGraphicsMissingSinceLastUpdate = False, 
                                     copyToColumbosFolder = True, generateTotalsGraphics = True  ):       
         """    
             @summary : Gets all the required daily graphs.
@@ -351,24 +345,24 @@ class WebPageGraphicsGenerator( Translatable ):
         """
         
         if getGraphicsMissingSinceLastUpdate == True :
-            self.__getMissingDailyGraphicsSinceLasteUpdate()
+            self.__generateAllMissingDailyGraphicsSinceLasteUpdate()
             
-        self.__getGraphicsForDailyWebPage(getGraphicsMissingSinceLastUpdate,\
+        self.__generateAllGraphicsForDailyWebPage(getGraphicsMissingSinceLastUpdate,\
                                           copyToColumbosFolder, generateTotalsGraphics)    
 
 
 
-    def getColumbosGraphics( self ):        
+    def generateColumbosGraphics( self ):        
         """
             @summary : generates the columbo required by columbo.
             
         """
         
-        self.getGraphicsForDailyWebPage( False, True, False )
+        self.generateAllGraphicsForDailyWebPage( False, True, False )
         
         
         
-    def getGraphicsForAllSupportedWebPages( self ):
+    def generateAllForEverySupportedWebPages( self ):
         """
             @summary : Gets all the graphics required by 
                        the web pages.
@@ -377,8 +371,8 @@ class WebPageGraphicsGenerator( Translatable ):
                       found in config file.
             
             @Note : we suppose here that the web pages
-            will require graphics from all the machines
-            specified in the configuration file.
+                    will require graphics from all the machines
+                    specified in the configuration file.
                
                              
         """        
@@ -393,20 +387,21 @@ class WebPageGraphicsGenerator( Translatable ):
         
   
   
-    def getGraphicsForAllSupportedWebPagesBasedOnFrequenciesFoundInConfig( self ):
+    def generateAllForEverySupportedWebPagesBasedOnFrequenciesFoundInConfig( self ):
         """
             @summary : Gets all the graphics required by 
                        the web pages based on the update 
                        frequencies found within the config file.
             
             @note: Supposes that the web pages
-            will require graphics from all the machines
-            specified in the configuration file.
+                    will require graphics from all the machines
+                    specified in the configuration file.
        
         """
         
         configParameters = StatsConfigParameters( )
         configParameters.getAllParameters()       
+        
                             
         updateManager = AutomaticUpdatesManager( configParameters.nbAutoUpdatesLogsToKeep )
         
