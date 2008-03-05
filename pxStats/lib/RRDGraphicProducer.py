@@ -46,7 +46,7 @@ sys.path.append( statsPaths.PXLIB )
 
 from   Logger import *
 
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__     
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "RRDGraphicProducer.py"     
 
 
 class RRDGraphicProducer( Translatable ):
@@ -1039,15 +1039,15 @@ class RRDGraphicProducer( Translatable ):
                 rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '800','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end),'--step','%s' %(interval*60), '--vertical-label', '%s' %formatedYLabelType,'--title', '%s'%title, '--lower-limit','0','DEF:%s=%s:%s:AVERAGE'%( translatedType, databaseName, translatedType), 'CDEF:realValue=%s,%i,*' %( translatedType, 1), 'AREA:realValue#%s:%s' %( innerColor, translatedType ),'LINE1:realValue#%s:%s'%( outerColor, translatedType ), "COMMENT: " + _("Min: ") + str(minimum) + "   " + _("Max: ") + str(maximum) + "   " + _( "Mean: " ) + str(mean) + "   " +  str(total) + "\c", 'COMMENT:%s %s %s\c' %( comment, graphicsNote, graphicsLegeng )  )
             except Exception, inst:
                 errorOccured = True
-                print _("Error : Could not generate ") + str(imageName)
-                print _("Error was : ") + str(inst)
+                #print _("Error : Could not generate ") + str(imageName)
+                #print _("Error was : ") + str(inst)
         else:#With monthly graphics, we force the use the day of month number as the x label.       
             try:
                 rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '800','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end),'--step','%s' %(interval*60), '--vertical-label', '%s' %formatedYLabelType,'--title', '%s'%title, '--lower-limit','0','DEF:%s=%s:%s:AVERAGE'%( translatedType, databaseName, translatedType), 'CDEF:realValue=%s,%i,*' %( translatedType, 1), 'AREA:realValue#%s:%s' %( innerColor, translatedType ),'LINE1:realValue#%s:%s'%( outerColor, translatedType ), '--x-grid', 'HOUR:24:DAY:1:DAY:1:0:%d',"COMMENT: " + _("Min: ") + str(minimum) + "   " + _("Max: ") + str(maximum) + "   " + _( "Mean: " ) + str(mean) + "   " +  str(total) + "\c", 'COMMENT:%s %s %s\c' %(comment,graphicsNote, graphicsLegeng)  )    
             except Exception, inst:
                 errorOccured = True
-                print _("Error : Could not generate ") + str( imageName )
-                print _("Error was : ") + str(inst)
+                #print _("Error : Could not generate ") + str( imageName )
+                #print _("Error was : ") + str(inst)
                 
         if errorOccured == False:
             try:
@@ -1510,7 +1510,9 @@ class RRDGraphicProducer( Translatable ):
                 if len( fileCounts[sourlient]) != desirableArrayLength:
                     fileCounts[sourlient] = self.getNormalisedDataBaseData(fileCounts[sourlient], desirableArrayLength, mergerType="average")  
                     if len( fileCounts[sourlient]) != desirableArrayLength:
-                        print "%s still has a problem %s %s " %(sourlient, len( fileCounts[sourlient]), desirableArrayLength) 
+                        if self.logger != None :
+                            self.logger.error(  _("%s still has a problem %s %s ") %(sourlient, len( fileCounts[sourlient]), desirableArrayLength ) )
+                        #print  
                     
                     
             pairs = RRDGraphicProducer.mergeData(timeStamps, fileCounts, data, withProportions = True)
