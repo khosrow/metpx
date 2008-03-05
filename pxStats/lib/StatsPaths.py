@@ -39,7 +39,7 @@ import commands, os, sys
 sys.path.insert(1, sys.path[0] + '/../../')
 
  
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + __name__.split(".")[-1:][0]
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "StatsPaths.py"
 
 
 class COLPATHS :
@@ -110,8 +110,9 @@ class PXPATHS:
                 pass
             
             if pxroot == "":
+
                 pxroot = os.path.normpath( os.environ['PXROOT'] )        
-                #print  os.environ 
+                
             
                 if pxroot != "":      
                     pxlib = str(pxroot) +'/lib'
@@ -404,7 +405,8 @@ class StatsPaths:
         self.STATSPICKLESTIMEOFUPDATES    = self.STATSDATA + _( 'picklesTimeOfUpdates/' )
         self.STATSPREVIOUSMACHINEPARAMS   = self.STATSDATA + _( 'previousMachineParameters' )
                                                           
-        self.STATSTEMPLOCKFILES = self.STATSTEMP + _( "lockFiles/" )
+        self.STATSTEMPLOCKFILES   = self.STATSTEMP + _( "lockFiles/" )
+        self.STATSTEMPAUTUPDTLOGS = self.STATSTEMP + _( "automaticUpdatesLogs/" )
           
     
 
