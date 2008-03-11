@@ -1,21 +1,21 @@
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
-named COPYING in the root of the source directory tree.
-
 #############################################################################################
-# Name  : backupRRDDatabases.py
+# @name   : backupRRDDatabases.py
 #
-# Author: Nicholas Lemay
+# @author : Nicholas Lemay
 #
-# Date  : 2006-10-25
+# @since  : 2006-10-25, last update March 11th 2008
 #
-# Description: This program is to be used to backup rrd databases and their corresponding
+# @license: MetPX Copyright (C) 2004-2006  Environment Canada
+#           MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
+#           named COPYING in the root of the source directory tree.
+#  
+# @summary   : This program is to be used to backup rrd databases and their corresponding
 #              time of update files. Backing up rrd databases at various point in time is a
 #              recommended paractice in case newly entered data is not valid. 
 #
-#              RRD does not offer any simple database modifying utilisties so the best way
+#              RRD does not offer any simple database modifying utilities so the best way
 #              to fix a problem is to used a backed up database and to restart the update 
 #              with the newly corrected data. 
 #              
@@ -33,7 +33,9 @@ sys.path.insert(1, sys.path[0] + '/../../../')
 
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
+from pxStats.lib.LanguageTools import LanguageTools
 
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "backupRRDDatabases.py" 
 
 def backupDatabases( timeOfBackup, backupsToKeep =20, foldersToPreserve = None ):
     """
@@ -112,14 +114,38 @@ def backupDatabaseUpdateTimes( timeOfBackup, backupsToKeep = 20, foldersToPreser
                     status, output = commands.getstatusoutput( "rm -r %s " %( newList[i] ) )
     
 
-    
-def main():
+def setGlobalLanguageParameters():
     """
-        This program is to be used to backup rrd databases and their corresponding
-        time of update files. Backing up rrd databases at various point in time is a
-        recommended paractice in case newly entered data is not valid. 
+        @summary : Sets up all the needed global language 
+                   tranlator so that it can be used 
+                   everywhere in this program.
+        
+        @Note    : The scope of the global _ function 
+                   is restrained to this module only and
+                   does not cover the entire project.
+        
+        @return: None
         
     """
+    
+    global _ 
+    
+    _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH ) 
+    
+    
+        
+def main():
+    """
+        @summary : This program is to be used to backup 
+                   rrd databases and their corresponding
+                   time of update files. Backing up rrd 
+                   databases at various point in time is a
+                   recommended paractice in case newly
+                   entered data is not valid. 
+        
+    """
+    
+    setGlobalLanguageParameters()
     
     currentTime = time.time()        
     currentTime = StatsDateLib.getIsoFromEpoch( currentTime )
@@ -132,7 +158,7 @@ def main():
         try:
             backupsToKeep =  int( sys.argv[1] )
         except:
-            print "Days to keep value must be an integer. For default 20 backups value, type nothing."
+            print _( "Days to keep value must be an integer. For default 20 backups value, type nothing." )
             sys.exit()
                       
     backupDatabaseUpdateTimes( currentTime, backupsToKeep )
