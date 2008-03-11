@@ -1,20 +1,18 @@
 #! /usr/bin/env python
 """
-@copyright: 
-
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
-named COPYING in the root of the source directory tree.
-
-
 #############################################################################################
 #
 #
-# @Name  : filecommitDependencyChecker.py
+# @Name  : fileCommitDependencyChecker.py
 #
 # @author: Nicholas Lemay
 #
-# @since: 2007-11-15
+# @since: 2007-11-15, last updated on March 11th 2008 
+#
+#
+# @license: MetPX Copyright (C) 2004-2006  Environment Canada
+#           MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
+#           named COPYING in the root of the source directory tree.
 #
 # @summary: This small script is to be used instead of using the svn commit command. This file 
 #           will check out all the dependencies of the file about to be commited. It will then
@@ -44,7 +42,10 @@ sys.path.insert(1, sys.path[0] + '/../../../')
 LOCAL_MACHINE = os.uname()[1]
 
 from pxStats.lib.StatsPaths import StatsPaths
+from pxStats.lib.LanguageTools import LanguageTools
 
+
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "fileCommitDependencyChecker.py" 
 
 
 def getFileNames():
@@ -176,6 +177,7 @@ def printFileDependencies( fileDependencies ):
                 print _("Could not find any dependencies for %s") %file
                                
 
+
 def getUsersAnswer():
     """
         @summary : Forces user to enter whether or not 
@@ -234,33 +236,25 @@ def greetAndQuit():
     sys.exit()
       
       
-def  setGlobalLanguageParameters( language = 'fr'):
+      
+def  setGlobalLanguageParameters():
     """
         @summary : Sets up all the needed global language 
-                   variables so that they can be used 
+                   tranlator so that it can be used 
                    everywhere in this program.
         
+        @Note    : The scope of the global _ function 
+                   is restrained to this module only and
+                   does not cover the entire project.
         
-        @param language: Language that is to be 
-                         outputted by this program. 
-     
         @return: None
         
     """
     
-    global LANGUAGE 
-    global translator
     global _ 
     
-    LANGUAGE = language 
-    
-    if language == 'fr':
-        fileName = StatsPaths.STATSLANGFRBINTOOLS + "fileCommitDependencyChecker" 
-    elif language == 'en':
-        fileName = StatsPaths.STATSLANGENBINTOOLS + "fileCommitDependencyChecker"    
-    
-    translator = gettext.GNUTranslations( open(fileName) )
-    _ = translator.gettext         
+    _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )             
+      
       
         
 def main():
@@ -268,20 +262,18 @@ def main():
         @summary 
     """
     
-    language = 'en'
-    setGlobalLanguageParameters( language )
-    
-    
+    setGlobalLanguageParameters()
+        
     fileNames       = []
     fileDependencies = {}
-    answer = 'no'
+    answer =  'no' 
     
     fileNames = getFileNames()
     fileDependencies = getFileDependencies( fileNames )
     printFileDependencies( fileDependencies )
     answer = getUsersAnswer()
     
-    if answer == 'yes':
+    if answer ==  'yes' :
         commitFiles( fileNames )
     else :
         greetAndQuit()
