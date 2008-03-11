@@ -1,53 +1,51 @@
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
-named COPYING in the root of the source directory tree.
-
-
 #############################################################################################
 #
 #
-# Name  : pickleSynchroniser
+# @name   : pickleSynchroniser
 #
-# Author: Nicholas Lemay
+# @author : Nicholas Lemay
 #
-# Date  : 2006-08-07
+# @since  : 2006-08-07, last updated on March 11th 2008
 #
-# Description : This program is to be used to synchronise the data found on the graphic 
-#               producing machine with the machines producing the data. 
+# @license : MetPX Copyright (C) 2004-2006  Environment Canada
+#            MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
+#            named COPYING in the root of the source directory tree.
+#
+# @summary: This program is to be used to synchronise the data found on the graphic 
+#           producing machine with the machines producing the data. 
+#
 #
 # Usage:   This program can be called from a crontab or from command-line. 
 #
-#   For informations about command-line:  PickleUpdater -h | --help
+# For informations about command-line:  PickleUpdater -h | --help
 #
 #
 ##############################################################################################
 """
 
-import os, sys
+import commands, os, sys
+from optparse import OptionParser 
+from pxStats.lib.StatsPaths import StatsPaths
+from pxStats.lib.LanguageTools import LanguageTools
+
 """
     Small function that adds pxlib to the environment path.  
 """
-try:
-    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
-except KeyError:
-    pxlib = '/apps/px/lib/'
-sys.path.append(pxlib)
-
+STATSPATHS = StatsPaths( )
+STATSPATHS.setPaths( LanguageTools.getMainApplicationLanguage() )
+sys.path.append( STATSPATHS.PXLIB )
 
 """
     Imports
     Logger requires pxlib 
 """
-
-import commands
-
-from   pxStats.lib.StatsPaths import StatsPaths
-from   optparse import OptionParser 
 from   Logger import *
 
 LOCAL_MACHINE = os.uname()[1]
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "pickleSynchroniser.py"
+
 
 
 def getOptionsFromParser( parser ):
@@ -67,7 +65,7 @@ def getOptionsFromParser( parser ):
     output            = options.output.replace( ' ','' )
 
     if (len(logins) != len(machines) ) and len(logins)!=1:
-        raise Exception("Error. Number of logins doest not match number of machines.")    
+        raise Exception( _("Error. Number of logins doest not match number of machines.") )    
     elif (len(machines) >1 ) and len(logins)==1: 
         for i in range( 1,len(machines) ):
             logins.append( logins[0] )
@@ -82,7 +80,7 @@ def createParser( ):
     
     """
     
-    usage = """
+    usage = _( """
 
 %prog [options]
 ********************************************
@@ -111,7 +109,7 @@ Ex3: %prog -c 'client1, client2' -m 'machine1 --> Machine1, for clients 1 and 2 
 
 ********************************************
 * See /doc.txt for more details.           *
-********************************************"""
+********************************************""" )
     
     parser = OptionParser( usage )
     addOptions( parser )
@@ -129,13 +127,13 @@ def addOptions( parser ):
     parser.add_option( "-c", "--clients", action="store", type="string", dest="clients", default="All",
                         help="Clients' names" )                 
    
-    parser.add_option( "-l", "--logins", action="store", type="string", dest="logins", default="pds", help = "SSH login name(s) to be used to connect to machines." ) 
+    parser.add_option( "-l", "--logins", action="store", type="string", dest="logins", default="pds", help = _( "SSH login name(s) to be used to connect to machines." ) ) 
     
-    parser.add_option( "-m", "--machines", action="store", type="string", dest="machines", default=LOCAL_MACHINE, help = "Machine on wich the update is run." ) 
+    parser.add_option( "-m", "--machines", action="store", type="string", dest="machines", default=LOCAL_MACHINE, help = _( "Machine on wich the update is run." ) ) 
     
-    parser.add_option( "-o", "--output", action="store", type="string", dest="output", default="", help = "File to be used as log file." ) 
+    parser.add_option( "-o", "--output", action="store", type="string", dest="output", default="", help = _( "File to be used as log file." ) ) 
     
-    parser.add_option( "-v", "--verbose", action="store_true", dest = "verbose", default=False, help="Whether or not to print out the errors reported by rsync." )
+    parser.add_option( "-v", "--verbose", action="store_true", dest = "verbose", default=False, help= _( "Whether or not to print out the errors reported by rsync." ) )
     
 
 
@@ -195,8 +193,8 @@ def synchronise( commandList, verbose, logger = None ):
             if logger != None :
                 logger.warning( rsyncOutput ) 
             elif verbose == True :
-                print "There was an error while calling rsync using the following line : %s. " %command
-                print "Output was : %s" %rsyncOutput 
+                print _( "There was an error while calling rsync using the following line : %s. ") %command
+                print _( "Output was : %s" ) %rsyncOutput 
 
 
                 
@@ -220,12 +218,35 @@ def buildLogger( output ):
     
     
     
+def  setGlobalLanguageParameters():
+    """
+        @summary : Sets up all the needed global language 
+                   tranlator so that it can be used 
+                   everywhere in this program.
+        
+        @Note    : The scope of the global _ function 
+                   is restrained to this module only and
+                   does not cover the entire project.
+        
+        @return: None
+        
+    """
+    
+    global _ 
+    
+    _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )     
+    
+    
+    
 def main():
     """
         Gathers options, then makes call to synchronise to synchronise the pickle files from the
         different clients and machines received in parameter.  
     
     """       
+    
+    setGlobalLanguageParameters()
+    
     parser   = createParser( )  #will be used to parse options 
     machines, clients, logins, verbose, output = getOptionsFromParser( parser )
     logger   = buildLogger( output )    
@@ -234,7 +255,7 @@ def main():
     synchronise( commands, verbose, logger )
     
     if logger != None :
-        logger.info( "This machine has been synchronised with the %s machines for %s clients. " %( machines,clients ) )
+        logger.info( _( "This machine has been synchronised with the %s machines for %s clients. " ) %( machines,clients ) )
 
 
 
