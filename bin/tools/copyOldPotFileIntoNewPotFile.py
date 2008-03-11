@@ -1,12 +1,5 @@
 #! /usr/bin/env python
 """
-@copyright: 
-
-MetPX Copyright (C) 2004-2008  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
-named COPYING in the root of the source directory tree.
-
-
 #############################################################################################
 #
 #
@@ -14,7 +7,12 @@ named COPYING in the root of the source directory tree.
 #
 # @author: Nicholas Lemay
 #
-# @since: 2008-02-06
+# @license: MetPX Copyright (C) 2004-2008  Environment Canada
+#           MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
+#           named COPYING in the root of the source directory tree.
+#
+#
+# @since: 2008-02-06 , last updated on March 11th 2008
 #
 # @summary: This simple script is to be used to copy the corresponding translations of 
 #           a certain .pot file into another .pot file.  
@@ -29,6 +27,10 @@ named COPYING in the root of the source directory tree.
 
 import os, sys
 
+sys.path.insert(1, sys.path[0] + '/../../../')
+from pxStats.lib.LanguageTools import LanguageTools
+
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "copyOldPotFileIntoNewPotFile.py" 
 
 def writeLinesToFile( destinationFile, destinationLines ):
     """
@@ -112,38 +114,60 @@ def copyPotFileContent( sourceFile, destinationFile ):
     
     
     
+def  setGlobalLanguageParameters():
+    """
+        @summary : Sets up all the needed global language 
+                   tranlator so that it can be used 
+                   everywhere in this program.
+        
+        @Note    : The scope of the global _ function 
+                   is restrained to this module only and
+                   does not cover the entire project.
+        
+        @return: None
+        
+    """
+    
+    global _ 
+    
+    _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )       
+    
+    
+    
 def main():
     """
         
         @summary : Verifies if received parameters are valid.
     
     """
+    
+    setGlobalLanguageParameters()
      
     if sys.argv.__len__() != 3 or ( sys.argv.__len__() ==1 and (sys.argv[1] =="-h" or sys.argv[1] =="--help" ) ):
         
-        print "This program needs to be called with two parameters."
-        print "First parameter is the source .pot file, presumably the previous version of the pot file."
-        print "Second parameter is the output .pot file,presumably the new version of the pot file."
-        print "Please call the program this way : %s sourcefileName outputFileName" %(sys.argv[0])
-        print "IMPORTANT NOTE : both "
-        print "Program terminated."
+        print _( "This program needs to be called with two parameters." )
+        print _( "First parameter is the source .pot file, presumably the previous version of the pot file." )
+        print _( "Second parameter is the output .pot file,presumably the new version of the pot file." )
+        print _( "Please call the program this way : %s sourcefileName outputFileName" %(sys.argv[0]) )
+        print _( "IMPORTANT NOTE : both " )
+        print _( "Program terminated." )
         sys.exit()
         
     else:
         
         if os.path.isfile( sys.argv[1]) == False :
-            print "Error. Source file does not exist. Please specify an existing file name."
-            print "Program terminated."
+            print _( "Error. Source file does not exist. Please specify an existing file name." )
+            print _( "Program terminated." )
             sys.exit()
         elif os.path.isfile( sys.argv[2]) == False :
-            print "Error. Destination file does not exist. Please specify an existing file name."
-            print "Program terminated."
+            print _( "Error. Destination file does not exist. Please specify an existing file name. " )
+            print _( "Program terminated." ) 
             sys.exit()     
             
         else: #everything seems OK
             copyPotFileContent( sys.argv[1], sys.argv[2] )
-            print "Copy was done properly."
-            print "Program terminated."
+            print _( "Copy was done properly." )
+            print _( "Program terminated." )
             sys.exit()
                  
                  
