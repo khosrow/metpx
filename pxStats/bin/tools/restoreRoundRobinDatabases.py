@@ -1,20 +1,21 @@
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
-named COPYING in the root of the source directory tree.
-
 #############################################################################################
-# Name  : restoreRoundRobinDatabases.py
 #
-# Author: Nicholas Lemay
+# @name  : restoreRoundRobinDatabases.py
 #
-# Date  : 2006-10-25
+# @author: Nicholas Lemay
 #
-# Description: This program is to be used to restore the backed up databases from a certain date
+# @since  : 2006-10-25, lat updated on March 11th 2008
+#
+# @license: MetPX Copyright (C) 2004-2006  Environment Canada
+#           MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
+#           named COPYING in the root of the source directory tree.
+#
+# @summary : This program is to be used to restore the backed up databases from a certain date
 #              ans use them as the main databases
 #
-#   Usage:   This program can be called from a crontab or from command-line. 
+# @usage:   This program can be called from a crontab or from command-line. 
 #
 #   For informations about command-line:  restoreRoundRobinDatabases.py -h | --help
 #
@@ -27,17 +28,24 @@ import os, commands, time, sys, pickle, glob
 sys.path.insert(1, sys.path[0] + '/../../../')
 import pxStats.bin.tools.backupRRDDatabases
 
-
+backupRRDDatabases =  pxStats.bin.tools.backupRRDDatabases
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
-backupRRDDatabases =  pxStats.bin.tools.backupRRDDatabases
+from pxStats.lib.LanguageTools import LanguageTools
+
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "restoreRoundRobinDatabases.py" 
 
 def restoreDatabases( timeToRestore, currentTime, nbBackupsToKeep ):
     """
-       Restore databases to restore. Archive current databases.
+       @summary : Restore databases to restore. Archive current databases.
        
-       Keep the limit number of backups to 5
+       @param timeToRestore : Time of the DB backups to set as current DB.
+       
+       @param currentTime : Time of the call to the script.
+       
+       @param nbBackupsToKeep : total number of backups to keep.
+       
     """
     
     source = StatsPaths.STATSDBBACKUPS + "/%s" %timeToRestore
@@ -52,11 +60,17 @@ def restoreDatabases( timeToRestore, currentTime, nbBackupsToKeep ):
     print output
 
 
+
 def restoreDatabaseUpdateTimes( timeToRestore, currentTime, nbBackupsToKeep ):
     """
-        Copy all databases into a folder sporting the data of the backup.
+       @summary : Copy all databases into a folder sporting the data of the backup.
         
-        Limits the number of database backups to 3.
+       @param timeToRestore : Time of the DB backups to set as current DB.
+       
+       @param currentTime : Time of the call to the script.
+       
+       @param nbBackupsToKeep : total number of backups to keep.
+       
     """
     
     source = StatsPaths.STATSDBUPDATESBACKUPS + "/%s" %timeToRestore
@@ -71,14 +85,36 @@ def restoreDatabaseUpdateTimes( timeToRestore, currentTime, nbBackupsToKeep ):
     status, output = commands.getstatusoutput( "cp -rf %s/* %s" %( source, destination ) )
     print output
             
+       
+def  setGlobalLanguageParameters():
+    """
+        @summary : Sets up all the needed global language 
+                   tranlator so that it can be used 
+                   everywhere in this program.
+        
+        @Note    : The scope of the global _ function 
+                   is restrained to this module only and
+                   does not cover the entire project.
+        
+        @return: None
+        
+    """
+    
+    global _ 
+    
+    _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH ) 
+
+
             
 def main():
     """
-        This program is to be used to backup rrd databases and their corresponding
-        time of update files. Backing up rrd databases at various point in time is a
-        recommended paractice in case newly entered data is not valid. 
+        @summary : This program is to be used to backup rrd databases and their corresponding
+                   time of update files. Backing up rrd databases at various point in time is a
+                   recommended paractice in case newly entered data is not valid. 
         
     """
+
+    setGlobalLanguageParameters()
     
     timeToRestore = "2006-10-23 09:00:00"
     
@@ -111,9 +147,9 @@ def main():
 
     
     else:
-        print "You must specify a date."
-        print "Date must be of the folowing format YYYY-MM-DD HH:MM:SS"
-        print "Program terminated."     
+        print _( "You must specify a date." )
+        print _( "Date must be of the folowing format YYYY-MM-DD HH:MM:SS" )
+        print _( "Program terminated." )
     
         
         
