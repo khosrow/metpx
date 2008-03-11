@@ -1,17 +1,17 @@
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
-
-
 #######################################################################################
 ##
 ## @name   : cvsDataConversion.py 
 ##  
 ## @author : Nicholas Lemay  
 ##
-## @since  : 2007-09-18
+## @license: MetPX Copyright (C) 2004-2006  Environment Canada
+##           MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+##           named COPYING in the root of the source directory tree.
+##
+## @since  : 2007-09-18, last updated on March 11th 2008
+##
 ##
 ## @summary: This file is to be used to convert data from pickles or databases 
 ##           and tranform it into a cvs file that can be read by a cvs reader file.  
@@ -22,27 +22,31 @@ named COPYING in the root of the source directory tree.
 """
 
 import os, rrdtool, sys, time
+from optparse  import OptionParser
 
 sys.path.insert(1, sys.path[0] + '/../../')
 
-from   optparse  import OptionParser
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.MachineConfigParameters import MachineConfigParameters
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.RrdUtilities import RrdUtilities 
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
+from pxStats.lib.LanguageTools import LanguageTools
 
-SUPPORTED_RX_DATATYPES = ["bytecount", "filecount", "errors" ]
-SUPPORTED_TX_DATATYPES = [ "latency", "filesOverMaxLatency", "bytecount",  "filecount", "errors" ]
 
 
 LOCAL_MACHINE = os.uname()[1]
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "cvsDataConversion.py"    
+
+
 
 class _CsvInfos:
     
     
-    def __init__( self, start, end , span ,timeSpan, fileType, machinesForLabels, machinesToSearch, machinesAreClusters,  dataSource, includegroups = True):
+    def __init__( self, start, end , span ,timeSpan, fileType, machinesForLabels,\
+                  machinesToSearch, machinesAreClusters,  dataSource, includegroups = True,\
+                  outputLanguage = None):
         """
             @summary: _CsvInfos constructor 
             
@@ -71,8 +75,6 @@ class _CsvInfos:
             @return : New _CsvInfos instance.
         
         """
-        
-        
         self.start      = start
         self.end        = end
         self.span       = span
@@ -83,22 +85,23 @@ class _CsvInfos:
         self.dataSource = dataSource
         self.includegroups = includegroups
         self.machinesAreClusters = machinesAreClusters
-        
+        self.outputLanguage = outputLanguage
+
 
 
 def getInterval( startTime, timeOfLastUpdate, graphicType = "daily", goal = "fetchData"  ):    
     """         
-        Returns the interval that was used for data consolidation. 
+        @summary : Returns the interval that was used for data consolidation. 
         
-        If graphicsType is weekly, monthly or yearly interval returned
-        will always be the same as long timeOfLastUpdate- startTime is 
-        within it's the maximum lenggth of it's associated RRA. 
+                    If graphicsType is weekly, monthly or yearly interval returned
+                    will always be the same as long timeOfLastUpdate- startTime is 
+                    within it's the maximum lenggth of it's associated RRA. 
+                    
+                    Otherwise it is based on the distance between
+                    starTTime being used and the time of the 
+                    last update of the database.
         
-        Otherwise it is based on the distance between
-        starTTime being used and the time of the 
-        last update of the database.
-        
-        Method is very usefull when handling totals.    
+        @note : Method is very usefull when handling totals.    
        
     """ 
     #432000 is 5 days in seconds
@@ -148,6 +151,8 @@ def buildCsvFileName( infos ):
         @return: Return the built up file name.              
                       
     """
+    paths = StatsPaths()
+    paths.setPaths()
     
     machinesStr = str(infos.machinesForLabels).replace('[','').replace( ']','' ).replace(',', '').replace("'","").replace( '"','').replace( ' ','' )
     
@@ -155,19 +160,19 @@ def buildCsvFileName( infos ):
     currentWeek = time.strftime( "%W", time.gmtime( StatsDateLib.getSecondsSinceEpoch (infos.start) ) )
     
     
-    fileName = "/apps/px/pxStats/data/csvFiles/"
+    fileName = paths.STATSCSVFILES
    
     if infos.span == "daily":
-        fileName = fileName + "daily/" + infos.fileType + "/%s/%s/%s/%s.csv" %( machinesStr, currentYear, currentMonth, currentDay )   
+        fileName = fileName + _("daily/") + infos.fileType + "/%s/%s/%s/%s.csv" %( machinesStr, currentYear, currentMonth, currentDay )   
     
     elif infos.span == "weekly":
-        fileName = fileName + "weekly/" + infos.fileType  + "/%s/%s/%s.csv" %( machinesStr, currentYear, currentWeek ) 
+        fileName = fileName + _("weekly/") + infos.fileType  + "/%s/%s/%s.csv" %( machinesStr, currentYear, currentWeek ) 
     
     elif infos.span == "monthly":
-        fileName = fileName + "monthly/" + infos.fileType + "/%s/%s/%s.csv" %( machinesStr, currentYear, currentMonth )
+        fileName = fileName + _("monthly/") + infos.fileType + "/%s/%s/%s.csv" %( machinesStr, currentYear, currentMonth )
     
     elif infos.span == "yearly":
-        fileName = fileName + "yearly/" + infos.fileType  + "/%s/%s.csv" %( machinesStr, currentYear )
+        fileName = fileName + _("yearly/") + infos.fileType  + "/%s/%s.csv" %( machinesStr, currentYear )
         
  
     return fileName 
@@ -247,7 +252,8 @@ def getAllClientOrSourcesNamesFromMachines( infos ):
     for group in groups : 
         
         if configParameters.groupParameters.groupFileTypes[group] == infos.fileType : 
-            sourlients[group] = [str( configParameters.groupParameters.groupsMachines[group] ).replace('[','').replace(']', '').replace(',','').replace( "'",'' ).replace('"','' ).replace(" ",'')]
+            sourlients[group] = [str( configParameters.groupParameters.groupsMachines[group] ).replace('[','').replace(']', '').\
+                                 replace(',','').replace( "'",'' ).replace('"','' ).replace(" ",'')]
     
     return sourlients
 
@@ -272,18 +278,18 @@ def writeCsvFileHeader( fileHandle, infos ):
         dataTypes = SUPPORTED_RX_DATATYPES
         for dataType in dataTypes:
             for valueType in valueTypes:
-                valuesToWrite = valuesToWrite + "," + dataType + " " + valueType
+                valuesToWrite = valuesToWrite + "," + dataTypes[dataType] + " " + valueType
                 
-        fileHandle.write( "sources" + valuesToWrite + '\n' )
+        fileHandle.write( _("sources") + valuesToWrite + '\n' )
         
     elif infos.fileType == "tx":
         valuesToWrite = ""
         dataTypes = SUPPORTED_TX_DATATYPES
         for dataType in dataTypes:
             for valueType in valueTypes:
-                valuesToWrite = valuesToWrite + "," + dataType + " " + valueType        
+                valuesToWrite = valuesToWrite + "," + dataTypes[dataType] + " " + valueType        
         
-        fileHandle.write( "clients"  + valuesToWrite + '\n' )    
+        fileHandle.write( _("clients")  + valuesToWrite + '\n' )    
     
         
     
@@ -362,7 +368,9 @@ def writeDataToFileName( infos, sourlients, data, fileName ):
 
 def fetchDataFromRRDDatabase( databaseName, startTime, endTime, interval, graphicType):
     """
-        Returns the stored data from a database based on the desiered interval.
+        @summary : Returns the stored data from a database based on the desired interval.
+        
+        @retutn : Output obtained from the rrd fetch command.
     """
     
     resolution = int(interval*60)
@@ -389,10 +397,13 @@ def fetchDataFromRRDDatabase( databaseName, startTime, endTime, interval, graphi
 
  
 
-def getGraphicsMinMaxMeanTotal( databaseName, startTime, endTime,graphicType, dataInterval, desiredInterval = None,  type="average", logger=None ):
+def getGraphicsMinMaxMeanTotal( databaseName, startTime, endTime, graphicType, dataInterval,\
+                                desiredInterval = None,  type="average", logger=None ):
     """
-        This methods returns the min max and mean of the entire set of data that is drawn 
-        on the graphic.
+        @summary : This methods returns the min max and mean of the entire set of data that is drawn 
+                   on the graphic.
+        
+        @return : A tuple containing the following : min, max, avg, total 
                 
     """
     
@@ -419,9 +430,6 @@ def getGraphicsMinMaxMeanTotal( databaseName, startTime, endTime,graphicType, da
     
         meanTuples = output[2]
         nbEntries = len( meanTuples )-1 #we dont use the first entry
-        
-    
-            
                  
         desiredNumberOfEntries = float( (realEndTime - startTime)/(desiredInterval*60) )
           
@@ -437,7 +445,7 @@ def getGraphicsMinMaxMeanTotal( databaseName, startTime, endTime,graphicType, da
                 
                 if meanTuples[i][0] != 'None' and meanTuples[i][0] != None :
                     
-                    realValue = ( float(meanTuples[i][0]) * float(interval)/ nbEntriesPerPoint ) 
+                    realValue = ( float(meanTuples[i][0]) * float(dataInterval)/ nbEntriesPerPoint ) 
                     
                     if  realValue > max:
                         max = realValue
@@ -519,7 +527,7 @@ def getDataFromDatabases( sourlients, dataTypes, infos ):
     """
         @summary: Gathers up all the requried data from allthe concerned databases 
     
-        param sourlients: List of sources clients for wich we need to gather up data.
+        @param sourlients: List of sources clients for wich we need to gather up data.
         
         @param machines: Machines on which the clients reside.
         
@@ -545,7 +553,8 @@ def getDataFromDatabases( sourlients, dataTypes, infos ):
                 machineConfig.getParametersFromMachineConfigurationFile()
                 machines = machineConfig.getMachinesAssociatedWith( machine ) 
                 oldMachine = machine
-                machine = str(machines).replace('[','').replace(']', '').replace(',','').replace( "'",'' ).replace('"','' ).replace(" ",'').replace('[','').replace(']', '').replace(',','').replace( "'",'' ).replace('"','' ).replace(" ",'')           
+                machine = str(machines).replace('[','').replace(']', '').replace(',','').replace( "'",'' ).replace('"','' ).replace(" ",'')\
+                          .replace('[','').replace(']', '').replace(',','').replace( "'",'' ).replace('"','' ).replace(" ",'')           
             
             if machine == '':
                 #print "trouvaille !!!"
@@ -566,7 +575,9 @@ def getDataFromDatabases( sourlients, dataTypes, infos ):
                     fetchedInterval = getInterval( int(StatsDateLib.getSecondsSinceEpoch(infos.start)), lastUpdate, dataType, goal = "fetchData"  )  
                     desiredInterval = getInterval( int(StatsDateLib.getSecondsSinceEpoch(infos.start)), lastUpdate, dataType, goal = "plotGraphic"  )
                     interval        = desiredInterval     
-                    minimum, maximum, mean, total = getGraphicsMinMaxMeanTotal( databaseName, int(StatsDateLib.getSecondsSinceEpoch(infos.start)), int(StatsDateLib.getSecondsSinceEpoch(infos.end)), infos.span, fetchedInterval,desiredInterval, type = "average" )
+                    minimum, maximum, mean, total = getGraphicsMinMaxMeanTotal( databaseName, int(StatsDateLib.getSecondsSinceEpoch(infos.start)),\
+                                                                                int(StatsDateLib.getSecondsSinceEpoch(infos.end)), infos.span,\
+                                                                                fetchedInterval,desiredInterval, type = "average" )
                     data[sourlient][machine][dataType] = {}
                     data[sourlient][machine][dataType]["min"]   = minimum
                     data[sourlient][machine][dataType]["max"]   = maximum
@@ -669,12 +680,14 @@ def getOptionsFromParser( parser ):
     turnOffLogging   = options.turnOffLogging
     includeGroups    = options.includeGroups
     machinesAreClusters = options.machinesAreClusters
+    outputLanguage      = options.outputLanguage
+    
     
     
     if fixedPrevious and fixedCurrent:
-        print "Error. Please use only one of the fixed options,either fixedPrevious or fixedCurrent. " 
-        print "Use -h for help."
-        print "Program terminated."
+        print _("Error. Please use only one of the fixed options,either fixedPrevious or fixedCurrent. " )
+        print _("Use -h for help.")
+        print _("Program terminated.")
         sys.exit()  
     
     counter = 0  
@@ -684,15 +697,15 @@ def getOptionsFromParser( parser ):
             counter = counter + 1 
             
     if counter > 1 :
-        print "Error. Only one of the daily, weekly and yearly options can be use at a time " 
-        print "Use -h for help."
-        print "Program terminated."
+        print _( "Error. Only one of the daily, weekly and yearly options can be use at a time " )
+        print _( "Use -h for help." )
+        print _( "Program terminated." )
         sys.exit()
         
     elif counter == 0:    
-        print "Error. Please use either the -d -m -w or -y options. " 
-        print "Use -h for help."
-        print "Program terminated."
+        print _( "Error. Please use either the -d -m -w or -y options. " )
+        print _( "Use -h for help." )
+        print _( "Program terminated." )
         sys.exit()
          
 
@@ -705,9 +718,9 @@ def getOptionsFromParser( parser ):
         date = "%s %s" %( split[0], split[1] )
 
     except:    
-        print "Error. The date format must be YYYY-MM-DD HH:MM:SS" 
-        print "Use -h for help."
-        print "Program terminated."
+        print _( "Error. The date format must be YYYY-MM-DD HH:MM:SS" )
+        print _( "Use -h for help." )
+        print _( "Program terminated." )
         sys.exit()         
         
          
@@ -775,10 +788,10 @@ def getOptionsFromParser( parser ):
      
          
     if fileType != "tx" and fileType != "rx":
-        print "Error. File type must be either tx or rx."
-        print 'Multiple types are not accepted.' 
-        print "Use -h for additional help."
-        print "Program terminated."
+        print _("Error. File type must be either tx or rx.")
+        print _('Multiple types are not accepted.' )
+        print _("Use -h for additional help.")
+        print _("Program terminated.")
         sys.exit()    
 
     if includeGroups == True:
@@ -791,11 +804,13 @@ def getOptionsFromParser( parser ):
                 machineConfig = MachineConfigParameters()
                 machineConfig.getParametersFromMachineConfigurationFile()
                 machinesAssociatedWith = machineConfig.getMachinesAssociatedWith( machine ) 
-                machinesToTest = str(machinesAssociatedWith).replace('[','').replace(']', '').replace(',','').replace( "'",'' ).replace('"','' ).replace(" ",'').replace('[','').replace(']', '').replace(',','').replace( "'",'' ).replace('"','' ).replace(" ",'')       
+                machinesToTest = str(machinesAssociatedWith).replace('[','').replace(']', '').replace(',','').replace( "'",'' ).replace('"','' ).\
+                                 replace(" ",'').replace('[','').replace(']', '').replace(',','').replace( "'",'' ).replace('"','' ).replace(" ",'')       
             
              
             for group in groups:
-                groupsMachine =  str( configParameters.groupParameters.groupsMachines[group] ).replace('[','').replace(']', '').replace(',','').replace( "'",'' ).replace('"','' ).replace(" ",'')
+                groupsMachine =  str( configParameters.groupParameters.groupsMachines[group] ).replace('[','').replace(']', '').\
+                                 replace(',','').replace( "'",'' ).replace('"','' ).replace(" ",'')
                 #print   "machinesToTest %s groupsMachine %s" %(machinesToTest,groupsMachine ) 
                 if machinesToTest in groupsMachine :
                     if groupsMachine not in machinesToSearch:
@@ -803,7 +818,8 @@ def getOptionsFromParser( parser ):
     
     
     #print machines
-    infos = _CsvInfos( start = start , end = end  , span = span, timeSpan = timeSpan, fileType = fileType, machinesForLabels = machines, machinesToSearch = machinesToSearch, machinesAreClusters = machinesAreClusters, dataSource = "databases" )    
+    infos = _CsvInfos( start = start , end = end  , span = span, timeSpan = timeSpan, fileType = fileType, machinesForLabels = machines,\
+                       machinesToSearch = machinesToSearch, machinesAreClusters = machinesAreClusters, dataSource = "databases", outputLanguage = outputLanguage )    
     
     return infos
 
@@ -816,31 +832,33 @@ def addOptions( parser ):
     """  
     
     parser.add_option("-c", "--clients", action="store", type="string", dest="clients", default="ALL",
-                        help="Clients' names")
+                        help=_("Clients' names"))
     
-    parser.add_option("-d", "--daily", action="store_true", dest = "daily", default=False, help="Create csv file containing daily data.")
+    parser.add_option("-d", "--daily", action="store_true", dest = "daily", default=False, help=_("Create csv file containing daily data.") )
     
-    parser.add_option( "--date", action="store", type="string", dest="date", default=StatsDateLib.getIsoFromEpoch( time.time() ), help="Decide end time of graphics. Usefull for testing.")
+    parser.add_option( "--date", action="store", type="string", dest="date", default=StatsDateLib.getIsoFromEpoch( time.time() ), help=_("Decide end time of graphics. Usefull for testing.") )
     
-    parser.add_option("-f", "--fileType", action="store", type="string", dest="fileType", default='tx', help="Type of log files wanted.")           
+    parser.add_option("-f", "--fileType", action="store", type="string", dest="fileType", default='tx', help=_("Type of log files wanted.") )           
    
-    parser.add_option( "--fixedPrevious", action="store_true", dest="fixedPrevious", default=False, help="Do not use floating weeks|days|months|years. Use previous fixed interval found.")
+    parser.add_option( "--fixedPrevious", action="store_true", dest="fixedPrevious", default=False, help=_("Do not use floating weeks|days|months|years. Use previous fixed interval found.") )
    
-    parser.add_option( "--fixedCurrent", action="store_true", dest="fixedCurrent", default=False, help="Do not use floating weeks|days|months|years. Use current fixed interval found.")
+    parser.add_option( "--fixedCurrent", action="store_true", dest="fixedCurrent", default=False, help=_("Do not use floating weeks|days|months|years. Use current fixed interval found.") )
    
-    parser.add_option( "--includeGroups", action="store_true", dest="includeGroups", default=False, help="Include groups of all the specified machines or clusters." )
+    parser.add_option( "--includeGroups", action="store_true", dest="includeGroups", default=False, help=_("Include groups of all the specified machines or clusters." ) )
     
-    parser.add_option( "--machines", action="store", type="string", dest="machines", default=LOCAL_MACHINE, help = "Machines for wich you want to collect data." )   
+    parser.add_option( "-l", "--language", action="store", type="string", dest="outputLanguage", default="", help = _("Language in which you want the casv file to be created in." )   )
     
-    parser.add_option("--machinesAreClusters", action="store_true", dest = "machinesAreClusters", default=False, help="Specified machines are clusters.")
+    parser.add_option( "--machines", action="store", type="string", dest="machines", default=LOCAL_MACHINE, help =_("Machines for wich you want to collect data." ) )
+    
+    parser.add_option("--machinesAreClusters", action="store_true", dest = "machinesAreClusters", default=False, help=_("Specified machines are clusters.") )
        
-    parser.add_option("-m", "--monthly", action="store_true", dest = "monthly", default=False, help="Create csv file containing monthly data." )
+    parser.add_option("-m", "--monthly", action="store_true", dest = "monthly", default=False, help=_("Create csv file containing monthly data." ) )
     
-    parser.add_option("--turnOffLogging", action="store_true", dest = "turnOffLogging", default=False, help="Turn off the logger")
+    parser.add_option("--turnOffLogging", action="store_true", dest = "turnOffLogging", default=False, help=_("Turn off the logger") )
      
-    parser.add_option("-w", "--weekly", action="store_true", dest = "weekly", default=False, help="Create csv file containing weekly data." )
+    parser.add_option("-w", "--weekly", action="store_true", dest = "weekly", default=False, help=_("Create csv file containing weekly data." ) )
     
-    parser.add_option("-y", "--yearly", action="store_true", dest = "yearly", default=False,help="Create csv file containing yearly data." )
+    parser.add_option("-y", "--yearly", action="store_true", dest = "yearly", default=False, help=_("Create csv file containing yearly data." ) )
     
 
 
@@ -851,7 +869,7 @@ def createParser( ):
     
     """
     
-    usage = """
+    usage = _("""
 
     
 %prog [options]
@@ -868,6 +886,7 @@ Options:
     - With -d|--daily you can specify you want daily data.
     - With --date you can specify the date of the call.
     - With -w|--weekly you can specify you want weekly data.
+    - With -l|--language you can specify the output language.
     - With -m|--monthly you can specify you want monthly data.
     - With -- turnOffLogging you can turn of logging.
     - With -y|--yearly you can specify you want yearly data.
@@ -877,7 +896,7 @@ Ex 1 :
 
 Ex 2 :     
     
-    """
+    """)
 
 
     parser = OptionParser( usage )
@@ -887,19 +906,47 @@ Ex 2 :
 
 
 
+def  setGlobalLanguageParameters():
+    """
+        @summary : Sets up all the needed global language 
+                   tranlator so that it can be used 
+                   everywhere in this program.
+        
+        @Note    : The scope of the global _ function 
+                   is restrained to this module only and
+                   does not cover the entire project.
+        
+        @return: None
+        
+    """
+    
+    global _ 
+    global SUPPORTED_RX_DATATYPES
+    global SUPPORTED_TX_DATATYPES
+    
+    _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )  
+    
+    
+    SUPPORTED_RX_DATATYPES = { "bytecount":_("bytecount") , "filecount": _("filecount"), "errors":_("errors") }
+    SUPPORTED_TX_DATATYPES = { "latency" :_("latency"), "filesOverMaxLatency":_("filesOverMaxLatency"), "bytecount":_("bytecount"), "filecount" :_("filecount"), "errors":_("errors") }
+
+
+
 def main():
     """
         @summary : Using the parameters received on the command line, generate 
                    a csv file containing the requested data.
     
     """
-    
+
+    setGlobalLanguageParameters()  
+        
     #get arguments
     parser = createParser()
     infos  = getOptionsFromParser(parser)
     filename = transferDataToCsvFile(infos)
     
-    print "generated filename : %s" %filename
+    print _("generated filename : %s") %filename
 
 
 
