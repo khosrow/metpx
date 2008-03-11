@@ -1,10 +1,5 @@
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
-
-
 ##############################################################################
 ##
 ##
@@ -12,7 +7,12 @@ named COPYING in the root of the source directory tree.
 ##
 ## @author :  Nicholas Lemay
 ##
-## @since  : 2007-10-03, last updated on 
+## @license: MetPX Copyright (C) 2004-2006  Environment Canada
+##           MetPX comes with ABSOLUTELY NO WARRANTY; For details
+##           type see the file named COPYING in the root of the source
+##           directory tree.   
+##
+## @since  : 2007-10-03, last updated on March 5th 2008
 ##
 ## @summary : Runs filters on the specified csv data files
 ##
@@ -20,22 +20,15 @@ named COPYING in the root of the source directory tree.
 """
 
 import os, sys
+from optparse import OptionParser
 
 sys.path.insert(1, sys.path[0] + '/../../../')
-
-try:
-    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
-except KeyError:
-    pxlib = '/apps/px/lib/'
-
-sys.path.append(pxlib)
-
-from optparse import OptionParser
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
+from pxStats.lib.LanguageTools import LanguageTools
 
 
 TOTAL_YEARLY_OPERATIONAL_COSTS =  10
-
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "csvDataFiletForWebPages.py" 
 
 
 class _csvFilterParameters:
@@ -125,8 +118,8 @@ def calculateCosts1( lines, totals, cost  ):
     costs = []
     
     
-    bytesTotalPosition     = getFieldPosition( 'bytecount total', lines[0] )
-    fileCountTotalPosition = getFieldPosition( 'filecount total', lines[0] )
+    bytesTotalPosition     = getFieldPosition( _('bytecount total'), lines[0] )
+    fileCountTotalPosition = getFieldPosition( _('filecount total'), lines[0] )
     
     costsComingFromBytecount = 0.40 * cost
     costsComingFromFilecount = 0.60 * cost
@@ -211,7 +204,7 @@ def addTotalsAndMeansToLines( lines ):
     
     for i in range(1, len( splitFirstLine ) ):
     
-        if 'total' in str(splitFirstLine[i]).lower() or 'cost' in   str(splitFirstLine[i]).lower():
+        if _('total') in str(splitFirstLine[i]).lower() or _('cost') in   str(splitFirstLine[i]).lower():
             lineToAdd = lineToAdd + ',' + str(totals[i-1])
         else:
             lineToAdd = lineToAdd + ','
@@ -233,7 +226,7 @@ def addTotalsAndMeansToLines( lines ):
     for i in range( len( totals ) ):
         means[i] = float(totals[i]) / float( nbSourlients )
     
-    lines.append( 'Means ( without groups ),' + str(means).replace( '[', '' ).replace( ']', '' ) )
+    lines.append( _('Means ( without groups ),') + str(means).replace( '[', '' ).replace( ']', '' ) )
         
     return lines 
 
@@ -269,8 +262,8 @@ def getNbSourlients( lines, includeGroups = False ):
             if str(fields[0].split( ' ' )[0]).replace(' ', '') in knownGroups :                
                 entryIsValid = False
                 
-        if  'client' in str(fields[0]).lower()  or 'source'  in str(fields[0]).lower()  \
-        or  'total'  in str(fields[0]).lower()  or 'mean' in str(fields[0]).lower() :
+        if  _('client') in str(fields[0]).lower()  or _('source')  in str(fields[0]).lower()  \
+        or  _('total')  in str(fields[0]).lower()  or _('mean') in str(fields[0]).lower() :
             entryIsValid = False
         
         if entryIsValid == True:
@@ -298,7 +291,7 @@ def addCostsToLines( lines, cost ):
     #put other costs here
     
     lines[0] = lines[0].replace('\n','')
-    lines[0] = lines[0]+',cost for bytes, cost for files, total cost' 
+    lines[0] = lines[0]+ _( ',cost for bytes, cost for files, total cost' )
     for i in range( len(lines[1:]) ):
         lines[i+1] = lines[i+1].replace('\n','')
         lines[i+1] = lines[i+1] + ',' + str(costs1[i]).replace( '(', '' ).replace( ')','' ) #put other costs there
@@ -374,9 +367,9 @@ def getOptionsFromParser( parser ):
                     raise
     
     except:        
-        print "Error. An existing file name MUST be specified." 
-        print "Use -h for help."
-        print "Program terminated."
+        print _( "Error. An existing file name MUST be specified." )
+        print _( "Use -h for help." )
+        print _( "Program terminated.")
         sys.exit()
 
     try :
@@ -385,14 +378,16 @@ def getOptionsFromParser( parser ):
             raise
        
     except:         
-        print "Error. You MUST specify a cost value above 0." 
-        print "Use -h for help."
-        print "Program terminated."
+        print _( "Error. You MUST specify a cost value above 0." )
+        print _( "Use -h for help." )
+        print _( "Program terminated.")
         sys.exit()
 
 
     parameters = _csvFilterParameters( fileName, cost )
     return parameters 
+ 
+ 
  
 def addOptions( parser ):
     """
@@ -400,9 +395,9 @@ def addOptions( parser ):
         
     """       
     
-    parser.add_option("-f", "--fileName", action="store", type="string", dest="fileName", default='', help="File on which to apply the filter.")  
+    parser.add_option("-f", "--fileName", action="store", type="string", dest="fileName", default='', help= _( "File on which to apply the filter." )  )
     
-    parser.add_option("-c", "--cost", action="store", type="string", dest="cost", default=0, help="Total operational cost of the period covered by the specified file.")  
+    parser.add_option("-c", "--cost", action="store", type="string", dest="cost", default=0, help= _( "Total operational cost of the period covered by the specified file." ) )
         
        
        
@@ -414,7 +409,7 @@ def createAParser( ):
         @return : The parser
     """
     
-    usage = """
+    usage = _( """
 
 %prog [options]
 ********************************************
@@ -435,13 +430,33 @@ Notes :
     addOptions( parser )
     
     
-    """
+    """ )
     
     parser = OptionParser( usage )
     
     addOptions( parser )
   
     return parser   
+
+
+
+def setGlobalLanguageParameters():
+    """
+        @summary : Sets up all the needed global language 
+                   tranlator so that it can be used 
+                   everywhere in this program.
+        
+        @Note    : The scope of the global _ function 
+                   is restrained to this module only and
+                   does not cover the entire project.
+        
+        @return: None
+        
+    """
+    
+    global _ 
+    
+    _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )   
 
 
     
@@ -455,6 +470,8 @@ def main():
         
         
     """
+    
+    setGlobalLanguageParameters()
     
     parser = createAParser()
     
@@ -472,9 +489,9 @@ def main():
         rewriteFile( parameters.fileName, lines )
     
     else:
-        print "Error. Specified files does not exist or contains no data."
-        print "Please specify a proper file name when calling this program."
-        print "Program terminated."
+        print _( "Error. Specified files does not exist or contains no data." )
+        print _( "Please specify a proper file name when calling this program." )
+        print _( "Program terminated." )
         sys.exit()
             
         
