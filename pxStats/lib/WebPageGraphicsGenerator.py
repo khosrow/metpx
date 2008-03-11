@@ -20,7 +20,7 @@
 ##      
 ## @author:  Nicholas Lemay  
 ##
-## @since   : November 22nd 2006, last updated on March 5th 2008
+## @since   : November 22nd 2006, last updated on March 11th 2008
 ##
 ##
 #############################################################################
@@ -122,10 +122,12 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
         
         
         
-    def __generateAllMissingYearlyGraphicsSinceLasteUpdate(self):
+    def __generateAllMissingYearlyGraphicsSinceLasteUpdate( self, generateTotalsGraphics ):
         """
             @summary : Generates the monthly graphics that were not 
                        generated between last update and timeOfRequest
+                       
+            @param generateTotalsGraphics: Whether or not to generate the totals graphics.
             
         """
         
@@ -139,18 +141,19 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
         
         for missingYear in missingYears:
             self.timeOfRequest = missingYear
-            self.__generateAllRRDGraphicsForWebPage( "yearly", True )
+            self.__generateAllRRDGraphicsForWebPage( "yearly", generateTotalsGraphics )
             self.__generateAllGraphicsForGroups( "yearly" )
             
         self.timeOfRequest = oldTimeOfRequest 
         
         
             
-    def __generateAllMissingMonthlyGraphicsSinceLasteUpdate(self):
+    def __generateAllMissingMonthlyGraphicsSinceLasteUpdate( self, generateTotalsGraphics ):
         """
             @summary : Generates the monthly graphics that were not 
                        generated between last update and timeOfRequest
-            
+                       
+            @param generateTotalsGraphics: Whether or not to generate the totals graphics.  
         """
         
         configParameters = StatsConfigParameters( )
@@ -163,17 +166,19 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
         
         for missingMonth in missingMonths:
             self.timeOfRequest = missingMonth
-            self.__generateAllRRDGraphicsForWebPage( "monthly", True )
+            self.__generateAllRRDGraphicsForWebPage( "monthly", generateTotalsGraphics )
             self.__generateAllGraphicsForGroups( "monthly" )
             
         self.timeOfRequest = oldTimeOfRequest     
                  
                  
                  
-    def __generateAllMissingWeeklyGraphicsSinceLasteUpdate(self):
+    def __generateAllMissingWeeklyGraphicsSinceLasteUpdate( self, generateTotalsGraphics ):
         """
             @summary : Generates the weekly graphics that were not 
                        generated between last update and timeOfRequest
+                       
+            @param generateTotalsGraphics: Whether or not to generate the totals graphics.   
             
         """
         
@@ -186,19 +191,19 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
         
         for missingWeek in missingWeeks:
             self.timeOfRequest = missingWeek
-            self.__generateAllRRDGraphicsForWebPage( "weekly", True )
+            self.__generateAllRRDGraphicsForWebPage( "weekly", generateTotalsGraphics )
             self.__generateAllGraphicsForGroups( "weekly" )
         
         self.timeOfRequest = oldTimeOfRequest    
                         
                         
                         
-    def __generateAllMissingDailyGraphicsSinceLasteUpdate( self ):
+    def __generateAllMissingDailyGraphicsSinceLasteUpdate( self, generateTotalsGraphics ):
         """
             @summary : generates the daily graphics that were not generated between 
                        last update and timeOfRequest.
                        
-                       
+            @param generateTotalsGraphics: Whether or not to generate the totals graphics.            
         """
         
         configParameters = StatsConfigParameters( )
@@ -211,7 +216,7 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
         
         for missingDay in missingDays:
             self.timeOfRequest = missingDay
-            self.__generateAllGraphicsForDailyWebPage( False, True )
+            self.__generateAllForDailyWebPage( False, generateTotalsGraphics )
         
         self.timeOfRequest = oldTimeOfRequest            
       
@@ -226,7 +231,10 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
                                                        the daily graphics that did 
                                                        not get generated since the 
                                                        last update.
-            
+ 
+            @param generateTotalsGraphics : Whether or not to generate the graphics 
+                                            displaying the totals for each clusters. 
+                                                        
             @todo : Add proper support for copyToColumbosFolder
                     when generateAllGraphics finally support 
         
@@ -286,10 +294,15 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
                                            the weekly graphics that did 
                                            not get generated since the 
                                            last update.
-
+            
+            @param generateTotalsGraphics : Whether or not to generate the graphics 
+                                            displaying the totals for each clusters. 
         """
         
-        self.__generateAllRRDGraphicsForWebPage( "yearly", generateTotalsGraphics= True )
+        if getGraphicsMissingSinceLastUpdate == True :
+            self.__generateAllMissingYearlyGraphicsSinceLasteUpdate( generateTotalsGraphics )
+        
+        self.__generateAllRRDGraphicsForWebPage( "yearly", generateTotalsGraphics= generateTotalsGraphics )
         
         self.__generateAllGraphicsForGroups( "yearly" )   
 
@@ -303,10 +316,15 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
                                                        the weekly graphics that did 
                                                        not get generated since the 
                                                        last update.
-
+                                                       
+            @param generateTotalsGraphics : Whether or not to generate the graphics 
+                                            displaying the totals for each clusters. 
         """
         
-        self.__generateAllRRDGraphicsForWebPage( "monthly", generateTotalsGraphics= True )
+        if getGraphicsMissingSinceLastUpdate == True : 
+            self.__generateAllMissingMonthlyGraphicsSinceLasteUpdate( generateTotalsGraphics )
+        
+        self.__generateAllRRDGraphicsForWebPage( "monthly", generateTotalsGraphics = generateTotalsGraphics )
         
         self.__generateAllGraphicsForGroups( "monthly" )      
     
@@ -320,10 +338,15 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
                                                        the weekly graphics that did 
                                                        not get generated since the 
                                                        last update.
-
+                                                       
+            @param generateTotalsGraphics : Whether or not to generate the graphics 
+                                            displaying the totals for each clusters. 
         """
         
-        self.__generateAllRRDGraphicsForWebPage( "weekly", generateTotalsGraphics= True )
+        if getGraphicsMissingSinceLastUpdate == True : 
+            self.__generateAllMissingWeeklyGraphicsSinceLasteUpdate( generateTotalsGraphics )
+
+        self.__generateAllRRDGraphicsForWebPage( "weekly", generateTotalsGraphics = generateTotalsGraphics )
         
         self.__generateAllGraphicsForGroups( "weekly" )
         
@@ -339,15 +362,18 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
                                                        not get generated since the 
                                                        last update.
             
+            @param generateTotalsGraphics : Whether or not to generate the graphics 
+                                            displaying the totals for each clusters. 
+            
             @todo : Add proper support for copyToColumbosFolder
                     when generateAllGraphics finally support
                                  
         """
         
         if getGraphicsMissingSinceLastUpdate == True :
-            self.__generateAllMissingDailyGraphicsSinceLasteUpdate()
+            self.__generateAllMissingDailyGraphicsSinceLasteUpdate( generateTotalsGraphics )
             
-        self.__generateAllGraphicsForDailyWebPage(getGraphicsMissingSinceLastUpdate,\
+        self.__generateAllForDailyWebPage(getGraphicsMissingSinceLastUpdate,\
                                           copyToColumbosFolder, generateTotalsGraphics)    
 
 
@@ -359,14 +385,23 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
         """
         
         self.generateAllGraphicsForDailyWebPage( False, True, False )
+       
         
         
-        
-    def generateAllForEverySupportedWebPages( self ):
+    def generateAllForEverySupportedWebPages( self, getGraphicsMissingSinceLastUpdate, generateTotalsGraphics ):
         """
             @summary : Gets all the graphics required by 
                        the web pages.
-            
+
+            @param getGraphicsMissingSinceLastUpdate : Whether or not to generate 
+                                                       the daily graphics that did 
+                                                       not get generated since the 
+                                                       last update.
+                                                       
+            @param generateTotalsGraphics : Whether or not to generate the graphics 
+                                            displaying the totals for each clusters.                                                       
+                                            
+                                            
             @warning: will not respect update frequencies
                       found in config file.
             
@@ -377,13 +412,13 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
                              
         """        
 
-        self.getGraphicsForDailyWebPage()    
+        self.generateAllForDailyWebPage(getGraphicsMissingSinceLastUpdate, False, generateTotalsGraphics)    
 
-        self.getGraphicsForWeeklyWebPage()            
+        self.generateAllForWeeklyWebPage(getGraphicsMissingSinceLastUpdate, generateTotalsGraphics)            
 
-        self.getGraphicsForMonthlyWebPage()
+        self.generateAllForMonthlyWebPage(getGraphicsMissingSinceLastUpdate, generateTotalsGraphics)
     
-        self.getGraphicsForYearlyWebPage()
+        self.generateAllForYearlyWebPage(getGraphicsMissingSinceLastUpdate, generateTotalsGraphics)
         
   
   
@@ -410,16 +445,16 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
                                   }
         
         if requiresUpdateFonctions[ configParameters.timeParameters.dailyWebPageFrequency ](self.timeOfRequest) ==   True :
-            self.getGraphicsForDailyWebPage()
+            self.generateAllForDailyWebPage( True, True, True )
         
         if requiresUpdateFonctions[ configParameters.timeParameters.weeklyWebPageFrequency ](self.timeOfRequest) ==  True :
-            self.getGraphicsForWeeklyWebPage()    
+            self.generateAllForWeeklyWebPage( True, True, True )    
             
         if requiresUpdateFonctions[ configParameters.timeParameters.monthlyWebPageFrequency ](self.timeOfRequest) == True :
-            self.getGraphicsForMonthlyWebPage()
+            self.generateAllForMonthlyWebPage(  True, True, True )
         
         if requiresUpdateFonctions[ configParameters.timeParameters.yearlyWebPageFrequency ](self.timeOfRequest) ==  True :
-            self.getGraphicsForYearlyWebPage()
+            self.generateAllForYearlyWebPage(  True, True, True )
         
         
         
