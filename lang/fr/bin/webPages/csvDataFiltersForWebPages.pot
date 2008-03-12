@@ -1,0 +1,96 @@
+msgid ""
+msgstr ""
+
+
+msgid "bytecount total"
+msgstr "Nombre total des bytes"
+
+msgid "filecount total"
+msgstr "Nombre total de fichiers"
+
+msgid "cost"
+msgstr "cout"
+
+msgid "total"
+msgstr "total"
+
+msgid "Means ( without groups ),"
+msgstr "Moyenne ( sans les groupes ),"
+
+msgid "client"
+msgstr "client"
+
+msgid "source"
+msgstr "source"
+
+msgid "mean"
+msgstr "moyenne"
+
+msgid ",cost for bytes, cost for files, total cost"
+msgstr ",cout pour les bytes, cout pour les fichiers, cout total"
+
+msgid "Error. An existing file name MUST be specified."
+msgstr "Erreur. Un nom de fichier existant DOIT etre specifie."
+
+msgid "Use -h for help."
+msgstr "Utilisez -h pour de l'aide."
+
+msgid "Program terminated."
+msgstr "Programme termine."
+
+msgid "Error. You MUST specify a cost value above 0."
+msgstr "Erreur. Vous devez specifier une valeur de cout superieure a 0."
+
+msgid "File on which to apply the filter."
+msgstr "Fichier sur lequel appliquer le filtre.."
+
+msgid "Total operational cost of the period covered by the specified file."
+msgstr "Cout operationel total pour la periode couverte par le fichier."
+
+
+msgid ""
+"\n"
+"\n"
+"%prog [options]\n"
+"********************************************\n"
+"* See doc.txt for more details.            *\n"
+"********************************************\n"
+"\n"
+"Options:\n"
+" \n"
+"    - With -c|--cost you can specify the total cost of the period the filter is applied on. \n"
+"    - With -f|--fileName you can specify the file name on which to apply the filter.\n"
+"        \n"
+"Notes : \n"
+"\n"
+"    - Default value for costs does not exist. This parameter MUST be specified. \n"
+"    - Default filename does not exist. This parameter MUST be specified.    \n"
+"    "
+
+
+msgstr ""
+"\n"
+"\n"
+"%prog [options]\n"
+"**************************************************************\n"
+"* Consultez la documentation pour plus de details            *\n"
+"**************************************************************\n"
+"\n"
+"Options:\n"
+" \n"
+"    - Avec -c|--cost vous pouvez specifier le cout total de la periode couverte par le fichier. \n"
+"    - Avec -f|--fileName vous pouvez specifier le nom de fichier sur lequel appliquer le filtre.\n"
+"        \n"
+"Notes : \n"
+"\n"
+"    - Une valeur par defaut pour le cout n'existe pas. Vous DEVEZ specifier une valeur. \n"
+"    - Une valeur par defaut pour le nom de fichier n'existe pas. Vous DEVER specifier une valeur.\n"
+"    "
+
+
+msgid "Error. Specified files does not exist or contains no data."
+msgstr "Erreur. Le fichier specifie n'existe pas ou ne contine aucune donnees."
+
+msgid "Please specify a proper file name when calling this program."
+msgstr "Veuillez specifier un fichier existant lorsque vous appelez ce programme."
+
