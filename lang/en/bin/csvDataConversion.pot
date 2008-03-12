@@ -1,0 +1,168 @@
+msgid ""
+msgstr ""
+
+
+msgid "daily/"
+msgstr "daily/"
+
+msgid "weekly/"
+msgstr "weekly/"
+
+msgid "monthly/"
+msgstr "monthly/"
+
+msgid "yearly/"
+msgstr "yearly/"
+
+msgid "sources"
+msgstr "sources"
+
+msgid "clients"
+msgstr "clients"
+
+msgid "Error. Please use only one of the fixed options,either fixedPrevious or fixedCurrent. "
+msgstr "Error. Please use only one of the fixed options,either fixedPrevious or fixedCurrent. "
+
+msgid "Use -h for help."
+msgstr "Use -h for help."
+
+msgid "Program terminated."
+msgstr "Program terminated."
+
+msgid "Error. Only one of the daily, weekly and yearly options can be use at a time "
+msgstr "Error. Only one of the daily, weekly and yearly options can be use at a time "
+
+msgid "Error. Please use either the -d -m -w or -y options. "
+msgstr "Error. Please use either the -d -m -w or -y options. "
+
+msgid "Error. The date format must be YYYY-MM-DD HH:MM:SS"
+msgstr "Error. The date format must be YYYY-MM-DD HH:MM:SS"
+
+msgid "Error. File type must be either tx or rx."
+msgstr "Error. File type must be either tx or rx."
+
+msgid "Multiple types are not accepted."
+msgstr "Multiple types are not accepted."
+
+msgid "Use -h for additional help."
+msgstr "Use -h for additional help."
+
+msgid "Clients' names"
+msgstr "Clients' names"
+
+msgid "Create csv file containing daily data."
+msgstr "Create csv file containing daily data."
+
+msgid "Decide end time of graphics. Usefull for testing."
+msgstr "Decide end time of graphics. Usefull for testing."
+
+msgid "Type of log files wanted."
+msgstr "Type of log files wanted."
+
+msgid "Do not use floating weeks|days|months|years. Use previous fixed interval found."
+msgstr "Do not use floating weeks|days|months|years. Use previous fixed interval found."
+
+msgid "Do not use floating weeks|days|months|years. Use current fixed interval found."
+msgstr "Do not use floating weeks|days|months|years. Use current fixed interval found."
+
+msgid "Include groups of all the specified machines or clusters."
+msgstr "Include groups of all the specified machines or clusters."
+
+msgid "Language in which you want the casv file to be created in."
+msgstr "Language in which you want the casv file to be created in."
+
+msgid "Machines for wich you want to collect data."
+msgstr "Machines for wich you want to collect data."
+
+msgid "Specified machines are clusters."
+msgstr "Specified machines are clusters."
+
+msgid "Create csv file containing monthly data."
+msgstr "Create csv file containing monthly data."
+
+msgid "Turn off the logger"
+msgstr "Turn off the logger"
+
+msgid "Create csv file containing weekly data."
+msgstr "Create csv file containing weekly data."
+
+msgid "Create csv file containing yearly data."
+msgstr "Create csv file containing yearly data."
+
+msgid ""
+"\n"
+"\n"
+"    \n"
+"%prog [options]\n"
+"\n"
+"Options:    \n"
+"\n"
+"    - With -c|--clients you can specify the clients( or sources) names on wich you want to collect data.    \n"
+"    - With -f|--fileType you can specify the file type wanted( rx or tx ).\n"
+"    - With --fixedPrevious you can specify that you want a graphic based on the previous( week, month year)\n"
+"      based on the fixed dates of the calendar.\n"
+"    - With --fixedPrevious you can specify that you want a graphic based on the current( week, month year)\n"
+"      based on the fixed dates of the calendar.\n"
+"    - With --includeGroups you can specify that you want to see groups appear in the csv files.\n"
+"    - With -d|--daily you can specify you want daily data.\n"
+"    - With --date you can specify the date of the call.\n"
+"    - With -w|--weekly you can specify you want weekly data.\n"
+"    - With -l|--language you can specify the output language.\n"
+"    - With -m|--monthly you can specify you want monthly data.\n"
+"    - With -- turnOffLogging you can turn of logging.\n"
+"    - With -y|--yearly you can specify you want yearly data.\n"
+"   \n"
+"    \n"
+"Ex 1 :\n"
+"\n"
+"Ex 2 :     \n"
+"    \n"
+"    "
+msgstr ""
+"\n"
+"\n"
+"    \n"
+"%prog [options]\n"
+"\n"
+"Options:    \n"
+"\n"
+"    - With -c|--clients you can specify the clients( or sources) names on wich you want to collect data.    \n"
+"    - With -f|--fileType you can specify the file type wanted( rx or tx ).\n"
+"    - With --fixedPrevious you can specify that you want a graphic based on the previous( week, month year)\n"
+"      based on the fixed dates of the calendar.\n"
+"    - With --fixedPrevious you can specify that you want a graphic based on the current( week, month year)\n"
+"      based on the fixed dates of the calendar.\n"
+"    - With --includeGroups you can specify that you want to see groups appear in the csv files.\n"
+"    - With -d|--daily you can specify you want daily data.\n"
+"    - With --date you can specify the date of the call.\n"
+"    - With -w|--weekly you can specify you want weekly data.\n"
+"    - With -l|--language you can specify the output language.\n"
+"    - With -m|--monthly you can specify you want monthly data.\n"
+"    - With -- turnOffLogging you can turn of logging.\n"
+"    - With -y|--yearly you can specify you want yearly data.\n"
+"   \n"
+"    \n"
+"Ex 1 :\n"
+"\n"
+"Ex 2 :     \n"
+"    \n"
+"    "
+
+msgid "bytecount"
+msgstr "bytecount"
+
+msgid "errors"
+msgstr "errors"
+
+msgid "filecount"
+msgstr "filecount"
+
+msgid "filesOverMaxLatency"
+msgstr "filesOverMaxLatency"
+
+msgid "latency"
+msgstr "latency"
+
+msgid "generated filename : %s"
+msgstr "generated filename : %s"
+

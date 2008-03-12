@@ -1,0 +1,168 @@
+msgid ""
+msgstr ""
+
+
+msgid "daily/"
+msgstr "journalier/"
+
+msgid "weekly/"
+msgstr "hebdomadaire/"
+
+msgid "monthly/"
+msgstr "mensuel/"
+
+msgid "yearly/"
+msgstr "annuel/"
+
+msgid "sources"
+msgstr "sources"
+
+msgid "clients"
+msgstr "clients"
+
+msgid "Error. Please use only one of the fixed options,either fixedPrevious or fixedCurrent. "
+msgstr "Erreur. Veuillez utiliser une seule des options suivantes : fixedPrevious or fixedCurrent."
+
+msgid "Use -h for help."
+msgstr "Utilisez -h pour obtenir de l'aide."
+
+msgid "Program terminated."
+msgstr "Programme termine."
+
+msgid "Error. Only one of the daily, weekly and yearly options can be use at a time "
+msgstr "Erreur. Une seule des options suivantes peut etre utilisee a la fois : daily, weekly and yearly."
+
+msgid "Error. Please use either the -d -m -w or -y options. "
+msgstr "Erreur. Veuillez utiliser une des options suivantes : -d -m -w or -y. "
+
+msgid "Error. The date format must be YYYY-MM-DD HH:MM:SS"
+msgstr "Erreur. Le format de la date doit etre le suivant : AAAA-MM-JJ HH:MM:SS"
+
+msgid "Error. File type must be either tx or rx."
+msgstr "Erreur. Le type de fichier doit etre tx ou rx."
+
+msgid "Multiple types are not accepted."
+msgstr "L'utilisation de multiples types n'est pas acceptee."
+
+msgid "Use -h for additional help."
+msgstr "Utilisez -h pour de l'aide additionnelle."
+
+msgid "Clients' names"
+msgstr "Noms des clients."
+
+msgid "Create csv file containing daily data."
+msgstr "Creer un fichier csv contenant des donnees journalieres."
+
+msgid "Decide end time of graphics. Usefull for testing."
+msgstr "Decide du temps de fin des grpahiques. Tres utiles pour les tests."
+
+msgid "Type of log files wanted."
+msgstr "Type de fichiers de journalisation voulus."
+
+msgid "Do not use floating weeks|days|months|years. Use previous fixed interval found."
+msgstr "Ne pas utiliser des weeks|days|months|years flottantes. Utilise les bornes reelles de l'interval precedent relatif a la date specifiee."
+
+msgid "Do not use floating weeks|days|months|years. Use current fixed interval found."
+msgstr "Ne pas utiliser des weeks|days|months|years flottantes. Utilise les bornes reelles de l'interval courant relatif a la date specifiee."
+
+msgid "Include groups of all the specified machines or clusters."
+msgstr "Inclus les groupes de toutes les machines ou grappes specifiees."
+
+msgid "Language in which you want the casv file to be created in."
+msgstr "Language avec lequel vous voulez que les fichiers csv soient ecris."
+
+msgid "Machines for wich you want to collect data."
+msgstr "Machines pour lesquelles vous voulez amasser des donnees."
+
+msgid "Specified machines are clusters."
+msgstr "Les machines specifiees sont des grappes."
+
+msgid "Create csv file containing monthly data."
+msgstr "Cree un fichier csv contenant des donnees mensuelles."
+
+msgid "Turn off the logger"
+msgstr "Desactive la journalisation."
+
+msgid "Create csv file containing weekly data."
+msgstr "Cree un fichier csv contenant des donnees hebdomadaires."
+
+msgid "Create csv file containing yearly data."
+msgstr "Cree un fichier csv contenant des donnees annuelles."
+
+msgid ""
+"\n"
+"\n"
+"    \n"
+"%prog [options]\n"
+"\n"
+"Options:    \n"
+"\n"
+"    - With -c|--clients you can specify the clients( or sources) names on wich you want to collect data.    \n"
+"    - With -f|--fileType you can specify the file type wanted( rx or tx ).\n"
+"    - With --fixedPrevious you can specify that you want a graphic based on the previous( week, month year)\n"
+"      based on the fixed dates of the calendar.\n"
+"    - With --fixedPrevious you can specify that you want a graphic based on the current( week, month year)\n"
+"      based on the fixed dates of the calendar.\n"
+"    - With --includeGroups you can specify that you want to see groups appear in the csv files.\n"
+"    - With -d|--daily you can specify you want daily data.\n"
+"    - With --date you can specify the date of the call.\n"
+"    - With -w|--weekly you can specify you want weekly data.\n"
+"    - With -l|--language you can specify the output language.\n"
+"    - With -m|--monthly you can specify you want monthly data.\n"
+"    - With -- turnOffLogging you can turn of logging.\n"
+"    - With -y|--yearly you can specify you want yearly data.\n"
+"   \n"
+"    \n"
+"Ex 1 :\n"
+"\n"
+"Ex 2 :     \n"
+"    \n"
+"    "
+msgstr ""
+"\n"
+"\n"
+"    \n"
+"%prog [options]\n"
+"\n"
+"Options:    \n"
+"\n"
+"    - Avec -c|--clients vous pouvez specifier les clients( ou sources ) pour lesquelles vous voulez ammasser des donnees.    \n"
+"    - Avec -f|--fileType vous pouvez specifier le type de fichier a utiliser( rx or tx ).\n"
+"    - Avec --fixedPrevious vous pouvez exiger un fichier base sur les donnees de la periode precedente( semaine, mois, annee)\n"
+"      basee sur les vraies dates du calendrier.\n"
+"    - Avec --fixedcurrent vous pouvez exiger un fichier base sur les donnees de la periode courante( semaine, mois annee )\n"
+"      basee sur les vraies dates du calendrier .\n"
+"    - Avec --includeGroups vous pouvez specifier que vous voulez que les groupes aparraissent dans le fichier csv produit.\n"
+"    - Avec -d|--daily vous pouvez specifier que vous voulez un fichier base sur des donnnees journalieres.\n"
+"    - Avec --date vous pouvez specifier la date de l'appel au programme.\n"
+"    - Avec -w|--weekly vous pouvez specifier que vous voulez un fichier base sur des donnees hebdomadaires.\n"
+"    - Avec -l|--language vous pouvez specifier le language avec lequel le fichier csv sera produit.\n"
+"    - Avec -m|--monthly vous pouvez specifier que vous voulez un fichier base sur des donnees mensuelles.\n"
+"    - Avec -- turnOffLogging vous pouvez desactiver la journalisation.\n"
+"    - Avec -y|--yearly vous pouvez specifier que vous voulez un fichier base sur des donnees journalieres.\n"
+"   \n"
+"    \n"
+"Ex 1 :\n"
+"\n"
+"Ex 2 :     \n"
+"    \n"
+"    "
+
+msgid "bytecount"
+msgstr "nbreDeBytes"
+
+msgid "errors"
+msgstr "erreurs"
+
+msgid "filecount"
+msgstr "nbreDeFichiers"
+
+msgid "filesOverMaxLatency"
+msgstr "fichiersAvecLatenceInnacceptable"
+
+msgid "latency"
+msgstr "latence"
+
+msgid "generated filename : %s"
+msgstr "fichier genere : %s"
+
