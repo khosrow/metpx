@@ -1,0 +1,7 @@
+msgid ""
+msgstr ""
+
+
+msgid "Days to keep value must be an integer. For default 20 backups value, type nothing."
+msgstr "Days to keep value must be an integer. For default 20 backups value, type nothing."
+
