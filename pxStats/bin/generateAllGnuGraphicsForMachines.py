@@ -243,7 +243,7 @@ def getOptionsFromParser( parser ):
     
     if outputLanguage not in LanguageTools.getSupportedLanguages():
         print _("Error. %s is not one of the supproted languages")
-        print _("Use one of the following languages : %s" % str( LanguageTools.getSupportedLanguages() ).replace("[","").replace("]","") )
+        print _("Use one of the following languages : %s") % str( LanguageTools.getSupportedLanguages() ).replace("[","").replace("]","") 
         print _("Use -h for additional help.")
         print _("Program terminated.")
    
