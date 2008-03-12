@@ -1,0 +1,31 @@
+msgid ""
+msgstr ""
+
+
+msgid "This program needs to be called with two parameters."
+msgstr "This program needs to be called with two parameters."
+
+msgid "First parameter is the source .pot file, presumably the previous version of the pot file."
+msgstr "First parameter is the source .pot file, presumably the previous version of the pot file."
+
+msgid "Second parameter is the output .pot file,presumably the new version of the pot file."
+msgstr "Second parameter is the output .pot file,presumably the new version of the pot file."
+
+msgid "Please call the program this way : %s sourcefileName outputFileName"
+msgstr "Please call the program this way : %s sourcefileName outputFileName"
+
+msgid "IMPORTANT NOTE : both parameters are required !"
+msgstr "IMPORTANT NOTE : both parameters are required !"
+
+msgid "Program terminated."
+msgstr "Program terminated."
+
+msgid "Error. Source file does not exist. Please specify an existing file name."
+msgstr "Error. Source file does not exist. Please specify an existing file name."
+
+msgid "Error. Destination file does not exist. Please specify an existing file name. "
+msgstr "Error. Destination file does not exist. Please specify an existing file name. "
+
+msgid "Copy was done properly."
+msgstr "Copy was done properly."
+
