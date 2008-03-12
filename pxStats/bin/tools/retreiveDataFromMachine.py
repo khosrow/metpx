@@ -229,8 +229,8 @@ def main():
         print _( "#    Log files will not be tansferred if local machine is not designed to be a pickling machine. " )
         print _( "#    If log files are to be transferred, they will be transferred straight from the source." )
         print _( "#" )
-        print _( "#    *** Make sure %sconfig is filled properly prior to running this script !!! ***"%paths.STATSETC )
-        print _( "#    *** Consult pxStats documentation if you are unsure how to fill %sconfig.  ***"%paths.STATSETC )
+        print _( "#    *** Make sure %sconfig is filled properly prior to running this script !!! ***") %paths.STATSETC 
+        print _( "#    *** Consult pxStats documentation if you are unsure how to fill %sconfig.  ***") %paths.STATSETC 
         print _( "#" )
         print _( "#" )    
         print _( "#" )
