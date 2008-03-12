@@ -1,0 +1,13 @@
+msgid ""
+msgstr ""
+
+
+msgid "Program must receive one arguments or two argument"
+msgstr "Le programme doit recevoir un ou deux arguments."
+
+msgid "usage1  : python sameLanguagePotFileTranslator potFileName  -> New file will be written over old file."
+msgstr "utilisation1  : python sameLanguagePotFileTranslator nomFichierPot  -> Le nouveau fichier portera le meme nom que le fichier source."
+
+msgid "usage1  : python sameLanguagePotFileTranslator inputfileName outputfileName"
+msgstr "usage1  : python sameLanguagePotFileTranslator fichierSource fichierDeSortie"
+
