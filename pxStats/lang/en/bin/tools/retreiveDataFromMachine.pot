@@ -1,0 +1,52 @@
+msgid ""
+msgstr ""
+
+
+msgid "#######################################################################################################"
+msgstr "#######################################################################################################"
+
+msgid "#"
+msgstr "#"
+
+msgid "#    Help for retreiveDataFromMachine.py"
+msgstr "#    Help for retreiveDataFromMachine.py"
+
+msgid "#    This program is to be used to transfer all of the important stats files"
+msgstr "#    This program is to be used to transfer all of the important stats files"
+
+msgid "#    from a remote machine to the local machine."
+msgstr "#    from a remote machine to the local machine."
+
+msgid "#    If large transfers are to be done, program may take many hours to complete."
+msgstr "#    If large transfers are to be done, program may take many hours to complete."
+
+msgid "#    Output from every operation will be printed as to let the user see exactly what is going on"
+msgstr "#    Output from every operation will be printed as to let the user see exactly what is going on"
+
+msgid "#    and allow errors to be detected."
+msgstr "#    and allow errors to be detected."
+
+msgid "#    Examples : invalid login or ssh other ssh errors"
+msgstr "#    Examples : invalid login or ssh other ssh errors"
+
+msgid "#    This will also serve as to take out the guesswork as to why the program is taking so long to complete."
+msgstr "#    This will also serve as to take out the guesswork as to why the program is taking so long to complete."
+
+msgid "#    Log files will not be tansferred if local machine is not designed to be a pickling machine. "
+msgstr "#    Log files will not be tansferred if local machine is not designed to be a pickling machine. "
+
+msgid "#    If log files are to be transferred, they will be transferred straight from the source."
+msgstr "#    If log files are to be transferred, they will be transferred straight from the source."
+
+msgid "#    *** Make sure %sconfig is filled properly prior to running this script !!! ***"
+msgstr "#    *** Make sure %sconfig is filled properly prior to running this script !!! ***"
+
+msgid "#    *** Consult pxStats documentation if you are unsure how to fill %sconfig.  ***"
+msgstr "#    *** Consult pxStats documentation if you are unsure how to fill %sconfig.  ***"
+
+msgid "#    Usage  : Program must receive exactly two arguments."
+msgstr "#    Usage  : Program must receive exactly two arguments."
+
+msgid "#    Example : python retreiveDataFromMachine.py login machineName "
+msgstr "#    Example : python retreiveDataFromMachine.py login machineName "
+
