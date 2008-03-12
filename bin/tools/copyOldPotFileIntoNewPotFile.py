@@ -148,7 +148,7 @@ def main():
         print _( "This program needs to be called with two parameters." )
         print _( "First parameter is the source .pot file, presumably the previous version of the pot file." )
         print _( "Second parameter is the output .pot file,presumably the new version of the pot file." )
-        print _( "Please call the program this way : %s sourcefileName outputFileName" %(sys.argv[0]) )
+        print _( "Please call the program this way : %s sourcefileName outputFileName") %(sys.argv[0]) 
         print _( "IMPORTANT NOTE : both " )
         print _( "Program terminated." )
         sys.exit()
