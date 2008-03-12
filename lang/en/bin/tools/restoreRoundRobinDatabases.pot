@@ -1,0 +1,13 @@
+msgid ""
+msgstr ""
+
+
+msgid "You must specify a date."
+msgstr "You must specify a date."
+
+msgid "Date must be of the folowing format YYYY-MM-DD HH:MM:SS"
+msgstr "Date must be of the folowing format YYYY-MM-DD HH:MM:SS"
+
+msgid "Program terminated."
+msgstr "Program terminated."
+
