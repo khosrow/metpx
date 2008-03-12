@@ -1,0 +1,94 @@
+msgid ""
+msgstr ""
+
+
+msgid "bytecount total"
+msgstr "bytecount total"
+
+msgid "filecount total"
+msgstr "filecount total"
+
+msgid "cost"
+msgstr "cost"
+
+msgid "total"
+msgstr "total"
+
+msgid "Means ( without groups ),"
+msgstr "Means ( without groups ),"
+
+msgid "client"
+msgstr "client"
+
+msgid "source"
+msgstr "source"
+
+msgid "mean"
+msgstr "mean"
+
+msgid ",cost for bytes, cost for files, total cost"
+msgstr ",cost for bytes, cost for files, total cost"
+
+msgid "Error. An existing file name MUST be specified."
+msgstr "Error. An existing file name MUST be specified."
+
+msgid "Use -h for help."
+msgstr "Use -h for help."
+
+msgid "Program terminated."
+msgstr "Program terminated."
+
+msgid "Error. You MUST specify a cost value above 0."
+msgstr "Error. You MUST specify a cost value above 0."
+
+msgid "File on which to apply the filter."
+msgstr "File on which to apply the filter."
+
+msgid "Total operational cost of the period covered by the specified file."
+msgstr "Total operational cost of the period covered by the specified file."
+
+msgid ""
+"\n"
+"\n"
+"%prog [options]\n"
+"********************************************\n"
+"* See doc.txt for more details.            *\n"
+"********************************************\n"
+"\n"
+"Options:\n"
+" \n"
+"    - With -c|--cost you can specify the total cost of the period the filter is applied on. \n"
+"    - With -f|--fileName you can specify the file name on which to apply the filter.\n"
+"        \n"
+"Notes : \n"
+"\n"
+"    - Default value for costs does not exist. This parameter MUST be specified. \n"
+"    - Default filename does not exist. This parameter MUST be specified.    \n"
+"    "
+
+
+msgstr ""
+"\n"
+"\n"
+"%prog [options]\n"
+"********************************************\n"
+"* See doc.txt for more details.            *\n"
+"********************************************\n"
+"\n"
+"Options:\n"
+" \n"
+"    - With -c|--cost you can specify the total cost of the period the filter is applied on. \n"
+"    - With -f|--fileName you can specify the file name on which to apply the filter.\n"
+"        \n"
+"Notes : \n"
+"\n"
+"    - Default value for costs does not exist. This parameter MUST be specified. \n"
+"    - Default filename does not exist. This parameter MUST be specified.    \n"
+"    "
+
+msgid "Error. Specified files does not exist or contains no data."
+msgstr "Error. Specified files does not exist or contains no data."
+
+msgid "Please specify a proper file name when calling this program."
+msgstr "Please specify a proper file name when calling this program."
+
