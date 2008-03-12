@@ -1,0 +1,52 @@
+msgid ""
+msgstr ""
+
+
+msgid "#######################################################################################################"
+msgstr "#######################################################################################################"
+
+msgid "#"
+msgstr "#"
+
+msgid "#    Help for retreiveDataFromMachine.py"
+msgstr "#   Aide pour retreiveDataFromMachine.py"
+
+msgid "#    This program is to be used to transfer all of the important stats files"
+msgstr "#    Ce programme peut etre utilise pour transferer tous les fichiers importants de stats."
+
+msgid "#    from a remote machine to the local machine."
+msgstr "#    a partir d'une machine eloingnee vers la machine locale."
+
+msgid "#    If large transfers are to be done, program may take many hours to complete."
+msgstr "#    Si de grandes quantites de fichiers doivent etre effectuees, le programme peut prendre plusieurs heures a completer."
+
+msgid "#    Output from every operation will be printed as to let the user see exactly what is going on"
+msgstr "#    Afficher ke resultats de chaques operations, question de laisser savoir a l'utilisateur ce qui se deroule."
+
+msgid "#    and allow errors to be detected."
+msgstr "#    et permettra de decouvrir toutes les erreurs."
+
+msgid "#    Examples : invalid login or ssh other ssh errors"
+msgstr "#    Exemples : nom d'usager invalide ou autre erreur relative a ssh."
+
+msgid "#    This will also serve as to take out the guesswork as to why the program is taking so long to complete."
+msgstr "#    Ceci servira aussi a retirer l'ambiguite a savoir pourquoi le programme prend uatant de temps a completer."
+
+msgid "#    Log files will not be tansferred if local machine is not designed to be a pickling machine. "
+msgstr "#    Les fichiers de journalisations ne seront pas transferes si la machine locale n'est pas configure pour effectuer le 'pickling'. "
+
+msgid "#    If log files are to be transferred, they will be transferred straight from the source."
+msgstr "#    Si les fichiers de journalisation doivent etre transferes, ils seront transferes directement de la source."
+
+msgid "#    *** Make sure %sconfig is filled properly prior to running this script !!! ***"
+msgstr "#    *** Assurez vous que %sconfig est configure correctement avant de rouler ce script !!! ***"
+
+msgid "#    *** Consult pxStats documentation if you are unsure how to fill %sconfig.  ***"
+msgstr "#    *** Consultez la documentation de pxStats si vous etes incertain de comment remplir %sconfig.  ***"
+
+msgid "#    Usage  : Program must receive exactly two arguments."
+msgstr "#    Utilisation  : Le programme doit etre appele avec deux arguments."
+
+msgid "#    Example : python retreiveDataFromMachine.py login machineName "
+msgstr "#    Example : python retreiveDataFromMachine.py nomDusager nomDeLaMachine "
+
