@@ -1,18 +1,19 @@
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
-
 
 #######################################################################################
 ##
-## Name   : FileStatsCollector.py 
+## @namw   : FileStatsCollector.py 
 ##  
-## Author : Nicholas Lemay  
+## @author : Nicholas Lemay  
 ##
-## Date   : May 19th 2006
+## @since : May 19th 2006, last updated on March 19th 2008
 ##
-## Goal   : This file contains all the usefull classes and methods needed to build stats  
+## @license : MetPX Copyright (C) 2004-2006  Environment Canada
+##            MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+##            named COPYING in the root of the source directory tree.
+##
+##
+## @summary: This file contains all the usefull classes and methods needed to build stats  
 ##          regarding latencies text files.   
 ##          
 ##          For performance puposes, users of this class can get stats from as many
@@ -25,41 +26,39 @@ named COPYING in the root of the source directory tree.
 #######################################################################################
 """
 
-import os, sys
-
+import datetime, fnmatch, os, sys
 
 """
-    Small function that adds pxlib to the environment path.  
+    Small function that adds pxStats to the environment path.  
 """
 sys.path.insert(1, sys.path[0] + '/../../')
-try:
-    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
-except KeyError:
-    pxlib = '/apps/px/lib/'
-sys.path.append(pxlib)
-
-
-"""
-    Imports
-    Logger requires pxlib 
-"""
-import commands, logging, time, sys, os, pickle, datetime, fnmatch #important files 
-
-from fnmatch import  fnmatch
-from Logger  import *
-
 from pxStats.lib.CpickleWrapper import CpickleWrapper
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.StatsPaths import StatsPaths 
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.LogFileAccessManager import LogFileAccessManager
+from pxStats.lib.Translatable import Translatable
 
-LOCAL_MACHINE = os.uname()[1]
+"""
+    Add pxlib to stats paths
+"""
+STATSPATHS = StatsPaths()
+STATSPATHS.setBasicPaths()
+sys.path.append( STATSPATHS.PXLIB )
 
+"""
+    Imports
+    Logger requires pxlib 
+"""
+from Logger  import Logger
 
 MINUTE = 60
 HOUR   = 60 * MINUTE
 DAY    = 24 * HOUR
+
+LOCAL_MACHINE = os.uname()[1]
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "FileStatsCollector.py"  
+
 
 
 class _ValuesDictionary:
@@ -111,15 +110,17 @@ class _FileStatsEntry:
         
                                          
                                             
-
-class FileStatsCollector:
+ 
+class FileStatsCollector( Translatable ):
     """
-       This class contains the date structure and the functions needed to collect stats from 
-       a certain file.
+        This class contains the date structure and the functions needed to collect stats from 
+        a certain file.
     
     """
     
-    def __init__( self, files = None, fileType = "tx", statsTypes = None,  startTime = '2005-08-30 20:06:59', endTime = '2005-08-30 20:06:59', interval=1*MINUTE, totalWidth = HOUR, firstFilledEntry = 0, lastFilledEntry = 0, maxLatency = 15, fileEntries = None, logger = None, logging =True ):
+    def __init__( self, files = None, fileType = "tx", statsTypes = None,  startTime = '2005-08-30 20:06:59',\
+                  endTime = '2005-08-30 20:06:59', interval=1*MINUTE, totalWidth = HOUR, firstFilledEntry = 0,\
+                  lastFilledEntry = 0, maxLatency = 15, fileEntries = None, logger = None, logging =True ):
         """ 
             Constructor. All values can be set from the constructor by the user but recommend usage
             is to set sourceFile and statsType. The class contains other methods to set the other values
@@ -130,7 +131,7 @@ class FileStatsCollector:
             Precondition : Interval should be smaller than width !
         
         """    
-
+         
         if fileEntries is None :
             fileEntries = {}    
         
@@ -168,7 +169,9 @@ class FileStatsCollector:
         
         if self.logging == True:
             if self.logger is None: # Enable logging
-                self.logger = Logger( StatsPaths.STATSLOGGING + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
+                statsPaths= StatsPaths()
+                statsPaths.setPaths()
+                self.logger = Logger( statsPaths.STATSLOGGING + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
                 self.logger = self.logger.getLogger()
             
         
@@ -187,7 +190,8 @@ class FileStatsCollector:
             self.files    = remainingList
             self.files.append( firstItem )                            
             
-            
+        global _ 
+        _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )    
              
                
     def isInterestingProduct( product = "", interestingProductTypes = ["All"] ):
@@ -209,7 +213,7 @@ class FileStatsCollector:
                 break
             else:    
                 pattern = GeneralStatsLibraryMethods.buildPattern(productType)            
-
+                
             if fnmatch.fnmatch( product, pattern) == True:
                 isInterestingProduct = True
                 break
@@ -249,7 +253,7 @@ class FileStatsCollector:
             startingBucket =0
         
         if self.logger != None :    
-            self.logger.debug( "Call to setMinMaxMeanMedians received." )     
+            self.logger.debug( _("Call to setMinMaxMeanMedians received.") )     
    
         fileEntries = self.fileEntries #dot removal optimization
               
@@ -404,7 +408,7 @@ class FileStatsCollector:
                                       
                         elif statsType == "arrival":                  
                         
-                            arrival = StatsDateLib.isoDateDashed( splitLine[6].split( ":" )[6] )    
+                            values[statsType] = StatsDateLib.isoDateDashed( splitLine[6].split( ":" )[6] )    
     
                                 
                         elif statsType == "bytecount":
@@ -454,8 +458,8 @@ class FileStatsCollector:
                 except:                
                     
                     if logger is not None :
-                        logger.error("could not find %s value in line %s." %( statsType,line ) ) 
-                        logger.error("value was replaced by 0.")
+                        logger.error(_("could not find %s value in line %s.") %( statsType,line ) ) 
+                        logger.error(_("value was replaced by 0."))
                     
                     if "valuesNotFound" not in values:
                         values[ "valuesNotFound" ] = []
@@ -597,7 +601,7 @@ class FileStatsCollector:
         usedTheSavedFileAccessPointer = False
         
         if self.logger != None :
-            self.logger.debug( "Call to findFirstInterestingLine received." )
+            self.logger.debug( _("Call to findFirstInterestingLine received.") )
         
         if useSavedFileAccessPointer is True:
             
@@ -705,7 +709,7 @@ class FileStatsCollector:
         """
         
         if self.logger != None :        
-            self.logger.debug( "Call to setValues received."  )
+            self.logger.debug( _("Call to setValues received.")  )
         
         if endTime is "" :                                        
             endTime = self.endTime
@@ -733,6 +737,7 @@ class FileStatsCollector:
             
             if usedTheSavedFileAccessPointer == True :
                useSavedFileAccessPointer = False 
+            
                 
             fileHandle = open( file, "r" )
             if line != "" :             
@@ -820,7 +825,7 @@ class FileStatsCollector:
         """
         #print "creates empty entries"
         if self.logger is not  None :
-            self.logger.debug( "Call to createEmptyEntries received." )
+            self.logger.debug( _("Call to createEmptyEntries received.") )
         
         if len ( self.timeSeperators ) > 1 : 
             #print 0, (len ( self.timeSeperators )-1)
@@ -845,12 +850,15 @@ class FileStatsCollector:
             
         """
         
+        statsPaths= StatsPaths()
+        statsPaths.setPaths()
+        
         baseName    = os.path.basename(self.files[0])
         machineName = os.path.basename(os.path.dirname( self.files[0] ))
         fileType    = baseName.split( "_" )[0]
         clientName  = baseName.split( "." )[0].split( "_" )[1] 
         
-        fileName = StatsPaths.STATSLOGACCESS  + "%s_%s_%s" %( fileType, clientName, machineName )
+        fileName = statsPaths.STATSLOGACCESS  + "%s_%s_%s" %( fileType, clientName, machineName )
         
         return fileName       
      
@@ -891,6 +899,10 @@ if __name__ == "__main__" :
     """
     
     import time 
+    
+    statsPaths = STATSPATHS()
+    statsPaths.setPaths()
+    
     
     timeA= time.time()
     types = [ "latency", "errors","bytecount" ]
