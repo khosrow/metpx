@@ -1,0 +1,10 @@
+msgid ""
+msgstr ""
+
+
+msgid "deleted : %s "
+msgstr "deleted : %s "
+
+msgid "Days to keep value must be an integer. For default 21 days value, type nothing."
+msgstr "Days to keep value must be an integer. For default 21 days value, type nothing."
+
