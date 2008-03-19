@@ -1,18 +1,17 @@
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
-
 ##############################################################################
 ##
 ##
-## Name   : BottomWebPageGenerator.py 
+## @name   : BottomWebPageGenerator.py 
 ##
+## @license : MetPX Copyright (C) 2004-2006  Environment Canada
+##            MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+##            named COPYING in the root of the source directory tree.
 ##
 ## @author:  Nicholas Lemay
 ##
-## @since:  2008-02-12 
+## @since:  2008-02-12 , last updated on 2008-03-19
 ##
 ##
 ## @summary : to be used to generate the bottom web page that presents
@@ -44,14 +43,19 @@ class BottomWebPageGenerator(Translatable):
             @param otherLanguages:Alternate languages the page can be presented in.
             
         """
+        
+        global _ 
         self.mainLanguage = mainLanguage
         self.otherLanguages = otherLanguages or []
+    
+        _ =self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )
     
     
     
     def __printJavaScript( self, fileHandle ):    
         """
-        
+            @summary : prints the java script section of the bottom web page.
+            
             @param mainLanguage:Language the page will first be presented in.
             
             @param languagesToLinkTo: Alternate languages the page can be presented in.
@@ -83,9 +87,9 @@ class BottomWebPageGenerator(Translatable):
                 try:
                     fileHandle.write("""<a href="top_%s.html" target="top" onclick="JavaScript:%sVersionWasClicked()">"""%(otherLanguages[i],otherLanguages[i]) + _("English version.")+ """</a>""")
                 except:
-                    print "Error.Unsupported language detected."
-                    print "Make sure %s is a supported language" %(otherLanguages[i])
-                    print "Program terminated"
+                    print _( "Error.Unsupported language detected." )
+                    print _( "Make sure %s is a supported language" )%(otherLanguages[i])
+                    print _( "Program terminated" )
                     sys.exit()
                 if i !=  (len(otherLanguages ) -1):
                     fileHandle.write("<br>")
@@ -106,6 +110,8 @@ class BottomWebPageGenerator(Translatable):
         
     def printWebPage( self ):
         """ 
+            @summary : prints out the entire bottom web page
+            
         """
         
         paths = StatsPaths()
@@ -144,13 +150,13 @@ class BottomWebPageGenerator(Translatable):
         
         for i in range( len( self.otherLanguages ) ):
                 _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.otherLanguages[i] )
-                print "liens de bas de page",CURRENT_MODULE_ABS_PATH, self.otherLanguages[i]
+                
                 try:
                     fileHandle.write("""<a href="top_%s.html" target="top" onclick="JavaScript:%sVersionWasClicked()">"""%( self.otherLanguages[i],self.otherLanguages[i]) + _("English version.")+ """</a>""")
                 except:
-                    print "Error.Unsupported language detected."
-                    print "Make sure %s is a supported language" %( self.otherLanguages[i] )
-                    print "Program terminated"
+                    print _( "Error.Unsupported language detected." )
+                    print _( "Make sure %s is a supported language") %( self.otherLanguages[i] )
+                    print _( "Program terminated")
                     sys.exit()
                     
                 if i !=  len(self.otherLanguages)-1 :
