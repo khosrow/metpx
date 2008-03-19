@@ -8,7 +8,7 @@
 #
 # @author: Nicholas Lemay
 #
-# @since: 2006-12-14, last updated on  2008-01-22
+# @since: 2006-12-14, last updated on  2008-03-19
 #
 #
 # @license: MetPX Copyright (C) 2004-2007  Environment Canada
@@ -22,8 +22,7 @@
 #############################################################################################
 """
 
-import commands, glob,  os,  sys
-from fnmatch import fnmatch
+import commands, glob,  os,  sys, fnmatch
 
 
 """
@@ -41,7 +40,10 @@ from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 """
     - Small function that adds pxLib to sys path.
 """    
-sys.path.append(StatsPaths.PXLIB)
+global STATSPATHS
+STATSPATHS = StatsPaths()
+STATSPATHS.setPaths()
+sys.path.append(STATSPATHS.PXLIB)
 
 
 """
@@ -72,10 +74,10 @@ class GeneralStatsLibraryMethods:
                                               
         """
         
-        fileName = StatsPaths.STATSTEMPLOCKFILES + str( processName ) + ".lock" 
+        fileName = STATSPATHS.STATSTEMPLOCKFILES + str( processName ) + ".lock" 
         
-        if not os.path.isdir( StatsPaths.STATSTEMPLOCKFILES ):
-            os.makedirs( StatsPaths.STATSTEMPLOCKFILES )
+        if not os.path.isdir( STATSPATHS.STATSTEMPLOCKFILES ):
+            os.makedirs( STATSPATHS.STATSTEMPLOCKFILES )
         
         fileHandle = open( fileName,'w' )
         fileHandle.write( str( os.getpid() ) )
@@ -97,7 +99,7 @@ class GeneralStatsLibraryMethods:
                        
         """
         
-        fileName = StatsPaths.STATSTEMPLOCKFILES + str( processName ) + ".lock" 
+        fileName = STATSPATHS.STATSTEMPLOCKFILES + str( processName ) + ".lock" 
         if os.path.isfile( fileName ):
             os.remove( fileName )
             
@@ -118,7 +120,7 @@ class GeneralStatsLibraryMethods:
         
         processIsAlreadyRunning = False
         
-        fileName = StatsPaths.STATSTEMPLOCKFILES + str( processName ) + ".lock"
+        fileName = STATSPATHS.STATSTEMPLOCKFILES + str( processName ) + ".lock"
         
         if os.path.isfile( fileName ) :
             fileHandle = open( fileName, 'r' )
@@ -219,9 +221,9 @@ class GeneralStatsLibraryMethods:
         """
         
         if localMachine == desiredMachine:
-            pathToLogFiles = StatsPaths.PXLOG 
+            pathToLogFiles = STATSPATHS.PXLOG 
         else:      
-            pathToLogFiles = StatsPaths.STATSLOGS + desiredMachine + "/"        
+            pathToLogFiles = STATSPATHS.STATSLOGS + desiredMachine + "/"        
             
         return pathToLogFiles    
             
@@ -243,20 +245,20 @@ class GeneralStatsLibraryMethods:
         if localMachine == desiredMachine : 
             
             if confType == 'rx': 
-                pathToConfigFiles = StatsPaths.PXETCRX
+                pathToConfigFiles = STATSPATHS.PXETCRX
             elif confType == 'tx':
-                pathToConfigFiles = StatsPaths.PXETCTX
+                pathToConfigFiles = STATSPATHS.PXETCTX
             elif confType == 'trx':
-                pathToConfigFiles = StatsPaths.PXETCTRX
+                pathToConfigFiles = STATSPATHS.PXETCTRX
         
         else:
             
             if confType == 'rx': 
-                pathToConfigFiles =  StatsPaths.STATSPXRXCONFIGS + desiredMachine
+                pathToConfigFiles =  STATSPATHS.STATSPXRXCONFIGS + desiredMachine
             elif confType == 'tx':
-                pathToConfigFiles =  StatsPaths.STATSPXTXCONFIGS + desiredMachine
+                pathToConfigFiles =  STATSPATHS.STATSPXTXCONFIGS + desiredMachine
             elif confType == 'trx':
-                pathToConfigFiles =  StatsPaths.STATSPXTRXCONFIGS + desiredMachine             
+                pathToConfigFiles =  STATSPATHS.STATSPXTRXCONFIGS + desiredMachine             
         
             pathToConfigFiles =   pathToConfigFiles.replace( '"',"").replace( "'","" )
                
@@ -274,18 +276,18 @@ class GeneralStatsLibraryMethods:
     
         """
     
-        if not os.path.isdir( StatsPaths.STATSPXRXCONFIGS + machine ):
-            os.makedirs(  StatsPaths.STATSPXRXCONFIGS + machine , mode=0777 )
-        if not os.path.isdir( StatsPaths.STATSPXTXCONFIGS + machine  ):
-            os.makedirs( StatsPaths.STATSPXTXCONFIGS + machine, mode=0777 )
-        if not os.path.isdir( StatsPaths.STATSPXTRXCONFIGS + machine ):
-            os.makedirs(  StatsPaths.STATSPXTRXCONFIGS + machine, mode=0777 )
+        if not os.path.isdir( STATSPATHS.STATSPXRXCONFIGS + machine ):
+            os.makedirs(  STATSPATHS.STATSPXRXCONFIGS + machine , mode=0777 )
+        if not os.path.isdir( STATSPATHS.STATSPXTXCONFIGS + machine  ):
+            os.makedirs( STATSPATHS.STATSPXTXCONFIGS + machine, mode=0777 )
+        if not os.path.isdir( STATSPATHS.STATSPXTRXCONFIGS + machine ):
+            os.makedirs(  STATSPATHS.STATSPXTRXCONFIGS + machine, mode=0777 )
     
-        rxConfigFilesSourcePath = StatsPaths.getPXPathFromMachine( StatsPaths.PXETCRX, machine, login )
-        output = commands.getoutput( "rsync -avzr --delete-before -e ssh %s@%s:%s  %s%s/"  %( login, machine, rxConfigFilesSourcePath, StatsPaths.STATSPXRXCONFIGS, machine ) )
+        rxConfigFilesSourcePath = STATSPATHS.getPXPathFromMachine( STATSPATHS.PXETCRX, machine, login )
+        output = commands.getoutput( "rsync -avzr --delete-before -e ssh %s@%s:%s  %s%s/"  %( login, machine, rxConfigFilesSourcePath, STATSPATHS.STATSPXRXCONFIGS, machine ) )
     
-        txConfigFilesSourcePath = StatsPaths.getPXPathFromMachine( StatsPaths.PXETCTX, machine, login )
-        output = commands.getoutput( "rsync -avzr  --delete-before -e ssh %s@%s:%s %s%s/"  %( login, machine, txConfigFilesSourcePath, StatsPaths.STATSPXTXCONFIGS, machine ) )
+        txConfigFilesSourcePath = StatsPaths.getPXPathFromMachine( STATSPATHS.PXETCTX, machine, login )
+        output = commands.getoutput( "rsync -avzr  --delete-before -e ssh %s@%s:%s %s%s/"  %( login, machine, txConfigFilesSourcePath, STATSPATHS.STATSPXTXCONFIGS, machine ) )
     
     updateConfigurationFiles = staticmethod( updateConfigurationFiles )    
         
@@ -387,8 +389,8 @@ class GeneralStatsLibraryMethods:
         if havingrunOnAllMachines == False:
             for machine in machines:           
                     
-                rxTxDatabasesLongNames = glob.glob( "%sbytecount/*_*%s*" %( StatsPaths.STATSCURRENTDB, machine ) )
-                txOnlyDatabasesLongNames = glob.glob( "%slatency/*_*%s*" %( StatsPaths.STATSCURRENTDB, machine )   )
+                rxTxDatabasesLongNames = glob.glob( "%sbytecount/*_*%s*" %( STATSPATHS.STATSCURRENTDB, machine ) )
+                txOnlyDatabasesLongNames = glob.glob( "%slatency/*_*%s*" %( STATSPATHS.STATSCURRENTDB, machine )   )
             
                 
                 #Keep only client/source names.
@@ -397,7 +399,8 @@ class GeneralStatsLibraryMethods:
                         if rxtxLongName not in rxTxDatabases:
                             rxTxDatabases.append( rxtxLongName )
                     else:
-                        if fnmatch.fnmatch(os.path.basename(rxtxLongName), pattern ):
+                        
+                        if fnmatch(os.path.basename(rxtxLongName), pattern ):
                             if rxtxLongName not in rxTxDatabases:
                                 rxTxDatabases.append( rxtxLongName )
                  
@@ -416,8 +419,8 @@ class GeneralStatsLibraryMethods:
             for machine in machines:
                 combinedMachineName = combinedMachineName + machine
     
-            rxTxDatabasesLongNames = glob.glob( "%sbytecount/*_%s*" %( StatsPaths.STATSCURRENTDB, combinedMachineName ) )
-            txOnlyDatabasesLongNames = glob.glob( "%slatency/*_%s*" %( StatsPaths.STATSCURRENTDB, combinedMachineName )   )
+            rxTxDatabasesLongNames = glob.glob( "%sbytecount/*_%s*" %( STATSPATHS.STATSCURRENTDB, combinedMachineName ) )
+            txOnlyDatabasesLongNames = glob.glob( "%slatency/*_%s*" %( STATSPATHS.STATSCURRENTDB, combinedMachineName )   )
     
     
             #Keep only client/source names.
@@ -605,6 +608,9 @@ class GeneralStatsLibraryMethods:
         
     getRxTxNamesForWebPages = staticmethod(getRxTxNamesForWebPages  )
     
+ 
+
+ 
  
  
 def main():
