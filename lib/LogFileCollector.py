@@ -1,17 +1,20 @@
-"""
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
+#! /usr/bin/env python
 
+"""
 ##########################################################################
 ##
-## Name   : LogFileCollector.py ( formely DirectoryFileCollector.py ) 
+## @name   : LogFileCollector.py ( formely DirectoryFileCollector.py ) 
 ##  
-## Author : Nicholas Lemay  
+## @author : Nicholas Lemay  
 ##
-## Date   : December 12th 2006
+## @license : MetPX Copyright (C) 2004-2006  Environment Canada
+##            MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+##            named COPYING in the root of the source directory tree.
 ##
-## Goal   : This class' goal is to find all the interesting log files within 
+##
+## @since  : December 12th 2006 , since march 19th 2008
+##
+## @summary: This class' goal is to find all the interesting log files within 
 ##          a certain directory. 
 ##
 ##          Usefull in the library to sort out the numerous log files found 
@@ -20,41 +23,44 @@ named COPYING in the root of the source directory tree.
 ##
 #############################################################################
 """
+
+
 import os, sys
 """
     Small function that adds pxlib to the environment path.  
 """
 sys.path.insert(1, sys.path[0] + '/../../')
-try:
-    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
-except KeyError:
-    pxlib = '/apps/px/lib/'
-sys.path.append(pxlib)
+from   pxStats.lib.BackwardReader             import BackwardReader 
+from   pxStats.lib.FileStatsCollector         import FileStatsCollector
+from   pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+from   pxStats.lib.StatsPaths                 import StatsPaths
+from   pxStats.lib.Translatable               import Translatable 
 
+STATSPATHS = StatsPaths()
+STATSPATHS.setPaths()
+sys.path.append( STATSPATHS.PXLIB )
 
 """
     Imports
     Logger requires pxlib 
 """
 import glob #important files 
-from   Logger                     import * 
-
-from   pxStats.lib.BackwardReader             import BackwardReader 
-from   pxStats.lib.FileStatsCollector         import FileStatsCollector
-from   pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
-from   pxStats.lib.StatsPaths                 import StatsPaths
-
+from   Logger import Logger
 
 LOCAL_MACHINE = os.uname()[1]   
 
-class LogFileCollector: 
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "LogFileCollector.py "
+
+
+
+class LogFileCollector( Translatable ): 
     """ 
-        This class' goal is to find all the interesting files within a certain directory. 
+        @summary : This class' goal is to find all the interesting files within a certain directory. 
         
-        It offers a data structure wich contains the directory's name and all the interesting
-        information to make such a search.   
+                    It offers a data structure wich contains the directory's name and all the interesting
+                    information to make such a search.   
         
-        Data structure that holds all the found files is a list.
+                    Data structure that holds all the found files is a list.
         
                  
     """
@@ -78,12 +84,16 @@ class LogFileCollector:
        
         
         if logger is None: # Enable logging
-            if not os.path.isdir( StatsPaths.STATSLOGGING  ):
-                os.makedirs( StatsPaths.STATSLOGGING , mode=0777 )
-            self.logger = Logger( StatsPaths.STATSLOGGING + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
+            
+            if not os.path.isdir( STATSPATHS.STATSLOGGING  ):
+                os.makedirs( STATSPATHS.STATSLOGGING , mode=0777 )
+            self.logger = Logger( STATSPATHS.STATSLOGGING + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
             self.logger = self.logger.getLogger()
+        
+        global _
+        _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )    
             
-            
+    
     
     def containsUsefullInfo( self, fileName ):
         """
@@ -160,7 +170,7 @@ class LogFileCollector:
         else:
             
             if self.logger != None :
-                self.logger.warning( "Warning in LogFileCollector. Folder named %s does not exist."%self.directory )
+                self.logger.warning( _("Warning in LogFileCollector. Folder named %s does not exist.") %self.directory )
 
                           
                     
