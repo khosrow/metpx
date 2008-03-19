@@ -1,0 +1,10 @@
+msgid ""
+msgstr ""
+
+
+msgid "Error occured in cpickleWrapper.load(). Exception was the following : %s"
+msgstr "Error occured in cpickleWrapper.load(). Exception was the following : %s"
+
+msgid "Error occured in cpickleWrapper.load().Filename used : %s, does not exist."
+msgstr "Error occured in cpickleWrapper.load().Filename used : %s, does not exist."
+
