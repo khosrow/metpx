@@ -353,7 +353,7 @@ class DailyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
                 webLink = "archives/daily/rx/%s/"%( rxName ) + str(currentYear) + "/" + str(currentMonth) + "/" + str(currentDay) + ".png"
                 
                 if os.path.isfile( file ):
-                    fileHandle.write(  """<a target ="%s" href="%s">"""%( rxName, webLink) + _("%s" %time.strftime( "%a", time.gmtime(day) ) )  + """   </a>""" )
+                    fileHandle.write(  """<a target ="%s" href="%s">"""%( rxName, webLink) + "%s" %time.strftime( "%a", time.gmtime(day) )  + """   </a>""" )
                     
                      
             fileHandle.write( """</td></tr>""" )
@@ -420,7 +420,7 @@ class DailyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
                 webLink =  "archives/daily/tx/%s/"%( txName ) + str(currentYear) + "/" + str(currentMonth) + "/" + str(currentDay) + ".png"
                 
                 if os.path.isfile( file ):
-                    fileHandle.write(  """<a target ="%s" href="%s">"""%( rxName, webLink) + _("%s" %(time.strftime( "%a", time.gmtime(day)) ))+"""  </a>""" )    
+                    fileHandle.write(  """<a target ="%s" href="%s">"""%( rxName, webLink) + "%s" %(time.strftime( "%a", time.gmtime(day)) )+"""  </a>""" )    
     
             fileHandle.write( "</td></tr>" )
     
