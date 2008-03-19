@@ -1,22 +1,22 @@
+#! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
-
 ##############################################################################
 ##
 ##
-## Name   : pickleVersionChecker.py 
+## @name   : pickleVersionChecker.py 
 ##
 ##
-## Author : Nicholas Lemay
+## @author : Nicholas Lemay
 ##
-## Date   : 06-07-2006 
+## @since  : 06-07-2006, last updates on 2008-03-19 
 ##
+## @license : MetPX Copyright (C) 2004-2006  Environment Canada
+##            MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+##            named COPYING in the root of the source directory tree.
 ##
-## Description : This file contains all the needed methods needed to compare 
-##               the current checksum of a pickle file to the previously saved
-##               checksum of the file.           
+## @summary :This file contains all the needed methods needed to compare 
+##           the current checksum of a pickle file to the previously saved
+##           checksum of the file.           
 ##
 ##               Note : The user parameter is used in some methods. This concept                
 ##                      has been implemented as to differentiate the different
@@ -31,40 +31,49 @@ named COPYING in the root of the source directory tree.
 """
 
 
-import os, commands, pwd, sys, glob
+import os, sys, glob
+
+
 sys.path.insert(1, sys.path[0] + '/../../')
-
-
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.CpickleWrapper import CpickleWrapper
 
 
 class PickleVersionChecker :
 
+
+
     def __init__( self ):
         """
-            Constructor. Contains two current and saved lists.
+            @summary : Constructor. Contains two current and saved lists.
         """
         
         self.currentClientFileList = {} # Current file list found for a client on disk.
         self.savedFileList         = {} # The one that was previously recorded
         
         
+        
     def getClientsCurrentFileList( self, clients ):
         """
-            Client list is used here since we need to find all the pickles that will be used in a merger.
-            Thus unlike all other methods we dont refer here to the combined name but rather to a list of
-            individual machine names. 
+            @summary : Gets all the files associated with the list of clients.
+                    
             
-            Returns the checksum of all pickle files currently found on the disk.
+            @note : Client list is used here since we need to find all the pickles that will be used in a merger.
+                    Thus unlike all other methods we dont refer here to the combined name but rather to a list of
+                    individual machine names. 
+            
+            @summary : Returns the all the files in a dictionnary associated
+                       with each file associated with it's mtime.
             
         """  
         
         
         fileNames = []
+        statsPaths = StatsPaths()
+        statsPaths.setPaths()
         
         for client in clients : 
-            filePattern = StatsPaths.STATSPICKLES + client + "/*/*"  #_??
+            filePattern = statsPaths.STATSPICKLES + client + "/*/*"  #_??
             folderNames = glob.glob( filePattern )
                         
             
@@ -84,12 +93,15 @@ class PickleVersionChecker :
         
     def getSavedList( self, user, clients ):
         """
-            Returns the checksum of the files contained in the saved list.
+            @summary : Returns the checksum of the files contained in the saved list.
         
         """
-        
+
         self.savedFileList         = {}
-        directory = StatsPaths.STATSDATA + "fileAccessVersions/"              
+        
+        statsPaths = StatsPaths()
+        statsPaths.setPaths()
+        directory = statsPaths.STATSDATA + "fileAccessVersions/"              
                 
         combinedName = ""
         for client in clients:
@@ -101,7 +113,7 @@ class PickleVersionChecker :
             
             self.savedFileList = CpickleWrapper.load( directory + fileName )
             
-            if savedFileList == None :
+            if self.savedFileLis == None :
                 self.savedFileList = {}
                 
         except: # if file does not exist
@@ -115,14 +127,19 @@ class PickleVersionChecker :
     def isDifferentFile( self, user ,clients, file):
         """
             
-            Goal : Returns whether or not the file is different than 
-                   the one previously recorded.
+            @summary :  Returns whether or not the file is different than 
+                        the one previously recorded.
             
-            File   : File to verify
-            Client : Client to wich the file is related(used to narrow down searchs)
-            User   : Name of the client, person, etc.. wich has a relation with the 
-                     file.  
+            
+            @param file    : File to verify
+            
+            @param clients : Client to wich the file is related(used to narrow down searchs)
+            
+            @param user   : Name of the client, person, etc.. wich has a relation with the 
+                            file.  
              
+            @return : Whether the file is different or not. 
+            
         """
         
         
@@ -152,10 +169,11 @@ class PickleVersionChecker :
     
     def updateFileInList( self, file ) :
         """
-            File : Name of the file 
-            User : Person for whom a relation with the file exists. 
-            Puts current checksum value  
+            @summary : Sets the current value of the file(mtime) 
+                       into the saved value of the same file.
             
+            @param file : Name of the file for which to perfomr the update.
+
         """ 
         
         if self.savedFileList == None :
@@ -167,13 +185,23 @@ class PickleVersionChecker :
             self.savedFileList[file] = 0
             
     
+    
     def saveList( self, user, clients ):   
         """
-            Saves list. Will include modification made in updateFileInlist method 
-        
+            @summary : Saves list. 
+            
+            @note : Will include modification made in updateFileInlist method 
+            
+            @param clients : Client to wich the file is related(used to narrow down searchs)
+            
+            @param user   : Name of the client, person, etc.. wich has a relation with the 
+                            file. 
+            
+            
         """
-        
-        directory = StatsPaths.STATSDATA + "fileAccessVersions/"
+        statsPaths = StatsPaths()
+        statsPaths.setPaths()
+        directory = statsPaths.STATSDATA + "fileAccessVersions/"
          
         
         combinedName = ""
@@ -194,7 +222,7 @@ class PickleVersionChecker :
            
 def main():
     """
-        small test case. Tests if everything works plus gives an idea on proper usage.
+        @summary : small test case. Tests if everything works plus gives an idea on proper usage.
     """
     
     vc  = PickleVersionChecker()
