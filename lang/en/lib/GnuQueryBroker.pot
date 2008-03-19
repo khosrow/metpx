@@ -1,0 +1,40 @@
+msgid ""
+msgstr ""
+
+
+msgid "current"
+msgstr "current"
+
+msgid "previous"
+msgstr "previous"
+
+msgid "Internal error. GnuQueryBroker was not called to plota gnuplot graphic."
+msgstr "Internal error. GnuQueryBroker was not called to plota gnuplot graphic."
+
+msgid "Error. FileType needs to be either rx or tx."
+msgstr "Error. FileType needs to be either rx or tx."
+
+msgid "Error. At least one sourlient name needs to be specified."
+msgstr "Error. At least one sourlient name needs to be specified."
+
+msgid "Error. When specifying a group name without any sourlients names, the group must be a pre-existing group."
+msgstr "Error. When specifying a group name without any sourlients names, the group must be a pre-existing group."
+
+msgid "Error. At least one machine name needs to be specified."
+msgstr "Error. At least one machine name needs to be specified."
+
+msgid "Error. Combine sourlients option needs to be either true or false."
+msgstr "Error. Combine sourlients option needs to be either true or false."
+
+msgid "Error. At Leat one statsType needs to be specified."
+msgstr "Error. At Leat one statsType needs to be specified."
+
+msgid "Error. Span(in hours) value needs to be numeric."
+msgstr "Error. Span(in hours) value needs to be numeric."
+
+msgid "Error. No language was specified by the querier. Please speciffy a language. Ex : lang=fr"
+msgstr "Error. No language was specified by the querier. Please speciffy a language. Ex : lang=fr"
+
+msgid "Error. Unsupported language detected in GnuQueryBroker. %s is not a supported language."
+msgstr "Error. Unsupported language detected in GnuQueryBroker. %s is not a supported language."
+
