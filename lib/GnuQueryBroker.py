@@ -38,7 +38,7 @@ from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 from pxStats.lib.GraphicsQueryBrokerInterface import GraphicsQueryBrokerInterface
-from pxStats.lib.ClientGraphicProducer import ClientGraphicProducer
+from pxStats.lib.GnuGraphicProducer import GnuGraphicProducer
 from pxStats.lib.LanguageTools import LanguageTools
 
 LOCAL_MACHINE = os.uname()[1]
@@ -54,7 +54,8 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
     
     """    
     
-    def __init__(self, queryParameters = None, replyParameters = None, graphicProducer = None, querierLanguage = None ):
+    def __init__(self, queryParameters = None, replyParameters = None,\
+                 graphicProducer = None, querierLanguage = None ):
         """
             @summary: GnuQueryBroker constructor.
             
@@ -390,7 +391,7 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
         
         self.queryParameters.sourLients.reverse()
         
-        self.graphicProducer = ClientGraphicProducer( directory = directory, fileType = self.queryParameters.fileType,\
+        self.graphicProducer = GnuGraphicProducer( directory = directory, fileType = self.queryParameters.fileType,\
                                                       clientNames = self.queryParameters.sourLients, \
                                                       groupName = self.queryParameters.groupName, \
                                                       timespan = int(self.queryParameters.span), currentTime = self.queryParameters.endTime,\
