@@ -1,0 +1,149 @@
+msgid ""
+msgstr ""
+
+
+
+msgid "hours"
+msgstr "hours"
+
+msgid "year(s)"
+msgstr "year(s)"
+
+msgid "month(s)"
+msgstr "month(s)"
+
+msgid "day(s)"
+msgstr "day(s)"
+
+msgid "ending at"
+msgstr "ending at"
+
+msgid "for"
+msgstr "for"
+
+msgid "for a span of "
+msgstr "for a span of "
+
+msgid "latency"
+msgstr "latency"
+
+msgid "minute(s) averages."
+msgstr "minute(s) averages."
+
+msgid "Graphics generated using "
+msgstr "Graphics generated using "
+
+msgid "hour(s) averages."
+msgstr "hour(s) averages."
+
+msgid "Error in generateRRDGraphics.getOverallMin. Unable to read "
+msgstr "Error in generateRRDGraphics.getOverallMin. Unable to read "
+
+msgid "years"
+msgstr "years"
+
+msgid "months"
+msgstr "months"
+
+msgid "days"
+msgstr "days"
+
+msgid "others/rrd/%s/%s_%s_%s_%s_%s%s_on_%s.png"
+msgstr "others/rrd/%s/%s_%s_%s_%s_%s%s_on_%s.png"
+
+msgid "bytecount"
+msgstr "bytecount"
+
+msgid "filecount"
+msgstr "filecount"
+
+msgid "Files"
+msgstr "Files"
+
+msgid "filesOverMaxLatency"
+msgstr "filesOverMaxLatency"
+
+msgid "F"
+msgstr "F"
+
+msgid "errors"
+msgstr "errors"
+
+msgid "Errors"
+msgstr "Errors"
+
+msgid "Avg"
+msgstr "Avg"
+
+msgid "k on the y axis stands for kilo, meaning x thousands."
+msgstr "k on the y axis stands for kilo, meaning x thousands."
+
+msgid "M on the y axis stands for Mega, meaning x millions."
+msgstr "M on the y axis stands for Mega, meaning x millions."
+
+msgid "G on the y axis stats for giga, meaning x billions."
+msgstr "G on the y axis stats for giga, meaning x billions."
+
+msgid "m on the y axis stands for milli, meaning x thousandths."
+msgstr "m on the y axis stands for milli, meaning x thousandths."
+
+msgid "daily"
+msgstr "daily"
+
+msgid "yearly"
+msgstr "yearly"
+
+msgid "monthly"
+msgstr "monthly"
+
+msgid "weekly"
+msgstr "weekly"
+
+msgid "totalForMachine"
+msgstr "totalForMachine"
+
+msgid "totals"
+msgstr "totals"
+
+msgid "Averaged latency per minute"
+msgstr "Averaged latency per minute"
+
+msgid "Latency(seconds)"
+msgstr "Latency(seconds)"
+
+msgid "Latencies over 15 seconds"
+msgstr "Latencies over 15 seconds"
+
+msgid "Files/Minute"
+msgstr "Files/Minute"
+
+msgid "Bytes/Minute"
+msgstr "Bytes/Minute"
+
+msgid "Errors/Minute"
+msgstr "Errors/Minute"
+
+msgid "Note(s):"
+msgstr "Note(s):"
+
+msgid "Total: "
+msgstr "Total: "
+
+msgid "Max: "
+msgstr "Max: "
+
+msgid "Mean: "
+msgstr "Mean: "
+
+msgid "Min: "
+msgstr "Min: "
+
+msgid "Plotted : "
+msgstr "Plotted : "
+
+msgid "Error : Could not generate "
+msgstr "Error : Could not generate "
+
+msgid "%s still has a problem %s %s "
+msgstr "%s still has a problem %s %s "
+
