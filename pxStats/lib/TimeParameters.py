@@ -134,10 +134,10 @@ class TimeConfigParameters:
                 raise Exception("Invalid time unit found in configuration file.")
         
         
-        self.dailyWebPageFrequency   =  config.get( 'timeConfig', 'dailyWebPageFrequency' ).replace( " ", "").replace( "'","" ).replace( '"','' )
-        self.weeklyWebPageFrequency  =  config.get( 'timeConfig', 'weeklyWebPageFrequency' ).replace( " ", "").replace( "'","" ).replace( '"','' )
-        self.monthlyWebPageFrequency =  config.get( 'timeConfig', 'monthlyWebPageFrequency' ).replace( " ", "").replace( "'","" ).replace( '"','' )
-        self.yearlyWebPageFrequency  =  config.get( 'timeConfig', 'yearlyWebPageFrequency' ).replace( " ", "").replace( "'","" ).replace( '"','' )
+        self.dailyWebPageFrequency   =  config.get( 'timeConfig', 'dailyWebPageUpdatesFrequency' ).replace( " ", "").replace( "'","" ).replace( '"','' )
+        self.weeklyWebPageFrequency  =  config.get( 'timeConfig', 'weeklyWebPageUpdatesFrequency' ).replace( " ", "").replace( "'","" ).replace( '"','' )
+        self.monthlyWebPageFrequency =  config.get( 'timeConfig', 'monthlyWebPageUpdatesFrequency' ).replace( " ", "").replace( "'","" ).replace( '"','' )
+        self.yearlyWebPageFrequency  =  config.get( 'timeConfig', 'yearlyWebPageUpdatesFrequency' ).replace( " ", "").replace( "'","" ).replace( '"','' )
         self.totalWebPagesUpdatesFrequency =  config.get( 'timeConfig', 'totalWebPagesUpdatesFrequency' ).replace( " ", "").replace( "'","" ).replace( '"','' )
         
              
