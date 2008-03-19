@@ -137,13 +137,13 @@ class GnuPlotter( Translatable ):
         if self.workingLanguage not in LanguageTools.getSupportedLanguages():
             if self.logging == True:
                 _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.workingLanguage )
-                self.logger.error( _("Error. %s is not a supported working language." %( self.workingLanguage ) ) )
+                self.logger.error( _("Error. %s is not a supported working language." ) %( self.workingLanguage )  )
                 sys.exit()
                 
         if self.outputLanguage not in LanguageTools.getSupportedLanguages():
             if self.logging == True:
                 _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.workingLanguage )
-                self.logger.error( _("Error. %s is not a supported output language." %( self.outputLanguage ) ) )        
+                self.logger.error( _("Error. %s is not a supported output language." ) %( self.outputLanguage )  )        
                 sys.exit()
                 
         
