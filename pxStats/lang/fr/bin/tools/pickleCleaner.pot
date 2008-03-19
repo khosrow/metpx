@@ -1,0 +1,10 @@
+msgid ""
+msgstr ""
+
+
+msgid "deleted : %s "
+msgstr "%s a ete supprime." 
+
+msgid "Days to keep value must be an integer. For default 21 days value, type nothing."
+msgstr "Le nombre du nombre de jours a converver doit etre un entier. Pour utiliser la valeur par defaut de 21 jours, ne tappez rien."
+
