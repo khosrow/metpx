@@ -1,17 +1,19 @@
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
-named COPYING in the root of the source directory tree.
-
 #############################################################################################
-# Name  : pickleCleaner.py
 #
-# Author: Nicholas Lemay
 #
-# Date  : 2006-10-12
+# @name  : pickleCleaner.py
 #
-# Description: 
+# @author: Nicholas Lemay
+#
+# @since : 2006-10-12, last updated on 2008-03-19
+# 
+# @license : MetPX Copyright (C) 2004-2006  Environment Canada
+#            MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
+#            named COPYING in the root of the source directory tree.
+#
+# @summary: : 
 #
 #   Usage:   This program can be called from a crontab or from command-line. 
 #
@@ -27,11 +29,19 @@ sys.path.insert(1, sys.path[0] + '/../../../')
 
 from pxStats.lib.StatsPaths import StatsPaths    
 from pxStats.lib.StatsDateLib import StatsDateLib
+from pxStats.lib.LanguageTools import LanguageTools
+
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "pickleCleaner.py" 
 
 
 def getDirListToKeep( daysToKeep = 21 ):
     """
-          Gets the list of directories to keep. Based on DAYS_TO_KEEP constant.
+          @summary : Gets the list of directories to keep. Based on daysToKeep parameter.
+          
+          @param   : Number of past days to keep. Specified in daysToKeep.
+          
+          @return : List of directories to keep.
+          
     """
     
     dirlist = []
@@ -46,7 +56,8 @@ def getDirListToKeep( daysToKeep = 21 ):
     
 def cleanPickles( dirsToKeep ):
     """
-        Deletes every pickle directory that is not within the list to keep.
+        @summary : Deletes every pickle directory that
+                   is not within the list to keep.
     """
     
     clientdirs = os.listdir( StatsPaths.STATSPICKLES )    
@@ -59,14 +70,37 @@ def cleanPickles( dirsToKeep ):
             
             if innerFolder not in dirsToKeep:
                 status, output = commands.getstatusoutput("rm -rf %s " %completePath )
-                print "deleted : %s " %completePath
+                print _("deleted : %s ") %completePath
+
+
                 
+def setGlobalLanguageParameters():
+    """
+        @summary : Sets up all the needed global language 
+                   tranlator so that it can be used 
+                   everywhere in this program.
+        
+        @Note    : The scope of the global _ function 
+                   is restrained to this module only and
+                   does not cover the entire project.
+        
+        @return: None
+        
+    """
     
+    global _ 
+    
+    _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )    
+
+
     
 def main():
     """
-        Gets the list of directories to keep. Based on DAYS_TO_KEEP constant.
-        Deletes every pickle directory that is not within the list to keep.
+        @summary : Gets the list of directories to keep,
+                   based on the specified number of days to keep.
+       
+                   Deletes every pickle directory that is not
+                   within the list to keep.
         
     """
     
@@ -76,7 +110,7 @@ def main():
         try:
             daysToKeep =  int( sys.argv[1] )
         except:
-            print "Days to keep value must be an integer. For default 21 days value, type nothing."
+            print _("Days to keep value must be an integer. For default 21 days value, type nothing.")
             sys.exit()
             
     dirsToKeep = getDirListToKeep( daysToKeep )
