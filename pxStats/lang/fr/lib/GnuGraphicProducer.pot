@@ -1,0 +1,28 @@
+#: GnuGraphicProducer.py:160
+msgid "Call to mergeHourlyPickles."
+msgstr "Appel à mergeHourlyPickles."
+
+#: GnuGraphicProducer.py:161
+msgid "Parameters used : %s %s %s"
+msgstr "Paramètres utilisés : %s %s %s"
+
+#: GnuGraphicProducer.py:264
+msgid "All"
+msgstr "Tous"
+
+#: GnuGraphicProducer.py:264
+msgid "all"
+msgstr "tous"
+
+#: GnuGraphicProducer.py:270
+msgid "Call to GnuPlotter :Clients:%s, timespan:%s, currentTime:%s, statsTypes:%s, productTypes:%s :"
+msgstr "Appel a GnuPlotter :Clients:%s, timespan:%s, currentTime:%s, statsTypes:%s, productTypes:%s :"
+
+#: GnuGraphicProducer.py:284
+msgid "Returns from GnuPlotter."
+msgstr "Retour de GnuPlotter."
+
+#: GnuGraphicProducer.py:286
+msgid "Created Graphics for following call : Clients : %s, timespan : %s, currentTime : %s, statsTypes : %s, productTypes : %s :"
+msgstr "Creation des graphiques pour l'appel suivant : Clients : %s, timespan : %s, currentTime : %s, statsTypes : %s, productTypes : %s :"
+

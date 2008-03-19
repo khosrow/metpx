@@ -1,0 +1,27 @@
+msgid ""
+msgstr ""
+
+
+
+
+msgid "Call to mergeHourlyPickles."
+msgstr "Call to mergeHourlyPickles."
+
+msgid "Parameters used : %s %s %s"
+msgstr "Parameters used : %s %s %s"
+
+msgid "All"
+msgstr "All"
+
+msgid "all"
+msgstr "all"
+
+msgid "Call to GnuPlotter :Clients:%s, timespan:%s, currentTime:%s, statsTypes:%s, productTypes:%s :"
+msgstr "Call to GnuPlotter :Clients:%s, timespan:%s, currentTime:%s, statsTypes:%s, productTypes:%s :"
+
+msgid "Returns from GnuPlotter."
+msgstr "Returns from GnuPlotter."
+
+msgid "Created Graphics for following call : Clients : %s, timespan : %s, currentTime : %s, statsTypes : %s, productTypes : %s :"
+msgstr "Created Graphics for following call : Clients : %s, timespan : %s, currentTime : %s, statsTypes : %s, productTypes : %s :"
+
