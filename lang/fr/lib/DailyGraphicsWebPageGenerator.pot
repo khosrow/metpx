@@ -1,0 +1,19 @@
+msgid ""
+msgstr ""
+
+
+msgid "Daily graphics for RX sources from MetPx."
+msgstr "Graphiques journaliers pour toutes les sources(RX) de MetPx."
+
+msgid "*updated hourly"
+msgstr "*M-a-j a chaques heures."
+
+msgid "List of available daily graphics."
+msgstr "Liste des graphiques journaliers disponibles."
+
+msgid "Days"
+msgstr "Journees"
+
+msgid "Daily graphics for TX clients from MetPx."
+msgstr "Graphiques journaliers pour tous les clients(TX) de MetPx."
+
