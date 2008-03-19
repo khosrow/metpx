@@ -1,0 +1,22 @@
+msgid ""
+msgstr ""
+
+
+msgid "Call to setMinMaxMeanMedians received."
+msgstr "Call to setMinMaxMeanMedians received."
+
+msgid "could not find %s value in line %s."
+msgstr "could not find %s value in line %s."
+
+msgid "value was replaced by 0."
+msgstr "value was replaced by 0."
+
+msgid "Call to findFirstInterestingLine received."
+msgstr "Call to findFirstInterestingLine received."
+
+msgid "Call to setValues received."
+msgstr "Call to setValues received."
+
+msgid "Call to createEmptyEntries received."
+msgstr "Call to createEmptyEntries received."
+
