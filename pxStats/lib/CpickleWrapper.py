@@ -1,52 +1,63 @@
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
-"""
-
 ##########################################################################
 ##  
-## Name   : cpickleWrapper.py 
+## @name : cpickleWrapper.py 
+##
+## 
+## @author : Nicholas Lemay
+##
+## @since  : 06-07-2006 last update on march 19th 2008
+##
+## @license: MetPX Copyright (C) 2004-2006  Environment Canada
+##           MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+##           named COPYING in the root of the source directory tree.
 ##
 ##
-## Author : Nicholas Lemay
+## @summary : Small wrapper to cpickle. cPickle is much faster than standard
+##            pickle so it is very usefull in this library. 
 ##
-## Date   : 06-07-2006 
-##
-##
-## Description : Small wrapper to cpickle. cPickle is much faster than standard
-##               pickle so it is very usefull in this library. 
-##
-##               This wrapper allows for folder creation when save is called. 
+##           This wrapper allows for folder creation when save is called. 
 ##         
-##               It also has exception handling in case of non existing file in 
-##               load call.
+##           It also has exception handling in case of non existing file in 
+##           load call.
 ##                 
 ##############################################################################
-
+"""
 
 import os, sys, cPickle
 sys.path.insert(1, sys.path[0] + '/../../')
 
 from pxStats.lib.StatsPaths import  StatsPaths
+from pxStats.lib.LanguageTools import LanguageTools
+
+
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "CpickleWrapper.py" 
+
 
 
 class CpickleWrapper :
     
+    global _ 
+    _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )
+    
     def save( object, filename ):
         """
-            Saves an object to disk using cpickle.
+            @summary : Saves an object to disk using cpickle.
             
-            Will create folder up to destination if folders don't exist. 
-       
-            User must have permission to write to the specified folder. 
             
-            Raises exception if application is unable to save file.
+            @note : Will create folder up to destination 
+                    if folders don't exist. 
+                   
+                    User must have permission to write 
+                    to the specified folder. 
             
-            Warning : Objects containing opened files, such as log files,
+            @raise Exception:  if application is unable to save file.
+            
+            @warning: Objects containing opened files, such as log files,
                       cannot be saved. Remember to close file or delete
                       file property from object prior to saving. 
+        
         """
             
         splitName = filename.split( "/" ) 
@@ -75,11 +86,15 @@ class CpickleWrapper :
     def load( filename ):
         """
             
-            Loads ands returns an object saved with cpickle.
+            @summary : Loads ands returns an object saved with cpickle.
             
-            Pre-condition : file must exist. File must have been created 
+            @param filename : Fielname containing the object that is to be loaded.
+            
+            @precondition: file must exist. File must have been created 
                             using cpickle. 
                             
+            @raise Exception: If file does not exist or file cannot be loaded thus breaking 
+                              one ofthe preconditions. 
         """
         
         object = None  
@@ -95,11 +110,11 @@ class CpickleWrapper :
                 file.close()
                 
             except Exception, e:            
-                raise Exception ( "Error occured in cpickleWrapper.load(). Exception was the following : %s" %e )
+                raise Exception ( _("Error occured in cpickleWrapper.load(). Exception was the following : %s") %e )
         
         else:
             
-            raise Exception ( "Error occured in cpickleWrapper.load().Filename used : %s, does not exist." %filename)
+            raise Exception ( _("Error occured in cpickleWrapper.load().Filename used : %s, does not exist.") %filename)
             
               
         return object
@@ -109,9 +124,10 @@ class CpickleWrapper :
     
         
 if __name__ == "__main__":
-    
     """
-        Small test case. Tests if everything works plus gives an idea on proper usage.
+        @summary : Small test case.
+                   Tests if everything works plus 
+                   gives an idea on proper usage.
     """
     
     #standard test case 
@@ -122,6 +138,6 @@ if __name__ == "__main__":
     
     #trouble cases 
     CpickleWrapper.save (x,"y")#non absolute file name not yet implemented.... 
-    y = load( StatsPaths.STATSDATA + "nonexistingfile" )
+    y = CpickleWrapper.load( StatsPaths.STATSDATA + "nonexistingfile" )
         
         
