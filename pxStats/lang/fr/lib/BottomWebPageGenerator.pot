@@ -1,4 +1,12 @@
-#: BottomWebPageGenerator.py:88 BottomWebPageGenerator.py:153
 msgid "English version."
 msgstr "Version francaise."
+
+msgid "Error.Unsupported language detected."
+msgstr "Erreur. Utilisation d'un langage non-supporte detectee."
+
+msgid "Make sure %s is a supported language"
+msgstr "Assurez vous que %s est un langage supporte"
+
+msgid "Program terminated"
+msgstr "Programme termine"
 
