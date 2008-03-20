@@ -47,7 +47,7 @@ from pxStats.lib.LogFileCollector import LogFileCollector
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.CpickleWrapper import CpickleWrapper
 from pxStats.lib.FileStatsCollector import FileStatsCollector
-from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+from pxStats.lib.Translatable import Translatable
 
 
 """
@@ -65,9 +65,9 @@ from   Logger import Logger
 
 
 LOCAL_MACHINE = os.uname()[1]   
-    
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "StatsPickler.py"    
 
-class StatsPickler:
+class StatsPickler(Translatable):
     """
         Contains all the methods needed to pickle stats for a certain client.
         
@@ -100,6 +100,9 @@ class StatsPickler:
                
         self.statsCollection  = statsCollection or FileStatsCollector( logger = self.logger )
         self.fileCollection   = LogFileCollector( directory = directory, logger = self.logger )       
+        
+        global _ 
+        _ = self.getTranslatorForModule(CURRENT_MODULE_ABS_PATH)
         
         
         
@@ -200,8 +203,8 @@ class StatsPickler:
         if os.path.isfile( self.pickleName ):
             
             if self.logger != None :
-                self.logger.warning( "User tried to modify allready filled pickle file." )
-                self.logger.warning( "Pickle was named : %s" %self.pickleName )      
+                self.logger.warning( _("User tried to modify allready filled pickle file." ) )
+                self.logger.warning( _("Pickle was named : %s") %self.pickleName )      
             
         
         # Creates a new FileStats collector wich spans from the very 
@@ -252,7 +255,7 @@ class StatsPickler:
                 self.statsCollection.logger = temp
             
             if self.logger != None:
-                self.logger.info( "Saved pickle named : %s " %self.pickleName )                          
+                self.logger.info( _("Saved pickle named : %s ") %self.pickleName )                          
                
                 
     
@@ -265,38 +268,38 @@ class StatsPickler:
                      
         """    
         
-        absoluteFilename = str( StatsPaths.STATSDATA ) + "CSP_output_file "
-        print "Output filename used : %s" %absoluteFilename
+        absoluteFilename = str( StatsPaths.STATSDATA ) + "TEST_OUTPUT_FILE_FOR_STATSPICKLER "
+        print _("Output filename used : %s") %absoluteFilename
         fileHandle = open( absoluteFilename , 'w' )
         old_stdout = sys.stdout 
         sys.stdout = fileHandle 
         
-        print "\n\nFiles used : %s" %self.fileCollection.entries
-        print "Starting date: %s" % self.statsCollection.startTime
+        print _("\n\nFiles used : %s") %self.fileCollection.entries
+        print _("Starting date: %s") % self.statsCollection.startTime
                                     
         print "Interval: %s" %self.statsCollection.interval
         print "endTime: %s" %self.statsCollection.endTime
 
         for j in range( self.statsCollection.nbEntries ):
-            print "\nEntry's interval : %s - %s " %(self.statsCollection.fileEntries[j].startTime,self.statsCollection.fileEntries[j].endTime)
-            print "Values :"
+            print _("\nEntry's interval : %s - %s ") %(self.statsCollection.fileEntries[j].startTime,self.statsCollection.fileEntries[j].endTime)
+            print _("Values :")
             print self.statsCollection.fileEntries[j].values.dictionary
-            print "Means :"
+            print _("Means :")
             print self.statsCollection.fileEntries[j].means
-            print "Medians"    
+            print _("Medians" )   
             print self.statsCollection.fileEntries[j].medians
-            print "Minimums"
+            print _("Minimums")
             print self.statsCollection.fileEntries[j].minimums
-            print "Maximums"
+            print _("Maximums")
             print self.statsCollection.fileEntries[j].maximums
-            print "Total"
+            print _("Total")
             print self.statsCollection.fileEntries[j].totals
     
 
             
         fileHandle.close()      
         sys.stdout = old_stdout #resets standard output  
-        print "Printed %s " %absoluteFilename
+        print _("Printed %s ") %absoluteFilename
     
     
  
