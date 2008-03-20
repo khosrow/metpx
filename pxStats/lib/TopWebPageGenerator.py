@@ -7,7 +7,7 @@ named COPYING in the root of the source directory tree.
 ##############################################################################
 ##
 ##
-## Name   : TopWebPageGenerator.py
+## @name   : TopWebPageGenerator.py
 ##
 ##
 ## @author: Nicholas Lemay
@@ -140,6 +140,8 @@ class TopWebPageGenerator( Translatable ):
                  <a href="../scripts/cgi-bin/graphicsRequestPage.py?lang=%s" target="bottom">"""%self.outputLanguage + _("Requests") + """</a>
     
                  <a href="html/helpPages/glossary_%s.html" target="bottom" >""" %self.outputLanguage + _("Glossary") + """</a>
+            
+                 <a href="html/docPages/listOfDocumentationFiles_%s" target="bottom">""" %self.outputLanguage + _("Documentation") +""" </a>  
             </div>
     
     
@@ -150,7 +152,6 @@ class TopWebPageGenerator( Translatable ):
     
     
         """ )
-    
     
         fileHandle.close()
 
