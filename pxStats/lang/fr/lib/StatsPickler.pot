@@ -1,0 +1,56 @@
+msgid ""
+msgstr ""
+
+
+msgid "User tried to modify allready filled pickle file."
+msgstr "L'utilisateur a tente de modifier un fichier pickle existant."
+
+msgid "Pickle was named : %s"
+msgstr "Le fichier pickle etait le suivant : %s"
+
+msgid "Saved pickle named : %s "
+msgstr "Sauvegarde du fichier pickle suivant : %s "
+
+msgid "Output filename used : %s"
+msgstr "Fichier de sortie utilise : %s"
+
+msgid ""
+"\n"
+"\n"
+"Files used : %s"
+msgstr ""
+"\n"
+"\n"
+"Fichiers utilises : %s"
+
+msgid "Starting date: %s"
+msgstr "Date de debut: %s"
+
+msgid ""
+"\n"
+"Entry's interval : %s - %s "
+msgstr ""
+"\n"
+"Interval de l'entree : %s - %s "
+
+msgid "Values :"
+msgstr "Valeurs :"
+
+msgid "Means :"
+msgstr "Moyennes :"
+
+msgid "Medians"
+msgstr "Medianes"
+
+msgid "Minimums"
+msgstr "Minimums"
+
+msgid "Maximums"
+msgstr "Maximums"
+
+msgid "Total"
+msgstr "Total"
+
+msgid "Printed %s "
+msgstr "Donnees affichees dans le fichier suivant : %s "
+
