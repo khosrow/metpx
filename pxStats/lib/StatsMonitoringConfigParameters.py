@@ -1,26 +1,28 @@
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
-
 ##########################################################################
 ##
-## Name   : StatsMonitoringConfigParameters.py 
+## @name   : StatsMonitoringConfigParameters.py 
 ##  
-## Author : Nicholas Lemay  
+## @author : Nicholas Lemay  
 ##
-## Date   : May 09th 2007
+## @license: MetPX Copyright (C) 2004-2006  Environment Canada
+##           MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+##           named COPYING in the root of the source directory tree.
 ##
 ##
-## Description : 
+## @since  : May 09th 2007, last updated on March 20th 2008
+##
+## @summary : This class contains all the attributes and the 
+##            methods required to deal with the config file to use in
+##            conjonction with StatsMonitor.py 
 ##
 ##
 #############################################################################
 
 """
 
-import os, sys, commands, time, pickle , fnmatch
+import os, sys,  time, pickle , fnmatch
 sys.path.insert(1, sys.path[0] + '/../../')
 
 import readMaxFile
@@ -29,25 +31,25 @@ from ConfigParser import ConfigParser
 
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
-from pxStats.lib.FileStatsCollector import FileStatsCollector
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.MachineConfigParameters import MachineConfigParameters 
-from pxStats.lib.StatsConfigParameters import *
+from pxStats.lib.StatsConfigParameters import StatsConfigParameters
+#from pxStats.lib.Translatable import Translatable
 
-
+#
 LOCAL_MACHINE = os.uname()[1]
+CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "StatsMonitoringConfigParameters.py"
 
-         
-         
+        
 class StatsMonitoringConfigParameters:
-    '''
+    """    
+        @summary: This class is used to store all the parameters that are required 
+              to run the stats monitoring properly.      
+    """
     
-    @summary: This class is used to store all the parameters that are required 
-              to run the stats monitoring properly.  
-    
-    '''
-    
-    def __init__(self, emails = None, machines = None , files = None, folders = None, maxUsages = None, errorsLogFile = None, maxSettingsFile = None, startTime = None, endTime = None, maximumGaps = None, sender = None, smtpServer = None):
+    def __init__(self, emails = None, machines = None , files = None, folders = None, maxUsages = None,\
+                 errorsLogFile = None, maxSettingsFile = None, startTime = None, endTime = None,\
+                 maximumGaps = None, sender = None, smtpServer = None):
         '''           
             @param emails: Emails to whom the stats monitoring resultats will be sent
             @param machines: machines to monitor
@@ -73,7 +75,9 @@ class StatsMonitoringConfigParameters:
         self.maximumGaps = maximumGaps            
         self.sender = sender
         self.smtpServer = smtpServer
-   
+        
+
+        
    
    
     def updateMachineNamesBasedOnExistingMachineTags(self):
@@ -95,10 +99,10 @@ class StatsMonitoringConfigParameters:
     
     def getParametersFromMonitoringConfigurationFile( self ):
         """
-            Gather all the parameters from the StatsPaths.STATSETC/config file.
+            @summary : Gather all the parameters from the StatsPaths.STATSETC/config file.
             
-            Returns all collected values in this order emails, machines,
-            files, folders, maxUsages, errorsLogFile, maxSettingsFile.
+            @return :  All collected values in this order emails, machines,
+                       files, folders, maxUsages, errorsLogFile, maxSettingsFile.
         
         """   
     
@@ -130,7 +134,7 @@ class StatsMonitoringConfigParameters:
                 pass
             
         else:
-            print "%s configuration file not present. Please restore file prior to running" %CONFIG
+            #print "%s configuration file not present. Please restore file prior to running" %CONFIG
             raise Exception( "%s configuration file not present. Please restore file prior to running" %CONFIG ) 
         
             
@@ -140,6 +144,10 @@ class StatsMonitoringConfigParameters:
             @summary : Reads columbos 
                        maxSettings.conf file
             
+            @returns: The maximum gaps dictionnary  containing the 
+                      maximium gap allowed between two transfers 
+                      for a specific client. ex : { clientX: 60 }
+                                
         """
         
         allNames = []
@@ -156,12 +164,12 @@ class StatsMonitoringConfigParameters:
         for tag in generalParameters.sourceMachinesTags:
             
             try:
-                print tag
-                print "in getMaximumGaps %s" %generalParameters.detailedParameters.sourceMachinesForTag
+                #print tag
+                #print "in getMaximumGaps %s" %generalParameters.detailedParameters.sourceMachinesForTag
                 machines = generalParameters.detailedParameters.sourceMachinesForTag[tag]    
                 machine  = machines[0]
             except:
-                raise Exception("Invalid tag found in main configuration file.")
+                raise Exception( "Invalid tag found in main configuration file." )
                     
             newRxNames, newTxNames = GeneralStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machine )
             rxNames.extend(newRxNames)
@@ -200,9 +208,11 @@ class StatsMonitoringConfigParameters:
         
     def getPreviousMonitoringJob( self, currentTime ):
         """
-            Gets the previous crontab from the pickle file.
+            @summary : Gets the previous crontab from the pickle file.
             
-            Returns "" if file does not exist.
+            @return : Time of the previous monitoring job.
+            
+            @warning : Returns "" if file does not exist.
             
         """     
          
@@ -213,12 +223,12 @@ class StatsMonitoringConfigParameters:
             fileHandle      = open( file, "r" )
             previousMonitoringJob = pickle.load( fileHandle )
             fileHandle.close()
-            print previousMonitoringJob
+            #print previousMonitoringJob
             
         else:
             previousMonitoringJob = StatsDateLib.getIsoTodaysMidnight( currentTime )
             
-        print previousMonitoringJob   
+        #print previousMonitoringJob   
         
         return previousMonitoringJob        
         
