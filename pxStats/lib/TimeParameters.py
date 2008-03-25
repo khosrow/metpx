@@ -17,12 +17,15 @@
 # 
 #############################################################################################
 '''
-import random, ConfigParser
-import sys 
-
+import random, ConfigParser, sys 
 from ConfigParser import *
 
+
+sys.path.insert(1, sys.path[0] + '/../../')
+
+print sys.path
 from pxStats.lib.StatsPaths import StatsPaths
+
 
 class TimeConfigParameters:
     
