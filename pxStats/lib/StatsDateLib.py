@@ -22,13 +22,13 @@ named COPYING in the root of the source directory tree.
 """
 
 import time, sys, os
-sys.path.insert(1, sys.path[0] + '/../../')
+sys.path.insert(1,  os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.LanguageTools import LanguageTools
 
  
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "StatsDateLib.py"
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 
 """
     - Small function that adds pxLib to sys path.

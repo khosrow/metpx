@@ -35,7 +35,7 @@ import gettext, os, shutil, sys
     - Small function that adds pxStats to sys path.  
 """
 
-sys.path.insert(1, sys.path[0] + '/../../')
+sys.path.insert(1,  os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 
@@ -302,7 +302,7 @@ def main():
     
     configParameters = StatsConfigParameters()
     configParameters.getAllParameters()
-    language = configParameters.language
+    language = configParameters.mainApplicationLanguage
     
     paths = StatsPaths()
     paths.setBasicPaths()

@@ -31,7 +31,7 @@ import datetime, fnmatch, os, sys
 """
     Small function that adds pxStats to the environment path.  
 """
-sys.path.insert(1, sys.path[0] + '/../../')
+sys.path.insert(1,  os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 from pxStats.lib.CpickleWrapper import CpickleWrapper
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.StatsPaths import StatsPaths 
@@ -57,7 +57,7 @@ HOUR   = 60 * MINUTE
 DAY    = 24 * HOUR
 
 LOCAL_MACHINE = os.uname()[1]
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "FileStatsCollector.py"  
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" ) 
 
 
 

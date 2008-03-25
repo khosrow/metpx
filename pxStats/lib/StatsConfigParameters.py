@@ -18,8 +18,8 @@
 #############################################################################################
 '''
 
-import sys
-sys.path.insert(1, sys.path[0] + '/../../')
+import os,sys
+sys.path.insert(1,  os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 
 from ConfigParser                        import ConfigParser
 from pxStats.lib.DetailedStatsParameters import DetailedStatsParameters

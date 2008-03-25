@@ -36,10 +36,10 @@ import commands, os, sys
 """
     - Small function that adds pxStats to sys path.  
 """
-sys.path.insert(1, sys.path[0] + '/../../')
+sys.path.insert(1,  os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 
  
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "StatsPaths.py"
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 
 
 class COLPATHS :

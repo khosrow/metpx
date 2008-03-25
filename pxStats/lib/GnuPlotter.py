@@ -42,7 +42,7 @@ import Gnuplot, Gnuplot.funcutils
 """
     - Small function that adds pxStats to sys path.  
 """
-sys.path.insert(1, sys.path[0] + '/../../')
+sys.path.insert(1,  os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 
 # These imports require pxStats.
 from pxStats.lib.StatsDateLib import StatsDateLib
@@ -66,7 +66,7 @@ from   Logger  import Logger
 """
     Globals
 """
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "GnuPlotter.py"
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 LOCAL_MACHINE = os.uname()[1]
 
 
@@ -143,7 +143,7 @@ class GnuPlotter( Translatable ):
         if self.outputLanguage not in LanguageTools.getSupportedLanguages():
             if self.logging == True:
                 _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.workingLanguage )
-                self.logger.error( _("Error. %s is not a supported output language." ) %( self.outputLanguage )  )        
+                self.logger.error( _("Error. %s is not a supported output language." %( self.outputLanguage )  )        
                 sys.exit()
                 
         

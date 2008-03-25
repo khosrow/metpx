@@ -31,8 +31,8 @@
 #############################################################################
 """
 
-import sys, commands
-sys.path.insert(1, sys.path[0] + '/../../')
+import os, sys, commands
+sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 
 
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
@@ -292,10 +292,10 @@ class WebPageCsvFilesGenerator( WebPageArtifactsGeneratorInterface ):
         
         clusters = str( configParameters.sourceMachinesTags).replace('[', '').replace(']', '').replace(' ', '').replace('"','').replace("'","")  
         
-        self.generateAllForDailyWebPage(  True, clusters, 0  )
-        self.generateAllForWeeklyWebPage( True, clusters, weeklyCosts )
-        self.generateAllForMonthlyWebPage(True, clusters, monthlyCosts  )
-        self.generateAllForYearlyWebPage( True, clusters, yearlyCosts  )       
+        self.generateAllForDailyWebPage(   True, clusters, 0  )
+        self.generateAllForWeeklyWebPage(  True, clusters, weeklyCosts )
+        self.generateAllForMonthlyWebPage( True, clusters, monthlyCosts  )
+        self.generateAllForYearlyWebPage(  True, clusters, yearlyCosts  )       
            
            
             

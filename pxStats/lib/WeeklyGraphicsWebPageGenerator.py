@@ -25,8 +25,8 @@ named COPYING in the root of the source directory tree.
 """
     Small function that adds pxlib to the environment path.  
 """
-import gettext, os, time, sys
-sys.path.insert(1, sys.path[0] + '/../../../')
+import  os, time, sys
+sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../../')
 
 try:
     pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
@@ -52,7 +52,7 @@ LOCAL_MACHINE = os.uname()[1]
    
 NB_WEEKS_DISPLAYED = 3 
 
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "WeeklyGraphicsWebPageGenerator.py" 
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 
 class WeeklyGraphicsWebPageGenerator( WebPageGeneratorInterface ): 
 

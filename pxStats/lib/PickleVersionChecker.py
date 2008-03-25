@@ -34,7 +34,7 @@
 import os, sys, glob
 
 
-sys.path.insert(1, sys.path[0] + '/../../')
+sys.path.insert(1,  os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.CpickleWrapper import CpickleWrapper
 

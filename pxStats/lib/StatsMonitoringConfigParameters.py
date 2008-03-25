@@ -23,7 +23,7 @@
 """
 
 import os, sys,  time, pickle , fnmatch
-sys.path.insert(1, sys.path[0] + '/../../')
+sys.path.insert(1,  os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 
 import readMaxFile
 
@@ -38,7 +38,7 @@ from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 
 #
 LOCAL_MACHINE = os.uname()[1]
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "StatsMonitoringConfigParameters.py"
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 
         
 class StatsMonitoringConfigParameters:

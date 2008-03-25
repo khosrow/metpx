@@ -22,14 +22,14 @@
 
 import os, sys, fnmatch
 
-sys.path.insert(1, sys.path[0] + '/../../')
+sys.path.insert(1,  os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.Translatable import Translatable
 from pxStats.lib.LanguageTools import LanguageTools
 
 
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "DocWebPageGenerator.py " 
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 
 class BottomWebPageGenerator(Translatable):
     

@@ -24,8 +24,8 @@ named COPYING in the root of the source directory tree.
 """
 
 
-import gettext, os, time, sys
-sys.path.insert(1, sys.path[0] + '/../../../')
+import os, time, sys
+sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../../')
 """
     Small function that adds pxlib to the environment path.  
 """
@@ -50,7 +50,9 @@ from pxStats.lib.WeeklyGraphicsWebPageGenerator import WebPageGeneratorInterface
 LOCAL_MACHINE = os.uname()[1]
     
 NB_YEARS_DISPLAYED = 3
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "YearlyGraphicsWebPageGenerator.py"       
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )    
+ 
+ 
     
 class YearlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):    
         

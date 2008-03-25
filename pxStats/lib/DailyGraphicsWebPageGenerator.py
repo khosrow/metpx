@@ -31,7 +31,7 @@ named COPYING in the root of the source directory tree.
 import  os, time, sys
 
 
-sys.path.insert(1, sys.path[0] + '/../../../')
+sys.path.insert(1,  os.path.dirname( os.path.abspath(__file__) ) + '/../../../')
 """
     Imports
     PXManager requires pxlib 
@@ -45,7 +45,7 @@ from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 
 # Constants
 LOCAL_MACHINE = os.uname()[1]
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "DailyGraphicsWebPageGenerator.py"             
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )          
 NB_DAYS_DISPLAYED = 7 
     
 

@@ -28,29 +28,29 @@ named COPYING in the root of the source directory tree.
     Small function that adds pxlib to the environment path.  
 """
 import gettext, math, os, time, sys, datetime
-sys.path.insert(1, sys.path[0] + '/../../../')
-try:
-    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
-except KeyError:
-    pxlib = '/apps/px/lib/'
-sys.path.append(pxlib)
-
-
-"""
-    Imports
-    PXManager requires pxlib 
-"""
 from math import *
-from PXManager import *
+
+
+sys.path.insert(1,  os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 from pxStats.lib.WebPageGeneratorInterface import WebPageGeneratorInterface
 
+"""
+    Imports
+    PXManager requires pxlib 
+"""
+
+
+
+from PXManager import *
+
+
 LOCAL_MACHINE  = os.uname()[1]    
 NB_MONTHS_DISPLAYED = 3 
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "MonthlyGraphicsWebPageGenerator.py"           
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )        
 
 
 class MonthlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):   

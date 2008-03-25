@@ -31,7 +31,7 @@ import os, sys, string
 """
     Small method that adds pxStats to syspath.
 """
-sys.path.insert(1, sys.path[0] + '/../../')
+sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
@@ -50,7 +50,7 @@ sys.path.append( PATHS.PXLIB )
 from PXManager import *
 
 LOCAL_MACHINE = os.uname()[1]   
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "TopWebPageGenerator.py" 
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 
 
 

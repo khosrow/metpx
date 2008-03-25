@@ -22,12 +22,12 @@
 #############################################################################################
 """
 
-import sys
+import os, sys
 
 """
     - Small function that adds pxStats to sys path.  
 """
-sys.path.insert(1, sys.path[0] + '/../../')
+sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 
 from pxStats.lib.Translatable import Translatable
 

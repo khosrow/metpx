@@ -24,7 +24,7 @@ named COPYING in the root of the source directory tree.
 
 
 import os, sys, commands, time
-sys.path.insert(1, sys.path[0] + '/../../')
+sys.path.insert(1,  os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 
 from pxStats.lib.PickleMerging import PickleMerging
  

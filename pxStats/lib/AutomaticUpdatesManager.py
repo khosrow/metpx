@@ -28,7 +28,7 @@ import commands, os, sys, time
 """
     Small function that adds pxStats to the environment path.  
 """
-sys.path.insert(1, sys.path[0] + '/../../')
+sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 
 from datetime import datetime
 from pxStats.lib.StatsPaths import StatsPaths

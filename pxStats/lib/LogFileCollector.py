@@ -29,7 +29,7 @@ import os, sys
 """
     Small function that adds pxlib to the environment path.  
 """
-sys.path.insert(1, sys.path[0] + '/../../')
+sys.path.insert(1,  os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 from   pxStats.lib.BackwardReader             import BackwardReader 
 from   pxStats.lib.FileStatsCollector         import FileStatsCollector
 from   pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
@@ -49,7 +49,7 @@ from   Logger import Logger
 
 LOCAL_MACHINE = os.uname()[1]   
 
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "LogFileCollector.py "
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 
 
 

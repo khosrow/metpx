@@ -27,7 +27,7 @@
 """
 
 import os, sys, commands
-sys.path.insert(1, sys.path[0] + '/../../')
+sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 from pxStats.lib.MachineConfigParameters import MachineConfigParameters
@@ -35,7 +35,7 @@ from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.AutomaticUpdatesManager import AutomaticUpdatesManager
 from pxStats.lib.WebPageArtifactsGeneratorInterface import WebPageArtifactsGeneratorInterface
 
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "WebPageGraphicsGenerator"
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 
 
 
