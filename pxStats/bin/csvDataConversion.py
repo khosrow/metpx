@@ -24,7 +24,7 @@
 import os, rrdtool, sys, time
 from optparse  import OptionParser
 
-sys.path.insert(1, sys.path[0] + '/../../')
+sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.MachineConfigParameters import MachineConfigParameters
@@ -37,7 +37,7 @@ from pxStats.lib.LanguageTools import LanguageTools
 
 
 LOCAL_MACHINE = os.uname()[1]
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "cvsDataConversion.py"    
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 
 
 

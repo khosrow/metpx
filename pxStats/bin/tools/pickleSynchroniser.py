@@ -26,6 +26,8 @@
 """
 
 import commands, os, sys
+sys.path.append( 1, os.path.dirname( os.path.abspath(__file__) ) + "/../../../" )
+
 from optparse import OptionParser 
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.LanguageTools import LanguageTools
@@ -44,7 +46,7 @@ sys.path.append( STATSPATHS.PXLIB )
 from   Logger import *
 
 LOCAL_MACHINE = os.uname()[1]
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "pickleSynchroniser.py"
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" ) 
 
 
 

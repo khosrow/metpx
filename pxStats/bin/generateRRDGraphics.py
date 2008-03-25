@@ -26,7 +26,7 @@ from   optparse  import OptionParser
 """
     Small function that adds pxStats to the environment path.  
 """
-sys.path.insert(1, sys.path[0] + '/../../')
+sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.RrdUtilities import RrdUtilities
@@ -48,7 +48,7 @@ from   PXManager import *
 from   Logger import *
 
 LOCAL_MACHINE = os.uname()[1]
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "generateRRDGraphics.py"      
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )     
     
        
      

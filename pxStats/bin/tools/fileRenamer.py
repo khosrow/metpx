@@ -1,12 +1,5 @@
 #! /usr/bin/env python
 """
-@copyright: 
-
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
-named COPYING in the root of the source directory tree.
-
-
 #############################################################################################
 #
 #
@@ -15,6 +8,10 @@ named COPYING in the root of the source directory tree.
 # @author: Nicholas Lemay
 #
 # @since: 2007-05-24
+#
+# @licence : MetPX Copyright (C) 2004-2006  Environment Canada
+#            MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
+#            named COPYING in the root of the source directory tree.
 #
 # @summary: This program is to be used to rename all the files wich are named after a 
 #           certain machine name into another machine's name. 
@@ -29,15 +26,15 @@ named COPYING in the root of the source directory tree.
 """ 
 
 import commands, os, sys  
-sys.path.insert(1, sys.path[0] + '/../../../')
+sys.path.insert(1,os.path.dirname( os.path.abspath(__file__) ) + '/../../../')
 
-from   optparse import OptionParser  
+from optparse import OptionParser  
 from fnmatch import fnmatch  
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.LanguageTools import LanguageTools
 
 LOCAL_MACHINE = os.uname()[1]
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "fileRenamer.py" 
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 
 
 class Parameters:

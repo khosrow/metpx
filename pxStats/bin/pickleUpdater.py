@@ -29,7 +29,9 @@ from optparse import OptionParser
 """
     Small function that adds pxlib to the environment path.  
 """
-sys.path.insert(1, sys.path[0] + '/../../')
+
+
+sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
@@ -50,7 +52,7 @@ from PXManager import *
 
 
 LOCAL_MACHINE = os.uname()[1]   
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "pickleUpdater.py"     
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )     
     
     
     
@@ -507,10 +509,10 @@ def main():
     if not os.path.isdir( paths.STATSPICKLES ):
         os.makedirs( paths.STATSPICKLES, mode=0777 )    
     
-    if not os.path.isdir( StatsPaths.STATSLOGGING ):
-        os.makedirs( StatsPaths.STATSLOGGING, mode=0777 )
+    if not os.path.isdir( paths.STATSLOGGING ):
+        os.makedirs( paths.STATSLOGGING, mode=0777 )
     
-    logger = Logger( StatsPaths.STATSLOGGING + _('stats_') + _('pickling') + '.log.notb', 'INFO', 'TX' + 'pickling', bytes = 10000000  ) 
+    logger = Logger( paths.STATSLOGGING + _('stats_') + _('pickling') + '.log.notb', 'INFO', 'TX' + 'pickling', bytes = 10000000  ) 
     logger = logger.getLogger()
    
     parser = createParser( )  #will be used to parse options 

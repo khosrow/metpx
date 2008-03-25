@@ -24,7 +24,7 @@
 """
 
 import os, time, sys
-sys.path.insert(1, sys.path[0] + '/../../')
+sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 
 from optparse import OptionParser
 from pxStats.lib.StatsDateLib import StatsDateLib
@@ -34,7 +34,7 @@ from pxStats.lib.LanguageTools import LanguageTools
 
 
 LOCAL_MACHINE = os.uname()[1]
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "generateGnuGraphics.py" 
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 
 
 class _GraphicsInfos:

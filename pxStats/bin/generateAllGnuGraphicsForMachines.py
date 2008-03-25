@@ -43,7 +43,7 @@ from   optparse  import OptionParser
 """
     Small function that adds pxlib to the environment path.  
 """
-sys.path.insert(1, sys.path[0] + '/../../')
+sys.path.insert(1, os.path.abspath(__file__)  + '/../../')
 
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
@@ -65,7 +65,7 @@ from PXManager import *
 
 
 LOCAL_MACHINE  = os.uname()[1]
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "generateGnuGraphicsForMachines.py" 
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 
 #################################################################
 #                                                               #

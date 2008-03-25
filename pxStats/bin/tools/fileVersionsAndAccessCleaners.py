@@ -1,6 +1,10 @@
-#!/usr/bin/env python
+#! /usr/bin/env python
 
-'''
+"""
+MetPX Copyright (C) 2004-2006  Environment Canada
+MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
+named COPYING in the root of the source directory tree.
+
 #############################################################################################
 #
 #
@@ -8,19 +12,23 @@
 #
 # @author: Nicholas Lemay
 #
+# @since: 2007-06-15 
+#
+#
 # @license: MetPX Copyright (C) 2004-2006  Environment Canada
 #           MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
 #           named COPYING in the root of the source directory tree.
 #
-# Description : Simple script used to clean file Versions pickles wich are no longer usefull. 
+# Description : Simple script used to clean pickle versions files and log access files
+#               wich are no longer usefull. 
 # 
 #############################################################################################
-'''
+"""
 
 
 import commands, os, sys
 
-sys.path.insert(1, sys.path[0] + '/../../../')
+sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../../')
 
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 from pxStats.lib.MachineConfigParameters import MachineConfigParameters
@@ -30,7 +38,9 @@ from fnmatch import fnmatch
 
 def concat(seq):
     """
+       @summary: Small method used to concatenate two strings. 
     """
+    
     if seq == []:
         return []
     else:
@@ -38,6 +48,7 @@ def concat(seq):
             return x+y
     
         return reduce(add, seq, "")
+    
     
     
 def getCurrentlyActiveMachine():
@@ -106,6 +117,7 @@ def  getListOfFileVersionFiles():
         listOfFileVersionfiles = os.listdir( StatsPaths.STATSFILEVERSIONS )
         listOfFileVersionfiles = filter( filterentriesStartingWithDots, listOfFileVersionfiles )
         listOfFileVersionfiles = [ StatsPaths.STATSFILEVERSIONS + file for file in  listOfFileVersionfiles] 
+    
     return listOfFileVersionfiles
   
   
@@ -132,8 +144,8 @@ def removeFile( file):
     """
         @summary: Deletes a file.
     """
-    #status,output = commands.getstatusoutput( "rm %s" %file)
-    print "rm %s" %file
+    status,output = commands.getstatusoutput( "rm %s" %file)
+    #print "rm %s" %file
     
     
 def removeFilesWichAreNotOwnedByActiveMachines( currentListOfFiles ):
@@ -153,13 +165,11 @@ def main():
     """
     getCurrentlyActiveMachine()
     #Delete file versions  
-    currentListOfFiles = getListOfFileVersionFiles()
-    print currentListOfFiles
+    currentListOfFiles = getListOfFileVersionFiles()    
     removeFilesWichAreNotOwnedByActiveMachines( currentListOfFiles )
     
     #Delete log access
-    currentListOfFiles = getListOfFileAccessFiles()
-    print currentListOfFiles
+    currentListOfFiles = getListOfFileAccessFiles()    
     removeFilesWichAreNotOwnedByActiveMachines( currentListOfFiles )
     
     

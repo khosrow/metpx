@@ -25,7 +25,7 @@
 """
 
 import os, commands, time, sys, pickle
-sys.path.insert(1, sys.path[0] + '/../../../')
+sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../../')
 
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
@@ -33,7 +33,7 @@ from pxStats.lib.LanguageTools import LanguageTools
 
 
 TOTAL_YEARLY_OPERATIONAL_COSTS =  10
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "setTimeOfLastUpdates.py" 
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 
 
 def updatePickledTimes( dateToSet = "2006-10-23 09:00:00"  ):

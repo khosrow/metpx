@@ -26,7 +26,7 @@ named COPYING in the root of the source directory tree.
 """
 
 import commands, md5, os, sys, time, shutil 
-sys.path.insert(1, sys.path[0] + '/../../../')
+sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../../')
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters 
 from pxStats.lib.GroupConfigParameters import GroupConfigParameters
@@ -131,26 +131,16 @@ def getCurrentListOfRRDGraphics( type = "weekly" ):
     return   currentListOfWeeklyGraphics 
   
       
-def getCurrentDailyPathDictionary(currentDate):
+def getYearMonthDayInStrfTime( timeInEpochFormat):
     """
-        @summary : For a certain day of the week, associates
-        the path the file should take within the archives.
-    """
+        @summary : Return the year month day in strftime 
+                   based on an epoch date.    """
     
-    currentWeeklyPathDictionary = {}
+    year  = time.strftime( '%Y', time.gmtime(timeInEpochFormat)  )
+    month = time.strftime( '%B', time.gmtime(timeInEpochFormat)  )
+    day   = time.strftime( '%d', time.gmtime(timeInEpochFormat)  )  
     
-    for i in range(7):
-        
-        timeOfDay = currentDate - ( StatsDateLib.DAY * i )
-        year = time.strftime('%Y', time.gmtime(timeOfDay) )
-        month = time.strftime('%B', time.gmtime(timeOfDay) )
-        day  = time.strftime('%d', time.gmtime(timeOfDay) )
-        dayOfWeek = time.strftime('%a', time.gmtime(timeOfDay) )
-        
-        currentWeeklyPathDictionary[dayOfWeek]= StatsPaths.STATSGRAPHSARCHIVES + "daily/%s/%s" + str(year) + "/" + str(month) + "/" + str(day) + ".png"
-    
-    
-    return currentWeeklyPathDictionary
+    return year, month, day
     
 
 
@@ -393,7 +383,26 @@ def archiveYearlyGraphics( rxNames, txNames, groupParameters ):
             os.makedirs( os.path.dirname( yearlyFileAssociations[ yearFile ] ) )
             copyFileIfNecessary( src = yearFile, dest = yearlyFileAssociations[ yearFile ] )
  
+def getCurrentDailyPathDictionary(currentDate):
+    """
+        @summary : For a certain day of the week, associates
+        the path the file should take within the archives.
+    """
 
+    currentWeeklyPathDictionary = {}
+
+    for i in range(7):
+
+        timeOfDay = currentDate - ( StatsDateLib.DAY * i )
+        year = time.strftime('%Y', time.gmtime(timeOfDay) )
+        month = time.strftime('%B', time.gmtime(timeOfDay) )
+        day  = time.strftime('%d', time.gmtime(timeOfDay) )
+        dayOfWeek = time.strftime('%a', time.gmtime(timeOfDay) )
+
+        currentWeeklyPathDictionary[dayOfWeek]= StatsPaths.STATSGRAPHSARCHIVES + "daily/%s/%s" + str(year) + "/" + str(month) + "/" + str(day) + ".png"
+
+
+    return currentWeeklyPathDictionary
 
 def archiveAllGraphicTypes( rxNames, txNames, groupParameters ):
     """

@@ -26,12 +26,21 @@ named COPYING in the root of the source directory tree.
 import cgi, gettext, os, time, sys
 import cgitb; cgitb.enable()
 
-sys.path.insert(1, sys.path[0] + '/../../')
-sys.path.insert(2, sys.path[0] + '/../../..')
-from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
-from pxStats.lib.StatsConfigParameters import StatsConfigParameters
-from pxStats.lib.StatsPaths import StatsPaths
-
+try: 
+    sys.path.insert(1, sys.path[0] + '/../..')
+    sys.path.insert(2, sys.path[0] + '/../../..')
+    
+    from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+    from pxStats.lib.StatsConfigParameters import StatsConfigParameters
+    from pxStats.lib.StatsPaths import StatsPaths
+    
+except Exception, instance: 
+    fileHandle = open("/web/pxStats/scripts/cgi-bin/../../html/popUps/out","w")
+    fileHandle.write( "import bug" )
+    fileHandle.write( str( instance ) )
+    fileHandle.close()   
+    sys.exit()
+    
 LOCAL_MACHINE = os.uname()[1]
 
 
@@ -320,55 +329,65 @@ def main():
         machines and file type parameters.
         
     """
-    
-    language = 'en'
-    
-    newForm = {}
-    
-    form = cgi.FieldStorage()
-    
-    for key in form.keys():
-        value = form.getvalue(key, "")
-        if isinstance(value, list):
-            # Multiple username fields specified
-            newvalue = ",".join(value)
-        else:
-            newvalue = value
-        
-        newForm[key.replace("?","")]= newvalue
-    
-    form = newForm
-    
     try:
-        fileType = form['fileType']
-        if fileType !='tx' and fileType != 'rx':
-            error= "Error. File type needs to be either rx or tx."
+        language = 'en'
         
-    except:
-        fileType = ""
+        newForm = {}
         
-    try:
-        machines  = form['machines']
-        machine = machines.split( ',' )[0]
-        machines = machines.replace( ',', '' )
-    except:
-        error = "Error. Machine names need to be specified."
-        machine = ""
+        form = cgi.FieldStorage()
+        
+        for key in form.keys():
+            value = form.getvalue(key, "")
+            if isinstance(value, list):
+                # Multiple username fields specified
+                newvalue = ",".join(value)
+            else:
+                newvalue = value
+            
+            newForm[key.replace("?","")]= newvalue
+        
+        form = newForm
+        
+        try:
+            fileType = form['fileType']
+            if fileType !='tx' and fileType != 'rx':
+                error= "Error. File type needs to be either rx or tx."
+            
+        except:
+            fileType = ""
+            
+        try:
+            machines  = form['machines']
+            machine = machines.split( ',' )[0]
+            machines = machines.replace( ',', '' )
+        except:
+            error = "Error. Machine names need to be specified."
+            machine = ""
+        
+        if machines != "":          
+            
+            rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machine )
+            
+            groups = getGroups( fileType, machine )
+        
+        fileHandle = open("/web/pxStats/scripts/cgi-bin/../../html/popUps/out","w")
+        fileHandle.write(sys.path[0] + "/../../html/popUps/%s%sPopUpSourlientAdder_%s.html" %( fileType, machines, language ))
+        fileHandle.close()
+        
+        
+        if fileType == "tx":
+            generateWebPage(txNames, groups, fileType, sys.path[0] + "/../../html/popUps/%s%sPopUpSourlientAdder_%s.html" %( fileType, machines, language ) )
+        elif fileType == "rx":
+            generateWebPage(rxNames, groups, fileType, sys.path[0] + "/../../html/popUps/%s%sPopUpSourlientAdder_%s.html" %( fileType, machines, language ) )
+        
+        returnReply('') 
     
-    if machines != "":          
-        
-        rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machine )
-        
-        groups = getGroups( fileType, machine )
-    
-    if fileType == "tx":
-        generateWebPage(txNames, groups, fileType, "../../html/popUps/%s%sPopUpSourlientAdder_%s.html" %( fileType, machines, language ) )
-    elif fileType == "rx":
-        generateWebPage(rxNames, groups, fileType, "../../html/popUps/%s%sPopUpSourlientAdder_%s.html" %( fileType, machines, language ) )
-    
-    returnReply('') 
-        
-        
+    except Exception, instance:
+        fileHandle = open("/web/pxStats/scripts/cgi-bin/../../html/popUps/out","w")
+        fileHandle.write( "main bug" )
+        fileHandle.write( str( instance ) )
+        fileHandle.close()                
+        sys.exit()
         
 if __name__ == '__main__':
     main()

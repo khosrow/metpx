@@ -29,13 +29,15 @@
 """
 
 import os, commands, time, sys, pickle, glob
-sys.path.insert(1, sys.path[0] + '/../../../')
+sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../../')
 
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.LanguageTools import LanguageTools
 
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "backupRRDDatabases.py" 
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
+
+
 
 def backupDatabases( timeOfBackup, backupsToKeep =20, foldersToPreserve = None ):
     """

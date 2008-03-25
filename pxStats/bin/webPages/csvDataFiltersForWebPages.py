@@ -425,11 +425,6 @@ Notes :
 
     - Default value for costs does not exist. This parameter MUST be specified. 
     - Default filename does not exist. This parameter MUST be specified.    
-    
-    parser = OptionParser( usage )
-    addOptions( parser )
-    
-    
     """ )
     
     parser = OptionParser( usage )

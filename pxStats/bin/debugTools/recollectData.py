@@ -25,7 +25,7 @@
 
 import commands, gettext, os, sys, time
 
-sys.path.insert(1, sys.path[0] + '/../../../')
+sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../../')
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.MachineConfigParameters import MachineConfigParameters
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters 

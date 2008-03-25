@@ -29,7 +29,7 @@ named COPYING in the root of the source directory tree.
 
 
 import gettext, os, sys
-sys.path.insert(1, sys.path[0] + '/../../../')
+sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../../')
 
 from pxStats.lib.CpickleWrapper import CpickleWrapper
 from pxStats.lib.FileStatsCollector import FileStatsCollector

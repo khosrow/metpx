@@ -31,7 +31,7 @@ import os, sys, commands, glob, pickle, time
 """
     Small function that adds pxStats to the environment path.  
 """
-sys.path.insert(1, sys.path[0] + '/../../')
+sys.path.insert(1,  os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 from pxStats.lib.StatsPickler import StatsPickler
 from pxStats.lib.CpickleWrapper import CpickleWrapper
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
@@ -53,7 +53,7 @@ sys.path.append( STATSPATHS.PXLIB )
 import smtplib, mailLib
 
 LOCAL_MACHINE = os.uname()[1] 
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "statsMonitor.py"   
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" ) 
             
     
 def savePreviousMonitoringJob( parameters, paths ) :
@@ -1237,14 +1237,14 @@ def getParameterValue():
             raise()         
     
     except:
-        print "Help on using statsMonitor.py"
-        print ""
-        print "This program can only receive a single parameter."
-        print "This parameters is a date specified in the iso format"
-        print "which spcieficies the end time of the monitoring job to be done."
-        print "Iso format is the following : 'YYYY-MM-DD HH:MM:SS'. "
-        print "Please respect this format when specifiying a date."
-        print "If no parameter is specified, current time will be used."
+        print _( "Help on using statsMonitor.py" )
+        print _( "" )
+        print _( "This program can only receive a single parameter." )
+        print _( "This parameters is a date specified in the iso format" )
+        print _( "which spcieficies the end time of the monitoring job to be done." )
+        print _( "Iso format is the following : 'YYYY-MM-DD HH:MM:SS'. " )
+        print _( "Please respect this format when specifiying a date." )
+        print _( "If no parameter is specified, current time will be used." )
         sys.exit()
                      
     return parameterValue

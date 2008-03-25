@@ -25,7 +25,7 @@
 
 import os, commands, time, sys, pickle, glob
 
-sys.path.insert(1, sys.path[0] + '/../../../')
+sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../../')
 import pxStats.bin.tools.backupRRDDatabases
 
 backupRRDDatabases =  pxStats.bin.tools.backupRRDDatabases
@@ -34,7 +34,7 @@ from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 from pxStats.lib.LanguageTools import LanguageTools
 
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "restoreRoundRobinDatabases.py" 
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 
 def restoreDatabases( timeToRestore, currentTime, nbBackupsToKeep ):
     """

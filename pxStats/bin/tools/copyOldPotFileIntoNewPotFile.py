@@ -27,10 +27,10 @@
 
 import os, sys
 
-sys.path.insert(1, sys.path[0] + '/../../../')
+sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../../')
 from pxStats.lib.LanguageTools import LanguageTools
 
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "copyOldPotFileIntoNewPotFile.py" 
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 
 def writeLinesToFile( destinationFile, destinationLines ):
     """
@@ -149,7 +149,7 @@ def main():
         print _( "First parameter is the source .pot file, presumably the previous version of the pot file." )
         print _( "Second parameter is the output .pot file,presumably the new version of the pot file." )
         print _( "Please call the program this way : %s sourcefileName outputFileName") %(sys.argv[0]) 
-        print _( "IMPORTANT NOTE : both " )
+        print _( "IMPORTANT NOTE : both parameters are required !" )
         print _( "Program terminated." )
         sys.exit()
         
