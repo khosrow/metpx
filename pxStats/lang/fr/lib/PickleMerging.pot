@@ -1,0 +1,19 @@
+msgid ""
+msgstr ""
+
+
+msgid "Call to mergeHourlyPickles received."
+msgstr "Appel a mergeHourlyPickles recut."
+
+msgid "Call to mergePickles received."
+msgstr "Appel a mergePickles recut."
+
+msgid "Pickle named %s did not exist. Empty entry was used instead."
+msgstr "Pickle nomme %s n'existe pas. Entree vide utilisee a la place."
+
+msgid "Did not merge pickles named : %s. Pickle list was not valid."
+msgstr "Impossible de joindre les pickels suivants : %s. Liste non valide."
+
+msgid "Filled with empty entries instead."
+msgstr "Remplis avec des entrees vide a la place."
+

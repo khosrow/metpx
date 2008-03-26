@@ -1,0 +1,19 @@
+msgid ""
+msgstr ""
+
+
+msgid "Call to mergeHourlyPickles received."
+msgstr "Call to mergeHourlyPickles received."
+
+msgid "Call to mergePickles received."
+msgstr "Call to mergePickles received."
+
+msgid "Pickle named %s did not exist. Empty entry was used instead."
+msgstr "Pickle named %s did not exist. Empty entry was used instead."
+
+msgid "Did not merge pickles named : %s. Pickle list was not valid."
+msgstr "Did not merge pickles named : %s. Pickle list was not valid."
+
+msgid "Filled with empty entries instead."
+msgstr "Filled with empty entries instead."
+
