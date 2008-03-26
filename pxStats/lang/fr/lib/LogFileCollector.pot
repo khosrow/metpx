@@ -1,0 +1,7 @@
+msgid ""
+msgstr ""
+
+
+msgid "Warning in LogFileCollector. Folder named %s does not exist."
+msgstr "Mise en garde dans LogFileCollector. Le dossier nomme %s n'existe pas."
+
