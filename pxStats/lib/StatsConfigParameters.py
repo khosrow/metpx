@@ -199,7 +199,7 @@ class StatsConfigParameters:
         self.graphicsUpLoadMachines.extend( config.get( 'generalConfig', 'graphicsUpLoadMachines' ).split(',') ) 
         self.daysOfPicklesToKeep = float( config.get( 'generalConfig', 'daysOfPicklesToKeep' ) )
         self.nbDbBackupsToKeep   = float( config.get( 'generalConfig', 'nbDbBackupsToKeep' ) )
-        self.nbAutoUpdatesLogsToKeep = float( config.get( 'generalConfig', 'nbAutoUpdatesLogsToKeep' ) )
+        self.nbAutoUpdatesLogsToKeep = int( config.get( 'generalConfig', 'nbAutoUpdatesLogsToKeep' ) )
         
         try:
             file.close()
