@@ -59,7 +59,7 @@ from   PXManager import *
 
 LOCAL_MACHINE = os.uname()[1]   
 CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
-    
+
 #################################################################
 #                                                               #
 #################PARSER AND OPTIONS SECTION######################
@@ -395,7 +395,7 @@ def updateRoundRobinDatabases(  client, machines, fileType, endTime, logger = No
     combinedMachineName = ""
     combinedMachineName = combinedMachineName.join( [machine for machine in machines ] )
     
-    tempRRDFileName = RrdUtilities.buildRRDFileName( dataType = "errors", clients = [client], machines = machines, fileType = fileType)
+    tempRRDFileName = RrdUtilities.buildRRDFileName( dataType = _("errors"), clients = [client], machines = machines, fileType = fileType)
     startTime   = RrdUtilities.getDatabaseTimeOfUpdate(  tempRRDFileName, fileType ) 
     
     if  startTime == 0 :
@@ -412,8 +412,10 @@ def updateRoundRobinDatabases(  client, machines, fileType, endTime, logger = No
         dataPairs   = getPairs( [client], machines, fileType, timeSeperators[i], timeSeperators[i+1] , groupName = "", logger = logger )
 
         for dataType in dataPairs:
-
-            rrdFileName = RrdUtilities.buildRRDFileName( dataType = dataType, clients = [client], machines = machines, fileType = fileType )
+            
+            translatedDataType = LanguageTools.translateTerm(dataType, 'en', LanguageTools.getMainApplicationLanguage(), CURRENT_MODULE_ABS_PATH)
+            
+            rrdFileName = RrdUtilities.buildRRDFileName( dataType = translatedDataType, clients = [client], machines = machines, fileType = fileType )
 
             if not os.path.isfile( rrdFileName ):
                  createRoundRobinDatabase(  databaseName = rrdFileName , startTime= startTime, dataType = dataType )
@@ -508,7 +510,7 @@ def updateGroupedRoundRobinDatabases( infos, logger = None ):
     
     endTime     = StatsDateLib.getSecondsSinceEpoch( infos.endTime )     
     
-    tempRRDFileName = RrdUtilities.buildRRDFileName( "errors", clients = infos.group, machines = infos.machines, fileType = infos.fileTypes[0]  )  
+    tempRRDFileName = RrdUtilities.buildRRDFileName( _("errors"), clients = infos.group, machines = infos.machines, fileType = infos.fileTypes[0]  )  
     startTime       = RrdUtilities.getDatabaseTimeOfUpdate(  tempRRDFileName, infos.fileTypes[0] )
     
    
@@ -527,7 +529,10 @@ def updateGroupedRoundRobinDatabases( infos, logger = None ):
         dataPairs = getPairs( infos.clients, infos.machines, infos.fileTypes[0], timeSeperators[i], timeSeperators[i+1], infos.group, logger )
     
         for dataType in dataPairs:
-            rrdFileName = RrdUtilities.buildRRDFileName( dataType = dataType, clients = infos.group, groupName = infos.group, machines =  infos.machines,fileType = infos.fileTypes[0], usage = "group" )
+            
+            translatedDataType = LanguageTools.translateTerm(dataType, 'en', LanguageTools.getMainApplicationLanguage(), CURRENT_MODULE_ABS_PATH)
+            rrdFileName = RrdUtilities.buildRRDFileName( dataType = translatedDataType, clients = infos.group, groupName = infos.group, machines =  infos.machines,fileType = infos.fileTypes[0], usage = "group" )
+            
             if not os.path.isfile( rrdFileName ):
                 createRoundRobinDatabase( rrdFileName,  startTime, dataType )
             
@@ -613,7 +618,7 @@ def createPaths( paths ):
     """            
        
         
-    dataTypes = [ "latency", "bytecount", "errors", "filesOverMaxLatency", "filecount" ]
+    dataTypes = [ _("latency"), _("bytecount"), _("errors"), _("filesOverMaxLatency"), _("filecount") ]
     
         
     for dataType in dataTypes:
@@ -646,7 +651,7 @@ def  setGlobalLanguageParameters():
     
     _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )  
                                
-
+   
                
 def main():
     """
