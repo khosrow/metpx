@@ -17,6 +17,9 @@ msgstr "man/"
 msgid "temp/"
 msgstr "temp/"
 
+msgid "csvFiles"
+msgstr "csvFiles"
+
 msgid "databases/"
 msgstr "databases/"
 
@@ -76,4 +79,7 @@ msgstr "previousMachineParameters"
 
 msgid "lockFiles/"
 msgstr "lockFiles/"
+
+msgid "automaticUpdatesLogs/"
+msgstr "automaticUpdatesLogs/"
 

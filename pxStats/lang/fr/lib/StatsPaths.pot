@@ -1,100 +1,125 @@
-#: StatsPaths.py:376
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2008-03-26 14:57+GMT\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: ENCODING\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: StatsPaths.py:378
 msgid "data/"
 msgstr "donnees/"
 
-#: StatsPaths.py:377
+#: StatsPaths.py:379
 msgid "doc/"
 msgstr "doc/"
 
-#: StatsPaths.py:378
+#: StatsPaths.py:380
 msgid "logs/"
 msgstr "journalisation/"
 
-#: StatsPaths.py:379
+#: StatsPaths.py:381
 msgid "man/"
 msgstr "man/"
 
-#: StatsPaths.py:380
+#: StatsPaths.py:382
 msgid "temp/"
 msgstr "temp/"
 
-#: StatsPaths.py:383
+#: StatsPaths.py:385
+msgid "csvFiles"
+msgstr "fichiersCsv/"
+
+#: StatsPaths.py:388
 msgid "databases/"
 msgstr "basesDeDonnees/"
 
-#: StatsPaths.py:384
+#: StatsPaths.py:389
 msgid "currentDatabases/"
 msgstr "basesDeDonneesCourantes/"
 
-#: StatsPaths.py:385
+#: StatsPaths.py:390
 msgid "currentDatabasesTimeOfUpdates/"
 msgstr "tempsMAJBasesDeDonneesCourantes/"
 
-#: StatsPaths.py:386
+#: StatsPaths.py:391
 msgid "databasesBackups/"
 msgstr "basesDeDonneesEmmagasinees/"
 
-#: StatsPaths.py:387
+#: StatsPaths.py:392
 msgid "databasesTimeOfUpdatesBackups/"
 msgstr "tempsMAJBdEmmagasinnees/"
 
-#: StatsPaths.py:390
+#: StatsPaths.py:395
 msgid "fileAcessVersions/"
 msgstr "versionsFichiersDacces/"
 
-#: StatsPaths.py:391
+#: StatsPaths.py:396
 msgid "logFileAccess/"
 msgstr "accesFichiersJournalisation/"
 
-#: StatsPaths.py:392
+#: StatsPaths.py:397
 msgid "monitoring/"
 msgstr "surveillance/"
 
-#: StatsPaths.py:393
+#: StatsPaths.py:398
 msgid "pickles/"
 msgstr "pickles/"
 
-#: StatsPaths.py:394
+#: StatsPaths.py:399
 msgid "logFiles/"
 msgstr "fichiersJournalisation/"
 
-#: StatsPaths.py:395
+#: StatsPaths.py:400
 msgid "webPages/"
 msgstr "pagesWeb/"
 
-#: StatsPaths.py:396
+#: StatsPaths.py:401
 msgid "html/"
 msgstr "html/"
 
-#: StatsPaths.py:397
+#: StatsPaths.py:402
 msgid "wordDatabases/"
 msgstr "banqueDeMots/"
 
-#: StatsPaths.py:398
+#: StatsPaths.py:403
 msgid "graphics/"
 msgstr "graphiques/"
 
-#: StatsPaths.py:399
+#: StatsPaths.py:404
 msgid "webGraphics/"
 msgstr "graphiquesWeb/"
 
-#: StatsPaths.py:400
+#: StatsPaths.py:405
 msgid "archives/"
 msgstr "archives/"
 
-#: StatsPaths.py:402
+#: StatsPaths.py:407
 msgid "columbo/"
 msgstr "columbo/"
 
-#: StatsPaths.py:404
+#: StatsPaths.py:409
 msgid "picklesTimeOfUpdates/"
 msgstr "tempsMAJPickles/"
 
-#: StatsPaths.py:405
+#: StatsPaths.py:410
 msgid "previousMachineParameters"
 msgstr "ancientsParametres"
 
-#: StatsPaths.py:407
+#: StatsPaths.py:412
 msgid "lockFiles/"
 msgstr "fichiersDeVerrou/"
+
+#: StatsPaths.py:413
+msgid "automaticUpdatesLogs/"
+msgstr "journalisationDesMAJAutomatiques/"
 
