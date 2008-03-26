@@ -353,6 +353,42 @@ class AutomaticUpdatesManager( Translatable ):
         
         return timeBetweenUpdates
     
+ 
+    def isFirstUpdateOfTheHour( self, timeOfUpdateInIsoFormat = "" ): 
+        """
+            @summary : Returns whether or not an update executed at 
+                       timeOfUpdateInIsoFormat would be the first update 
+                       of the hour.
+                       
+            @timeOfUpdateInIsoFormat : Time at which the update would be executed.
+            
+            @return : True or False.
+                        
+        """
+        
+        isFirstUpdateOfTheHour = False
+        
+        lastUpdateISO = self.getTimeOfLastUpdateInLogs()
+        
+        if timeOfUpdateInIsoFormat > lastUpdateISO:
+            
+            day1 = timeOfUpdateInIsoFormat.split( " " )[0]
+            day2 = lastUpdateISO.split( " " )[0]
+            
+            
+            if day1 != day2 :
+                isFirstUpdateOfTheHour = True
+            else:
+                
+                hour1 =  timeOfUpdateInIsoFormat.split( " " )[1].split(":")[0]
+                hour2 =  lastUpdateISO.split( " " )[1].split(":")[0]  
+                if hour1 != hour2:
+                    isFirstUpdateOfTheHour = True
+        
+        
+        return isFirstUpdateOfTheHour 
+ 
+ 
     
     
     def isFirstUpdateOfTheDay( self, timeOfUpdateInIsoFormat = "" ): 
@@ -371,7 +407,7 @@ class AutomaticUpdatesManager( Translatable ):
         
         lastUpdateISO = self.getTimeOfLastUpdateInLogs()
         
-        if timeOfUpdateInIsoFormat > isFirstUpdateOfTheDay:
+        if timeOfUpdateInIsoFormat > lastUpdateISO:
             
             lastUpdateDT    = datetime( int( lastUpdateISO.split("-")[0]),\
                                       int( lastUpdateISO.split("-")[1]),\
