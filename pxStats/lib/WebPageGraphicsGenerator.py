@@ -41,7 +41,18 @@ CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 
 class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
             
-    def __init__(self):
+    def __init__( self, timeOfRequest, outputLanguage ):
+        """        
+        
+            @param timeOfRequest : Time at which the graphics are requested.
+        
+            @param outputLanguage : Language in which to output the graphics.
+        
+        """
+        
+        self.timeOfRequest  = timeOfRequest
+        self.outputLanguage = outputLanguage
+        
         self.paths = StatsPaths
         self.paths.setPaths()
                 
