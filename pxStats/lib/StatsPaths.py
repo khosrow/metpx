@@ -493,7 +493,7 @@ class StatsPaths:
                        
             @param path : Path that neeeds to be transformed 
                           based on the specified machine.
-                          Ex: StatsPaths.STATSBIN
+                          Ex: self.STATSBIN
             
             @param machine : Machine for which we want to know a certain path.
             
@@ -506,14 +506,12 @@ class StatsPaths:
         
         pathOnThatMachine = ""
         
-        statsRootFromThatMachine = StatsPaths.getRootPathFromMachine( machine = machine, userName = userName, rootType = "COLROOT" )
+        statsRootFromThatMachine = self.getRootPathFromMachine( machine = machine, userName = userName, rootType = "COLROOT" )
         
-        pathOnThatMachine = str(path).replace( StatsPaths.COLROOT, statsRootFromThatMachine )
+        pathOnThatMachine = str(path).replace( self.COLROOT, statsRootFromThatMachine )
     
         return pathOnThatMachine
-    
-    getColumbosPathFromMachine = staticmethod( getColumbosPathFromMachine )        
-    
+               
     
     
     def getStatsPathFromMachine( self, path, machine, userName = "" ):
@@ -526,7 +524,7 @@ class StatsPaths:
                        
             @param path : Path that neeeds to be transformed 
                           based on the specified machine.
-                          Ex: StatsPaths.STATSBIN
+                          Ex: self.STATSBIN
             
             @param machine : Machine for which we want to know a certain path.
             
@@ -538,13 +536,11 @@ class StatsPaths:
         
         pathOnThatMachine = ""
         
-        statsRootFromThatMachine = StatsPaths.getRootPathFromMachine( machine = machine, userName = userName, rootType = "STATSROOT" )
+        statsRootFromThatMachine = self.getRootPathFromMachine( machine = machine, userName = userName, rootType = "STATSROOT" )
         
-        pathOnThatMachine = str(path).replace( StatsPaths.STATSROOT, statsRootFromThatMachine )
+        pathOnThatMachine = str(path).replace( self.STATSROOT, statsRootFromThatMachine )
     
         return pathOnThatMachine
-    
-    getStatsPathFromMachine = staticmethod( getStatsPathFromMachine )
     
     
     
@@ -558,7 +554,7 @@ class StatsPaths:
                        
             @param path : Path that neeeds to be transformed 
                           based on the specified machine.
-                          Ex: StatsPaths.PXLIB
+                          Ex: self.PXLIB
             
             @param machine : Machine for which we want to know a certain path.
             
@@ -570,18 +566,14 @@ class StatsPaths:
         
         pathOnThatMachine = ""
         
-        pxRootFromThatMachine = StatsPaths.getRootPathFromMachine(  machine = machine, userName = userName, rootType ="PXROOT" )
+        pxRootFromThatMachine = self.getRootPathFromMachine(  machine = machine, userName = userName, rootType ="PXROOT" )
               
-        pathOnThatMachine = str(path).replace( StatsPaths.PXROOT, pxRootFromThatMachine )
+        pathOnThatMachine = str(path).replace( self.PXROOT, pxRootFromThatMachine )
     
         return pathOnThatMachine
     
     
-    
-    getPXPathFromMachine = staticmethod( getPXPathFromMachine )
-    
-    
-    
+
     def getAllPaths( self, language = '' ):
         """
             @summary : Returns all the paths named found within StatsPaths...
@@ -594,7 +586,7 @@ class StatsPaths:
         """         
         
         
-        return [].extend( StatsPaths.getAllPdsPaths(language) ).extend(StatsPaths.getAllPxPaths(language) ).extend( StatsPaths.getAllStatsPaths(language) ) 
+        return [].extend( self.getAllPdsPaths(language) ).extend(self.getAllPxPaths(language) ).extend( self.getAllStatsPaths(language) ) 
     
     
     getAllPaths = staticmethod( getAllPaths )
@@ -612,26 +604,23 @@ class StatsPaths:
             
         """        
         
-        return [ StatsPaths.STATSBIN, StatsPaths.STATSCOLGRAPHS, StatsPaths.STATSCURRENTDB, StatsPaths.STATSCURRENTDBUPDATES, \
-                 StatsPaths.STATSDATA, StatsPaths.STATSDB, StatsPaths.STATSDBBACKUPS, StatsPaths.STATSDBUPDATESBACKUPS, \
-                 StatsPaths.STATSDEBUGTOOLS, StatsPaths.STATSDEV, StatsPaths.STATSDEVDEPENDENCIES, StatsPaths.STATSDEVDEPENDENCIESBIN, \
-                 StatsPaths.STATSDEVDEPENDENCIESBINDEBUGTOOLS, StatsPaths.STATSDEVDEPENDENCIESBINTOOLS, StatsPaths.STATSDEVDEPENDENCIESBINWEBPAGES, \
-                 StatsPaths.STATSDEVDEPENDENCIESLIB, StatsPaths.STATSDOC,StatsPaths.STATSETC, StatsPaths.STATSFILEVERSIONS, StatsPaths.STATSGRAPHS,\
-                 StatsPaths.STATSGRAPHSARCHIVES, StatsPaths.STATSLANG, StatsPaths.STATSLANGEN, StatsPaths.STATSLANGENBIN, \
-                 StatsPaths.STATSLANGENBINDEBUGTOOLS, StatsPaths.STATSLANGENBINTOOLS, StatsPaths.STATSLANGENBINWEBPAGES, StatsPaths.STATSLANGENLIB, \
-                 StatsPaths.STATSLANGFR, StatsPaths.STATSLANGFRBIN, StatsPaths.STATSLANGFRBINDEBUGTOOLS, StatsPaths.STATSLANGFRBINTOOLS, \
-                 StatsPaths.STATSLANGFRBINWEBPAGES, StatsPaths.STATSLANGFRLIB,StatsPaths.STATSLIB, StatsPaths.STATSLIBRARY,StatsPaths.STATSLOGACCESS,\
-                 StatsPaths.STATSLOGGING, StatsPaths.STATSLOGS,StatsPaths.STATSMAN, StatsPaths.STATSMONITORING, StatsPaths.STATSPICKLES, \
-                 StatsPaths.STATSPICKLESTIMEOFUPDATES, StatsPaths.STATSPREVIOUSMACHINEPARAMS, StatsPaths.STATSPXCONFIGS, StatsPaths.STATSPXRXCONFIGS,\
-                 StatsPaths.STATSPXTRXCONFIGS, StatsPaths.STATSPXTXCONFIGS, StatsPaths.STATSROOT, StatsPaths.STATSTEMP, \
-                 StatsPaths.STATSTEMPLOCKFILES, StatsPaths.STATSTOOLS, StatsPaths.STATSWEBGRAPHS, StatsPaths.STATSWEBPAGES,\
-                 StatsPaths.STATSWEBPAGESGENERATORS, StatsPaths.STATSWEBPAGESHTML, StatsPaths.STATSWEBPAGESWORDDBS ]
+        return [ self.STATSBIN, self.STATSCOLGRAPHS, self.STATSCURRENTDB, self.STATSCURRENTDBUPDATES, \
+                 self.STATSDATA, self.STATSDB, self.STATSDBBACKUPS, self.STATSDBUPDATESBACKUPS, \
+                 self.STATSDEBUGTOOLS, self.STATSDEV, self.STATSDEVDEPENDENCIES, self.STATSDEVDEPENDENCIESBIN, \
+                 self.STATSDEVDEPENDENCIESBINDEBUGTOOLS, self.STATSDEVDEPENDENCIESBINTOOLS, self.STATSDEVDEPENDENCIESBINWEBPAGES, \
+                 self.STATSDEVDEPENDENCIESLIB, self.STATSDOC,self.STATSETC, self.STATSFILEVERSIONS, self.STATSGRAPHS,\
+                 self.STATSGRAPHSARCHIVES, self.STATSLANG, self.STATSLANGEN, self.STATSLANGENBIN, \
+                 self.STATSLANGENBINDEBUGTOOLS, self.STATSLANGENBINTOOLS, self.STATSLANGENBINWEBPAGES, self.STATSLANGENLIB, \
+                 self.STATSLANGFR, self.STATSLANGFRBIN, self.STATSLANGFRBINDEBUGTOOLS, self.STATSLANGFRBINTOOLS, \
+                 self.STATSLANGFRBINWEBPAGES, self.STATSLANGFRLIB,self.STATSLIB, self.STATSLIBRARY,self.STATSLOGACCESS,\
+                 self.STATSLOGGING, self.STATSLOGS,self.STATSMAN, self.STATSMONITORING, self.STATSPICKLES, \
+                 self.STATSPICKLESTIMEOFUPDATES, self.STATSPREVIOUSMACHINEPARAMS, self.STATSPXCONFIGS, self.STATSPXRXCONFIGS,\
+                 self.STATSPXTRXCONFIGS, self.STATSPXTXCONFIGS, self.STATSROOT, self.STATSTEMP, \
+                 self.STATSTEMPLOCKFILES, self.STATSTOOLS, self.STATSWEBGRAPHS, self.STATSWEBPAGES,\
+                 self.STATSWEBPAGESGENERATORS, self.STATSWEBPAGESHTML, self.STATSWEBPAGESWORDDBS ]
     
     
-    getAllStatsPaths = staticmethod( getAllStatsPaths )
-    
-    
-    
+       
     def getAllPdsPaths( self, language = '' ):
         """
             @summary : Returns all the paths named pds...
@@ -643,9 +632,9 @@ class StatsPaths:
             
         """ 
         
-        return [StatsPaths.PDSCOLETC, StatsPaths.PDSCOLGRAPHS, StatsPaths.PDSCOLLOGS]
+        return [self.PDSCOLETC, self.PDSCOLGRAPHS, self.PDSCOLLOGS]
         
-    getAllPdsPaths = staticmethod( getAllPdsPaths )    
+      
     
     
     
@@ -660,10 +649,10 @@ class StatsPaths:
             
         """     
         
-        return [ StatsPaths.PXETC, StatsPaths.PXETCRX, StatsPaths.PXETCTRX, StatsPaths.PXETCTX , \
-                 StatsPaths.PXLIB, StatsPaths.PXLOG, StatsPaths.PXROOT ]
+        return [ self.PXETC, self.PXETCRX, self.PXETCTRX, self.PXETCTX , \
+                 self.PXLIB, self.PXLOG, self.PXROOT ]
     
-    getAllPxPaths = staticmethod( getAllPxPaths )
+   
     
     
     
