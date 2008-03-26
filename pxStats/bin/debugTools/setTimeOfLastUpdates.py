@@ -41,7 +41,10 @@ def updatePickledTimes( dateToSet = "2006-10-23 09:00:00"  ):
           @summary : Get all the keys then set all of them to the desired date.
     """
     
-    folder = StatsPaths.STATSPICKLESTIMEOFUPDATES
+    statsPaths = StatsPaths()
+    statsPaths.setPaths()
+    
+    folder = statsPaths.STATSPICKLESTIMEOFUPDATES
     
     files = os.listdir(folder)
     for fileName in files :

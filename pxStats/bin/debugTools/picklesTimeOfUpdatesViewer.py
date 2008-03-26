@@ -1,20 +1,17 @@
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
-named COPYING in the root of the source directory tree.
-
 #############################################################################################
-# Name  : picklesTimeOfUpdatesViewer.py
+# 
+# @name    : picklesTimeOfUpdatesViewer.py
 #
-# Author: Nicholas Lemay
+# @author  : Nicholas Lemay
 #
-# Date  : 2006-06-19, Last updated on 2007-06-11
+# @since   : 2006-06-19, Last updated on 2007-06-11
 #
-# Description: This method allows user to quicly see all the update times stored in the 
+# @summary : This method allows user to quicly see all the update times stored in the 
 #              time of updates file.
 #
-#   Usage:   This program can be called from command-line. 
+#   @usage:   This program can be called from command-line. 
 #
 #   For informations about command-line:  picklesTimeOfUpdatesViewer.py -h | --help
 #
@@ -99,7 +96,10 @@ def getListOfPickleUpdateFiles():
     
     """
     
-    files = glob.glob( StatsPaths.STATSPICKLESTIMEOFUPDATES + '*' )
+    statsPaths = StatsPaths()
+    statsPaths.setPaths()
+    
+    files = glob.glob( statsPaths.STATSPICKLESTIMEOFUPDATES + '*' )
     
     return files
 
