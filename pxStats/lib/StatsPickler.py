@@ -54,7 +54,7 @@ from pxStats.lib.Translatable import Translatable
     - Small function that adds PXLIB to the environment path.
 """
 STATSPATHS = StatsPaths()
-STATSPATHS.setBasicPaths()
+STATSPATHS.setPaths()
 sys.path.append( STATSPATHS.PXLIB )
 
 """
