@@ -110,13 +110,16 @@ def  getListOfFileVersionFiles():
     
     """   
     
-    listOfFileVersionfiles = []
-    
-    if os.path.isdir(StatsPaths.STATSFILEVERSIONS) :
+    statsPaths = StatsPaths()
+    statsPaths.setPaths()
         
-        listOfFileVersionfiles = os.listdir( StatsPaths.STATSFILEVERSIONS )
+    listOfFileVersionfiles = []
+        
+    if os.path.isdir(statsPaths.STATSFILEVERSIONS) :
+        
+        listOfFileVersionfiles = os.listdir( statsPaths.STATSFILEVERSIONS )
         listOfFileVersionfiles = filter( filterentriesStartingWithDots, listOfFileVersionfiles )
-        listOfFileVersionfiles = [ StatsPaths.STATSFILEVERSIONS + file for file in  listOfFileVersionfiles] 
+        listOfFileVersionfiles = [ statsPaths.STATSFILEVERSIONS + file for file in  listOfFileVersionfiles] 
     
     return listOfFileVersionfiles
   
@@ -129,13 +132,16 @@ def getListOfFileAccessFiles():
     
     """   
     
+    statsPaths = StatsPaths()
+    statsPaths.setPaths()
+        
     listOfFileAccessFiles = []
     
-    if os.path.isdir(StatsPaths.STATSLOGACCESS) :
+    if os.path.isdir(statsPaths.STATSLOGACCESS) :
         
-        listOfFileAccessFiles = os.listdir( StatsPaths.STATSLOGACCESS )
+        listOfFileAccessFiles = os.listdir( statsPaths.STATSLOGACCESS )
         listOfFileAccessFiles = filter( filterentriesStartingWithDots, listOfFileAccessFiles )
-        listOfFileAccessFiles = [ StatsPaths.STATSLOGACCESS + file for file in  listOfFileAccessFiles ]
+        listOfFileAccessFiles = [ statsPaths.STATSLOGACCESS + file for file in  listOfFileAccessFiles ]
     
     return listOfFileAccessFiles                
                 

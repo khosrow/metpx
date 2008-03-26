@@ -60,10 +60,13 @@ def cleanPickles( dirsToKeep ):
                    is not within the list to keep.
     """
     
-    clientdirs = os.listdir( StatsPaths.STATSPICKLES )    
+    statsPaths = StatsPaths()
+    statsPaths.setPaths()
+    
+    clientdirs = os.listdir( statsPaths.STATSPICKLES )    
     
     for clientDir in clientdirs :
-        upperDir = StatsPaths.STATSPICKLES  + clientDir 
+        upperDir = statsPaths.STATSPICKLES  + clientDir 
         innerList = os.listdir( upperDir )
         for innerFolder in innerList:
             completePath = upperDir + "/" + innerFolder

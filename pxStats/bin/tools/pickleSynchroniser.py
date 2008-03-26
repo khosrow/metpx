@@ -160,12 +160,12 @@ def buildCommands( logins, machines, clients ):
     if clients[0] == "All" :
         for login,machine in map( None, logins, machines) :
             for i in range(3):#do 3 times in case of currently turning log files. 
-                commands.append( "rsync -avzr  -e ssh %s@%s:%s %s"  %( login, machine, StatsPaths.STATSPICKLES, StatsPaths.STATSPICKLES )  )
+                commands.append( "rsync -avzr  -e ssh %s@%s:%s %s"  %( login, machine, STATSPATHS.STATSPICKLES, STATSPATHS.STATSPICKLES )  )
           
     else:
         
         for client in clients :
-            path = StatsPaths.STATSPICKLES + client + "/"
+            path = STATSPATHS.STATSPICKLES + client + "/"
             for login, machine in  map( None, logins, machines ):
                 for i in range(3):#do 3 times in case of currently turning log files.
                     commands.append( "rsync  -avzr -e ssh %s@%s:%s %s"  %( login, machine, path, path )  )
@@ -183,8 +183,8 @@ def synchronise( commandList, verbose, logger = None ):
     
     """
     
-    if not os.path.isdir( StatsPaths.STATSPICKLES ):
-        os.makedirs( StatsPaths.STATSPICKLES, mode=0777 )
+    if not os.path.isdir( STATSPATHS.STATSPICKLES ):
+        os.makedirs( STATSPATHS.STATSPICKLES, mode=0777 )
 
     for command in commandList :     
 
@@ -211,9 +211,9 @@ def buildLogger( output ):
     logger = None 
     
     if output != "":     
-        if not os.path.isdir( StatsPaths.STATSLOGGING  ):
-            os.makedirs( StatsPaths.STATSLOGGING  , mode=0777 )  
-        logger = Logger( StatsPaths.STATSLOGGING  + 'stats_' + output + '.log.notb', 'INFO', 'TX' + output, bytes = True  ) 
+        if not os.path.isdir( STATSPATHS.STATSLOGGING  ):
+            os.makedirs( STATSPATHS.STATSLOGGING  , mode=0777 )  
+        logger = Logger( STATSPATHS.STATSLOGGING  + 'stats_' + output + '.log.notb', 'INFO', 'TX' + output, bytes = True  ) 
         logger = logger.getLogger()    
     
     return logger 

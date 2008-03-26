@@ -49,10 +49,13 @@ def backupDatabases( timeOfBackup, backupsToKeep =20, foldersToPreserve = None )
     
     """
     
+    statsPaths = StatsPaths()
+    statsPaths.setPaths()
+    
     foldersToPreserve = foldersToPreserve or []
     
-    source = StatsPaths.STATSCURRENTDB
-    destination = StatsPaths.STATSDBBACKUPS + "%s" %timeOfBackup
+    source = statsPaths.STATSCURRENTDB
+    destination = statsPaths.STATSDBBACKUPS + "%s" %timeOfBackup
     
     if not os.path.isdir( destination ):
         os.makedirs( destination )
@@ -60,7 +63,7 @@ def backupDatabases( timeOfBackup, backupsToKeep =20, foldersToPreserve = None )
     print output    
     
     #limit number of backup
-    filePattern = StatsPaths.STATSDBBACKUPS + "*"           
+    filePattern = statsPaths.STATSDBBACKUPS + "*"           
     fileNames = glob.glob( filePattern )  
     fileNames.sort()       
     
@@ -89,10 +92,13 @@ def backupDatabaseUpdateTimes( timeOfBackup, backupsToKeep = 20, foldersToPreser
     
     """
     
+    statsPaths = StatsPaths()
+    statsPaths.setPaths()    
+    
     foldersToPreserve = foldersToPreserve or []
     
-    source = StatsPaths.STATSCURRENTDBUPDATES
-    destination = StatsPaths.STATSDBUPDATESBACKUPS + "%s" %timeOfBackup
+    source = statsPaths.STATSCURRENTDBUPDATES
+    destination = statsPaths.STATSDBUPDATESBACKUPS + "%s" %timeOfBackup
     
     if not os.path.isdir( destination ):
         os.makedirs( destination )
@@ -100,7 +106,7 @@ def backupDatabaseUpdateTimes( timeOfBackup, backupsToKeep = 20, foldersToPreser
     print output 
 
     #limit number of backups         
-    filePattern = StatsPaths.STATSDBUPDATESBACKUPS + "*"          
+    filePattern = statsPaths.STATSDBUPDATESBACKUPS + "*"          
     fileNames = glob.glob( filePattern )  
     fileNames.sort()       
     

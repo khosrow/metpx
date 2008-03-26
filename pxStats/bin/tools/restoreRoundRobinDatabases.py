@@ -25,16 +25,22 @@
 
 import os, commands, time, sys, pickle, glob
 
+"""
+    - Add pxStats so sys.path.
+"""
 sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../../')
-import pxStats.bin.tools.backupRRDDatabases
 
+import pxStats.bin.tools.backupRRDDatabases
 backupRRDDatabases =  pxStats.bin.tools.backupRRDDatabases
+
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 from pxStats.lib.LanguageTools import LanguageTools
 
 CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
+
+
 
 def restoreDatabases( timeToRestore, currentTime, nbBackupsToKeep ):
     """
@@ -48,8 +54,11 @@ def restoreDatabases( timeToRestore, currentTime, nbBackupsToKeep ):
        
     """
     
-    source = StatsPaths.STATSDBBACKUPS + "/%s" %timeToRestore
-    destination = StatsPaths.STATSCURRENTDB
+    statsPaths = StatsPaths()
+    statsPaths.setPaths()
+    
+    source = statsPaths.STATSDBBACKUPS + "/%s" %timeToRestore
+    destination = statsPaths.STATSCURRENTDB
     
     #Archive current Database
     backupRRDDatabases.backupDatabases( currentTime, nbBackupsToKeep, foldersToPreserve = [ source ])
@@ -72,9 +81,12 @@ def restoreDatabaseUpdateTimes( timeToRestore, currentTime, nbBackupsToKeep ):
        @param nbBackupsToKeep : total number of backups to keep.
        
     """
-    
-    source = StatsPaths.STATSDBUPDATESBACKUPS + "/%s" %timeToRestore
-    destination = StatsPaths.STATSCURRENTDBUPDATES
+
+    statsPaths = StatsPaths()
+    statsPaths.setPaths()
+        
+    source = statsPaths.STATSDBUPDATESBACKUPS + "/%s" %timeToRestore
+    destination = statsPaths.STATSCURRENTDBUPDATES
     
     #Archive current Database
     backupRRDDatabases.backupDatabaseUpdateTimes( currentTime, nbBackupsToKeep, foldersToPreserve = [ source ] )
