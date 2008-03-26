@@ -105,8 +105,11 @@ class StatsMonitoringConfigParameters:
                        files, folders, maxUsages, errorsLogFile, maxSettingsFile.
         
         """   
+        
+        statsPaths = StatsPaths()
+        statsPaths.setPaths()
     
-        CONFIG = StatsPaths.STATSETC +"monitoringConf" 
+        CONFIG = statsPaths.STATSETC +"monitoringConf" 
         config = ConfigParser()
         
         if os.path.isfile( CONFIG ):
@@ -215,8 +218,11 @@ class StatsMonitoringConfigParameters:
             @warning : Returns "" if file does not exist.
             
         """     
-         
-        file  = "%spreviousMonitoringJob" %StatsPaths.STATSMONITORING
+        
+        statsPaths = StatsPaths()
+        statsPaths.setPaths()         
+        
+        file  = "%spreviousMonitoringJob" %statsPaths.STATSMONITORING
         previousMonitoringJob = ""
         
         if os.path.isfile( file ):

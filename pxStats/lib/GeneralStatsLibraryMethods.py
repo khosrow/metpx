@@ -73,7 +73,7 @@ class GeneralStatsLibraryMethods:
             @return : None
                                               
         """
-        
+
         fileName = STATSPATHS.STATSTEMPLOCKFILES + str( processName ) + ".lock" 
         
         if not os.path.isdir( STATSPATHS.STATSTEMPLOCKFILES ):
@@ -100,6 +100,7 @@ class GeneralStatsLibraryMethods:
         """
         
         fileName = STATSPATHS.STATSTEMPLOCKFILES + str( processName ) + ".lock" 
+        
         if os.path.isfile( fileName ):
             os.remove( fileName )
             
@@ -117,7 +118,7 @@ class GeneralStatsLibraryMethods:
             @returns True or False
             
         """
-        
+                
         processIsAlreadyRunning = False
         
         fileName = STATSPATHS.STATSTEMPLOCKFILES + str( processName ) + ".lock"
@@ -219,7 +220,7 @@ class GeneralStatsLibraryMethods:
             Log source    : From wich machine the logs come from.
         
         """
-        
+                
         if localMachine == desiredMachine:
             pathToLogFiles = STATSPATHS.PXLOG 
         else:      
@@ -228,6 +229,7 @@ class GeneralStatsLibraryMethods:
         return pathToLogFiles    
             
     getPathToLogFiles = staticmethod( getPathToLogFiles )
+    
     
      
     def getPathToConfigFiles( localMachine, desiredMachine, confType ):
@@ -239,7 +241,7 @@ class GeneralStatsLibraryMethods:
             confType       : type of config file : rx|tx|trx      
         
         """
-            
+        
         pathToConfigFiles = ""
         
         if localMachine == desiredMachine : 
@@ -275,7 +277,7 @@ class GeneralStatsLibraryMethods:
             to make sure we're up to date.
     
         """
-    
+          
         if not os.path.isdir( STATSPATHS.STATSPXRXCONFIGS + machine ):
             os.makedirs(  STATSPATHS.STATSPXRXCONFIGS + machine , mode=0777 )
         if not os.path.isdir( STATSPATHS.STATSPXTXCONFIGS + machine  ):
@@ -286,7 +288,7 @@ class GeneralStatsLibraryMethods:
         rxConfigFilesSourcePath = STATSPATHS.getPXPathFromMachine( STATSPATHS.PXETCRX, machine, login )
         output = commands.getoutput( "rsync -avzr --delete-before -e ssh %s@%s:%s  %s%s/"  %( login, machine, rxConfigFilesSourcePath, STATSPATHS.STATSPXRXCONFIGS, machine ) )
     
-        txConfigFilesSourcePath = StatsPaths.getPXPathFromMachine( STATSPATHS.PXETCTX, machine, login )
+        txConfigFilesSourcePath = STATSPATHS.getPXPathFromMachine( STATSPATHS.PXETCTX, machine, login )
         output = commands.getoutput( "rsync -avzr  --delete-before -e ssh %s@%s:%s %s%s/"  %( login, machine, txConfigFilesSourcePath, STATSPATHS.STATSPXTXCONFIGS, machine ) )
     
     updateConfigurationFiles = staticmethod( updateConfigurationFiles )    

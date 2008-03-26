@@ -216,8 +216,11 @@ class LanguageTools :
         
         """
         
-        formerLanguagePaths = StatsPaths.getAllStatsPaths( formerLanguage )
-        newLanguagePaths    = StatsPaths.getAllStatsPaths( newLanguage )
+        statsPaths = StatsPaths()
+        statsPaths.setPaths()
+        
+        formerLanguagePaths = statsPaths.getAllStatsPaths(formerLanguage)
+        newLanguagePaths    = statsPaths.getAllStatsPaths( newLanguage )
         combinedPaths = []
         
         for formerPath, newPath in formerLanguagePaths, newLanguagePaths:

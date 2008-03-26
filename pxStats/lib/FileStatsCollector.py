@@ -169,9 +169,7 @@ class FileStatsCollector( Translatable ):
         
         if self.logging == True:
             if self.logger is None: # Enable logging
-                statsPaths= StatsPaths()
-                statsPaths.setPaths()
-                self.logger = Logger( statsPaths.STATSLOGGING + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
+                self.logger = Logger( STATSPATHS.STATSLOGGING + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
                 self.logger = self.logger.getLogger()
             
         
@@ -849,16 +847,13 @@ class FileStatsCollector( Translatable ):
             @return: returns the file's name. 
             
         """
-        
-        statsPaths= StatsPaths()
-        statsPaths.setPaths()
-        
+                
         baseName    = os.path.basename(self.files[0])
         machineName = os.path.basename(os.path.dirname( self.files[0] ))
         fileType    = baseName.split( "_" )[0]
         clientName  = baseName.split( "." )[0].split( "_" )[1] 
         
-        fileName = statsPaths.STATSLOGACCESS  + "%s_%s_%s" %( fileType, clientName, machineName )
+        fileName = STATSPATHS.STATSLOGACCESS  + "%s_%s_%s" %( fileType, clientName, machineName )
         
         return fileName       
      
@@ -900,14 +895,11 @@ if __name__ == "__main__" :
     
     import time 
     
-    statsPaths = STATSPATHS()
-    statsPaths.setPaths()
-    
-    
+       
     timeA= time.time()
     types = [ "latency", "errors","bytecount" ]
     
-    filename = StatsPaths.STATSLOGS + 'someMachine/tx_someclient.log'
+    filename = statsPaths.STATSLOGS + 'someMachine/tx_someclient.log'
     
     startingHours=["00:00:00","01:00:00","02:00:00","03:00:00","04:00:00","05:00:00","06:00:00","07:00:00","08:00:00","09:00:00","10:00:00","11:00:00","12:00:00","13:00:00","14:00:00","15:00:00","16:00:00","17:00:00","18:00:00","19:00:00","20:00:00","21:00:00","22:00:00","23:00:00" ]
     
@@ -918,7 +910,7 @@ if __name__ == "__main__" :
     timeB = time.time()
     print timeB - timeA    
     
-    saveFile = StatsPaths.STATSDATA + "testNew" 
+    saveFile = STATSPATHS.STATSDATA + "testNew" 
     
     del stats.logger
     CpickleWrapper.save( object = stats, filename = saveFile )

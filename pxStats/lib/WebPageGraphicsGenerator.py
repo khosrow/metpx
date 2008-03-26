@@ -41,6 +41,10 @@ CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 
 class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
             
+    def __init__(self):
+        self.paths = StatsPaths
+        self.paths.setPaths()
+                
     def __generateAllGraphicsForGroups( self, graphicType ):
         """
             
@@ -69,10 +73,10 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
                 
                 if graphicType == "daily":
                     commands.getstatusoutput( '%sgenerateGraphics.py -g %s -c %s --combineClients --copy -d "%s"  -m %s -f %s -p %s  -s 24 --outputLanguage %s'\
-                                              %( StatsPaths.STATSBIN, group, groupMembers, self.timeOfRequest, groupMachines, groupFileTypes, groupProducts, self.outputLanguage ) )
+                                              %( self.paths.STATSBIN, group, groupMembers, self.timeOfRequest, groupMachines, groupFileTypes, groupProducts, self.outputLanguage ) )
                 else:    
                     commands.getoutput('%sgenerateGraphics.py -g %s -c %s --combineClients --copy --date "%s"  -m %s -f %s -p %s  %s --outputLanguage %s'\
-                                        %( StatsPaths.STATSBIN, group, groupMembers, self.timeOfRequest, groupMachines, groupFileTypes,\
+                                        %( self.paths.STATSBIN, group, groupMembers, self.timeOfRequest, groupMachines, groupFileTypes,\
                                            groupProducts, supportedGraphicTypes[ graphicType], self.outputLanguage ) )
          
          
@@ -106,18 +110,18 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
         for machinePair in machinePairs:
             #individual graphics 
             commands.getstatusoutput( "%sgenerateRRDGraphics.py %s --copy -f tx --machines '%s' --havingRun --date '%s' --fixedCurrent --outputLanguage %s"\
-                                      %( supportedGraphicTypes[graphicType], StatsPaths.STATSBIN, machinePair, self.timeOfRequest, self.outputLanguage ) )
+                                      %( supportedGraphicTypes[graphicType], self.paths.STATSBIN, machinePair, self.timeOfRequest, self.outputLanguage ) )
             #print output
             commands.getstatusoutput( "%sgenerateRRDGraphics.py %s --copy -f rx --machines '%s' --havingRun --date '%s' --fixedCurrent --outputLanguage %s"\
-                                      %( supportedGraphicTypes[graphicType], StatsPaths.STATSBIN, machinePair, self.timeOfRequest, self.outputLanguage ) )    
+                                      %( supportedGraphicTypes[graphicType], self.paths.STATSBIN, machinePair, self.timeOfRequest, self.outputLanguage ) )    
             
             if generateTotalsGraphics == True :
                 #print output
                 commands.getstatusoutput( '%sgenerateRRDGraphics.py %s --copy --totals -f "rx" --machines "%s" --havingRun  --fixedCurrent --date "%s" --outputLanguage %s'\
-                                          %( supportedGraphicTypes[graphicType], StatsPaths.STATSBIN, machinePair, self.timeOfRequest, self.outputLanguage ) )
+                                          %( supportedGraphicTypes[graphicType], self.paths.STATSBIN, machinePair, self.timeOfRequest, self.outputLanguage ) )
                 #print output
                 commands.getstatusoutput( '%sgenerateRRDGraphics.py %s --copy --totals -f "tx" --machines "%s" --havingRun  --fixedCurrent --date "%s" --outputLanguage %s'\
-                                          %( supportedGraphicTypes[graphicType], StatsPaths.STATSBIN, machinePair, self.timeOfRequest, self.outputLanguage ) )
+                                          %( supportedGraphicTypes[graphicType], self.paths.STATSBIN, machinePair, self.timeOfRequest, self.outputLanguage ) )
                 #print output
         
         
@@ -264,11 +268,11 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
             if "," in machines :
                 #print "%sgenerateAllGraphsForServer.py -m '%s' -c  -l '%s' --date '%s'  " %( StatsPaths.STATSBIN, machines.replace( "'","" ),logins.replace( "'","" ),currentTime )
                 commands.getoutput( "%sgenerateAllGraphsForServer.py -m '%s' -c  -l '%s' --date '%s' --outputLanguage %s "\
-                                    %( StatsPaths.STATSBIN, machines.replace( "'","" ), logins.replace( "'","" ), self.timeOfRequest, self.outputLanguage ) )
+                                    %( self.paths.STATSBIN, machines.replace( "'","" ), logins.replace( "'","" ), self.timeOfRequest, self.outputLanguage ) )
                 #print output
             else:
                 commands.getoutput( "%sgenerateAllGraphsForServer.py -i -m '%s' -l '%s'  --date '%s' --outputLanguage %s "
-                                     %( StatsPaths.STATSBIN, machines.replace( "'","" ), logins.replace( "'","" ), self.timeOfRequest, self.outputLanguage ) )    
+                                     %( self.paths.STATSBIN, machines.replace( "'","" ), logins.replace( "'","" ), self.timeOfRequest, self.outputLanguage ) )    
                 #print "%sgenerateAllGraphsForServer.py -i -m '%s' -l '%s' --date '%s'  " %( StatsPaths.STATSBIN, machines.replace( "'","" ),logins.replace( "'","" ),currentTime )
                 #print output        
                 
@@ -279,10 +283,10 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
         
                 #Generate all the daily total graphs.
                 commands.getoutput( '%sgenerateRRDGraphics.py --copy --totals -f "rx" --machines "%s" -d --fixedCurrent --date "%s" --outputLanguage %s'\
-                                    %( StatsPaths.STATSBIN, machinePair, self.timeOfRequest, self.outputLanguage) )
+                                    %( self.paths.STATSBIN, machinePair, self.timeOfRequest, self.outputLanguage) )
                 #print output    
                 commands.getoutput( '%sgenerateRRDGraphics.py --copy --totals -f "tx" --machines "%s" -d --fixedCurrent --date "%s" --outputLanguage %s'\
-                                    %( StatsPaths.STATSBIN, machinePair, self.timeOfRequest, self.outputLanguage ) )
+                                    %( self.paths.STATSBIN, machinePair, self.timeOfRequest, self.outputLanguage ) )
           
           
           

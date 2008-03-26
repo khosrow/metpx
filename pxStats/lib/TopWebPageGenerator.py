@@ -1,9 +1,5 @@
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
-
 ##############################################################################
 ##
 ##
@@ -11,6 +7,10 @@ named COPYING in the root of the source directory tree.
 ##
 ##
 ## @author: Nicholas Lemay
+##
+## @license : MetPX Copyright (C) 2004-2006  Environment Canada
+##            MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+##            named COPYING in the root of the source directory tree.
 ##
 ## @since: 12-04-2007, last updated on 2008-02-19 
 ##
@@ -43,9 +43,9 @@ from pxStats.lib.Translatable import Translatable
 """
     - Small function that adds pxLib to sys path.
 """    
-PATHS = StatsPaths( )
-PATHS.setPaths()
-sys.path.append( PATHS.PXLIB )
+STATSPATHS = StatsPaths( )
+STATSPATHS.setPaths()
+sys.path.append( STATSPATHS.PXLIB )
 
 from PXManager import *
 
@@ -87,7 +87,7 @@ class TopWebPageGenerator( Translatable ):
         paths = StatsPaths()
         paths.setPaths( LanguageTools.getMainApplicationLanguage() )
     
-        file = "%stop_%s.html" %( StatsPaths.STATSWEBPAGES, self.outputLanguage )
+        file = "%stop_%s.html" %( paths.STATSWEBPAGES, self.outputLanguage )
         fileHandle = open( file , 'w' )
     
         fileHandle.write( """

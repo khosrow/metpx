@@ -21,7 +21,7 @@
 #############################################################################################
 """
 
-import commands, gettext, os, time, getopt, rrdtool, shutil, sys
+import commands, os, time, rrdtool, shutil, sys
 
 
 """
@@ -40,9 +40,9 @@ from pxStats.lib.Translatable import Translatable
 """
     - Small function that adds pxLib to sys path.
 """
-statsPaths = StatsPaths( )
-statsPaths.setBasicPaths()
-sys.path.append( statsPaths.PXLIB )
+STATSPATHS = StatsPaths( )
+STATSPATHS.setBasicPaths()
+sys.path.append( STATSPATHS.PXLIB )
 
 from   Logger import *
 
@@ -83,7 +83,7 @@ class RRDGraphicProducer( Translatable ):
         self.pathTowardsProducedGraphics.setPaths(outputLanguage)
         
         if turnOffLogging == False:
-            logger = Logger( statsPaths.STATSLOGGING + 'stats_'+'rrd_graphs' + '.log.notb', 'INFO', 'TX' + 'rrd_graphs', bytes = 10000000  ) 
+            logger = Logger( self.pathTowardsSourceFiles.STATSLOGGING + 'stats_'+'rrd_graphs' + '.log.notb', 'INFO', 'TX' + 'rrd_graphs', bytes = 10000000  ) 
             self.logger = logger.getLogger()
         else:
             self.logger = None
@@ -833,9 +833,9 @@ class RRDGraphicProducer( Translatable ):
                 destination ="%s%s/%s/%s/%s/%s"  %( self.pathTowardsProducedGraphics.STATSGRAPHSARCHIVES, translatedGraphicType , _("totals"), machine, self.fileType, endOfDestination  )
             else:
                 
-                destination =  "%s%s/%s/%s/%s" %( StatsPaths.STATSGRAPHSARCHIVES, translatedGraphicType, self.fileType, client, endOfDestination )   
+                destination =  "%s%s/%s/%s/%s" %( self.pathTowardsProducedGraphics.STATSGRAPHSARCHIVES, translatedGraphicType, self.fileType, client, endOfDestination )   
         else:  
-            destination = "%s%s/%s/%s/%s" %( StatsPaths.STATSGRAPHSARCHIVES, translatedGraphicType, self.fileType, client, endOfDestination )
+            destination = "%s%s/%s/%s/%s" %( self.pathTowardsProducedGraphics.STATSGRAPHSARCHIVES, translatedGraphicType, self.fileType, client, endOfDestination )
         
         
         #print destination
@@ -866,7 +866,7 @@ class RRDGraphicProducer( Translatable ):
             os.makedirs( os.path.dirname( destination ), mode=0777 )                                                      
             dirname = os.path.dirname( destination )                                                  
             
-            while( dirname != StatsPaths.STATSGRAPHSARCHIVES[:-1] ):#[:-1] removes the last / character 
+            while( dirname != self.pathTowardsProducedGraphics.STATSGRAPHSARCHIVES[:-1] ):#[:-1] removes the last / character 
                         
                 try:
                     os.chmod( dirname, 0777 )

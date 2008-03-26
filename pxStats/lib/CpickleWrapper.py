@@ -130,14 +130,16 @@ if __name__ == "__main__":
                    gives an idea on proper usage.
     """
     
+    paths = StatsPaths()
+    paths.setPaths()
     #standard test case 
     x = "Hello world!"
-    CpickleWrapper.save( x, StatsPaths.STATSDATA +"x" )
-    x = CpickleWrapper.load ( StatsPaths.STATSDATA +"x" ) 
+    CpickleWrapper.save( x, paths.STATSDATA +"x" )
+    x = CpickleWrapper.load ( paths.STATSDATA +"x" ) 
     print x
     
     #trouble cases 
     CpickleWrapper.save (x,"y")#non absolute file name not yet implemented.... 
-    y = CpickleWrapper.load( StatsPaths.STATSDATA + "nonexistingfile" )
+    y = CpickleWrapper.load( paths.STATSDATA + "nonexistingfile" )
         
         

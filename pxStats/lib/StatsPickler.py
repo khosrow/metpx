@@ -91,9 +91,9 @@ class StatsPickler(Translatable):
         
         if self.logging == True:
             if logger is None: # Enable logging
-                if not os.path.isdir( StatsPaths.STATSLOGGING ):
-                    os.makedirs( StatsPaths.STATSLOGGING , mode=0777 )
-                self.logger = Logger( StatsPaths.STATSLOGGING + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
+                if not os.path.isdir( STATSPATHS.STATSLOGGING ):
+                    os.makedirs( STATSPATHS.STATSLOGGING , mode=0777 )
+                self.logger = Logger( STATSPATHS.STATSLOGGING + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
                 self.logger = self.logger.getLogger()
         else:
             logger = True
@@ -143,9 +143,9 @@ class StatsPickler(Translatable):
                 
         hour = StatsDateLib.getHoursFromIso( StatsDateLib.getIsoFromEpoch( currentTime ) )
         
-        maxLt = ( os.statvfs( StatsPaths.STATSPICKLES )[statvfs.F_NAMEMAX])
+        maxLt = ( os.statvfs( STATSPATHS.STATSPICKLES )[statvfs.F_NAMEMAX])
         
-        fileName = ( "%s" + "%." +  str( maxLt ) + "s/%s/%s/%." + str( maxLt ) + "s_%s" )   %( StatsPaths.STATSPICKLES, client, timeFolder,  fileType, str(machine),  str(hour) )  
+        fileName = ( "%s" + "%." +  str( maxLt ) + "s/%s/%s/%." + str( maxLt ) + "s_%s" )   %( STATSPATHS.STATSPICKLES, client, timeFolder,  fileType, str(machine),  str(hour) )  
                 
         return fileName 
           
@@ -239,7 +239,7 @@ class StatsPickler(Translatable):
                                  
                 dirname = os.path.dirname( self.pickleName )                                                  
                 
-                while( dirname != StatsPaths.STATSPICKLES[:-1] ):#[:-1] removes the last / character 
+                while( dirname != STATSPATHS.STATSPICKLES[:-1] ):#[:-1] removes the last / character 
                     
                     try:
                         os.chmod( dirname, 0777 )
@@ -268,7 +268,7 @@ class StatsPickler(Translatable):
                      
         """    
         
-        absoluteFilename = str( StatsPaths.STATSDATA ) + "TEST_OUTPUT_FILE_FOR_STATSPICKLER "
+        absoluteFilename = str( STATSPATHS.STATSDATA ) + "TEST_OUTPUT_FILE_FOR_STATSPICKLER "
         print _("Output filename used : %s") %absoluteFilename
         fileHandle = open( absoluteFilename , 'w' )
         old_stdout = sys.stdout 
@@ -318,7 +318,7 @@ def main():
     #cs.printStats()        
     
     testFileName = StatsPickler.buildThisHoursFileName("client1client2client3", 0, "2007-07-15 00:00:00", "tx", "machinename")
-    if testFileName != "%sclient1client2client3/20070715/tx/machinename_00" %StatsPaths.STATSPICKLES :
+    if testFileName != "%sclient1client2client3/20070715/tx/machinename_00" %STATSPATHS.STATSPICKLES :
         print "Error. StatsPickler.buildThisHoursFileName does not produce the right file name."
         print "Please verify the method's code or it's unit test."
         sys.exit()

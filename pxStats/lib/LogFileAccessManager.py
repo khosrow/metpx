@@ -1,8 +1,5 @@
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
 #############################################################################################
 #
 #
@@ -49,8 +46,11 @@ class LogFileAccessManager(object):
             @param accessFile:
         
         """
+        paths = StatsPaths()
+        paths.setPaths()
+        
         if accessFile =="":
-            accessFile = StatsPaths.STATSLOGACCESS + "default"
+            accessFile = paths.STATSLOGACCESS + "default"
                 
         self.accessDictionary = accessDictionary or {} # Empty array to start with.
         self.accessFile = accessFile #File that contains the current file acces.
@@ -259,10 +259,12 @@ def main():
     """
     from LogFileAccessManager import LogFileAccessManager
    
+    paths = StatsPaths()
+    paths.setPaths()
     #  
     # Create text file for testing.
     #    
-    testDirectory = StatsPaths.STATSDATA + "logFileAccessTestFolder/"
+    testDirectory = paths.STATSDATA + "logFileAccessTestFolder/"
     if not os.path.isdir( testDirectory ) :
         os.makedirs(testDirectory)      
    

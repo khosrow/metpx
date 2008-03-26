@@ -27,12 +27,24 @@ named COPYING in the root of the source directory tree.
     Small function that adds pxlib to the environment path.  
 """
 import gettext, os, time, sys, datetime, string
+
+"""
+    - Add pxStats to sys.path
+"""
 sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../../')
-try:
-    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
-except KeyError:
-    pxlib = '/apps/px/lib/'
-sys.path.append(pxlib)
+from pxStats.lib.StatsPaths import StatsPaths
+from pxStats.lib.StatsDateLib import StatsDateLib
+from pxStats.lib.StatsConfigParameters import StatsConfigParameters
+from pxStats.lib.MachineConfigParameters import MachineConfigParameters
+from pxStats.lib.WebPageGeneratorInterface import WebPageGeneratorInterface
+
+
+"""
+    - Add pxlib to sys.path
+"""
+STATSPATHS = StatsPaths()
+STATSPATHS.setPaths()
+sys.path.append(STATSPATHS.PXLIB)
 
 
 """
@@ -40,11 +52,7 @@ sys.path.append(pxlib)
     PXManager requires pxlib 
 """
 from PXManager import *
-from pxStats.lib.StatsPaths import StatsPaths
-from pxStats.lib.StatsDateLib import StatsDateLib
-from pxStats.lib.StatsConfigParameters import StatsConfigParameters
-from pxStats.lib.MachineConfigParameters import MachineConfigParameters
-from pxStats.lib.WebPageGeneratorInterface import WebPageGeneratorInterface
+
    
 LOCAL_MACHINE = os.uname()[1]   
 CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
@@ -246,10 +254,10 @@ class TotalsGraphicsWebPageGenerator( WebPageGeneratorInterface ):
         for machineTag in machineTags:
             machineNames     = machineParameters.getPairedMachinesAssociatedWithListOfTags( [ machineTag ] )
             for machineName in machineNames:
-                if not os.path.isdir(StatsPaths.STATSWEBPAGESHTML):
-                    os.makedirs( StatsPaths.STATSWEBPAGESHTML )
+                if not os.path.isdir(self.pathsTowardsOutputFiles.STATSWEBPAGESHTML):
+                    os.makedirs( self.pathsTowardsOutputFiles.STATSWEBPAGESHTML )
                 machineName = TotalsGraphicsWebPageGenerator.getCombinedMachineName( machineName )
-                file = "%s%s_%s.html" %( StatsPaths.STATSWEBPAGESHTML, machineTag, self.displayedLanguage )
+                file = "%s%s_%s.html" %( self.pathsTowardsOutputFiles.STATSWEBPAGESHTML, machineTag, self.displayedLanguage )
                 fileHandle = open( file , 'w' )
                 
                 
@@ -340,16 +348,16 @@ class TotalsGraphicsWebPageGenerator( WebPageGeneratorInterface ):
                             year, month, day = StatsDateLib.getYearMonthDayInStrfTime( x )
                             week = time.strftime( "%W", time.gmtime(x))
                             if timeType ==  timeTypes[0] :
-                                file = "%sdaily/totals/%s/rx/%s/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, month, rxTypesInFileNames[type], day )     
+                                file = "%sdaily/totals/%s/rx/%s/%s/%s/%s.png" %( self.pathsTowardsGraphics.STATSGRAPHSARCHIVES, machineName, year, month, rxTypesInFileNames[type], day )     
                                 webLink =  "archives/daily/totals/%s/rx/%s/%s/%s/%s.png" %(  machineName, year, month, rxTypesInFileNames[type], day )     
                             elif timeType ==  timeTypes[1]:
-                                file = "%sweekly/totals/%s/rx/%s/%s/%s.png" %(  StatsPaths.STATSGRAPHSARCHIVES, machineName, year, rxTypesInFileNames[type], week )
+                                file = "%sweekly/totals/%s/rx/%s/%s/%s.png" %(  self.pathsTowardsGraphics.STATSGRAPHSARCHIVES, machineName, year, rxTypesInFileNames[type], week )
                                 webLink ="archives/weekly/totals/%s/rx/%s/%s/%s.png" %(  machineName, year, rxTypesInFileNames[type], week )
                             elif timeType ==  timeTypes[2]:
-                                file = "%smonthly/totals/%s/rx/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, rxTypesInFileNames[type], month )
+                                file = "%smonthly/totals/%s/rx/%s/%s/%s.png" %( self.pathsTowardsGraphics.STATSGRAPHSARCHIVES, machineName, year, rxTypesInFileNames[type], month )
                                 webLink ="archives/monthly/totals/%s/rx/%s/%s/%s.png" %(  machineName, year, rxTypesInFileNames[type], month )
                             elif timeType ==  timeTypes[3]:
-                                file = "%syearly/totals/%s/rx/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName,  rxTypesInFileNames[type], year ) 
+                                file = "%syearly/totals/%s/rx/%s/%s.png" %( self.pathsTowardsGraphics.STATSGRAPHSARCHIVES, machineName,  rxTypesInFileNames[type], year ) 
                                 webLink = "archives/yearly/totals/%s/rx/%s/%s.png" %(  machineName,  rxTypesInFileNames[type], year ) 
                             
                             
@@ -423,19 +431,19 @@ class TotalsGraphicsWebPageGenerator( WebPageGeneratorInterface ):
                             year, month, day = StatsDateLib.getYearMonthDayInStrfTime( x )
                             week = time.strftime( "%W", time.gmtime(x))
                             if timeType == timeTypes[0] :
-                                file = "%sdaily/totals/%s/tx/%s/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, month, txTypesInFileNames[type], day )
+                                file = "%sdaily/totals/%s/tx/%s/%s/%s/%s.png" %( self.pathsTowardsGraphics.STATSGRAPHSARCHIVES, machineName, year, month, txTypesInFileNames[type], day )
                                 webLink = "archives/daily/totals/%s/tx/%s/%s/%s/%s.png" %( machineName, year, month, txTypesInFileNames[type], day )     
                             
                             elif timeType == timeTypes[1]:
-                                file = "%sweekly/totals/%s/tx/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, txTypesInFileNames[type], week )
+                                file = "%sweekly/totals/%s/tx/%s/%s/%s.png" %( self.pathsTowardsGraphics.STATSGRAPHSARCHIVES, machineName, year, txTypesInFileNames[type], week )
                                 webLink = "archives/weekly/totals/%s/tx/%s/%s/%s.png" %( machineName, year, txTypesInFileNames[type], week )
                                 
                             elif timeType == timeTypes[2]:
-                                file = "%smonthly/totals/%s/tx/%s/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName, year, txTypesInFileNames[type], month )
+                                file = "%smonthly/totals/%s/tx/%s/%s/%s.png" %( self.pathsTowardsGraphics.STATSGRAPHSARCHIVES, machineName, year, txTypesInFileNames[type], month )
                                 webLink = "archives/monthly/totals/%s/tx/%s/%s/%s.png" %( machineName, year, txTypesInFileNames[type], month )
                                 
                             elif timeType == timeTypes[3]:
-                                file = "%syearly/totals/%s/tx/%s/%s.png" %( StatsPaths.STATSGRAPHSARCHIVES, machineName,  txTypesInFileNames[type], year )  
+                                file = "%syearly/totals/%s/tx/%s/%s.png" %( self.pathsTowardsGraphics.STATSGRAPHSARCHIVES, machineName,  txTypesInFileNames[type], year )  
                                 webLink = "archives/yearly/totals/%s/tx/%s/%s.png" %(  machineName,  txTypesInFileNames[type], year )
                             
                             if os.path.isfile(file):  

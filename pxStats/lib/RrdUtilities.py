@@ -88,7 +88,7 @@ class RrdUtilities:
             elif usage == "group":
                  fileName = STATSPATHS.STATSCURRENTDB + "%s/%s_%s" %( dataType, groupName, combinedMachineName )    
             elif usage == "totalForMachine":
-                 fileName = StatsPaths.STATSCURRENTDB + "%s/%s_%s" %( dataType, fileType, combinedMachineName )            
+                 fileName = STATSPATHS.STATSCURRENTDB + "%s/%s_%s" %( dataType, fileType, combinedMachineName )            
         else:
             if usage == "regular":
                 fileName = STATSPATHS.STATSCURRENTDB + "%s/combined/%s_%s" %( dataType, combinedClientsName, combinedMachineName )  

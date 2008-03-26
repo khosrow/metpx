@@ -53,9 +53,9 @@ from pxStats.lib.Translatable import Translatable
 """
     - Small function that adds pxLib to sys path.
 """
-statsPaths = StatsPaths( )
-statsPaths.setBasicPaths()
-sys.path.append( statsPaths.PXLIB )
+STATSPATHS = StatsPaths( )
+STATSPATHS.setBasicPaths()
+sys.path.append( STATSPATHS.PXLIB )
 
 """
     These imports require pxlib 
@@ -120,7 +120,7 @@ class GnuPlotter( Translatable ):
         self.logger           = logger
         self.logging          = logging
         self.workingLanguage  = workingLanguage   # Language with whom we are currently working, in which the string parameters were specified.
-        self. outputLanguage  = outputLanguage    # Language in which the graphics will be produced.
+        self.outputLanguage  = outputLanguage    # Language in which the graphics will be produced.
         
         if self.logging == True:
             if self.logger == None: # Enable logging
@@ -137,13 +137,13 @@ class GnuPlotter( Translatable ):
         if self.workingLanguage not in LanguageTools.getSupportedLanguages():
             if self.logging == True:
                 _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.workingLanguage )
-                self.logger.error( _("Error. %s is not a supported working language." ) %( self.workingLanguage )  )
+                self.logger.error( _("Error. %s is not a supported working language.") %( self.workingLanguage )  )
                 sys.exit()
                 
         if self.outputLanguage not in LanguageTools.getSupportedLanguages():
             if self.logging == True:
                 _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.workingLanguage )
-                self.logger.error( _("Error. %s is not a supported output language." %( self.outputLanguage )  )        
+                self.logger.error( _("Error. %s is not a supported output language.") %( self.outputLanguage )  )        
                 sys.exit()
                 
         
@@ -189,9 +189,10 @@ class GnuPlotter( Translatable ):
         
         """ 
         
+        statsPaths = STATSPATHS()
+        statsPaths.setPaths(self.outputLanguage)
         _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.outputLanguage )
-        
-        
+
         entityName = ""
         
         if len( self.clientNames ) == 0:
@@ -216,7 +217,7 @@ class GnuPlotter( Translatable ):
             
             formattedProductName = combinedProductsName[ :-1 ] #remove trailing _ character.    
         
-        folder =   StatsPaths.STATSGRAPHS + _("others/gnuplot/%.50s/") %( entityName )     
+        folder =   statsPaths.STATSGRAPHS + _("others/gnuplot/%.50s/") %( entityName )     
         
         translatedStatsTypes = [ LanguageTools.translateTerm(statsType, self.workingLanguage, self.outputLanguage, CURRENT_MODULE_ABS_PATH)\
                                  for statsType in self.statsTypes ] 
@@ -517,6 +518,9 @@ class GnuPlotter( Translatable ):
             
         """
         
+        statsPaths = STATSPATHS()
+        statsPaths.setPaths(self.outputLanguage)
+        
         _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.outputLanguage )
         
         src = self.imageName
@@ -544,13 +548,13 @@ class GnuPlotter( Translatable ):
             
                                         
         if copyToArchive == True : 
-            destination = StatsPaths.STATSGRAPHSARCHIVES + _("daily/%s/%s/") %( self.fileType, clientName ) + str(year) + "/" + str(month) + "/" + str(day) + ".png"
+            destination = statsPaths.STATSGRAPHSARCHIVES + _("daily/%s/%s/") %( self.fileType, clientName ) + str(year) + "/" + str(month) + "/" + str(day) + ".png"
                         
             if not os.path.isdir( os.path.dirname( destination ) ):
                 os.makedirs(  os.path.dirname( destination ), 0777 )   
                 dirname = os.path.dirname( destination )                                                  
                 
-                while( dirname != StatsPaths.STATSGRAPHSARCHIVES[:-1] ):#[:-1] removes the last / character 
+                while( dirname != statsPaths.STATSGRAPHSARCHIVES[:-1] ):#[:-1] removes the last / character 
                     
                     try:
                         os.chmod( dirname, 0777 )
@@ -571,7 +575,7 @@ class GnuPlotter( Translatable ):
         
         
         if copyToColumbo == True : 
-            destination = StatsPaths.STATSGRAPHS + "webGraphics/columbo/%s.png" %clientName
+            destination = statsPaths.STATSGRAPHS + "webGraphics/columbo/%s.png" %clientName
             if not os.path.isdir( os.path.dirname( destination ) ):
                 os.makedirs(  os.path.dirname( destination ), 0777 )                                                      
                 os.chmod( os.path.dirname( destination ), 0777 )
