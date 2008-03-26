@@ -94,11 +94,13 @@ class AutomaticUpdatesManager( Translatable ):
             
         """
         
-        timeOfLastUpdate = None 
+        timeOfLastUpdate = StatsDateLib.getCurrentTimeInIsoformat() 
         
         paths = StatsPaths()
         paths.setPaths()
-                
+        
+        if not os.path.isdir(paths.STATSTEMPAUTUPDTLOGS):
+            os.makedirs(paths.STATSTEMPAUTUPDTLOGS)       
         allEntries = os.listdir(paths.STATSTEMPAUTUPDTLOGS) 
         
         if allEntries !=[] :
