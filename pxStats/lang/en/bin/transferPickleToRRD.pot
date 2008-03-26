@@ -118,9 +118,24 @@ msgstr "Error in getPairs."
 msgid "The %s stat type was not found in previously collected data."
 msgstr "The %s stat type was not found in previously collected data."
 
+msgid "errors"
+msgstr "errors"
+
 msgid "Updated  %s db for %s in db named : %s"
 msgstr "Updated  %s db for %s in db named : %s"
 
 msgid "This database was not updated since it's last update was more recent than specified date : %s"
 msgstr "This database was not updated since it's last update was more recent than specified date : %s"
+
+msgid "bytecount"
+msgstr "bytecount"
+
+msgid "filecount"
+msgstr "filecount"
+
+msgid "filesOverMaxLatency"
+msgstr "filesOverMaxLatency"
+
+msgid "latency"
+msgstr "latency"
 

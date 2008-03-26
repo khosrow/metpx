@@ -1,4 +1,7 @@
-#: transferPickleToRRD.py:83
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
 msgid ""
 "\n"
 "\n"
@@ -66,83 +69,85 @@ msgstr ""
 
 
 
-#: transferPickleToRRD.py:128
-msgid "Clients for wich we need to tranfer the data."
-msgstr "Clients pour lesquels nous devons transférer les données."
-
-#: transferPickleToRRD.py:128 transferPickleToRRD.py:138
-#: transferPickleToRRD.py:183 transferPickleToRRD.py:196
-#: transferPickleToRRD.py:202 transferPickleToRRD.py:208
-msgid "ALL"
-msgstr "TOUS"
-
-#: transferPickleToRRD.py:130
-msgid "Decide ending time of the update."
-msgstr "Décidez le temps de fin de la mise-à-jour."
-
-#: transferPickleToRRD.py:132
-msgid "Specify the data type for each of the clients."
-msgstr "Spécifiez le type de donnée pour chacuns des clients."
-
-#: transferPickleToRRD.py:134
 msgid "Transfer the combined data of all the specified clients/sources into a grouped database."
 msgstr "Transfer les données combinées de tous les clients en une seule base de donnée de groupe."
 
-#: transferPickleToRRD.py:136
+#: transferPickleToRRD.py:144
 msgid "Specify on wich machine the clients reside."
 msgstr "Spécifiez sur quelle machine réside les clients."
 
-#: transferPickleToRRD.py:138
+#: transferPickleToRRD.py:146
 msgid "Specify wich product you are interested in."
 msgstr "Spécifiez quels produits vous intéressent."
 
-#: transferPickleToRRD.py:170
+#: transferPickleToRRD.py:178
 msgid "Error. The endind date format must be YYYY-MM-DD HH:MM:SS"
 msgstr "Erreur. La format de la date de fin doit être le suivant : AAAA-MM-JJ HH:MM:SS"
 
-#: transferPickleToRRD.py:171 transferPickleToRRD.py:185
-#: transferPickleToRRD.py:198 transferPickleToRRD.py:204
+#: transferPickleToRRD.py:179 transferPickleToRRD.py:193
+#: transferPickleToRRD.py:206 transferPickleToRRD.py:212
 msgid "Use -h for help."
 msgstr "Utilisez -h pour l'aide"
 
-#: transferPickleToRRD.py:172 transferPickleToRRD.py:186
-#: transferPickleToRRD.py:199 transferPickleToRRD.py:205
+#: transferPickleToRRD.py:180 transferPickleToRRD.py:194
+#: transferPickleToRRD.py:207 transferPickleToRRD.py:213
 msgid "Program terminated."
 msgstr "Programme terminé."
 
-#: transferPickleToRRD.py:184
+#: transferPickleToRRD.py:192
 msgid "Error. Products can only be specified when using special groups."
 msgstr "Erreur. Les produits ne peuvent être que sépcifiés que lorsuq'on utlise des groupes spéciaux."
 
-#: transferPickleToRRD.py:197
+#: transferPickleToRRD.py:205
 msgid "Error. Filetypes cannot be specified when all clients are to be updated."
 msgstr "Erreurs. Les types de fichiers ne peuvent être spécifiés quand tous les clients doivent être mis-à-jour."
 
-#: transferPickleToRRD.py:203
+#: transferPickleToRRD.py:211
 msgid "Error. Specified filetypes must be either 1 for all the group or of the exact same lenght as the number of clients/sources."
 msgstr "Erreur. Le nombre de types de fichier doit être 1 seul pour tout le groupe ou bien le même nombre que le nombre total de clients/sources."
 
-#: transferPickleToRRD.py:217
+#: transferPickleToRRD.py:225
 msgid "tx"
 msgstr "tx"
 
-#: transferPickleToRRD.py:219
+#: transferPickleToRRD.py:227
 msgid "rx"
 msgstr "rx"
 
-#: transferPickleToRRD.py:312
+#: transferPickleToRRD.py:321
 msgid "Error in getPairs."
 msgstr "Erreur dans la méthode getPairs."
 
-#: transferPickleToRRD.py:313
+#: transferPickleToRRD.py:322
 msgid "The %s stat type was not found in previously collected data."
 msgstr "Le type de donnée %s n'a pas été trouvé dans les données précédemment relevées."
 
-#: transferPickleToRRD.py:418
+#: transferPickleToRRD.py:398 transferPickleToRRD.py:513
+#: transferPickleToRRD.py:621
+msgid "errors"
+msgstr "erreurs"
+
+#: transferPickleToRRD.py:443
 msgid "Updated  %s db for %s in db named : %s"
 msgstr "Mis-à-jour de la bd %s pour %s dans une base de données nommée : %s"
 
-#: transferPickleToRRD.py:422 transferPickleToRRD.py:522
+#: transferPickleToRRD.py:449 transferPickleToRRD.py:561
 msgid "This database was not updated since it's last update was more recent than specified date : %s"
 msgstr "Cette base de données ne peut être mise-à-jour puisque la dernière mise-à-jour est plus récente que la date de fin spécifiée : %s"
+
+#: transferPickleToRRD.py:621
+msgid "bytecount"
+msgstr "nbreDeBytes"
+
+#: transferPickleToRRD.py:621
+msgid "filecount"
+msgstr "nbreDeFichiers"
+
+#: transferPickleToRRD.py:621
+msgid "filesOverMaxLatency"
+msgstr "fichiersAvecLatenceInnacceptable"
+
+#: transferPickleToRRD.py:621
+msgid "latency"
+msgstr "latence"
 
