@@ -283,7 +283,7 @@ def generateGraphsForIndividualMachines( infos ) :
             
             if pid == 0: #child process
                 output = commands.getoutput( "python %sgenerateGnuGraphics.py -m '%s' -f tx -c '%s' -d '%s' -s %s --copy --outputLanguage %s" \
-                                             %( StatsPaths.STATSBIN, infos.machines[i], txName, infos.date, infos.timespan, infos.outputLanguage  ) )               
+                                             %( STATSPATHS.STATSBIN, infos.machines[i], txName, infos.date, infos.timespan, infos.outputLanguage  ) )               
                 print output 
                 sys.exit()
         
@@ -310,7 +310,7 @@ def generateGraphsForIndividualMachines( infos ) :
             
             if pid == 0 :#child process
                 output = commands.getoutput( "python %sgenerateGnuGraphics.py -m '%s' -f rx -c '%s' -d '%s' -s %s --copy --outputLanguage %s"\
-                                             %( StatsPaths.STATSBIN, infos.machines[i] , rxName, infos.date,infos.timespan, infos.outputLanguage ) )     
+                                             %( STATSPATHS.STATSBIN, infos.machines[i] , rxName, infos.date,infos.timespan, infos.outputLanguage ) )     
                 print output
                 sys.exit()
         
@@ -352,7 +352,7 @@ def generateGraphsForPairedMachines( infos ) :
         if pid == 0 :#child process
             
             output = commands.getoutput( "python %sgenerateGnuGraphics.py -m %s -f tx -c %s -d '%s' -s %s  --copy --outputLanguage %s"
-                                         %( StatsPaths.STATSBIN, infos.combinedName, txName, infos.date, infos.timespan, infos.outputLanguage ) )
+                                         %( STATSPATHS.STATSBIN, infos.combinedName, txName, infos.date, infos.timespan, infos.outputLanguage ) )
             print output
             sys.exit()    #terminate child process
     
@@ -379,7 +379,7 @@ def generateGraphsForPairedMachines( infos ) :
         
         if pid == 0:#child process            
             output = commands.getoutput( "python %sgenerateGnuGraphics.py -m %s -f rx -c %s -d '%s' -s %s  --copy --outputLanguage %s"\
-                                        %( StatsPaths.STATSBIN, infos.combinedName, rxName, infos.date, infos.timespan, infos.outputLanguage ) )     
+                                        %( STATSPATHS.STATSBIN, infos.combinedName, rxName, infos.date, infos.timespan, infos.outputLanguage ) )     
             print output 
             sys.exit()
         else:
