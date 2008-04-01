@@ -189,7 +189,7 @@ class GnuPlotter( Translatable ):
         
         """ 
         
-        statsPaths = STATSPATHS()
+        statsPaths = StatsPaths()
         statsPaths.setPaths(self.outputLanguage)
         _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.outputLanguage )
 
@@ -315,7 +315,8 @@ class GnuPlotter( Translatable ):
         self.nbErrors[clientCount] = 0
         self.nbFilesOverMaxLatency[clientCount] = 0
         nbEntries = len( self.stats[clientCount].statsCollection.timeSeperators )-1 
-               
+        
+        translatedStatType = LanguageTools.translateTerm(statType, self.workingLanguage, 'en', CURRENT_MODULE_ABS_PATH)
         
         if nbEntries !=0:
             
@@ -333,34 +334,34 @@ class GnuPlotter( Translatable ):
                     if len( self.stats[clientCount].statsCollection.fileEntries[k].means ) >=1 :
                             
                         #special manipulation for each type                    
-                        if statType == _("latency"):
+                        if translatedStatType == "latency":
                             self.nbFilesOverMaxLatency[clientCount] = self.nbFilesOverMaxLatency[ clientCount ] + self.stats[clientCount].statsCollection.fileEntries[k].filesOverMaxLatency    
                     
-                        elif statType == _("bytecount"):
-                            self.totalNumberOfBytes[clientCount] =  self.totalNumberOfBytes[clientCount] +    self.stats[clientCount].statsCollection.fileEntries[k].totals[statType]
+                        elif translatedStatType == "bytecount":
+                            self.totalNumberOfBytes[clientCount] =  self.totalNumberOfBytes[clientCount] +    self.stats[clientCount].statsCollection.fileEntries[k].totals[translatedStatType]
                         
                         
-                        elif statType == _("errors"):
+                        elif translatedStatType == "errors":
                                                     #calculate total number of errors
-                            self.nbErrors[clientCount] = self.nbErrors[clientCount] + self.stats[clientCount].statsCollection.fileEntries[k].totals[statType] 
+                            self.nbErrors[clientCount] = self.nbErrors[clientCount] + self.stats[clientCount].statsCollection.fileEntries[k].totals[translatedStatType] 
                         
                           
                         #add to pairs    
-                        if statType == _("errors") or statType == _("bytecount"): #both use totals     
-                            pairs.append( [StatsDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), self.stats[clientCount].statsCollection.fileEntries[k].totals[statType]] )
+                        if translatedStatType == "errors" or translatedStatType == "bytecount": #both use totals     
+                            pairs.append( [StatsDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), self.stats[clientCount].statsCollection.fileEntries[k].totals[translatedStatType]] )
                                                
-                            #print    StatsDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), self.stats[clientCount].statsCollection.fileEntries[k].totals[statType]                        
+                            #print    StatsDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), self.stats[clientCount].statsCollection.fileEntries[k].totals[translatedStatType]                        
                         
-                        elif statType == _("filecount"):
+                        elif translatedStatType == "filecount":
                             pairs.append( [StatsDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), self.stats[clientCount].statsCollection.fileEntries[k].nbFiles ]  )
                         
                         else:#latency uses means
                             
-                            pairs.append( [ StatsDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), self.stats[clientCount].statsCollection.fileEntries[k].means[statType]] )
+                            pairs.append( [ StatsDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), self.stats[clientCount].statsCollection.fileEntries[k].means[translatedStatType]] )
                             
-                            #print self.stats[clientCount].statsCollection.timeSeperators[k], self.stats[clientCount].statsCollection.fileEntries[k].means[statType]
+                            #print self.stats[clientCount].statsCollection.timeSeperators[k], self.stats[clientCount].statsCollection.fileEntries[k].means[translatedStatType]
                         
-                        if statType == _("filecount"):
+                        if translatedStatType == "filecount":
                             
                             if self.stats[clientCount].statsCollection.fileEntries[k].nbFiles > self.maximums[clientCount][typeCount] :
                                 self.maximums[clientCount][typeCount] =  self.stats[clientCount].statsCollection.fileEntries[k].nbFiles
@@ -370,19 +371,19 @@ class GnuPlotter( Translatable ):
                                 self.minimums[clientCount][typeCount] = self.stats[clientCount].statsCollection.fileEntries[k].nbFiles
                         
                         
-                        elif( self.stats[clientCount].statsCollection.fileEntries[k].maximums[statType]  > self.maximums[clientCount][typeCount] ) :
+                        elif( self.stats[clientCount].statsCollection.fileEntries[k].maximums[translatedStatType]  > self.maximums[clientCount][typeCount] ) :
                             
-                            self.maximums[clientCount][typeCount] =  self.stats[clientCount].statsCollection.fileEntries[k].maximums[statType]
+                            self.maximums[clientCount][typeCount] =  self.stats[clientCount].statsCollection.fileEntries[k].maximums[translatedStatType]
                             
-                            self.timeOfMax[clientCount][typeCount] = self.stats[clientCount].statsCollection.fileEntries[k].timesWhereMaxOccured[statType]
+                            self.timeOfMax[clientCount][typeCount] = self.stats[clientCount].statsCollection.fileEntries[k].timesWhereMaxOccured[translatedStatType]
                             
-                            self.filesWhereMaxOccured[clientCount][typeCount] = self.stats[clientCount].statsCollection.fileEntries[k].filesWhereMaxOccured[statType]
+                            self.filesWhereMaxOccured[clientCount][typeCount] = self.stats[clientCount].statsCollection.fileEntries[k].filesWhereMaxOccured[translatedStatType]
                         
                             
-                        elif self.stats[clientCount].statsCollection.fileEntries[k].minimums[statType] < self.minimums[clientCount][typeCount] :      
+                        elif self.stats[clientCount].statsCollection.fileEntries[k].minimums[translatedStatType] < self.minimums[clientCount][typeCount] :      
                             
-                            if not ( statType == _("bytecount") and  self.stats[clientCount].statsCollection.fileEntries[k].minimums[statType] == 0 ):
-                                self.minimums[clientCount][typeCount] = self.stats[clientCount].statsCollection.fileEntries[k].minimums[statType]
+                            if not ( translatedStatType == "bytecount" and  self.stats[clientCount].statsCollection.fileEntries[k].minimums[translatedStatType] == 0 ):
+                                self.minimums[clientCount][typeCount] = self.stats[clientCount].statsCollection.fileEntries[k].minimums[translatedStatType]
                                                     
                         self.nbFiles[clientCount]  = self.nbFiles[clientCount]  + self.stats[clientCount].statsCollection.fileEntries[k].nbFiles   
                    
@@ -392,7 +393,8 @@ class GnuPlotter( Translatable ):
                         pairs.append( [ StatsDateLib.getSecondsSinceEpoch(self.stats[clientCount].statsCollection.timeSeperators[k]), 0.0 ] )
                 
                 
-                except KeyError:
+                except KeyError, instance:
+                    print instance
                     _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.workingLanguage )
                     self.logger.error( _("Error in getPairs.") )
                     self.logger.error( _("The %s stat type was not found in previously collected data.") %statType )    
@@ -518,7 +520,7 @@ class GnuPlotter( Translatable ):
             
         """
         
-        statsPaths = STATSPATHS()
+        statsPaths = StatsPaths()
         statsPaths.setPaths(self.outputLanguage)
         
         _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.outputLanguage )
