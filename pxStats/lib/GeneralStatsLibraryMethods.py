@@ -4,7 +4,7 @@
 #############################################################################################
 #
 #
-# @name: generalStatsLibraryMethods.py
+# @name: GeneralStatsLibraryMethods.py
 #
 # @author: Nicholas Lemay
 #
@@ -35,8 +35,8 @@ from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.MachineConfigParameters import  MachineConfigParameters
 from pxStats.lib.RrdUtilities import RrdUtilities
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
-
-    
+from pxStats.lib.LanguageTools import LanguageTools
+        
 """
     - Small function that adds pxLib to sys path.
 """    
@@ -51,14 +51,16 @@ sys.path.append(STATSPATHS.PXLIB)
 """
 import PXManager
 import PXPaths
-from PXManager import *
+from   PXManager import *
 
 
 
 #Constants
 LOCAL_MACHINE = os.uname()[1]
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 
-
+global _ 
+_ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH ) 
 
 class GeneralStatsLibraryMethods:
     
@@ -74,7 +76,7 @@ class GeneralStatsLibraryMethods:
                                               
         """
 
-        fileName = STATSPATHS.STATSTEMPLOCKFILES + str( processName ) + ".lock" 
+        fileName = STATSPATHS.STATSTEMPLOCKFILES + str( processName ) + _( ".lock" )
         
         if not os.path.isdir( STATSPATHS.STATSTEMPLOCKFILES ):
             os.makedirs( STATSPATHS.STATSTEMPLOCKFILES )
@@ -99,7 +101,7 @@ class GeneralStatsLibraryMethods:
                        
         """
         
-        fileName = STATSPATHS.STATSTEMPLOCKFILES + str( processName ) + ".lock" 
+        fileName = STATSPATHS.STATSTEMPLOCKFILES + str( processName ) + _( ".lock" )
         
         if os.path.isfile( fileName ):
             os.remove( fileName )
@@ -121,7 +123,7 @@ class GeneralStatsLibraryMethods:
                 
         processIsAlreadyRunning = False
         
-        fileName = STATSPATHS.STATSTEMPLOCKFILES + str( processName ) + ".lock"
+        fileName = STATSPATHS.STATSTEMPLOCKFILES + str( processName ) + _(".lock")
         
         if os.path.isfile( fileName ) :
             fileHandle = open( fileName, 'r' )
@@ -317,13 +319,13 @@ class GeneralStatsLibraryMethods:
     
     def buildPattern( pattern = "" ):
         '''        
-        @param Pattern: pattern from wich to build a matching pattern. Can contain wildcards.               
+            @param Pattern: pattern from wich to build a matching pattern. Can contain wildcards.               
         
         '''
         
         newPattern = '*'
         
-        if pattern == "All" or pattern == '':
+        if pattern == _( "All" ) or pattern == '':
             newPattern = "*"
         else:
             if pattern[0] != "*" and pattern[0] != '?' :
@@ -391,8 +393,8 @@ class GeneralStatsLibraryMethods:
         if havingrunOnAllMachines == False:
             for machine in machines:           
                     
-                rxTxDatabasesLongNames = glob.glob( "%sbytecount/*_*%s*" %( STATSPATHS.STATSCURRENTDB, machine ) )
-                txOnlyDatabasesLongNames = glob.glob( "%slatency/*_*%s*" %( STATSPATHS.STATSCURRENTDB, machine )   )
+                rxTxDatabasesLongNames = glob.glob( _("%sbytecount/*_*%s*") %( STATSPATHS.STATSCURRENTDB, machine ) )
+                txOnlyDatabasesLongNames = glob.glob( _("%slatency/*_*%s*") %( STATSPATHS.STATSCURRENTDB, machine )   )
             
                 
                 #Keep only client/source names.
@@ -421,8 +423,8 @@ class GeneralStatsLibraryMethods:
             for machine in machines:
                 combinedMachineName = combinedMachineName + machine
     
-            rxTxDatabasesLongNames = glob.glob( "%sbytecount/*_%s*" %( STATSPATHS.STATSCURRENTDB, combinedMachineName ) )
-            txOnlyDatabasesLongNames = glob.glob( "%slatency/*_%s*" %( STATSPATHS.STATSCURRENTDB, combinedMachineName )   )
+            rxTxDatabasesLongNames = glob.glob( _("%sbytecount/*_%s*") %( STATSPATHS.STATSCURRENTDB, combinedMachineName ) )
+            txOnlyDatabasesLongNames = glob.glob( _("%slatency/*_%s*") %( STATSPATHS.STATSCURRENTDB, combinedMachineName )   )
     
     
             #Keep only client/source names.
