@@ -365,6 +365,10 @@ msgstr "Crée des graphiques hebdomadaires."
 msgid "Create yearly graph(s)."
 msgstr "Crée des graphiques annuels."
 
+#: generateRRDGraphics.py:455
+msgid "Plotted : %s"
+msgstr "Graphique genere : %s"
+
 #: generateRRDGraphics.py:478 generateRRDGraphics.py:861
 msgid "hours"
 msgstr "heures"
