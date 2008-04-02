@@ -1,10 +1,5 @@
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
-
-
 ##############################################################################
 ##
 ##
@@ -12,6 +7,10 @@ named COPYING in the root of the source directory tree.
 ##
 ##
 ## @author:  : Nicholas Lemay
+##
+## @license  : MetPX Copyright (C) 2004-2006  Environment Canada
+##             MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+##             named COPYING in the root of the source directory tree. 
 ##
 ## @since    :  2006-11-22, last updated on 2008-02-19
 ##
@@ -349,8 +348,12 @@ class DailyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
                 
                 currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( day )
                 
-                file = file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + "daily/rx/%s/"%( rxName ) + str(currentYear) + "/" + str(currentMonth) + "/" + str(currentDay) + ".png"
-                webLink = "archives/daily/rx/%s/"%( rxName ) + str(currentYear) + "/" + str(currentMonth) + "/" + str(currentDay) + ".png"
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.filesLanguage)
+                
+                file = file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + _("daily/rx/%s/")%( rxName ) + str(currentYear) + "/" + str(currentMonth) + "/" + str(currentDay) + ".png"
+                webLink = _("archives/daily/rx/%s/")%( rxName ) + str(currentYear) + "/" + str(currentMonth) + "/" + str(currentDay) + ".png"
+                
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
                 
                 if os.path.isfile( file ):
                     fileHandle.write(  """<a target ="%s" href="%s">"""%( rxName, webLink) + "%s" %time.strftime( "%a", time.gmtime(day) )  + """   </a>""" )
@@ -416,9 +419,14 @@ class DailyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             for day in self.days:
                             
                 currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( day )
-                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + "/daily/tx/%s/"%( txName ) + str(currentYear) + "/" + str(currentMonth) + "/" + str(currentDay) + ".png"
-                webLink =  "archives/daily/tx/%s/"%( txName ) + str(currentYear) + "/" + str(currentMonth) + "/" + str(currentDay) + ".png"
                 
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.filesLanguage )
+                
+                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + _("/daily/tx/%s/")%( txName ) + str(currentYear) + "/" + str(currentMonth) + "/" + str(currentDay) + ".png"
+                webLink =  _("archives/daily/tx/%s/")%( txName ) + str(currentYear) + "/" + str(currentMonth) + "/" + str(currentDay) + ".png"
+
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
+
                 if os.path.isfile( file ):
                     fileHandle.write(  """<a target ="%s" href="%s">"""%( rxName, webLink) + "%s" %(time.strftime( "%a", time.gmtime(day)) )+"""  </a>""" )    
     
