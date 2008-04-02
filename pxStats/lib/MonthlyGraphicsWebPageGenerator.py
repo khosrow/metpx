@@ -1,17 +1,17 @@
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
-
 
 ##############################################################################
 ##
 ##
-## @name   : MonthlyGraphicsWebPageGenerator.py 
+## @name    : MonthlyGraphicsWebPageGenerator.py 
 ##
 ##
-## @author :  Nicholas Lemay
+## @author  : Nicholas Lemay
+##
+## @license : MetPX Copyright (C) 2004-2006  Environment Canada
+##            MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+##            named COPYING in the root of the source directory tree.
 ##
 ## @since    :  2006-11-22, last updated on 2008-02-19
 ##
@@ -42,8 +42,6 @@ from pxStats.lib.WebPageGeneratorInterface import WebPageGeneratorInterface
     Imports
     PXManager requires pxlib 
 """
-
-
 
 from PXManager import *
 
@@ -376,9 +374,13 @@ class MonthlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
                    
             machinesStr = str( parameters.sourceMachinesTags ).replace( '[','' ).replace( ']','' ).replace(',','').replace("'","").replace('"','').replace(" ","")
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
-            file = "/apps/px/pxStats/data/csvFiles/monthly/" + 'rx'+"/%s/%s/%s.csv" %( machinesStr, currentYear, currentMonth )
-            webLink = "csvFiles/monthly/" + 'rx' + "/%s/%s/%s.csv" %( machinesStr, currentYear, currentMonth )
             
+            _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.filesLanguage )
+            
+            file = self.pathsTowardsGraphics.STATSCSVFILES + _("rx/%s/%s/%s.csv") %( machinesStr, currentYear, currentMonth )
+            webLink = _("csvFiles/monthly/rx/%s/%s/%s.csv") %( machinesStr, currentYear, currentMonth )
+            
+            _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
             
             if os.path.isfile( file ):
                 if oneFileFound == False :
@@ -488,8 +490,13 @@ class MonthlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             for month in self.months:
                 
                 currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
-                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + "monthly/rx/%s/"%( rxName ) + str(currentYear) + "/bytecount/%s.png" %str(currentMonth)
-                webLink = "archives/monthly/rx/%s/"%( rxName ) + str(currentYear) + "/bytecount/%s.png" %str(currentMonth)
+                
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.filesLanguage )
+                
+                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + _("monthly/rx/%s/")%( rxName ) + str(currentYear) + _("/bytecount/%s.png") %str(currentMonth)
+                webLink = _("archives/monthly/rx/%s/")%( rxName ) + str(currentYear) + _("/bytecount/%s.png") %str(currentMonth)
+    
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
     
                 if os.path.isfile( file ):
                     fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%.3s&nbsp;</a>"""%( rxName, webLink ,currentMonth ) ) 
@@ -502,8 +509,14 @@ class MonthlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             for month in self.months:
                 
                 currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
-                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + "monthly/rx/%s/"%( rxName ) + str(currentYear) + "/filecount/%s.png" %str(currentMonth)
-                webLink = "archives/monthly/rx/%s/"%( rxName ) + str(currentYear) + "/filecount/%s.png" %str(currentMonth)
+                
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.filesLanguage )
+                
+                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + _("monthly/rx/%s/")%( rxName ) + str(currentYear) + _("/filecount/%s.png") %str(currentMonth)
+                webLink = _("archives/monthly/rx/%s/")%( rxName ) + str(currentYear) + _("/filecount/%s.png") %str(currentMonth)
+                
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
+                
                 if os.path.isfile(file):
                     fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%.3s&nbsp;</a>"""%( rxName, webLink ,currentMonth ) )   
                             
@@ -515,8 +528,11 @@ class MonthlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             for month in self.months:
                 
                 currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
-                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + "monthly/rx/%s/"%( rxName ) + str( currentYear) + "/errors/%s.png" %str(currentMonth)
-                webLink = "archives/monthly/rx/%s/"%( rxName ) + str( currentYear) + "/errors/%s.png" %str(currentMonth)
+                
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.filesLanguage )
+                
+                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + _("monthly/rx/%s/")%( rxName ) + str( currentYear) + _("/errors/%s.png") %str(currentMonth)
+                webLink = _("archives/monthly/rx/%s/")%( rxName ) + str( currentYear) + _("/errors/%s.png") %str(currentMonth)
                 
                 if os.path.isfile( file ):
                     fileHandle.write(  """ <a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%.3s&nbsp;</a>"""%( rxName, webLink ,currentMonth ) )  
@@ -541,8 +557,13 @@ class MonthlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             parameters.getAllParameters()               
             machinesStr = str( parameters.sourceMachinesTags ).replace( '[','' ).replace( ']','' ).replace(',','').replace("'","").replace('"','').replace(" ","")
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
-            file = "/apps/px/pxStats/data/csvFiles/monthly/" + 'tx'+"/%s/%s/%s.csv" %( machinesStr, currentYear, currentMonth )
-            webLink = "csvFiles/monthly/" + 'tx' + "/%s/%s/%s.csv" %( machinesStr, currentYear, currentMonth )
+            
+            _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.filesLanguage )
+            
+            file = self.pathsTowardsGraphics.STATSCSVFILES +  _("tx/%s/%s/%s.csv") %( machinesStr, currentYear, currentMonth )
+            webLink = _("csvFiles/monthly/tx/%s/%s/%s.csv") %( machinesStr, currentYear, currentMonth )
+            
+            _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
             
             if os.path.isfile( file ):
                 if oneFileFound == False:
@@ -676,8 +697,13 @@ class MonthlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             for month in self.months:            
                 
                 currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
-                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + "monthly/tx/%s/"%( txName ) + str(currentYear) + "/latency/%s.png" %str(currentMonth)
-                webLink = "archives/monthly/tx/%s/"%( txName ) + str(currentYear) + "/latency/%s.png" %str(currentMonth)
+                
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.filesLanguage )
+                
+                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + _("monthly/tx/%s/")%( txName ) + str(currentYear) + _("/latency/%s.png") %str(currentMonth)
+                webLink = _("archives/monthly/tx/%s/")%( txName ) + str(currentYear) + _("/latency/%s.png") %str(currentMonth)
+                
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
                 
                 if os.path.isfile( file ):
                     fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%.3s</a>"""%( txName, webLink ,currentMonth ) )
@@ -690,8 +716,13 @@ class MonthlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             for month in self.months:
                
                 currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
-                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + "monthly/tx/%s/"%( txName ) + str(currentYear) + "/filesOverMaxLatency/%s.png" %str(currentMonth)
-                webLink = "archives/monthly/tx/%s/"%( txName ) + str(currentYear) + "/filesOverMaxLatency/%s.png" %str(currentMonth)
+                
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.filesLanguage )
+                
+                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + _("monthly/tx/%s/")%( txName ) + str(currentYear) + _("/filesOverMaxLatency/%s.png") %str(currentMonth)
+                webLink = _("archives/monthly/tx/%s/")%( txName ) + str(currentYear) + _("/filesOverMaxLatency/%s.png") %str(currentMonth)
+                
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
                 
                 if os.path.isfile( file ):
                     fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%.3s</a>"""%( txName, webLink ,currentMonth ) )
@@ -705,8 +736,13 @@ class MonthlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             for month in self.months:
                 
                 currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
-                file    = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + "monthly/tx/%s/"%( txName ) + str(currentYear) + "/bytecount/%s.png" %str(currentMonth)
-                webLink = "archives/monthly/tx/%s/"%( txName ) + str(currentYear) + "/bytecount/%s.png" %str(currentMonth)
+                
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.filesLanguage )
+                
+                file    = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + _("monthly/tx/%s/")%( txName ) + str(currentYear) + _("/bytecount/%s.png") %str(currentMonth)
+                webLink = _("archives/monthly/tx/%s/")%( txName ) + str(currentYear) + _("/bytecount/%s.png") %str(currentMonth)
+                
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
                 
                 if os.path.isfile( file ):
                     fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%.3s</a>"""%( txName, webLink ,currentMonth ) )
@@ -719,8 +755,13 @@ class MonthlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             for month in self.months:
                 
                 currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
-                file    = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + "monthly/tx/%s/"%( txName ) + str(currentYear) + "/filecount/%s.png" %str(currentMonth)
-                webLink = "archives/monthly/tx/%s/"%( txName ) + str(currentYear) + "/filecount/%s.png" %str(currentMonth)
+                
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.filesLanguage )
+                
+                file    = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + _("monthly/tx/%s/")%( txName ) + str(currentYear) + _("/filecount/%s.png") %str(currentMonth)
+                webLink = _("archives/monthly/tx/%s/")%( txName ) + str(currentYear) + _("/filecount/%s.png") %str(currentMonth)
+                
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
                 
                 if os.path.isfile( file ):
                     fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%.3s</a>"""%( txName, webLink ,currentMonth ) )
@@ -733,8 +774,13 @@ class MonthlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             for month in self.months:
                 
                 currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( month )
-                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + "monthly/tx/%s/"%( txName ) + str(currentYear) + "/errors/%s.png" %str(currentMonth)
-                webLink = "archives/monthly/tx/%s/"%( txName ) + str(currentYear) + "/errors/%s.png" %str(currentMonth)
+                
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.filesLanguage )
+                
+                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + _("monthly/tx/%s/")%( txName ) + str(currentYear) + _("/errors/%s.png") %str(currentMonth)
+                webLink = _("archives/monthly/tx/%s/")%( txName ) + str(currentYear) + _("/errors/%s.png") %str(currentMonth)
+                
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
                 
                 if os.path.isfile( file ):
                     fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%.3s</a>"""%( txName, webLink ,currentMonth ) )
