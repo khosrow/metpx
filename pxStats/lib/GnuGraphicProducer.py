@@ -101,7 +101,7 @@ class GnuGraphicProducer( Translatable ):
         self.outputLanguage = outputLanguage   # Language in which the graphic will be produced in.
         
         paths = StatsPaths()
-        paths.setBasicPaths()
+        paths.setPaths()
         if logging == True:
             if self.logger is None: # Enable logging
                 if not os.path.isdir( paths.STATSLOGGING ):
