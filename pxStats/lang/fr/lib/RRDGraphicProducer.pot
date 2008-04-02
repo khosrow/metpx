@@ -1,91 +1,205 @@
-#: RRDGraphicProducer.py:689 RRDGraphicProducer.py:700
+#: RRDGraphicProducer.py:124 RRDGraphicProducer.py:525
+msgid "hours"
+msgstr "heures"
+
+#: RRDGraphicProducer.py:128
+msgid "year(s)"
+msgstr "annee(s)"
+
+#: RRDGraphicProducer.py:132
+msgid "month(s)"
+msgstr "mois"
+
+#: RRDGraphicProducer.py:136
+msgid "day(s)"
+msgstr "jour(s)"
+
+#: RRDGraphicProducer.py:141
+msgid "ending at"
+msgstr "se terminant le"
+
+#: RRDGraphicProducer.py:141
+msgid "for"
+msgstr "pour"
+
+#: RRDGraphicProducer.py:141
+msgid "for a span of "
+msgstr "pour une duree de "
+
+#: RRDGraphicProducer.py:157 RRDGraphicProducer.py:629
+#: RRDGraphicProducer.py:633 RRDGraphicProducer.py:636
+#: RRDGraphicProducer.py:646 RRDGraphicProducer.py:906
+#: RRDGraphicProducer.py:945 RRDGraphicProducer.py:1002
+#: RRDGraphicProducer.py:1538
+msgid "latency"
+msgstr "latence"
+
+#: RRDGraphicProducer.py:162
+msgid "minute(s) averages."
+msgstr "minutes(s)."
+
+#: RRDGraphicProducer.py:162 RRDGraphicProducer.py:165
+msgid "Graphics generated using "
+msgstr "Graphiques cree en utilisant la moyenne de "
+
+#: RRDGraphicProducer.py:165
+msgid "hour(s) averages."
+msgstr "heure(s)."
+
+#: RRDGraphicProducer.py:208 RRDGraphicProducer.py:258
+#: RRDGraphicProducer.py:310
+msgid "Error in generateRRDGraphics.getOverallMin. Unable to read "
+msgstr "Erreur dans generateRRDGraphics.getOverallMin. Impossible de lire."
+
+#: RRDGraphicProducer.py:529
+msgid "years"
+msgstr "annees"
+
+#: RRDGraphicProducer.py:533
+msgid "months"
+msgstr "mois"
+
+#: RRDGraphicProducer.py:537
+msgid "days"
+msgstr "jours"
+
+#: RRDGraphicProducer.py:544
+msgid "others/rrd/%s/%s_%s_%s_%s_%s%s_on_%s.png"
+msgstr "autres/"
+
+#: RRDGraphicProducer.py:591 RRDGraphicProducer.py:914
+#: RRDGraphicProducer.py:945 RRDGraphicProducer.py:1012
+msgid "bytecount"
+msgstr "nbreDeBytes"
+
+#: RRDGraphicProducer.py:623 RRDGraphicProducer.py:918
+#: RRDGraphicProducer.py:945 RRDGraphicProducer.py:1012
+#: RRDGraphicProducer.py:1496
+msgid "filecount"
+msgstr "nbreDeFichiers"
+
+#: RRDGraphicProducer.py:624 RRDGraphicProducer.py:661
+msgid "Files"
+msgstr "Fichiers"
+
+#: RRDGraphicProducer.py:625 RRDGraphicProducer.py:660
+#: RRDGraphicProducer.py:910 RRDGraphicProducer.py:945
+#: RRDGraphicProducer.py:1007
+msgid "filesOverMaxLatency"
+msgstr "fichiersAvecLatenceInnacceptable"
+
+#: RRDGraphicProducer.py:626
+msgid "F"
+msgstr "F"
+
+#: RRDGraphicProducer.py:627 RRDGraphicProducer.py:922
+#: RRDGraphicProducer.py:945
+msgid "errors"
+msgstr "erreurs"
+
+#: RRDGraphicProducer.py:628
+msgid "Errors"
+msgstr "Erreurs"
+
+#: RRDGraphicProducer.py:630
+msgid "Avg"
+msgstr "Moy"
+
+#: RRDGraphicProducer.py:688 RRDGraphicProducer.py:703
+msgid "k on the y axis stands for kilo, meaning x thousands."
+msgstr "k sur l'axe des y signifie kilo, donc x milliers"
+
+#: RRDGraphicProducer.py:690 RRDGraphicProducer.py:701
 msgid "M on the y axis stands for Mega, meaning x millions."
 msgstr "M sur l'axe des y ségnifie Mega, donc x millions."
 
-#: RRDGraphicProducer.py:691 RRDGraphicProducer.py:698
+#: RRDGraphicProducer.py:692 RRDGraphicProducer.py:699
 msgid "G on the y axis stats for giga, meaning x billions."
-msgstr "G sur l'axe des y signifie giga, donc x milliard"
+msgstr "G sur l'axe des y signifie giga, donc x milliards"
 
-#: RRDGraphicProducer.py:704
+#: RRDGraphicProducer.py:705
 msgid "m on the y axis stands for milli, meaning x thousandths."
 msgstr "m sur l'axe des y signifie mili,donc x millièmes."
 
-#: RRDGraphicProducer.py:744 RRDGraphicProducer.py:756
-#: RRDGraphicProducer.py:820
+#: RRDGraphicProducer.py:745 RRDGraphicProducer.py:757
+#: RRDGraphicProducer.py:819
 msgid "daily"
 msgstr "journalier"
 
-#: RRDGraphicProducer.py:750 RRDGraphicProducer.py:817
+#: RRDGraphicProducer.py:751 RRDGraphicProducer.py:816
 msgid "yearly"
 msgstr "annuel"
 
-#: RRDGraphicProducer.py:752 RRDGraphicProducer.py:814
-#: RRDGraphicProducer.py:1037
+#: RRDGraphicProducer.py:753 RRDGraphicProducer.py:813
+#: RRDGraphicProducer.py:1029
 msgid "monthly"
 msgstr "mensuel"
 
-#: RRDGraphicProducer.py:754 RRDGraphicProducer.py:811
+#: RRDGraphicProducer.py:755 RRDGraphicProducer.py:810
 msgid "weekly"
 msgstr "hebdomadaire"
 
-#: RRDGraphicProducer.py:824
+#: RRDGraphicProducer.py:823
 msgid "totalForMachine"
 msgstr "totalForMachine"
 
-#: RRDGraphicProducer.py:833
+#: RRDGraphicProducer.py:832
 msgid "totals"
 msgstr "totaux"
 
-#: RRDGraphicProducer.py:912
+#: RRDGraphicProducer.py:908
 msgid "Averaged latency per minute"
 msgstr "Latence moyenne par minute"
 
-#: RRDGraphicProducer.py:913
+#: RRDGraphicProducer.py:909
 msgid "Latency(seconds)"
 msgstr "Latence(en secondes)"
 
-#: RRDGraphicProducer.py:916
+#: RRDGraphicProducer.py:912
 msgid "Latencies over 15 seconds"
 msgstr "Latence au dessus de 15 secondes"
 
-#: RRDGraphicProducer.py:917 RRDGraphicProducer.py:924
-#: RRDGraphicProducer.py:925
+#: RRDGraphicProducer.py:913 RRDGraphicProducer.py:920
+#: RRDGraphicProducer.py:921
 msgid "Files/Minute"
 msgstr "Fichiers/Minute"
 
-#: RRDGraphicProducer.py:920 RRDGraphicProducer.py:921
+#: RRDGraphicProducer.py:916 RRDGraphicProducer.py:917
 msgid "Bytes/Minute"
 msgstr "Bytes/Minute"
 
-#: RRDGraphicProducer.py:928 RRDGraphicProducer.py:929
+#: RRDGraphicProducer.py:924 RRDGraphicProducer.py:925
 msgid "Errors/Minute"
 msgstr "Erreurs/Minute"
 
-#: RRDGraphicProducer.py:1007
+#: RRDGraphicProducer.py:999
 msgid "Note(s):"
 msgstr "Note(s):"
 
-#: RRDGraphicProducer.py:1018 RRDGraphicProducer.py:1023
-#: RRDGraphicProducer.py:1028
+#: RRDGraphicProducer.py:1010 RRDGraphicProducer.py:1015
+#: RRDGraphicProducer.py:1020
 msgid "Total: "
 msgstr "Total: "
 
-#: RRDGraphicProducer.py:1039 RRDGraphicProducer.py:1046
+#: RRDGraphicProducer.py:1031 RRDGraphicProducer.py:1038
 msgid "Max: "
 msgstr "Max:"
 
-#: RRDGraphicProducer.py:1039 RRDGraphicProducer.py:1046
+#: RRDGraphicProducer.py:1031 RRDGraphicProducer.py:1038
 msgid "Mean: "
 msgstr "Moyenne: "
 
-#: RRDGraphicProducer.py:1039 RRDGraphicProducer.py:1046
+#: RRDGraphicProducer.py:1031 RRDGraphicProducer.py:1038
 msgid "Min: "
 msgstr "Min: "
 
-#: RRDGraphicProducer.py:1063
+#: RRDGraphicProducer.py:1055
 msgid "Plotted : "
 msgstr "Dessiné :"
 
-msgid "ending at"
-msgstr "se terminant le"
+
+
+#: RRDGraphicProducer.py:1503
+msgid "%s still has a problem %s %s "
+msgstr ""
 
