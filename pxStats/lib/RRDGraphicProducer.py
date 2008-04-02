@@ -71,11 +71,12 @@ class RRDGraphicProducer( Translatable ):
         self.turnOffLogging =turnOffLogging   # Whether to turn off logging or not 
         self.inputLanguage = inputLanguage    # Language in which the partameters will be written.
         
-        if outputLanguage == "":
+        
+        if str(outputLanguage).replace( " ","" ) == "":
             self.outputLanguage = LanguageTools.getMainApplicationLanguage()
         else:
             self.outputLanguage = outputLanguage
-        
+                   
         self.pathTowardsSourceFiles = StatsPaths()
         self.pathTowardsProducedGraphics = StatsPaths()
         
@@ -91,6 +92,8 @@ class RRDGraphicProducer( Translatable ):
         self.translatorForOutput = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.outputLanguage )
         self.translatorForInput  = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.inputLanguage )
         
+        global _ 
+        _ = self.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, self.inputLanguage )
             
     
     def buildTitle( self, type, client,  minimum, maximum, mean):
@@ -513,10 +516,6 @@ class RRDGraphicProducer( Translatable ):
             
             @param machine:
             
-            @param infos:
-            
-            @param logger:
-            
             @return : Builds and returns the image name to be created by rrdtool.
         """
     
@@ -542,7 +541,7 @@ class RRDGraphicProducer( Translatable ):
         
         translatedFileType = LanguageTools.translateTerm( self.fileType, self.inputLanguage, self.outputLanguage, CURRENT_MODULE_ABS_PATH )
         
-        fileName = self.pathTowardsProducedGraphics.STATSGRAPHS + _( "others/rrd/%s/%s_%s_%s_%s_%s%s_on_%s.png" ) %( client, translatedFileType, client, date, type, span, timeMeasure, machine )
+        fileName = self.pathTowardsProducedGraphics.STATSGRAPHS + ( _( "others/rrd/%s/%s_%s_%s_%s_%s%s_on_%s.png" ) %( client, translatedFileType, client, date, type, span, timeMeasure, machine ) )
             
         fileName = fileName.replace( '[', '').replace(']', '').replace(" ", "").replace( "'","" )               
         
@@ -629,7 +628,6 @@ class RRDGraphicProducer( Translatable ):
                 tag = _("Errors")
             elif type == _("latency"):
                 tag = _("Avg")
-                
             
             if minimum != None :
                 if type == _("latency") or averageOrTotal == "average":
@@ -794,8 +792,6 @@ class RRDGraphicProducer( Translatable ):
            @param client:
            
            @param machine:
-           
-           @param infos:
         
            @return : The carchive copy destination. 
         
@@ -820,7 +816,7 @@ class RRDGraphicProducer( Translatable ):
         elif self.graphicType == _("daily"):
             endOfDestination = "%s/%s/%s/%s.png" %( currentYear, currentMonth, type, currentDay )
             
-        #destination = "%s/%s/%s/%s" %( StatsPaths.STATSGRAPHSARCHIVES, infos.graphicType, infos.fileType, label, infos.graphicType, endOfDestination )
+        
         totalForMachine = _('totalForMachine')
         
         
@@ -853,14 +849,11 @@ class RRDGraphicProducer( Translatable ):
             @param type:
             @param machine:
             @param imageName:
-            @param infos:
-            
-        
-            
+
         """ 
        
         src         = imageName
-        destination = self.getArchiveCopyDestination( self, type, client, machine )
+        destination = self.getArchiveCopyDestination( type, client, machine )
     
         if not os.path.isdir( os.path.dirname( destination ) ):
             os.makedirs( os.path.dirname( destination ), mode=0777 )                                                      
@@ -961,7 +954,7 @@ class RRDGraphicProducer( Translatable ):
             
             
             
-    def plotRRDGraph( self, databaseName, type, fileType, client, machine, infos ):
+    def plotRRDGraph( self, databaseName, type, client, machine ):
         """
             @summary : This method is used to produce a rrd graphic.
             
@@ -975,20 +968,16 @@ class RRDGraphicProducer( Translatable ):
             
             @param machine:
             
-            @param infos:
-            
-            @param logger:
-            
         """
         
         errorOccured = False
         
         imageName    = self.buildImageName( type, client, machine )        
-        start        = int ( StatsDateLib.getSecondsSinceEpoch ( infos.startTime ) ) 
-        end          = int ( StatsDateLib.getSecondsSinceEpoch ( infos.endTime ) )  
+        start        = int ( StatsDateLib.getSecondsSinceEpoch ( self.startTime ) ) 
+        end          = int ( StatsDateLib.getSecondsSinceEpoch ( self.endTime ) )  
         formatedTitleType, formatedYLabelType = self.formatedTypesForLables( type )          
     
-        lastUpdate = RrdUtilities.getDatabaseTimeOfUpdate( databaseName, fileType )        
+        lastUpdate = RrdUtilities.getDatabaseTimeOfUpdate( databaseName, self.fileType )        
                       
         fetchedInterval = self.getInterval( start, lastUpdate, goal = "fetchData"  )  
         desiredInterval = self.getInterval( start, lastUpdate, goal = "plotGraphic"  )
@@ -1034,7 +1023,7 @@ class RRDGraphicProducer( Translatable ):
         
         translatedType = self.translateDataType(type)
         
-        if infos.graphicType != _("monthly"):
+        if self.graphicType != _("monthly"):
             try:
                 rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '800','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end),'--step','%s' %(interval*60), '--vertical-label', '%s' %formatedYLabelType,'--title', '%s'%title, '--lower-limit','0','DEF:%s=%s:%s:AVERAGE'%( translatedType, databaseName, translatedType), 'CDEF:realValue=%s,%i,*' %( translatedType, 1), 'AREA:realValue#%s:%s' %( innerColor, translatedType ),'LINE1:realValue#%s:%s'%( outerColor, translatedType ), "COMMENT: " + _("Min: ") + str(minimum) + "   " + _("Max: ") + str(maximum) + "   " + _( "Mean: " ) + str(mean) + "   " +  str(total) + "\c", 'COMMENT:%s %s %s\c' %( comment, graphicsNote, graphicsLegeng )  )
             except Exception, inst:
@@ -1055,7 +1044,7 @@ class RRDGraphicProducer( Translatable ):
             except:
                 pass
             
-            if infos.copy == True:
+            if self.copy == True:
                 self.createCopy( client, type, machine, imageName )
             
             if self.logger != None:
@@ -1095,8 +1084,7 @@ class RRDGraphicProducer( Translatable ):
         @param machine: machine from wich the data comes from. If data comes form two machines, 
                         group the names togehter EX : machine1 and machine2 become machine1machine1
         
-        @param infos: _GraphicsInfos instance that is used throughout the program.
-        
+       
         """    
                                                       
         rrdFilename = RrdUtilities.buildRRDFileName( dataType = dataType, clients = self.clientNames, machines =[machine], fileType = self.fileType, usage =self.mergerType)
@@ -1226,8 +1214,6 @@ class RRDGraphicProducer( Translatable ):
     def getDataForAllSourlients( self, dataType = "fileCount" ):
         """ 
             @summary : 
-            
-            @param infos: Infos with whom the program the program what was. 
             
             @return : Returns the dictionary containing the timespant filecount 
                       associations for all sourlients.
@@ -1538,11 +1524,7 @@ class RRDGraphicProducer( Translatable ):
             @param start : Start of the span of data we are interested in.
             
             @param end : End of the span of data we are interested in.
-            
-            @param infos : _GraphicsInfos instance containing vital infos.
-            
-            @param logger : Logger in wich to write log entries. 
-            
+                        
             @return : Array containing one tuple entry per timestamp of the following form : 
                      ( timestamp, combinedValue ) pairs.
             
@@ -1552,7 +1534,7 @@ class RRDGraphicProducer( Translatable ):
         
         if type == _("latency"):
             pairs = self.getPairsFromDatabases( type, machine, start, end,  mergeWithProportions = True ) 
-            #pairs = getPairsFromDatabasesWithoutProportions( type, machine, start, end, infos, logger=None )       
+       
         else :
             pairs = self.getPairsFromDatabases( type, machine, start, end, mergeWithProportions = False, mergerTypeWithoutProportions = "total" )
             
