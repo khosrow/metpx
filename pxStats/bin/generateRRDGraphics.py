@@ -1,14 +1,13 @@
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-
-
 #######################################################################################
 ##
 ## @Name:  generateRRDGraphics.py 
 ##  
 ## @author:  Nicholas Lemay  
+##
+## @license : MetPX Copyright (C) 2004-2006  Environment Canada
+##            MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
 ##
 ## @since: October 2nd 2006, last updated on March 5th 2008.
 ##
@@ -203,7 +202,7 @@ def getGraphicProducerFromParserOptions( parser ):
         sys.exit()            
         
                 
-    if havingRun == True and clientNames[0] != "ALL":
+    if havingRun == True and clientNames[0] != _("ALL"):
         print _("Error. Cannot use the havingRun option while specifying client/source names.")
         print _("To use havingRun, do not use -c|--client option.")
         print _("Use -h for additional help.")
@@ -240,8 +239,7 @@ def getGraphicProducerFromParserOptions( parser ):
         else :
             for t in types :
                 if t not in validTypes:
-                    print t
-                    raise Exception("")
+                    raise Exception("%s is not a valid type" %t)
                     
     else:      
         
@@ -296,7 +294,8 @@ def getGraphicProducerFromParserOptions( parser ):
     
     end = StatsDateLib.getIsoWithRoundedHours( end )
     
-    graphicsProducer = RRDGraphicProducer( startTime = start, endTime = end, graphicType = graphicType, clientNames = clientNames, types = types, timespan = timespan, machines = machines, fileType = fileType, totals = totals, copy = copy, mergerType = mergerType,turnOffLogging = turnOffLogging  )   
+    graphicsProducer = RRDGraphicProducer( startTime = start, endTime = end, graphicType = graphicType, clientNames = clientNames, types = types, timespan = timespan, machines = machines, fileType = fileType,\
+                                           totals = totals, copy = copy, mergerType = mergerType,turnOffLogging = turnOffLogging, inputLanguage = LanguageTools.getMainApplicationLanguage() ,  outputLanguage = outputLanguage )   
             
     return graphicsProducer                       
 
@@ -453,7 +452,7 @@ def main():
     plottedGraphics  = graphicsProducer.generateRRDGraphics()
     
     for plottedGraphic in plottedGraphics:
-        print "Plotted : %s" %plottedGraphic
+        print _("Plotted : %s") %plottedGraphic
     
     
 if __name__ == "__main__":
