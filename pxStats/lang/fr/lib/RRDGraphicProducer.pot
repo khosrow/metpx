@@ -65,7 +65,7 @@ msgstr "jours"
 
 #: RRDGraphicProducer.py:544
 msgid "others/rrd/%s/%s_%s_%s_%s_%s%s_on_%s.png"
-msgstr "autres/rrd/%s/%s_%s_%s_%s_%s%s_on_%s.png"
+msgstr "autres/rrd/%s/%s_%s_%s_%s_%s%s_sur_%s.png"
 
 #: RRDGraphicProducer.py:591 RRDGraphicProducer.py:914
 #: RRDGraphicProducer.py:945 RRDGraphicProducer.py:1012
