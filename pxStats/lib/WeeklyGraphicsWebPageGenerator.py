@@ -1,9 +1,5 @@
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
-
 ##############################################################################
 ##
 ##
@@ -11,6 +7,10 @@ named COPYING in the root of the source directory tree.
 ##
 ##
 ## @author:  Nicholas Lemay
+##
+## @license : MetPX Copyright (C) 2004-2006  Environment Canada
+##            MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+##            named COPYING in the root of the source directory tree.
 ##
 ## @since    :  2006-11-22, last updated on 2008-02-19
 ##
@@ -176,7 +176,7 @@ class WeeklyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             os.makedirs(  self.pathsTowardsOutputFiles.STATSWEBPAGESHTML )      
         fileHandle = open( "%sweeklyGraphs_%s.html" % (self.pathsTowardsOutputFiles.STATSWEBPAGESHTML, self.displayedLanguage) , 'w' )
     
-    
+        print "%sweeklyGraphs_%s.html" % (self.pathsTowardsOutputFiles.STATSWEBPAGESHTML, self.displayedLanguage)
         fileHandle.write(  """
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -364,8 +364,13 @@ class WeeklyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             machinesStr = str( parameters.sourceMachinesTags ).replace( '[','' ).replace( ']','' ).replace(',','').replace("'","").replace('"','').replace(" ","")
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( weekNumber )
             currentWeek = time.strftime("%W", time.gmtime(weekNumber))
-            file = "/apps/px/pxStats/data/csvFiles/weekly/" + 'rx' "/%s/%s/%s.csv" %( machinesStr, currentYear, currentWeek ) 
-            webLink = "csvFiles/weekly/" + 'rx' +  "/%s/%s/%s.csv" %( machinesStr, currentYear, currentWeek ) 
+            
+            _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.filesLanguage )
+            
+            file = self.pathsTowardsGraphics.STATSCSVFILES +  _( "weekly/rx/%s/%s/%s.csv" ) %( machinesStr, currentYear, currentWeek ) 
+            webLink = _("csvFiles/weekly/rx/%s/%s/%s.csv") %( machinesStr, currentYear, currentWeek ) 
+            
+            _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
             
             if os.path.isfile( file ):
                 if oneFileFound == False:
@@ -473,9 +478,13 @@ class WeeklyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             for week in self.weeks:
                 currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
                 currentWeek = time.strftime("%W", time.gmtime(week))
-                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + "weekly/rx/%s/"%( rxName ) + str(currentYear) + "/bytecount/%s.png" %str(currentWeek)
-                webLink =  "archives/weekly/rx/%s/"%( rxName ) + str(currentYear) + "/bytecount/%s.png" %str(currentWeek)
                 
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.filesLanguage )
+                
+                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + _("weekly/rx/%s/") %( rxName ) + str(currentYear) + _("/bytecount/%s.png") %str(currentWeek)
+                webLink =  _("archives/weekly/rx/%s/")%( rxName ) + str(currentYear) + _("/bytecount/%s.png") %str(currentWeek)
+                
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
                 if os.path.isfile( file ):
                     fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, webLink , currentWeek ) ) 
             
@@ -488,8 +497,13 @@ class WeeklyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             for week in self.weeks:
                 currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
                 currentWeek = time.strftime("%W", time.gmtime(week))
-                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + "weekly/rx/%s/"%( rxName ) + str(currentYear) + "/filecount/%s.png" %str(currentWeek)
-                webLink = "archives/weekly/rx/%s/"%( rxName ) + str(currentYear) + "/filecount/%s.png" %str(currentWeek)
+                
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.filesLanguage )
+                
+                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + _("weekly/rx/%s/")%( rxName ) + str(currentYear) + _("/filecount/%s.png") %str(currentWeek)
+                webLink = _("archives/weekly/rx/%s/")%( rxName ) + str(currentYear) + _("/filecount/%s.png") %str(currentWeek)
+                
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
                 
                 if os.path.isfile( file ):
                     fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, webLink , currentWeek ) ) 
@@ -502,8 +516,13 @@ class WeeklyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             for week in self.weeks:
                 currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
                 currentWeek = time.strftime("%W", time.gmtime(week))
-                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + "weekly/rx/%s/"%( rxName ) + str(currentYear) + "/errors/%s.png" %str(currentWeek)
-                webLink = "archives/weekly/rx/%s/"%( rxName ) + str(currentYear) + "/errors/%s.png" %str(currentWeek)
+                
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.filesLanguage )
+                
+                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + _("weekly/rx/%s/")%( rxName ) + str(currentYear) + _("/errors/%s.png") %str(currentWeek)
+                webLink = _("archives/weekly/rx/%s/")%( rxName ) + str(currentYear) + _("/errors/%s.png") %str(currentWeek)
+                
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
                 
                 if os.path.isfile( file ):
                     fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, webLink , currentWeek ) ) 
@@ -532,9 +551,13 @@ class WeeklyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             machinesStr = str( parameters.sourceMachinesTags ).replace( '[','' ).replace( ']','' ).replace(',','').replace("'","").replace('"','').replace(" ","")
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( weekNumber )
             currentWeek = time.strftime("%W", time.gmtime(weekNumber))
-            file = "/apps/px/pxStats/data/csvFiles/weekly/" +  "tx" + "/%s/%s/%s.csv" %( machinesStr, currentYear, currentWeek ) 
-            webLink = "csvFiles/weekly/" + 'tx' +  "/%s/%s/%s.csv" %( machinesStr, currentYear, currentWeek ) 
             
+            _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.filesLanguage )
+            
+            file = self.pathsTowardsGraphics.STATSCSVFILES +  _("/weekly/tx/%s/%s/%s.csv") %( machinesStr, currentYear, currentWeek ) 
+            webLink = _("csvFiles/weekly/tx/%s/%s/%s.csv") %( machinesStr, currentYear, currentWeek ) 
+            
+            _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
             
             if os.path.isfile( file ):
                 if oneFileFound == False:
@@ -670,8 +693,13 @@ class WeeklyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             for week in self.weeks:
                 currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
                 currentWeek = time.strftime("%W", time.gmtime(week))
-                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + "weekly/tx/%s/"%( txName ) + str(currentYear) + "/latency/%s.png" %str(currentWeek)
-                webLink =  "archives/weekly/tx/%s/"%( txName ) + str(currentYear) + "/latency/%s.png" %str(currentWeek)
+                
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.filesLanguage )
+                
+                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + _("weekly/tx/%s/")%( txName ) + str(currentYear) + _("/latency/%s.png") %str(currentWeek)
+                webLink =  _("archives/weekly/tx/%s/")%( txName ) + str(currentYear) + _("/latency/%s.png") %str(currentWeek)
+                
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
                 
                 if os.path.isfile( file ):
                     fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, webLink , currentWeek ) )
@@ -685,9 +713,12 @@ class WeeklyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
                 currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
                 currentWeek = time.strftime("%W", time.gmtime(week))
                 
-                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + "weekly/tx/%s/"%( txName ) + str(currentYear) + "/filesOverMaxLatency/%s.png" %str(currentWeek)
-                webLink = "archives/weekly/tx/%s/"%( txName ) + str(currentYear) + "/filesOverMaxLatency/%s.png" %str(currentWeek)
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.filesLanguage )
                 
+                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + _("weekly/tx/%s/")%( txName ) + str(currentYear) + _("/filesOverMaxLatency/%s.png") %str(currentWeek)
+                webLink = _("archives/weekly/tx/%s/")%( txName ) + str(currentYear) + _("/filesOverMaxLatency/%s.png") %str(currentWeek)
+                
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
                 
                 if os.path.isfile( file ):
                     fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, webLink, currentWeek ) )
@@ -701,8 +732,12 @@ class WeeklyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
                 currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
                 currentWeek = time.strftime("%W", time.gmtime(week))
                 
-                file    = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + "weekly/tx/%s/"%( txName ) + str(currentYear) + "/bytecount/%s.png" %str(currentWeek) 
-                webLink = "archives/weekly/tx/%s/"%( txName ) + str(currentYear) + "/bytecount/%s.png" %str(currentWeek)
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.filesLanguage )
+                
+                file    = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + _("weekly/tx/%s/")%( txName ) + str(currentYear) + _("/bytecount/%s.png") %str(currentWeek) 
+                webLink = _("archives/weekly/tx/%s/")%( txName ) + str(currentYear) + _("/bytecount/%s.png") %str(currentWeek)
+                
+                _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
                 
                 if os.path.isfile( file ):
                     fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, webLink, currentWeek ) )
@@ -715,8 +750,8 @@ class WeeklyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
                 currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
                 currentWeek = time.strftime("%W", time.gmtime(week))
                 
-                file    = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + "weekly/tx/%s/"%( txName ) + str(currentYear) + "/filecount/%s.png" %str(currentWeek)
-                webLink = "archives/weekly/tx/%s/"%( txName ) + str(currentYear) + "/filecount/%s.png" %str(currentWeek)
+                file    = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + _("weekly/tx/%s/")%( txName ) + str(currentYear) + _("/filecount/%s.png") %str(currentWeek)
+                webLink = _("archives/weekly/tx/%s/")%( txName ) + str(currentYear) + _("/filecount/%s.png") %str(currentWeek)
                             
                 if os.path.isfile( file ):
                     fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, webLink, currentWeek ) )
@@ -729,8 +764,8 @@ class WeeklyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
                 currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( week )
                 currentWeek = time.strftime("%W", time.gmtime(week))
                 
-                file    =  self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + "weekly/tx/%s/"%( txName ) + str(currentYear) + "/errors/%s.png" %str(currentWeek)
-                webLink =  "archives/weekly/tx/%s/"%( txName ) + str(currentYear) + "/errors/%s.png" %str(currentWeek)
+                file    =  self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + _("weekly/tx/%s/")%( txName ) + str(currentYear) + _("/errors/%s.png") %str(currentWeek)
+                webLink =  _("archives/weekly/tx/%s/")%( txName ) + str(currentYear) + _("/errors/%s.png") %str(currentWeek)
                             
                 if os.path.isfile( file ):
                     fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">&nbsp;%s</a>"""%( txName, webLink, currentWeek ) )
