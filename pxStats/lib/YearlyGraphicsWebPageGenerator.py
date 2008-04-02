@@ -97,7 +97,7 @@ class YearlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
         self.pathsTowardsGraphics.setPaths( filesLanguage )
         
         self.pathsTowardsOutputFiles = StatsPaths()  
-    
+        self.pathsTowardsOutputFiles.setPaths(filesLanguage)
     
     
     def setYears( self ):
@@ -709,6 +709,17 @@ class YearlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
         """ )     
                     
         fileHandle.close()                 
+        
     
-
+    def generateWebPage( self ):
+        """
+        
+            @summary : Call to generate the web page. 
+            
+        """
+        
+        self.setYears()
+        start, end = self.getStartEndOfWebPage()
+        rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNamesForWebPages( start, end )
+        self.printWebPage( rxNames, txNames )
 
