@@ -1,0 +1,22 @@
+msgid ""
+msgstr ""
+
+
+msgid ".lock"
+msgstr ".lock"
+
+msgid "All"
+msgstr "All"
+
+msgid "%sbytecount/*_*%s*"
+msgstr "%sbytecount/*_*%s*"
+
+msgid "%slatency/*_*%s*"
+msgstr "%slatency/*_*%s*"
+
+msgid "%sbytecount/*_%s*"
+msgstr "%sbytecount/*_%s*"
+
+msgid "%slatency/*_%s*"
+msgstr "%slatency/*_%s*"
+
