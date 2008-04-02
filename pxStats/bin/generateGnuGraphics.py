@@ -56,8 +56,7 @@ class _GraphicsInfos:
         self.copy           = copy              # Whether or not we create a copy file.
         self.combineClients = combineClients    # Wheter or not we combine the data of all clients/sources.
         self.groupName      = groupName         # Name given to the combined client/sources.
-        
-        
+        self.outputLanguage = outputLanguage    # Language in which to output the graphics.
 
 
 def getOptionsFromParser( parser ):
@@ -319,6 +318,8 @@ def main():
     parser = createAParser( )  #will be used to parse options 
     
     infos = getOptionsFromParser( parser )          
+
+    
     
     gp = GnuGraphicProducer( clientNames = infos.clientNames, groupName = infos.groupName , timespan = infos.timespan,\
                                 currentTime = infos.currentTime, productTypes = infos.productTypes, directory = infos.directory ,\
