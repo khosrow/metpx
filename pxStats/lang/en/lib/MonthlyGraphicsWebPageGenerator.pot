@@ -29,8 +29,8 @@ msgstr "Monthly graphics for RX sources from MetPx."
 msgid "*updated weekly"
 msgstr "*updated weekly"
 
-msgid "rx/%s/%s/%s.csv"
-msgstr "rx/%s/%s/%s.csv"
+msgid "monthly/rx/%s/%s/%s.csv"
+msgstr "monthly/rx/%s/%s/%s.csv"
 
 msgid "csvFiles/monthly/rx/%s/%s/%s.csv"
 msgstr "csvFiles/monthly/rx/%s/%s/%s.csv"
@@ -77,8 +77,8 @@ msgstr "/errors/%s.png"
 msgid "Monthly graphics for TX clients from MetPx."
 msgstr "Monthly graphics for TX clients from MetPx."
 
-msgid "tx/%s/%s/%s.csv"
-msgstr "tx/%s/%s/%s.csv"
+msgid "monthly/tx/%s/%s/%s.csv"
+msgstr "monthly/tx/%s/%s/%s.csv"
 
 msgid "csvFiles/monthly/tx/%s/%s/%s.csv"
 msgstr "csvFiles/monthly/tx/%s/%s/%s.csv"

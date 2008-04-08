@@ -111,10 +111,12 @@ msgstr "/nbreDeFichiers/%s.png"
 msgid "/errors/%s.png"
 msgstr "/erreurs/%s.png"
 
+msgid "monthly/rx/%s/%s/%s.csv"
+msgstr "mensuel/rx/%s/%s/%s.csv"
 
 #: MonthlyGraphicsWebPageGenerator.py:563
-msgid "tx/%s/%s/%s.csv"
-msgstr "tx/%s/%s/%s.csv"
+msgid "monthly/tx/%s/%s/%s.csv"
+msgstr "mensuel/tx/%s/%s/%s.csv"
 
 #: MonthlyGraphicsWebPageGenerator.py:564
 msgid "csvFiles/monthly/tx/%s/%s/%s.csv"
