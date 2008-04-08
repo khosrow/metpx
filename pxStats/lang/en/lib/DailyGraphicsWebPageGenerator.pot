@@ -14,6 +14,18 @@ msgstr "List of available daily graphics."
 msgid "Days"
 msgstr "Days"
 
+msgid "daily/rx/%s/"
+msgstr "daily/rx/%s/"
+
+msgid "archives/daily/rx/%s/"
+msgstr "archives/daily/rx/%s/"
+
 msgid "Daily graphics for TX clients from MetPx."
 msgstr "Daily graphics for TX clients from MetPx."
+
+msgid "/daily/tx/%s/"
+msgstr "/daily/tx/%s/"
+
+msgid "archives/daily/tx/%s/"
+msgstr "archives/daily/tx/%s/"
 

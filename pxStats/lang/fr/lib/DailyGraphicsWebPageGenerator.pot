@@ -1,7 +1,3 @@
-msgid ""
-msgstr ""
-
-
 msgid "Daily graphics for RX sources from MetPx."
 msgstr "Graphiques journaliers pour toutes les sources(RX) de MetPx."
 
@@ -16,4 +12,21 @@ msgstr "Journees"
 
 msgid "Daily graphics for TX clients from MetPx."
 msgstr "Graphiques journaliers pour tous les clients(TX) de MetPx."
+
+
+#: DailyGraphicsWebPageGenerator.py:353
+msgid "daily/rx/%s/"
+msgstr "journaliers/rx/%s/"
+
+#: DailyGraphicsWebPageGenerator.py:354
+msgid "archives/daily/rx/%s/"
+msgstr "archives/journaliers/rx/%s/"
+
+#: DailyGraphicsWebPageGenerator.py:425
+msgid "/daily/tx/%s/"
+msgstr "/journaliers/tx/%s/"
+
+#: DailyGraphicsWebPageGenerator.py:426
+msgid "archives/daily/tx/%s/"
+msgstr "archives/journaliers/tx/%s/"
 
