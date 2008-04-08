@@ -66,7 +66,7 @@ class TopWebPageGenerator( Translatable ):
         
         self.outputLanguage = outputLanguage
         
-        if self.outputLanguage in LanguageTools.getSupportedLanguages():
+        if self.outputLanguage not in LanguageTools.getSupportedLanguages():
             raise Exception( "Error. Unsupported language detected in TopWebPageGenerator. %s is not a supported language." %(self.outputLanguage) )
         else:
             global _ #Global translator for this module.
@@ -82,8 +82,13 @@ class TopWebPageGenerator( Translatable ):
             
             @param machineTags  : Tags representing machine groups 
                                   for which we are producing graphics.              
-                                   
+            
+            @precondition: Requires _ translator to have been set prior to calling this function.                           
+            
         """
+        
+        global _ 
+        
         paths = StatsPaths()
         paths.setPaths( LanguageTools.getMainApplicationLanguage() )
     
