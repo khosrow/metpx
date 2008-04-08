@@ -1,9 +1,5 @@
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
-
 ##############################################################################
 ##
 ##
@@ -12,6 +8,10 @@ named COPYING in the root of the source directory tree.
 ##
 ## @author:  : Nicholas Lemay
 ##
+## @license  : MetPX Copyright (C) 2004-2006  Environment Canada
+##             MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+##             named COPYING in the root of the source directory tree.
+## 
 ## @since    :  2006-11-22, last updated on 2008-02-19
 ##
 ##
@@ -25,27 +25,17 @@ named COPYING in the root of the source directory tree.
 
 
 import os, time, sys
-sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../../')
-"""
-    Small function that adds pxlib to the environment path.  
-"""
-try:
-    pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
-except KeyError:
-    pxlib = '/apps/px/lib/'
-sys.path.append(pxlib)
 
 """
-    Imports
-    PXManager requires pxlib 
+    - Adds pxStats to sys.path
 """
-from PXManager import *
+sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../../')
+
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 from pxStats.lib.WeeklyGraphicsWebPageGenerator import WebPageGeneratorInterface
-
 
 LOCAL_MACHINE = os.uname()[1]
     
@@ -53,11 +43,9 @@ NB_YEARS_DISPLAYED = 3
 CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )    
  
  
-    
 class YearlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):    
         
-        
-        
+                
     def __init__( self, displayedLanguage = 'en', filesLanguage='en', years = None, \
                   pathsTowardsGraphics = None, pathsTowardsOutputFiles = None  ):
         """
@@ -98,6 +86,7 @@ class YearlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
         
         self.pathsTowardsOutputFiles = StatsPaths()  
         self.pathsTowardsOutputFiles.setPaths(filesLanguage)
+    
     
     
     def setYears( self ):
@@ -337,9 +326,15 @@ class YearlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             parameters.getAllParameters()               
             machinesStr = str( parameters.sourceMachinesTags ).replace( '[','' ).replace( ']','' ).replace(',','').replace("'","").replace('"','').replace(" ","")
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )
-            file = "/apps/px/pxStats/data/csvFiles/yearly/rx/%s/%s.csv" %( machinesStr, currentYear )
-            webLink = "csvFiles/yearly/rx/%s/%s.csv" %( machinesStr, currentYear )
-            print file
+            
+            _ = self.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, self.filesLanguage )
+            
+            file = self.pathsTowardsGraphics.STATSCSVFILES + _("yearly/rx/%s/%s.csv") %( machinesStr, currentYear )
+            webLink = _("csvFiles/yearly/rx/%s/%s.csv") %( machinesStr, currentYear )
+            
+            _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
+            
+            
             if os.path.isfile( file ):
                 if oneFileFound == False:
                     fileHandle.write(  "<div class='right'><font size='2' color='black'>CSV files&nbsp;:&nbsp; " )
@@ -441,8 +436,12 @@ class YearlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             for year in self.years:
                 currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )   
                 
-                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + "yearly/rx/%s/"%( rxName ) + "bytecount/%s.png" %str(currentYear)         
-                webLink = "archives/yearly/rx/%s/"%( rxName ) + "bytecount/%s.png" %str(currentYear)
+                _ = self.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, self.filesLanguage )
+                
+                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + _("yearly/rx/%s/")%( rxName ) + _("bytecount/%s.png") %str(currentYear)         
+                webLink = _("archives/yearly/rx/%s/")%( rxName ) + _("bytecount/%s.png") %str(currentYear)
+                
+                _ = self.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
                 
                 if os.path.isfile( file ):
                     fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, webLink , time.strftime("%Y",time.gmtime(year) ) ) ) 
@@ -455,9 +454,14 @@ class YearlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             
             for year in self.years:
                 
-                currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )            
-                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + "yearly/rx/%s/"%( rxName ) + "filecount/%s.png" %str(currentYear)
-                webLink = "archives/yearly/rx/%s/"%( rxName ) + "filecount/%s.png" %str(currentYear)
+                currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )
+                
+                _ = self.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, self.filesLanguage )            
+                
+                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + _("yearly/rx/%s/")%( rxName ) + _("filecount/%s.png") %str(currentYear)
+                webLink = _("archives/yearly/rx/%s/")%( rxName ) + _("filecount/%s.png") %str(currentYear)
+                
+                _ = self.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
                 
                 if os.path.isfile( file ):
                     fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, webLink , time.strftime("%Y",time.gmtime(year) ) ) ) 
@@ -468,9 +472,15 @@ class YearlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             fileHandle.write(  """ <td bgcolor="#66CCFF" class="cssTable">""" + _("Years") + """&nbsp;:&nbsp;""" )
             
             for year in self.years:
-                currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )            
-                file    = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + "yearly/rx/%s/"%( rxName ) + "errors/%s.png" %str(currentYear)
-                webLink = "archives/yearly/rx/%s/"%( rxName ) + "errors/%s.png" %str(currentYear)
+                currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )
+                
+                _ = self.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, self.filesLanguage )
+                            
+                file    = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + _("yearly/rx/%s/")%( rxName ) + _("errors/%s.png") %str(currentYear)
+                webLink = _("archives/yearly/rx/%s/")%( rxName ) + _("errors/%s.png") %str(currentYear)
+                
+                _ = self.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
+                
                 
                 if os.path.isfile( file ):
                     fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( rxName, file , time.strftime("%Y",time.gmtime(year) ) ) ) 
@@ -497,8 +507,13 @@ class YearlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             parameters.getAllParameters()               
             machinesStr = str( parameters.sourceMachinesTags ).replace( '[','' ).replace( ']','' ).replace(',','').replace("'","").replace('"','').replace(" ","")
             currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )
-            file = "/apps/px/pxStats/data/csvFiles/yearly/tx/%s/%s.csv" %( machinesStr, currentYear ) 
-            webLink = "csvFiles/yearly/tx/%s/%s.csv" %( machinesStr, currentYear ) 
+            
+            _ = self.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, self.filesLanguage )
+             
+            file = self.pathsTowardsGraphics.STATSCSVFILES + _("yearly/tx/%s/%s.csv") %( machinesStr, currentYear ) 
+            webLink = _("csvFiles/yearly/tx/%s/%s.csv") %( machinesStr, currentYear ) 
+            
+            _ = self.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
             
             print file
             if os.path.isfile( file ):
@@ -631,9 +646,14 @@ class YearlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
                 
            
             for year in self.years:
-                currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )            
-                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + "yearly/tx/%s/"%( txName ) + "latency/%s.png" %str(currentYear)
-                webLink = "archives/yearly/tx/%s/"%( txName ) + "latency/%s.png" %str(currentYear)
+                currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )      
+                
+                _ = self.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, self.filesLanguage )
+                      
+                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + _("yearly/tx/%s/")%( txName ) + _("latency/%s.png") %str(currentYear)
+                webLink = _("archives/yearly/tx/%s/")%( txName ) + _("latency/%s.png")%str(currentYear)
+                
+                _ = self.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
                 
                 if os.path.isfile( file ):
                     fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( txName, webLink , time.strftime("%y",time.gmtime(year) ) ) )
@@ -646,9 +666,12 @@ class YearlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
                 
                 currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )            
                 
-                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + "yearly/tx/%s/"%( txName ) + "filesOverMaxLatency/%s.png" %str(currentYear)
-                webLink =  "archives/yearly/tx/%s/"%( txName ) + "filesOverMaxLatency/%s.png" %str(currentYear)
+                _ = self.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, self.filesLanguage )
                 
+                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + _("yearly/tx/%s/")%( txName ) + _("filesOverMaxLatency/%s.png")%str(currentYear)
+                webLink =  _("archives/yearly/tx/%s/")%( txName ) + _("filesOverMaxLatency/%s.png") %str(currentYear)
+                
+                _ = self.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
                 
                 if os.path.isfile( file ):
                     fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( txName, webLink , time.strftime("%y",time.gmtime(year) ) ) )
@@ -660,8 +683,13 @@ class YearlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             for year in self.years:
                 
                 currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )            
-                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + "yearly/tx/%s/"%( txName ) + "bytecount/%s.png" %str(currentYear)
-                webLink = "archives/yearly/tx/%s/"%( txName ) + "bytecount/%s.png" %str(currentYear)
+                
+                _ = self.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, self.filesLanguage )
+                
+                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + _("yearly/tx/%s/")%( txName ) + _("bytecount/%s.png") %str(currentYear)
+                webLink = _("archives/yearly/tx/%s/")%( txName ) + _("bytecount/%s.png") %str(currentYear)
+                
+                _ = self.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
                 
                 if os.path.isfile( file ):
                     fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( txName, webLink , time.strftime("%y",time.gmtime(year) ) ) )
@@ -672,9 +700,14 @@ class YearlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             
             for year in self.years:
                 
-                currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )            
-                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + "yearly/tx/%s/"%( txName ) + "filecount/%s.png" %str(currentYear)
-                webLink = "archives/yearly/tx/%s/"%( txName ) + "filecount/%s.png" %str(currentYear)
+                currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )    
+
+                _ = self.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, self.filesLanguage )        
+                
+                file = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + _("yearly/tx/%s/")%( txName ) + _("filecount/%s.png") %str(currentYear)
+                webLink = _("archives/yearly/tx/%s/")%( txName ) + _("filecount/%s.png") %str(currentYear)
+                
+                _ = self.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
                 
                 if os.path.isfile( file ):
                     fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( txName, webLink , time.strftime("%y",time.gmtime(year) ) ) )
@@ -687,8 +720,12 @@ class YearlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
                 
                 currentYear, currentMonth, currentDay = StatsDateLib.getYearMonthDayInStrfTime( year )            
                 
-                file    = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + "yearly/tx/%s/"%( txName ) + "errors/%s.png" %str(currentYear)
-                webLink = "archives/yearly/tx/%s/"%( txName ) + "errors/%s.png" %str(currentYear) 
+                _ = self.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, self.filesLanguage )
+                 
+                file    = self.pathsTowardsGraphics.STATSGRAPHSARCHIVES + _("yearly/tx/%s/")%( txName ) + _("errors/%s.png") %str(currentYear)
+                webLink = _("archives/yearly/tx/%s/")%( txName ) + _("errors/%s.png") %str(currentYear) 
+                
+                _ = self.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
                 
                 if os.path.isfile( file ):
                     fileHandle.write(  """<a target ="popup" href="%s" onClick="wopen('%s', 'popup', 875, 240); return false;">%s&nbsp;</a>"""%( txName, webLink , time.strftime("%y",time.gmtime(year) ) ) )
