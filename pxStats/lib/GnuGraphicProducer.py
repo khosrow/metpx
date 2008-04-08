@@ -7,7 +7,7 @@
 ##
 ## @author :  Nicholas Lemay
 ##
-## @since  :  06-07-2006, last updated on 2008-01-23 
+## @since  :  06-07-2006, last updated on 2008-04-02
 ##
 ##
 ## @license : MetPX Copyright (C) 2004-2006  Environment Canada
@@ -150,6 +150,8 @@ class GnuGraphicProducer( Translatable ):
             
         """
         
+        global _ 
+        
         dataCollection = []         
          
         for client in self.clientNames : # 
@@ -249,6 +251,8 @@ class GnuGraphicProducer( Translatable ):
             @return: Returns the name of the file that was produced.
                
         """         
+        
+        global _ 
         
         dataCollection = [] #                  
         startTime, endTime = self.getStartTimeAndEndTime()

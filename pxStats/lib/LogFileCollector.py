@@ -12,7 +12,7 @@
 ##            named COPYING in the root of the source directory tree.
 ##
 ##
-## @since  : December 12th 2006 , since march 19th 2008
+## @since  : December 12th 2006 , last updated on 2008-04-02
 ##
 ## @summary: This class' goal is to find all the interesting log files within 
 ##          a certain directory. 
@@ -152,7 +152,8 @@ class LogFileCollector( Translatable ):
                             log file format. 
         
         """      
-              
+        
+        global _               
         entries = []
         
            

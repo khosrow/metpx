@@ -1,20 +1,19 @@
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
-named COPYING in the root of the source directory tree.
-
 ##############################################################################
 ##
 ##
-## Name   : StatsDateLib.py 
+## @name   : StatsDateLib.py 
+##
+## @license : MetPX Copyright (C) 2004-2006  Environment Canada
+##            MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
+##            named COPYING in the root of the source directory tree.
+##
+## @author : Nicholas Lemay
+##
+## @since  : 29-05-2006 , last updated on 08-04-2008
 ##
 ##
-## Author : Nicholas Lemay
-##
-## Date   : 29-05-2006 
-##
-##
-## Description : Contains many usefull date manipulation methods wich are 
+## @summary: Contains many usefull date manipulation methods wich are 
 ##               to be used throughout the stats library. 
 ##
 ##############################################################################

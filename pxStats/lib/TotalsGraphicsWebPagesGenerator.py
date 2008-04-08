@@ -1,20 +1,22 @@
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
 ##############################################################################
 ##
 ##
-## Name   : totalGraphicsWebPages.py 
+## @Name   : totalGraphicsWebPages.py 
 ##
-##
+## 
 ## Author : Nicholas Lemay
 ##
-## Date   : 25-01-2007 
+## 
+## @license : MetPX Copyright (C) 2004-2006  Environment Canada
+##            MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+##            named COPYING in the root of the source directory tree.
+##
+## @since   : 25-01-2007, last updated on 08-04-2008 
 ##
 ##
-## Description : Generates the web pages that gives access to users
+## @summary :    Generates the web pages that gives access to users
 ##               to the graphics based on the data totals of all the 
 ##               rx sources or tx clients combined. Daily, weekly, monthly,
 ##               and yearly graphics will be made available through these
@@ -95,17 +97,17 @@ class TotalsGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             self.days = days 
             
         if weeks == None:
-            self.setWeeks()()
+            self.setWeeks()
         else:    
             self.weeks = weeks             
             
         if months == None:
-            self.setMonths()()
+            self.setMonths()
         else:    
             self.months = months 
                             
         if years == None:
-            self.setYears()()
+            self.setYears()
         else:    
             self.years = years                 
                 
@@ -241,6 +243,7 @@ class TotalsGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             
         """  
         
+        global _
       
         rxTypes      = [ _("bytecount"), _("filecount"), _("errors")]
         txTypes      = [ _("latency"), _("filesOverMaxLatency"), _("bytecount"), _("filecount"), _("errors") ]

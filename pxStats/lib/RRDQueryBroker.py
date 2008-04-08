@@ -14,7 +14,7 @@ named COPYING in the root of the source directory tree.
 ##
 ## @author :  Nicholas Lemay
 ##
-## @since  : 2007-06-28, last updated on 2007-07-03  
+## @since  : 2007-06-28, last updated on 2008-04-02  
 ##
 ##
 ## @summary : This class implements the GraphicsQueryBrokerInterface
@@ -309,6 +309,8 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
                        query parameters. 
         """
         
+        global _ 
+        
         error = ""
            
         try :
@@ -371,6 +373,8 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
             @SIDE_EFFECT :  modifies self.query value.
             
         """
+        
+        global _ 
         
         if self.queryParameters.total == 'true':
             totals = True

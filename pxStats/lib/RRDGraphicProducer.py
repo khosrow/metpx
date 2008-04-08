@@ -8,7 +8,7 @@
 #
 # @author: Nicholas Lemay
 #
-# @since: 2008-01-30
+# @since: 2008-01-30, last updated on 2008-04-02
 #
 #
 # @license: MetPX Copyright (C) 2004-2007  Environment Canada
@@ -183,6 +183,7 @@ class RRDGraphicProducer( Translatable ):
             @return : The absolute minimum
         """
         
+        global _ 
         
         minimum = None 
         
@@ -238,6 +239,8 @@ class RRDGraphicProducer( Translatable ):
             @return : The absolute max 
         """  
         
+        global _ 
+        
         maximum = None
         
         try:
@@ -286,6 +289,8 @@ class RRDGraphicProducer( Translatable ):
             @return : the absolute mean.
             
         """
+        
+        global _ 
         
         sum = 0 
         avg = 0
@@ -518,7 +523,7 @@ class RRDGraphicProducer( Translatable ):
             
             @return : Builds and returns the image name to be created by rrdtool.
         """
-    
+                
         _ = self.translatorForOutput
         
         span = self.timespan
@@ -539,9 +544,9 @@ class RRDGraphicProducer( Translatable ):
                         
         date = self.endTime.replace( "-","" ).replace( " ", "_")
         
-        translatedFileType = LanguageTools.translateTerm( self.fileType, self.inputLanguage, self.outputLanguage, CURRENT_MODULE_ABS_PATH )
+        translatedType = LanguageTools.translateTerm( type, self.inputLanguage, self.outputLanguage, CURRENT_MODULE_ABS_PATH )
         
-        fileName = self.pathTowardsProducedGraphics.STATSGRAPHS + ( _( "others/rrd/%s/%s_%s_%s_%s_%s%s_on_%s.png" ) %( client, translatedFileType, client, date, type, span, timeMeasure, machine ) )
+        fileName = self.pathTowardsProducedGraphics.STATSGRAPHS + ( _( "others/rrd/%s/%s_%s_%s_%s_%s%s_on_%s.png" ) %( client, self.fileType, client, date, translatedType, span, timeMeasure, machine ) )
             
         fileName = fileName.replace( '[', '').replace(']', '').replace(" ", "").replace( "'","" )               
         
@@ -969,6 +974,8 @@ class RRDGraphicProducer( Translatable ):
             @param machine:
             
         """
+        
+        global _ 
         
         errorOccured = False
         
@@ -1465,6 +1472,8 @@ class RRDGraphicProducer( Translatable ):
         
         """
         
+        global _ 
+        
         fileCounts = {}
     
         timeStamps = self.getTimeStamps(start, end, type)
@@ -1529,6 +1538,8 @@ class RRDGraphicProducer( Translatable ):
                      ( timestamp, combinedValue ) pairs.
             
         """
+        
+        global _ 
         
         pairs = []
         

@@ -11,7 +11,7 @@
 ##
 ## @author:  Nicholas Lemay
 ##
-## @since:  2008-03-20 
+## @since:  2008-03-20 , last updated on 2008-04-02
 ##
 ## @summary : to be used to generate the web page that displays a link to 
 ##            all the doc files in all of the specified languages.        
@@ -84,7 +84,11 @@ class BottomWebPageGenerator(Translatable):
                        of doc pages required by 
                        all languages.
             
+            @precondition: Requires _ translator to have been set prior to calling this function.
+            
         """       
+        
+        global _ 
         
         statsPaths = StatsPaths()
         statsPaths.setPaths( self.mainLanguage )

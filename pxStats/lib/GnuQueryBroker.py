@@ -13,7 +13,7 @@ named COPYING in the root of the source directory tree.
 ##
 ## @author :  Nicholas Lemay
 ##
-## @since  : 2007-06-28, last updated on  2007-07-03
+## @since  : 2007-06-28, last updated on 2008-04-02
 ##
 ##
 ## @summary : This class implements the GraphicsQueryBrokerInterface
@@ -194,7 +194,7 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
                        
            
         """
-        
+        global _
         #print form
         
         image       = None  #No image was produced yet
@@ -334,6 +334,8 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
                        found within the current
                        query parameters. 
         """
+        
+        global _ 
         
         error = ""
         

@@ -6,7 +6,7 @@
 ##  
 ## @author : Nicholas Lemay  
 ##
-## @since : May 19th 2006, last updated on March 19th 2008
+## @since : May 19th 2006, last updated on 2008-04-02
 ##
 ## @license : MetPX Copyright (C) 2004-2006  Environment Canada
 ##            MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
@@ -43,7 +43,7 @@ from pxStats.lib.Translatable import Translatable
     Add pxlib to stats paths
 """
 STATSPATHS = StatsPaths()
-STATSPATHS.setBasicPaths()
+STATSPATHS.setPaths()
 sys.path.append( STATSPATHS.PXLIB )
 
 """
@@ -131,7 +131,11 @@ class FileStatsCollector( Translatable ):
             Precondition : Interval should be smaller than width !
         
         """    
-         
+        
+        global _ 
+        _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH ) 
+        
+        
         if fileEntries is None :
             fileEntries = {}    
         
@@ -188,10 +192,8 @@ class FileStatsCollector( Translatable ):
             self.files    = remainingList
             self.files.append( firstItem )                            
             
-        global _ 
-        _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )    
-             
-               
+    
+                    
     def isInterestingProduct( product = "", interestingProductTypes = ["All"] ):
         ''' 
             @param product: Product to verifry.
@@ -238,10 +240,12 @@ class FileStatsCollector( Translatable ):
                         selected products names.  
             
             @precondition:  Values dictionary should have been built and filled prior to using this method.
-        
+                            
+                            Requires _ translator to have been set prior to calling this function.
             @return :
         """
         
+        global _ 
        
        
         if finishingBucket <= 0 :
@@ -370,12 +374,16 @@ class FileStatsCollector( Translatable ):
                        be an array containing the list of statsType for which no 
                        values were found.
             
+            @precondition: Requires _ translator to have been set prior to calling this function.
+            
             @return : returns a dictionary containing the statsType->foundValue associations.
         
                        
             
         """
        
+        global _ 
+        
         values = {} #in case of an unknown type
         
         splitLine = line.split( " " )
@@ -582,6 +590,8 @@ class FileStatsCollector( Translatable ):
                                               where the previous one eneded in an attempt 
                                               to save searching time.          
            
+           @precondition: Requires _ translator to have been set prior to calling this function.
+           
            @return : Tuple containing the following fields : 
                      line : The first interesting line found.
                      lineType: The type of that line.
@@ -589,6 +599,8 @@ class FileStatsCollector( Translatable ):
                      usedTheSavedFileAccessPointer : Whether or not the access pointer was used.
                      
         """       
+        
+        global _
         
         #print "in  findFirstInterestingLine     "
         line                 = ""
@@ -698,13 +710,17 @@ class FileStatsCollector( Translatable ):
             @param useSavedFileAccessPointer: Whether or not you want to 
                                               read the files as a continuation 
                                               of a previous setting of values.
-                                                 
+            
+            @precondition: Requires _ translator to have been set prior to calling this function.                                     
+            
             @note: stats type specified in self must be valid.         
                    All lines deemed invalid will be discarted, 
                    even if only one of the stats type could not be found 
                    on a certain line. 
               
         """
+        
+        global _ 
         
         if self.logger != None :        
             self.logger.debug( _("Call to setValues received.")  )
@@ -819,8 +835,11 @@ class FileStatsCollector( Translatable ):
             @summary : Fills up fileEntries with empty
                        entries with proper time labels 
         
+            @precondition: Requires _ translator to have been set prior to calling this function.
         
         """
+        
+        global _ 
         #print "creates empty entries"
         if self.logger is not  None :
             self.logger.debug( _("Call to createEmptyEntries received.") )
@@ -895,6 +914,8 @@ if __name__ == "__main__" :
     
     import time 
     
+    statsPaths = StatsPaths()
+    statsPaths.setPaths()
        
     timeA= time.time()
     types = [ "latency", "errors","bytecount" ]

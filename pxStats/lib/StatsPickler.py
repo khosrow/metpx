@@ -8,7 +8,7 @@
 ##  
 ## @author: Nicholas Lemay  
 ##
-## @since  : May 19th 2006 , last updated on 2008-02-28
+## @since  : May 19th 2006 ,last updated on 2008-04-02
 ##
 ##
 ## @license : MetPX Copyright (C) 2004-2006  Environment Canada
@@ -186,6 +186,8 @@ class StatsPickler(Translatable):
             
         """     
         
+        global _ 
+        
         #Find up to date file list. 
         self.fileCollection =  LogFileCollector( startTime  = startTime , endTime = endTime, directory = directory, lastLineRead = "",\
                                                  logType = fileType, name = self.client, logger = self.logger )   
@@ -267,7 +269,7 @@ class StatsPickler(Translatable):
             @note : ****Mostly usefull for debugging****
                      
         """    
-        
+        global _ 
         absoluteFilename = str( STATSPATHS.STATSDATA ) + "TEST_OUTPUT_FILE_FOR_STATSPICKLER "
         print _("Output filename used : %s") %absoluteFilename
         fileHandle = open( absoluteFilename , 'w' )
