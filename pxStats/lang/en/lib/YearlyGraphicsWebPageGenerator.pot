@@ -1,78 +1,186 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2008-04-08 15:32+GMT\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: ENCODING\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: YearlyGraphicsWebPageGenerator.py:198
 msgid "Definition of 'source'"
-msgstr "Definition of 'source'"
+msgstr ""
 
+#: YearlyGraphicsWebPageGenerator.py:203
 msgid "Definition of 'byteCount'"
-msgstr "Definition of 'byteCount'"
+msgstr ""
 
+#: YearlyGraphicsWebPageGenerator.py:208
 msgid "Definition of 'client'"
-msgstr "Definition of 'client'"
+msgstr ""
 
+#: YearlyGraphicsWebPageGenerator.py:213
 msgid "Definition of 'errors'"
-msgstr "Definition of 'errors'"
+msgstr ""
 
+#: YearlyGraphicsWebPageGenerator.py:218
 msgid "Definition of 'filecount'"
-msgstr "Definition of 'filecount'"
+msgstr ""
 
+#: YearlyGraphicsWebPageGenerator.py:223
 msgid "Definition of 'filesOverMaxLatency'"
-msgstr "Definition of 'filesOverMaxLatency'"
+msgstr ""
 
+#: YearlyGraphicsWebPageGenerator.py:228
 msgid "Definition of 'latency'"
-msgstr "Definition of 'latency'"
+msgstr ""
 
+#: YearlyGraphicsWebPageGenerator.py:318
 msgid "Yearly graphics for RX sources from MetPx."
-msgstr "Yearly graphics for RX sources from MetPx."
+msgstr ""
 
+#: YearlyGraphicsWebPageGenerator.py:318 YearlyGraphicsWebPageGenerator.py:499
 msgid "*updated monthly"
-msgstr "*updated monthly"
+msgstr ""
 
+#: YearlyGraphicsWebPageGenerator.py:332
+msgid "yearly/rx/%s/%s.csv"
+msgstr ""
+
+#: YearlyGraphicsWebPageGenerator.py:333
+msgid "csvFiles/yearly/rx/%s/%s.csv"
+msgstr ""
+
+#: YearlyGraphicsWebPageGenerator.py:368
 msgid "Sources"
-msgstr "Sources"
+msgstr ""
 
+#: YearlyGraphicsWebPageGenerator.py:378
 msgid "Display the total of bytes received every day of the week for each sources."
-msgstr "Display the total of bytes received every day of the week for each sources."
+msgstr ""
 
+#: YearlyGraphicsWebPageGenerator.py:382 YearlyGraphicsWebPageGenerator.py:593
 msgid "Bytecount"
-msgstr "Bytecount"
+msgstr ""
 
+#: YearlyGraphicsWebPageGenerator.py:392
 msgid "Display the total of files received every day of the week for each sources."
-msgstr "Display the total of files received every day of the week for each sources."
+msgstr ""
 
+#: YearlyGraphicsWebPageGenerator.py:396 YearlyGraphicsWebPageGenerator.py:607
 msgid "Filecount"
-msgstr "Filecount"
+msgstr ""
 
+#: YearlyGraphicsWebPageGenerator.py:406
 msgid "Display the total of errors that occured during the receptions for every day of the week for each sources."
-msgstr "Display the total of errors that occured during the receptions for every day of the week for each sources."
+msgstr ""
 
+#: YearlyGraphicsWebPageGenerator.py:410 YearlyGraphicsWebPageGenerator.py:621
 msgid "Errors"
-msgstr "Errors"
+msgstr ""
 
-msgid "Months"
-msgstr "Months"
+#: YearlyGraphicsWebPageGenerator.py:430 YearlyGraphicsWebPageGenerator.py:434
+#: YearlyGraphicsWebPageGenerator.py:451 YearlyGraphicsWebPageGenerator.py:472
+#: YearlyGraphicsWebPageGenerator.py:641 YearlyGraphicsWebPageGenerator.py:645
+#: YearlyGraphicsWebPageGenerator.py:663 YearlyGraphicsWebPageGenerator.py:681
+#: YearlyGraphicsWebPageGenerator.py:699
+msgid "Years"
+msgstr ""
 
+#: YearlyGraphicsWebPageGenerator.py:441 YearlyGraphicsWebPageGenerator.py:442
+#: YearlyGraphicsWebPageGenerator.py:689 YearlyGraphicsWebPageGenerator.py:690
+msgid "bytecount/%s.png"
+msgstr ""
+
+#: YearlyGraphicsWebPageGenerator.py:441 YearlyGraphicsWebPageGenerator.py:461
+#: YearlyGraphicsWebPageGenerator.py:479
+msgid "yearly/rx/%s/"
+msgstr ""
+
+#: YearlyGraphicsWebPageGenerator.py:442 YearlyGraphicsWebPageGenerator.py:462
+#: YearlyGraphicsWebPageGenerator.py:480
+msgid "archives/yearly/rx/%s/"
+msgstr ""
+
+#: YearlyGraphicsWebPageGenerator.py:461 YearlyGraphicsWebPageGenerator.py:462
+#: YearlyGraphicsWebPageGenerator.py:707 YearlyGraphicsWebPageGenerator.py:708
+msgid "filecount/%s.png"
+msgstr ""
+
+#: YearlyGraphicsWebPageGenerator.py:479 YearlyGraphicsWebPageGenerator.py:480
+#: YearlyGraphicsWebPageGenerator.py:725 YearlyGraphicsWebPageGenerator.py:726
+msgid "errors/%s.png"
+msgstr ""
+
+#: YearlyGraphicsWebPageGenerator.py:499
 msgid "Yearly graphics for TX clients from MetPx."
-msgstr "Yearly graphics for TX clients from MetPx."
+msgstr ""
 
+#: YearlyGraphicsWebPageGenerator.py:513
+msgid "yearly/tx/%s/%s.csv"
+msgstr ""
+
+#: YearlyGraphicsWebPageGenerator.py:514
+msgid "csvFiles/yearly/tx/%s/%s.csv"
+msgstr ""
+
+#: YearlyGraphicsWebPageGenerator.py:551
 msgid "Clients"
-msgstr "Clients"
+msgstr ""
 
-msgid "Display the average latency of file transfers for every day of the week for each clients."
-msgstr "Display the average latency of file transfers for every day of the week for each clients."
+#: YearlyGraphicsWebPageGenerator.py:561
+msgid "Display the taverage latency of file transfers for every day of the week for each clients."
+msgstr ""
 
+#: YearlyGraphicsWebPageGenerator.py:565
 msgid "Latency"
-msgstr "Latency"
+msgstr ""
 
+#: YearlyGraphicsWebPageGenerator.py:575
 msgid "Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients."
-msgstr "Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients."
+msgstr ""
 
+#: YearlyGraphicsWebPageGenerator.py:579
 msgid "Files Over Max. Lat."
-msgstr "Files Over Max. Lat."
+msgstr ""
 
+#: YearlyGraphicsWebPageGenerator.py:589
 msgid "Display the total of bytes transfered every day of the week for each clients."
-msgstr "Display the total of bytes transfered every day of the week for each clients."
+msgstr ""
 
+#: YearlyGraphicsWebPageGenerator.py:603
 msgid "Display the total of files transferred every day of the week for each clients."
-msgstr "Display the total of files transferred every day of the week for each clients."
+msgstr ""
 
+#: YearlyGraphicsWebPageGenerator.py:617
 msgid "Display the total of errors that occured during file transfers every day of the week for each clients."
-msgstr "Display the total of errors that occured during file transfers every day of the week for each clients."
+msgstr ""
+
+#: YearlyGraphicsWebPageGenerator.py:653 YearlyGraphicsWebPageGenerator.py:654
+msgid "latency/%s.png"
+msgstr ""
+
+#: YearlyGraphicsWebPageGenerator.py:653 YearlyGraphicsWebPageGenerator.py:671
+#: YearlyGraphicsWebPageGenerator.py:689 YearlyGraphicsWebPageGenerator.py:707
+#: YearlyGraphicsWebPageGenerator.py:725
+msgid "yearly/tx/%s/"
+msgstr ""
+
+#: YearlyGraphicsWebPageGenerator.py:654 YearlyGraphicsWebPageGenerator.py:672
+#: YearlyGraphicsWebPageGenerator.py:690 YearlyGraphicsWebPageGenerator.py:708
+#: YearlyGraphicsWebPageGenerator.py:726
+msgid "archives/yearly/tx/%s/"
+msgstr ""
+
+#: YearlyGraphicsWebPageGenerator.py:671 YearlyGraphicsWebPageGenerator.py:672
+msgid "filesOverMaxLatency/%s.png"
+msgstr ""
 

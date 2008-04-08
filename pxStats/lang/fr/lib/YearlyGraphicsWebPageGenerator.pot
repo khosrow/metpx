@@ -1,4 +1,4 @@
-
+#: YearlyGraphicsWebPageGenerator.py:198
 msgid "Definition of 'source'"
 msgstr "Définition de 'source'"
 
@@ -76,4 +76,58 @@ msgstr "Afficher, pour chaque jour de la semaine, le nombre total de fichiers en
 
 msgid "Display the total of errors that occured during file transfers every day of the week for each clients."
 msgstr "Afficher,pour chaque jour de la semaine, le nombre total d'erreurs qui se sont produites durant l'envois de fichiers à tous les clients."
+
+
+#: YearlyGraphicsWebPageGenerator.py:441 YearlyGraphicsWebPageGenerator.py:442
+#: YearlyGraphicsWebPageGenerator.py:689 YearlyGraphicsWebPageGenerator.py:690
+msgid "bytecount/%s.png"
+msgstr "nbreDeBytes/%s.png"
+
+#: YearlyGraphicsWebPageGenerator.py:441 YearlyGraphicsWebPageGenerator.py:461
+#: YearlyGraphicsWebPageGenerator.py:479
+msgid "yearly/rx/%s/"
+msgstr "annuel/rx/%s/"
+
+#: YearlyGraphicsWebPageGenerator.py:442 YearlyGraphicsWebPageGenerator.py:462
+#: YearlyGraphicsWebPageGenerator.py:480
+msgid "archives/yearly/rx/%s/"
+msgstr "archives/annuel/rx/%s/"
+
+#: YearlyGraphicsWebPageGenerator.py:461 YearlyGraphicsWebPageGenerator.py:462
+#: YearlyGraphicsWebPageGenerator.py:707 YearlyGraphicsWebPageGenerator.py:708
+msgid "filecount/%s.png"
+msgstr "nbreDeFichiers/%s.png"
+
+#: YearlyGraphicsWebPageGenerator.py:479 YearlyGraphicsWebPageGenerator.py:480
+#: YearlyGraphicsWebPageGenerator.py:725 YearlyGraphicsWebPageGenerator.py:726
+msgid "errors/%s.png"
+msgstr "erreurs/%s.png"
+
+#: YearlyGraphicsWebPageGenerator.py:513
+msgid "yearly/tx/%s/%s.csv"
+msgstr "annuel/tx/%s/%s.csv"
+
+#: YearlyGraphicsWebPageGenerator.py:514
+msgid "csvFiles/yearly/tx/%s/%s.csv"
+msgstr "fichiersCsv/annuel/tx/%s/%s.csv"
+
+#: YearlyGraphicsWebPageGenerator.py:653 YearlyGraphicsWebPageGenerator.py:654
+msgid "latency/%s.png"
+msgstr "latence/%s.png"
+
+#: YearlyGraphicsWebPageGenerator.py:653 YearlyGraphicsWebPageGenerator.py:671
+#: YearlyGraphicsWebPageGenerator.py:689 YearlyGraphicsWebPageGenerator.py:707
+#: YearlyGraphicsWebPageGenerator.py:725
+msgid "yearly/tx/%s/"
+msgstr "annuel/tx/%s/"
+
+#: YearlyGraphicsWebPageGenerator.py:654 YearlyGraphicsWebPageGenerator.py:672
+#: YearlyGraphicsWebPageGenerator.py:690 YearlyGraphicsWebPageGenerator.py:708
+#: YearlyGraphicsWebPageGenerator.py:726
+msgid "archives/yearly/tx/%s/"
+msgstr "archives/annuel/tx/%s/"
+
+#: YearlyGraphicsWebPageGenerator.py:671 YearlyGraphicsWebPageGenerator.py:672
+msgid "filesOverMaxLatency/%s.png"
+msgstr "fichiersAvecLatenceInnacceptable/%s.png"
 
