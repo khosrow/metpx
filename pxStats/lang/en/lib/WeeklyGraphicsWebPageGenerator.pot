@@ -1,107 +1,121 @@
+msgid ""
+msgstr ""
+
+
 msgid "Definition of 'source'"
 msgstr "Definition of 'source'"
 
-#: weeklyGraphicsWebPage.py:296
 msgid "Definition of 'byteCount'"
 msgstr "Definition of 'byteCount'"
 
-#: weeklyGraphicsWebPage.py:301
 msgid "Definition of 'client'"
 msgstr "Definition of 'client'"
 
-#: weeklyGraphicsWebPage.py:306
 msgid "Definition of 'errors'"
 msgstr "Definition of 'errors'"
 
-#: weeklyGraphicsWebPage.py:311
 msgid "Definition of 'filecount'"
 msgstr "Definition of 'filecount'"
 
-#: weeklyGraphicsWebPage.py:316
 msgid "Definition of 'filesOverMaxLatency'"
 msgstr "Definition of 'filesOverMaxLatency'"
 
-#: weeklyGraphicsWebPage.py:321
 msgid "Definition of 'latency'"
 msgstr "Definition of 'latency'"
 
-#: weeklyGraphicsWebPage.py:334
 msgid "Weekly graphics for RX sources from MetPx."
 msgstr "Weekly graphics for RX sources from MetPx."
 
-#: weeklyGraphicsWebPage.py:334 weeklyGraphicsWebPage.py:502
 msgid "*updated hourly"
 msgstr "*updated hourly"
 
-#: weeklyGraphicsWebPage.py:380
+msgid "weekly/rx/%s/%s/%s.csv"
+msgstr "weekly/rx/%s/%s/%s.csv"
+
+msgid "csvFiles/weekly/rx/%s/%s/%s.csv"
+msgstr "csvFiles/weekly/rx/%s/%s/%s.csv"
+
 msgid "Sources"
 msgstr "Sources"
 
-#: weeklyGraphicsWebPage.py:390
 msgid "Display the total of bytes received every day of the week for each sources."
 msgstr "Display the total of bytes received every day of the week for each sources."
 
-#: weeklyGraphicsWebPage.py:394 weeklyGraphicsWebPage.py:593
 msgid "Bytecount"
 msgstr "Bytecount"
 
-#: weeklyGraphicsWebPage.py:404
 msgid "Display the total of files received every day of the week for each sources."
 msgstr "Display the total of files received every day of the week for each sources."
 
-#: weeklyGraphicsWebPage.py:408 weeklyGraphicsWebPage.py:607
 msgid "Filecount"
 msgstr "Filecount"
 
-#: weeklyGraphicsWebPage.py:418
 msgid "Display the total of errors that occured during the receptions for every day of the week for each sources."
 msgstr "Display the total of errors that occured during the receptions for every day of the week for each sources."
 
-#: weeklyGraphicsWebPage.py:422 weeklyGraphicsWebPage.py:621
 msgid "Errors"
 msgstr "Errors"
 
-#: weeklyGraphicsWebPage.py:445 weeklyGraphicsWebPage.py:449
-#: weeklyGraphicsWebPage.py:465 weeklyGraphicsWebPage.py:479
-#: weeklyGraphicsWebPage.py:642 weeklyGraphicsWebPage.py:646
-#: weeklyGraphicsWebPage.py:661 weeklyGraphicsWebPage.py:677
-#: weeklyGraphicsWebPage.py:691 weeklyGraphicsWebPage.py:705
 msgid "Weeks"
 msgstr "Weeks"
 
-#: weeklyGraphicsWebPage.py:502
+msgid "/bytecount/%s.png"
+msgstr "/bytecount/%s.png"
+
+msgid "weekly/rx/%s/"
+msgstr "weekly/rx/%s/"
+
+msgid "archives/weekly/rx/%s/"
+msgstr "archives/weekly/rx/%s/"
+
+msgid "/filecount/%s.png"
+msgstr "/filecount/%s.png"
+
+msgid "/errors/%s.png"
+msgstr "/errors/%s.png"
+
 msgid "Weekly graphics for TX clients from MetPx."
 msgstr "Weekly graphics for TX clients from MetPx."
 
-#: weeklyGraphicsWebPage.py:551
+msgid "/weekly/tx/%s/%s/%s.csv"
+msgstr "/weekly/tx/%s/%s/%s.csv"
+
+msgid "csvFiles/weekly/tx/%s/%s/%s.csv"
+msgstr "csvFiles/weekly/tx/%s/%s/%s.csv"
+
 msgid "Clients"
 msgstr "Clients"
 
-#: weeklyGraphicsWebPage.py:561
 msgid "Display the average latency of file transfers for every day of the week for each clients."
 msgstr "Display the average latency of file transfers for every day of the week for each clients."
 
-#: weeklyGraphicsWebPage.py:565
 msgid "Latency"
 msgstr "Latency"
 
-#: weeklyGraphicsWebPage.py:575
 msgid "Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients."
 msgstr "Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients."
 
-#: weeklyGraphicsWebPage.py:579
 msgid "Files Over Max. Lat."
 msgstr "Files Over Max. Lat."
 
-#: weeklyGraphicsWebPage.py:589
 msgid "Display the total of bytes transfered every day of the week for each clients."
 msgstr "Display the total of bytes transfered every day of the week for each clients."
 
-#: weeklyGraphicsWebPage.py:603
 msgid "Display the total of files transferred every day of the week for each clients."
 msgstr "Display the total of files transferred every day of the week for each clients."
 
-#: weeklyGraphicsWebPage.py:617
 msgid "Display the total of errors that occured during file transfers every day of the week for each clients."
 msgstr "Display the total of errors that occured during file transfers every day of the week for each clients."
+
+msgid "/latency/%s.png"
+msgstr "/latency/%s.png"
+
+msgid "weekly/tx/%s/"
+msgstr "weekly/tx/%s/"
+
+msgid "archives/weekly/tx/%s/"
+msgstr "archives/weekly/tx/%s/"
+
+msgid "/filesOverMaxLatency/%s.png"
+msgstr "/filesOverMaxLatency/%s.png"
 
