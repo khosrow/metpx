@@ -1,3 +1,7 @@
+msgid ""
+msgstr ""
+
+
 msgid "Definition of 'source'"
 msgstr "Definition of 'source'"
 
@@ -20,10 +24,16 @@ msgid "Definition of 'latency'"
 msgstr "Definition of 'latency'"
 
 msgid "Monthly graphics for RX sources from MetPx."
-msgstr "Weekly graphics for RX sources from MetPx."
+msgstr "Monthly graphics for RX sources from MetPx."
 
 msgid "*updated weekly"
 msgstr "*updated weekly"
+
+msgid "rx/%s/%s/%s.csv"
+msgstr "rx/%s/%s/%s.csv"
+
+msgid "csvFiles/monthly/rx/%s/%s/%s.csv"
+msgstr "csvFiles/monthly/rx/%s/%s/%s.csv"
 
 msgid "Sources"
 msgstr "Sources"
@@ -49,30 +59,48 @@ msgstr "Errors"
 msgid "Months"
 msgstr "Months"
 
+msgid "/bytecount/%s.png"
+msgstr "/bytecount/%s.png"
+
+msgid "monthly/rx/%s/"
+msgstr "monthly/rx/%s/"
+
+msgid "archives/monthly/rx/%s/"
+msgstr "archives/monthly/rx/%s/"
+
+msgid "/filecount/%s.png"
+msgstr "/filecount/%s.png"
+
+msgid "/errors/%s.png"
+msgstr "/errors/%s.png"
+
 msgid "Monthly graphics for TX clients from MetPx."
 msgstr "Monthly graphics for TX clients from MetPx."
+
+msgid "tx/%s/%s/%s.csv"
+msgstr "tx/%s/%s/%s.csv"
+
+msgid "csvFiles/monthly/tx/%s/%s/%s.csv"
+msgstr "csvFiles/monthly/tx/%s/%s/%s.csv"
 
 msgid "Clients"
 msgstr "Clients"
 
-msgid "Display the average latency of file transfers for every day of the week for each clients."
-msgstr "Display the average latency of file transfers for every day of the week for each clients."
-
 msgid "Latency"
 msgstr "Latency"
-
-msgid "Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients."
-msgstr "Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients."
 
 msgid "Files Over Max. Lat."
 msgstr "Files Over Max. Lat."
 
-msgid "Display the total of bytes transfered every day of the week for each clients."
-msgstr "Display the total of bytes transfered every day of the week for each clients."
+msgid "/latency/%s.png"
+msgstr "/latency/%s.png"
 
-msgid "Display the total of files transferred every day of the week for each clients."
-msgstr "Display the total of files transferred every day of the week for each clients."
+msgid "monthly/tx/%s/"
+msgstr "monthly/tx/%s/"
 
-msgid "Display the total of errors that occured during file transfers every day of the week for each clients."
-msgstr "Display the total of errors that occured during file transfers every day of the week for each clients."
+msgid "archives/monthly/tx/%s/"
+msgstr "archives/monthly/tx/%s/"
+
+msgid "/filesOverMaxLatency/%s.png"
+msgstr "/filesOverMaxLatency/%s.png"
 

@@ -1,39 +1,4 @@
-msgid  "January"
-msgstr "Janvier"
-
-msgid  "February"
-msgstr "Février"
-
-msgid  "March"
-msgstr "Mars"
-
-msgid  "April"
-msgstr "Avril"
-
-msgid  "May"
-msgstr "Mai"
-
-msgid  "June"
-msgstr "Juin"
-
-msgid  "July"
-msgstr "Juillet"
-
-msgid  "August"
-msgstr "Aout"
-
-msgid  "Spetember"
-msgstr "Septembre"
-
-msgid  "October"
-msgstr "Octobre"
-
-msgid  "Novembre"
-msgstr "November"
-
-msgid  "December"
-msgstr "Décembre"
-
+#: MonthlyGraphicsWebPageGenerator.py:245
 msgid "Definition of 'source'"
 msgstr "Définition de 'source'"
 
@@ -111,4 +76,73 @@ msgstr "Afficher, pour chaque jour de la semaine, le nombre total de fichiers en
 
 msgid "Display the total of errors that occured during file transfers every day of the week for each clients."
 msgstr "Afficher,pour chaque jour de la semaine, le nombre total d'erreurs qui se sont produites durant l'envois de fichiers à tous les clients."
+
+
+#: MonthlyGraphicsWebPageGenerator.py:496
+#: MonthlyGraphicsWebPageGenerator.py:497
+#: MonthlyGraphicsWebPageGenerator.py:742
+#: MonthlyGraphicsWebPageGenerator.py:743
+msgid "/bytecount/%s.png"
+msgstr "/nbreDeBytes/%s.png"
+
+#: MonthlyGraphicsWebPageGenerator.py:496
+#: MonthlyGraphicsWebPageGenerator.py:515
+#: MonthlyGraphicsWebPageGenerator.py:534
+msgid "monthly/rx/%s/"
+msgstr "mensuel/rx/%s/"
+
+#: MonthlyGraphicsWebPageGenerator.py:497
+#: MonthlyGraphicsWebPageGenerator.py:516
+#: MonthlyGraphicsWebPageGenerator.py:535
+msgid "archives/monthly/rx/%s/"
+msgstr "archives/mensuel/rx/%s/"
+
+#: MonthlyGraphicsWebPageGenerator.py:515
+#: MonthlyGraphicsWebPageGenerator.py:516
+#: MonthlyGraphicsWebPageGenerator.py:761
+#: MonthlyGraphicsWebPageGenerator.py:762
+msgid "/filecount/%s.png"
+msgstr "/nbreDeFichiers/%s.png"
+
+#: MonthlyGraphicsWebPageGenerator.py:534
+#: MonthlyGraphicsWebPageGenerator.py:535
+#: MonthlyGraphicsWebPageGenerator.py:780
+#: MonthlyGraphicsWebPageGenerator.py:781
+msgid "/errors/%s.png"
+msgstr "/erreurs/%s.png"
+
+
+#: MonthlyGraphicsWebPageGenerator.py:563
+msgid "tx/%s/%s/%s.csv"
+msgstr "tx/%s/%s/%s.csv"
+
+#: MonthlyGraphicsWebPageGenerator.py:564
+msgid "csvFiles/monthly/tx/%s/%s/%s.csv"
+msgstr "fichiersCsv/mensuel/tx/%s/%s/%s.csv"
+
+#: MonthlyGraphicsWebPageGenerator.py:703
+#: MonthlyGraphicsWebPageGenerator.py:704
+msgid "/latency/%s.png"
+msgstr "/latence/%s.png"
+
+#: MonthlyGraphicsWebPageGenerator.py:703
+#: MonthlyGraphicsWebPageGenerator.py:722
+#: MonthlyGraphicsWebPageGenerator.py:742
+#: MonthlyGraphicsWebPageGenerator.py:761
+#: MonthlyGraphicsWebPageGenerator.py:780
+msgid "monthly/tx/%s/"
+msgstr "mensuel/tx/%s/"
+
+#: MonthlyGraphicsWebPageGenerator.py:704
+#: MonthlyGraphicsWebPageGenerator.py:723
+#: MonthlyGraphicsWebPageGenerator.py:743
+#: MonthlyGraphicsWebPageGenerator.py:762
+#: MonthlyGraphicsWebPageGenerator.py:781
+msgid "archives/monthly/tx/%s/"
+msgstr "archives/mensuel/tx/%s/"
+
+#: MonthlyGraphicsWebPageGenerator.py:722
+#: MonthlyGraphicsWebPageGenerator.py:723
+msgid "/filesOverMaxLatency/%s.png"
+msgstr "/fichiersAvecLatenceInnacceptable/%s.png"
 
