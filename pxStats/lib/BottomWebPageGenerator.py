@@ -60,7 +60,11 @@ class BottomWebPageGenerator(Translatable):
             
             @param languagesToLinkTo: Alternate languages the page can be presented in.
             
+            @precondition: Requires _ translator to have been set prior to calling this function.
+        
         """
+        
+        global _ 
         
         allLanguagesUsed = copy.copy( self.otherLanguages )
         allLanguagesUsed.append( self.mainLanguage )
@@ -112,7 +116,11 @@ class BottomWebPageGenerator(Translatable):
         """ 
             @summary : prints out the entire bottom web page
             
+            @precondition: Requires _ translator to have been set prior to calling this function.
+        
         """
+        
+        global _ 
         
         paths = StatsPaths()
         paths.setPaths( LanguageTools.getMainApplicationLanguage() )
