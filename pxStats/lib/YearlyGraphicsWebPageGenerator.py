@@ -129,14 +129,28 @@ class YearlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
     
     def printWebPage( self, rxNames, txNames ):
         """
-            Generates a web page based on all the 
-            rxnames and tx names that have run during
-            the past x years. 
+            @summary : Generates a web page based on all the 
+                       rxnames and tx names that have run during
+                       the past x years. 
+                   
+            @param rxNames: List of sources for which to write 
+                            links to their yearly graphics.         
             
-            Only links to available graphics will be 
-            displayed.
+            @param txNames: List of clients for which to write 
+                            links to their yearly graphics.  
+            
+            @precondition: global _ translator must be set prior to calling this function.
+            
+            @notes :   Only links to available graphics will be 
+                       displayed.
+            
+            @return : None                        
+                       
             
         """       
+        
+        global _
+        
         rxNamesArray = rxNames.keys()
         txNamesArray = txNames.keys()
         

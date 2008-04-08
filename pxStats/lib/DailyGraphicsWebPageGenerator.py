@@ -30,7 +30,7 @@
 import  os, time, sys
 
 
-sys.path.insert(1,  os.path.dirname( os.path.abspath(__file__) ) + '/../../../')
+sys.path.insert(1,  os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 """
     Imports
     PXManager requires pxlib 
@@ -143,14 +143,18 @@ class DailyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
                        with the content based on 
                        the specified parameters.
             
-            @param rxNames:
+            @param rxNames: List of rx for which to display the graphics
             
-            @param txNames: 
+            @param txNames: List of rx for which to display the graphics
+            
+            @precondition: global _ translator must be set prior to calling this function.
              
             @note :   Only links to available graphics will be 
                       displayed.
             
         """  
+        
+        global _ 
         
         rxNamesArray = rxNames.keys()
         txNamesArray = txNames.keys()

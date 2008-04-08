@@ -85,7 +85,7 @@ class MonthlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
         if months == None:
             self.setMonths()
         else:    
-            self.days = months 
+            self.months = months 
                 
         self.displayedLanguage = displayedLanguage
         self.filesLanguage     = filesLanguage
@@ -135,10 +135,12 @@ class MonthlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
     
     def getStartEndOfWebPage():
         """
-            Returns the time of the first 
-            graphics to be shown on the web 
-            page and the time of the last 
-            graphic to be displayed. 
+            @summary : Returns the time of the first 
+                       graphics to be shown on the web 
+                       page and the time of the last 
+                       graphic to be displayed. 
+            
+            @return :  start, end tuple in iso format.
             
         """
         
@@ -172,14 +174,30 @@ class MonthlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
     
     def printWebPage( self, rxNames, txNames ):
         """
-            Generates a web page based on all the 
-            rxnames and tx names that have run during
-            the past x months. 
+            @summary : Generates a web page based on all the 
+                       rxnames and tx names that have run during
+                       the past x months. 
             
-            Only links to available graphics will be 
-            displayed.
+                       Only links to available graphics will be 
+                       displayed.
+        
+            @param rxNames: List of sources for which to write 
+                            links to their monthly graphics.         
+            
+            @param txNames: List of clients for which to write 
+                            links to their monthly graphics.  
+            
+            @precondition: global _ translator must be set prior to calling this function.
+            
+            @notes :   Only links to available graphics will be 
+                       displayed.
+            
+            @return : None          
+          
             
         """           
+        
+        global _ 
 
         rxNamesArray = rxNames.keys()
         txNamesArray = txNames.keys()
