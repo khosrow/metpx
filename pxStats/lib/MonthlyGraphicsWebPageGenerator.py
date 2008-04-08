@@ -377,7 +377,7 @@ class MonthlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             
             _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.filesLanguage )
             
-            file = self.pathsTowardsGraphics.STATSCSVFILES + _("rx/%s/%s/%s.csv") %( machinesStr, currentYear, currentMonth )
+            file = self.pathsTowardsGraphics.STATSCSVFILES + _("monthly/rx/%s/%s/%s.csv") %( machinesStr, currentYear, currentMonth )
             webLink = _("csvFiles/monthly/rx/%s/%s/%s.csv") %( machinesStr, currentYear, currentMonth )
             
             _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
@@ -560,7 +560,7 @@ class MonthlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             
             _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.filesLanguage )
             
-            file = self.pathsTowardsGraphics.STATSCSVFILES +  _("tx/%s/%s/%s.csv") %( machinesStr, currentYear, currentMonth )
+            file = self.pathsTowardsGraphics.STATSCSVFILES +  _("monthly/tx/%s/%s/%s.csv") %( machinesStr, currentYear, currentMonth )
             webLink = _("csvFiles/monthly/tx/%s/%s/%s.csv") %( machinesStr, currentYear, currentMonth )
             
             _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
