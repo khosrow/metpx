@@ -1,0 +1,21 @@
+msgid "wordDatabases"
+msgstr "baseDeMots"
+
+msgid "installPxStatsWebInterface.py help page."
+msgstr "Aide sur installPxStatsWebInterface.py."
+
+msgid "Usage : installPxStatsWebInterface.py installationPath"
+msgstr "Utilisation : installPxStatsWebInterface.py cheminOuInstallerLinterface"
+
+msgid "Installation path must be an aboslute path name of the following form : /a/b/c/d "
+msgstr "Le chemin vers l'endroit ou l'installation doit etre effectuee doit etre specifie par un chemin absolu de la forme : /a/b/c/d "
+
+msgid "Installation path does not need to exist. Permissions for folder arborescence creation must be possessed."
+msgstr "Le chemin specifie n'existe pas. Note : Vosu devez posseder les permissions pour creer l'arborescence ou l'installation aura lieu."
+
+msgid "Specified folder must be an absolute path name. Please use folowing syntax : '/a/b/c/d'."
+msgstr "Le chemin specifie doit etre un chemin absolu. Veuillez utiliser le format suivant : '/a/b/c/d'."
+
+msgid "Error. Application must be called with one and only one parameter. Use -h|--help for further help."
+msgstr "Erreur. L'application doit etre appelee avec un seul parametre. Utilisez -h|--help pour plus d'assistance."
+

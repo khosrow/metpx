@@ -1,0 +1,25 @@
+msgid ""
+msgstr ""
+
+
+msgid "wordDatabases"
+msgstr "wordDatabases"
+
+msgid "installPxStatsWebInterface.py help page."
+msgstr "installPxStatsWebInterface.py help page."
+
+msgid "Usage : installPxStatsWebInterface.py installationPath"
+msgstr "Usage : installPxStatsWebInterface.py installationPath"
+
+msgid "Installation path must be an aboslute path name of the following form : /a/b/c/d "
+msgstr "Installation path must be an aboslute path name of the following form : /a/b/c/d "
+
+msgid "Installation path does not need to exist. Permissions for folder arborescence creation must be possessed."
+msgstr "Installation path does not need to exist. Permissions for folder arborescence creation must be possessed."
+
+msgid "Specified folder must be an absolute path name. Please use folowing syntax : '/a/b/c/d'."
+msgstr "Specified folder must be an absolute path name. Please use folowing syntax : '/a/b/c/d'."
+
+msgid "Error. Application must be called with one and only one parameter. Use -h|--help for further help."
+msgstr "Error. Application must be called with one and only one parameter. Use -h|--help for further help."
+
