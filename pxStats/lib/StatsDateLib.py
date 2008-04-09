@@ -194,7 +194,9 @@ class StatsDateLib:
             @summary : Return the year month day in strftime 
                        based on an epoch date.   
         """
-    
+        
+        global _
+        
         months ={ "January": _("January"),  "February": _("February"),  "March":_("March"),  "April":_("April"),\
                  "May":_("May"), "June":_("June"), "July":_("July"),  "August":_("August"),  "September":_("September"),\
                  "October":_("October"),  "November":_("November"),  "December":_("December") }
@@ -833,6 +835,8 @@ class StatsDateLib:
             
             
         """
+        
+        global _ 
         
         #TODO :fixStartEnd method???    
         if fixedPrevious :
