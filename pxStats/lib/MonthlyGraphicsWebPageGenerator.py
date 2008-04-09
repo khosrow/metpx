@@ -94,7 +94,7 @@ class MonthlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
         self.pathsTowardsGraphics.setPaths( filesLanguage )
         
         self.pathsTowardsOutputFiles = StatsPaths()
-        self.pathsTowardsOutputFiles.setPaths( configParameters.mainApplicationLanguage )
+        self.pathsTowardsOutputFiles.setPaths( self.displayedLanguage )
 
 
 

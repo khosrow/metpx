@@ -90,7 +90,7 @@ class TopWebPageGenerator( Translatable ):
         global _ 
         
         paths = StatsPaths()
-        paths.setPaths( LanguageTools.getMainApplicationLanguage() )
+        paths.setPaths( self.outputLanguage )
     
         file = "%stop_%s.html" %( paths.STATSWEBPAGES, self.outputLanguage )
         fileHandle = open( file , 'w' )

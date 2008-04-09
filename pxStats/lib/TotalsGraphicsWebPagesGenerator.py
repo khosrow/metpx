@@ -118,7 +118,7 @@ class TotalsGraphicsWebPageGenerator( WebPageGeneratorInterface ):
         self.pathsTowardsGraphics.setPaths( filesLanguage )
         
         self.pathsTowardsOutputFiles = StatsPaths()
-        self.pathsTowardsOutputFiles.setPaths( configParameters.mainApplicationLanguage )
+        self.pathsTowardsOutputFiles.setPaths( self.displayedLanguage )
 
 
 
@@ -257,7 +257,7 @@ class TotalsGraphicsWebPageGenerator( WebPageGeneratorInterface ):
         for machineTag in machineTags:
             machineNames     = machineParameters.getPairedMachinesAssociatedWithListOfTags( [ machineTag ] )
             for machineName in machineNames:
-                if not os.path.isdir(self.pathsTowardsOutputFiles.STATSWEBPAGESHTML):
+                if not os.path.isdir(self.pathsTowardsGraphics.STATSWEBPAGESHTML):
                     os.makedirs( self.pathsTowardsOutputFiles.STATSWEBPAGESHTML )
                 machineName = TotalsGraphicsWebPageGenerator.getCombinedMachineName( machineName )
                 file = "%s%s_%s.html" %( self.pathsTowardsOutputFiles.STATSWEBPAGESHTML, machineTag, self.displayedLanguage )

@@ -85,7 +85,7 @@ class YearlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
         self.pathsTowardsGraphics.setPaths( filesLanguage )
         
         self.pathsTowardsOutputFiles = StatsPaths()  
-        self.pathsTowardsOutputFiles.setPaths(filesLanguage)
+        self.pathsTowardsOutputFiles.setPaths( self.displayedLanguage )
     
     
     
