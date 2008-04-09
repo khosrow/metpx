@@ -1,0 +1,31 @@
+msgid ""
+msgstr ""
+
+
+msgid "Individual graphics"
+msgstr "Individual graphics"
+
+msgid "Daily"
+msgstr "Daily"
+
+msgid "Weekly"
+msgstr "Weekly"
+
+msgid "Monthly"
+msgstr "Monthly"
+
+msgid "Yearly"
+msgstr "Yearly"
+
+msgid "Clusters"
+msgstr "Clusters"
+
+msgid "Requests"
+msgstr "Requests"
+
+msgid "Glossary"
+msgstr "Glossary"
+
+msgid "Documentation"
+msgstr "Documentation"
+
