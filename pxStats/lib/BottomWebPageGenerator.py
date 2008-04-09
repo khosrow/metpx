@@ -100,7 +100,7 @@ class BottomWebPageGenerator(Translatable):
                 
                 
             fileHandle.write( """ ';    
-                document.getElementById("logo").src = "images/mainLogo_%s.png"
+                document.getElementById("logo").src = "images/mainLogo_%s.gif"
                 }
             """ %(languageUsed))
         
@@ -145,7 +145,7 @@ class BottomWebPageGenerator(Translatable):
         fileHandle.write("""  
              <body bgcolor="#FFD684">
                   <div style="position:absolute;top:20%%;vertical-align: middle;text-align:center;left:15%%;bottom:0%%;">
-                     <img name="logo" id="logo" src="images/mainLogo_%s.png" ></img>
+                     <img name="logo" id="logo" src="images/mainLogo_%s.gif" ></img>
      
                   </div>
         """ %self.mainLanguage)
