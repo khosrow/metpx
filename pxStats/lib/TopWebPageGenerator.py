@@ -109,16 +109,16 @@ class TopWebPageGenerator( Translatable ):
             <div class="left">
                 """ + _("Individual graphics") + """&nbsp;&nbsp;:&nbsp;&nbsp;
     
-                 <a href="html/dailyGraphs_%s.html" target="bottom">"""%self.outputLanguage  + _("Daily") + """</a>
+                 <a href="html_%s/dailyGraphs_%s.html" target="bottom">"""%( self.outputLanguage, self.outputLanguage )  + _("Daily") + """</a>
                 &nbsp;&nbsp;
     
-                 <a href="html/weeklyGraphs_%s.html" target="bottom">"""%self.outputLanguage + _("Weekly")  + """</a>
+                 <a href="html_%s/weeklyGraphs_%s.html" target="bottom">"""%( self.outputLanguage, self.outputLanguage ) + _("Weekly")  + """</a>
                 &nbsp;&nbsp;
     
-                 <a href="html/monthlyGraphs_%s.html" target="bottom">"""%self.outputLanguage + _("Monthly") + """</a>
+                 <a href="html_%s/monthlyGraphs_%s.html" target="bottom">"""%( self.outputLanguage, self.outputLanguage ) + _("Monthly") + """</a>
                 &nbsp;&nbsp;
     
-                 <a href="html/yearlyGraphs_%s.html" target="bottom">""" %self.outputLanguage +_("Yearly") + """</a>
+                 <a href="html_%s/yearlyGraphs_%s.html" target="bottom">""" %( self.outputLanguage, self.outputLanguage) +_("Yearly") + """</a>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     
         """   )
@@ -131,9 +131,9 @@ class TopWebPageGenerator( Translatable ):
     
             for machineTag in machineTags:
                 fileHandle.write( """
-                <a href="html/%s_%s.html" target="bottom">%s</a>
+                <a href="html_%s/%s_%s.html" target="bottom">%s</a>
                 &nbsp;&nbsp;&nbsp;
-                 """ %( machineTag.replace( ',','' ),self.outputLanguage , string.upper(machineTag) ) )
+                 """ %( self.outputLanguage, machineTag.replace( ',','' ),self.outputLanguage , string.upper(machineTag) ) )
     
     
         fileHandle.write( """
@@ -144,9 +144,9 @@ class TopWebPageGenerator( Translatable ):
     
                  <a href="../scripts/cgi-bin/graphicsRequestPage.py?lang=%s" target="bottom">"""%self.outputLanguage + _("Requests") + """</a>
     
-                 <a href="html/helpPages/glossary_%s.html" target="bottom" >""" %self.outputLanguage + _("Glossary") + """</a>
+                 <a href="html_%s/helpPages/glossary_%s.html" target="bottom" >""" %( self.outputLanguage, self.outputLanguage ) + _("Glossary") + """</a>
             
-                 <a href="html/docPages/listOfDocumentationFiles_%s" target="bottom">""" %self.outputLanguage + _("Documentation") +""" </a>  
+                 <a href="html_%s/docPages/listOfDocumentationFiles_%s" target="bottom">""" %( self.outputLanguage, self.outputLanguage ) + _("Documentation") +""" </a>  
             </div>
     
     
