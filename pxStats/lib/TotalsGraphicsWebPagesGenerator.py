@@ -120,7 +120,7 @@ class TotalsGraphicsWebPageGenerator( WebPageGeneratorInterface ):
         self.pathsTowardsOutputFiles = StatsPaths()
         self.pathsTowardsOutputFiles.setPaths( self.displayedLanguage )
 
-
+        StatsDateLib.setLanguage(filesLanguage)
 
     def setDays( self ):
         """

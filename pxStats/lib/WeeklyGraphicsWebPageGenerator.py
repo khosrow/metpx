@@ -99,7 +99,9 @@ class WeeklyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
         self.pathsTowardsOutputFiles = StatsPaths()
         self.pathsTowardsOutputFiles.setPaths( self.displayedLanguage )    
     
-
+        StatsDateLib.setLanguage(filesLanguage)
+    
+    
     
     def setWeeks( self ):
         """

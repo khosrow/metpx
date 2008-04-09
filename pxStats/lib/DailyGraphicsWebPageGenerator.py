@@ -94,6 +94,8 @@ class DailyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
         self.pathsTowardsOutputFiles = StatsPaths()
         self.pathsTowardsOutputFiles.setPaths( self.displayedLanguage )
         
+        StatsDateLib.setLanguage( self.filesLanguage )
+        
 
 
     def setDays( self ):
@@ -361,7 +363,8 @@ class DailyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
                 
                 if os.path.isfile( file ):
                     fileHandle.write(  """<a target ="%s" href="%s">"""%( rxName, webLink) + "%s" %time.strftime( "%a", time.gmtime(day) )  + """   </a>""" )
-                    
+                else :
+                    print file   
                      
             fileHandle.write( """</td></tr>""" )
         
@@ -433,7 +436,8 @@ class DailyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
 
                 if os.path.isfile( file ):
                     fileHandle.write(  """<a target ="%s" href="%s">"""%( rxName, webLink) + "%s" %(time.strftime( "%a", time.gmtime(day)) )+"""  </a>""" )    
-    
+                else :
+                    print file 
             fileHandle.write( "</td></tr>" )
     
         fileHandle.write(  """
