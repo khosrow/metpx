@@ -66,6 +66,10 @@ def createSymbolicLinks( path, currentlyUsedLanguages ):
     commands.getstatusoutput( "ln -s %s/bottom.html %s/bottom.html" %(statsPaths.STATSWEBPAGES , path )  )
     #print "ln -s %s/bottom.html %s/bottom.html" %(statsPaths.STATSWEBPAGES , path )
     
+    # .../path/bottom.html  Only on, multilingual fomr of this file exists.
+    commands.getstatusoutput( "ln -s %s/top_%s.html %s/top.html" %(statsPaths.STATSWEBPAGES , LanguageTools.getMainApplicationLanguage(),  path )  )
+    #print "ln -s %s/bottom.html %s/bottom.html" %(statsPaths.STATSWEBPAGES , path )
+    
     # .../path/pxStats
     commands.getstatusoutput( "ln -s %s %s/pxStats" %( statsPaths.STATSROOT, path  ) )
     #print  "ln -s %s %s/pxStats" %( statsPaths.STATSROOT, path  )
@@ -80,6 +84,7 @@ def createSymbolicLinks( path, currentlyUsedLanguages ):
     
     
     
+    
     for language in currentlyUsedLanguages:
         
         statsPaths.setPaths( language )
@@ -89,11 +94,15 @@ def createSymbolicLinks( path, currentlyUsedLanguages ):
         #print "ln -s %s/html %s/html_%s" %( statsPaths.STATSWEBPAGES, path, language ) 
         
         # .../path/archives_lang 
-        commands.getstatusoutput( "ln -s %s %s/archives_%s" %( statsPaths.STATSGRAPHSARCHIVES[:-1], path. language  ) )
+        commands.getstatusoutput( "ln -s %s %s/archives_%s" %( statsPaths.STATSGRAPHSARCHIVES[:-1], path, language  ) )
         #print "ln -s %s %s/archives_%s" %( statsPaths.STATSGRAPHSARCHIVES[:-1], path, language  )
         
+        # .../paths/html_lang/archives
+        commands.getstatusoutput( "ln -s %s %s/html_%s/archives" %( statsPaths.STATSGRAPHSARCHIVES[:-1], path, language  ) )
+        #print "ln -s %s %s/html_%s/archives" %( statsPaths.STATSGRAPHSARCHIVES[:-1], path, language  )
+        
         # .../path/top_lang.html
-        commands.getstatusoutput( "ln -s %s/top%s.html %s/top_%s.html" %( statsPaths.STATSWEBPAGES, language, path, language )  ) 
+        commands.getstatusoutput( "ln -s %s/top_%s.html %s/top_%s.html" %( statsPaths.STATSWEBPAGES, language, path, language )  ) 
         #print "ln -s %s/top_%s.html %s/top_%s.html" %( statsPaths.STATSWEBPAGES, language, path, language )
     
         #.../path/scripts/js_lang
@@ -259,7 +268,7 @@ def main():
                 createSubFolders( path, currentlyUsedLanguages )                 
                 createSymbolicLinks( path,  currentlyUsedLanguages )
             
-            except:
+            except :
                 print _("Specified folder must be an absolute path name. Please use folowing syntax : '/a/b/c/d'.")
                 sys.exit()
     
