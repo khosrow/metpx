@@ -1,10 +1,5 @@
 #!/usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
-
-
 ##############################################################################
 ##
 ##
@@ -13,7 +8,12 @@ named COPYING in the root of the source directory tree.
 ##
 ## @author :  Nicholas Lemay
 ##
-## @since  : 2007-06-28, last updated on  2008-02-19
+## @license: MetPX Copyright (C) 2004-2006  Environment Canada
+##           MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+##           named COPYING in the root of the source directory tree.
+##
+##
+## @since  : 2007-06-28, last updated on  2008-04-15
 ##
 ##
 ## @summary : This file is to be hosted on a cgi-enabled web server as to 
@@ -35,11 +35,10 @@ import os, time, sys
 import cgi, cgitb; cgitb.enable()
 
 
-"""
+"""#
     Small method required to add pxStats to syspath.
 """
-sys.path.insert(1, sys.path[0] + '/../../')
-sys.path.insert(2, sys.path[0] + '/../../..')
+sys.path.insert(1, sys.path[0] + '/../../..')
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
@@ -54,8 +53,100 @@ sys.path.append( PATHS.PXLIB )
 
 from PXManager import * #Found within pxlib
 
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "graphicsRequestPage.py" 
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 
+
+
+
+class __infos:
+    
+    def __init__( self, language, supportedFileTypes = None , rxDatatypes = None , txDatatypes = None,\
+                  fixedTimeSpans = None, fixedParameters = None,preDeterminedSpans = None,\
+                  fixedSpans = None, mainMachines = None, otherMachines = None ):
+        """
+            - Creates an info object to be used to pass general parameters 
+              to most of the methods of this cgi web page creating script. 
+            
+        """
+        
+        
+        self.supportedFileTypes = supportedFileTypes or [] 
+        self.rxDatatypes        = rxDatatypes or []        
+        self.txDatatypes        = txDatatypes or []       
+        self.fixedTimeSpans     = fixedTimeSpans or []     
+        self.fixedParameters    = fixedParameters or []    
+        self.preDeterminedSpans = preDeterminedSpans or [] 
+        self.fixedSpans         = fixedSpans or []
+        self.mainMachines       = mainMachines or [] 
+        self.otherMachines      = otherMachines or [] 
+        self.language           = language or ""
+
+
+    def setPropertiesBasedOnLanguage( self ):
+        """
+            
+            @summary : Sets the different properties of an 
+                       __infos object based on the specified language.
+            
+            @precondition : Global _ translator must have been initialized.
+              
+        """
+        
+        global _ #using the global translator
+        
+        
+        self.getAvailableMachines()
+ 
+        self.supportedFileTypes = [ "rx","tx"]
+    
+        self.rxDatatypes = [ _("bytecount"), _("filecount"), _("errors"), _("bytecount,errors"), _("bytecount,filecount"), _("filecount,errors"), _("bytecount,filecount,errors") ]
+        
+        self.txDatatypes = [ _("latency"),_("bytecount"),_("filecount"), _("errors"), _("bytecount,errors"), _("bytecount,filecount"), _("latency, bytecount"), _("filecount,errors") , _("latency,errors") ,
+                         _("latency,filecount"), _("bytecount,filecount,errors"), _("latency,bytecount,filecount"), _("latency,bytecount,errors") ,_("latency,bytecount,filecount,errors") ]
+                        
+        self.fixedTimeSpans = [ _("daily") , _("weekly"), _("monthly"), _("yearly") ] 
+        
+        self.fixedParameters =  [ _("fixedCurrent"), _("fixedPrevious") ] 
+        
+        self.preDeterminedSpans = [ _('daily'), _('weekly'), _('monthly'),  _('yearly') ]
+        
+        self.fixedSpans = [ _('fixedCurrent'), _('fixedPrevious') ]
+
+ 
+ 
+ 
+ 
+ 
+        
+    def getAvailableMachines( self ):
+        """    
+            @summary : Based on the list of machines found within the 
+                       config files, returns the list of avaiable machines.
+                       
+            @return: returns the list of available machines.             
+        
+        """
+        
+            
+        configParameters = StatsConfigParameters()
+        configParameters.getAllParameters()
+        
+        self.mainMachines  = []
+        self.otherMachines = []
+        
+        for tag in configParameters.detailedParameters.sourceMachinesForTag:
+            machines = configParameters.detailedParameters.sourceMachinesForTag[tag]
+            self.mainMachines.append( str(machines).replace("[", "").replace("]", "").replace('"','').replace("'","").replace(" ", "") )
+            for i in range( len( machines ) ):
+                self.otherMachines.append( machines[i] )
+                combinedNames = machines[i]
+                for j in range( i+1, len( machines ) ) :
+                    combinedNames = combinedNames + ',' + machines[j].replace(" ","")
+                    self.otherMachines.append( combinedNames )
+                    
+        self.otherMachines.sort()
+        self.mainMachines.sort();        
+        
 
 def getWordsFromFile( file ):
     """    
@@ -93,10 +184,14 @@ def getWordsFromDB( wordType ):
         
         @param  wordType: Type of words to look for. 
         
+        @precondition : Global _ translator must have been initialized.
+        
         @return: Returns the words found within
                  the databases.     
         
     """
+    
+    global _ #using the global translator
     
     words = []
     
@@ -108,34 +203,6 @@ def getWordsFromDB( wordType ):
     return words    
 
 
-
-def getAvailableMachines():
-    """    
-        @summary : Based on the list of machines found within the 
-                   config files, returns the list of avaiable machines.
-                   
-        @return: returns the list of available machines.             
-    
-    """
-    
-        
-    configParameters = StatsConfigParameters()
-    configParameters.getAllParameters()
-    
-    
-    for tag in configParameters.detailedParameters.sourceMachinesForTag:
-        machines = configParameters.detailedParameters.sourceMachinesForTag[tag]
-        MAIN_MACHINES.append( str(machines).replace("[", "").replace("]", "").replace('"','').replace("'","").replace(" ", "") )
-        for i in range( len( machines ) ):
-            OTHER_MACHINES.append( machines[i] )
-            combinedNames = machines[i]
-            for j in range( i+1, len( machines ) ) :
-                combinedNames = combinedNames + ',' + machines[j].replace(" ","")
-                OTHER_MACHINES.append( combinedNames )
-                
-    OTHER_MACHINES.sort()
-    MAIN_MACHINES.sort();
-       
                                 
 def getCurrentTimeForCalendar( ):
     """
@@ -173,10 +240,15 @@ def printChoiceOfSourlients( form ):
     """  
         @summary : Prints the list of available  source or clients
         
-         @param form: Form with whom this page was called. 
+        @param form: Form with whom this page was called. 
                       Need to know if any clients were previously
                       selected.                     
+    
+        @precondition : Global _ translator must have been initialized.
+        
     """    
+    
+    global _ #using the global translator
     
     try:
         sourLients = form["sourLients"].split(',')
@@ -240,12 +312,17 @@ def printAjaxRequestsScript():
                    functions that will allow us to make queries 
                    to the request broker and to display the query results 
                    without having to refresh the page.
-
+        
+        @precondition : Global _ translator must have been initialized.
+        
         @author:   Java script functions were originaly found here :
                    http://wikipython.flibuste.net/moin.py/AJAX
                    
                    They were modified to fit our specific needs. 
+    
     """
+    
+    global _ #using the global translator
     
     largeImageWidth  = 925 
     largeImageHeight = 960
@@ -684,7 +761,9 @@ def printSlideShowScript( images ):
     """    
         @summary : Prints out the javascript required 
                    by the image slide show
-    
+        
+        @precondition : Global _ translator must have been initialized.
+        
         @credits : This code was heavily inspired by the 
                    freely avaiable code found here : 
                    http://www.dynamicdrive.com/dynamicindex14/dhtmlslide_dev.htm  
@@ -692,6 +771,8 @@ def printSlideShowScript( images ):
                    This code was modified according to the terms of use found here:
                    http://dynamicdrive.com/notice.htm    
     """
+
+    global _ #using the global translator
 
     smallImageWidth  = 1200
     smallImageHeight = 900   
@@ -839,12 +920,13 @@ def printImageFieldSet( form ):
        
        @param form: Form with whom this program was called.
        
+       @precondition : Global _ translator must have been initialized.
+       
        @todo: Receive variable image size as a parameter.
        
     """
-    
-    #-------------------------------------------------------------- width  = 875
-    #-------------------------------------------------------------- height = 250
+
+    global _ #using the global translator
     
     print """
          <fieldset class="imgFieldset">
@@ -883,8 +965,12 @@ def printGroupTextBox( form ):
                    the text box will be set to this value.
                    
         @param form: Form with whom this program was called.      
+        
+        @precondition : Global _ translator must have been initialized.
               
     """
+    
+    global _ #using the global translator
     
     try:
         groupName = form["groupName"][0]
@@ -920,7 +1006,11 @@ def printProductsTextBox( form ):
 
         @param form: Form with whom this program was called.
 
+        @precondition : Global _ translator must have been initialized.
+        
     """
+
+    global _ #using the global translator
 
     try:
         products = form["products"][0]
@@ -963,8 +1053,13 @@ def printSpanTextBox( form ):
                    If form contains a span value, 
                    the text box will be set to this value.
                    
-        @param form: Form with whom this program was called.         
+        @param form: Form with whom this program was called.     
+            
+        @precondition : Global _ translator must have been initialized.            
+            
     """
+    
+    global _ #using the global translator
     
     try:
         span = form["span"][0]
@@ -980,15 +1075,19 @@ def printSpanTextBox( form ):
 
 
 
-def printFileTypeComboBox( form ):
+def printFileTypeComboBox( form, infos  ):
     """    
         @Summary : Prints out the file type combo box.
                    If form contains a file type value, 
                    the combo will be set to this value.
                    
-        @param form: Form with whom this program was called.  
+        @param form: Form with whom this program was called. 
+        
+        @precondition : Global _ translator must have been initialized.
         
     """
+    
+    global _ #using the global translator
     
     try:
         selectedFileType = form["fileType"]
@@ -1003,8 +1102,7 @@ def printFileTypeComboBox( form ):
                                 <option>""" + _("Select a file type...") + """</option>
     """
     
-    
-    for fileType in SUPPORTED_FILETYPES:
+    for fileType in infos.supportedFileTypes:
         if fileType == selectedFileType:            
             print """                               
                                 <option selected value="%s">%s</option>                              
@@ -1021,14 +1119,27 @@ def printFileTypeComboBox( form ):
     """
 
       
-def printSpecificSpanComboBox( form ):
+def printSpecificSpanComboBox( form, infos ):
     """    
-        @Summary : Prints out the specific span combo box.
-                   If form contains a specific span value, 
-                   the combo will be set to this value.
+        @Summary    : Prints out the specific span combo box.
+                      If form contains a specific span value, 
+                      the combo will be set to this value.
                    
-        @param form: Form with whom this program was called.  
+        @precondition : Global _ translator must have been initialized.
+        
+        @param form  : Form with whom this program was called.  
+        
+        @param infos : __infos instance containing the general parameters 
+                       to use throughout the generation of this web page.
+        
+        
+        @return      : None 
+        
+        
+    
     """
+     
+    global _ #using the global translator
     
     try:
         selectedPreDeterminedSpan = form["preDeterminedSpan"][0]
@@ -1044,7 +1155,7 @@ def printSpecificSpanComboBox( form ):
     """
     
     
-    for span in PRE_DETERMINED_SPANS:
+    for span in infos.preDeterminedSpans:
         if span == selectedPreDeterminedSpan:            
             print """                               
                                 <option selected value="%s">%s</option>                              
@@ -1056,14 +1167,24 @@ def printSpecificSpanComboBox( form ):
 
 
 
-def printFixedSpanComboBox( form ):
+def printFixedSpanComboBox( form, infos  ):
     """    
         @Summary : Prints out the fixed span combo box.
                    If form contains a fixed span value, 
                    the combo will be set to this value.
-                   
-        @param form: Form with whom this program was called.  
+        
+        @precondition : Global _ translator must have been initialized.           
+        
+        @param form  : Form with whom this program was called.  
+        
+        @param infos : __infos instance containing the general parameters 
+                       to use throughout the generation of this web page.
+        
+        @return      : None 
+        
     """
+    
+    global _ #using the global translator
     
     try:
         selectedFixedSpan = form["fixedSpan"][0]
@@ -1078,7 +1199,7 @@ def printFixedSpanComboBox( form ):
                             <option>""" + _("Select fixed span...") + """</option>               
     """
     
-    for span in FIXED_SPANS:
+    for span in infos.fixedSpans :
         if span == selectedFixedSpan:            
             print """                               
                                 <option selected value="%s">%s</option>                              
@@ -1090,15 +1211,24 @@ def printFixedSpanComboBox( form ):
 
 
 
-def printMachinesComboBox( form ):
+def printMachinesComboBox( form, infos ):
     """    
-        @Summary : Prints out the machines combo box.
-                   If form contains a machines value, 
-                   the combo will be set to this value.
+        @Summary     : Prints out the machines combo box.
+                       If form contains a machines value, 
+                       the combo will be set to this value.
                    
-        @param form: Form with whom this program was called.  
+        @precondition : Global _ translator must have been initialized.
+                   
+        @param form  : Form with whom this program was called.  
+        
+        @param infos : __infos instance containing the general parameters 
+                       to use throughout the generation of this web page.
     
+        @return      :
+        
     """
+    
+    global _ #using the global translator
     
     try:
         selectedMachines = form["machines"][0]
@@ -1114,7 +1244,7 @@ def printMachinesComboBox( form ):
                             <optgroup  style="width:500px" bgcolor="#7092B9" label=""" + '"' + _("Main machine(s):") + '"' + """>"""+ _("Main machine(s):") + """</optgroup>                
     """
     
-    for machines in MAIN_MACHINES:
+    for machines in  infos.mainMachines:
         if machines == selectedMachines:            
             print """                               
                                 <option style="width:300px"selected value="%s">%s</option>                              
@@ -1132,7 +1262,7 @@ def printMachinesComboBox( form ):
     
     """
     
-    for machines in OTHER_MACHINES:
+    for machines in infos.otherMachines:
         if machines == selectedMachines:            
             print """                               
                                 <option style="width:300px" selected value="%s">%s</option>                              
@@ -1149,16 +1279,24 @@ def printMachinesComboBox( form ):
     
     
     
-def printStatsTypesComboBox(  form ):
+def printStatsTypesComboBox( form, infos  ):
     """    
-        @Summary : Prints out the machines combo box.
-                   If form contains a machines value, 
-                   the combo will be set to this value.
+        @Summary     : Prints out the machines combo box.
+                       If form contains a machines value, 
+                       the combo will be set to this value.
+        
+        @precondition : Global _ translator must have been initialized.
                    
-        @param form: Form with whom this program was called.  
+        @param form  : Form with whom this program was called.  
+        
+        @param infos : __infos instance containing the general parameters 
+                       to use throughout the generation of this web page. 
+        
+        @return      : None 
         
     """
     
+    global _ #using the global translator
     
     try:
         selectedStatsTypes = form["statsTypes"][0]
@@ -1171,9 +1309,9 @@ def printStatsTypesComboBox(  form ):
         filetype = "rx"
         
     if  filetype == "rx":    
-        listOfChoices = RX_DATATYPES
+        listOfChoices = infos.rxDatatypes
     elif  filetype == "tx":
-        listOfChoices = TX_DATATYPES
+        listOfChoices = infos.txDatatypes
     else:    
         listOfChoices = []    
         
@@ -1210,9 +1348,13 @@ def printCombineHavingrunCheckbox( form ):
                    If form contains an having run value, 
                    the check box will be checked.
                    
+        @precondition : Global _ translator must have been initialized.
+        
         @param form: Form with whom this program was called.     
         
     """
+    
+    global _  #using the global translator
     
     try:
         havingRun = form["havingRun"][0]
@@ -1238,10 +1380,14 @@ def printIndividualCheckbox( form ):
         @Summary : Prints out the Individual check box.
                    If form contains an Individual value, 
                    the check box will be checked.
+        
+        @precondition : Global _ translator must have been initialized.
                    
         @param form: Form with whom this program was called.   
           
     """
+    
+    global _ #using the global translator
     
     try:
         individual = form["individual"][0]
@@ -1269,10 +1415,14 @@ def printTotalCheckbox( form ):
         @Summary : Prints out the total check box.
                    If form contains an total value, 
                    the check box will be checked.
+        
+        @precondition : Global _ translator must have been initialized. 
                    
         @param form: Form with whom this program was called.     
         
     """
+    
+    global _ #using the global translator
     
     try:
         total = form["total"][0]
@@ -1299,10 +1449,14 @@ def printCombineSourlientsCheckbox( form ):
         @Summary : Prints out the check box.
                    If form contains a checkbox value, 
                    the check box will be checked.
+        
+        @precondition : Global _ translator must have been initialized.
                    
         @param form: Form with whom this program was called.     
     
     """
+    
+    global _ #using the global translator
     
     try:
         combineSourlients = form["combineSourlients"][0]
@@ -1337,9 +1491,13 @@ def printEndTime( form ):
         @summary : Prints end time calendar into the 
                    inputform
         
+        @precondition : Global _ translator must have been initialized.
+        
         @param  form : The parameter form with whom this program was called. 
     
     """
+    
+    global _ #using the global translator
     
     try:
         endTime = form["endTime"][0]
@@ -1363,114 +1521,8 @@ def printEndTime( form ):
                         </td>
                 
     """     
-    
    
-    
-def printGnuPlotInputForm(  form   ):
-    """
-        @summary: Prints a form containing all the 
-                  the avaiable field for a graph to
-                  be plotted with gnu. 
-       @param  form : The parameter form with whom this program was called.            
-    """
-    
-    #Start of form
-    print """
-        <form name="inputForm">
-    """
-    
-        
-    print """   
-            <fieldset class="fieldsetLevel1">
-                <legend class="legendLevel1">""" +_("Required fields") + """</legend>
-               
-                <table bgcolor="#FFF4E5">
-                                           
-                
-    """         
-
-    print """       <tr bgcolor="#FFF4E5">
-    
-    """
-    
-    printFileTypeComboBox(form)
-    printMachinesComboBox(form)
-    printStatsTypesComboBox( "gnuplot", form )    
-    printCombineSourlientsCheckbox(form)
-    printChoiceOfSourlients( 'gnuplot', form )
-
-    #printCombineSourlientsCheckbox(form)  
    
-    #End of fieldSet
-    print """                
-    
-                   </tr>       
-                </table>     
-            </fieldset>    
-    """
-    
-    print """        
-        
-        <fieldset class="fieldSetOptional" >
-            <div name="advancedOptionsLinkDiv" id="advancedOptionsLinkDiv" class="left">
-               <a href="JavaScript:showAdvancedOptions();" name="advancedOptionsLink" id="advancedOptionsLink">""" +_("Show advanced options...") +"""</a>
-            </div>
-            <br>
-    """
-    
-    
-    print """         
-            
-             <div name="advancedOptions" id="advancedOptions" style="visibility:hidden">
-                <table>
-                    <tr>
-                   
-            
-    """
-    
-    printEndTime(form)        
-    printSpanTextBox(form)
-    #printGroupTextBox(form)
-    printProductsTextBox(form)
-            
-    print """     
-                       
-                   </tr>
-               </table>    
-             </div> 
-            
-        </fieldset>
-    
-    """
-    
-    
-    #Add fieldset for submit button 
-    print """
-            <fieldset class="fieldSetAction">     
-                <div class="left" >
-                    <input type="button"  class="largeButton"  name="generateGraphics" value=""" + '"' + _("Generate graphic(s)") + '"' + """ onclick="JavaScript:executeAjaxRequest('graphicsRequestBroker.py')" ></input> 
-                    <div id="errorLabel" style="display:inline;"> <font color="#FFFFFF">&nbsp;&nbsp;&nbsp; """ + _("Application status : Awaiting request(s).") + """</font></div>     
-                </div>         
-                                    
-    """
-
-
-    print """
-                <div class="right">
-                      <input type=button  class="button"   name="help "value=""" + '"' + _("Get Help") + '"'  + """ onclick ="wopen( '../../html/helpPages/gnuplotHelp.html', 'popup', 800, 670 );"></input>
-                </div>
-    """
-    
-    print """        
-                        
-            </fieldset>    
-    """
-    
-    #End of form.
-    print """
-        </form>        
-    """
-    
     
 def printLogo():
     """
@@ -1486,117 +1538,24 @@ def printLogo():
 
     """
     
-    
-def printRRDInputForm(  form   ):
-    """
-        @summary: Prints a form containing all the 
-                  the avaiable field for a graph to
-                  be plotted with gnu. 
-    """
-    
-    
- 
-    #Non-optional section first....
-    print """
-        <form name="inputForm"  method="post" class="fieldset legend">
-            <fieldset class="fieldSetLevel1">
-                <legend class="legendLevel1">""" + _("RRD fields") + """</legend>
-                
-                <table>
-                    <tr>
-                
-    """         
-    printFileTypeComboBox(form)
-    printMachinesComboBox(form)
-    printStatsTypesComboBox( "rrd", form )     
-    printSpecificSpanComboBox(form)
-    printFixedSpanComboBox(form)
-    printChoiceOfSourlients( 'rrd', form )
-    
-    print """
-                    </tr> 
-    
-                </table>
-    
-            </fieldset>
-    """
-    
-      
-    #Optional section.
-    print """        
-        
-        <fieldset class="fieldSetOptional" >
-            <div name="advancedOptionsLinkDiv" id="advancedOptionsLinkDiv">
-               <a href="JavaScript:showAdvancedOptions();" name="advancedOptionsLink" id="advancedOptionsLink">""" +_("Show advanced options...") + """</a>
-            </div>
-    """
-    
-    print """         
-            
-            <div name="advancedOptions" id="advancedOptions" style="visibility:hidden">
-                <table>
-                    <tr>
-            
-    """
-    
-    
-    #Print first table row
-    printEndTime(form)
-    #printGroupTextBox(form)
-    printSpanTextBox(form)
-    printTotalCheckbox(form)
-    #printIndividualCheckbox(form)
-        
-    
-    print """     
-                   </tr>
-               </table>    
-            </div>
-            
-        </fieldset>
-    
-    """
-    
-    #Add fieldset for submit button
-    print """
-            <fieldset class="fieldSetAction">
-                <div class="left" >     
-                     <input type="button"  class="largeButton"  name="generateGraphics" value=""" + '"' + _("Generate graphic(s)") + '"' + """ onclick="JavaScript:executeAjaxRequest('graphicsRequestBroker.py')"></input> 
-                     <div name="errorLabel "id="errorLabel" style="display:inline;"><font color="#FFFFFF">&nbsp;&nbsp;&nbsp; """ + _("Application status : Awaiting request(s).") + """</font></div> 
-                </div>    
-    """
 
-
-    print"""
-             <div class="right">
-                <input type=button  class="button"   name="help "value=""" + '"' + _("Get Help") + """ onclick ="wopen( '../../html/helpPages/rrdHelp.html', 'popup', 830, 1100 );">
-            </div>
-            
-
-    """
-
-    print """
-            </fieldset>
-    """
-    
-    #End of form.
-    print """
-        </form>        
-    """
-    
-    
-  
      
-     
-     
-def printInputForm( form ):
+def printInputForm( form, infos  ):
     """
         @summary: Prints the form based 
                   on the chosen parameters
-                  
+
+        @precondition : Global _ translator must have been initialized.
+        
         @param  form : The parameter form with whom this program was called.            
-                  
+             
+        @param infos : __infos instance containing the general parameters 
+                       to use throughout the generation of this web page.
+        
+        @return : None           
     """
+    
+    global _ #using the global translator
     
     #Non-optional section first....
     print """
@@ -1608,12 +1567,12 @@ def printInputForm( form ):
                     <tr>
                 
     """         
-    printFileTypeComboBox(form)
-    printMachinesComboBox(form)
-    printStatsTypesComboBox( form )     
-    printSpecificSpanComboBox(form)
-    printFixedSpanComboBox(form)
-    printChoiceOfSourlients(  form )
+    printFileTypeComboBox( form, infos )
+    printMachinesComboBox( form, infos )
+    printStatsTypesComboBox( form, infos )     
+    printSpecificSpanComboBox( form, infos )
+    printFixedSpanComboBox( form, infos )
+    printChoiceOfSourlients(  form  )
     
     print """
                     </tr> 
@@ -1674,7 +1633,7 @@ def printInputForm( form ):
             </div>
     
         
-    """%(LANGUAGE)
+    """%( infos.language )
 
     print """
             </fieldset>
@@ -1687,11 +1646,26 @@ def printInputForm( form ):
     
       
         
-def printHead( form ):
+def printHead( form, infos  ):
     """
-        @summary : Print the head of the html file. 
-            
+        
+        @summary : Prints the head of the html file 
+                   
+                   This inclused the printing of css properties 
+                   and the javascript. 
+        
+        @precondition : Global _ translator must have been initialized.
+        
+        @param form  : Form with whom this program was called.   
+        
+        @param infos : __infos instance containing the general parameters 
+                       to use throughout the generation of this web page.
+        
+        @return      : None 
+        
     """
+    
+    global _  #using the global translator
         
     print """
     
@@ -1951,7 +1925,7 @@ def printHead( form ):
                  var errors = searchFormForPopUpErrors();
                  
                  if( errors == ""){
-                     popupAddingWindow( '../../html/popUps/' + document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].text + document.inputForm.machines[ document.inputForm.machines.selectedIndex ].text.replace( /,/g , '' ) + 'PopUpSourlientAdder_%s.html' );""" %LANGUAGE + """
+                     popupAddingWindow( '../../html/popUps/' + document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].text + document.inputForm.machines[ document.inputForm.machines.selectedIndex ].text.replace( /,/g , '' ) + 'PopUpSourlientAdder_%s.html' );""" %infos.language + """
                 }else{
                     document.getElementById("errorLabel").innerHTML = '<font color="#C11B17">' + errors + '</font>';
                 }
@@ -2067,8 +2041,8 @@ def printHead( form ):
     """ )
     
     
-    rxStatsTypes = RX_DATATYPES
-    txStatsTypes = TX_DATATYPES
+    rxStatsTypes = infos.rxDatatypes
+    txStatsTypes = infos.txDatatypes
                    
     print """
             <script>
@@ -2253,6 +2227,8 @@ def startCGI():
     
 def printBody():    
     """
+        @summary : Prints the body tag.
+    
     """
     
     
@@ -2263,7 +2239,7 @@ def printBody():
     """
 
     
-def buildWebPageBasedOnReceivedForm( form ):
+def buildWebPageBasedOnReceivedForm( form, infos  ):
     """
         
         @summary: Buils up the graphics query page. Fields will be filled with the values
@@ -2274,10 +2250,10 @@ def buildWebPageBasedOnReceivedForm( form ):
     """
     
     startCGI()
-    printHead( form )
+    printHead( form, infos )
     printBody()
     printLogo()
-    printInputForm( form )
+    printInputForm( form, infos  )
     printImageFieldSet( form )
     printEndOfBody()
 
@@ -2332,14 +2308,12 @@ def getLanguage( form ):
 
 
     
-def  setGlobalLanguageParameters( form ):
+def  setGlobalLanguageParameters( language ):
     """
         @summary : Sets up all the needed global language 
                    variables so that they can be used 
                    everywhere in this program.
-        
-        @param form 
-        
+               
         @param language: Language that is to be 
                          outputted by this program. 
      
@@ -2348,60 +2322,31 @@ def  setGlobalLanguageParameters( form ):
     """
     
     
-    global _ 
-    global LANGUAGE 
-    global translator    
-    global SUPPORTED_FILETYPES
-    global RX_DATATYPES
-    global TX_DATATYPES
-    global FIXED_TIMESPANS
-    global FIXED_PARAMETERS
-    global PRE_DETERMINED_SPANS
-    global FIXED_SPANS
-    global MAIN_MACHINES
-    global OTHER_MACHINES
-    
-    language = getLanguage( form )     
+    global _          
     
     _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, language )
-        
+       
     
-    SUPPORTED_FILETYPES = [ "rx","tx"]
-
-    RX_DATATYPES = [ _("bytecount"), _("filecount"), _("errors"), _("bytecount,errors"), _("bytecount,filecount"), _("filecount,errors"), _("bytecount,filecount,errors") ]
-    
-    TX_DATATYPES = [ _("latency"),_("bytecount"),_("filecount"), _("errors"), _("bytecount,errors"), _("bytecount,filecount"), _("latency, bytecount"), _("filecount,errors") , _("latency,errors") ,
-                     _("latency,filecount"), _("bytecount,filecount,errors"), _("latency,bytecount,filecount"), _("latency,bytecount,errors") ,_("latency,bytecount,filecount,errors") ]
-                    
-    
-    FIXED_TIMESPANS = [ _("daily") , _("weekly"), _("monthly"), _("yearly") ] 
-    
-    FIXED_PARAMETERS =  [ _("fixedCurrent"), _("fixedPrevious") ] 
-    
-    PRE_DETERMINED_SPANS = [ _('daily'), _('weekly'), _('monthly'),  _('yearly') ]
-    
-    FIXED_SPANS = [ _('fixedCurrent'), _('fixedPrevious') ]
-    
-    MAIN_MACHINES   = []
-    OTHER_MACHINES  = []
-    
-
 
 def main():
     """
         @summary : Displays the content of the page based 
-                   on parameters.  
+                   on parameters with whom this cgi script 
+                   was called.  
+    
     """    
-    
-    
-    
-    getAvailableMachines()
-    
+      
     form = getForm()
     
-    setGlobalLanguageParameters( form )
+    language = getLanguage( form )
     
-    buildWebPageBasedOnReceivedForm( form )
+    setGlobalLanguageParameters( language )
+    
+    infos = __infos(language = language)   
+    
+    infos.setPropertiesBasedOnLanguage()
+    
+    buildWebPageBasedOnReceivedForm( form, infos  )
       
     
     
