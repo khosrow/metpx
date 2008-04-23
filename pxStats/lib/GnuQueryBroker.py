@@ -54,10 +54,12 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
     
     """    
     
-    def __init__(self, queryParameters = None, replyParameters = None,\
-                 graphicProducer = None, querierLanguage = None ):
+    def __init__(self,  querierLanguage, queryParameters = None, replyParameters = None,\
+                 graphicProducer = None ):
         """
             @summary: GnuQueryBroker constructor.
+            
+            @param querierLanguage : Language spoken by the qerier at the time of the query.
             
             @param queryParameters: _QueryParameters instance wich 
                                     contains the query parameters. 
@@ -66,7 +68,7 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
             
             @param graphicProducer :  
             
-            @param querierLanguage : Language spoken by the qerier at the time of the query.
+           
             
         """
         
@@ -450,8 +452,8 @@ class GnuQueryBroker(GraphicsQueryBrokerInterface):
         """
         
         params = self.replyParameters
-        
-        reformatedImageLocation = '../../pxStats' + params.image.split( 'pxStats' )[1]
+                
+        reformatedImageLocation = '../../pxStats' + params.image.split( 'pxStats' )[-1:][0]
                         
         reply = "images=%s;error=%s"%( reformatedImageLocation, params.error   )
 
