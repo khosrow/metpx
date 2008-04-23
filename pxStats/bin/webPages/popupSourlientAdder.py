@@ -1,22 +1,22 @@
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
-
-
 ##############################################################################
 ##
 ##
 ## @Name   : PopSourlientUpAdder.py 
 ##
 ##
-## @author :  Nicholas Lemay
+## @author  :  Nicholas Lemay
 ##
-## @since  : 2007-07-03
+## @license : MetPX Copyright (C) 2004-2006  Environment Canada
+##            MetPX comes with ABSOLUTELY NO WARRANTY; For details type 
+##            see the file named COPYING in the root of the source directory 
+##            tree.
+##
+## @since  : 2007-07-03, last updated on 2008-04-15
 ##
 ## @summary : This file is to be called from the graphicsResquest page to update
-##            the samll popup adder utility windows.   
+##            the small popup adder utility windows.   
 ##
 ##                   
 ##
@@ -26,26 +26,19 @@ named COPYING in the root of the source directory tree.
 import cgi, gettext, os, time, sys
 import cgitb; cgitb.enable()
 
-try: 
-    sys.path.insert(1, sys.path[0] + '/../..')
-    sys.path.insert(2, sys.path[0] + '/../../..')
-    
-    from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
-    from pxStats.lib.StatsConfigParameters import StatsConfigParameters
-    from pxStats.lib.StatsPaths import StatsPaths
-    
-except Exception, instance: 
-    fileHandle = open("/web/pxStats/scripts/cgi-bin/../../html/popUps/out","w")
-    fileHandle.write( "import bug" )
-    fileHandle.write( str( instance ) )
-    fileHandle.close()   
-    sys.exit()
-    
+
+sys.path.insert(1, sys.path[0] + '/../../..')
+
+from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
+from pxStats.lib.StatsConfigParameters import StatsConfigParameters
+from pxStats.lib.LanguageTools import LanguageTools
+from pxStats.lib.StatsPaths import StatsPaths
+
 LOCAL_MACHINE = os.uname()[1]
 
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 
-
-def generateWebPage( sourlientNames, groups, fileType, outputFileName, language = 'en' ):
+def generateWebPage( sourlientNames, groups, fileType, outputFileName, language ):
     """
     
         
@@ -57,7 +50,7 @@ def generateWebPage( sourlientNames, groups, fileType, outputFileName, language 
         
         @param groups : List of groups that need to be printed.
         
-        @param fileType:   
+        @param fileType:  tx or rx 
         
         @param outputFileName : Filename that needs to be created.
         
@@ -65,21 +58,16 @@ def generateWebPage( sourlientNames, groups, fileType, outputFileName, language 
     
     """
      
+    statsPaths = StatsPaths()
+    statsPaths.setPaths(language)
     
-    if language == 'fr':
-        fileName = StatsPaths.STATSLANGFRBINWEBPAGES + "popupSourlientAdder" 
-    elif language == 'en':
-        fileName = StatsPaths.STATSLANGENBINWEBPAGES + "popupSourlientAdder"      
-    
-    
-    translator = gettext.GNUTranslations(open(fileName))
-    _ = translator.gettext
-        
+    _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, language )        
     
     if not  os.path.isdir( os.path.dirname(outputFileName) ):
         os.makedirs( os.path.dirname(outputFileName) )
     
     """ Redirect the output"""  
+    #print outputFileName
     fileHandle = open( outputFileName, "w" )
     oldStdOut = sys.stdout #save previous stdout
     sys.stdout = fileHandle
@@ -286,6 +274,7 @@ def generateWebPage( sourlientNames, groups, fileType, outputFileName, language 
     sys.stdout = oldStdOut #resets standard output 
     
 
+
 def returnReply( error = '' ):
     """
         @summary : Prints an empty reply so that the receiving web page will
@@ -308,6 +297,8 @@ def returnReply( error = '' ):
 
 def getGroups( fileType, machine):
     """
+        @summary : Gathers group found in config file.   
+        
         @param fileType: Filetype for wich to search groups for.
         @param machine : Machien for wich to search groups for.
         
@@ -325,12 +316,12 @@ def getGroups( fileType, machine):
     
 def main():
     """
-        Generates the web page based on the received 
-        machines and file type parameters.
+        @summary : Generates the web page based on the received 
+                   machines and file type parameters.
         
     """
     try:
-        language = 'en'
+        
         
         newForm = {}
         
@@ -349,12 +340,20 @@ def main():
         form = newForm
         
         try:
+            language = form["lang"]
+        except: 
+            language = ""
+            error = "Error.Unknwown language detected in popSourlientUpAdder"    
+        
+        try:
             fileType = form['fileType']
             if fileType !='tx' and fileType != 'rx':
                 error= "Error. File type needs to be either rx or tx."
             
         except:
             fileType = ""
+            
+            
             
         try:
             machines  = form['machines']
@@ -370,24 +369,30 @@ def main():
             
             groups = getGroups( fileType, machine )
         
-        fileHandle = open("/web/pxStats/scripts/cgi-bin/../../html/popUps/out","w")
-        fileHandle.write(sys.path[0] + "/../../html/popUps/%s%sPopUpSourlientAdder_%s.html" %( fileType, machines, language ))
-        fileHandle.close()
+        #print "/../../html/popUps/%s%sPopUpSourlientAdder_%s.html" %( fileType, machines, language )
+        #----------------------------- fileHandle = open("/web/pxStats/out","w")
+        # fileHandle.write(sys.path[0] + "/../../html/popUps/%s%sPopUpSourlientAdder_%s.html" %( fileType, machines, language ))
+        #---------------------------------------------------- fileHandle.close()
+        
+        path = StatsPaths()
+        path.setPaths( language )
         
         
         if fileType == "tx":
-            generateWebPage(txNames, groups, fileType, sys.path[0] + "/../../html/popUps/%s%sPopUpSourlientAdder_%s.html" %( fileType, machines, language ) )
+            generateWebPage(txNames, groups, fileType, path.STATSWEBPAGESHTML + "/popUps/%s%sPopUpSourlientAdder_%s.html" %( fileType, machines, language ), language )
         elif fileType == "rx":
-            generateWebPage(rxNames, groups, fileType, sys.path[0] + "/../../html/popUps/%s%sPopUpSourlientAdder_%s.html" %( fileType, machines, language ) )
+            generateWebPage(rxNames, groups, fileType, path.STATSWEBPAGESHTML + "/popUps/%s%sPopUpSourlientAdder_%s.html" %( fileType, machines, language ), language )
         
         returnReply('') 
     
     except Exception, instance:
-        fileHandle = open("/web/pxStats/scripts/cgi-bin/../../html/popUps/out","w")
-        fileHandle.write( "main bug" )
+        fileHandle = open("/web/pxStats/out","w")
+        fileHandle.write( "bug in main method" )
         fileHandle.write( str( instance ) )
         fileHandle.close()                
         sys.exit()
+        
+        
         
 if __name__ == '__main__':
     main()
