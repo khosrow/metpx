@@ -1,11 +1,6 @@
 
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
-
-
 ##############################################################################
 ##
 ##
@@ -14,7 +9,11 @@ named COPYING in the root of the source directory tree.
 ##
 ## @author :  Nicholas Lemay
 ##
-## @since  : 2007-06-28, last updated on 2008-04-02  
+## @license: MetPX Copyright (C) 2004-2006  Environment Canada
+##           MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+##           named COPYING in the root of the source directory tree.
+##
+## @since  : 2007-06-28, last updated on 2008-04-23  
 ##
 ##
 ## @summary : This class implements the GraphicsQueryBrokerInterface
@@ -53,24 +52,19 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
           
     """    
     
-    def __init__( self,  queryParameters = None, replyParameters = None,
-                  graphicProducer = None, querierLanguage = None ):
+    def __init__( self, querierLanguage, queryParameters = None, replyParameters = None,
+                  graphicProducer = None,  ):
         """
-            @summary: GnuQueryBroker constructor.
+            @summary: RRDQueryBroker constructor.
+            
+            @param querierLanguage : Language spoken by the qerier at the time of the query.
             
             @param queryParameters: _QueryParameters instance wich 
                                     contains the query parameters. 
             
-            @param replyParameters: _replyParameters instance wich contains the reply parameters.
-             
-            @param reply: Reply to send to querier
-            
-            @query : Query to send to generateRRDGraphics.py
-              
-            @param querierLanguage : Language spoken by the qerier at the time of the query.
-            
-        """       
-        
+            @param replyParameters: _replyParameters instance wich contains the reply parameters.           
+
+        """               
         
         self.queryParameters = queryParameters
         self.replyParameters = replyParameters
@@ -78,7 +72,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
         self.querierLanguage = querierLanguage
         
         if self.querierLanguage not in LanguageTools.getSupportedLanguages():
-            raise Exception( "Error. Unsupported language detected in GnuQueryBroker. %s is not a supported language."%( self.querierLanguage ) )
+            raise Exception( "Error. Unsupported language detected in RRDQueryBroker. %s is not a supported language."%( self.querierLanguage ) )
         else:#language is supposed to be supported 
             global _
             _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.querierLanguage )
@@ -92,11 +86,11 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
         
         
         
-        def __init__( self, fileType, sourLients, groupName, machines, havingRun, individual, combine, endTime,  products, statsTypes,  span, specificSpan, fixedSpan ):
+        def __init__( self, fileTypes, sourLients, groupName, machines, havingRun, individual, combine, endTime,  products, statsTypes,  span, specificSpan, fixedSpan ):
             """
                 @summary : _QueryParameters parameters class constructor.                
                 
-                @param fileType: rx or tx                
+                @param fileTypes: list of rx or tx                
                 @param sourLients: list of sour or clients for wich to produce graphic(s).                
                 @param groupName: Group name tag to give to a group of clients.      
                 @param machines : List of machine on wich the data resides.   
@@ -112,7 +106,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
                 
             """
             
-            self.fileType     = fileType
+            self.fileTypes    = fileTypes
             self.sourLients   = sourLients
             self.groupName    = groupName
             self.machines     = machines
@@ -132,7 +126,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
             List of parameters required for replies.
         """
         
-        def __init__( self, querier, plotter, image, fileType, sourLients, groupName, machines, havingRun, individual,
+        def __init__( self, querier, plotter, image, fileTypes, sourLients, groupName, machines, havingRun, individual,
                       combine, endTime,  products, statsTypes,  span, specificSpan, fixedSpan, error ):
             """
                 @summary : _QueryParameters parameters class constructor.    
@@ -140,7 +134,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
                 @param querier:Path to the program that sent out the request.
                 @param plotter : Type of plotter that was selected.
                 @param image   : image(s) that was/were produced by the plotter. 
-                @param fileType: rx or tx                
+                @param fileTypes: rx or tx                
                 @param sourLients: list of sour or clients for wich to produce graphic(s).                
                 @param groupName: Group name tag to give to a group of clients.      
                 @param machines : List of machine on wich the data resides.   
@@ -159,13 +153,13 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
             self.querier      = querier
             self.plotter      = plotter 
             self.image        = image
-            self.fileType     = fileType
+            self.fileTypes    = fileTypes
             self.sourLients   = sourLients
             self.groupName    = groupName
             self.machines     = machines
             self.havingRun    = havingRun
             self.individual   = individual
-            self.combine        = combine
+            self.combine      = combine
             self.endTime      = endTime
             self.products     = products
             self.statsTypes   = statsTypes
@@ -316,7 +310,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
         try :
             
             if self.queryParameters.plotter != "rrd":
-                error = _("Internal error. GnuQueryBroker was not called to plot a gnuplot graphic.")
+                error = _("Internal error. RRDQueryBroker was not called to plot a rrd graphic.")
                 raise
         
             for fileType in self.queryParameters.fileTypes :
@@ -339,11 +333,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
             if self.queryParameters.statsTypes == []:
                 error = _("Error. At Leat one statsType needs to be specified."  ) 
                 raise
-            
-            if self.queryParameters.groupName != "" and self.queryParameters.total != 'true':
-                error = _("Error. Groupname needs to be used with total option.")
-                raise 
-            
+                        
             if self.queryParameters.groupName != "" and self.queryParameters.individual == 'true':
                 error = _("Error. Groupname cannot be used with individual option.")
                 raise
@@ -376,7 +366,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
         
         global _ 
         
-        if self.queryParameters.total == 'true':
+        if self.queryParameters.combine == 'true':
             totals = True
             mergerType = "regular"
         else:
@@ -406,22 +396,21 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
         else:
             timespan = int(self.queryParameters.span )    
             
+        StatsDateLib.setLanguage( self.querierLanguage )
         startTime, endTime = StatsDateLib.getStartEndInIsoFormat(date, timespan, self.queryParameters.specificSpan, fixedCurrent, fixedPrevious )
+        
         timespan = int( StatsDateLib.getSecondsSinceEpoch( endTime ) - StatsDateLib.getSecondsSinceEpoch( startTime ) ) / 3600   
-       
-        #turns "string1,string2,string3" into [ "string1", "string2", "string3" ]
-        statsTypes =  self.queryParameters.statsTypes.split(",")
-        sourlients =  self.queryParameters.sourLients.split(",")
-        machines   =  self.queryParameters.machines.split(",") 
+               
         
-        self.graphicProducer = RRDGraphicProducer( self.queryParameters.fileTypes[0], statsTypes ,\
+        self.graphicProducer = RRDGraphicProducer( self.queryParameters.fileTypes[0], self.queryParameters.statsTypes ,\
                                                    totals,  self.queryParameters.specificSpan,\
-                                                   sourlients, timespan,\
-                                                   startTime, endTime, machines, False,
+                                                   self.queryParameters.sourLients, timespan,\
+                                                   startTime, endTime, self.queryParameters.machines, False,
                                                    mergerType, True, self.querierLanguage, self.querierLanguage )
-       
-        
   
+        StatsDateLib.setLanguage( LanguageTools.getMainApplicationLanguage() )
+            
+            
             
     def getImageListToReplyFromPlottedImageList( self, plottedImages ):
         """ 
@@ -435,7 +424,7 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
         images = ''
                 
         for imageName in plottedImages :
-            images = images + imageName + '+'
+            images = images + '../../pxStats' + imageName.split( 'pxStats' )[-1:][0] + '+'
                 
         images = images[:-1]    
         #print images
