@@ -53,8 +53,8 @@ sys.path.append( PATHS.PXLIB )
 
 from PXManager import * #Found within pxlib
 
-CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 
 
 
@@ -306,12 +306,15 @@ def printChoiceOfSourlients( form ):
   
   
     
-def printAjaxRequestsScript():
+def printAjaxRequestsScript( infos ):
     """    
         @summary : prints out the section that will contain the javascript 
                    functions that will allow us to make queries 
                    to the request broker and to display the query results 
                    without having to refresh the page.
+        
+        @param infos : __infos instance containing the general parameters 
+                       to use throughout the generation of this web page.
         
         @precondition : Global _ translator must have been initialized.
         
@@ -644,7 +647,7 @@ def printAjaxRequestsScript():
                     
                     var machines     = document.inputForm.machines[document.inputForm.machines.selectedIndex].text;
                                                    
-                    var qstr = '?fileType=' + escape(fileType) + '&machines=' + escape(machines);  
+                    var qstr = '?fileType=' + escape(fileType) + '&machines=' + escape(machines) + '&lang=' + escape('%s');  
         
                 
                     return qstr;
@@ -663,7 +666,7 @@ def printAjaxRequestsScript():
                     
                 }
                         
-    """ %( "../../html/combinedImageWebPage.html", largeImageHeight, largeImageWidth )
+    """ %( infos.language, "../../html/combinedImageWebPage.html", largeImageHeight, largeImageWidth )
     
  
         
@@ -1667,6 +1670,9 @@ def printHead( form, infos  ):
     
     global _  #using the global translator
         
+    paths = StatsPaths() 
+    paths.setPaths( infos.language )
+        
     print """
     
     <html>
@@ -1925,7 +1931,7 @@ def printHead( form, infos  ):
                  var errors = searchFormForPopUpErrors();
                  
                  if( errors == ""){
-                     popupAddingWindow( '../../html/popUps/' + document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].text + document.inputForm.machines[ document.inputForm.machines.selectedIndex ].text.replace( /,/g , '' ) + 'PopUpSourlientAdder_%s.html' );""" %infos.language + """
+                     popupAddingWindow( '../../pxStats/%s/popUps/' + document.inputForm.fileType[ document.inputForm.fileType.selectedIndex ].text + document.inputForm.machines[ document.inputForm.machines.selectedIndex ].text.replace( /,/g , '' ) + 'PopUpSourlientAdder_%s.html' );""" %( str(paths.STATSWEBPAGESHTML).split( paths.STATSROOT )[1]  , infos.language ) + """
                 }else{
                     document.getElementById("errorLabel").innerHTML = '<font color="#C11B17">' + errors + '</font>';
                 }
@@ -2198,7 +2204,8 @@ def printHead( form, infos  ):
         </script>
                            
     """
-    printAjaxRequestsScript() 
+    
+    printAjaxRequestsScript( infos ) 
     
        
     try:
