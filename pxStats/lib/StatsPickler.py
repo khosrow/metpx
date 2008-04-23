@@ -74,7 +74,7 @@ class StatsPickler(Translatable):
     """
     
     def __init__( self, client = "", directory = "", statsTypes = None, statsCollection = None,\
-                  pickleName = "", logger = None, logging = True, machine = "pdsCSP"  ):
+                  pickleName = "", logger = None, logging = False, machine = "pdsCSP"  ):
         """ 
             Constructor.
             -Builds a StatsPickler with no entries.           
@@ -98,8 +98,8 @@ class StatsPickler(Translatable):
         else:
             logger = True
                
-        self.statsCollection  = statsCollection or FileStatsCollector( logger = self.logger )
-        self.fileCollection   = LogFileCollector( directory = directory, logger = self.logger )       
+        self.statsCollection  = statsCollection or FileStatsCollector( logger = self.logger, logging = logging )
+        self.fileCollection   = LogFileCollector( directory = directory, logger = self.logger, logging = logging )       
         
         global _ 
         _ = self.getTranslatorForModule(CURRENT_MODULE_ABS_PATH)
@@ -190,7 +190,7 @@ class StatsPickler(Translatable):
         
         #Find up to date file list. 
         self.fileCollection =  LogFileCollector( startTime  = startTime , endTime = endTime, directory = directory, lastLineRead = "",\
-                                                 logType = fileType, name = self.client, logger = self.logger )   
+                                                 logType = fileType, name = self.client, logger = self.logger, logging = self.logging )   
         
         
         temp  = self.logger#Need to remove current logger temporarily
@@ -218,7 +218,7 @@ class StatsPickler(Translatable):
             
         self.statsCollection = FileStatsCollector( files = self.fileCollection.entries, fileType = fileType, statsTypes = types,\
                                                    startTime = StatsDateLib.getIsoWithRoundedHours( startTime ), endTime = endTime,\
-                                                   interval = interval, totalWidth = 1*StatsDateLib.HOUR, logger = self.logger )
+                                                   interval = interval, totalWidth = 1*StatsDateLib.HOUR, logger = self.logger,logging = self.logging )
         
         #Temporarily delete logger to make sure no duplicated lines appears in log file.
         temp  = self.logger

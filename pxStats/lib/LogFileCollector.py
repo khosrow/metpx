@@ -26,10 +26,12 @@
 
 
 import os, sys
+
 """
     Small function that adds pxlib to the environment path.  
 """
 sys.path.insert(1,  os.path.dirname( os.path.abspath(__file__) ) + '/../../')
+
 from   pxStats.lib.BackwardReader             import BackwardReader 
 from   pxStats.lib.FileStatsCollector         import FileStatsCollector
 from   pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
@@ -65,7 +67,8 @@ class LogFileCollector( Translatable ):
                  
     """
     
-    def __init__( self, startTime = "2006-06-06 01:00:00", endTime = "2006-06-06 02:00:00", directory = None, lastLineRead = "", logType = "tx", name = "satnet", logger = None ):
+    def __init__( self, startTime = "2006-06-06 01:00:00", endTime = "2006-06-06 02:00:00", directory = None,
+                  lastLineRead = "", logType = "tx", name = "satnet", logger = None, logging = True ):
         """ 
             Constructor.
             -Builds a directoryFileCollector with no entries.   
@@ -83,12 +86,12 @@ class LogFileCollector( Translatable ):
         self.loggerName   = 'fileCollector' # Name used for the logger if none was specified.
        
         
-        if logger is None: # Enable logging
-            
-            if not os.path.isdir( STATSPATHS.STATSLOGGING  ):
-                os.makedirs( STATSPATHS.STATSLOGGING , mode=0777 )
-            self.logger = Logger( STATSPATHS.STATSLOGGING + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
-            self.logger = self.logger.getLogger()
+        if logging == True :
+            if logger is None: # Enable logging                
+                if not os.path.isdir( STATSPATHS.STATSLOGGING  ):
+                    os.makedirs( STATSPATHS.STATSLOGGING , mode=0777 )
+                self.logger = Logger( STATSPATHS.STATSLOGGING + 'stats_' + self.loggerName + '.log.notb', 'INFO', 'TX' + self.loggerName, bytes = True  ) 
+                self.logger = self.logger.getLogger()
         
         global _
         _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )    
