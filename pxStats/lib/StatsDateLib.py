@@ -869,9 +869,23 @@ class StatsDateLib:
                 start, end = StatsDateLib.getStartEndFromCurrentYear( timeOfTheCall ) 
                         
         else:       
-            #TODO fix timeSpan method???   
-               
-            start = StatsDateLib.getIsoFromEpoch( StatsDateLib.getSecondsSinceEpoch( timeOfTheCall ) - span*60*60 ) 
+            
+            if spanType == _("daily") :                
+                start = StatsDateLib.getIsoFromEpoch(  StatsDateLib.getSecondsSinceEpoch( timeOfTheCall ) -  StatsDateLib.DAY )    
+                         
+            elif spanType == _("weekly"):
+                start = StatsDateLib.getIsoFromEpoch(  StatsDateLib.getSecondsSinceEpoch( timeOfTheCall ) -  ( 7 * StatsDateLib.DAY ) ) 
+            
+            elif spanType == _("monthly"):
+                start = StatsDateLib.getIsoFromEpoch(  StatsDateLib.getSecondsSinceEpoch( timeOfTheCall ) -  ( 30 * StatsDateLib.DAY ) ) 
+            
+            elif spanType == _("yearly") :
+                start = StatsDateLib.getIsoFromEpoch(  StatsDateLib.getSecondsSinceEpoch( timeOfTheCall ) -  ( 365 * StatsDateLib.DAY ) )  
+            
+            else:    
+                start = StatsDateLib.getIsoFromEpoch( StatsDateLib.getSecondsSinceEpoch( timeOfTheCall ) - span*60*60 )
+            
+            
             end   = timeOfTheCall   
  
             
