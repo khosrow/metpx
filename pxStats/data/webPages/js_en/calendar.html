@@ -9,7 +9,7 @@ Note: Script consists of two files: calendar?.js and calendar.html
 -->
 <html>
 <head>
-<title>Select Date, Please.</title>
+<title>End date</title>
 <style>
 	td {font-family: Tahoma, Verdana, sans-serif; font-size: 12px;}
 </style>
@@ -23,7 +23,7 @@ var ARR_WEEKDAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 // day week starts from (normally 0-Su or 1-Mo)
 var NUM_WEEKSTART = 1;
 // path to the directory where calendar images are stored. trailing slash req.
-var STR_ICONPATH = '../js/img/';
+var STR_ICONPATH = '../js_en/img/';
 
 var re_url = new RegExp('datetime=(\\-?\\d+)');
 var dt_current = (re_url.exec(String(window.location))
