@@ -330,6 +330,9 @@ def printAjaxRequestsScript( infos ):
     largeImageWidth  = 925 
     largeImageHeight = 960
     
+    statsPaths = StatsPaths() 
+    statsPaths.setPaths( infos.language )
+    
     print """
     
             <script language="JavaScript">
@@ -576,7 +579,10 @@ def printAjaxRequestsScript( infos ):
                     return qstr;  
                       
                 }  
-                
+
+    """
+    
+    print """
                     
                 function getParametersForGraphicsRequests( ){
                     
@@ -629,13 +635,16 @@ def printAjaxRequestsScript( infos ):
                     qstr = qstr + '&preDeterminedSpan=' + escape(preDeterminedSpan) + '&fixedSpan=' + escape(fixedSpan);
                     qstr = qstr + '&sourLients=' + escape( sourlients );
                     qstr = qstr  + '&combineSourlients=' + escape( combineSourlients );//+ '&individual=' + escape( individual )
-                    qstr = qstr + '&products='+ escape(products);
+                    qstr = qstr + '&products='+ escape(products) + '&lang=' + escape('%s');
                     
                     return qstr;
                                       
                 }
                 
-                
+    """ %( infos.language )
+    
+    
+    print """                
                 function clearSourlientsList(){
                     document.inputForm.sourlientList.options.length = 0;
                 }
@@ -660,13 +669,13 @@ def printAjaxRequestsScript( infos ):
                 
                 function executeAjaxReplyAction( action ){
                     if( action.match('showImageWindow') != null ){
-                         window.open( '%s', 'mywindow', "status = 0, height=%s, width=%s, resizable=0, scrollbars=yes" );
+                         window.open( '../../html_%s/html/combinedImageWebPage.html', 'mywindow', "status = 0, height=%s, width=%s, resizable=0, scrollbars=yes" );
                     
                     }
                     
                 }
                         
-    """ %( infos.language, "../../html/combinedImageWebPage.html", largeImageHeight, largeImageWidth )
+    """ %( infos.language, infos.language , largeImageHeight, largeImageWidth )
     
  
         
@@ -1560,6 +1569,9 @@ def printInputForm( form, infos  ):
     
     global _ #using the global translator
     
+    statsPaths = StatsPaths()
+    statsPaths.setPaths(infos.language)
+    
     #Non-optional section first....
     print """
         <form name="inputForm"  method="post" class="fieldset legend">
@@ -1632,11 +1644,11 @@ def printInputForm( form, infos  ):
 
     print"""
              <div class="right">
-                <input type=button  class="button"   name="help "value=""" +'"' + _("Get Help") + '"' + """ onclick ="wopen( '../../html/helpPages/requestHelp_%s.html', 'popup', 830, 1100 );">
+                <input type=button  class="button"   name="help "value=""" +'"' + _("Get Help") + '"' + """ onclick ="wopen( '../../html_%s/html/helpPages/requestHelp_%s.html', 'popup', 830, 1100 );">
             </div>
     
         
-    """%( infos.language )
+    """%(  infos.language, infos.language )
 
     print """
             </fieldset>
