@@ -1,11 +1,5 @@
-
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
-t
-
 ##############################################################################
 ##
 ##
@@ -14,6 +8,13 @@ t
 ##
 ## @author :  Nicholas Lemay
 ##
+##
+## @license: MetPX Copyright (C) 2004-2006  Environment Canada
+##           MetPX comes with ABSOLUTELY NO WARRANTY; For details type 
+##           see the file named COPYING in the root of the source directory
+##           tree.
+##
+##
 ## @since  : 2008-01-15, last updated on 2008-02-28
 ##
 ##
@@ -21,8 +22,6 @@ t
 ##            deal with the multilingual features of pxStats.            
 ##
 ##            
-##
-##
 ## @requires: StatsPaths.py and StatsConfigParameters.py
 ##
 ##############################################################################
@@ -238,6 +237,49 @@ class LanguageTools :
 
 
 
+    def translateDataType( self, dataType, sourceLanguage, destinationLanguage ):
+        """
+        
+            @summary : Takes a file type from one source language and translates
+                       it into the destination language. 
+            
+            @raise exception          : If one of the specified languages
+                                        is not supported.
+            
+            @param dataType           : Data type to translate.            
+            
+            @param sourceLanguage     : language in which the data type is written.
+            
+            @param destinationLanguage: language in which to translate the 
+                                        data type.            
+            
+            @return                   :  the translated data type.
+            
+        """
+        
+        translatedDataType = ""
+        
+        if sourceLanguage not in LanguageTools.getSupportedLanguages():
+            raise Exception( "Unsupported source language detected in LanguageTools.translateDataType." )
+        elif destinationLanguage not in LanguageTools.getSupportedLanguages():
+            raise Exception( "Unsupported destination language detected in LanguageTools.translateDataType." )
+        
+        if sourceLanguage == 'fr' and destinationLanguage == 'en' :
+            translationDictionary = {"latence":"latency", "nbreDeBytes":"bytecount","nbreDeFichiers":"filecount","erreurs":"errors", "fichiersAvecLatenceInnacceptable":"filesOverMaxLatency"}
+        elif  sourceLanguage == 'en' and destinationLanguage == 'fr':
+            translationDictionary = {"latency":"latence", "bytecount":"nbreDeBytes","filecount":"nbreDeFichiers","errors":"erreurs", "filesOverMaxLatency":"fichiersAvecLatenceInnacceptable"}
+        
+        try:
+            translatedDataType = translationDictionary[ dataType ] 
+        except:
+            raise Exception( "Unknown dataType detected in LanguageTools.translateDataType." )    
+        
+        return translatedDataType
+    
+    translateFileType = staticmethod( translateDataType )
+    
+    
+    
     def translateTerm( term, originalLanguage, destinationLanguage, moduleFromWhichTermIsFrom ):
         """
             @summary : Takes a term of a certain language and translates it into 
