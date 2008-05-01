@@ -32,6 +32,7 @@ import cgitb; cgitb.enable()
 sys.path.insert(1, sys.path[0] + '/../../..')
 
 from pxStats.lib.StatsPaths import StatsPaths
+from pxStats.lib.LanguageTools import LanguageTools
 
 """
     Small method required to add pxLib to syspath.
@@ -72,12 +73,14 @@ def returnReplyToQuerier( error ="" ):
 
 
 
-def generateWebPage( images ):
+def generateWebPage( images, lang ):
     """
         @summary : Generates a web page that simply displays a
                    series of images one on top of the other.
         
         @param images : List of images to display.           
+    
+        @param lang   : language with whom this generator was called.
     
     """
     
@@ -85,7 +88,7 @@ def generateWebPage( images ):
     smallImageHeight = 320
     
     statsPaths = StatsPaths()
-    statsPaths.setPaths()
+    statsPaths.setPaths( lang )
         
     file = statsPaths.STATSWEBPAGESHTML + "combinedImageWebPage.html"
     fileHandle = open( file, "w")           
@@ -184,16 +187,21 @@ def generateWebPage( images ):
     
     fileHandle.close()
     
-    os.chmod(file,0777)
+    try:
+        os.chmod(file,0777)
+    except:
+        pass    
 
     
-def getImagesFromForm():
+def getImagesLangFromForm():
     """
         @summary : Parses form with whom this program was called.
         
-        @return: Returns the images foud within the form.
+        @return: Returns the images and language found within the form.
         
     """
+    
+    lang = LanguageTools.getMainApplicationLanguage()
     
     images = []
     
@@ -203,7 +211,7 @@ def getImagesFromForm():
 
     for key in form.keys():
         value = form.getvalue(key, "")
-        print value
+
         if isinstance(value, list):
             newvalue = ",".join(value)
                    
@@ -214,13 +222,18 @@ def getImagesFromForm():
 
     try:
         images = newForm["images"]  
-        print images 
         images = images.split(';')
-        print images 
+
     except:
         pass
+    
+    try:
+        lang = newForm["lang"]
+    except:
+        pass  
         
-    return images 
+    return images, lang 
+
 
 
 def main():
@@ -230,9 +243,9 @@ def main():
                    is informed the page was generated.     
     """
 
-    images = getImagesFromForm()
+    images, lang = getImagesLangFromForm()
     #print images
-    generateWebPage( images )
+    generateWebPage( images, lang )
     returnReplyToQuerier()
 
         
