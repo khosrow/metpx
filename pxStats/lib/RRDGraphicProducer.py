@@ -94,6 +94,7 @@ class RRDGraphicProducer( Translatable ):
         
         global _ 
         _ = self.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, self.inputLanguage )
+    
             
     
     def buildTitle( self, type, client,  minimum, maximum, mean):
@@ -1034,6 +1035,7 @@ class RRDGraphicProducer( Translatable ):
             try:
                 rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '800','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end),'--step','%s' %(interval*60), '--vertical-label', '%s' %formatedYLabelType,'--title', '%s'%title, '--lower-limit','0','DEF:%s=%s:%s:AVERAGE'%( translatedType, databaseName, translatedType), 'CDEF:realValue=%s,%i,*' %( translatedType, 1), 'AREA:realValue#%s:%s' %( innerColor, translatedType ),'LINE1:realValue#%s:%s'%( outerColor, translatedType ), "COMMENT: " + _("Min: ") + str(minimum) + "   " + _("Max: ") + str(maximum) + "   " + _( "Mean: " ) + str(mean) + "   " +  str(total) + "\c", 'COMMENT:%s %s %s\c' %( comment, graphicsNote, graphicsLegeng )  )
             except Exception, inst:
+                #print Exception, inst
                 errorOccured = True
                 #print _("Error : Could not generate ") + str(imageName)
                 #print _("Error was : ") + str(inst)
@@ -1041,6 +1043,7 @@ class RRDGraphicProducer( Translatable ):
             try:
                 rrdtool.graph( imageName,'--imgformat', 'PNG','--width', '800','--height', '200','--start', "%i" %(start) ,'--end', "%s" %(end),'--step','%s' %(interval*60), '--vertical-label', '%s' %formatedYLabelType,'--title', '%s'%title, '--lower-limit','0','DEF:%s=%s:%s:AVERAGE'%( translatedType, databaseName, translatedType), 'CDEF:realValue=%s,%i,*' %( translatedType, 1), 'AREA:realValue#%s:%s' %( innerColor, translatedType ),'LINE1:realValue#%s:%s'%( outerColor, translatedType ), '--x-grid', 'HOUR:24:DAY:1:DAY:1:0:%d',"COMMENT: " + _("Min: ") + str(minimum) + "   " + _("Max: ") + str(maximum) + "   " + _( "Mean: " ) + str(mean) + "   " +  str(total) + "\c", 'COMMENT:%s %s %s\c' %(comment,graphicsNote, graphicsLegeng)  )    
             except Exception, inst:
+                print Exception, inst
                 errorOccured = True
                 #print _("Error : Could not generate ") + str( imageName )
                 #print _("Error was : ") + str(inst)
@@ -1092,9 +1095,15 @@ class RRDGraphicProducer( Translatable ):
                         group the names togehter EX : machine1 and machine2 become machine1machine1
         
        
-        """    
-                                                      
-        rrdFilename = RrdUtilities.buildRRDFileName( dataType = dataType, clients = self.clientNames, machines =[machine], fileType = self.fileType, usage =self.mergerType)
+        """  
+          
+        mainApplicationLanguage = LanguageTools.getMainApplicationLanguage()
+        if mainApplicationLanguage != self.inputLanguage :
+            translatedDataType = LanguageTools.translateDataType( type, self.inputLanguage, mainApplicationLanguage )
+        else  :
+            translatedDataType = dataType   
+                                                       
+        rrdFilename = RrdUtilities.buildRRDFileName( dataType = translatedDataType, clients = self.clientNames, machines =[machine], fileType = self.fileType, usage =self.mergerType)
            
         
         if interval == 1:#daily :
@@ -1230,12 +1239,19 @@ class RRDGraphicProducer( Translatable ):
         
         data = {} 
         
+        mainApplicationLanguage = LanguageTools.getMainApplicationLanguage()
+        if mainApplicationLanguage != self.inputLanguage :
+            translatedDataType = LanguageTools.translateDataType( dataType, self.inputLanguage, mainApplicationLanguage )
+        else  :   
+            translatedDataType = dataType       
+            
+             
         # Get filecount value for each sourlient.
         for client in self.clientNames:#Gather all pairs for that type
             
-            databaseName = RrdUtilities.buildRRDFileName( dataType = dataType, clients = [client], machines = self.machines, fileType = self.fileType) 
+            databaseName = RrdUtilities.buildRRDFileName( dataType = translatedDataType, clients = [client], machines = self.machines, fileType = self.fileType) 
             if not os.path.isfile(databaseName):
-                databaseName = RrdUtilities.buildRRDFileName( dataType = dataType, groupName =  client, machines = self.machines, fileType = self.fileType, usage = "group" ) 
+                databaseName = RrdUtilities.buildRRDFileName( dataType = translatedDataType, groupName =  client, machines = self.machines, fileType = self.fileType, usage = "group" ) 
             
             #print databaseName
             if self.totals == True :#try and force all databases to give back data with the exact same resolution.
@@ -1284,11 +1300,20 @@ class RRDGraphicProducer( Translatable ):
         """
         
         databaseNames = {}
-        
+
+        mainApplicationLanguage = LanguageTools.getMainApplicationLanguage()
+        if mainApplicationLanguage != self.inputLanguage :
+            translatedDataType = LanguageTools.translateDataType( datatype, self.inputLanguage, mainApplicationLanguage )
+        else  :   
+            translatedDataType = datatype
+
+  
         for sourlient in self.clientNames:
-            databaseName = RrdUtilities.buildRRDFileName( dataType = datatype , clients = sourlient, machines = self.machines, fileType = self.fileType ) 
+            
+            
+            databaseName = RrdUtilities.buildRRDFileName( dataType = translatedDataType , clients = sourlient, machines = self.machines, fileType = self.fileType ) 
             if not os.path.isfile(databaseName):
-                databaseName = RrdUtilities.buildRRDFileName( dataType = datatype , groupName = sourlient, machines = self.machines, fileType = self.fileType, usage="group" ) 
+                databaseName = RrdUtilities.buildRRDFileName( dataType = translatedDataType , groupName = sourlient, machines = self.machines, fileType = self.fileType, usage="group" ) 
             if not os.path.isfile(databaseName):
                 databaseName = ""
                 
@@ -1581,10 +1606,16 @@ class RRDGraphicProducer( Translatable ):
                             
                 typeData[type] = {}
                 i = 0 
+                
                 while i < len(self.clientNames) and lastUpdate == 0 :
-                    databaseName = RrdUtilities.buildRRDFileName( dataType = type, clients = [self.clientNames[i]] , machines = [machine],  fileType = self.fileType, usage = "regular"  )
+                    mainApplicationLanguage = LanguageTools.getMainApplicationLanguage()
+                    if mainApplicationLanguage != self.inputLanguage :
+                        translatedDataType = LanguageTools.translateDataType( type, self.inputLanguage, mainApplicationLanguage )
+                    else  :   
+                        translatedDataType = type
+                    databaseName = RrdUtilities.buildRRDFileName( dataType = translatedDataType, clients = [self.clientNames[i]] , machines = [machine],  fileType = self.fileType, usage = "regular"  )
                     if not os.path.isfile(databaseName):
-                        RrdUtilities.buildRRDFileName( dataType = type, groupName = self.clientNames[i] , machines = [machine],  fileType = self.fileType, usage = "group"  )    
+                        RrdUtilities.buildRRDFileName( dataType = translatedDataType, groupName = self.clientNames[i] , machines = [machine],  fileType = self.fileType, usage = "group"  )    
                     
                     lastUpdate  =  RrdUtilities.getDatabaseTimeOfUpdate( databaseName, self.fileType )
                 
@@ -1616,8 +1647,9 @@ class RRDGraphicProducer( Translatable ):
         """    
             
         plottedGraphics = []
+        
             
-        if self.totals: #Graphics based on total values from a group of clients.
+        if self.totals == True: #Graphics based on total values from a group of clients.
             #todo : Make 2 title options
             
             databaseNames = self.createMergedDatabases()
@@ -1640,11 +1672,19 @@ class RRDGraphicProducer( Translatable ):
                 for client in self.clientNames:
                     
                     for type in self.types : 
-                       
-                        databaseName = RrdUtilities.buildRRDFileName( dataType = type, clients = [client], machines = [machine], fileType = self.fileType )
+                                        
+                        mainApplicationLanguage = LanguageTools.getMainApplicationLanguage()
+                        if mainApplicationLanguage != self.inputLanguage :
+                            translatedDataType = LanguageTools.translateDataType( type, self.inputLanguage, mainApplicationLanguage )
+                        else  :   
+                            translatedDataType = type
+                        
+                        databaseName = RrdUtilities.buildRRDFileName( dataType = translatedDataType, clients = [client], machines = [machine], fileType = self.fileType )
+                        #print databaseName
+                        
                         if not os.path.isfile(databaseName):
                             databaseName = RrdUtilities.buildRRDFileName( dataType = type, groupName=client, machines = [machine], fileType = self.fileType, usage = "group" )
-                        
+                        #print databaseName
                         plottedGraphics.append( self.plotRRDGraph( databaseName, type, client, machine )        )
             
             
