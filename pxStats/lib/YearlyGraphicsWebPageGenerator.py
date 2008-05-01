@@ -12,7 +12,7 @@
 ##             MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
 ##             named COPYING in the root of the source directory tree.
 ## 
-## @since    :  2006-11-22, last updated on 2008-02-19
+## @since    :  2006-11-22, last updated on 2008-05-01
 ##
 ##
 ## @summary : Generates a web pages that gives access to user 
@@ -168,9 +168,9 @@ class YearlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
         <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
         <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
-            <link rel="stylesheet" href="../scripts/js/windowfiles/dhtmlwindow.css" type="text/css" />
+            <link rel="stylesheet" href="../scripts/js_%s/windowfiles/dhtmlwindow.css" type="text/css" />
             
-            <script type="text/javascript" src="../scripts/js/windowfiles/dhtmlwindow.js">
+            <script type="text/javascript" src="../scripts/js_%s/windowfiles/dhtmlwindow.js">
                 
                 This is left here to give credit to the original 
                 creators of the dhtml script used for the group pop ups: 
@@ -181,6 +181,9 @@ class YearlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
                 ***********************************************/
             
             </script>
+
+        """%( self.displayedLanguage, self.displayedLanguage ) + """
+            
             <script type="text/javascript">
     
                 var descriptionWindow=dhtmlwindow.open("description", "inline", "description", "Description", "width=900px,height=120px,left=150px,top=10px,resize=1,scrolling=0", "recal")
