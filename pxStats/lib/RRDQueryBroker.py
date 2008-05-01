@@ -400,12 +400,18 @@ class RRDQueryBroker(GraphicsQueryBrokerInterface):
         startTime, endTime = StatsDateLib.getStartEndInIsoFormat(date, timespan, self.queryParameters.specificSpan, fixedCurrent, fixedPrevious )
         
         timespan = int( StatsDateLib.getSecondsSinceEpoch( endTime ) - StatsDateLib.getSecondsSinceEpoch( startTime ) ) / 3600   
-               
+        
+        combinedMachineName = ""
+        for machine in self.queryParameters.machines:
+            combinedMachineName = combinedMachineName + machine
+
+        machines = [ combinedMachineName ]
+       
         
         self.graphicProducer = RRDGraphicProducer( self.queryParameters.fileTypes[0], self.queryParameters.statsTypes ,\
                                                    totals,  self.queryParameters.specificSpan,\
                                                    self.queryParameters.sourLients, timespan,\
-                                                   startTime, endTime, self.queryParameters.machines, False,
+                                                   startTime, endTime, machines, False,
                                                    mergerType, True, self.querierLanguage, self.querierLanguage )
   
         StatsDateLib.setLanguage( LanguageTools.getMainApplicationLanguage() )
