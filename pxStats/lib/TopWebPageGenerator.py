@@ -140,13 +140,14 @@ class TopWebPageGenerator( Translatable ):
             </div>
     
             <div class="right">
-                <a href="archives" target="bottom" >Archives</a>
+                <a href="archives_%s" target="bottom" >Archives</a>
     
                  <a href="../scripts/cgi-bin/graphicsRequestPage.py?lang=%s" target="bottom">"""%self.outputLanguage + _("Requests") + """</a>
     
                  <a href="html_%s/helpPages/glossary_%s.html" target="bottom" >""" %( self.outputLanguage, self.outputLanguage ) + _("Glossary") + """</a>
             
-                 <a href="html_%s/docPages/listOfDocumentationFiles_%s" target="bottom">""" %( self.outputLanguage, self.outputLanguage ) + _("Documentation") +""" </a>  
+                 <a href="html_%s/docPages/listOfDocumentationFiles_%s.html" target="bottom">""" %( self.outputLanguage, self.outputLanguage ) + _("Documentation") +""" </a>  
+                 
             </div>
     
     
@@ -156,7 +157,7 @@ class TopWebPageGenerator( Translatable ):
     </html>
     
     
-        """ )
+        """%( self.outputLanguage ) )
     
         fileHandle.close()
 
