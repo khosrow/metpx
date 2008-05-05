@@ -17,7 +17,7 @@
 ##            named COPYING in the root of the source directory tree.  
 ##
 ##
-## Date   : November 29th 2006, last updated Frebruary 28th 2008
+## Date   : November 29th 2006, last updated May 5th 2008
 ##
 #############################################################################
 """
@@ -32,6 +32,7 @@ import os, sys, commands, glob, pickle, time
     Small function that adds pxStats to the environment path.  
 """
 sys.path.insert(1,  os.path.dirname( os.path.abspath(__file__) ) + '/../../')
+
 from pxStats.lib.StatsPickler import StatsPickler
 from pxStats.lib.CpickleWrapper import CpickleWrapper
 from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
@@ -151,10 +152,14 @@ def savelastValidEntry( name, lastValidEntry, paths ):
 def buildReportHeader( parameters, paths ):
     """
         
-        Returns the header to eb used 
-        within the content of the email.
+        @summary : Returns the header to be used 
+                   within the content of the email.
     
+        @return : The header 
+        
     """
+    
+    global _ 
     
     reportHeader = "\n\n"
     reportHeader = reportHeader + _("Stats monitor results\n----------------------------------------------------------------------------------------------------------------------------------\n")
@@ -171,9 +176,15 @@ def buildReportHeader( parameters, paths ):
 
 def getPresenceOfWarningsOrErrorsWithinReport( report ):
     """
-        Returns whether or not important warnings or errors were found within
-        the specified report.
+       @summary:  Returns whether or not important warnings or errors were found within
+                  the specified report.
+    
+       @return :  whether or not important warnings or errors were found within
+                  the specified report.
     """     
+ 
+        
+    global _ 
     
     results = ""
     
@@ -206,8 +217,11 @@ def getPresenceOfWarningsOrErrorsWithinReport( report ):
     
 def getEmailSubject( currentTime, report ):
     """
-        Returns the subject of the
-        email to be sent.
+        @summary : Returns the subject of the
+                   email to be sent.
+                   
+        @return  : the subject of the
+                   email to be sent.
     
     """       
     
@@ -221,14 +235,21 @@ def getEmailSubject( currentTime, report ):
     
 def verifyFreeDiskSpace( parameters, report, paths ):
     """
-        This method verifies all the free disk 
-        space for all the folders where the stats library. 
+        @summary : This method verifies all the free disk 
+                  space for all the folders where the stats library. 
         
-        A disk usage wich is too hight might be a symptom
-        of the cleaning systems not working or not being 
-        installed properly. 
+        @note    :  A disk usage wich is too hight might be a symptom
+                    of the cleaning systems not working or not being 
+                    installed properly. 
         
-        Adds a warning to the report when the usage is over x%.             
+        @param parameters : StatsMonitoringCongfigParameters instance.
+        
+        @param report     : report to which the new lines will be added.
+        
+        @param paths      : StatsPaths instance
+        
+        @return: The original report + the warning associated with the
+                 he usage is over x%.             
         
     """
     
@@ -270,7 +291,14 @@ def verifyFreeDiskSpace( parameters, report, paths ):
 
 def saveCurrentCrontab( currentCrontab, paths ) :
     """
-        Set current crontab as the previous crontab.
+        @summary : Sets current crontab as the previous crontab.
+        
+        @param currentCrontab: The current crontab entry list.
+        
+        @param paths : statsPaths instance
+        
+        @return : None         
+        
     """
     
     file  = "%spreviousCrontab" %paths.STATSMONITORING
@@ -286,11 +314,15 @@ def saveCurrentCrontab( currentCrontab, paths ) :
     
     
     
-def getPreviousCrontab( paths):
+def getPreviousCrontab( paths ):
     """
-        Gets the previous crontab from the pickle file.
+        @summary : Gets the previous crontab
+                   from the pickle file.
         
-        Returns "" if file does not exist.
+        @param   : statspaths instance.
+        
+        @return :  "" if file does not exist, 
+                   the previous crontab otherwise.
         
     """     
     
@@ -308,8 +340,14 @@ def getPreviousCrontab( paths):
     
 def verifyCrontab( report, paths ):
     """
-        Verifies if crontab has been modified since last update. 
+        @summary : Verifies if crontab has been modified since last update. 
         
+        @param report:Orinigal report to which the new lines will be added.
+        
+        @param paths: StatsPaths instance 
+         
+        @return : Report containing the original report + 
+                  the errors relative to the crontab.
     """
     
     previousCrontab = getPreviousCrontab( paths )
@@ -330,19 +368,27 @@ def verifyCrontab( report, paths ):
     
 def findFirstInterestingLinesPosition( file, startTime, endtime, lastReadPosition = 0 ):
     """
-        This method browses a file from the specified lastReadPosition.
+        @summary : This method browses a file from the specified lastReadPosition.
         
-        From there it tries to find the position of the first interesting line 
-        based on specified startTime and endtime. 
+                    From there it tries to find the position of the first interesting line 
+                    based on specified startTime and endtime. 
         
-        Returns last readposition so it can be seeked to read the line found.
+        @param file: file to search in.
         
-        Returns the first interesting line line wich will equal "" if end of file was met.
+        @param startTime: startime of the span we are interested in.
         
-        Returns linefound and a line different than "" when a line >= then endtime
-        was found without finid a line between startTime and endTime.  
+        @param endtime: endtime of the span we are interested in.
         
-        
+        @param lastReadPosition: Where the file was last read.
+                
+        @return:  A three-item tuple containing the following : 
+                    - last read position so it can be seeked to read the line found.
+                    - True or false which specified whether or not an interesting 
+                      line was found or not
+                    - the first interesting line line wich will equal "" if end of file was met
+                      or  a line different than "" when a line >=  endtime
+                      was found within the file  between startTime and endTime.  
+               
     """       
     
     lineFound = False
@@ -372,9 +418,13 @@ def findFirstInterestingLinesPosition( file, startTime, endtime, lastReadPositio
     
 def findHoursBetween( startTime, endTime ):
     """
-        Returns all hours between start time and end time.
+        @summary : Returns all hours between start time and end time.
         
-        A startTime of 2006-11-11 01:00:00 and an endTime of
+        @param startTime: start of the span we are intereasted in/
+        
+        @param endTime: end of the span we are interested in.
+        
+        @return : list of hours between start time and endtime
          
     """
     
@@ -391,9 +441,11 @@ def findHoursBetween( startTime, endTime ):
     
 def getSortedLogs( logs ):
     """
-        Takes a series of size-based rotating 
-        log files and sorts them in chronological 
-        order.
+        @summary : Takes a series of size-based rotating 
+                   log files and sorts them in chronological 
+                   order.
+                   
+        @return : The list of logs sorted.            
         
     """     
        
@@ -413,8 +465,14 @@ def getSortedLogs( logs ):
          
 def findHoursWithNoEntries( logs, startTime, endTime ):
     """
-        Returns all the hours for wich no entries were 
-        found within specified 
+        @summary : Returns all the hours for wich no entries were 
+                  found within specified span.
+                  
+        @param startTime: start of the span we are intereasted in/
+        
+        @param endTime: end of the span we are interested in.
+        
+        @return : The list of hours with no entries                   
         
     """
     
@@ -454,18 +512,21 @@ def findHoursWithNoEntries( logs, startTime, endTime ):
     
 
 
-def verifyStatsLogs( parameters, report, paths, logger = None ):    
+def verifyStatsLogs( parameters, report, paths ):    
     """
     
-        Verifies if any entries exists within all
-        4 types of stats log files between the time 
-        of the last monitoring job and current time.
+        @summary : Verifies if any entries exists within all
+                   4 types of stats log files between the time 
+                   of the last monitoring job and current time.
         
-        Adds to the report the log types for 
-        wich there was no entry during specified
-        amount of time. 
+        @param report : report to which the logs for 
+                        wich there was no entry during 
+                        specified span will be added
         
-        Returns the report with the added lines
+        @param paths  : StatsPaths instance                  
+        
+        @return       : The report origninal report +
+                        the newly added lines
         
     """    
     
@@ -476,7 +537,7 @@ def verifyStatsLogs( parameters, report, paths, logger = None ):
     
     for logFileType in logFileTypes:
         
-        lfc =  LogFileCollector( startTime  = parameters.startTime , endTime = parameters.endTime, directory = paths.STATSLOGGING, lastLineRead = "", logType = "stats", name = logFileType, logger = logger )    
+        lfc =  LogFileCollector( startTime  = parameters.startTime , endTime = parameters.endTime, directory = paths.STATSLOGGING, lastLineRead = "", logType = "stats", name = logFileType, logger = None )    
         
         lfc.collectEntries()
         logs = lfc.entries                
@@ -511,8 +572,15 @@ def verifyStatsLogs( parameters, report, paths, logger = None ):
      
 def sendReportByEmail( parameters, report  ) :
     """
-        Takes the report and sends it to the specified 
-        recipients using cmc's server.
+        @summary : Takes the report and sends it to the specified 
+                   recipients using cmc's server.
+        
+        @param report: The report to e-mail.
+        
+        @param parameters:  StatsMonitoringConfigParameters instance
+        
+        @return : None          
+                                      
         
     """
 
@@ -532,10 +600,23 @@ def sendReportByEmail( parameters, report  ) :
     
 def getFoldersAndFilesAssociatedWith( client, fileType, machines, startTime, endtime ):
     """
-        This function verifies whether all the
-        expected pickles for all the specified machiens
-        between a certain interval are present.  
+        @summary : This function returns the folders and files
+                   associated with the pickles of all the specified
+                   machines of a certain client of a specific fileType                   
+                   between a certain interval are all present.  
     
+        @param client: Client for which to find the folders and files.
+        
+        @param fileType : tx or rx
+        
+        @param machines : machiens associated with the client
+        
+        @param startTime : start of the span
+        
+        @param endTime : end of the span
+        
+        @return : The list of folders        
+        
     """
     
     folders = {}
@@ -576,10 +657,14 @@ def getFoldersAndFilesAssociatedWith( client, fileType, machines, startTime, end
     
 def getCombinedMachineName( machines ):
     """
-        Gets all the specified machine names 
-        and combines them so they can be used
-        to find pickles.
+        @summary : Gets all the specified machine names 
+                   and combines them so they can be used
+                   to find pickles.
         
+        @machines : List of machines to combine.
+        
+        @return : The combined machine names.
+    
     """        
     
     combinedMachineName = ""
@@ -595,10 +680,16 @@ def getCombinedMachineName( machines ):
     
 def verifyPicklePresence( parameters, report, paths ):
     """
-        This fucntion verifies wheteher all the
-        expected pickles for all the specified machiens
-        between a certain interval are present.   
-                  
+        @summary : This fucntion verifies wheteher all the
+                   expected pickles for all the specified machiens
+                   between a certain interval are present.   
+        
+        @param parameters : StatsMonitoringConfigParameters instance
+    
+        @param report     : Report to which we need to add the new report lines.
+        
+        @param paths      : StatsPaths instance  
+    
     """
     
     missingFiles   = False
@@ -710,8 +801,19 @@ def verifyPicklePresence( parameters, report, paths ):
         
 def gapInErrorLog( name, start, end, errorLog )  :  
     """
-        Returns wheter or not the gap described within the 
-        parameters is found in a certain log file.
+        @summary : Returns wheter or not the gap 
+                   described within the parameters
+                   is found within the specified
+                   log file.
+        
+        @param name:   name of the client for which
+                       the gap is to be verified.        
+        
+        @param start : start of the gap
+        
+        @param end   : End of the gap
+        
+        @errorLog    : Log in which to search for the gap               
         
     """
     
@@ -761,9 +863,8 @@ def gapInErrorLog( name, start, end, errorLog )  :
 
 def getSortedTextFiles( files ):
     """
-        Takes a series of size-based rotating 
-        log files and sorts them in chronological 
-        order.
+        @summary : sorts files based on names.
+        @return  : The sorted files.
         
     """     
        
@@ -775,8 +876,17 @@ def getSortedTextFiles( files ):
     
 def getErrorLog( file, startTime ):
     """
-        Takes a standard transmisson error log 
-        and returns only the lines after start time. 
+        @summary : Takes a standard transmisson error log 
+                   and returns only the lines after the specified 
+                   start time. 
+        
+        @param file : file from which to extract the desired lines.
+        
+        @param startTime :start time of the data we are interested in.
+        
+        @return : the lines past the start time foudn in the specified log file.
+                     
+        
     
     """  
           
@@ -802,13 +912,29 @@ def getErrorLog( file, startTime ):
     
 def getPickleAnalysis( files, name, lastValidEntry, maximumGap, errorLog ):
     """
-        This function is used to browse all the pickle files
-        in chronological order. 
+        @summary : This function is used to browse all the pickle files
+                   in chronological order and to verify if any gaps of unsent
+                   data larger than  maximumGap are present within the 
+                   pickle files and not within the erroLog
+                     
+                   data is found in the specified files. 
         
-        If any gap longer than maximumGap are found between
-        entries they will be added to report. 
+        @param files : pickle files to verify
         
-        Report is returned at the end. 
+        @param name : client's name
+        
+        @param lastValidEntry : time of the last valid entry
+              for the specified client/source.
+        
+        @param maximumGap : Maximum gap allowed
+        
+        @param errorLog: Lof in which to search for any of the gaps 
+                         above maximum gap found.
+        
+        @return : A tuple containing the following : 
+                      - The report lines generated by this analysis. 
+                      - The last lastValidEntry that was found during 
+                        analysis  
         
     """
     
@@ -864,8 +990,16 @@ def getPickleAnalysis( files, name, lastValidEntry, maximumGap, errorLog ):
     
 def verifyPickleContent( parameters, report, paths ):        
     """
-        Browses the content of the pickle files 
-        associated with specified clients and sources.       
+        @summary : Browses the content of the pickle files 
+                   associated with specified clients and sources.       
+        
+        @param parameters : StatsMonitoringConfigParameters instance         
+        
+        @param report : report to which the new lines will be added
+        
+        @param paths : StatsPaths instance.
+        
+        @return : The original report + the newly added lines,
                 
     """
     
@@ -917,8 +1051,12 @@ def verifyPickleContent( parameters, report, paths ):
     
 def getFileChecksum( file ):
     """
-        Returns the current file checksum of the 
-        file.
+        @summary : Returns the current md5sum of the 
+                   specified file.
+        
+        @param file : File for which the md5sum is needed.
+        
+        @return     : md5sum of the specified file.
          
     """
     
@@ -934,13 +1072,17 @@ def getFileChecksum( file ):
     
 def getPresentAndAbsentFilesFromParameters( parameters ):
     """
-        This method is to be used to get all the filenames
-        associated with the parameters received. 
+        @summary : This method is to be used to verify the presence of 
+                   all the filenames associated with the parameters received. 
         
-        When a folder is used, all the .py files within this 
-        directory will be returned.
+        @Note :    When a folder is encountered, all the .py files within this 
+                   directory will be returned.
         
-        Note : search of files within a directory is NOT recursive.
+        @warning :search of files within a directory is NOT recursive.
+    
+        @return : a tuple of two lists : 
+                        - presentFiles
+                        - absentfiles 
     
     """
     
@@ -970,9 +1112,12 @@ def getPresentAndAbsentFilesFromParameters( parameters ):
     
 def getSavedFileChecksums( paths ):
     """
-        Returns the checksums saved 
-        from the last monitoring job.
+        @summary : Returns the checksums saved 
+                   from the last monitoring job.
         
+        @param paths: StatsPaths instance.
+        
+        @return : the previously saved chescksums dictionary
     """    
     
     file = "%spreviousFileChecksums" %paths.STATSMONITORING
@@ -990,9 +1135,15 @@ def getSavedFileChecksums( paths ):
     
 def saveCurrentChecksums( currentChecksums, paths ) :
     """
-        Takes the current checksums and set them 
-        as the previous checksums in a pickle file named 
-        paths.STATSMONITORING/previousFileChecksums
+        @summary : Takes the current checksums and set them 
+                   as the previous checksums in a pickle file named 
+                   paths.STATSMONITORING/previousFileChecksums
+        
+        @param currentChecksums : dictionary containing the current 
+                                  file:checksum associations.
+                                               
+        @param paths : StatsPaths instance.
+                   
         
     """   
     
@@ -1011,12 +1162,20 @@ def saveCurrentChecksums( currentChecksums, paths ) :
 
 def verifyFileVersions( parameters, report, paths  ):
     """
-        This method is to be used to add the checksums warning 
-        found to the report. 
+        @summary : This method is to be used to add the checksums warning 
+                   found to the report. 
         
-        This will set the current checksums found as the previous 
-        checksums.
-    
+        @side-effect : This will set the current checksums found as the previous 
+                       checksums.
+
+        @param parameters : StatsMonitoringConfigParameters instance
+        
+        @param report : original report to which new lines will be added.
+        
+        @param paths : StatsPaths instance
+        
+        @return : report + the newly added lines
+        
     """   
     
     newReportLines = ""
@@ -1062,9 +1221,15 @@ def verifyFileVersions( parameters, report, paths  ):
     
 def verifyWebPages( parameters, report, paths ):
     """
-        This method verifies whether or not
-        the different web pages and images are 
-        up to date.  
+        @summary : This method verifies whether or not
+                   the different web pages and images are 
+                   up to date.  
+                   
+        @param parameters : StatsMonitoringConfigParameters instance.
+        
+        @param report     : Original report to whci h the new lines will be added.
+        
+        @return : The original report + the newly added lines.
         
     """
     
@@ -1097,8 +1262,16 @@ def verifyWebPages( parameters, report, paths ):
     
 def verifyGraphs( parameters, report, paths ):
     """
-        Verifies whether or not all daily 
-        graphics seem up to date. 
+        @summary : Verifies whether or not all daily 
+                   graphics seem up to date. 
+                     
+        @param parameters : StatsMonitoringconfigParameters instance
+        
+        @report : report to which to the new lines willbe added           
+        
+        @param paths: StatsPaths instance 
+        
+        @return : The original report + the newly added lines. 
         
     """    
     
@@ -1146,9 +1319,13 @@ def verifyGraphs( parameters, report, paths ):
 
 def updateRequiredfiles( parameters, paths ):
     """
-        This method is used to download 
-        the latest version of all the required
-        files.
+        @summary : This method is used to download 
+                   the latest version of all the required
+                   files.
+       
+        @parameter parameters : StatsMonitoringConfig parameters
+        
+        @parameter paths :             
         
     """    
        
@@ -1164,8 +1341,11 @@ def updateRequiredfiles( parameters, paths ):
 
 def validateParameters( parameters ):
     """
-        Validates parameters. 
-        If critical errors are foudn program is temrinated.
+        @summary : Validates parameters. 
+        
+        @parameters : StatsMonitoringConfigParameters instance to validate.
+        
+        @warning: If critical errors are found program is temrinated.
         
     """       
     
@@ -1253,10 +1433,10 @@ def getParameterValue():
          
 def main():
     """
-        Builds the entire report by 
-        runnign all the different monitoring functions.
+        @summary : Builds the entire report by 
+                   runnign all the different monitoring functions.
         
-        Sends the report by email to the designed recipients.
+                   Sends the report by email to the designed recipients.
         
     """ 
     
