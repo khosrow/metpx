@@ -23,7 +23,6 @@ from ConfigParser import ConfigParser
 
 sys.path.insert(1,  os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 
-print sys.path
 from pxStats.lib.StatsPaths import StatsPaths
 
 
