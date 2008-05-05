@@ -404,7 +404,7 @@ class GeneralStatsLibraryMethods:
                             rxTxDatabases.append( rxtxLongName )
                     else:
                         
-                        if fnmatch(os.path.basename(rxtxLongName), pattern ):
+                        if fnmatch.fnmatch(os.path.basename(rxtxLongName), pattern ):
                             if rxtxLongName not in rxTxDatabases:
                                 rxTxDatabases.append( rxtxLongName )
                  
