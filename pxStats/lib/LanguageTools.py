@@ -237,7 +237,7 @@ class LanguageTools :
 
 
 
-    def translateDataType( self, dataType, sourceLanguage, destinationLanguage ):
+    def translateDataType( dataType, sourceLanguage, destinationLanguage ):
         """
         
             @summary : Takes a file type from one source language and translates
@@ -276,7 +276,7 @@ class LanguageTools :
         
         return translatedDataType
     
-    translateFileType = staticmethod( translateDataType )
+    translateDataType = staticmethod( translateDataType )
     
     
     
