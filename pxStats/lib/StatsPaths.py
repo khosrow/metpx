@@ -1,17 +1,16 @@
 #!/usr/bin/env python2
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
-"""
 
-"""
 #############################################################################################
 # @Name    : StatsPaths.py
 #
 # @author  :  Nicholas Lemay, 
 #
 # @since   : 2007-05-14, last updated on 2008-01-09
+#
+# @license : MetPX Copyright (C) 2004-2006  Environment Canada
+#            MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+#            named COPYING in the root of the source directory tree. 
 #
 # @summary : This class file contains all the needed paths within the differents 
 #            stats library programs. This will prevent the programs to have hard-coded 
@@ -365,7 +364,6 @@ class StatsPaths:
         global _ 
         from pxStats.lib.LanguageTools import LanguageTools
         _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, language )
-        #print CURRENT_MODULE_ABS_PATH, language
      
         """
             Sets all the paths that can not be translated.
