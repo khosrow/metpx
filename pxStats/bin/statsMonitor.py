@@ -1183,7 +1183,7 @@ def verifyFileVersions( parameters, report, paths  ):
     unequalChecksumsFound = False         
         
     presentFiles, absentFiles = getPresentAndAbsentFilesFromParameters( parameters )
-    previousFileChecksums = getSavedFileChecksums()
+    previousFileChecksums = getSavedFileChecksums( paths )
     
     
     for file in absentFiles:
@@ -1317,25 +1317,7 @@ def verifyGraphs( parameters, report, paths ):
     
 
 
-def updateRequiredfiles( parameters, paths ):
-    """
-        @summary : This method is used to download 
-                   the latest version of all the required
-                   files.
-       
-        @parameter parameters : StatsMonitoringConfig parameters
-        
-        @parameter paths :             
-        
-    """    
-       
-    if len( parameters.detailedParameters.uploadMachines ) != 0:
-        machine = parameters.detailedParameters.uploadMachines[0]
-        login = parameters.detailedParameters.uploadMachinesLogins[machine]
-    
-        commands.getstatusoutput( "scp %s@%s:%sPX_Errors.txt* %s >>/dev/null 2>&1" %(login, machine, paths.PDSCOLLOGS, paths.STATSMONITORING ) )
-        
-        commands.getstatusoutput( "scp %s@%s:%smaxSettings.conf %smaxSettings.conf >>/dev/null 2>&1" %(login, machine, paths.PDSCOLETC, paths.STATSMONITORING ) ) 
+
     
 
 
@@ -1428,9 +1410,30 @@ def getParameterValue():
         sys.exit()
                      
     return parameterValue
+  
     
     
-         
+def updateRequiredfiles( parameters, paths ):
+    """
+        @summary : This method is used to download
+                   the latest version of all the required
+                   files.
+  
+        @parameter parameters : StatsMonitoringConfig parameters
+        
+        @parameter paths :
+  
+    """
+  
+    if len( parameters.detailedParameters.uploadMachines ) != 0:
+        machine = parameters.detailedParameters.uploadMachines[0]
+        login = parameters.detailedParameters.uploadMachinesLogins[machine]
+  
+        commands.getstatusoutput( "scp %s@%s:%sPX_Errors.txt* %s >>/dev/null 2>&1" %(login, machine, paths.PDSCOLLOGS, paths.STATSMONITORING ) )
+  
+  
+  
+           
 def main():
     """
         @summary : Builds the entire report by 
@@ -1451,15 +1454,14 @@ def main():
     
     generalParameters = StatsConfigParameters( )
     generalParameters.getAllParameters()
-   
+                   
     parameters = StatsMonitoringConfigParameters()
     parameters.getParametersFromMonitoringConfigurationFile()
     
     if endTime != "":#If a specific end time was specified at the moment of the call.
         parameters = setMonitoringEndTime( parameters )
     
-    updateRequiredfiles( generalParameters, paths )               
-
+    updateRequiredfiles( generalParameters, paths )
     validateParameters( parameters )
     
     report = buildReportHeader( parameters, paths )
