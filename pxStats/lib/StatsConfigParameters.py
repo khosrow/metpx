@@ -188,9 +188,10 @@ class StatsConfigParameters:
         self.mainApplicationLanguage = config.get( 'generalConfig', 'mainApplicationLanguage' )
         self.artifactsLanguages.extend( config.get( 'generalConfig', 'artifactsLanguages' ).split(',') )
         
-        languages = config.get( 'generalConfig', 'webPagesLanguages' ).split(',')
-        for i in range(  len(languages), 2 ):
-            self.webPagesLanguages.append( languages[i].split(":")[0], languages[i].split(":")[0] )
+        languagePairs = config.get( 'generalConfig', 'webPagesLanguages' ).split(',')
+        
+        for languagePair in languagePairs:
+            self.webPagesLanguages.append( (languagePair.split(":")[0], languagePair.split(":")[1]) )
            
         self.statsRoot = config.get( 'generalConfig', 'statsRoot' )    
         self.sourceMachinesTags.extend( config.get( 'generalConfig', 'sourceMachinesTags' ).split(',') )
