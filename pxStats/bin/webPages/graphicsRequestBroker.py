@@ -1,10 +1,5 @@
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
-
-
 ##############################################################################
 ##
 ##
@@ -13,8 +8,12 @@ named COPYING in the root of the source directory tree.
 ##
 ## @author :  Nicholas Lemay
 ##
-## @since  : 2007-06-28, last updated on  2008-02-19 
+## @since  : 2007-06-28, last updated on  2008-04-23 
 ##
+##
+## @license : MetPX Copyright (C) 2004-2006  Environment Canada
+##            MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+##            named COPYING in the root of the source directory tree.
 ##
 ## @summary : This file is to be used as a bridge between the graphics 
 ##            request web page  and hte different plotting methods.
@@ -32,7 +31,6 @@ named COPYING in the root of the source directory tree.
 import cgi, gettext, os, sys
 import cgitb; cgitb.enable()
 
-sys.path.insert(1, sys.path[0] + '/../../')
 sys.path.insert(2, sys.path[0] + '/../../..')
 
 from pxStats.lib.StatsPaths import StatsPaths
@@ -47,7 +45,7 @@ LOCAL_MACHINE = os.uname()[1]
 
 EXPECTED_PARAMETERS = [ 'lang', 'querier','endTime','groupName','span','fileType','machines','statsTypes','preDeterminedSpan','sourlients','combineSourlients','products']
 
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "graphicsRequestBroker.py" 
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 
 
 def returnToQueriersLocationWithReply( querier, reply ):
@@ -94,21 +92,30 @@ def getQuerierLocation( form ):
     
 
     
-def handlePlotRequest( form ): 
+def handlePlotRequest( form, language  ): 
     """
         @param form: form wich contains 
                      the parameters to use
                      for the query.
+        
+        @param language : language of the querier.
+        
+        @precondition: global _ translator 
+                       must have been set 
+                       prior to calling 
+                       this method.
     """
+    
+    global _ 
     
     querier =  getQuerierLocation( form ) 
     plotter = getPlotterType(form)
     
     #validate for known plotter
     if plotter == "gnuplot":
-        queryBroker = GnuQueryBroker()
+        queryBroker = GnuQueryBroker( querierLanguage = language )
     elif plotter == "rrd":
-        queryBroker = RRDQueryBroker()
+        queryBroker = RRDQueryBroker( querierLanguage = language )
     else:
         queryBroker = None    
     
@@ -255,7 +262,7 @@ def main():
     
        
     
-    try:              
+    try:
         
         form = getForm()
         
@@ -265,19 +272,19 @@ def main():
         if language == "" : # unspecified language.
             
             querier = getQuerierLocation( form )
-            reply = "images=;error=" + _("Error in query broker. Cannot proceed with query. No language was specified.")
+            reply = "images=;error=" + "Error in query broker. Cannot proceed with query. No language was specified." #No language, do not translate.
             returnToQueriersLocationWithReply( querier, reply )
         
         elif language not in LanguageTools.getSupportedLanguages(): # unsupported language
             
             querier = getQuerierLocation( form )
-            reply = "images=;error=" + _("Error in query broker. Cannot proceed with query. %s is not a supported language.") %language
+            reply = "images=;error=" + "Error in query broker. Cannot proceed with query. %s is not a supported language." %language #Unsupported language, do not translate.
             returnToQueriersLocationWithReply( querier, reply )
                        
         else: #params seem ok
             
             setGlobalLanguageParameters( language  )
-            handlePlotRequest(form)
+            handlePlotRequest( form, language )
     
     except Exception, instance :   #temp file helpfull for debugging!
         fileHandle= open('graphicsRequestBrokerDebuggingOutput','w')
