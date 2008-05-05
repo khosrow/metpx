@@ -1,27 +1,30 @@
 #! /usr/bin/env python
 """
-MetPX Copyright (C) 2004-2006  Environment Canada
-MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
-named COPYING in the root of the source directory tree.
-"""
+
 
 ##############################################################################
 ##
 ##
-## Name   : backwardReader.py 
+## @name    : backwardReader.py 
+##
+## @license : MetPX Copyright (C) 2004-2006  Environment Canada
+##            MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
+##            named COPYING in the root of the source directory tree.
 ##
 ##
-## Author : Nicholas Lemay
+## @author : Nicholas Lemay
 ##
-## Date   : 06-07-2006 
+## @since: : 06-07-2006 
 ##
 ##
-## Description : Small utility that can be used to read text files backward. 
+## @summary : Small utility that can be used to read text files backward. 
 ##
-##  Has a readlineBackwards method that is similar to readline 
-##  and a tail method that is similar to the tail used in linux 
+##            Has a readlineBackwards method that is similar to readline 
+##            and a tail method that is similar to the tail used in linux 
 ## 
 ##############################################################################
+"""
+
 
 import os,sys 
 
@@ -29,13 +32,15 @@ class BackwardReader:
     
     def tail( nbLines = 1, file = "", printIt = False ):
         """
-            Similar to the usual tail method we use in linux, only now it is in pure python.
+            @summary : Similar to the usual tail method we use in linux, only now it is in pure python.
             
-            File must exist or else program will be terminated. 
+            @warning : File must exist or else program will be terminated. 
             
-            nbLines : Number of lines we want to get from the end of the file.
-            file    : Absolute path to the file we want to use.
-            printIt : Whether or not user want to print the results of action performed here. 
+            @param nbLines : Number of lines we want to get from the end of the file.
+            @param file    : Absolute path to the file we want to use.
+            @param printIt : Whether or not user want to print the results of action performed here. 
+            
+            @return : Lines from the bottom of the file.
             
         """
         
@@ -97,15 +102,26 @@ class BackwardReader:
     
     tail = staticmethod(tail)    
         
+        
+        
     def readLineBackwards( fileHandle, offset = -1 , fileSize =0 ) :           
         """
-            This method is to be used in place of readlines to read a file line by 
-            line backwards. 
+            @summary : This method is to be used in place of readlines
+                       to read a file line by line backwards. 
             
-            It will prove to be much faster and much less demanding on memory when 
-            using large files than reading an entire file form the top with either 
-            readline or readlines.  
+            @note    : It will prove to be much faster and much less 
+                       demanding on memory when using large files than
+                       reading an entire file form the top with either 
+                       readline or readlines.  
         
+            @param fileHandle : fileHandle of the file to read,
+            
+            @param offset     : offset from which to start reading.
+            
+            @param fileSize   : Size of the file 
+            
+            @return : tuple conatinaing the readline and the offset 
+                      before the read line.  
         """
     
         
