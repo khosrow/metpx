@@ -557,7 +557,7 @@ def printAjaxRequestsScript( infos ):
                     
                     listOfImagesToCombine = listOfImagesToCombine.slice( 0, listOfImagesToCombine.length - 1 );
                     
-                    qstr = "?images=" + escape(listOfImagesToCombine) + "&errors=";
+                    qstr = "?images=" + escape(listOfImagesToCombine) + "&errors=" + "&lang=" + escape("%s");
                     
                     return qstr; 
                     
@@ -580,7 +580,7 @@ def printAjaxRequestsScript( infos ):
                       
                 }  
 
-    """
+    """%( infos.language )
     
     print """
                     
@@ -669,7 +669,7 @@ def printAjaxRequestsScript( infos ):
                 
                 function executeAjaxReplyAction( action ){
                     if( action.match('showImageWindow') != null ){
-                         window.open( '../../html_%s/html/combinedImageWebPage.html', 'mywindow', "status = 0, height=%s, width=%s, resizable=0, scrollbars=yes" );
+                         window.open( '../../html_%s/combinedImageWebPage.html', 'mywindow', "status = 0, height=%s, width=%s, resizable=0, scrollbars=yes" );
                     
                     }
                     
@@ -1644,7 +1644,7 @@ def printInputForm( form, infos  ):
 
     print"""
              <div class="right">
-                <input type=button  class="button"   name="help "value=""" +'"' + _("Get Help") + '"' + """ onclick ="wopen( '../../html_%s/html/helpPages/requestHelp_%s.html', 'popup', 830, 1100 );">
+                <input type=button  class="button"   name="help "value=""" +'"' + _("Get Help") + '"' + """ onclick ="wopen( '../../html_%s/helpPages/requestHelp_%s.html', 'popup', 830, 1100 );">
             </div>
     
         
@@ -1871,12 +1871,14 @@ def printHead( form, infos  ):
         
     print ("""
             <!--Java scripts sources -->
-            <script language="Javascript" src="../js/autosuggest.js"></script>
-            <script src="../js/calendar1.js"></script>
-            <script src="../js/calendar2.js"></script>
-            <script src="../js/windowUtils.js"></script>
-            <script src="../js/popupListAdder.js"></script>
+            <script language="Javascript" src="../js_%s/autosuggest.js"></script>
+            <script src="../js_%s/calendar1.js"></script>
+            <script src="../js_%s/calendar2.js"></script>
+            <script src="../js_%s/windowUtils.js"></script>
+            <script src="../js_%s/popupListAdder.js"></script>
            
+    """ %( infos.language, infos.language, infos.language, infos.language, infos.language ) + """
+
             <script>
                 
                 counter =0;             
