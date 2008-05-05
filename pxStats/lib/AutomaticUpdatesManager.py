@@ -90,11 +90,12 @@ class AutomaticUpdatesManager( Translatable ):
             
             @summary : Returns the time of the last update in iso format.
        
-            @return : None if no update as found, Last update in ISO format otherwise.
+            @return : None if no update as found, EPCH is returned in iso format,
+                      as to make sure an update is made since no prior updates exist.
             
         """
         
-        timeOfLastUpdate = StatsDateLib.getCurrentTimeInIsoformat() 
+        timeOfLastUpdate = StatsDateLib.getIsoTodaysMidnight( StatsDateLib.getCurrentTimeInIsoformat() ) 
         
         paths = StatsPaths()
         paths.setPaths()
@@ -366,9 +367,12 @@ class AutomaticUpdatesManager( Translatable ):
                         
         """
         
+        
         isFirstUpdateOfTheHour = False
         
         lastUpdateISO = self.getTimeOfLastUpdateInLogs()
+
+        print "lastUpdateISO", lastUpdateISO
         
         if timeOfUpdateInIsoFormat > lastUpdateISO:
             
@@ -385,7 +389,7 @@ class AutomaticUpdatesManager( Translatable ):
                 if hour1 != hour2:
                     isFirstUpdateOfTheHour = True
         
-        
+        print "isFirstUpdateOfTheHour", isFirstUpdateOfTheHour
         return isFirstUpdateOfTheHour 
  
  
