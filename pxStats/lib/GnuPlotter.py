@@ -191,8 +191,8 @@ class GnuPlotter( Translatable ):
         
         statsPaths = StatsPaths()
         statsPaths.setPaths(self.outputLanguage)
-        _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.outputLanguage )
-
+        _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.workingLanguage )
+        
         entityName = ""
         
         if len( self.clientNames ) == 0:
@@ -208,14 +208,18 @@ class GnuPlotter( Translatable ):
                 
         date = self.currentTime.replace( "-","" ).replace( " ", "_")
         
-        if self.productTypes[0] == "All" or self.productTypes[0] == "*":
-            formattedProductName = _("All")
+        if self.productTypes[0] == _("All") or self.productTypes[0] == "*":
+            
+            formattedProductName = LanguageTools.translateTerm("All", self.workingLanguage, self.outputLanguage, CURRENT_MODULE_ABS_PATH)
+            
         else:
             combinedProductsName = ""
             for product in self.productTypes:
                 combinedProductsName = combinedProductsName + str(product) + "_"
             
             formattedProductName = combinedProductsName[ :-1 ] #remove trailing _ character.    
+        
+        _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.outputLanguage )
         
         folder =   statsPaths.STATSGRAPHS + _("others/gnuplot/%.50s/") %( entityName )     
         
