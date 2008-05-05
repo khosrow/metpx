@@ -50,7 +50,7 @@ class RrdUtilities:
     
     
     
-    def buildRRDFileName( dataType = 'errors', clients = ['client1','client1'] , machines = ['machine1','machine2'],\
+    def buildRRDFileName( dataType = 'errors', clients = None , machines = None,\
                           groupName = "", fileType = "", usage = "regular"  ):
         """
             @summary : Returns the name of the round robin database bases on the parameters.
@@ -71,6 +71,8 @@ class RrdUtilities:
         
         """
         
+        clients  = clients or ['client1','client1']
+        machines = machines or ['machine1','machine2']
         
         fileName = ""
         
@@ -81,7 +83,7 @@ class RrdUtilities:
         combinedClientsName = ""  
         for client in clients:
             combinedClientsName = combinedClientsName + client
-        
+               
         if len(clients) ==1:       
             if usage == "regular":
                 fileName = STATSPATHS.STATSCURRENTDB + "%s/%s_%s" %( dataType, combinedClientsName, combinedMachineName )  
