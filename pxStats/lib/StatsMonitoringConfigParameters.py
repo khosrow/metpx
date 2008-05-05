@@ -22,7 +22,7 @@
 
 """
 
-import os, sys,  time, pickle , fnmatch
+import commands, os, sys,  time, pickle , fnmatch
 sys.path.insert(1,  os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 
 import readMaxFile
@@ -77,7 +77,27 @@ class StatsMonitoringConfigParameters:
         self.smtpServer = smtpServer
         
 
-        
+    def __updateMaxSettingsFile( self, parameters ):
+            """
+                @summary : This method is used to download 
+                           the latest version of all the required
+                           files.
+               
+                @parameter parameters : StatsConfig parameters isntance
+    
+            """    
+            
+            paths = StatsPaths()
+            paths.setPaths()   
+            
+            if not os.path.isdir(paths.STATSMONITORING) :
+                os.makedirs(paths.STATSMONITORING)
+            if len( parameters.detailedParameters.uploadMachines ) != 0:
+                machine = parameters.detailedParameters.uploadMachines[0]
+                login = parameters.detailedParameters.uploadMachinesLogins[machine]
+            
+                commands.getstatusoutput( "scp %s@%s:%smaxSettings.conf %smaxSettings.conf >>/dev/null 2>&1" %(login, machine, paths.PDSCOLETC, paths.STATSMONITORING ) )         
+   
    
    
     def updateMachineNamesBasedOnExistingMachineTags(self):
@@ -163,7 +183,7 @@ class StatsMonitoringConfigParameters:
         generalParameters = StatsConfigParameters()
         generalParameters.getAllParameters()
                        
-
+        self.__updateMaxSettingsFile( generalParameters )
         for tag in generalParameters.sourceMachinesTags:
             
             try:
