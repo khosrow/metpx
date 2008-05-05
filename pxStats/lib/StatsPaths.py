@@ -6,7 +6,7 @@
 #
 # @author  :  Nicholas Lemay, 
 #
-# @since   : 2007-05-14, last updated on 2008-01-09
+# @since   : 2007-05-14, last updated on 2008-05-05
 #
 # @license : MetPX Copyright (C) 2004-2006  Environment Canada
 #            MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file
@@ -400,6 +400,7 @@ class StatsPaths:
         self.STATSWEBPAGESWORDDBS  = self.STATSWEBPAGES  + _( 'wordDatabases/' )
         self.STATSGRAPHS           = self.STATSDATA + _( 'graphics/' )
         self.STATSWEBGRAPHS        = self.STATSGRAPHS + _( 'webGraphics/' )
+        self.STATSWEBWORDDATABASES = self.STATSWEBPAGES + _( 'wordDatabases/' )
         self.STATSGRAPHSARCHIVES   = self.STATSWEBGRAPHS + _( 'archives/' ) 
         
         self.STATSCOLGRAPHS        = self.STATSWEBGRAPHS + _( 'columbo/' )
