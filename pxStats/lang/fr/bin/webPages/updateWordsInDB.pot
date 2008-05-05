@@ -1,0 +1,7 @@
+
+msgid "products"
+msgstr "produits"
+
+msgid "groupNames"
+msgstr "nomsDeGroupes"
+
