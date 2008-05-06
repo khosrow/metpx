@@ -1,0 +1,34 @@
+msgid ""
+msgstr ""
+
+
+msgid "Error reading config file in launchGraphCreation program. Parameter number mismatch. Program was terminated abruptly."
+msgstr "Error reading config file in launchGraphCreation program. Parameter number mismatch. Program was terminated abruptly."
+
+msgid "Error reading config file. Parameter number mismatch between pickling machines and source machines associated with %s tag . Program was terminated abruptly."
+msgstr "Error reading config file. Parameter number mismatch between pickling machines and source machines associated with %s tag . Program was terminated abruptly."
+
+msgid "source machines : %s  picklingmachines : %s "
+msgstr "source machines : %s  picklingmachines : %s "
+
+msgid "Error reading config file in launchGraphCreation program. Program was terminated abruptly."
+msgstr "Error reading config file in launchGraphCreation program. Program was terminated abruptly."
+
+msgid "Finished."
+msgstr "Finished."
+
+msgid "Error. An other instance of pxStatsStartup is allready running."
+msgstr "Error. An other instance of pxStatsStartup is allready running."
+
+msgid "Only one instance of this software can be run at once."
+msgstr "Only one instance of this software can be run at once."
+
+msgid "Please terminate the other instance or wait for it to end it's execution"
+msgstr "Please terminate the other instance or wait for it to end it's execution"
+
+msgid "before running this program again."
+msgstr "before running this program again."
+
+msgid "Program terminated."
+msgstr "Program terminated."
+
