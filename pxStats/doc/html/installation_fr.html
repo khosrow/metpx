@@ -1,564 +1,564 @@
 <html>
-    
-    """
-    MetPX Copyright (C) 2004-2006  Environment Canada
-    MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
-    named COPYING in the root of the source directory tree.
-    """
-    ################################################################################
-    #     _____          _        _ _       _   _             
-    #    |_   _|        | |      | | |     | | (_)            
-    #      | | _ __  ___| |_ __ _| | | __ _| |_ _  ___  _ __  
-    #      | || '_ \/ __| __/ _` | | |/ _` | __| |/ _ \| '_ \ 
-    #     _| || | | \__ \ || (_| | | | (_| | |_| | (_) | | | |
-    #     \___/_| |_|___/\__\__,_|_|_|\__,_|\__|_|\___/|_| |_|
-    #
-    #
-    # Auteur                 : Nicholas Lemay
-    # Dernière mise-à-jour   : October 16th 2007
-    #
-    ################################################################################
-    
-    
-    À propos de ce document :
-    --------------------------------------------------------------------------------
-    Le but de ce document est de fournir à un usagers les connaissances nécessaires
-    pour effectuer une nouvelle installation du logiciel pxStats.
-    
-    
-    Note importante :
-    --------------------------------------------------------------------------------
-    Tous au long du document, losqu'un dossier sera mentionné vous trouverez la
-    mention .../pxStats. Ceci signifie qu'on parle du chemin abosulu vers le dossier
-    pxStats où l'application est installée. Lorsque vous exécutez les commandes
-    listées dans ce document , veuillez remplacer les "..." par le chemin absolu 
-    où pxStats est installé.
-    
-    
-    Contenu:
-    --------------------------------------------------------------------------------
-    
-    Section 1.1 Exigences
-        Section 1.1.1 Exigences logicielles
-        Section 1.1.2 Exigences Matérielles
-    
-    Section 2  : Installation sur une première machine.
-            
-        Section 2.1 Fichiers nécessaires   
-        
-        Section 2.2 Fichiers de configuration.
-            Section 2.2.1 Configurer le logiciel
-            Section 2.2.2 Configurer les outils de nettoyage
-            Section 2.2.3 Configurer l'outil de surveillance 
-        
-        Section 2.3 Configuer ssh
-        
-        Section 2.4 Configurer les Crontabs      
-    
-        Section 2.5 Avant la première exécution du crontab 
-        
-        
-    Section 3 : Installer en tant que machine mirroir.
-        
-        Section 3.1 Ce qui doit être téléchargé    
-        
-        Section 3.2 La configuration qui doit être effectuée 
-    
-    Section 4 : Installation permettant que la sérialisation des données soit 
-                fait sur une autre machine.
-    
-    
-    Installation:
-    --------------------------------------------------------------------------------
-    
-    Section 1.1 Exigences
-    --------------------------------------------------------------------------------
-        
-        Section 1.1.1 Exigences logicielles
-        ----------------------------------------------------------------------------
-            Python     : version 2.3 ou plus récente.
-            SSH        : Permet de connecter les machine entre-elles.
-            Rsync      : Permet la synchronisation des données entre les machines.
-            RRDTOOL    : Permet la sauvegarde de données dans les bases de données et 
-                        la création de graphiques basées sur ces mêmes données.
-            Python-rrd : Paquetage Python.
-            Gnuplot.py : Paquetage Python.
-        
-            
-        Section 1.1.2 Hardware Requirements
-        ----------------------------------------------------------------------------
-            
-            -> Au moins 7gb d'espace disque PAR machine pour lesquelles des données
-            seront récoltées. Présentement, la machine qui produit le plus de 
-            données produit environ 6 GB de données. Ce chiffre risque de
-            s'accroître dans le futur.
-            
-            Cet espace devra être disponible sous le répertoire 
-            ...pxStats/data/logFiles/.
-            
-            
-            -> Au moins un GB d'espace disque pour les graphiques. La configuration
-            actuelle des outils de nettoyage, combinée avec le nombre actuel 
-            de graphiques produits garde l'espace occupée par les graphiques en
-            dessas de 1GB. Par contre, une configuration différente des outils
-            de nettoyage doublée d'une augmentation des graphiques gardés en 
-            archives pourrait faitre accroître ce chiffre infiniment.
-            
-            Cet espace libre devra se trouver sous le répertoire 
-            ...pxStats/data/graphics/
-                        
-        
-            -> 1.5 Megs par clients et 1 meg par sources pour lesquels nous 
-            produisons des statistiques. Avec notre configuration actuelle,
-            ceci représente environ 600 megs d'espace disque pour les bases 
-            de données courantes. 
-            
-            Cet espace sera nécessaire sous le répertoire 
-                ...pxStats/data/databases/currentDatabases
-            
-            
-                    
-            -> X megs d'espace disque pour les "backups" des bases de données où 
-            x = (1.5meg * nombre de client * nombre de backups) +
-                ( 1meg * nombre de client * nombre de backup)
-            
-            Notre configuration courante requiert présentement 12GB d'espace disque. 
-            La configuration actuelle nous permet donc d'avoir acces à 20 backups, 
-            effectués à chaques 12 heures. Ceci nous permet donc de retourner en 
-            arrière pendant 10 jours en cas de problème, et de garder un délais 
-            raisonnable entre les mise à jour pour limiter le recalcul de données 
-            valides déjà calculées.  
-            
-            - Environ 300 meg d'espace disque pour la séraialisation( pickling ) des 
-            données de chaques clients/sources( Environ 17 megs par jour). En plus
-            de quelques megs pour la sérialisation de données temporaires réalisées
-            par l'inferface web de requêtes de graphiques. Notre configuration 
-            actuelle, comprennant environ 355 clients, sources, groupes réguliers et
-            quelques données de requêtes spéciales requiert 120 GB.
-            
-            Dans la configuration acutelle, nous gardons les données sérialisés
-            des 21 derniers jours. Une configuration différentes donnera des besoins
-            d'espace très différents
-                
-            L'espace sera nécessaire sous le dossier suivant : 
-            ../pxStats/data/pickles/
-            
-            -> Certaines parties du logiciel ont été conçues pour être exécutées
-            de façon optimale sur une machine à plusieurs processeurs. Les 
-            performances du logiciel seront ammoindries si le logiciel est 
-            installé sur une machine ne possédant qu'un seul processeur.
-            
-    
-                    
-    Section 2  : Installation sur une première machine.
-    --------------------------------------------------------------------------------
-        Cette section couvre les étapes nécessaires pour installer pxStats sur une 
-        machine lorsqu'aucune autre de vos machines exécute présentement ce même
-        logiciel. 
-    
-    
-        Section 2.1 Fichiers nécessaires
-        ----------------------------------------------------------------------------    
-            -> Tous les fichiers devant se trouver sous le dossier .../pxStats/ 
-            Ces fichiers peuvent être téléchargés ici : 
-            https://metpx.svn.sourceforge.net/svnroot/metpx/trunk/pxStats
-            
-            -> Python-rrd  : un paquetage Python utilisé pour les bases de donnés 
-                            et les graphiques basés sur ces bases de données.
-            
-            -> Gnuplot.py  : un paquetage Python servant a produire les graphiques
-                            basés sur les données sérialisées(pickles).
-            
-            -> Logger.py   : Habituellement disponible sous /apps/px/lib/
-            
-            -> PXPaths.py  : Habituellement disponible sous /apps/px/lib/
-            
-            -> PXManager   : Habituellement disponible sous /apps/px/lib/
-            
-            -> readMaxFile : Habituellement disponible sous /apps/pds/tools/Columbo/ColumboShow/lib
-            
-            
-        Section 2.2  Fichiers de configuration.
-        ----------------------------------------------------------------------------
-        
-            Section 2.2.1 Configurer le logiciel
-            ------------------------------------------------------------------------
-                -> Allez dans le dossier .../pxStats/etc.
-                
-                -> Télécharger les fichiers d'exemples de configuration ici :
-                https://metpx.svn.sourceforge.net/svnroot/metpx/trunk/sundew/stats/etc
-                
-                -> Suivez les instructions disponibles dans l'entête du fichier.
-            
-            Section 2.2.2 Configurer les outils de nettoyage
-            ------------------------------------------------------------------------
-                
-                Section 2.2.2.1 Configurer .../pxStats/etc/clean.conf
-                --------------------------------------------------------------------
-                    -> Allez dans le dossier .../pxStats/etc/
-                    -> Téléchargez le fichier clean.conf à partir de cette adresse :
-                    https://metpx.svn.sourceforge.net/svnroot/metpx/trunk/
-                    pxStats/etc/              
-                    -> Suivez les instructions disponibles dans l'entête du fichier.     
-                    
-                    Notes sur les temps utilisé dans le fichier : 
-                    ---------------------------------------------------------------        
-                    -> Les seuls graphiques qui devraient être nettoyés sur une 
-                    base régulière sont ceux se toruvant sous ce répertoire : 
-                    .../pxStats/data/graphics/others.     
-                    
-                    -> Les graphiques dans les autres sections devraient être gardés 
-                    puisqu'ils font partie des graphiques utilisés par l'interface 
-                    web "Columbo" et par l'archive de graphiques.
-    
-                
-                Section 2.2.2.1 Configurer le nettoyeur de fichiers sérialisés(pickles).
-                --------------------------------------------------------------------  
-                    -> L'âge d'un pickle est déterminé par son nom et non par sa 
-                    date de création. Il faut donc utiliser un nettoyeur différent 
-                    de celui controllé par clean.conf.
-                    
-                    Voir la section 2.4.x pour apprendre à configurer le script 
-                    picklecleaner.        
-                    
-            
-            Section 2.2.3 Configurer l'outil de surveillance 
-            ------------------------------------------------------------------------
-                
-                -> Allez dans le dossier .../pxStats/etc/.
-                
-                -> Téléchargez le fichier statsMonitoring.conf se trouvant ici :
-                https://metpx.svn.sourceforge.net/svnroot/metpx/trunk/
-                pxStats/etc/
-                
-                -> Suivez les instructions se trouvant dans l'entête du fichier.
-                
-                
-        Section 2.3 Configuer ssh
-        -----------------------------------------------------------------------------
-            Lorsque vous configurez le ficheir de configuration principal du dossier 
-            .../pxStats/etc/, vous pouvez configurer le logiciel de tel sorte que 
-            plusieurs machines doivent communiquer entres elles.
-    
-            Par exemple, une machine centrale(x) qui crée les graphiques appel une 
-            machine(y) pour qu'elle fasse la sérialisation des données alors que la
-            machine y doi appeler une machine z qui contient les fichiers de données 
-            sources(log files). Ceci représente en fait le plus haut niveau 
-            d'interdépendance entre différentes machines que ce logiciel est capable 
-            de créer.
-            
-            Pour s'assurer que tout fonctionne bien lors de la communication entre 
-            les machines, vous devrez configurer le logiciel ssh de manière à ce que 
-            toutes les machines puissent communiquer entre elles à l'aide du nom 
-            d'usager spécifié dans le fichier de configuration 
-            .../pxStats/etc/configForMachines et ce sans qu'AUCUN mot de passe soit
-            nécessaire pour établir la connection.
-            
-        
-        Section 2.4 Configurer les Crontabs      
-        -----------------------------------------------------------------------------
-            voici un example de configuration d'un fichier de crontab utilisé sur 
-            une de nos machines de dévelopement. 
-        
-            2  * * * * /apps/px/pxStats/bin/pxStatsStartup.py  > /dev/null 2>&1
-    
-            Pour obtenir la liste des entrée de votre propre crontab tappez 
-            crontab -l. 
-            
-            Pour éditer cette liste, tappez crontab -e.
-            
-            Les entrées commencant par le caractère "#" seront considérés des lignes
-            de commentaires.
-                
-            
-            2.4.1 pxStatsStartup.py 
-            -------------------------------------------------------------------------
-            
-                Devrait être exécuté à chaques heures. Le choix de la minute à laquelle 
-                l'exécution est déclanchée est arbitraire. Par contre, il serait préférable 
-                qu'elle soit au début de l'heure, pour s'assurer que l'application ait le 
-                temps de terminer avant l'arrivée de l'heure suivante
-    
-                Liés à l'exécution de ce programmes, certains autre programmes seront 
-                exécutés selon la fréquence désigné par l'usager. Voici donc comment 
-                configurer ces utilitaires :      
-            
-                2.4.1.1 pickleCleaner.py 
-                -------------------------------------------------------------------------
-                L'outil de surveillance s'attned à ce que l'on garde les pickles pour 
-                au moins 7 jours. Dans notre configuration actuelle, nous gardons 21 jours
-                de pickles grâce à la ligne usivante du fichier pxStats/etc/config :  
-                daysOfPicklesToKeep     = 21
-                
-                Ce programme devrait donc être exécuté a chaques jour pusique c'est la
-                fréquence maximale à laquelle on peut exécuter ce script et s'assurer 
-                d'avoir seulement x nombre de jour de sauvegardés. Pour se faire nous 
-                devons retrouver la line suivante dans le fichier de configuration 
-                
-                pickleCleanerFrequency  = 24/hours
-                    
-                
-                2.4.1.2 backupRRDDatabases.py 
-                -------------------------------------------------------------------------
-                    Cet utilitaire nous permet de créer une copie de sécurité des bases
-                    de données RRD à un certain moment de la journée. De cette façon, 
-                    si certaines erreur commencent à polluer nos données, nous pouvons 
-                    corriger la source du problème, remettre en service de vielles bases 
-                    de données n'ayant pas été souillées et recommencer le traitement 
-                    des données.
-                    
-                    La sauvegarde des copie de sécurités des base de données ne devrait 
-                    pas se faire à chaques heures puisque le transfer de donnée sérialisé 
-                    vers les bases de données se fait tout de même rapidement. Par contre,
-                    il ne faudrait pas abuser et la fréquence de sauvegarde devrait rester 
-                    raisonnable.  
-    
-                    Nos machines effectues présentement une sauvegarde à tous les 12 heures, 
-                    ce qui semble être un bon compromis entre les nombrede sauvegarde à garder
-                    sur le disque et le temps requis pour récupérer des données si quelque 
-                    chose tourne mal. 
-                    
-                    Pour se faire, le fichier .../pxStats/etc/config contient la ligne 
-                    suivante : 
-                            
-                    dbBackupsFrequency      = 12/hours 
-                    
-                    
-                2.4.1.3 .../pxStats/bin/tools/clean_dir.plx
-                -------------------------------------------------------------------------
-                    Ceci est le nettoyeur générique des différents dossier du logiciel
-                    pxStats.
-                    
-                    Il devrait être exécuté selon la fréquence la plus rapide à laquelle
-                    un des dossier doit être nettoyé pour que le fichier de configuration 
-                    garde sa cohérence. Avec notre confguration actuelle, la ligne 
-                    suivante effectue le travail désiré :
-                    
-                    generalCleanerFrequency = 24/hours 
-    
-                
-            
-            
-    Section 3: Installation en tant que deuxième machine(ou plus) ou comme machine mirroir.
-    ----------------------------------------------------------------------------------------
-        Cette section couvre les différents aspets nécessairs pour intialiser
-        ( ou ré-initialiser) l'exécution du logiciel sur un machine alors qu'il existe 
-        une autre machine qui produit déja des graphiques pour une ou plusieurs des machines 
-        qui seront pris en charge par la machine que l'on veut lancer ou relancer.
-    
-    
-        
-        Section 3.1 Ce qui doit être configuré.    
-        -----------------------------------------------------------------------------
-            Avec une tel machine, tous les fichiers qui ont été configurés sur les 
-            autres machines doivent tout de même être configurés sur la nouvelle 
-            machine.
-            
-            Si une répartition des tâches différentes est utilisée (Ex : Une machine
-            distante fait la sérialisation et l'autre machine le fait localement)ou si 
-            la liste des machines de données sources traitée par les autres machines 
-            n'est pas identiques à la liste des machines qui seront traités sur la 
-            nouvelle machine, une installation manuelle complète devra être réalisé.
-            (section 3.1.1)
-            
-            Sinon, si la nouvelel machine aura le comportement indentique à une autre
-            machine déjà configuré et foncitonelle, un simple transfert de
-            configuration sera nécessaire.(section 3.1.2) 
-            
-            
-            3.1.1 Configurer la machine manuellement.
-            -------------------------------------------------------------------------
-                Step 1 -> Ouvrez une console de session sur la machine existante.
-                Step 2 -> Ouvrer une console de session sur la nouvelle machine. 
-                Step 3 -> Suivez les étapes 2.2 à 2.4 de ce document.
-                Step 4 -> Copiez tous les paramètres qui semble nécessaire à la nouvelle
-                        machine à partir de lamachine existante.
-                Step 5 -> Ajoutez/modifiez/retirez tout paramètres devant être différents 
-                        sur la nouvelle machine.          
-                
-            3.1.2 Téléchargement des pramètres de l'autre machine.
-            -------------------------------------------------------------------------
-                -> Pour avoir une configuration identique sur deux machine, veuillez
-                effecteur les commandes suivante : 
-                
-                scp login@remoteMachine:.../pxStats/etc/config            .../pxStats/etc/
-                scp login@remoteMachine:.../pxStats/etc/configForMachines .../pxStats/etc/
-                scp login@remoteMachine:.../pxStats/etc/monitoringConf    .../pxStats/etc/
-                
-                -> Certaines parties de la configuration ne peut être téléchargée.
-                Par exemple la configuration du crontab devra être copié manuellement
-                d'un machine à l'autre.
-                
-                -> L'étape 2.3 devra aussi être fait manuellement sur la nouvelle 
-                machine et ce de la même manière que sur la machine existante.
-                
-        
-        Section 3.2 Ce qui doit être téléchargé.
-                ( Sera aussi très utile pour relancer une machine )    
-        ----------------------------------------------------------------------------- 
-            
-            3.2.1 Sur une machine mirroir.
-            -------------------------------------------------------------------------  
-                Sur une machine mirroir, il existe un petit utilitaire qui permet de 
-                transférer tous les artéfacts de l'outil de surveillance, les données
-                sérialisées, les graphiques, les bases de données et les copies de 
-                sécurité d'une machine à l'autre.
-                
-                Pour utiliser cet utilitaire, veuillez executer la commande suivante : 
-                python pxStats/tools/retreiveDataFromMachine.py nomDusager nomDeLaMachine 
-                
-                Veuillez lire les instructions sur cette utilitaire avant de l'exécuter.
-                Veuillez aussi exécuter cette commande avant d'activer le crontab.
-                
-                Si pour certaines raison un long délais sépare la fin de l'exécution 
-                de ce script et la première exécution du crontab, veuillez ré-exécuter 
-                ce script avant de laisser le crontab s'exécuter. Sinon vous risquez
-                de vous retrouver avec quelques incohérences de données. 
-                
-                
-                Note : /apps/px/stats/config doit être configuré AVANT d'appeler 
-                    retreiveDataFromMachine.py. 
-                        
-                    Les permission SSH doivent ausi permettre d'effectuer une connection 
-                    entre la nouvelle machine et la machine existante sans qu'un mot de 
-                    passe soit exigé.
-            
-                
-            3.2.1 Sur une machine non-mirroir
-            -------------------------------------------------------------------------
-                Sur une machine non-mirroir, l'obtention de tous les fichiers nécessaire
-                sera plus complexe.
-                
-                Voici donc une recette qui devrait vous permettre d'obtenir tous les 
-                fichiers désirés.
-                
-                Note : Assurez vous d'avoir assez d'espace disque avant d'effectuer 
-                    un transfer de donnée. La quantité d'information pourrait 
-                    s'avérer monumentale.
-                
-                3.2.1.1 Transfert des fichier log files :
-                ---------------------------------------------------------------------
-                Vous devriez seulement télécharger les fichiers se rapportants 
-                à une machine sur la machine qui effectuera la sérialisation de 
-                ces données.           
-                
-                La commande,effectué à partir de la machine effectuant la 
-                sérialisation devrait être la suivante :
-                
-                rsync -avzr --delete-before -e ssh nomUsager@MachineProduistantLogs:/apps/px/log/ 
-                ...pxStats/data/logFiles/nomMachineProduisantLogs/
-                                        
-                
-                
-                3.2.1.2 Transfer des artéfactsde l'outil de surveillance :
-                ---------------------------------------------------------------------           
-                
-                rsync -avzr  --delete-before -e ssh 
-                nomDusager@machineExistante:.../pxStats/data/monitoring/statsMonitoring/*
-                .../pxStats/data/monitoring/statsMonitoring/
-    
-                
-                3.2.1.2 Transfert des graphiques :
-                ---------------------------------------------------------------------
-            
-                rsync -avzr  --delete-before -e ssh nomDusager@machineExistante:.../pxStats/data/monitoring/statsMonitoring/*
-                .../pxStats/data/monitoring/statsMonitoring/
-                
-                Note : Dépendemement de la grosseur des fichiers à télécharger,
-                    il peut s'avérer plus simple de tout télécharger les graphiques 
-                    et par la suite supprimer ceux qui ne sont pas intéressant que 
-                    de chercher à télécharger ceux qui sont intéressant et les télécharger
-                    petit à petit. 
-                
-                    
-                    
-                3.2.1.2 Transfert des fichiers de sérialisation :
-                ---------------------------------------------------------------------                        
-                rsync -avzr  --delete-before -e ssh nomDusager@machineExistante:.../pxStats/data/pickles
-                .../pxStats/data/pickles
-                
-                rsync -avzr  --delete-before -e ssh nomDusager@machineExistante:.../pxStats/data/picklesTimeOfUpdates
-                .../pxStats/data/picklesTimeOfUpdates
-                
-                
-                3.2.1.2 Transfert des bases de données :
-                ---------------------------------------------------------------------                              
-                rsync -avzr  --delete-before -e ssh nomDusager@machineExistante:.../pxStats/data/databases
-                .../pxStats/data/databases
-    
-                
-                Note : Dépendemement de la grosseur des fichiers à télécharger,
-                    il peut s'avérer plus simple de tout télécharger les bases de données 
-                    et par la suite supprimer ceux qui ne sont pas intéressant que 
-                    de chercher à télécharger ceux qui sont intéressant et les télécharger
-                    petit à petit. 
-                    
-                    Transférer une énorme quantité de fichier peux prendre quelques heures.
-                    Ceci signifie que le premier type de données téléchargé( ex : pickles)
-                    sera plus périmé que les dernier fichier téléchargés( bases de donnée)
-                        
-                    Cette inconsistance pourrait corrompre le bon foncitonnement du logiciel.
-                    
-                    Pour se parer à cette éventualité, il faudrait idéallement que tous les 
-                    fichiers soit tous les plus récent possible. Idéallement, il faudrait 
-                    exécuter les commande rsync en boucle quelques fois jusqu'à ce qu'on 
-                    remarque que tous les fichiers semblent être à jour.                 
-                    
-            
-                            
-    Section 4 : Installation permettant que la sérialisation des données soit 
-                fait sur une autre machine.
-    ---------------------------------------------------------------------------------
-    
-    Une machine distante utilisée seulement pour la sérialisation des données 
-    devra être configuré selon les étapes suivantes :
-        
-        4.1 Fichier nécessaires
-        -----------------------------------------------------------------------------    
-            -> Tous les fichiers devant se trouver sous le dossier .../pxStats/ 
-            Ces fichiers peuvent être téléchargés ici : 
-            https://metpx.svn.sourceforge.net/svnroot/metpx/trunk/pxStats
-            
-            -> Python-rrd  : un paquetage Python utilisé pour les bases de donnés 
-                            et les graphiques basés sur ces bases de données.
-            
-            -> Gnuplot.py  : un paquetage Python servant a produire les graphiques
-                            basés sur les données sérialisées(pickles).
-            
-            -> Logger.py   : Habituellement disponible sous /apps/px/lib/
-            
-            -> PXPaths.py  : Habituellement disponible sous /apps/px/lib/
-            
-            -> PXManager   : Habituellement disponible sous /apps/px/lib/
-            
-            -> readMaxFile : Habituellement disponible sous /apps/pds/tools/Columbo/ColumboShow/lib 
-                
-            -> Logger.py   : Habituellement disponible sous /apps/px/lib/
-                                
-            -> PXPaths.py  : Habituellement disponible sous /apps/px/lib/
-            
-            -> PXManager   : Habituellement disponible sous /apps/px/lib/
-            
-            Ces fichier sont tous disponibles à l'adresse suivante : 
-            https://svn.sourceforge.net/svnroot/metpx/trunk/sundew/lib/ 
-    
-            
-        4.2 Espace disque
-        -----------------------------------------------------------------------------
-            Consultez la section section 1.1.2 pour plus de détails.
-        
-            
-        4.3 Configuration de ssh
-        ------------------------------------------------------------------------------    
-            SSH devra minimalement être configuré de sorte à ce que la machine qui 
-            génère les graphiques puisse se connecter à cette machine sans que l'usager 
-            ait à entrer un mot de passe.
-            
-            Si la machine qui fait la sérialisation n'est pas la même que celle qui 
-            produit les log files et qu'elle n'est pas la même  qui produit les graphiques,
-            le même genre de lien devrait être effectué entre cette machine et celle
-            qui produit les logfiles.
-                
-    
-        
-</html>
+<br>    
+<br>    """
+<br>    MetPX Copyright (C) 2004-2006  Environment Canada
+<br>    MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
+<br>    named COPYING in the root of the source directory tree.
+<br>    """
+<br>    ################################################################################
+<br>    #     _____          _        _ _       _   _             
+<br>    #    |_   _|        | |      | | |     | | (_)            
+<br>    #      | | _ __  ___| |_ __ _| | | __ _| |_ _  ___  _ __  
+<br>    #      | || '_ \/ __| __/ _` | | |/ _` | __| |/ _ \| '_ \ 
+<br>    #     _| || | | \__ \ || (_| | | | (_| | |_| | (_) | | | |
+<br>    #     \___/_| |_|___/\__\__,_|_|_|\__,_|\__|_|\___/|_| |_|
+<br>    #
+<br>    #
+<br>    # Auteur                 : Nicholas Lemay
+<br>    # Dernière mise-à-jour   : October 16th 2007
+<br>    #
+<br>    ################################################################################
+<br>    
+<br>    
+<br>    À propos de ce document :
+<br>    --------------------------------------------------------------------------------
+<br>    Le but de ce document est de fournir à un usagers les connaissances nécessaires
+<br>    pour effectuer une nouvelle installation du logiciel pxStats.
+<br>    
+<br>    
+<br>    Note importante :
+<br>    --------------------------------------------------------------------------------
+<br>    Tous au long du document, losqu'un dossier sera mentionné vous trouverez la
+<br>    mention .../pxStats. Ceci signifie qu'on parle du chemin abosulu vers le dossier
+<br>    pxStats où l'application est installée. Lorsque vous exécutez les commandes
+<br>    listées dans ce document , veuillez remplacer les "..." par le chemin absolu 
+<br>    où pxStats est installé.
+<br>    
+<br>    
+<br>    Contenu:
+<br>    --------------------------------------------------------------------------------
+<br>    
+<br>    Section 1.1 Exigences
+<br>        Section 1.1.1 Exigences logicielles
+<br>        Section 1.1.2 Exigences Matérielles
+<br>    
+<br>    Section 2  : Installation sur une première machine.
+<br>            
+<br>        Section 2.1 Fichiers nécessaires   
+<br>        
+<br>        Section 2.2 Fichiers de configuration.
+<br>            Section 2.2.1 Configurer le logiciel
+<br>            Section 2.2.2 Configurer les outils de nettoyage
+<br>            Section 2.2.3 Configurer l'outil de surveillance 
+<br>        
+<br>        Section 2.3 Configuer ssh
+<br>        
+<br>        Section 2.4 Configurer les Crontabs      
+<br>    
+<br>        Section 2.5 Avant la première exécution du crontab 
+<br>        
+<br>        
+<br>    Section 3 : Installer en tant que machine mirroir.
+<br>        
+<br>        Section 3.1 Ce qui doit être téléchargé    
+<br>        
+<br>        Section 3.2 La configuration qui doit être effectuée 
+<br>    
+<br>    Section 4 : Installation permettant que la sérialisation des données soit 
+<br>                fait sur une autre machine.
+<br>    
+<br>    
+<br>    Installation:
+<br>    --------------------------------------------------------------------------------
+<br>    
+<br>    Section 1.1 Exigences
+<br>    --------------------------------------------------------------------------------
+<br>        
+<br>        Section 1.1.1 Exigences logicielles
+<br>        ----------------------------------------------------------------------------
+<br>            Python     : version 2.3 ou plus récente.
+<br>            SSH        : Permet de connecter les machine entre-elles.
+<br>            Rsync      : Permet la synchronisation des données entre les machines.
+<br>            RRDTOOL    : Permet la sauvegarde de données dans les bases de données et 
+<br>                        la création de graphiques basées sur ces mêmes données.
+<br>            Python-rrd : Paquetage Python.
+<br>            Gnuplot.py : Paquetage Python.
+<br>        
+<br>            
+<br>        Section 1.1.2 Hardware Requirements
+<br>        ----------------------------------------------------------------------------
+<br>            
+<br>            -> Au moins 7gb d'espace disque PAR machine pour lesquelles des données
+<br>            seront récoltées. Présentement, la machine qui produit le plus de 
+<br>            données produit environ 6 GB de données. Ce chiffre risque de
+<br>            s'accroître dans le futur.
+<br>            
+<br>            Cet espace devra être disponible sous le répertoire 
+<br>            ...pxStats/data/logFiles/.
+<br>            
+<br>            
+<br>            -> Au moins un GB d'espace disque pour les graphiques. La configuration
+<br>            actuelle des outils de nettoyage, combinée avec le nombre actuel 
+<br>            de graphiques produits garde l'espace occupée par les graphiques en
+<br>            dessas de 1GB. Par contre, une configuration différente des outils
+<br>            de nettoyage doublée d'une augmentation des graphiques gardés en 
+<br>            archives pourrait faitre accroître ce chiffre infiniment.
+<br>            
+<br>            Cet espace libre devra se trouver sous le répertoire 
+<br>            ...pxStats/data/graphics/
+<br>                        
+<br>        
+<br>            -> 1.5 Megs par clients et 1 meg par sources pour lesquels nous 
+<br>            produisons des statistiques. Avec notre configuration actuelle,
+<br>            ceci représente environ 600 megs d'espace disque pour les bases 
+<br>            de données courantes. 
+<br>            
+<br>            Cet espace sera nécessaire sous le répertoire 
+<br>                ...pxStats/data/databases/currentDatabases
+<br>            
+<br>            
+<br>                    
+<br>            -> X megs d'espace disque pour les "backups" des bases de données où 
+<br>            x = (1.5meg * nombre de client * nombre de backups) +
+<br>                ( 1meg * nombre de client * nombre de backup)
+<br>            
+<br>            Notre configuration courante requiert présentement 12GB d'espace disque. 
+<br>            La configuration actuelle nous permet donc d'avoir acces à 20 backups, 
+<br>            effectués à chaques 12 heures. Ceci nous permet donc de retourner en 
+<br>            arrière pendant 10 jours en cas de problème, et de garder un délais 
+<br>            raisonnable entre les mise à jour pour limiter le recalcul de données 
+<br>            valides déjà calculées.  
+<br>            
+<br>            - Environ 300 meg d'espace disque pour la séraialisation( pickling ) des 
+<br>            données de chaques clients/sources( Environ 17 megs par jour). En plus
+<br>            de quelques megs pour la sérialisation de données temporaires réalisées
+<br>            par l'inferface web de requêtes de graphiques. Notre configuration 
+<br>            actuelle, comprennant environ 355 clients, sources, groupes réguliers et
+<br>            quelques données de requêtes spéciales requiert 120 GB.
+<br>            
+<br>            Dans la configuration acutelle, nous gardons les données sérialisés
+<br>            des 21 derniers jours. Une configuration différentes donnera des besoins
+<br>            d'espace très différents
+<br>                
+<br>            L'espace sera nécessaire sous le dossier suivant : 
+<br>            ../pxStats/data/pickles/
+<br>            
+<br>            -> Certaines parties du logiciel ont été conçues pour être exécutées
+<br>            de façon optimale sur une machine à plusieurs processeurs. Les 
+<br>            performances du logiciel seront ammoindries si le logiciel est 
+<br>            installé sur une machine ne possédant qu'un seul processeur.
+<br>            
+<br>    
+<br>                    
+<br>    Section 2  : Installation sur une première machine.
+<br>    --------------------------------------------------------------------------------
+<br>        Cette section couvre les étapes nécessaires pour installer pxStats sur une 
+<br>        machine lorsqu'aucune autre de vos machines exécute présentement ce même
+<br>        logiciel. 
+<br>    
+<br>    
+<br>        Section 2.1 Fichiers nécessaires
+<br>        ----------------------------------------------------------------------------    
+<br>            -> Tous les fichiers devant se trouver sous le dossier .../pxStats/ 
+<br>            Ces fichiers peuvent être téléchargés ici : 
+<br>            https://metpx.svn.sourceforge.net/svnroot/metpx/trunk/pxStats
+<br>            
+<br>            -> Python-rrd  : un paquetage Python utilisé pour les bases de donnés 
+<br>                            et les graphiques basés sur ces bases de données.
+<br>            
+<br>            -> Gnuplot.py  : un paquetage Python servant a produire les graphiques
+<br>                            basés sur les données sérialisées(pickles).
+<br>            
+<br>            -> Logger.py   : Habituellement disponible sous /apps/px/lib/
+<br>            
+<br>            -> PXPaths.py  : Habituellement disponible sous /apps/px/lib/
+<br>            
+<br>            -> PXManager   : Habituellement disponible sous /apps/px/lib/
+<br>            
+<br>            -> readMaxFile : Habituellement disponible sous /apps/pds/tools/Columbo/ColumboShow/lib
+<br>            
+<br>            
+<br>        Section 2.2  Fichiers de configuration.
+<br>        ----------------------------------------------------------------------------
+<br>        
+<br>            Section 2.2.1 Configurer le logiciel
+<br>            ------------------------------------------------------------------------
+<br>                -> Allez dans le dossier .../pxStats/etc.
+<br>                
+<br>                -> Télécharger les fichiers d'exemples de configuration ici :
+<br>                https://metpx.svn.sourceforge.net/svnroot/metpx/trunk/sundew/stats/etc
+<br>                
+<br>                -> Suivez les instructions disponibles dans l'entête du fichier.
+<br>            
+<br>            Section 2.2.2 Configurer les outils de nettoyage
+<br>            ------------------------------------------------------------------------
+<br>                
+<br>                Section 2.2.2.1 Configurer .../pxStats/etc/clean.conf
+<br>                --------------------------------------------------------------------
+<br>                    -> Allez dans le dossier .../pxStats/etc/
+<br>                    -> Téléchargez le fichier clean.conf à partir de cette adresse :
+<br>                    https://metpx.svn.sourceforge.net/svnroot/metpx/trunk/
+<br>                    pxStats/etc/              
+<br>                    -> Suivez les instructions disponibles dans l'entête du fichier.     
+<br>                    
+<br>                    Notes sur les temps utilisé dans le fichier : 
+<br>                    ---------------------------------------------------------------        
+<br>                    -> Les seuls graphiques qui devraient être nettoyés sur une 
+<br>                    base régulière sont ceux se toruvant sous ce répertoire : 
+<br>                    .../pxStats/data/graphics/others.     
+<br>                    
+<br>                    -> Les graphiques dans les autres sections devraient être gardés 
+<br>                    puisqu'ils font partie des graphiques utilisés par l'interface 
+<br>                    web "Columbo" et par l'archive de graphiques.
+<br>    
+<br>                
+<br>                Section 2.2.2.1 Configurer le nettoyeur de fichiers sérialisés(pickles).
+<br>                --------------------------------------------------------------------  
+<br>                    -> L'âge d'un pickle est déterminé par son nom et non par sa 
+<br>                    date de création. Il faut donc utiliser un nettoyeur différent 
+<br>                    de celui controllé par clean.conf.
+<br>                    
+<br>                    Voir la section 2.4.x pour apprendre à configurer le script 
+<br>                    picklecleaner.        
+<br>                    
+<br>            
+<br>            Section 2.2.3 Configurer l'outil de surveillance 
+<br>            ------------------------------------------------------------------------
+<br>                
+<br>                -> Allez dans le dossier .../pxStats/etc/.
+<br>                
+<br>                -> Téléchargez le fichier statsMonitoring.conf se trouvant ici :
+<br>                https://metpx.svn.sourceforge.net/svnroot/metpx/trunk/
+<br>                pxStats/etc/
+<br>                
+<br>                -> Suivez les instructions se trouvant dans l'entête du fichier.
+<br>                
+<br>                
+<br>        Section 2.3 Configuer ssh
+<br>        -----------------------------------------------------------------------------
+<br>            Lorsque vous configurez le ficheir de configuration principal du dossier 
+<br>            .../pxStats/etc/, vous pouvez configurer le logiciel de tel sorte que 
+<br>            plusieurs machines doivent communiquer entres elles.
+<br>    
+<br>            Par exemple, une machine centrale(x) qui crée les graphiques appel une 
+<br>            machine(y) pour qu'elle fasse la sérialisation des données alors que la
+<br>            machine y doi appeler une machine z qui contient les fichiers de données 
+<br>            sources(log files). Ceci représente en fait le plus haut niveau 
+<br>            d'interdépendance entre différentes machines que ce logiciel est capable 
+<br>            de créer.
+<br>            
+<br>            Pour s'assurer que tout fonctionne bien lors de la communication entre 
+<br>            les machines, vous devrez configurer le logiciel ssh de manière à ce que 
+<br>            toutes les machines puissent communiquer entre elles à l'aide du nom 
+<br>            d'usager spécifié dans le fichier de configuration 
+<br>            .../pxStats/etc/configForMachines et ce sans qu'AUCUN mot de passe soit
+<br>            nécessaire pour établir la connection.
+<br>            
+<br>        
+<br>        Section 2.4 Configurer les Crontabs      
+<br>        -----------------------------------------------------------------------------
+<br>            voici un example de configuration d'un fichier de crontab utilisé sur 
+<br>            une de nos machines de dévelopement. 
+<br>        
+<br>            2  * * * * /apps/px/pxStats/bin/pxStatsStartup.py  > /dev/null 2>&1
+<br>    
+<br>            Pour obtenir la liste des entrée de votre propre crontab tappez 
+<br>            crontab -l. 
+<br>            
+<br>            Pour éditer cette liste, tappez crontab -e.
+<br>            
+<br>            Les entrées commencant par le caractère "#" seront considérés des lignes
+<br>            de commentaires.
+<br>                
+<br>            
+<br>            2.4.1 pxStatsStartup.py 
+<br>            -------------------------------------------------------------------------
+<br>            
+<br>                Devrait être exécuté à chaques heures. Le choix de la minute à laquelle 
+<br>                l'exécution est déclanchée est arbitraire. Par contre, il serait préférable 
+<br>                qu'elle soit au début de l'heure, pour s'assurer que l'application ait le 
+<br>                temps de terminer avant l'arrivée de l'heure suivante
+<br>    
+<br>                Liés à l'exécution de ce programmes, certains autre programmes seront 
+<br>                exécutés selon la fréquence désigné par l'usager. Voici donc comment 
+<br>                configurer ces utilitaires :      
+<br>            
+<br>                2.4.1.1 pickleCleaner.py 
+<br>                -------------------------------------------------------------------------
+<br>                L'outil de surveillance s'attned à ce que l'on garde les pickles pour 
+<br>                au moins 7 jours. Dans notre configuration actuelle, nous gardons 21 jours
+<br>                de pickles grâce à la ligne usivante du fichier pxStats/etc/config :  
+<br>                daysOfPicklesToKeep     = 21
+<br>                
+<br>                Ce programme devrait donc être exécuté a chaques jour pusique c'est la
+<br>                fréquence maximale à laquelle on peut exécuter ce script et s'assurer 
+<br>                d'avoir seulement x nombre de jour de sauvegardés. Pour se faire nous 
+<br>                devons retrouver la line suivante dans le fichier de configuration 
+<br>                
+<br>                pickleCleanerFrequency  = 24/hours
+<br>                    
+<br>                
+<br>                2.4.1.2 backupRRDDatabases.py 
+<br>                -------------------------------------------------------------------------
+<br>                    Cet utilitaire nous permet de créer une copie de sécurité des bases
+<br>                    de données RRD à un certain moment de la journée. De cette façon, 
+<br>                    si certaines erreur commencent à polluer nos données, nous pouvons 
+<br>                    corriger la source du problème, remettre en service de vielles bases 
+<br>                    de données n'ayant pas été souillées et recommencer le traitement 
+<br>                    des données.
+<br>                    
+<br>                    La sauvegarde des copie de sécurités des base de données ne devrait 
+<br>                    pas se faire à chaques heures puisque le transfer de donnée sérialisé 
+<br>                    vers les bases de données se fait tout de même rapidement. Par contre,
+<br>                    il ne faudrait pas abuser et la fréquence de sauvegarde devrait rester 
+<br>                    raisonnable.  
+<br>    
+<br>                    Nos machines effectues présentement une sauvegarde à tous les 12 heures, 
+<br>                    ce qui semble être un bon compromis entre les nombrede sauvegarde à garder
+<br>                    sur le disque et le temps requis pour récupérer des données si quelque 
+<br>                    chose tourne mal. 
+<br>                    
+<br>                    Pour se faire, le fichier .../pxStats/etc/config contient la ligne 
+<br>                    suivante : 
+<br>                            
+<br>                    dbBackupsFrequency      = 12/hours 
+<br>                    
+<br>                    
+<br>                2.4.1.3 .../pxStats/bin/tools/clean_dir.plx
+<br>                -------------------------------------------------------------------------
+<br>                    Ceci est le nettoyeur générique des différents dossier du logiciel
+<br>                    pxStats.
+<br>                    
+<br>                    Il devrait être exécuté selon la fréquence la plus rapide à laquelle
+<br>                    un des dossier doit être nettoyé pour que le fichier de configuration 
+<br>                    garde sa cohérence. Avec notre confguration actuelle, la ligne 
+<br>                    suivante effectue le travail désiré :
+<br>                    
+<br>                    generalCleanerFrequency = 24/hours 
+<br>    
+<br>                
+<br>            
+<br>            
+<br>    Section 3: Installation en tant que deuxième machine(ou plus) ou comme machine mirroir.
+<br>    ----------------------------------------------------------------------------------------
+<br>        Cette section couvre les différents aspets nécessairs pour intialiser
+<br>        ( ou ré-initialiser) l'exécution du logiciel sur un machine alors qu'il existe 
+<br>        une autre machine qui produit déja des graphiques pour une ou plusieurs des machines 
+<br>        qui seront pris en charge par la machine que l'on veut lancer ou relancer.
+<br>    
+<br>    
+<br>        
+<br>        Section 3.1 Ce qui doit être configuré.    
+<br>        -----------------------------------------------------------------------------
+<br>            Avec une tel machine, tous les fichiers qui ont été configurés sur les 
+<br>            autres machines doivent tout de même être configurés sur la nouvelle 
+<br>            machine.
+<br>            
+<br>            Si une répartition des tâches différentes est utilisée (Ex : Une machine
+<br>            distante fait la sérialisation et l'autre machine le fait localement)ou si 
+<br>            la liste des machines de données sources traitée par les autres machines 
+<br>            n'est pas identiques à la liste des machines qui seront traités sur la 
+<br>            nouvelle machine, une installation manuelle complète devra être réalisé.
+<br>            (section 3.1.1)
+<br>            
+<br>            Sinon, si la nouvelel machine aura le comportement indentique à une autre
+<br>            machine déjà configuré et foncitonelle, un simple transfert de
+<br>            configuration sera nécessaire.(section 3.1.2) 
+<br>            
+<br>            
+<br>            3.1.1 Configurer la machine manuellement.
+<br>            -------------------------------------------------------------------------
+<br>                Step 1 -> Ouvrez une console de session sur la machine existante.
+<br>                Step 2 -> Ouvrer une console de session sur la nouvelle machine. 
+<br>                Step 3 -> Suivez les étapes 2.2 à 2.4 de ce document.
+<br>                Step 4 -> Copiez tous les paramètres qui semble nécessaire à la nouvelle
+<br>                        machine à partir de lamachine existante.
+<br>                Step 5 -> Ajoutez/modifiez/retirez tout paramètres devant être différents 
+<br>                        sur la nouvelle machine.          
+<br>                
+<br>            3.1.2 Téléchargement des pramètres de l'autre machine.
+<br>            -------------------------------------------------------------------------
+<br>                -> Pour avoir une configuration identique sur deux machine, veuillez
+<br>                effecteur les commandes suivante : 
+<br>                
+<br>                scp login@remoteMachine:.../pxStats/etc/config            .../pxStats/etc/
+<br>                scp login@remoteMachine:.../pxStats/etc/configForMachines .../pxStats/etc/
+<br>                scp login@remoteMachine:.../pxStats/etc/monitoringConf    .../pxStats/etc/
+<br>                
+<br>                -> Certaines parties de la configuration ne peut être téléchargée.
+<br>                Par exemple la configuration du crontab devra être copié manuellement
+<br>                d'un machine à l'autre.
+<br>                
+<br>                -> L'étape 2.3 devra aussi être fait manuellement sur la nouvelle 
+<br>                machine et ce de la même manière que sur la machine existante.
+<br>                
+<br>        
+<br>        Section 3.2 Ce qui doit être téléchargé.
+<br>                ( Sera aussi très utile pour relancer une machine )    
+<br>        ----------------------------------------------------------------------------- 
+<br>            
+<br>            3.2.1 Sur une machine mirroir.
+<br>            -------------------------------------------------------------------------  
+<br>                Sur une machine mirroir, il existe un petit utilitaire qui permet de 
+<br>                transférer tous les artéfacts de l'outil de surveillance, les données
+<br>                sérialisées, les graphiques, les bases de données et les copies de 
+<br>                sécurité d'une machine à l'autre.
+<br>                
+<br>                Pour utiliser cet utilitaire, veuillez executer la commande suivante : 
+<br>                python pxStats/tools/retreiveDataFromMachine.py nomDusager nomDeLaMachine 
+<br>                
+<br>                Veuillez lire les instructions sur cette utilitaire avant de l'exécuter.
+<br>                Veuillez aussi exécuter cette commande avant d'activer le crontab.
+<br>                
+<br>                Si pour certaines raison un long délais sépare la fin de l'exécution 
+<br>                de ce script et la première exécution du crontab, veuillez ré-exécuter 
+<br>                ce script avant de laisser le crontab s'exécuter. Sinon vous risquez
+<br>                de vous retrouver avec quelques incohérences de données. 
+<br>                
+<br>                
+<br>                Note : /apps/px/stats/config doit être configuré AVANT d'appeler 
+<br>                    retreiveDataFromMachine.py. 
+<br>                        
+<br>                    Les permission SSH doivent ausi permettre d'effectuer une connection 
+<br>                    entre la nouvelle machine et la machine existante sans qu'un mot de 
+<br>                    passe soit exigé.
+<br>            
+<br>                
+<br>            3.2.1 Sur une machine non-mirroir
+<br>            -------------------------------------------------------------------------
+<br>                Sur une machine non-mirroir, l'obtention de tous les fichiers nécessaire
+<br>                sera plus complexe.
+<br>                
+<br>                Voici donc une recette qui devrait vous permettre d'obtenir tous les 
+<br>                fichiers désirés.
+<br>                
+<br>                Note : Assurez vous d'avoir assez d'espace disque avant d'effectuer 
+<br>                    un transfer de donnée. La quantité d'information pourrait 
+<br>                    s'avérer monumentale.
+<br>                
+<br>                3.2.1.1 Transfert des fichier log files :
+<br>                ---------------------------------------------------------------------
+<br>                Vous devriez seulement télécharger les fichiers se rapportants 
+<br>                à une machine sur la machine qui effectuera la sérialisation de 
+<br>                ces données.           
+<br>                
+<br>                La commande,effectué à partir de la machine effectuant la 
+<br>                sérialisation devrait être la suivante :
+<br>                
+<br>                rsync -avzr --delete-before -e ssh nomUsager@MachineProduistantLogs:/apps/px/log/ 
+<br>                ...pxStats/data/logFiles/nomMachineProduisantLogs/
+<br>                                        
+<br>                
+<br>                
+<br>                3.2.1.2 Transfer des artéfactsde l'outil de surveillance :
+<br>                ---------------------------------------------------------------------           
+<br>                
+<br>                rsync -avzr  --delete-before -e ssh 
+<br>                nomDusager@machineExistante:.../pxStats/data/monitoring/statsMonitoring/*
+<br>                .../pxStats/data/monitoring/statsMonitoring/
+<br>    
+<br>                
+<br>                3.2.1.2 Transfert des graphiques :
+<br>                ---------------------------------------------------------------------
+<br>            
+<br>                rsync -avzr  --delete-before -e ssh nomDusager@machineExistante:.../pxStats/data/monitoring/statsMonitoring/*
+<br>                .../pxStats/data/monitoring/statsMonitoring/
+<br>                
+<br>                Note : Dépendemement de la grosseur des fichiers à télécharger,
+<br>                    il peut s'avérer plus simple de tout télécharger les graphiques 
+<br>                    et par la suite supprimer ceux qui ne sont pas intéressant que 
+<br>                    de chercher à télécharger ceux qui sont intéressant et les télécharger
+<br>                    petit à petit. 
+<br>                
+<br>                    
+<br>                    
+<br>                3.2.1.2 Transfert des fichiers de sérialisation :
+<br>                ---------------------------------------------------------------------                        
+<br>                rsync -avzr  --delete-before -e ssh nomDusager@machineExistante:.../pxStats/data/pickles
+<br>                .../pxStats/data/pickles
+<br>                
+<br>                rsync -avzr  --delete-before -e ssh nomDusager@machineExistante:.../pxStats/data/picklesTimeOfUpdates
+<br>                .../pxStats/data/picklesTimeOfUpdates
+<br>                
+<br>                
+<br>                3.2.1.2 Transfert des bases de données :
+<br>                ---------------------------------------------------------------------                              
+<br>                rsync -avzr  --delete-before -e ssh nomDusager@machineExistante:.../pxStats/data/databases
+<br>                .../pxStats/data/databases
+<br>    
+<br>                
+<br>                Note : Dépendemement de la grosseur des fichiers à télécharger,
+<br>                    il peut s'avérer plus simple de tout télécharger les bases de données 
+<br>                    et par la suite supprimer ceux qui ne sont pas intéressant que 
+<br>                    de chercher à télécharger ceux qui sont intéressant et les télécharger
+<br>                    petit à petit. 
+<br>                    
+<br>                    Transférer une énorme quantité de fichier peux prendre quelques heures.
+<br>                    Ceci signifie que le premier type de données téléchargé( ex : pickles)
+<br>                    sera plus périmé que les dernier fichier téléchargés( bases de donnée)
+<br>                        
+<br>                    Cette inconsistance pourrait corrompre le bon foncitonnement du logiciel.
+<br>                    
+<br>                    Pour se parer à cette éventualité, il faudrait idéallement que tous les 
+<br>                    fichiers soit tous les plus récent possible. Idéallement, il faudrait 
+<br>                    exécuter les commande rsync en boucle quelques fois jusqu'à ce qu'on 
+<br>                    remarque que tous les fichiers semblent être à jour.                 
+<br>                    
+<br>            
+<br>                            
+<br>    Section 4 : Installation permettant que la sérialisation des données soit 
+<br>                fait sur une autre machine.
+<br>    ---------------------------------------------------------------------------------
+<br>    
+<br>    Une machine distante utilisée seulement pour la sérialisation des données 
+<br>    devra être configuré selon les étapes suivantes :
+<br>        
+<br>        4.1 Fichier nécessaires
+<br>        -----------------------------------------------------------------------------    
+<br>            -> Tous les fichiers devant se trouver sous le dossier .../pxStats/ 
+<br>            Ces fichiers peuvent être téléchargés ici : 
+<br>            https://metpx.svn.sourceforge.net/svnroot/metpx/trunk/pxStats
+<br>            
+<br>            -> Python-rrd  : un paquetage Python utilisé pour les bases de donnés 
+<br>                            et les graphiques basés sur ces bases de données.
+<br>            
+<br>            -> Gnuplot.py  : un paquetage Python servant a produire les graphiques
+<br>                            basés sur les données sérialisées(pickles).
+<br>            
+<br>            -> Logger.py   : Habituellement disponible sous /apps/px/lib/
+<br>            
+<br>            -> PXPaths.py  : Habituellement disponible sous /apps/px/lib/
+<br>            
+<br>            -> PXManager   : Habituellement disponible sous /apps/px/lib/
+<br>            
+<br>            -> readMaxFile : Habituellement disponible sous /apps/pds/tools/Columbo/ColumboShow/lib 
+<br>                
+<br>            -> Logger.py   : Habituellement disponible sous /apps/px/lib/
+<br>                                
+<br>            -> PXPaths.py  : Habituellement disponible sous /apps/px/lib/
+<br>            
+<br>            -> PXManager   : Habituellement disponible sous /apps/px/lib/
+<br>            
+<br>            Ces fichier sont tous disponibles à l'adresse suivante : 
+<br>            https://svn.sourceforge.net/svnroot/metpx/trunk/sundew/lib/ 
+<br>    
+<br>            
+<br>        4.2 Espace disque
+<br>        -----------------------------------------------------------------------------
+<br>            Consultez la section section 1.1.2 pour plus de détails.
+<br>        
+<br>            
+<br>        4.3 Configuration de ssh
+<br>        ------------------------------------------------------------------------------    
+<br>            SSH devra minimalement être configuré de sorte à ce que la machine qui 
+<br>            génère les graphiques puisse se connecter à cette machine sans que l'usager 
+<br>            ait à entrer un mot de passe.
+<br>            
+<br>            Si la machine qui fait la sérialisation n'est pas la même que celle qui 
+<br>            produit les log files et qu'elle n'est pas la même  qui produit les graphiques,
+<br>            le même genre de lien devrait être effectué entre cette machine et celle
+<br>            qui produit les logfiles.
+<br>                
+<br>    
+<br>        
+<br></html><br>
