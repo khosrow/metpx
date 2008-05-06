@@ -432,6 +432,8 @@ class StatsPaths:
         
         """
         
+        errorFound = False 
+        
         defaults     = { "PXROOT" : "/apps/px/" , "COLROOT" : "/apps/pds/tools/columbo/" , "STATSROOT" : "/apps/px/pxStats" }
         programNames = { "PXROOT" : "px" , "COLROOT" : "columbo" , "STATSROOT" : "pxStats" }
         
@@ -447,28 +449,34 @@ class StatsPaths:
             #print "ssh %s@%s '. $HOME/.bash_profile;echo $PXROOT' " %( userName, machine )
             output = commands.getoutput( "ssh %s@%s 'cat /etc/%s/%s.conf' " %( userName, machine, programNames[rootType], programNames[rootType] ) )
         
-        outputLines = str(output).splitlines()
-        try : 
-            for line in outputLines :
-                if rootType in line :
-                    root =  str( line ).split( "=" )[1]
-                    break
-        except : 
-            root = ""
-
+        if "ssh" in output or output == "" :
+            errorFound = True 
         
-        # Search for the root value  
-        # within environment variables.      
-        if root == "" :
-            if userName == "" :
-                #print "ssh %s '. $HOME/.bash_profile;echo $PXROOT' " %( machine )
-                output = commands.getoutput( "ssh %s '. $HOME/.bash_profile;source /etc/profile;echo $%s' " %( machine, rootType ) )
-            else:
-                #print "ssh %s@%s '. $HOME/.bash_profile;echo $PXROOT' " %( userName, machine )
-                output = commands.getoutput( "ssh %s@%s '. $HOME/.bash_profile;source /etc/profile;echo $%s' " %( userName, machine, rootType ) )
+        if errorFound == False :
+            outputLines = str(output).splitlines()
+            try : 
+                for line in outputLines :
+                    if rootType in line :
+                        root =  str( line ).split( "=" )[1]
+                        break
+            except : 
+                root = ""
+    
             
+            # Search for the root value  
+            # within environment variables.      
+            if root == "" :
+                if userName == "" :
+                    #print "ssh %s '. $HOME/.bash_profile;echo $PXROOT' " %( machine )
+                    output = commands.getoutput( "ssh %s '. $HOME/.bash_profile;source /etc/profile;echo $%s' " %( machine, rootType ) )
+                else:
+                    #print "ssh %s@%s '. $HOME/.bash_profile;echo $PXROOT' " %( userName, machine )
+                    output = commands.getoutput( "ssh %s@%s '. $HOME/.bash_profile;source /etc/profile;echo $%s' " %( userName, machine, rootType ) )
             
-        if output == "":
+            if output == "" or "ssh" in output:
+                errorFound= True
+            
+        if output == "" or errorFound == True :
             root = defaults[ rootType ]
         else:    
             root = output
