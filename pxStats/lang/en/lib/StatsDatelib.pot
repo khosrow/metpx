@@ -1,0 +1,181 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2008-05-07 14:41+GMT\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: ENCODING\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: StatsDateLib.py:63
+msgid "Apr"
+msgstr ""
+
+#: StatsDateLib.py:63
+msgid "Aug"
+msgstr ""
+
+#: StatsDateLib.py:63
+msgid "Dec"
+msgstr ""
+
+#: StatsDateLib.py:63
+msgid "Feb"
+msgstr ""
+
+#: StatsDateLib.py:63
+msgid "Jan"
+msgstr ""
+
+#: StatsDateLib.py:63
+msgid "Jul"
+msgstr ""
+
+#: StatsDateLib.py:63
+msgid "Jun"
+msgstr ""
+
+#: StatsDateLib.py:63
+msgid "Mar"
+msgstr ""
+
+#: StatsDateLib.py:63
+msgid "Nov"
+msgstr ""
+
+#: StatsDateLib.py:63
+msgid "Oct"
+msgstr ""
+
+#: StatsDateLib.py:63
+msgid "Sep"
+msgstr ""
+
+#: StatsDateLib.py:63 StatsDateLib.py:64 StatsDateLib.py:209
+msgid "May"
+msgstr ""
+
+#: StatsDateLib.py:64 StatsDateLib.py:208
+msgid "April"
+msgstr ""
+
+#: StatsDateLib.py:64 StatsDateLib.py:208
+msgid "February"
+msgstr ""
+
+#: StatsDateLib.py:64 StatsDateLib.py:208
+msgid "January"
+msgstr ""
+
+#: StatsDateLib.py:64 StatsDateLib.py:208
+msgid "March"
+msgstr ""
+
+#: StatsDateLib.py:64 StatsDateLib.py:209
+msgid "August"
+msgstr ""
+
+#: StatsDateLib.py:64 StatsDateLib.py:209
+msgid "July"
+msgstr ""
+
+#: StatsDateLib.py:64 StatsDateLib.py:209
+msgid "June"
+msgstr ""
+
+#: StatsDateLib.py:64 StatsDateLib.py:209
+msgid "September"
+msgstr ""
+
+#: StatsDateLib.py:64 StatsDateLib.py:210
+msgid "December"
+msgstr ""
+
+#: StatsDateLib.py:64 StatsDateLib.py:210
+msgid "November"
+msgstr ""
+
+#: StatsDateLib.py:64 StatsDateLib.py:210
+msgid "October"
+msgstr ""
+
+#: StatsDateLib.py:212
+msgid "Fri"
+msgstr ""
+
+#: StatsDateLib.py:212
+msgid "Mon"
+msgstr ""
+
+#: StatsDateLib.py:212
+msgid "Sat"
+msgstr ""
+
+#: StatsDateLib.py:212
+msgid "Sun"
+msgstr ""
+
+#: StatsDateLib.py:212
+msgid "Thu"
+msgstr ""
+
+#: StatsDateLib.py:212
+msgid "Tue"
+msgstr ""
+
+#: StatsDateLib.py:212
+msgid "Wed"
+msgstr ""
+
+#: StatsDateLib.py:213
+msgid "Friday"
+msgstr ""
+
+#: StatsDateLib.py:213
+msgid "Monday"
+msgstr ""
+
+#: StatsDateLib.py:213
+msgid "Saturday"
+msgstr ""
+
+#: StatsDateLib.py:213
+msgid "Sunday"
+msgstr ""
+
+#: StatsDateLib.py:213
+msgid "Thursday"
+msgstr ""
+
+#: StatsDateLib.py:213
+msgid "Tuesday"
+msgstr ""
+
+#: StatsDateLib.py:213
+msgid "Wednesday"
+msgstr ""
+
+#: StatsDateLib.py:856 StatsDateLib.py:871 StatsDateLib.py:886
+msgid "daily"
+msgstr ""
+
+#: StatsDateLib.py:859 StatsDateLib.py:874 StatsDateLib.py:889
+msgid "weekly"
+msgstr ""
+
+#: StatsDateLib.py:862 StatsDateLib.py:877 StatsDateLib.py:892
+msgid "monthly"
+msgstr ""
+
+#: StatsDateLib.py:865 StatsDateLib.py:880 StatsDateLib.py:895
+msgid "yearly"
+msgstr ""
+
