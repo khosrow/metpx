@@ -16,11 +16,11 @@ msgstr "annuel"
 
 #: RRDQueryBroker.py:405
 msgid "current"
-msgstr "courante"
+msgstr "courant"
 
 #: RRDQueryBroker.py:407
 msgid "previous"
-msgstr "précédente"
+msgstr "précédent"
 
 msgid "Plotted :"
 msgstr "Dessiné :"
