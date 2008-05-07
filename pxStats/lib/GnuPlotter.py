@@ -198,7 +198,7 @@ class GnuPlotter( Translatable ):
         statsPaths = StatsPaths()
         statsPaths.setPaths(self.outputLanguage)
         _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.workingLanguage )
-        
+
         entityName = ""
         
         if len( self.clientNames ) == 0:
@@ -326,7 +326,7 @@ class GnuPlotter( Translatable ):
         self.nbFilesOverMaxLatency[clientCount] = 0
         nbEntries = len( self.stats[clientCount].statsCollection.timeSeperators )-1 
         
-        translatedStatType = LanguageTools.translateTerm(statType, self.workingLanguage, self.outputLanguage, CURRENT_MODULE_ABS_PATH)
+        translatedStatType = LanguageTools.translateTerm(statType, self.workingLanguage, "en", CURRENT_MODULE_ABS_PATH)
         
         if nbEntries !=0:
             
@@ -404,7 +404,7 @@ class GnuPlotter( Translatable ):
                 
                 
                 except KeyError, instance:
-                    print instance
+                    #print instance
                     _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.workingLanguage )
                     self.logger.error( _("Error in getPairs.") )
                     self.logger.error( _("The %s stat type was not found in previously collected data.") %statType )    
@@ -697,6 +697,32 @@ class GnuPlotter( Translatable ):
             del self.graph
             self.createCopy( )     
          
+         
+         
+    def getFormatedProductTypesForLabel(self):
+        """
+            @summary : Returns the product type in a format that can be displayed
+                       on of of the graphcis labels.
+                       
+            @note    : If Productype is * or _("All") it will be translated.
+            
+            @return : the product type in a format that can be displayed
+                      on of of the graphcis labels.
+                      
+        """
+        
+        _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.workingLanguage )
+        formattedProductType = ""
+                
+        if self.productTypes[0] == _("All") or self.productTypes[0] == "*":
+            formattedProductType = LanguageTools.translateTerm(_("All"), self.workingLanguage, self.outputLanguage, CURRENT_MODULE_ABS_PATH)
+        else:
+            formattedProductType = self.productTypes[0]
+        
+        formattedProductType = "%-25s" %( (str)( formattedProductType  ) ).replace('[','' ).replace( ']', '' ).replace("'","")
+        
+        return formattedProductType
+                
             
             
     def addLatencyLabelsToGraph( self, clientIndex, statsTypeIndex, nbGraphs, maxPairValue ):
@@ -732,9 +758,9 @@ class GnuPlotter( Translatable ):
         else:
             entityType = "Group"
             entityName = self.groupName
-                  
+                        
         
-        formatedProductTypes = "%-25s" %( (str)( self.productTypes ) ).replace('[','' ).replace( ']', '' ).replace("'","")
+        formatedProductTypes =  self.getFormatedProductTypesForLabel()
                 
         self.graph( 'set size .545, .37' )
         
@@ -818,7 +844,7 @@ class GnuPlotter( Translatable ):
         else:#larger than a gig
             totalNumberOfBytes =  _("%.2f GigaBytes")  %( self.totalNumberOfBytes[clientIndex]/1000000000.0 )
          
-        formatedProductTypes = "%-25s" %( (str)( self.productTypes ) ).replace('[','' ).replace( ']', '' ).replace("'","") 
+        formatedProductTypes =  self.getFormatedProductTypesForLabel()
             
         self.graph( 'set size .545, .37' )
         
@@ -891,7 +917,7 @@ class GnuPlotter( Translatable ):
             entityType = "Group"
             entityName = self.groupName    
         
-        formatedProductTypes = "%-25s" %( (str)( self.productTypes ) ).replace('[','' ).replace( ']', '' ).replace("'","")
+        formatedProductTypes =  self.getFormatedProductTypesForLabel()
         
         self.graph( 'set size .545, .37' )
         
@@ -951,7 +977,7 @@ class GnuPlotter( Translatable ):
             entityType = "Group"
             entityName = self.groupName    
         
-        formatedProductTypes = "%-25s" %( (str)( self.productTypes ) ).replace('[','' ).replace( ']', '' ).replace("'","")
+        formatedProductTypes =  self.getFormatedProductTypesForLabel()
         
         self.graph( 'set size .545, .37' )
         
