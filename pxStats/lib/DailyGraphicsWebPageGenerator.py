@@ -158,6 +158,8 @@ class DailyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
         
         global _ 
         
+        StatsDateLib.setLanguage(self.displayedLanguage)
+        
         rxNamesArray = rxNames.keys()
         txNamesArray = txNames.keys()
         
@@ -341,6 +343,7 @@ class DailyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
         
         
         
+        
         for rxName in rxNamesArray :
             
             if rxNames[rxName] == "" :
@@ -364,9 +367,9 @@ class DailyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
                 _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
                 
                 if os.path.isfile( file ):
-                    fileHandle.write(  """<a target ="%s" href="%s">"""%( rxName, webLink) + "%s" %time.strftime( "%a", time.gmtime(day) )  + """   </a>""" )
+                    fileHandle.write(  """<a target ="%s" href="%s">"""%( rxName, webLink) + "%s" %StatsDateLib.getDayOfTheWeek(day)  + """   </a>""" )
                 else :
-                    print file   
+                    pass 
                      
             fileHandle.write( """</td></tr>""" )
         
@@ -437,9 +440,9 @@ class DailyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
                 _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.displayedLanguage )
 
                 if os.path.isfile( file ):
-                    fileHandle.write(  """<a target ="%s" href="%s">"""%( rxName, webLink) + "%s" %(time.strftime( "%a", time.gmtime(day)) )+"""  </a>""" )    
+                    fileHandle.write(  """<a target ="%s" href="%s">"""%( rxName, webLink) + "%s" %StatsDateLib.getDayOfTheWeek(day) +"""  </a>""" )    
                 else :
-                    print file 
+                    pass 
             fileHandle.write( "</td></tr>" )
     
         fileHandle.write(  """
@@ -458,7 +461,7 @@ class DailyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
                     
         fileHandle.close()                 
         
-        
+    
         
     def generateWebPage( self ):
         """
