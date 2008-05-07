@@ -1,108 +1,164 @@
-#: StatsDateLib.py:64
+#: StatsDateLib.py:63
 msgid "Apr"
 msgstr "Avr"
 
-#: StatsDateLib.py:64
+#: StatsDateLib.py:63
 msgid "Aug"
 msgstr "Aou"
 
-#: StatsDateLib.py:64
+#: StatsDateLib.py:63
 msgid "Dec"
 msgstr "Dec"
 
-#: StatsDateLib.py:64
+#: StatsDateLib.py:63
 msgid "Feb"
 msgstr "Fev"
 
-#: StatsDateLib.py:64
+#: StatsDateLib.py:63
 msgid "Jan"
-msgstr ""
+msgstr "Jan"
 
-#: StatsDateLib.py:64
+#: StatsDateLib.py:63
 msgid "Jul"
 msgstr "Jul"
 
-#: StatsDateLib.py:64
+#: StatsDateLib.py:63
 msgid "Jun"
 msgstr "Jui"
 
-#: StatsDateLib.py:64
+#: StatsDateLib.py:63
 msgid "Mar"
 msgstr "Mar"
 
-#: StatsDateLib.py:64
+#: StatsDateLib.py:63
 msgid "Nov"
 msgstr "Nov"
 
-#: StatsDateLib.py:64
+#: StatsDateLib.py:63
 msgid "Oct"
 msgstr "Oct"
 
-#: StatsDateLib.py:64
+#: StatsDateLib.py:63
 msgid "Sep"
 msgstr "Sep"
 
-#: StatsDateLib.py:64 StatsDateLib.py:65 StatsDateLib.py:185
+#: StatsDateLib.py:63 StatsDateLib.py:64 StatsDateLib.py:209
 msgid "May"
 msgstr "Mai"
 
-#: StatsDateLib.py:65 StatsDateLib.py:184
+#: StatsDateLib.py:64 StatsDateLib.py:208
 msgid "April"
 msgstr "Avril"
 
-#: StatsDateLib.py:65 StatsDateLib.py:184
+#: StatsDateLib.py:64 StatsDateLib.py:208
 msgid "February"
 msgstr "Fevrier"
 
-#: StatsDateLib.py:65 StatsDateLib.py:184
+#: StatsDateLib.py:64 StatsDateLib.py:208
 msgid "January"
 msgstr "Janvier"
 
-#: StatsDateLib.py:65 StatsDateLib.py:184
+#: StatsDateLib.py:64 StatsDateLib.py:208
 msgid "March"
 msgstr "Mars"
 
-#: StatsDateLib.py:65 StatsDateLib.py:185
+#: StatsDateLib.py:64 StatsDateLib.py:209
 msgid "August"
 msgstr "Aout"
 
-#: StatsDateLib.py:65 StatsDateLib.py:185
+#: StatsDateLib.py:64 StatsDateLib.py:209
 msgid "July"
 msgstr "Juillet"
 
-#: StatsDateLib.py:65 StatsDateLib.py:185
+#: StatsDateLib.py:64 StatsDateLib.py:209
 msgid "June"
 msgstr "Juin"
 
-#: StatsDateLib.py:65 StatsDateLib.py:185
+#: StatsDateLib.py:64 StatsDateLib.py:209
 msgid "September"
 msgstr "Septembre"
 
-#: StatsDateLib.py:65 StatsDateLib.py:186
+#: StatsDateLib.py:64 StatsDateLib.py:210
 msgid "December"
 msgstr "Decembre"
 
-#: StatsDateLib.py:65 StatsDateLib.py:186
+#: StatsDateLib.py:64 StatsDateLib.py:210
 msgid "November"
 msgstr "Novembre"
 
-#: StatsDateLib.py:65 StatsDateLib.py:186
+#: StatsDateLib.py:64 StatsDateLib.py:210
 msgid "October"
 msgstr "Octobre"
 
-#: StatsDateLib.py:825 StatsDateLib.py:840
+#: StatsDateLib.py:212
+msgid "Fri"
+msgstr "Ven"
+
+#: StatsDateLib.py:212
+msgid "Mon"
+msgstr "Lun"
+
+#: StatsDateLib.py:212
+msgid "Sat"
+msgstr "Sam"
+
+#: StatsDateLib.py:212
+msgid "Sun"
+msgstr "Dim"
+
+#: StatsDateLib.py:212
+msgid "Thu"
+msgstr "Jeu"
+
+#: StatsDateLib.py:212
+msgid "Tue"
+msgstr "Mar"
+
+#: StatsDateLib.py:212
+msgid "Wed"
+msgstr "Mer"
+
+#: StatsDateLib.py:213
+msgid "Friday"
+msgstr "Vendredi"
+
+#: StatsDateLib.py:213
+msgid "Monday"
+msgstr "Lundi"
+
+#: StatsDateLib.py:213
+msgid "Saturday"
+msgstr "Samedi"
+
+#: StatsDateLib.py:213
+msgid "Sunday"
+msgstr "Dimanche"
+
+#: StatsDateLib.py:213
+msgid "Thursday"
+msgstr "Jeudi"
+
+#: StatsDateLib.py:213
+msgid "Tuesday"
+msgstr "Mardi"
+
+#: StatsDateLib.py:213
+msgid "Wednesday"
+msgstr "Mercredi"
+
+#: StatsDateLib.py:856 StatsDateLib.py:871 StatsDateLib.py:886
 msgid "daily"
 msgstr "journalier"
 
-#: StatsDateLib.py:828 StatsDateLib.py:843
+#: StatsDateLib.py:859 StatsDateLib.py:874 StatsDateLib.py:889
 msgid "weekly"
 msgstr "hebdomadaire"
 
-#: StatsDateLib.py:831 StatsDateLib.py:846
+#: StatsDateLib.py:862 StatsDateLib.py:877 StatsDateLib.py:892
 msgid "monthly"
 msgstr "mensuel"
 
-#: StatsDateLib.py:834 StatsDateLib.py:849
+#: StatsDateLib.py:865 StatsDateLib.py:880 StatsDateLib.py:895
 msgid "yearly"
 msgstr "annuel"
 
