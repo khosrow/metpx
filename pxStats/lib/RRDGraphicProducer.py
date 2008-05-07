@@ -802,6 +802,8 @@ class RRDGraphicProducer( Translatable ):
            @return : The carchive copy destination. 
         
         """
+        _  = self.translatorForOutput
+        translatedType = LanguageTools.translateTerm( type, self.inputLanguage, self.outputLanguage, CURRENT_MODULE_ABS_PATH ) 
         
         _ = self.translatorForInput
         
@@ -811,16 +813,16 @@ class RRDGraphicProducer( Translatable ):
         
            
         if self.graphicType == _("weekly"):
-            endOfDestination =  "%s/%s/%s.png" %( currentYear, type, currentWeek )
+            endOfDestination =  "%s/%s/%s.png" %( currentYear, translatedType, currentWeek )
         
         elif self.graphicType == _("monthly"):
-            endOfDestination =  "%s/%s/%s.png" %( currentYear,type, currentMonth )
+            endOfDestination =  "%s/%s/%s.png" %( currentYear,translatedType, currentMonth )
         
         elif self.graphicType == _("yearly"):
-            endOfDestination =  "%s/%s.png" %( type, currentYear )
+            endOfDestination =  "%s/%s.png" %( translatedType, currentYear )
         
         elif self.graphicType == _("daily"):
-            endOfDestination = "%s/%s/%s/%s.png" %( currentYear, currentMonth, type, currentDay )
+            endOfDestination = "%s/%s/%s/%s.png" %( currentYear, currentMonth, translatedType, currentDay )
             
         
         totalForMachine = _('totalForMachine')
