@@ -21,7 +21,7 @@
 ##############################################################################
 """
 
-import sys, os, shutil, commands
+import sys, os, commands
 
 sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../../')
 
@@ -29,8 +29,60 @@ from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.LanguageTools import LanguageTools
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 
+
 CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 
+
+def giveOutPermissionsToFolders( currentlyUsedLanguages ):
+    """    
+        @summary : opens up permissions to folders that 
+                   might be required by the web user.
+                   
+        @param currentlyUsedLanguages: Languages currently set to be 
+                                       displayed in the web interface
+    
+    """
+    
+    for language in currentlyUsedLanguages:
+        
+        _ = LanguageTools.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, language)
+        
+        paths = StatsPaths()        
+        paths.setPaths(language)        
+        
+        pathsToOpenUp = []
+        
+        pathsToOpenUp.append( paths.STATSLOGGING)
+        pathsToOpenUp.append( paths.STATSPICKLES )
+        
+        pathsToOpenUp.append( paths.STATSDB)
+        
+        pathsToOpenUp.append( paths.STATSCURRENTDB )        
+        pathsToOpenUp.append( paths.STATSCURRENTDB + _("bytecount") )
+        pathsToOpenUp.append( paths.STATSCURRENTDB + _("errors")  )
+        pathsToOpenUp.append( paths.STATSCURRENTDB + _("filecount") )
+        pathsToOpenUp.append( paths.STATSCURRENTDB + _("filesOverMaxLatency"))
+        pathsToOpenUp.append( paths.STATSCURRENTDB + _("latency"))      
+        
+        pathsToOpenUp.append( paths.STATSCURRENTDBUPDATES)
+        pathsToOpenUp.append( paths.STATSCURRENTDBUPDATES + _("rx") )
+        pathsToOpenUp.append( paths.STATSCURRENTDBUPDATES + _("tx") )
+        pathsToOpenUp.append( paths.STATSCURRENTDBUPDATES + _("totals") )        
+        
+        pathsToOpenUp.append( paths.STATSDBBACKUPS )
+        pathsToOpenUp.append( paths.STATSDBBACKUPS + "*/" + _("rx") )
+        pathsToOpenUp.append( paths.STATSDBBACKUPS + "*/" + _("tx") )
+        pathsToOpenUp.append( paths.STATSDBBACKUPS + "*/" + _("totals") )    
+                
+        pathsToOpenUp.append( paths.STATSGRAPHS )
+        pathsToOpenUp.append( paths.STATSGRAPHS +_("others/"))
+        pathsToOpenUp.append( paths.STATSGRAPHS +_("others/") + "gnuplot/")
+        pathsToOpenUp.append( paths.STATSGRAPHS +_("others/") + "rrd/")
+               
+        for path in pathsToOpenUp:
+            commands.getstatusoutput( "chmod 0777 %s" %path )
+            commands.getstatusoutput( "chmod 0777 %s/*" %path )
+    
 
 
 def createSymbolicLinks( path, currentlyUsedLanguages ):
@@ -47,6 +99,9 @@ def createSymbolicLinks( path, currentlyUsedLanguages ):
         
         @param path   : Paths in which we are installing
                         the web interface.
+        
+        @param currentlyUsedLanguages: Languages currently set to be 
+                                       displayed in the web interface
         
         @precondition : copyFiles method MUST have been called
                         prior to calling this method.
@@ -267,7 +322,8 @@ def main():
                 copySourceFiles( currentlyUsedLanguages )
                 createSubFolders( path, currentlyUsedLanguages )                 
                 createSymbolicLinks( path,  currentlyUsedLanguages )
-            
+                giveOutPermissionsToFolders( currentlyUsedLanguages )
+                
             except :
                 print _("Specified folder must be an absolute path name. Please use folowing syntax : '/a/b/c/d'.")
                 sys.exit()
