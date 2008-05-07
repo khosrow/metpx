@@ -1342,7 +1342,7 @@ class RRDGraphicProducer( Translatable ):
         
         timeStamps = []
         
-        databaseNames = self.getDatabaseNames( self.clientNames, self.fileType, dataType, self.machines )
+        databaseNames = self.getDatabaseNames( dataType )
         timeOfLastUpdate = RrdUtilities.getMostPopularTimeOfLastUpdate(databaseNames) 
         interval = self.getInterval( start, timeOfLastUpdate, "fetchData")
         interval = interval * 60
