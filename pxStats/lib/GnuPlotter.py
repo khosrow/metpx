@@ -75,7 +75,7 @@ class GnuPlotter( Translatable ):
 
     def __init__( self, timespan,  stats = None, clientNames = None, groupName = "", type='lines',           \
                   interval=1, imageName="gnuplotOutput", title = "Stats", currentTime = "",now = False,      \
-                  statsTypes = None, productTypes = ["All"], logger = None, logging = True, fileType = "tx", \
+                  statsTypes = None, productTypes = None, logger = None, logging = True, fileType = "tx", \
                   machines = "", entryType = "minute", maxLatency = 15, workingLanguage = None, outputLanguage = None ):
         """
         
@@ -147,7 +147,13 @@ class GnuPlotter( Translatable ):
                 sys.exit()
                 
         
+        _ = self.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, self.workingLanguage)
+        
+        self.productTypes = productTypes or [ _( "All" ) ]
+        
         _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.outputLanguage )        
+        
+        
         
         if self.fileType == 'tx':
             self.sourlient = _("Client")
@@ -210,7 +216,7 @@ class GnuPlotter( Translatable ):
         
         if self.productTypes[0] == _("All") or self.productTypes[0] == "*":
             
-            formattedProductName = LanguageTools.translateTerm("All", self.workingLanguage, self.outputLanguage, CURRENT_MODULE_ABS_PATH)
+            formattedProductName = LanguageTools.translateTerm(_("All"), self.workingLanguage, self.outputLanguage, CURRENT_MODULE_ABS_PATH)
             
         else:
             combinedProductsName = ""
@@ -320,7 +326,7 @@ class GnuPlotter( Translatable ):
         self.nbFilesOverMaxLatency[clientCount] = 0
         nbEntries = len( self.stats[clientCount].statsCollection.timeSeperators )-1 
         
-        translatedStatType = LanguageTools.translateTerm(statType, self.workingLanguage, 'en', CURRENT_MODULE_ABS_PATH)
+        translatedStatType = LanguageTools.translateTerm(statType, self.workingLanguage, self.outputLanguage, CURRENT_MODULE_ABS_PATH)
         
         if nbEntries !=0:
             
@@ -495,7 +501,8 @@ class GnuPlotter( Translatable ):
             _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.outputLanguage )
             explanation = _("With the total value of every minutes.")
                         
-                        
+        
+        statType = LanguageTools.translateTerm(statType, self.workingLanguage, self.outputLanguage, CURRENT_MODULE_ABS_PATH)                
         statType = statType[0].upper() + statType[1:]             
               
         if self.groupName == "":
@@ -506,8 +513,7 @@ class GnuPlotter( Translatable ):
         
         _ = self.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.outputLanguage )    
         title =  _("%s for %s for a span of %s hours ending at %s")\
-                 %( LanguageTools.translateTerm(statType, self.workingLanguage, self.outputLanguage, CURRENT_MODULE_ABS_PATH),\
-                    entityName, self.timespan, self.currentTime) + "\\n%s\\n\\n" %explanation +_("MAX: ") + str(maximum) + " " +\
+                 %( statType, entityName, self.timespan, self.currentTime) + "\\n%s\\n\\n" %explanation +_("MAX: ") + str(maximum) + " " +\
                     _("MEAN: ") + "%3.2f"%(self.means[clientIndex][typeCount]) + " " + _("MIN: ") +str(minimum)     
         
         return title
