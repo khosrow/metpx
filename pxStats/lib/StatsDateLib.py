@@ -62,7 +62,7 @@ class StatsDateLib:
     MINUTES_PER_DAY = 24*60
     LIST_OF_MONTHS_3LETTER_FORMAT = [ _("Jan"),  _("Feb"),  _("Mar"),  _("Apr"),  _("May"),  _("Jun"),  _("Jul"),  _("Aug"),  _("Sep"),  _("Oct"),  _("Nov"),  _("Dec") ]
     LIST_OF_MONTHS=[  _("January"),  _("February"),  _("March"),  _("April"),  _("May"),  _("June"),  _("July"),  _("August"),  _("September"),  _("October"),  _("November"),  _("December") ]
-
+    
     
     def setLanguage( language ):
         """
@@ -189,23 +189,36 @@ class StatsDateLib:
     
     
     
-    def getYearMonthDayInStrfTime( timeInEpochFormat):
+    def getYearMonthDayInStrfTime( timeInEpochFormat ):
         """
             @summary : Return the year month day in strftime 
                        based on an epoch date.   
+            
+            @param timeInEpochFormat  : Time, in seconds since epoch format
+                                        from which you want to get the year month day.
+                                        
+            @return : a three item tuple containing the following :
+                           - year
+                           - month
+                           - day
         """
         
         global _
         
-        months ={ "January": _("January"),  "February": _("February"),  "March":_("March"),  "April":_("April"),\
+        months = { "January": _("January"),  "February": _("February"),  "March":_("March"),  "April":_("April"),\
                  "May":_("May"), "June":_("June"), "July":_("July"),  "August":_("August"),  "September":_("September"),\
                  "October":_("October"),  "November":_("November"),  "December":_("December") }
+       
+        days  = { "Mon": _("Mon"), "Tue": _("Tue"), "Wed": _("Wed"), "Thu": _("Thu"),"Fri": _("Fri"),"Sat": _("Sat"),"": _("Sat"),\
+                  "Monday": _("Monday"), "Tuesday": _("Tuesday"), "Wednesday": _("Wednesday"), "Thursday": _("Thursday"),"Friday": _("Friday"),"Saturday": _("Saturday") }   
+        
         
         year  = time.strftime( '%Y', time.gmtime(timeInEpochFormat)  )
         month = time.strftime( '%B', time.gmtime(timeInEpochFormat)  )
         day   = time.strftime( '%d', time.gmtime(timeInEpochFormat)  )  
         
         month = months[month]
+        day   = days[ day]
         
         return year, month, day   
     
