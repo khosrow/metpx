@@ -209,8 +209,8 @@ class StatsDateLib:
                  "May":_("May"), "June":_("June"), "July":_("July"),  "August":_("August"),  "September":_("September"),\
                  "October":_("October"),  "November":_("November"),  "December":_("December") }
        
-        days  = { "Mon": _("Mon"), "Tue": _("Tue"), "Wed": _("Wed"), "Thu": _("Thu"),"Fri": _("Fri"),"Sat": _("Sat"),"": _("Sat"),\
-                  "Monday": _("Monday"), "Tuesday": _("Tuesday"), "Wednesday": _("Wednesday"), "Thursday": _("Thursday"),"Friday": _("Friday"),"Saturday": _("Saturday") }   
+        days  = { "Mon": _("Mon"), "Tue": _("Tue"), "Wed": _("Wed"), "Thu": _("Thu"),"Fri": _("Fri"),"Sat": _("Sat"),"Sun": _("Sun"),\
+                  "Monday": _("Monday"), "Tuesday": _("Tuesday"), "Wednesday": _("Wednesday"), "Thursday": _("Thursday"),"Friday": _("Friday"),"Saturday": _("Saturday"),"Sunday":_("Sunday") }   
         
         
         year  = time.strftime( '%Y', time.gmtime(timeInEpochFormat)  )
