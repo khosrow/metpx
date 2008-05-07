@@ -208,21 +208,45 @@ class StatsDateLib:
         months = { "January": _("January"),  "February": _("February"),  "March":_("March"),  "April":_("April"),\
                  "May":_("May"), "June":_("June"), "July":_("July"),  "August":_("August"),  "September":_("September"),\
                  "October":_("October"),  "November":_("November"),  "December":_("December") }
-       
-        days  = { "Mon": _("Mon"), "Tue": _("Tue"), "Wed": _("Wed"), "Thu": _("Thu"),"Fri": _("Fri"),"Sat": _("Sat"),"Sun": _("Sun"),\
-                  "Monday": _("Monday"), "Tuesday": _("Tuesday"), "Wednesday": _("Wednesday"), "Thursday": _("Thursday"),"Friday": _("Friday"),"Saturday": _("Saturday"),"Sunday":_("Sunday") }   
-        
-        
+               
         year  = time.strftime( '%Y', time.gmtime(timeInEpochFormat)  )
         month = time.strftime( '%B', time.gmtime(timeInEpochFormat)  )
         day   = time.strftime( '%d', time.gmtime(timeInEpochFormat)  )  
         
         month = months[month]
-        day   = days[ day]
         
         return year, month, day   
     
     getYearMonthDayInStrfTime = staticmethod(getYearMonthDayInStrfTime)   
+    
+    
+    def getDayOfTheWeek( timeInEpochFormat ):
+        """
+            @summary : Return the year month day in strftime 
+                       based on an epoch date.   
+        
+            @Note : The returned day of the week will be written in the language 
+                    that has currently been set.
+                    
+            @param :  Time, in seconds since epoch format
+                      from which you want to get the day of the week.        
+        """
+        
+        global _
+        
+        days  = { "Mon": _("Mon"), "Tue": _("Tue"), "Wed": _("Wed"), "Thu": _("Thu"),\
+                  "Fri": _("Fri"),"Sat": _("Sat"),"Sun": _("Sun"), "Monday": _("Monday"),\
+                  "Tuesday": _("Tuesday"), "Wednesday": _("Wednesday"), "Thursday": _("Thursday"),\
+                  "Friday": _("Friday"),"Saturday": _("Saturday"),"Sunday":_("Sunday") } 
+    
+        day = time.strftime( "%a", time.gmtime( timeInEpochFormat ) )
+    
+    
+        day = days[day]
+        
+        return day
+    
+    getDayOfTheWeek = staticmethod( getDayOfTheWeek )
     
     
     
