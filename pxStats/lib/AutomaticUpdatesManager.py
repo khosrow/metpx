@@ -35,24 +35,34 @@ from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.Translatable import Translatable
 from pxStats.lib.CpickleWrapper import CpickleWrapper
 from pxStats.lib.StatsDateLib import StatsDateLib
+from pxStats.lib.TimeParameters import TimeConfigParameters
 from datetime import datetime
 
+
+SUPPORTED_UPDATE_TYPES = [ "pxStatsStartup", "monitoring", "generalCleaner", "picklecleaner", "dbBackups"]
 
 
 class AutomaticUpdatesManager( Translatable ):
 
 
-    def __init__( self, numberOfLogsToKeep ):
+    def __init__( self, numberOfLogsToKeep, updateType ):
         """
             @summary : Constructor.
             
             @param numberOfLogsToKeep: Number of log entries to keep in 
                                        the AutomaticUpdatesLogs folder. 
+            
+            @param updateType        :  Type of update to add; usually the name 
+                                        of the program doing an update.
+                                       
         """
         
         self.numberOfLogsToKeep = numberOfLogsToKeep
-   
-   
+        self.updateType         = updateType
+        
+        if not updateType in SUPPORTED_UPDATE_TYPES:
+            raise Exception( "Unsupported updateType detected in AutomaticUpdatesManager. Supported types are : %s" %( SUPPORTED_UPDATE_TYPES ) )
+        
    
     def addAutomaticUpdateToLogs( self, timeOfUpdateInIsoFormat, currentUpdateFrequency  = None ):
        """
@@ -65,7 +75,7 @@ class AutomaticUpdatesManager( Translatable ):
        
        paths = StatsPaths()
        paths.setPaths()
-       fileName = paths.STATSTEMPAUTUPDTLOGS +  str( timeOfUpdateInIsoFormat ).replace( " ", "_" )
+       fileName = paths.STATSTEMPAUTUPDTLOGS + self.updateType + "/" + str( timeOfUpdateInIsoFormat ).replace( " ", "_" )
        
        #Safety to make sure 
        if not os.path.isdir( os.path.dirname( fileName ) ):
@@ -102,9 +112,11 @@ class AutomaticUpdatesManager( Translatable ):
         paths = StatsPaths()
         paths.setPaths()
         
-        if not os.path.isdir(paths.STATSTEMPAUTUPDTLOGS):
-            os.makedirs(paths.STATSTEMPAUTUPDTLOGS)       
-        allEntries = os.listdir(paths.STATSTEMPAUTUPDTLOGS) 
+        updatesDirectory = paths.STATSTEMPAUTUPDTLOGS + self.updateType + "/"
+        
+        if not os.path.isdir( updatesDirectory ):
+            os.makedirs(updatesDirectory)       
+        allEntries = os.listdir(updatesDirectory) 
         
         if allEntries !=[] :
             allEntries.sort()
@@ -156,7 +168,7 @@ class AutomaticUpdatesManager( Translatable ):
         paths = StatsPaths()
         paths.setPaths()
         
-        updates = os.listdir( paths.STATSTEMPAUTUPDTLOGS ) 
+        updates = os.listdir( updatesDirectory = paths.STATSTEMPAUTUPDTLOGS + self.updateType + "/" ) 
 
         updates =  filter( afterEndTime, updates)
 
@@ -226,11 +238,19 @@ class AutomaticUpdatesManager( Translatable ):
     
     
     
-    def getCurrentUpdateFrequency(self):
-        """       
-            @summary : Returns the current update frequency 
-                       in minutes base on the crontab entries.
+    def __getPxStatsCurrentUpdateFrequency(self):
         """
+            @summary : Returns the current update 
+                       frequency of pxStatsStartup 
+                       found within the current crontab.
+            
+            @return:  current update 
+                      frequency of pxStatsStartup 
+                      found within the current crontab.           
+                        
+        """
+        
+        currentUpdateFrequency = 0
         
         highestPriorityFound = 0         
         
@@ -264,8 +284,79 @@ class AutomaticUpdatesManager( Translatable ):
                     highestPriorityFound = crontabPriority 
                     break
             
-            currentUpdateFrequency = self.__getNbMinutesBetweenUpdates( splitLine[highestPriorityFound], highestPriorityFound )
+            currentUpdateFrequency = self.__getNbMinutesBetweenUpdates( splitLine[highestPriorityFound], highestPriorityFound )    
+    
+            return currentUpdateFrequency
+    
+    
+    
+    def updateIsRequired( self, timeInIsoFormat ):
+        """
             
+            @summary : Returns whether or not, based on the
+                       current update frequency of the update type,
+                       a new update would be required 
+            
+            @return : True or False 
+            
+        """
+        
+        anUpdateIsRequired = False 
+        
+        timeSinceLastUpdate = self.getTimeSinceLastUpdate(timeInIsoFormat)
+        currentUpdateFrequency = self.getCurrentUpdateFrequency()
+        
+        timeSinceLastUpdateInMinutes = timeSinceLastUpdate/60
+        
+        if (timeSinceLastUpdateInMinutes >= currentUpdateFrequency):
+            anUpdateIsRequired = True 
+        
+        
+        return anUpdateIsRequired
+    
+    
+    
+    
+    def getCurrentUpdateFrequency(self):
+        """       
+            @summary : Returns the current update frequency 
+                       in minutes base on the crontab entries.
+                       
+            @return :            
+                       
+        """
+        
+        currentUpdateFrequency = 0
+        
+        if self.updateType == "pxStatsStartup" :
+            self.__getPxStatsCurrentUpdateFrequency()
+            
+        else:
+            timeParameters = TimeConfigParameters()
+            timeParameters.getTimeParametersFromConfigurationFile()
+            
+            frequencyFromConfig= {}
+            
+            if self.updateType == "monitoring":
+                frequencyFromConfig = timeParameters.monitoringFrequency
+            elif self.updateType == "generalCleaner":
+                frequencyFromConfig = timeParameters.generalCleanerFrequency
+            elif self.updateType == "picklecleaner":
+                frequencyFromConfig = timeParameters.pickleCleanerFrequency
+            elif self.updateType == "dbBackups":
+                frequencyFromConfig = timeParameters.dbBackupsFrequency
+            else:    
+                raise Exception( "Unsupported updateType detected in AutomaticUpdatesManager. Supported types are : %s" %( SUPPORTED_UPDATE_TYPES ) )
+            
+            value = frequencyFromConfig.keys()[0]
+            if frequencyFromConfig[value] == "minutes":              
+                currentUpdateFrequency = value 
+                 
+            elif frequencyFromConfig[value] == "hours":      
+                currentUpdateFrequency = value * 60
+            
+            elif frequencyFromConfig[value] == "days":            
+                currentUpdateFrequency = value * 60 * 24
             
         return currentUpdateFrequency
         
