@@ -350,13 +350,13 @@ class AutomaticUpdatesManager( Translatable ):
             
             value = frequencyFromConfig.keys()[0]
             if frequencyFromConfig[value] == "minutes":              
-                currentUpdateFrequency = value 
+                currentUpdateFrequency = int(value) 
                  
             elif frequencyFromConfig[value] == "hours":      
-                currentUpdateFrequency = value * 60
+                currentUpdateFrequency = int(value) * 60
             
             elif frequencyFromConfig[value] == "days":            
-                currentUpdateFrequency = value * 60 * 24
+                currentUpdateFrequency = int(value) * 60 * 24
             
         return currentUpdateFrequency
         
@@ -759,7 +759,7 @@ def main():
     #    This section test the utility methods which do not require log files 
     #
     ##################################################################################################
-    updateManager = AutomaticUpdatesManager( 10 )
+    updateManager = AutomaticUpdatesManager( 10, "pxStatsStartup" )
     
     
     print ""
