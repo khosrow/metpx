@@ -587,7 +587,7 @@ class GnuPlotter( Translatable ):
         
         
         if copyToColumbo == True : 
-            destination = statsPaths.STATSGRAPHS + "webGraphics/columbo/%s.png" %clientName
+            destination = statsPaths.STATSGRAPHS + "webGraphics/columbo/%s_%s.png" %(clientName,self.outputLanguage)
             if not os.path.isdir( os.path.dirname( destination ) ):
                 os.makedirs(  os.path.dirname( destination ), 0777 )                                                      
                 os.chmod( os.path.dirname( destination ), 0777 )
