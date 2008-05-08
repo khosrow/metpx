@@ -7,7 +7,7 @@
 // -------------------------------------------------------------------
 
 var dhtmlwindow={
-imagefiles:['../scripts/js/windowfiles/min.gif', '../scripts/js/windowfiles/close.gif', '../scripts/js/windowfiles/restore.gif', '../scripts/js/windowfiles/resize.gif'], //Path to 4 images used by script, in that order
+imagefiles:['../scripts/js_fr/windowfiles/min.gif', '../scripts/js_fr/windowfiles/close.gif', '../scripts/js_fr/windowfiles/restore.gif', '../scripts/js_fr/windowfiles/resize.gif'], //Path to 4 images used by script, in that order
 ajaxbustcache: true, //Bust caching when fetching a file via Ajax?
 
 minimizeorder: 0,
