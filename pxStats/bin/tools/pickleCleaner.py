@@ -60,6 +60,8 @@ def cleanPickles( dirsToKeep ):
                    is not within the list to keep.
     """
     
+    global _ 
+    
     statsPaths = StatsPaths()
     statsPaths.setPaths()
     
@@ -115,7 +117,7 @@ def main():
         except:
             print _("Days to keep value must be an integer. For default 21 days value, type nothing.")
             sys.exit()
-            
+    setGlobalLanguageParameters()        
     dirsToKeep = getDirListToKeep( daysToKeep )
     cleanPickles( dirsToKeep )
 
