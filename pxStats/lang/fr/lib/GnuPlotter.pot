@@ -97,7 +97,7 @@ msgstr "MIN: "
 
 #: GnuPlotter.py:547
 msgid "daily/%s/%s/"
-msgstr "journaliers/%s/%s/"
+msgstr "journalier/%s/%s/"
 
 #: GnuPlotter.py:600
 msgid "Call to plot received"

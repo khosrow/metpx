@@ -16,17 +16,17 @@ msgstr "Graphiques journaliers pour tous les clients(TX) de MetPx."
 
 #: DailyGraphicsWebPageGenerator.py:353
 msgid "daily/rx/%s/"
-msgstr "journaliers/rx/%s/"
+msgstr "journalier/rx/%s/"
 
 #: DailyGraphicsWebPageGenerator.py:354
 msgid "archives/daily/rx/%s/"
-msgstr "archives/journaliers/rx/%s/"
+msgstr "archives/journalier/rx/%s/"
 
 #: DailyGraphicsWebPageGenerator.py:425
 msgid "/daily/tx/%s/"
-msgstr "/journaliers/tx/%s/"
+msgstr "/journalier/tx/%s/"
 
 #: DailyGraphicsWebPageGenerator.py:426
 msgid "archives/daily/tx/%s/"
-msgstr "archives/journaliers/tx/%s/"
+msgstr "archives/journalier/tx/%s/"
 

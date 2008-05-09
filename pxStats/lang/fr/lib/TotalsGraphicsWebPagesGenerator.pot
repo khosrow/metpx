@@ -94,35 +94,35 @@ msgstr "Erreurs"
 
 #: TotalsGraphicsWebPagesGenerator.py:354
 msgid "%sdaily/totals/%s/rx/%s/%s/%s/%s.png"
-msgstr "%sjournaliers/totaux/%s/rx/%s/%s/%s/%s.png"
+msgstr "%sjournalier/totaux/%s/rx/%s/%s/%s/%s.png"
 
 #: TotalsGraphicsWebPagesGenerator.py:355
 msgid "archives_%s/daily/totals/%s/rx/%s/%s/%s/%s.png"
-msgstr "archives_%s/journaliers/totaux/%s/rx/%s/%s/%s/%s.png"
+msgstr "archives_%s/journalier/totaux/%s/rx/%s/%s/%s/%s.png"
 
 #: TotalsGraphicsWebPagesGenerator.py:357
 msgid "%sweekly/totals/%s/rx/%s/%s/%s.png"
-msgstr "%shebdomadaires/totaux/%s/rx/%s/%s/%s.png"
+msgstr "%shebdomadaire/totaux/%s/rx/%s/%s/%s.png"
 
 #: TotalsGraphicsWebPagesGenerator.py:358
 msgid "archives_%s/weekly/totals/%s/rx/%s/%s/%s.png"
-msgstr "archives_%s/hebdomadaires/totaux/%s/rx/%s/%s/%s.png"
+msgstr "archives_%s/hebdomadaire/totaux/%s/rx/%s/%s/%s.png"
 
 #: TotalsGraphicsWebPagesGenerator.py:360
 msgid "%smonthly/totals/%s/rx/%s/%s/%s.png"
-msgstr "%smensuels/totaux/%s/rx/%s/%s/%s.png"
+msgstr "%smensuel/totaux/%s/rx/%s/%s/%s.png"
 
 #: TotalsGraphicsWebPagesGenerator.py:361
 msgid "archives_%s/monthly/totals/%s/rx/%s/%s/%s.png"
-msgstr "archives_%s/mensuels/totaux/%s/rx/%s/%s/%s.png"
+msgstr "archives_%s/mensuel/totaux/%s/rx/%s/%s/%s.png"
 
 #: TotalsGraphicsWebPagesGenerator.py:363
 msgid "%syearly/totals/%s/rx/%s/%s.png"
-msgstr "%sannuels/totaux/%s/rx/%s/%s.png"
+msgstr "%sannuel/totaux/%s/rx/%s/%s.png"
 
 #: TotalsGraphicsWebPagesGenerator.py:364
 msgid "archives_%s/yearly/totals/%s/rx/%s/%s.png"
-msgstr "archives_%s/annuels/totaux/%s/rx/%s/%s.png"
+msgstr "archives_%s/annuel/totaux/%s/rx/%s/%s.png"
 
 #: TotalsGraphicsWebPagesGenerator.py:390
 msgid "TX totals for"
@@ -151,33 +151,33 @@ msgstr "Afficher le total des erreurs qui se sont produites durant la transmissi
 
 #: TotalsGraphicsWebPagesGenerator.py:437
 msgid "%sdaily/totals/%s/tx/%s/%s/%s/%s.png"
-msgstr "%sjournaliers/totaux/%s/tx/%s/%s/%s/%s.png"
+msgstr "%sjournalier/totaux/%s/tx/%s/%s/%s/%s.png"
 
 #: TotalsGraphicsWebPagesGenerator.py:438
 msgid "archives_%s/daily/totals/%s/tx/%s/%s/%s/%s.png"
-msgstr "archives_%s/journaliers/totaux/%s/tx/%s/%s/%s/%s.png"
+msgstr "archives_%s/journalier/totaux/%s/tx/%s/%s/%s/%s.png"
 
 #: TotalsGraphicsWebPagesGenerator.py:441
 msgid "%sweekly/totals/%s/tx/%s/%s/%s.png"
-msgstr "%shebdomadaires/totaux/%s/tx/%s/%s/%s.png"
+msgstr "%shebdomadaire/totaux/%s/tx/%s/%s/%s.png"
 
 #: TotalsGraphicsWebPagesGenerator.py:442
 msgid "archives_%s/weekly/totals/%s/tx/%s/%s/%s.png"
-msgstr "archives_%s/hebdomadaires/totaux/%s/tx/%s/%s/%s.png"
+msgstr "archives_%s/hebdomadaire/totaux/%s/tx/%s/%s/%s.png"
 
 #: TotalsGraphicsWebPagesGenerator.py:445
 msgid "%smonthly/totals/%s/tx/%s/%s/%s.png"
-msgstr "%smensuels/totaux/%s/tx/%s/%s/%s.png"
+msgstr "%smensuel/totaux/%s/tx/%s/%s/%s.png"
 
 #: TotalsGraphicsWebPagesGenerator.py:446
 msgid "archives_%s/monthly/totals/%s/tx/%s/%s/%s.png"
-msgstr "archives_%s/mensuels/totaux/%s/tx/%s/%s/%s.png"
+msgstr "archives_%s/mensuel/totaux/%s/tx/%s/%s/%s.png"
 
 #: TotalsGraphicsWebPagesGenerator.py:449
 msgid "%syearly/totals/%s/tx/%s/%s.png"
-msgstr "%sannuels/totaux/%s/tx/%s/%s.png"
+msgstr "%sannuel/totaux/%s/tx/%s/%s.png"
 
 #: TotalsGraphicsWebPagesGenerator.py:450
 msgid "archives_%s/yearly/totals/%s/tx/%s/%s.png"
-msgstr "archives_%s/annuels/totaux/%s/tx/%s/%s.png"
+msgstr "archives_%s/annuel/totaux/%s/tx/%s/%s.png"
 
