@@ -86,7 +86,7 @@ class AutomaticUpdatesManager( Translatable ):
        
        CpickleWrapper.save( currentUpdateFrequency, fileName )
            
-       allEntries = os.listdir(paths.STATSTEMPAUTUPDTLOGS) 
+       allEntries = os.listdir(paths.STATSTEMPAUTUPDTLOGS + self.updateType + "/") 
        
        allEntries.sort()
        
