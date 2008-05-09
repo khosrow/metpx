@@ -1,82 +1,133 @@
-#: totalGraphicsWebPages.py:192
-msgid "(upd. hourly)"
-msgstr "(upd. hourly)"
-#: totalGraphicsWebPages.py:192
-msgid "(upd. monthly)"
-msgstr "(upd. monthly)"
+msgid ""
+msgstr ""
 
-#: totalGraphicsWebPages.py:192
-msgid "(upd. weekly)"
-msgstr "(upd. weekly)"
 
-#: totalGraphicsWebPages.py:192
+msgid "bytecount"
+msgstr "bytecount"
+
+msgid "errors"
+msgstr "errors"
+
+msgid "filecount"
+msgstr "filecount"
+
+msgid "filesOverMaxLatency"
+msgstr "filesOverMaxLatency"
+
+msgid "latency"
+msgstr "latency"
+
 msgid "daily"
 msgstr "daily"
 
-#: totalGraphicsWebPages.py:192
 msgid "monthly"
 msgstr "monthly"
 
-#: totalGraphicsWebPages.py:192
 msgid "weekly"
 msgstr "weekly"
 
-#: totalGraphicsWebPages.py:192
 msgid "yearly"
 msgstr "yearly"
 
-#: totalGraphicsWebPages.py:247
+msgid "(upd. hourly)"
+msgstr "(upd. hourly)"
+
+msgid "(upd. monthly)"
+msgstr "(upd. monthly)"
+
+msgid "(upd. weekly)"
+msgstr "(upd. weekly)"
+
 msgid "RX totals for"
 msgstr "RX totals for"
 
-
-#: totalGraphicsWebPages.py:255
-msgid "ByteCount"
-msgstr "ByteCount"
-
-#: totalGraphicsWebPages.py:255
 msgid "Display the total of bytes received by all sources."
 msgstr "Display the total of bytes received by all sources."
 
-#: totalGraphicsWebPages.py:257
+msgid "ByteCount"
+msgstr "ByteCount"
+
 msgid "Display the total of files received by all sources."
 msgstr "Display the total of files received by all sources."
 
-#: totalGraphicsWebPages.py:257
 msgid "FileCount"
 msgstr "FileCount"
 
-#: totalGraphicsWebPages.py:259
 msgid "Display the total of errors that occured during all the receptions."
 msgstr "Display the total of errors that occured during all the receptions."
 
-#: totalGraphicsWebPages.py:259
 msgid "Errors"
 msgstr "Errors"
 
+msgid "%sdaily/totals/%s/rx/%s/%s/%s/%s.png"
+msgstr "%sdaily/totals/%s/rx/%s/%s/%s/%s.png"
 
-#: totalGraphicsWebPages.py:323
+msgid "archives_%s/daily/totals/%s/rx/%s/%s/%s/%s.png"
+msgstr "archives_%s/daily/totals/%s/rx/%s/%s/%s/%s.png"
+
+msgid "%sweekly/totals/%s/rx/%s/%s/%s.png"
+msgstr "%sweekly/totals/%s/rx/%s/%s/%s.png"
+
+msgid "archives_%s/weekly/totals/%s/rx/%s/%s/%s.png"
+msgstr "archives_%s/weekly/totals/%s/rx/%s/%s/%s.png"
+
+msgid "%smonthly/totals/%s/rx/%s/%s/%s.png"
+msgstr "%smonthly/totals/%s/rx/%s/%s/%s.png"
+
+msgid "archives_%s/monthly/totals/%s/rx/%s/%s/%s.png"
+msgstr "archives_%s/monthly/totals/%s/rx/%s/%s/%s.png"
+
+msgid "%syearly/totals/%s/rx/%s/%s.png"
+msgstr "%syearly/totals/%s/rx/%s/%s.png"
+
+msgid "archives_%s/yearly/totals/%s/rx/%s/%s.png"
+msgstr "archives_%s/yearly/totals/%s/rx/%s/%s.png"
+
 msgid "TX totals for"
-msgstr "TX totals for" 
+msgstr "TX totals for"
 
-#: totalGraphicsWebPages.py:330
 msgid "Display the average latency of file transfers for all clients."
 msgstr "Display the average latency of file transfers for all clients."
 
-#: totalGraphicsWebPages.py:332
+msgid "Latency"
+msgstr "Latency"
+
 msgid "Display the number of files for wich the latency was over 15 seconds for all clients."
 msgstr "Display the number of files for wich the latency was over 15 seconds for all clients."
 
-#: totalGraphicsWebPages.py:334
+msgid "Files Over Max. Lat."
+msgstr "Files Over Max. Lat."
+
 msgid "Display number of bytes transfered to all clients."
 msgstr "Display number of bytes transfered to all clients."
 
-#: totalGraphicsWebPages.py:336
 msgid "Display the number of files transferred every day to all clients."
 msgstr "Display the number of files transferred every day to all clients."
 
-
-#: totalGraphicsWebPages.py:338
 msgid "Display the total of errors that occured during the file transfers to allclients."
 msgstr "Display the total of errors that occured during the file transfers to allclients."
+
+msgid "%sdaily/totals/%s/tx/%s/%s/%s/%s.png"
+msgstr "%sdaily/totals/%s/tx/%s/%s/%s/%s.png"
+
+msgid "archives/daily/totals/%s/tx/%s/%s/%s/%s.png"
+msgstr "archives/daily/totals/%s/tx/%s/%s/%s/%s.png"
+
+msgid "%sweekly/totals/%s/tx/%s/%s/%s.png"
+msgstr "%sweekly/totals/%s/tx/%s/%s/%s.png"
+
+msgid "archives/weekly/totals/%s/tx/%s/%s/%s.png"
+msgstr "archives/weekly/totals/%s/tx/%s/%s/%s.png"
+
+msgid "%smonthly/totals/%s/tx/%s/%s/%s.png"
+msgstr "%smonthly/totals/%s/tx/%s/%s/%s.png"
+
+msgid "archives/monthly/totals/%s/tx/%s/%s/%s.png"
+msgstr "archives/monthly/totals/%s/tx/%s/%s/%s.png"
+
+msgid "%syearly/totals/%s/tx/%s/%s.png"
+msgstr "%syearly/totals/%s/tx/%s/%s.png"
+
+msgid "archives/yearly/totals/%s/tx/%s/%s.png"
+msgstr "archives/yearly/totals/%s/tx/%s/%s.png"
 

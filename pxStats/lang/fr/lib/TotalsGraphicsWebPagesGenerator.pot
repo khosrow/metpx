@@ -1,87 +1,31 @@
-msgid  "Mon"
-msgstr "Lun"
+#: TotalsGraphicsWebPagesGenerator.py:248
+#: TotalsGraphicsWebPagesGenerator.py:249
+#: TotalsGraphicsWebPagesGenerator.py:251
+#: TotalsGraphicsWebPagesGenerator.py:252
+msgid "bytecount"
+msgstr "nbreDeBytes"
 
-msgid  "Tue"
-msgstr "Mar"
-
-msgid  "Wed"
-msgstr "Mer"
-
-msgid  "Thu"
-msgstr "Jeu"
-
-msgid  "Fri"
-msgstr "Ven"
-
-msgid  "Sat"
-msgstr "Sam"
-
-msgid  "Sun"
-msgstr "Dim"
-
-
-
-
-
-
-msgid  "January"
-msgstr "Janvier"
-
-msgid  "February"
-msgstr "Février"
-
-msgid  "March"
-msgstr "Mars"
-
-msgid  "April"
-msgstr "Avril"
-
-msgid  "May"
-msgstr "Mai"
-
-msgid  "June"
-msgstr "Juin"
-
-msgid  "July"
-msgstr "Juillet"
-
-msgid  "August"
-msgstr "Aout"
-
-msgid  "Spetember"
-msgstr "Septembre"
-
-msgid  "October"
-msgstr "Octobre"
-
-msgid  "Novembre"
-msgstr "November"
-
-msgid  "December"
-msgstr "Décembre"
-
-
-
-
-
-
-
-
-
-
-#: totalGraphicsWebPages.py:189 totalGraphicsWebPages.py:190
+#: TotalsGraphicsWebPagesGenerator.py:248
+#: TotalsGraphicsWebPagesGenerator.py:249
+#: TotalsGraphicsWebPagesGenerator.py:251
+#: TotalsGraphicsWebPagesGenerator.py:252
 msgid "errors"
 msgstr "Erreurs"
 
-#: totalGraphicsWebPages.py:189 totalGraphicsWebPages.py:190
+#: TotalsGraphicsWebPagesGenerator.py:248
+#: TotalsGraphicsWebPagesGenerator.py:249
+#: TotalsGraphicsWebPagesGenerator.py:251
+#: TotalsGraphicsWebPagesGenerator.py:252
 msgid "filecount"
 msgstr "nombre de fichiers"
 
-#: totalGraphicsWebPages.py:190
+#: TotalsGraphicsWebPagesGenerator.py:249
+#: TotalsGraphicsWebPagesGenerator.py:252
 msgid "filesOverMaxLatency"
 msgstr "fichiers avec latence innacceptable "
 
-#: totalGraphicsWebPages.py:190
+#: TotalsGraphicsWebPagesGenerator.py:249
+#: TotalsGraphicsWebPagesGenerator.py:252
 msgid "latency"
 msgstr "latence"
 
@@ -94,83 +38,146 @@ msgstr "Fichier avec latence innacceptable"
 
 
 
-#: totalGraphicsWebPages.py:192
-msgid "(upd. hourly)"
-msgstr "(M.À.J à l'heure.)"
 
-#: totalGraphicsWebPages.py:192
-msgid "(upd. monthly)"
-msgstr "(M.À.J mensuel.)"
-
-#: totalGraphicsWebPages.py:192
-msgid "(upd. weekly)"
-msgstr "(M.À.J hebdomadaire.)"
-
-#: totalGraphicsWebPages.py:192
-msgid "daily"
-msgstr "Journaliers"
-
-#: totalGraphicsWebPages.py:192
-msgid "monthly"
-msgstr "Mensuels"
-
-#: totalGraphicsWebPages.py:192
+#: TotalsGraphicsWebPagesGenerator.py:254
+#: TotalsGraphicsWebPagesGenerator.py:255
 msgid "weekly"
 msgstr "Hebdomadaires"
 
-#: totalGraphicsWebPages.py:192
+#: TotalsGraphicsWebPagesGenerator.py:254
+#: TotalsGraphicsWebPagesGenerator.py:255
 msgid "yearly"
 msgstr "Annuels"
 
-#: totalGraphicsWebPages.py:247
+#: TotalsGraphicsWebPagesGenerator.py:255
+msgid "(upd. hourly)"
+msgstr "(M.À.J à l'heure.)"
+
+#: TotalsGraphicsWebPagesGenerator.py:255
+msgid "(upd. monthly)"
+msgstr "(M.À.J mensuel.)"
+
+#: TotalsGraphicsWebPagesGenerator.py:255
+msgid "(upd. weekly)"
+msgstr "(M.À.J hebdomadaire.)"
+
+#: TotalsGraphicsWebPagesGenerator.py:310
 msgid "RX totals for"
 msgstr "Totaux des réceptions(RX) pour"
 
-#: totalGraphicsWebPages.py:255
-msgid "ByteCount"
-msgstr "Nombre de bytes"
-
-#: totalGraphicsWebPages.py:255
+#: TotalsGraphicsWebPagesGenerator.py:317
 msgid "Display the total of bytes received by all sources."
 msgstr "Afficher le nombre de bytes transférés à tous les clients."
 
-#: totalGraphicsWebPages.py:257
+#: TotalsGraphicsWebPagesGenerator.py:317
+#: TotalsGraphicsWebPagesGenerator.py:401
+msgid "ByteCount"
+msgstr "Nombre de bytes"
+
+#: TotalsGraphicsWebPagesGenerator.py:319
 msgid "Display the total of files received by all sources."
 msgstr "Afficher le total de fichiers reçus par toutes les sources."
 
-#: totalGraphicsWebPages.py:257
+#: TotalsGraphicsWebPagesGenerator.py:319
+#: TotalsGraphicsWebPagesGenerator.py:403
 msgid "FileCount"
 msgstr "Nombre de fichiers"
 
-#: totalGraphicsWebPages.py:259
+#: TotalsGraphicsWebPagesGenerator.py:321
 msgid "Display the total of errors that occured during all the receptions."
 msgstr "Afficher le total d'erreurs qui se sont produites durant les réceptions."
 
-#: totalGraphicsWebPages.py:259
+#: TotalsGraphicsWebPagesGenerator.py:321
+#: TotalsGraphicsWebPagesGenerator.py:405
 msgid "Errors"
 msgstr "Erreurs"
 
-#: totalGraphicsWebPages.py:323
+#: TotalsGraphicsWebPagesGenerator.py:354
+msgid "%sdaily/totals/%s/rx/%s/%s/%s/%s.png"
+msgstr "%sjournaliers/totaux/%s/rx/%s/%s/%s/%s.png"
+
+#: TotalsGraphicsWebPagesGenerator.py:355
+msgid "archives_%s/daily/totals/%s/rx/%s/%s/%s/%s.png"
+msgstr "archives_%s/journaliers/totaux/%s/rx/%s/%s/%s/%s.png"
+
+#: TotalsGraphicsWebPagesGenerator.py:357
+msgid "%sweekly/totals/%s/rx/%s/%s/%s.png"
+msgstr "%shebdomadaires/totaux/%s/rx/%s/%s/%s.png"
+
+#: TotalsGraphicsWebPagesGenerator.py:358
+msgid "archives_%s/weekly/totals/%s/rx/%s/%s/%s.png"
+msgstr "archives_%s/hebdomadaires/totaux/%s/rx/%s/%s/%s.png"
+
+#: TotalsGraphicsWebPagesGenerator.py:360
+msgid "%smonthly/totals/%s/rx/%s/%s/%s.png"
+msgstr "%smensuels/totaux/%s/rx/%s/%s/%s.png"
+
+#: TotalsGraphicsWebPagesGenerator.py:361
+msgid "archives_%s/monthly/totals/%s/rx/%s/%s/%s.png"
+msgstr "archives_%s/mensuels/totaux/%s/rx/%s/%s/%s.png"
+
+#: TotalsGraphicsWebPagesGenerator.py:363
+msgid "%syearly/totals/%s/rx/%s/%s.png"
+msgstr "%sannuels/totaux/%s/rx/%s/%s.png"
+
+#: TotalsGraphicsWebPagesGenerator.py:364
+msgid "archives_%s/yearly/totals/%s/rx/%s/%s.png"
+msgstr "archives_%s/annuels/totaux/%s/rx/%s/%s.png"
+
+#: TotalsGraphicsWebPagesGenerator.py:390
 msgid "TX totals for"
 msgstr "Totaux des transmissions(TX) pour"
 
-#: totalGraphicsWebPages.py:330
+#: TotalsGraphicsWebPagesGenerator.py:397
 msgid "Display the average latency of file transfers for all clients."
 msgstr "Afficher la latence moyenne pour tous les transferts."
 
-#: totalGraphicsWebPages.py:332
+
+#: TotalsGraphicsWebPagesGenerator.py:399
 msgid "Display the number of files for wich the latency was over 15 seconds for all clients."
 msgstr "Afficher le nombre de fichiers pour lesquels la latence tait de 15 secondes ou plus."
 
-#: totalGraphicsWebPages.py:334
+#: TotalsGraphicsWebPagesGenerator.py:401
 msgid "Display number of bytes transfered to all clients."
 msgstr "Afficher le nombre de bytes transférés à tous les clients."
 
-#: totalGraphicsWebPages.py:336
+#: TotalsGraphicsWebPagesGenerator.py:403
 msgid "Display the number of files transferred every day to all clients."
 msgstr "Afficher le nombre de fichiers transférés à tous les clients." 
 
-#: totalGraphicsWebPages.py:338
+#: TotalsGraphicsWebPagesGenerator.py:405
 msgid "Display the total of errors that occured during the file transfers to allclients."
 msgstr "Afficher le total des erreurs qui se sont produites durant la transmissions des fichers aux clients."
+
+#: TotalsGraphicsWebPagesGenerator.py:437
+msgid "%sdaily/totals/%s/tx/%s/%s/%s/%s.png"
+msgstr "%sjournaliers/totaux/%s/tx/%s/%s/%s/%s.png"
+
+#: TotalsGraphicsWebPagesGenerator.py:438
+msgid "archives_%s/daily/totals/%s/tx/%s/%s/%s/%s.png"
+msgstr "archives_%s/journaliers/totaux/%s/tx/%s/%s/%s/%s.png"
+
+#: TotalsGraphicsWebPagesGenerator.py:441
+msgid "%sweekly/totals/%s/tx/%s/%s/%s.png"
+msgstr "%shebdomadaires/totaux/%s/tx/%s/%s/%s.png"
+
+#: TotalsGraphicsWebPagesGenerator.py:442
+msgid "archives_%s/weekly/totals/%s/tx/%s/%s/%s.png"
+msgstr "archives_%s/hebdomadaires/totaux/%s/tx/%s/%s/%s.png"
+
+#: TotalsGraphicsWebPagesGenerator.py:445
+msgid "%smonthly/totals/%s/tx/%s/%s/%s.png"
+msgstr "%smensuels/totaux/%s/tx/%s/%s/%s.png"
+
+#: TotalsGraphicsWebPagesGenerator.py:446
+msgid "archives_%s/monthly/totals/%s/tx/%s/%s/%s.png"
+msgstr "archives_%s/mensuels/totaux/%s/tx/%s/%s/%s.png"
+
+#: TotalsGraphicsWebPagesGenerator.py:449
+msgid "%syearly/totals/%s/tx/%s/%s.png"
+msgstr "%sannuels/totaux/%s/tx/%s/%s.png"
+
+#: TotalsGraphicsWebPagesGenerator.py:450
+msgid "archives_%s/yearly/totals/%s/tx/%s/%s.png"
+msgstr "archives_%s/annuels/totaux/%s/tx/%s/%s.png"
 
