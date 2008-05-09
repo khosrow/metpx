@@ -6,216 +6,220 @@ msgstr "Erreur. %s n'est pas un langage de travail supporte."
 msgid "Error. %s is not a supported output language."
 msgstr "Erreur. %s n'est pas un language de sortie supporte"
 
-#: GnuPlotter.py:153
-msgid "Client"
-msgstr "Client"
-
-#: GnuPlotter.py:155
-msgid "Source"
-msgstr "Source"
-
-#: GnuPlotter.py:211
+#: GnuPlotter.py:152 GnuPlotter.py:217 GnuPlotter.py:219 GnuPlotter.py:717
+#: GnuPlotter.py:718
 msgid "All"
 msgstr "Tous"
 
-#: GnuPlotter.py:219
+#: GnuPlotter.py:159
+msgid "Client"
+msgstr "Client"
+
+#: GnuPlotter.py:161
+msgid "Source"
+msgstr "Source"
+
+#: GnuPlotter.py:230
 msgid "others/gnuplot/%.50s/"
 msgstr "autres/gnuplot/%.50s/"
 
-#: GnuPlotter.py:224
+#: GnuPlotter.py:235
 msgid "%s_%s_%s_%s_%shours_on_%s_for_%s_products.png"
 msgstr "%s_%s_%s_%s_%sheures_sur_%s_pour_les_produits_%s.png"
 
-#: GnuPlotter.py:238
-msgid "s_%s_%s_%shours_on_%s."
-msgstr "s_%s_%s_%sheures_sur_%s."
+#: GnuPlotter.py:249
+msgid "s_%s_%s_%shours_on_%."
+msgstr "s_%s_%s_%sheures_sur_%."
 
-#: GnuPlotter.py:239
+#: GnuPlotter.py:250
 msgid "s_for_%."
 msgstr "s_pour_les_produits_%"
 
-#: GnuPlotter.py:239
+#: GnuPlotter.py:250
 msgid "s_products.png"
 msgstr "s.png"
 
-#: GnuPlotter.py:265
+#: GnuPlotter.py:276
 msgid "Call to getXtics received"
 msgstr "Appel à getXtics reçu."
 
-#: GnuPlotter.py:308
+#: GnuPlotter.py:319
 msgid "Call to getPairs received."
 msgstr "Appel à getPairs reçu."
 
-#: GnuPlotter.py:335 GnuPlotter.py:473 GnuPlotter.py:479 GnuPlotter.py:484
-#: GnuPlotter.py:656
-msgid "latency"
-msgstr "latence"
-
-#: GnuPlotter.py:338 GnuPlotter.py:348 GnuPlotter.py:383 GnuPlotter.py:660
-msgid "bytecount"
-msgstr "nbreDeBytes"
-
-#: GnuPlotter.py:342 GnuPlotter.py:348 GnuPlotter.py:652
-msgid "errors"
-msgstr "erreurs"
-
-#: GnuPlotter.py:353 GnuPlotter.py:362 GnuPlotter.py:664
-msgid "filecount"
-msgstr "nbreDeFichiers"
-
-#: GnuPlotter.py:396
+#: GnuPlotter.py:409
 msgid "Error in getPairs."
 msgstr "Erreur dans la méthode getPairs."
 
-#: GnuPlotter.py:397
+#: GnuPlotter.py:410
 msgid "The %s stat type was not found in previously collected data."
 msgstr "Le type de donnée %s n'a pas été trouvé dans les types de donnés pris en charge."
 
-#: GnuPlotter.py:486
+#: GnuPlotter.py:486 GnuPlotter.py:492 GnuPlotter.py:497 GnuPlotter.py:672
+msgid "latency"
+msgstr "latence"
+
+#: GnuPlotter.py:499
 msgid "With values rounded for every minutes."
 msgstr "Avec des valeurs arrondies pour chaques minutes."
 
-#: GnuPlotter.py:489
+#: GnuPlotter.py:502
 msgid "With the total value of every minutes."
 msgstr "Avec les valeurs totales de chaques minutes."
 
-#: GnuPlotter.py:501
+#: GnuPlotter.py:515
 msgid "%s for %s for a span of %s hours ending at %s"
 msgstr "%s pour %s pour une durée de %s heures se terminant le %s"
 
-#: GnuPlotter.py:503
+#: GnuPlotter.py:516
 msgid "MAX: "
 msgstr "MAX: "
 
-#: GnuPlotter.py:504
+#: GnuPlotter.py:517
 msgid "MEAN: "
 msgstr "MOYENNE: "
 
-#: GnuPlotter.py:504
+#: GnuPlotter.py:517
 msgid "MIN: "
 msgstr "MIN: "
 
-#: GnuPlotter.py:547
+#: GnuPlotter.py:563
 msgid "daily/%s/%s/"
 msgstr "journalier/%s/%s/"
 
-#: GnuPlotter.py:600
+#: GnuPlotter.py:590
+msgid "webGraphics/columbo/%s_%s.png"
+msgstr "graphiquesWeb/columbo/%s_%s.png"
+
+#: GnuPlotter.py:616
 msgid "Call to plot received"
 msgstr "Appel a la method plot recut"
 
-#: GnuPlotter.py:617
+#: GnuPlotter.py:633
 msgid "time (hours)"
 msgstr "temps(en heures)"
 
-#: GnuPlotter.py:727
+#: GnuPlotter.py:668
+msgid "errors"
+msgstr "erreurs"
+
+#: GnuPlotter.py:676
+msgid "bytecount"
+msgstr "nbreDeBytes"
+
+#: GnuPlotter.py:680
+msgid "filecount"
+msgstr "nbreDeFichiers"
+
+#: GnuPlotter.py:769
 msgid "latency (seconds)"
 msgstr "latence(en secondes)"
 
-#: GnuPlotter.py:729
+#: GnuPlotter.py:771
 msgid "\"%s : %s\""
 msgstr "\"%s : %s\""
 
-#: GnuPlotter.py:731 GnuPlotter.py:815 GnuPlotter.py:888 GnuPlotter.py:948
+#: GnuPlotter.py:773 GnuPlotter.py:857 GnuPlotter.py:930 GnuPlotter.py:990
 msgid "\"Machines : %s\""
 msgstr "\"Machines : %s\""
 
-#: GnuPlotter.py:733 GnuPlotter.py:817 GnuPlotter.py:890 GnuPlotter.py:950
+#: GnuPlotter.py:775 GnuPlotter.py:859 GnuPlotter.py:932 GnuPlotter.py:992
 msgid "\"Product type(s) : %s\""
 msgstr "\"Types de produits : %s\""
 
-#: GnuPlotter.py:735
+#: GnuPlotter.py:777
 msgid "\"Absolute max. lat. : %s seconds\""
 msgstr "\"Max. abs. latence : %s seconds\""
 
-#: GnuPlotter.py:737
+#: GnuPlotter.py:779
 msgid "\"Time of max. lat. : %s\""
 msgstr "\"Temps de la max. lat. : %s\""
 
-#: GnuPlotter.py:740
+#: GnuPlotter.py:782
 msgid "\"File with max. lat. :%s\""
 msgstr "\"Fichier avec la max. lat. :%s\""
 
-#: GnuPlotter.py:743
+#: GnuPlotter.py:785
 msgid "\"File with max. lat. :\""
 msgstr "\"Fichier avec la max. lat. :\""
 
-#: GnuPlotter.py:747 GnuPlotter.py:833
+#: GnuPlotter.py:789 GnuPlotter.py:875
 msgid "\"# of files : %s \""
 msgstr "\"# de fichiers : %s \""
 
-#: GnuPlotter.py:749
+#: GnuPlotter.py:791
 msgid "\"# of files over %s seconds: %s \""
 msgstr "\"# de latences au dela de %s secondes: %s \""
 
-#: GnuPlotter.py:751
+#: GnuPlotter.py:793
 msgid "\"%% of files over %s seconds: %3.2f %%\""
 msgstr "\"%% de latences au dela de %s seconds: %3.2f %%\""
 
-#: GnuPlotter.py:795
+#: GnuPlotter.py:837
 msgid "%s Bytes"
 msgstr "%s Bytes"
 
-#: GnuPlotter.py:798
+#: GnuPlotter.py:840
 msgid "%.2f kiloBytes"
 msgstr "%.2f kiloBytes"
 
-#: GnuPlotter.py:801
+#: GnuPlotter.py:843
 msgid "%.2f MegaBytes"
 msgstr "%.2f MegaBytes"
 
-#: GnuPlotter.py:803
+#: GnuPlotter.py:845
 msgid "%.2f GigaBytes"
 msgstr "%.2f GigaBytes"
 
-#: GnuPlotter.py:811
+#: GnuPlotter.py:853
 msgid "Bytes/Minute"
 msgstr "Bytes/Minute"
 
-#: GnuPlotter.py:821
+#: GnuPlotter.py:863
 msgid "\"Largest file : %s\""
 msgstr "\"Plus gros fichier : %s\""
 
-#: GnuPlotter.py:824
+#: GnuPlotter.py:866
 msgid "\"Largest file : \""
 msgstr "\"Plus gros fichier : \""
 
-#: GnuPlotter.py:829
+#: GnuPlotter.py:871
 msgid "\"Size of largest file : %s Bytes\""
 msgstr "\"Taille du plus gros fichier : %s Bytes\""
 
-#: GnuPlotter.py:831
+#: GnuPlotter.py:873
 msgid "\"Time of largest file : %s\""
 msgstr "\"Temps du plus gros fichier : %s\""
 
-#: GnuPlotter.py:835
+#: GnuPlotter.py:877
 msgid "\"# of Bytes: %s \""
 msgstr "\"# de Bytes: %s \""
 
-#: GnuPlotter.py:884
+#: GnuPlotter.py:926
 msgid "Errors/Minute"
 msgstr "Erreurs/Minute"
 
-#: GnuPlotter.py:892
+#: GnuPlotter.py:934
 msgid "\"Max error/%s : %s\""
 msgstr "\"Maximum d'erreurs/%s : %s\""
 
-#: GnuPlotter.py:894 GnuPlotter.py:954
+#: GnuPlotter.py:936 GnuPlotter.py:996
 msgid "\"Time of max. : %s\""
 msgstr "\"Temps du maximum : %s\""
 
-#: GnuPlotter.py:896
+#: GnuPlotter.py:938
 msgid "\"# of errors : %.f\""
 msgstr "\"# d'erreurs : %.f\""
 
-#: GnuPlotter.py:944
+#: GnuPlotter.py:986
 msgid "Files/Minute"
 msgstr "Fichiers/Minute"
 
-#: GnuPlotter.py:952
+#: GnuPlotter.py:994
 msgid "\"Max files/%s : %s\""
 msgstr "\"Maximum de fichiers/%s : %s\""
 
-#: GnuPlotter.py:956
+#: GnuPlotter.py:998
 msgid "\"# of files : %s\""
 msgstr "\"# de fichiers : %s\""
 
