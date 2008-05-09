@@ -9,7 +9,7 @@
 #                named Plotter.py written by Daniel Lemay. This file can be found in the lib
 #                folder of this application. 
 #
-# @since        : 2006-06-06, last updated on 2008-02-28
+# @since        : 2006-06-06, last updated on 2008-05-09
 #
 #
 # @license: MetPX Copyright (C) 2004-2008  Environment Canada
@@ -587,7 +587,7 @@ class GnuPlotter( Translatable ):
         
         
         if copyToColumbo == True : 
-            destination = statsPaths.STATSGRAPHS + "webGraphics/columbo/%s_%s.png" %(clientName,self.outputLanguage)
+            destination = statsPaths.STATSGRAPHS + _("webGraphics/columbo/%s_%s.png") %(clientName,self.outputLanguage)
             if not os.path.isdir( os.path.dirname( destination ) ):
                 os.makedirs(  os.path.dirname( destination ), 0777 )                                                      
                 os.chmod( os.path.dirname( destination ), 0777 )
