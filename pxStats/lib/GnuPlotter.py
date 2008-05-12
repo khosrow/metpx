@@ -555,8 +555,8 @@ class GnuPlotter( Translatable ):
         
         
         StatsDateLib.setLanguage( self.outputLanguage ) # Makes sure month is in the right language.
-        year, month, day = StatsDateLib.getYearMonthDayInStrfTime( StatsDateLib.getSecondsSinceEpoch( self.currentTime ) )        
-        StatsDateLib.setLanguage( self.workingLanguage )# Sets language back to working language.
+        year, month, day = StatsDateLib.getYearMonthDayInStrfTime( StatsDateLib.getSecondsSinceEpoch( self.currentTime ) - 60 ) # -60 means that a graphic ending at midnight
+        StatsDateLib.setLanguage( self.workingLanguage )# Sets language back to working language.                               # would be named after the rpevious day.
             
                                         
         if copyToArchive == True : 
