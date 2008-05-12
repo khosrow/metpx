@@ -151,8 +151,12 @@ def buildCsvFileName( infos ):
         @return: Return the built up file name.              
                       
     """
+    
+    global _ 
+    
+    StatsDateLib.setLanguage(infos.outputLanguage)
     paths = StatsPaths()
-    paths.setPaths()
+    paths.setPaths( infos.outputLanguage )
     
     machinesStr = str(infos.machinesForLabels).replace('[','').replace( ']','' ).replace(',', '').replace("'","").replace( '"','').replace( ' ','' )
     
@@ -163,18 +167,20 @@ def buildCsvFileName( infos ):
     fileName = paths.STATSCSVFILES
    
     if infos.span == "daily":
-        fileName = fileName + _("daily/") + infos.fileType + "/%s/%s/%s/%s.csv" %( machinesStr, currentYear, currentMonth, currentDay )   
+        fileName = fileName + "/" + _("daily/") + infos.fileType + "/%s/%s/%s/%s.csv" %( machinesStr, currentYear, currentMonth, currentDay )   
     
     elif infos.span == "weekly":
-        fileName = fileName + _("weekly/") + infos.fileType  + "/%s/%s/%s.csv" %( machinesStr, currentYear, currentWeek ) 
+        fileName = fileName + "/" +  _("weekly/") + infos.fileType  + "/%s/%s/%s.csv" %( machinesStr, currentYear, currentWeek ) 
     
     elif infos.span == "monthly":
-        fileName = fileName + _("monthly/") + infos.fileType + "/%s/%s/%s.csv" %( machinesStr, currentYear, currentMonth )
+        fileName = fileName + "/" + _("monthly/") + infos.fileType + "/%s/%s/%s.csv" %( machinesStr, currentYear, currentMonth )
     
     elif infos.span == "yearly":
-        fileName = fileName + _("yearly/") + infos.fileType  + "/%s/%s.csv" %( machinesStr, currentYear )
+        fileName = fileName + "/" + _("yearly/") + infos.fileType  + "/%s/%s.csv" %( machinesStr, currentYear )
         
- 
+    
+    StatsDateLib.setLanguage( LanguageTools.getMainApplicationLanguage() )    
+        
     return fileName 
 
 
@@ -271,6 +277,8 @@ def writeCsvFileHeader( fileHandle, infos ):
         @return : None
         
     """
+    
+    global _
     
     valueTypes = [ "min", "max", "mean", "total" ]
     if infos.fileType == "rx":
@@ -906,7 +914,7 @@ Ex 2 :
 
 
 
-def  setGlobalLanguageParameters():
+def  setGlobalLanguageParameters( language = "" ):
     """
         @summary : Sets up all the needed global language 
                    tranlator so that it can be used 
@@ -916,6 +924,8 @@ def  setGlobalLanguageParameters():
                    is restrained to this module only and
                    does not cover the entire project.
         
+        @param language : language to set.
+        
         @return: None
         
     """
@@ -924,9 +934,12 @@ def  setGlobalLanguageParameters():
     global SUPPORTED_RX_DATATYPES
     global SUPPORTED_TX_DATATYPES
     
-    _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )  
-    
-    
+    if language == "":
+        _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )  
+    else :
+        _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, language )
+        
+        
     SUPPORTED_RX_DATATYPES = { "bytecount":_("bytecount") , "filecount": _("filecount"), "errors":_("errors") }
     SUPPORTED_TX_DATATYPES = { "latency" :_("latency"), "filesOverMaxLatency":_("filesOverMaxLatency"), "bytecount":_("bytecount"), "filecount" :_("filecount"), "errors":_("errors") }
 
@@ -944,6 +957,7 @@ def main():
     #get arguments
     parser = createParser()
     infos  = getOptionsFromParser(parser)
+    setGlobalLanguageParameters( infos.outputLanguage )
     filename = transferDataToCsvFile(infos)
     
     print _("generated filename : %s") %filename
