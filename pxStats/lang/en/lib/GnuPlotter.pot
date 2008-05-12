@@ -1,242 +1,172 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR ORGANIZATION
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2008-05-09 18:46+GMT\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
-"Content-Transfer-Encoding: ENCODING\n"
-"Generated-By: pygettext.py 1.5\n"
 
 
-#: GnuPlotter.py:140
 msgid "Error. %s is not a supported working language."
-msgstr ""
+msgstr "Error. %s is not a supported working language."
 
-#: GnuPlotter.py:146
 msgid "Error. %s is not a supported output language."
-msgstr ""
+msgstr "Error. %s is not a supported output language."
 
-#: GnuPlotter.py:152 GnuPlotter.py:217 GnuPlotter.py:219 GnuPlotter.py:717
-#: GnuPlotter.py:718
 msgid "All"
-msgstr ""
+msgstr "All"
 
-#: GnuPlotter.py:159
 msgid "Client"
-msgstr ""
+msgstr "Client"
 
-#: GnuPlotter.py:161
 msgid "Source"
-msgstr ""
+msgstr "Source"
 
-#: GnuPlotter.py:230
 msgid "others/gnuplot/%.50s/"
-msgstr ""
+msgstr "others/gnuplot/%.50s/"
 
-#: GnuPlotter.py:235
 msgid "%s_%s_%s_%s_%shours_on_%s_for_%s_products.png"
-msgstr ""
+msgstr "%s_%s_%s_%s_%shours_on_%s_for_%s_products.png"
 
-#: GnuPlotter.py:249
 msgid "s_%s_%s_%shours_on_%."
-msgstr ""
+msgstr "s_%s_%s_%shours_on_%."
 
-#: GnuPlotter.py:250
 msgid "s_for_%."
-msgstr ""
+msgstr "s_for_%."
 
-#: GnuPlotter.py:250
 msgid "s_products.png"
-msgstr ""
+msgstr "s_products.png"
 
-#: GnuPlotter.py:276
 msgid "Call to getXtics received"
-msgstr ""
+msgstr "Call to getXtics received"
 
-#: GnuPlotter.py:319
 msgid "Call to getPairs received."
-msgstr ""
+msgstr "Call to getPairs received."
 
-#: GnuPlotter.py:409
 msgid "Error in getPairs."
-msgstr ""
+msgstr "Error in getPairs."
 
-#: GnuPlotter.py:410
 msgid "The %s stat type was not found in previously collected data."
-msgstr ""
+msgstr "The %s stat type was not found in previously collected data."
 
-#: GnuPlotter.py:486 GnuPlotter.py:492 GnuPlotter.py:497 GnuPlotter.py:672
 msgid "latency"
-msgstr ""
+msgstr "latency"
 
-#: GnuPlotter.py:499
 msgid "With values rounded for every minutes."
-msgstr ""
+msgstr "With values rounded for every minutes."
 
-#: GnuPlotter.py:502
 msgid "With the total value of every minutes."
-msgstr ""
+msgstr "With the total value of every minutes."
 
-#: GnuPlotter.py:515
 msgid "%s for %s for a span of %s hours ending at %s"
-msgstr ""
+msgstr "%s for %s for a span of %s hours ending at %s"
 
-#: GnuPlotter.py:516
 msgid "MAX: "
-msgstr ""
+msgstr "MAX: "
 
-#: GnuPlotter.py:517
 msgid "MEAN: "
-msgstr ""
+msgstr "MEAN: "
 
-#: GnuPlotter.py:517
 msgid "MIN: "
-msgstr ""
+msgstr "MIN: "
 
-#: GnuPlotter.py:563
 msgid "daily/%s/%s/"
-msgstr ""
+msgstr "daily/%s/%s/"
 
-#: GnuPlotter.py:590
 msgid "webGraphics/columbo/%s_%s.png"
-msgstr ""
+msgstr "webGraphics/columbo/%s_%s.png"
 
-#: GnuPlotter.py:616
 msgid "Call to plot received"
-msgstr ""
+msgstr "Call to plot received"
 
-#: GnuPlotter.py:633
 msgid "time (hours)"
-msgstr ""
+msgstr "time (hours)"
 
-#: GnuPlotter.py:668
 msgid "errors"
-msgstr ""
+msgstr "errors"
 
-#: GnuPlotter.py:676
 msgid "bytecount"
-msgstr ""
+msgstr "bytecount"
 
-#: GnuPlotter.py:680
 msgid "filecount"
-msgstr ""
+msgstr "filecount"
 
-#: GnuPlotter.py:769
 msgid "latency (seconds)"
-msgstr ""
+msgstr "latency (seconds)"
 
-#: GnuPlotter.py:771
 msgid "\"%s : %s\""
-msgstr ""
+msgstr "\"%s : %s\""
 
-#: GnuPlotter.py:773 GnuPlotter.py:857 GnuPlotter.py:930 GnuPlotter.py:990
 msgid "\"Machines : %s\""
-msgstr ""
+msgstr "\"Machines : %s\""
 
-#: GnuPlotter.py:775 GnuPlotter.py:859 GnuPlotter.py:932 GnuPlotter.py:992
 msgid "\"Product type(s) : %s\""
-msgstr ""
+msgstr "\"Product type(s) : %s\""
 
-#: GnuPlotter.py:777
 msgid "\"Absolute max. lat. : %s seconds\""
-msgstr ""
+msgstr "\"Absolute max. lat. : %s seconds\""
 
-#: GnuPlotter.py:779
 msgid "\"Time of max. lat. : %s\""
-msgstr ""
+msgstr "\"Time of max. lat. : %s\""
 
-#: GnuPlotter.py:782
 msgid "\"File with max. lat. :%s\""
-msgstr ""
+msgstr "\"File with max. lat. :%s\""
 
-#: GnuPlotter.py:785
 msgid "\"File with max. lat. :\""
-msgstr ""
+msgstr "\"File with max. lat. :\""
 
-#: GnuPlotter.py:789 GnuPlotter.py:875
 msgid "\"# of files : %s \""
-msgstr ""
+msgstr "\"# of files : %s \""
 
-#: GnuPlotter.py:791
 msgid "\"# of files over %s seconds: %s \""
-msgstr ""
+msgstr "\"# of files over %s seconds: %s \""
 
-#: GnuPlotter.py:793
 msgid "\"%% of files over %s seconds: %3.2f %%\""
-msgstr ""
+msgstr "\"%% of files over %s seconds: %3.2f %%\""
 
-#: GnuPlotter.py:837
 msgid "%s Bytes"
-msgstr ""
+msgstr "%s Bytes"
 
-#: GnuPlotter.py:840
 msgid "%.2f kiloBytes"
-msgstr ""
+msgstr "%.2f kiloBytes"
 
-#: GnuPlotter.py:843
 msgid "%.2f MegaBytes"
-msgstr ""
+msgstr "%.2f MegaBytes"
 
-#: GnuPlotter.py:845
 msgid "%.2f GigaBytes"
-msgstr ""
+msgstr "%.2f GigaBytes"
 
-#: GnuPlotter.py:853
 msgid "Bytes/Minute"
-msgstr ""
+msgstr "Bytes/Minute"
 
-#: GnuPlotter.py:863
 msgid "\"Largest file : %s\""
-msgstr ""
+msgstr "\"Largest file : %s\""
 
-#: GnuPlotter.py:866
 msgid "\"Largest file : \""
-msgstr ""
+msgstr "\"Largest file : \""
 
-#: GnuPlotter.py:871
 msgid "\"Size of largest file : %s Bytes\""
-msgstr ""
+msgstr "\"Size of largest file : %s Bytes\""
 
-#: GnuPlotter.py:873
 msgid "\"Time of largest file : %s\""
-msgstr ""
+msgstr "\"Time of largest file : %s\""
 
-#: GnuPlotter.py:877
 msgid "\"# of Bytes: %s \""
-msgstr ""
+msgstr "\"# of Bytes: %s \""
 
-#: GnuPlotter.py:926
 msgid "Errors/Minute"
-msgstr ""
+msgstr "Errors/Minute"
 
-#: GnuPlotter.py:934
 msgid "\"Max error/%s : %s\""
-msgstr ""
+msgstr "\"Max error/%s : %s\""
 
-#: GnuPlotter.py:936 GnuPlotter.py:996
 msgid "\"Time of max. : %s\""
-msgstr ""
+msgstr "\"Time of max. : %s\""
 
-#: GnuPlotter.py:938
 msgid "\"# of errors : %.f\""
-msgstr ""
+msgstr "\"# of errors : %.f\""
 
-#: GnuPlotter.py:986
 msgid "Files/Minute"
-msgstr ""
+msgstr "Files/Minute"
 
-#: GnuPlotter.py:994
 msgid "\"Max files/%s : %s\""
-msgstr ""
+msgstr "\"Max files/%s : %s\""
 
-#: GnuPlotter.py:998
 msgid "\"# of files : %s\""
-msgstr ""
+msgstr "\"# of files : %s\""
 
