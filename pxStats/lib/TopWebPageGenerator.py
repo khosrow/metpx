@@ -140,7 +140,7 @@ class TopWebPageGenerator( Translatable ):
             </div>
     
             <div class="right">
-                <a href="archives_%s" target="bottom" >Archives</a>
+                <a href="html_%s/archives" target="bottom" >Archives</a>
     
                  <a href="../scripts/cgi-bin/graphicsRequestPage.py?lang=%s" target="bottom">"""%(self.outputLanguage,self.outputLanguage) + _("Requests") + """</a>
     
