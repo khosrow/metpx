@@ -89,15 +89,13 @@ class WebPageCsvFilesGenerator( WebPageArtifactsGeneratorInterface ):
         paths = StatsPaths()
         paths.setPaths()
         
-        output = commands.getoutput( paths.STATSBIN + 'csvDataConversion.py --includeGroups -d --machines "%s" ' +\
-                                    '--machinesAreClusters --fixedPrevious --date "%s" -f rx'  %( clusters, self.timeOfRequest ) )
+        output = commands.getoutput( paths.STATSBIN + 'csvDataConversion.py --includeGroups -d --machines "%s" --machinesAreClusters --fixedPrevious --date "%s" -f rx --language %s'  %( clusters, self.timeOfRequest, self.outputLanguage ) )
         #print output
            
-        output = commands.getoutput( paths.STATSBIN + 'csvDataConversion.py --includeGroups -d --machines "%s" ' + 
-                                    '--machinesAreClusters --fixedPrevious --date "%s" -f tx'  %( clusters, self.timeOfRequest ) )
+        output = commands.getoutput( paths.STATSBIN + 'csvDataConversion.py --includeGroups -d --machines "%s" --machinesAreClusters --fixedPrevious --date "%s" -f tx --language %s'  %( clusters, self.timeOfRequest, self.outputLanguage ) )
         #print output      
         
-        fileName = self.getFileNameFromExecutionOutput(output)
+        fileName = self.__getFileNameFromExecutionOutput(output)
         
         if fileName != "":
             commands.getstatusoutput(paths.STATSWEBPAGESGENERATORS + 'csvDataFiltersForWebPages.py -c %s -f %s ' %(cost, fileName) )
@@ -115,7 +113,7 @@ class WebPageCsvFilesGenerator( WebPageArtifactsGeneratorInterface ):
             
             configParameters = StatsConfigParameters( )
             configParameters.getAllParameters()    
-            updateManager = AutomaticUpdatesManager( configParameters.nbAutoUpdatesLogsToKeep )
+            updateManager =  AutomaticUpdatesManager( configParameters.nbAutoUpdatesLogsToKeep, "pxStatsStartup" )
             
             missingYears = updateManager.getMissingYearsBetweenUpdates( updateManager.getTimeOfLastUpdateInLogs(), self.timeOfRequest )
             oldTimeOfRequest = self.timeOfRequest
@@ -140,7 +138,7 @@ class WebPageCsvFilesGenerator( WebPageArtifactsGeneratorInterface ):
             
             configParameters = StatsConfigParameters( )
             configParameters.getAllParameters()    
-            updateManager = AutomaticUpdatesManager( configParameters.nbAutoUpdatesLogsToKeep )
+            updateManager = AutomaticUpdatesManager( configParameters.nbAutoUpdatesLogsToKeep, "pxStatsStartup" )
             
             missingMonths = updateManager.getMissingMonthsBetweenUpdates( updateManager.getTimeOfLastUpdateInLogs(), self.timeOfRequest )
             
@@ -166,7 +164,7 @@ class WebPageCsvFilesGenerator( WebPageArtifactsGeneratorInterface ):
             
             configParameters = StatsConfigParameters( )
             configParameters.getAllParameters()    
-            updateManager = AutomaticUpdatesManager( configParameters.nbAutoUpdatesLogsToKeep )
+            updateManager = AutomaticUpdatesManager( configParameters.nbAutoUpdatesLogsToKeep, "pxStatsStartup" )
             
             missingWeeks = updateManager.getMissingWeeksBetweenUpdates( updateManager.getTimeOfLastUpdateInLogs(), self.timeOfRequest )
             
@@ -193,7 +191,7 @@ class WebPageCsvFilesGenerator( WebPageArtifactsGeneratorInterface ):
             
             configParameters = StatsConfigParameters( )
             configParameters.getAllParameters()    
-            updateManager = AutomaticUpdatesManager( configParameters.nbAutoUpdatesLogsToKeep )
+            updateManager = AutomaticUpdatesManager( configParameters.nbAutoUpdatesLogsToKeep, "pxStatsStartup" )
             
             missingDays = updateManager.getMissingDaysBetweenUpdates( updateManager.getTimeOfLastUpdateInLogs(), self.timeOfRequest )
             
@@ -324,9 +322,9 @@ class WebPageCsvFilesGenerator( WebPageArtifactsGeneratorInterface ):
         clusters = str( configParameters.sourceMachinesTags).replace('[', '').replace(']', '').replace(' ', '').replace('"','').replace("'","")  
           
                               
-        updateManager = AutomaticUpdatesManager( configParameters.nbAutoUpdatesLogsToKeep )
+        updateManager = AutomaticUpdatesManager( configParameters.nbAutoUpdatesLogsToKeep, "pxStatsStartup" )
         
-        requiresUpdateFonctions = { "daily": updateManager.isFirstUpdateOfTheDay, "weekly": updateManager.isFirstUpdateOfTheWeek,\
+        requiresUpdateFonctions = { "hourly": updateManager.isFirstUpdateOfTheHour,"daily": updateManager.isFirstUpdateOfTheDay, "weekly": updateManager.isFirstUpdateOfTheWeek,\
                                     "monthly": updateManager.isFirstUpdateOfTheMonth, "yearly": updateManager.isFirstUpdateOfTheYear
                                   }
         
