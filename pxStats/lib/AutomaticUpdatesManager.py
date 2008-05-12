@@ -93,7 +93,7 @@ class AutomaticUpdatesManager( Translatable ):
        entriesToRemove = allEntries[ :-self.numberOfLogsToKeep]
        
        for entrytoRemove in entriesToRemove:
-           os.remove(paths.STATSTEMPAUTUPDTLOGS + entrytoRemove ) 
+           os.remove(paths.STATSTEMPAUTUPDTLOGS  + self.updateType + "/" + entrytoRemove ) 
    
    
    
