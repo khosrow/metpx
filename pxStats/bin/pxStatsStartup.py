@@ -45,6 +45,8 @@ from pxStats.lib.DailyGraphicsWebPageGenerator import DailyGraphicsWebPageGenera
 from pxStats.lib.WeeklyGraphicsWebPageGenerator import WeeklyGraphicsWebPageGenerator
 from pxStats.lib.MonthlyGraphicsWebPageGenerator import MonthlyGraphicsWebPageGenerator
 from pxStats.lib.YearlyGraphicsWebPageGenerator import YearlyGraphicsWebPageGenerator
+from pxStats.lib.BottomWebPageGenerator import BottomWebPageGenerator
+from pxStats.lib.TopWebPageGenerator import TopWebPageGenerator
 from pxStats.lib.TotalsGraphicsWebPagesGenerator import TotalsGraphicsWebPageGenerator
 from pxStats.lib.AutomaticUpdatesManager import AutomaticUpdatesManager
 from pxStats.lib.LanguageTools import LanguageTools
@@ -64,6 +66,8 @@ def validateParameters( parameters, machineParameters, logger = None  ):
                    will be terminated.     
           
     """   
+    
+    global _ 
     
     if len( parameters.picklingMachines ) != len(parameters.sourceMachinesTags ) :
     
@@ -135,43 +139,49 @@ def updatePickles( parameters, machineParameters, currentTimeInIsoFormat ):
                     
                     if parameters.detailedParameters.picklingMachines[tag][i] != LOCAL_MACHINE :#pickling to be done elsewhere
                         for j in range(3):#do 3 times in case of currently turning log files.
-                            remotePxLibPath = paths.getPXPathFromMachine(paths.PXLIB, sourceMachines[i], machineParameters.getUserNameForMachine( sourceMachines[i]))
-                            output = commands.getoutput( "ssh %s@%s 'rsync -avzr --delete-before -e ssh  %s@%s:%s %s%s/' "  %( machineParameters.getUserNameForMachine( picklingMachine), picklingMachine,machineParameters.getUserNameForMachine( sourceMachines[i] ) , sourceMachines[i] , remotePxLibPath,  paths.STATSLOGS, sourceMachines[i] ) )
-                            #print "ssh %s@%s 'rsync -avzr --delete-before -e ssh  %s@%s:%s %s%s/' "%( machineParameters.getUserNameForMachine( picklingMachine), picklingMachine,machineParameters.getUserNameForMachine( sourceMachines[i] ) , sourceMachines[i] , paths.PXLOG, paths.STATSLOGS, sourceMachines[i] ) 
-                            #print output
+                            remotePxLogPath = paths.getPXPathFromMachine(paths.PXLOG, sourceMachines[i], machineParameters.getUserNameForMachine( sourceMachines[i]))
+                            output = commands.getoutput( "ssh %s@%s 'rsync -avzr --delete-before -e ssh  %s@%s:%s %s%s/' "  %( machineParameters.getUserNameForMachine( picklingMachine), picklingMachine,machineParameters.getUserNameForMachine( sourceMachines[i] ) , sourceMachines[i] , remotePxLogPath,  paths.STATSLOGS, sourceMachines[i] ) )
+                            print "ssh %s@%s 'rsync -avzr --delete-before -e ssh  %s@%s:%s %s%s/' "  %( machineParameters.getUserNameForMachine( picklingMachine), picklingMachine,machineParameters.getUserNameForMachine( sourceMachines[i] ) , sourceMachines[i] , remotePxLogPath,  paths.STATSLOGS, sourceMachines[i] ) 
+                            print output
                     else:
                         
                         for j in range(3):#do 3 times in case of currently turning log files.
-                            remotePxLibPath = paths.getPXPathFromMachine(paths.PXLIB, sourceMachines[i], machineParameters.getUserNameForMachine( sourceMachines[i]))
-                            output = commands.getoutput( "rsync -avzr --delete-before -e ssh %s@%s:%s   %s%s/ " %( machineParameters.getUserNameForMachine( sourceMachines[i] ), sourceMachines[i] , remotePxLibPath,  paths.STATSLOGS, sourceMachines[i] ) )
-                            #print "rsync -avzr --delete-before -e ssh %s@%s:%s   %s%s/ " %( machineParameters.getUserNameForMachine( sourceMachines[i] ), sourceMachines[i] , paths.PXLOG, paths.STATSLOGS, sourceMachines[i] )
-                            #print output   
+                            remotePxLogPath = paths.getPXPathFromMachine(paths.PXLOG, sourceMachines[i], machineParameters.getUserNameForMachine( sourceMachines[i]))
+                            print "le remote paths : ", remotePxLogPath
+                            print                            
+                            output = commands.getoutput( "rsync -avzr --delete-before -e ssh %s@%s:%s   %s%s/ " %( machineParameters.getUserNameForMachine( sourceMachines[i] ), sourceMachines[i] , remotePxLogPath,  paths.STATSLOGS, sourceMachines[i] ) )
+                            print
+                            print "*****************************"
+                            print
+                            print "rsync -avzr --delete-before -e ssh " + """%s@%s:%s   %s%s/"""  %( machineParameters.getUserNameForMachine( sourceMachines[i] ), sourceMachines[i] , remotePxLogPath,  paths.STATSLOGS, sourceMachines[i] )
+                            print
+                            print output   
                                     
                    
                 if picklingMachine != LOCAL_MACHINE :#pickling to be done elsewhere,needs ssh             
                               
                     output = commands.getoutput( """ssh %s@%s 'python %spickleUpdater.py  -m %s -f rx --date "%s" '   """ %( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine, paths.STATSBIN,  sourceMachines[i], currentTimeInIsoFormat ) ) 
-                    #print "ssh %s@%s 'python %spickleUpdater.py  -m %s -f rx'   "  %( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine, paths.STATSBIN, sourceMachines[i] )
-                    #print output
+                    print "ssh %s@%s 'python %spickleUpdater.py  -m %s -f rx'   "  %( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine, paths.STATSBIN, sourceMachines[i] )
+                    print output
                     
                     output = commands.getoutput( """ssh %s@%s 'python %spickleUpdater.py -m %s -f tx --date "%s" '  """( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine , paths.STATSBIN, sourceMachines[i], currentTimeInIsoFormat ) )
-                    #print "ssh %s@%s 'python %spickleUpdater.py -m %s -f tx'  "%( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine , paths.STATSBIN, sourceMachines[i] )
-                    #print output
+                    print "ssh %s@%s 'python %spickleUpdater.py -m %s -f tx'  "%( machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine , paths.STATSBIN, sourceMachines[i] )
+                    print output
                     
                     output = commands.getoutput( """%spickleSynchroniser.py -l %s -m %s  """%( paths.STATSTOOLS, machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine ) )      
-                    #print "%spickleSynchroniser.py -l %s -m %s  " %( paths.STATSTOOLS, machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine )
-                    #print output
+                    print "%spickleSynchroniser.py -l %s -m %s  " %( paths.STATSTOOLS, machineParameters.getUserNameForMachine( picklingMachine ), picklingMachine )
+                    print output
                 
                     
                 else: # pickling is to be done locally. Log files may or may not reside elsewhere.
                     
                     output = commands.getoutput( """python %spickleUpdater.py -f rx -m %s --date "%s" """%( paths.STATSBIN, sourceMachines[i], currentTimeInIsoFormat ) )
-                    #print "python %spickleUpdater.py -f rx -m %s " %( paths.STATSBIN, sourceMachines[i] )
-                    #print output
+                    print "python %spickleUpdater.py -f rx -m %s " %( paths.STATSBIN, sourceMachines[i] )
+                    print output
                     
                     output = commands.getoutput( """python %spickleUpdater.py -f tx -m %s --date "%s" """  %(  paths.STATSBIN, sourceMachines[i], currentTimeInIsoFormat ) )
-                    #print "python %spickleUpdater.py -f tx -m %s " %( paths.STATSBIN, sourceMachines[i] )
-                    #print output
+                    print "python %spickleUpdater.py -f tx -m %s " %( paths.STATSBIN, sourceMachines[i] )
+                    print output
         
             sys.exit()            
             
@@ -202,8 +212,8 @@ def uploadGraphicFiles( parameters, machineParameters ):
     for uploadMachine in parameters.graphicsUpLoadMachines :
         output = commands.getoutput( "scp %s* %s@%s:%s " %( paths.STATSCOLGRAPHS, machineParameters.getUserNameForMachine(uploadMachine), uploadMachine, paths.PDSCOLGRAPHS   ) )
         
-        #print "scp %s* %s@%s:%s " %( paths.STATSCOLGRAPHS, machineParameters.getUserNameForMachine(uploadMachine),uploadMachine, paths.PDSCOLGRAPHS )
-        #print output
+        print "scp %s* %s@%s:%s " %( paths.STATSCOLGRAPHS, machineParameters.getUserNameForMachine(uploadMachine),uploadMachine, paths.PDSCOLGRAPHS )
+        print output
 
 
         
@@ -260,8 +270,8 @@ def updateDatabases( parameters, machineParameters, currentTimeInIsoFormat ):
              machines = machineParameters.getMachinesAssociatedWith(tag)             
              machines = str( machines ).replace( "[", "" ).replace( "]", "" ).replace( " ", "" )
              output = commands.getoutput( "%stransferPickleToRRD.py -m '%s' -e '%s' " %( paths.STATSBIN, machines, currentTimeInIsoFormat )  )
-             #print  "%stransferPickleToRRD.py -m '%s' " %( paths.STATSBIN, machines )
-             #print "output:%s" %output
+             print  "%stransferPickleToRRD.py -m '%s' " %( paths.STATSBIN, machines )
+             print "output:%s" %output
         
         if parameters.groupParameters.groups != []:
             
@@ -273,8 +283,8 @@ def updateDatabases( parameters, machineParameters, currentTimeInIsoFormat ):
                 groupFileTypes = str(parameters.groupParameters.groupFileTypes[group]).replace( "[", "" ).replace( "]", "" ).replace( " ", "" )
                
                 output = commands.getoutput( "%stransferPickleToRRD.py -c '%s' -m '%s' -g '%s' -f %s -p '%s' -e '%s' " %( paths.STATSBIN, groupMembers, groupMachines, group, groupFileTypes, groupProducts, currentTimeInIsoFormat  ) )
-                #print   "%stransferPickleToRRD.py -c '%s' -m '%s' -g '%s' -f %s -p '%s' " %( paths.STATSBIN, groupMembers, groupMachines, group, groupFileTypes, groupProducts  )
-                #print output
+                print   "%stransferPickleToRRD.py -c '%s' -m '%s' -g '%s' -f %s -p '%s' " %( paths.STATSBIN, groupMembers, groupMachines, group, groupFileTypes, groupProducts  )
+                print output
  
  
  
@@ -293,7 +303,7 @@ def getGraphicsForWebPages( generalParameters, currentTimeInIsoFormat ):
     
     for language in generalParameters.artifactsLanguages:
         graphicsGenerator = WebPageGraphicsGenerator( currentTimeInIsoFormat, language) 
-        graphicsGenerator.getGraphicsForAllSupportedWebPagesBasedOnFrequenciesFoundInConfig()
+        graphicsGenerator.generateAllForEverySupportedWebPagesBasedOnFrequenciesFoundInConfig()
 
 
     
@@ -310,34 +320,40 @@ def updateWebPages( generalParameters ):
     
     
     generalParameters = StatsConfigParameters()
+    generalParameters.getAllParameters()
     
-    dailyWebPageGenerator  = DailyGraphicsWebPageGenerator()
-    weeklyWebPageGenerator = WeeklyGraphicsWebPageGenerator()
-    monthlyWebPageGenerator= MonthlyGraphicsWebPageGenerator()
-    yearlyWebPageGenerator = YearlyGraphicsWebPageGenerator()
-    totalWebPageGenerator  = TotalsGraphicsWebPageGenerator()
-       
-    generators = [ dailyWebPageGenerator, weeklyWebPageGenerator, monthlyWebPageGenerator, yearlyWebPageGenerator, totalWebPageGenerator   ]   
+    otherLanguages = []
+
+ 
+    generatorsTypes = [ DailyGraphicsWebPageGenerator, WeeklyGraphicsWebPageGenerator, MonthlyGraphicsWebPageGenerator, YearlyGraphicsWebPageGenerator, TotalsGraphicsWebPageGenerator   ]   
     
     for languagePair in generalParameters.webPagesLanguages :
-        for generator in generators :
-            generator.displayedLanguage = languagePair[0]
-            generator.filesLanguage     = languagePair[1]
+        for generatorsType in generatorsTypes :
+            generator = generatorsType( languagePair[0], languagePair[1] )
             generator.generateWebPage()
-            
-    output = commands.getoutput( paths.STATSWEBPAGESGENERATORS + "generateTopWebPage.py" )
-    #print paths.STATSWEBPAGESGENERATORS + "generateTopWebPage.py"   
+        
+        topWebPageGenerator = TopWebPageGenerator(languagePair[0]) 
+        topWebPageGenerator.generateTopWebPage()
+        otherLanguages.append( languagePair[0] )
+    
+    try:
+        while(1):
+            otherLanguages.remove( generalParameters.mainApplicationLanguage )
+    except:
+        pass
+    
+    bottomWebPageGenerator = BottomWebPageGenerator(generalParameters.mainApplicationLanguage, otherLanguages )
+    bottomWebPageGenerator.printWebPage()
     
     
     
-def monitorActivities( timeParameters, currentTime ):
+def monitorActivities( configParameters, currentTime ):
     """
         @summary: Monitors all the activities that occured during 
         the course of this program. Report is sent out by mail
         to recipients specified in the config file.
         
-        @param timeParameters: Parameters specifying at wich 
-                               frequency the programs need to run.
+        @param configParameters: StatsConfigParameters instance.
                                
         @param currenTime: currentTime in seconds since epoch format.
         
@@ -346,12 +362,15 @@ def monitorActivities( timeParameters, currentTime ):
     paths = StatsPaths()
     paths.setPaths()
     
+    updateManager = AutomaticUpdatesManager( configParameters.nbAutoUpdatesLogsToKeep, "monitoring")
     
-    if needsToBeRun(timeParameters.monitoringFrequency, currentTime ):        
-        output = commands.getoutput( paths.STATSBIN + "statsMonitor.py" )
-        #print paths.STATSBIN + "statsMonitor.py"
-        #print output
-        
+    if updateManager.updateIsRequired(currentTime)  :  
+         output = commands.getoutput( paths.STATSBIN + "statsMonitor.py '%s'" %( currentTime ) )
+         print paths.STATSBIN + "statsMonitor.py"
+         print output
+         updateManager.addAutomaticUpdateToLogs( currentTime )
+ 
+ 
  
 def needsToBeRun( frequency, currentTime ):        
     """
@@ -416,43 +435,46 @@ def needsToBeRun( frequency, currentTime ):
     
     
     
-def cleanUp( timeParameters, currentTime, daysOfPicklesToKeep ):
+def cleanUp( configParameters, currentTime, daysOfPicklesToKeep ):
     """
     
         @summary: Based on current time and frequencies contained
                   within the time parameters, we will run 
                   the cleaners that need to be run.       
                             
-        @param timeParameters: Parameters specifying at wich 
-                               frequency the programs need to run.
+        @param configParameters: StatsConfigParameters instance.
                                
         @param currenTime: currentTime in seconds since epoch format.
                                   
     """     
     
-    paths = StatsPaths
+    paths = StatsPaths()
     paths.setPaths()
     
-    if needsToBeRun( timeParameters.pickleCleanerFrequency, currentTime ) :
+    updateManager = AutomaticUpdatesManager(configParameters.nbAutoUpdatesLogsToKeep, "picklecleaner")
+    
+    if updateManager.updateIsRequired(currentTime) :
         
         output = commands.getoutput( paths.STATSTOOLS + "pickleCleaner.py %s" %int(daysOfPicklesToKeep) )
-        #print paths.STATSTOOLS + "pickleCleaner.py" + " " + str( daysOfPicklesToKeep )
+        print paths.STATSTOOLS + "pickleCleaner.py" + " " + str( daysOfPicklesToKeep )
+        updateManager.addAutomaticUpdateToLogs( currentTime )
         
-    if needsToBeRun( timeParameters.generalCleanerFrequency, currentTime ):
-        commands.getstatusoutput( paths.STATSTOOLS + "clean_dir.plx" + " " + paths.PXETC + "clean.conf"   )
-        #print paths.STATSTOOLS + "clean_dir.plx" + " " + paths.PXETC + "clean.conf" 
-        
+    updateManager = AutomaticUpdatesManager(configParameters.nbAutoUpdatesLogsToKeep, "generalCleaner")    
+    
+    if updateManager.updateIsRequired(currentTime) :
+        commands.getstatusoutput( paths.STATSTOOLS + "clean_dir.plx" + " " + paths.STATSETC + "clean_dir.conf"   )
+        print paths.STATSTOOLS + "clean_dir.plx" + " " + paths.STATSETC + "clean_dir.conf" 
+        updateManager.addAutomaticUpdateToLogs( currentTime )
     
     
-def backupRRDDatabases( timeParameters, currentTime, nbBackupsToKeep ):
+def backupRRDDatabases( configParameters, currentTime, nbBackupsToKeep ):
     """
     
         @summary: Based on current time and frequencies contained
                   within the time parameters, we will backup the databases
                   only if necessary.       
                             
-        @param timeParameters: Parameters specifying at wich 
-                               frequency the programs need to run.
+        @param configParameters: StatsConfigParameters instance.
                                
         @param currenTime: currentTime in seconds since epoch format.
                                   
@@ -461,10 +483,12 @@ def backupRRDDatabases( timeParameters, currentTime, nbBackupsToKeep ):
     paths = StatsPaths()
     paths.setPaths()    
     
-    if needsToBeRun( timeParameters.dbBackupsFrequency, currentTime ):
+    updateManager = AutomaticUpdatesManager(configParameters.nbAutoUpdatesLogsToKeep, "dbBackups" )
+    
+    if updateManager.updateIsRequired( currentTime )  :
         commands.getstatusoutput( paths.STATSTOOLS + "backupRRDDatabases.py" + " " + str( int(nbBackupsToKeep)) )             
-        #print paths.STATSTOOLS + "backupRRDDatabases.py" + " " + str(nbBackupsToKeep)
-
+        print paths.STATSTOOLS + "backupRRDDatabases.py" + " " + str(nbBackupsToKeep)
+        updateManager.addAutomaticUpdateToLogs( currentTime )
 
 
 def saveCurrentMachineParameters( machineParameters  ):
@@ -480,7 +504,7 @@ def saveCurrentMachineParameters( machineParameters  ):
     paths.setPaths()
     
     if not os.path.isdir( os.path.dirname( paths.STATSPREVIOUSMACHINEPARAMS ) ):
-        os.makedirs( paths.STATSPREVIOUSMACHINEPARAMS )
+        os.makedirs( os.path.dirname(paths.STATSPREVIOUSMACHINEPARAMS) )
     
     CpickleWrapper.save( machineParameters, paths.STATSPREVIOUSMACHINEPARAMS)
         
@@ -567,8 +591,8 @@ def updateFilesAssociatedWithMachineTags( tagsNeedingUpdates, machineParameters 
         currentCombinedMachineNames = currentCombinedMachineNames.join( [ x for x in machineParameters.getMachinesAssociatedWith( tag ) ]) 
         
         output = commands.getoutput( "%sfileRenamer.py -o %s  -n %s --overrideConfirmation" %( paths.STATSTOOLS, previousCombinedMachineNames, currentCombinedMachineNames  ) )
-        #print "%sfileRenamer.py -o %s  -n %s --overrideConfirmation" %( paths.STATSTOOLS, previousCombinedMachineNames, currentCombinedMachineNames  )
-        #print output 
+        print "%sfileRenamer.py -o %s  -n %s --overrideConfirmation" %( paths.STATSTOOLS, previousCombinedMachineNames, currentCombinedMachineNames  )
+        print output 
 
     
         
@@ -649,21 +673,21 @@ def main():
         
         updateDatabases( generalParameters, machineParameters, currentTimeInIsoFormat )
         
-        backupRRDDatabases( generalParameters.timeParameters, currentTime, generalParameters.nbDbBackupsToKeep )
+        backupRRDDatabases( generalParameters, currentTimeInIsoFormat, generalParameters.nbDbBackupsToKeep )
         
-        updateCsvFiles( )
+        #updateCsvFiles( )
         
-        getGraphicsForWebPages( currentTimeInIsoFormat )
+        getGraphicsForWebPages( generalParameters, currentTimeInIsoFormat )
                     
         updateWebPages( generalParameters )
         
-        uploadGraphicFiles( generalParameters, machineParameters )
+        #uploadGraphicFiles( generalParameters, machineParameters )
      
-        cleanUp( generalParameters.timeParameters, currentTime, generalParameters.daysOfPicklesToKeep )
+        cleanUp( generalParameters , currentTimeInIsoFormat, generalParameters.daysOfPicklesToKeep )
     
-        monitorActivities( generalParameters.timeParameters, currentTime )
+        monitorActivities(  generalParameters, currentTimeInIsoFormat )
         
-        updateManager = AutomaticUpdatesManager( generalParameters.nbAutoUpdatesLogsToKeep )
+        updateManager = AutomaticUpdatesManager( generalParameters.nbAutoUpdatesLogsToKeep, "pxStatsStartup" )
         updateManager.addAutomaticUpdateToLogs( currentTimeInIsoFormat )
         
         GeneralStatsLibraryMethods.deleteLockFile( "pxStatsStartup" )
