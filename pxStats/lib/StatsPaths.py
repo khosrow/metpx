@@ -380,7 +380,7 @@ class StatsPaths:
         self.STATSTEMP    = self.STATSROOT + _( "temp/" )       
 
         #csvfiles 
-        self.STATSCSVFILES         = self.STATSDATA + _("csvFiles")
+        self.STATSCSVFILES         = self.STATSDATA + _("csvFiles/")
         
         #Databases related paths.
         self.STATSDB               = self.STATSDATA + _( 'databases/' )
