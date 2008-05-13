@@ -17,8 +17,8 @@ msgstr "man/"
 msgid "temp/"
 msgstr "temp/"
 
-msgid "csvFiles"
-msgstr "csvFiles"
+msgid "csvFiles/"
+msgstr "csvFiles/"
 
 msgid "databases/"
 msgstr "databases/"

@@ -1,3 +1,7 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
 msgid ""
 msgstr ""
 
@@ -17,7 +21,7 @@ msgstr "man/"
 msgid "temp/"
 msgstr "temp/"
 
-msgid "csvFiles"
+msgid "csvFiles/"
 msgstr "fichiersCsv/"
 
 msgid "databases/"
@@ -82,4 +86,5 @@ msgstr "fichiersDeVerrou/"
 
 msgid "automaticUpdatesLogs/"
 msgstr "journalisationDesMAJAutomatiques/"
+
 
