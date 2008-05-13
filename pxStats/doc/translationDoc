@@ -36,14 +36,17 @@ To implement the solution as described below the following were required :
 - pygettext python module.
 - pygettext software, which is the python equivalent to xgettext.
 - msgfmt software which compiles the pygettext output to binary format
-- sameLanguagePotFileTranslator.py a time-saving utility found within pxStats.  
+- sameLanguagePotFileTranslator.py a time-saving utility found within 
+  .../pxStats/bin/tools
+- copyOldPotFileIntoNewPotFile.pya utility file used to save time when updating 
+  .pot files.
 
 
 Guiding principles
 ----------------------------------------------------------------------------------
 
 - Application was originally written in english, documentation was in english  
-  and everything outputted, from graphcis to webPages to emails were in english.
+  and everything outputted, from graphics to webPages to emails were in english.
 
 - Translation support had to be added with as little code change as possible while 
   keeping code as readable as possible.  
@@ -57,6 +60,7 @@ Guiding principles
   might not even have been generated for. Example a french web page showing
   graphics whose content is in english.
     
+- Translation files have to be easily updatable.
 
 
 Implementation :
@@ -71,7 +75,7 @@ parameters :
 - Main application language :
 
   This language will be the one used to set all the path towards the different 
-  files produced by the application, the names of the pickles and pdatabases 
+  files produced by the application, the names of the pickles and databases 
   produced and the application in which all the programs will be presented to 
   the user.
    
@@ -97,18 +101,22 @@ parameters :
   
     These languages specify in which languages the web pages need to be generated.
     Web page are generated very fast so adding more languages is not a problem.
-    Web pages specified here must be specified in couples, stating A : the 
+    Web pages specified here must be specified in couples(A:B), stating A : the 
     language printed in the web pages and B the language in which the artifacts 
-    in linked from inside the web page are in.  
+    in linked from inside the web page are in.
+    
+    Example : fr:fr,en:en
 
     
 Supported languages(.../lang/)
 ================================================================================
 All the supported languages are found in the lang folder. Each folders found 
-there contains the translation files needed for that particular language. 
+there contains the translation files needed for that particular language.
+
 To make things easier, the arborescence found under each language's folder is 
-the same as the file being translated. Example ...pxStats/bin/webPages/test.py
-would be found under ...pxStats/lang/bin/webPages/test
+the same as the file being translated. For example, the english translation file
+for this file : ...pxStats/bin/webPages/x.py would be found here
+...pxStats/lang/en/bin/webPages/x
 
 
 Explicit translation support( Translatable class )
@@ -117,16 +125,63 @@ Classes which want to support translation can inherit from the Translation class
 found in the lib folder.
  
 This will automatically add a getTranslatorForModule function to the 
-class. This way, each class does not have to delcare it's own translator and if 
-the translator method and if the translation themods are ever to change, we will
-only have to change it at a single place.
+class. This way, each class does not have to declare it's own translator and if 
+the translator methods are ever to change, we will only have to change it at 
+a single place.
 
 Non-explicit translation support
 ================================================================================
-If you are working with a binary file(.../pxStats/bin/) you will probably want
+If you are working with a binary file(.../pxStats/bin/x.py) you will probably want
 to translate part of you application, yet getting your module to derive from 
-the Translatable class would make little sens. In that case you will need to 
-use the language tools class found in the lib folder.
+the Translatable class would make little sens since it's not a class. In that 
+case you will need to use the language tools class found in the lib folder.
+
+Code excerpts from .../pxStats/bin/generateRRDGraphics.py 
+.
+.
+.
+from pxStats.lib.LanguageTools import LanguageTools
+.
+.
+.
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
+.
+.
+.
+def  setGlobalLanguageParameters():
+    """
+        @summary : Sets up all the needed global language 
+                   tranlator so that it can be used 
+                   everywhere in this program.
+        
+        @Note    : The scope of the global _ function 
+                   is restrained to this module only and
+                   does not cover the entire project.
+        
+        @return: None
+        
+    """
+    
+    global _ 
+    
+    _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH )    
+
+
+Once the setGlobalLanguageParameters() has been called, the _ translator method
+will be available all throughout the module by any method which needs it.
+
+To avoid namespace problems, specifiy at the top of the method using 
+the translator that you are using the global _ translator.
+
+Example :
+
+def methodThatNeedTranslator()
+    global _
+    _("my string to translate")
+
+
+
+
 
 Supporting different language throughout a module
 ================================================================================
@@ -134,27 +189,30 @@ In the following sections, we will cover how to render a module translatable.
 The common approach to this problem, however, allows for only one language to 
 be used for translating text throughout the entire module.
 
-PXStats, however has some modules which are requried to support multiple 
+PXStats, however has some modules which are required to support multiple 
 languages at the same time during the same execution.
 
-The simple workaround found to counter this was to add as many proterties or 
+The simple workaround found to counter this was to add as many properties or 
 parameters as needed to the classes which need to support more than one
-language. Throughout the application execution, the translator being used will
-be set to the language that needs to be usedat that point in time based on the
-properties that were added to the class.
+language.
 
-That way, a class or script could have as many translator as desired.
+For example some classes have an outputLanguage property and an inputLanguage
+property. This way, during the the course of the program's execution, the 
+translator can be switched towards one of the two language depending on the 
+current need.
+
+example : _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, self.outputLanguage )
 
 
-
+That way, a class or script could support as many languages as necessary.
 
 
 Steps towards translating a module
 --------------------------------------------------------------------------------
 Here is the series of steps to follow in order to get a module that is 
-translatable.Please refer to the how-to section for details on each section.
+translatable. Please refer to the how-to section for details on each section.
 
-1- Make sure language is supported by the application.
+1- Make sure language you want to translate it into is supported by the application.
 
 2- Make the content of your module translatable
 
@@ -173,17 +231,25 @@ How-to
 Adding supported languages
 ===============================================================================
 To add supported languages, you simply need to create a new folder in the 
-lang section( ex : sp for spanish ) and create the necessary subfolders 
-that reflect the pxStats arborescence.
+.../pxStats/lang directory( ex : sp for spanish, fr for french, en for english )
+and create the necessary subfolders that reflect the pxStats arborescence.
 
 Making the content of a module translatable
 ===============================================================================
 
-- A class from whom instances are created should usually inherit from the 
-  translatable type. 
+- A class from whom instances are created( should be under .../pxStats/lib/ )
+  should usually inherit from the Translatable type.
+
+  Example of a transaltable class definition :
+    class GnuPlotter( Translatable ):
+
+- A binary script should include LanguageTools and have a method similar or identical
+  to the setGlobalLanguageParameters() example given above.
+
 
 - EVERY module should be modified as to conform to the folowing :
-  - Every string that can be displayed to the user, be it a single-quoted or double quoted string sould be transformed in the following way :
+  
+    - Every string that can be displayed to the user, be it a single-quoted or double quoted string sould be transformed in the following way :
     
     print "Hello World"
     print _("Hello World")
@@ -213,36 +279,69 @@ Making the content of a module translatable
               """   
 
               
+
 Generating .po translation files from a translatable module
 ===============================================================================  
-To generate a translation file from pygettext simply execute the following 
-command in a console
+To generate a translation file( message.pot ) from pygettext simply execute 
+the following command in a console
 
-pygettext moduleName 
+pygettext moduleNameToBeTranslated.py 
 
 
 Obtaining a completly filled .po for the same languages as the one used within the module.
 ============================================================================================  
-Use sameLanguagePotFileTranslator.py  found in the tools section of pxStats.
+Use the following command .../pxStats/bin/tools/sameLanguagePotFileTranslator.py potfile.pot.
+
 
 Translating a .po file into a different language than the one used within the module.
 ============================================================================================  
 To to this, you will need to open the .po file resulting from executing the 
-"Generating .po translation" step with a text editor. For every "msgid" found you 
-will need to fill the the following "msgstr" line with the appropriate translation.
+"Generating .po translation" step with a text editor.
 
+For every "msgid" found, you will need to fill the the following "msgstr" 
+line with the appropriate translation.
 
 When updating a script, the new .po you will unfortunatly have to refill
-most of the .po file with translations form the previous version. A small utility 
-is in the works  that will copy the cotent of an old .po file into a new one to 
-save up some time.
+the added of modified .po file with translations form the previous version. 
+
+Updating a .po file
+===========================================================================================
+
+When executing pygettext on a modified python file you will get a brand new message.pot 
+file. If a old filled version of that pot file allready exist, we have developped 
+a small utility that will copy the filled content of the old file into the new file, 
+which saves up a lot of time when updating python files.
+
+To use it simple execute the following commang : 
+.../pxStats/bin/tools/copyOldPotFileIntoNewPotFile.py   oldFile.pot newFile.pot
+
+
+Afterwards open up the newFile.pot and fill out whats missing.
 
 
 Generating the binary translation file(s) from the translated .po file(s).
 ===============================================================================  
 For all the generated .po file, do the following command  :
-msgfmt .poFile outputfileName
-  
+msgfmt translationfile.po -o translationfile
+
+warning : make sure this kind of lines is removed from the .po file prior
+to converting it :
+
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2008-05-13 14:44+GMT\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: ENCODING\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
 
 Using the binary translation files within a program
 ===============================================================================
@@ -265,3 +364,5 @@ simply need to add the following lines to your code:
 If all steps were followed properly, this would print out a translated version of 
 the Hello world message.
 
+Otherwise use the translatable inheritence or use the LanguageTools tactic
+presented in the "Non-explicit translation support" section.
