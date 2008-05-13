@@ -32,6 +32,7 @@ sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 from pxStats.lib.MachineConfigParameters import MachineConfigParameters
 from pxStats.lib.StatsPaths import StatsPaths
+from pxStats.lib.StatsDateLib import StatsDateLib
 from pxStats.lib.AutomaticUpdatesManager import AutomaticUpdatesManager
 from pxStats.lib.WebPageArtifactsGeneratorInterface import WebPageArtifactsGeneratorInterface
 
@@ -85,18 +86,14 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
                 groupMachines = str(groupMachines).replace( "[", "" ).replace( "]", "" ).replace( "'", "" ).replace( '"','' )
                  
                 if graphicType == "daily":
-                    commands.getstatusoutput( '%sgenerateRRDGraphics.py -g %s -c %s --combineClients --copy -d "%s"  -m %s -f %s -p %s  -s 24 --language %s'\
-                                              %( self.paths.STATSBIN, group, groupMembers, self.timeOfRequest, groupMachines, groupFileTypes, groupProducts, self.outputLanguage ) )
-                    #print '%sgenerateRRDGraphics.py -g %s -c %s --combineClients --copy -d "%s"  -m %s -f %s -p %s  -s 24 --language %s'\
-                    #                          %( self.paths.STATSBIN, group, groupMembers, self.timeOfRequest, groupMachines, groupFileTypes, groupProducts, self.outputLanguage )
+                    commands.getstatusoutput( '%sgenerateGnuGraphics.py -g %s -c %s --combineClients --copy -d "%s"  -m %s -f %s -p %s  -s 24 --outputLanguage %s' %( self.paths.STATSBIN, group, groupMembers, self.timeOfRequest, groupMachines, groupFileTypes, groupProducts, self.outputLanguage ) )
+                    #print  '%sgenerateGnuGraphics.py -g %s -c %s --combineClients --fixedCurrent --copy -d "%s"  -m %s -f %s -p %s  -s 24 --language %s' %( self.paths.STATSBIN, group, groupMembers, self.timeOfRequest, groupMachines, groupFileTypes, groupProducts, self.outputLanguage )
                 
                 else:    
-                    commands.getoutput('%sgenerateRRDGraphics.py -g %s -c %s --combineClients --copy --date "%s"  -m %s -f %s -p %s  %s --language %s'\
-                                        %( self.paths.STATSBIN, group, groupMembers, self.timeOfRequest, groupMachines, groupFileTypes,\
-                                           groupProducts, supportedGraphicTypes[ graphicType], self.outputLanguage ) )
-                    #print '%sgenerateRRDGraphics.py -g %s -c %s --combineClients --copy --date "%s"  -m %s -f %s -p %s  %s --language %s'\
-                    #                    %( self.paths.STATSBIN, group, groupMembers, self.timeOfRequest, groupMachines, groupFileTypes,\
-                    #                       groupProducts, supportedGraphicTypes[ graphicType], self.outputLanguage )
+                    commands.getoutput("%sgenerateRRDGraphics.py %s --copy -f %s --machines '%s'  -c %s --date '%s' --fixedCurrent --outputLanguage %s" %( self.paths.STATSBIN, supportedGraphicTypes[ graphicType], groupFileTypes, groupMachines, group, self.timeOfRequest, self.outputLanguage ) )
+                    # print '%sgenerateRRDGraphics.py -g %s -c %s --combineClients --copy --date "%s"  -m %s -f %s -p %s  %s --language %s'\
+                                        # %( self.paths.STATSBIN, group, groupMembers, self.timeOfRequest, groupMachines, groupFileTypes,\
+                                           # groupProducts, supportedGraphicTypes[ graphicType], self.outputLanguage )
          
          
     def __generateAllRRDGraphicsForWebPage( self, graphicType, generateTotalsGraphics = True  ):
@@ -130,30 +127,30 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
             machinePair = str(machinePair).replace( "[", "" ).replace( "]", "" ).replace( " ", "" ).replace( "'", "" ).replace( '"','' )
             #individual graphics 
             commands.getstatusoutput( "%sgenerateRRDGraphics.py %s --copy -f tx --machines '%s' --havingRun --date '%s' --fixedCurrent --language %s"\
-                                      %(  self.paths.STATSBIN, supportedGraphicTypes[graphicType], machinePair, self.timeOfRequest, self.outputLanguage ) )
+                                       %(  self.paths.STATSBIN, supportedGraphicTypes[graphicType], machinePair, self.timeOfRequest, self.outputLanguage ) )
             
             # print "%sgenerateRRDGraphics.py %s --copy -f tx --machines '%s' --havingRun --date '%s' --fixedCurrent --language %s"\
-                                      # %( self.paths.STATSBIN, supportedGraphicTypes[graphicType], machinePair, self.timeOfRequest, self.outputLanguage )
+                                       # %( self.paths.STATSBIN, supportedGraphicTypes[graphicType], machinePair, self.timeOfRequest, self.outputLanguage )
                                       
             commands.getstatusoutput( "%sgenerateRRDGraphics.py %s --copy -f rx --machines '%s' --havingRun --date '%s' --fixedCurrent --language %s"\
-                                      %( self.paths.STATSBIN, supportedGraphicTypes[graphicType], machinePair, self.timeOfRequest, self.outputLanguage ) )    
+                                       %( self.paths.STATSBIN, supportedGraphicTypes[graphicType], machinePair, self.timeOfRequest, self.outputLanguage ) )
             
             # print  "%sgenerateRRDGraphics.py %s --copy -f rx --machines '%s' --havingRun --date '%s' --fixedCurrent --language %s"\
-                                      # %( self.paths.STATSBIN, supportedGraphicTypes[graphicType], machinePair, self.timeOfRequest, self.outputLanguage )
+                                       # %( self.paths.STATSBIN, supportedGraphicTypes[graphicType], machinePair, self.timeOfRequest, self.outputLanguage )
             
             if generateTotalsGraphics == True :
                 #print output
                 commands.getstatusoutput( '%sgenerateRRDGraphics.py %s --copy --totals -f "rx" --machines "%s" --havingRun  --fixedCurrent --date "%s" --language %s'\
-                                          %( self.paths.STATSBIN, supportedGraphicTypes[graphicType], machinePair, self.timeOfRequest, self.outputLanguage ) )
+                                           %( self.paths.STATSBIN, supportedGraphicTypes[graphicType], machinePair, self.timeOfRequest, self.outputLanguage ) )
                 # print '%sgenerateRRDGraphics.py %s --copy --totals -f "rx" --machines "%s" --havingRun  --fixedCurrent --date "%s" --language %s'\
-                                          # %( self.paths.STATSBIN, supportedGraphicTypes[graphicType], machinePair, self.timeOfRequest, self.outputLanguage )
+                                           # %( self.paths.STATSBIN, supportedGraphicTypes[graphicType], machinePair, self.timeOfRequest, self.outputLanguage )
                                           
                 
                 commands.getstatusoutput( '%sgenerateRRDGraphics.py %s --copy --totals -f "tx" --machines "%s" --havingRun  --fixedCurrent --date "%s" --language %s'\
-                                          %( self.paths.STATSBIN, supportedGraphicTypes[graphicType], machinePair, self.timeOfRequest, self.outputLanguage ) )
+                                           %( self.paths.STATSBIN, supportedGraphicTypes[graphicType], machinePair, self.timeOfRequest, self.outputLanguage ) )
                 
                 # print '%sgenerateRRDGraphics.py %s --copy --totals -f "tx" --machines "%s" --havingRun  --fixedCurrent --date "%s" --language %s'\
-                                          # %( self.paths.STATSBIN, supportedGraphicTypes[graphicType], machinePair, self.timeOfRequest, self.outputLanguage )
+                                           # %( self.paths.STATSBIN, supportedGraphicTypes[graphicType], machinePair, self.timeOfRequest, self.outputLanguage )
         
         
         
@@ -168,7 +165,7 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
         
         configParameters = StatsConfigParameters( )
         configParameters.getAllParameters()    
-        updateManager = AutomaticUpdatesManager( configParameters.nbAutoUpdatesLogsToKeep )
+        updateManager = AutomaticUpdatesManager( configParameters.nbAutoUpdatesLogsToKeep, "pxStatsStartup" )
         
         missingYears = updateManager.getMissingYearsBetweenUpdates( updateManager.getTimeOfLastUpdateInLogs(), self.timeOfRequest )
         
@@ -193,7 +190,7 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
         
         configParameters = StatsConfigParameters( )
         configParameters.getAllParameters()    
-        updateManager = AutomaticUpdatesManager( configParameters.nbAutoUpdatesLogsToKeep )
+        updateManager = AutomaticUpdatesManager( configParameters.nbAutoUpdatesLogsToKeep, "pxStatsStartup" )
         
         missingMonths = updateManager.getMissingMonthsBetweenUpdates( updateManager.getTimeOfLastUpdateInLogs(), self.timeOfRequest )
         
@@ -219,7 +216,7 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
         
         configParameters = StatsConfigParameters( )
         configParameters.getAllParameters()    
-        updateManager = AutomaticUpdatesManager( configParameters.nbAutoUpdatesLogsToKeep )
+        updateManager = AutomaticUpdatesManager( configParameters.nbAutoUpdatesLogsToKeep, "pxStatsStartup" )
         
         missingWeeks = updateManager.getMissingWeeksBetweenUpdates( updateManager.getTimeOfLastUpdateInLogs(), self.timeOfRequest )        
         oldTimeOfRequest = self.timeOfRequest
@@ -243,16 +240,17 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
         
         configParameters = StatsConfigParameters( )
         configParameters.getAllParameters()    
-        updateManager = AutomaticUpdatesManager( configParameters.nbAutoUpdatesLogsToKeep )
+        updateManager = AutomaticUpdatesManager( configParameters.nbAutoUpdatesLogsToKeep, "pxStatsStartup" )
         
         missingDays = updateManager.getMissingDaysBetweenUpdates( updateManager.getTimeOfLastUpdateInLogs(), self.timeOfRequest )
-        
+        missingDays.append(self.timeOfRequest)
         oldTimeOfRequest = self.timeOfRequest
         
-        for missingDay in missingDays:
-            self.timeOfRequest = missingDay
+        for missingDay in missingDays[1:]:
+            self.timeOfRequest = StatsDateLib.getIsoTodaysMidnight( missingDay )
             self.__generateAllForDailyWebPage( False, generateTotalsGraphics )
-        
+            self.__generateAllGraphicsForGroups( "daily" )
+            
         self.timeOfRequest = oldTimeOfRequest            
       
               
@@ -297,17 +295,18 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
             
             
             if "," in machines :
-                #print "%sgenerateAllGnuGraphicsForMachines.py -m '%s' -c  -l '%s' --date '%s'  " %( StatsPaths.STATSBIN, machines.replace( "'","" ),logins.replace( "'","" ),currentTime )
+                
                 output = commands.getoutput( "%sgenerateAllGnuGraphicsForMachines.py -m '%s' -c  -l '%s' --date '%s' --outputLanguage %s "\
-                                    %( self.paths.STATSBIN, machines.replace( "'","" ), logins.replace( "'","" ), self.timeOfRequest, self.outputLanguage ) )
-                # print "%sgenerateAllGnuGraphicsForMachines.py -m '%s' -c  -l '%s' --date '%s' --outputLanguage %s "\
-                                    # %( self.paths.STATSBIN, machines.replace( "'","" ), logins.replace( "'","" ), self.timeOfRequest, self.outputLanguage )
+                                    %( self.paths.STATSBIN, machines.replace( "'","" ), logins.replace( "'","" ), self.timeOfRequest, self.outputLanguage) ) 
+                #print "%sgenerateAllGnuGraphicsForMachines.py -m '%s' -c  -l '%s' --date '%s' --outputLanguage %s "\
+                                    #%( self.paths.STATSBIN, machines.replace( "'","" ), logins.replace( "'","" ), self.timeOfRequest, self.outputLanguage ) 
                 #print output                    
             else:
                 output =  commands.getoutput( "%sgenerateAllGnuGraphicsForMachines.py -i -m '%s' -l '%s'  --date '%s' --outputLanguage %s "
                                      %( self.paths.STATSBIN, machines.replace( "'","" ), logins.replace( "'","" ), self.timeOfRequest, self.outputLanguage ) )    
-                # print "%sgenerateAllGnuGraphicsForMachines.py -i -m '%s' -l '%s'  --date '%s' --outputLanguage %s " %( self.paths.STATSBIN, machines.replace( "'","" ), logins.replace( "'","" ), self.timeOfRequest, self.outputLanguage )
-                #-------------------------------------------------- print output
+                #print "%sgenerateAllGnuGraphicsForMachines.py -i -m '%s' -l '%s'  --date '%s' --outputLanguage %s " %( self.paths.STATSBIN, machines.replace( "'","" ), logins.replace( "'","" ), self.timeOfRequest, self.outputLanguage )
+                #print output
+
 
         if generateTotalsGraphics == True :
             
@@ -316,13 +315,14 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
                 #Generate all the daily total graphs.
                 commands.getoutput( '%sgenerateRRDGraphics.py --copy --totals -f "rx" --machines "%s" -d --fixedCurrent --date "%s" --language %s'\
                                     %( self.paths.STATSBIN, machinePair, self.timeOfRequest, self.outputLanguage) )
-                # print '%sgenerateRRDGraphics.py --copy --totals -f "rx" --machines "%s" -d --fixedCurrent --date "%s" --language %s'\
-                                    # %( self.paths.STATSBIN, machinePair, self.timeOfRequest, self.outputLanguage)
+                #print '%sgenerateRRDGraphics.py --copy --totals -f "rx" --machines "%s" -d --fixedCurrent --date "%s" --language %s'\
+                #         %( self.paths.STATSBIN, machinePair, self.timeOfRequest, self.outputLanguage)
                                          
                 commands.getoutput( '%sgenerateRRDGraphics.py --copy --totals -f "tx" --machines "%s" -d --fixedCurrent --date "%s" --language %s'\
                                     %( self.paths.STATSBIN, machinePair, self.timeOfRequest, self.outputLanguage ) )
-                # print '%sgenerateRRDGraphics.py --copy --totals -f "tx" --machines "%s" -d --fixedCurrent --date "%s" --language %s'\
-                                    # %( self.paths.STATSBIN, machinePair, self.timeOfRequest, self.outputLanguage )
+                #print '%sgenerateRRDGraphics.py --copy --totals -f "tx" --machines "%s" -d --fixedCurrent --date "%s" --language %s'\
+                #                     %( self.paths.STATSBIN, machinePair, self.timeOfRequest, self.outputLanguage )
+          
           
           
     def generateAllForYearlyWebPage( self, getGraphicsMissingSinceLastUpdate = False, generateTotalsGraphics = True ): 
@@ -413,7 +413,7 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
             self.__generateAllMissingDailyGraphicsSinceLasteUpdate( generateTotalsGraphics )
             
         self.__generateAllForDailyWebPage( copyToColumbosFolder, generateTotalsGraphics)    
-
+        self.__generateAllGraphicsForGroups( "daily" )
 
 
     def generateColumbosGraphics( self ):        
@@ -476,7 +476,7 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
         configParameters.getAllParameters()       
         
                             
-        updateManager = AutomaticUpdatesManager( configParameters.nbAutoUpdatesLogsToKeep )
+        updateManager = AutomaticUpdatesManager( configParameters.nbAutoUpdatesLogsToKeep, "pxStatsStartup" )
         
         requiresUpdateFonctions = { "hourly": updateManager.isFirstUpdateOfTheHour,  "daily": updateManager.isFirstUpdateOfTheDay, "weekly": updateManager.isFirstUpdateOfTheWeek,\
                                     "monthly": updateManager.isFirstUpdateOfTheMonth, "yearly": updateManager.isFirstUpdateOfTheYear
@@ -485,12 +485,12 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
         #-------------------- print "time of the request : ", self.timeOfRequest
         # print "daily frequency : ", configParameters.timeParameters.dailyWebPageFrequency
         
-        #if requiresUpdateFonctions[ configParameters.timeParameters.dailyWebPageFrequency ](self.timeOfRequest) ==   True :
-        #    self.generateAllForDailyWebPage( True, True, True )
+        if requiresUpdateFonctions[ configParameters.timeParameters.dailyWebPageFrequency ](self.timeOfRequest) ==   True :
+            self.generateAllForDailyWebPage( True, True, True )
         
         # print "weekly frequency : ", configParameters.timeParameters.weeklyWebPageFrequency
         if requiresUpdateFonctions[ configParameters.timeParameters.weeklyWebPageFrequency ](self.timeOfRequest) ==  True :
-            print "weeklies need to be updated."
+            #print "weeklies need to be updated."
             self.generateAllForWeeklyWebPage(  True, True )    
         
         # print "montlhly frequency : ", configParameters.timeParameters.monthlyWebPageFrequency
