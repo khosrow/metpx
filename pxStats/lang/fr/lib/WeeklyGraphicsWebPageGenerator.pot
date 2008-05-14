@@ -1,169 +1,134 @@
-#: WeeklyGraphicsWebPageGenerator.py:312
-msgid "Definition of 'source'"
-msgstr "Définition de 'source'"
+msgid "Weeks"
+msgstr "Semaines"
 
-#: WeeklyGraphicsWebPageGenerator.py:317
-msgid "Definition of 'byteCount'"
-msgstr "Définition de 'nombre de bytes'."
+msgid "Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients."
+msgstr "Afficher, pour chaque jour de la semaine, le nombre total de fichiers envoyés à tous les clients pour lesquels la latence fut au delà de 15 secondes."
 
-#: WeeklyGraphicsWebPageGenerator.py:322
-msgid "Definition of 'client'"
-msgstr "Définition de 'client'."
+msgid "Weekly graphics for TX clients from MetPx."
+msgstr "Graphiques hebdomadaires pour tous les clients(TX) de MetPx."
 
-#: WeeklyGraphicsWebPageGenerator.py:327
-msgid "Definition of 'errors'"
-msgstr "Définition d'erreurs."
+msgid "Errors"
+msgstr "Erreurs"
 
-#: WeeklyGraphicsWebPageGenerator.py:332
+msgid "Display the total of files received every day of the week for each sources."
+msgstr "afficher le total de fichiers reçus à tous les jours de la semaine par toutes les sources."
+
 msgid "Definition of 'filecount'"
 msgstr "Définition de 'nombre de fichiers'."
 
-#: WeeklyGraphicsWebPageGenerator.py:337
-msgid "Definition of 'filesOverMaxLatency'"
-msgstr "Définition de 'Latences au dessus de 15 secondes'."
+msgid "Latency"
+msgstr "Latence"
 
-#: WeeklyGraphicsWebPageGenerator.py:342
-msgid "Definition of 'latency'"
-msgstr "Définition de latence."
+msgid "Display the average latency of file transfers for every day of the week for each clients."
+msgstr "Afficher la latence moyenne pour tous les fichiers envoyés à tous les clients pour chaque jour de la semaine."
 
-#: WeeklyGraphicsWebPageGenerator.py:355
-msgid "Weekly graphics for RX sources from MetPx."
-msgstr "Graphiques hebdomadaires pour toutes les sources(RX) de MetPx."
+msgid "/bytecount/%s.png"
+msgstr "/nbreDeBytes/%s.png"
 
-#: WeeklyGraphicsWebPageGenerator.py:355 WeeklyGraphicsWebPageGenerator.py:542
-msgid "*updated hourly"
-msgstr "*M-à-j à chaques heures."
+msgid "Definition of 'client'"
+msgstr "Définition de 'client'."
 
-#: WeeklyGraphicsWebPageGenerator.py:370
-msgid "weekly/rx/%s/%s/%s.csv"
-msgstr "hebdomadaire/rx/%s/%s/%s.csv"
+msgid "Display the total of files transferred every day of the week for each clients."
+msgstr "Afficher, pour chaque jour de la semaine, le nombre total de fichiers envoyés à tous les clients."
 
-#: WeeklyGraphicsWebPageGenerator.py:371
-msgid "csvFiles/weekly/rx/%s/%s/%s.csv"
-msgstr "fichiersCsv/hebdomadaire/rx/%s/%s/%s.csv"
+msgid "weekly/rx/%s/"
+msgstr "hebdomadaire/rx/%s/"
 
-#: WeeklyGraphicsWebPageGenerator.py:406
+msgid "Definition of 'errors'"
+msgstr "Définition d'erreurs."
+
+msgid "/errors/%s.png"
+msgstr "/erreurs/%s.png"
+
+msgid "/filesOverMaxLatency/%s.png"
+msgstr "/fichiersAvecLatenceInnacceptable/%s.png"
+
+msgid "csvFiles/weekly/tx/%s/%s/%s.csv"
+msgstr "csvFiles/hebdomadaire/tx/%s/%s/%s.csv"
+
+msgid "archives/weekly/rx/%s/"
+msgstr "archives/hebdomadaire/rx/%s/"
+
+msgid "Filecount"
+msgstr "Nombre de fichiers"
+
+msgid "Clients"
+msgstr "Clients"
+
 msgid "Sources"
 msgstr "Sources"
 
 
-msgid "Display the total of bytes received every day of the week for each sources."
-msgstr "Afficher le nombre total de bytes reçus à tous les jours de la semaine par toutes les sources."
+msgid "CSV files"
+msgstr "Fichiers CSV"
 
-#: WeeklyGraphicsWebPageGenerator.py:420 WeeklyGraphicsWebPageGenerator.py:637
-msgid "Bytecount"
-msgstr "Nombre de bytes"
-
-#: WeeklyGraphicsWebPageGenerator.py:430
-msgid "Display the total of files received every day of the week for each sources."
-msgstr "afficher le total de fichiers reçus à tous les jours de la semaine par toutes les sources."
-
-#: WeeklyGraphicsWebPageGenerator.py:434 WeeklyGraphicsWebPageGenerator.py:651
-msgid "Filecount"
-msgstr "Nombre de fichiers"
-
-#: WeeklyGraphicsWebPageGenerator.py:444
 msgid "Display the total of errors that occured during the receptions for every day of the week for each sources."
 msgstr "Afficher le total d'erreurs s'étant produite lors de la réception de fichiers à tous les jours de la semaines pour toutes les sources."
 
-#: WeeklyGraphicsWebPageGenerator.py:448 WeeklyGraphicsWebPageGenerator.py:665
-msgid "Errors"
-msgstr "Erreurs"
+msgid "Definition of 'latency'"
+msgstr "Définition de latence."
 
-#: WeeklyGraphicsWebPageGenerator.py:471 WeeklyGraphicsWebPageGenerator.py:475
-#: WeeklyGraphicsWebPageGenerator.py:495 WeeklyGraphicsWebPageGenerator.py:514
-#: WeeklyGraphicsWebPageGenerator.py:686 WeeklyGraphicsWebPageGenerator.py:690
-#: WeeklyGraphicsWebPageGenerator.py:710 WeeklyGraphicsWebPageGenerator.py:729
-#: WeeklyGraphicsWebPageGenerator.py:747 WeeklyGraphicsWebPageGenerator.py:765
-msgid "Weeks"
-msgstr "Semaines"
-
-#: WeeklyGraphicsWebPageGenerator.py:484 WeeklyGraphicsWebPageGenerator.py:485
-#: WeeklyGraphicsWebPageGenerator.py:737 WeeklyGraphicsWebPageGenerator.py:738
-msgid "/bytecount/%s.png"
-msgstr "/nbreDeBytes/%s.png"
-
-#: WeeklyGraphicsWebPageGenerator.py:484 WeeklyGraphicsWebPageGenerator.py:503
-#: WeeklyGraphicsWebPageGenerator.py:522
-msgid "weekly/rx/%s/"
-msgstr "hebdomadaire/rx/%s/"
-
-#: WeeklyGraphicsWebPageGenerator.py:485 WeeklyGraphicsWebPageGenerator.py:504
-#: WeeklyGraphicsWebPageGenerator.py:523
-msgid "archives/weekly/rx/%s/"
-msgstr "archives/hebdomadaire/rx/%s/"
-
-#: WeeklyGraphicsWebPageGenerator.py:503 WeeklyGraphicsWebPageGenerator.py:504
-#: WeeklyGraphicsWebPageGenerator.py:755 WeeklyGraphicsWebPageGenerator.py:756
-msgid "/filecount/%s.png"
-msgstr "/nbreDeFichiers/%s.png"
-
-#: WeeklyGraphicsWebPageGenerator.py:522 WeeklyGraphicsWebPageGenerator.py:523
-#: WeeklyGraphicsWebPageGenerator.py:773 WeeklyGraphicsWebPageGenerator.py:774
-msgid "/errors/%s.png"
-msgstr "/erreurs/%s.png"
-
-#: WeeklyGraphicsWebPageGenerator.py:542
-msgid "Weekly graphics for TX clients from MetPx."
-msgstr "Graphiques hebdomadaires pour tous les clients(TX) de MetPx."
-
-#: WeeklyGraphicsWebPageGenerator.py:557
-msgid "/weekly/tx/%s/%s/%s.csv"
-msgstr "/hebdomadaire/tx/%s/%s/%s.csv"
-
-#: WeeklyGraphicsWebPageGenerator.py:558
-msgid "csvFiles/weekly/tx/%s/%s/%s.csv"
-msgstr "csvFiles/hebdomadaire/tx/%s/%s/%s.csv"
-
-#: WeeklyGraphicsWebPageGenerator.py:595
-msgid "Clients"
-msgstr "Clients"
-
-#: WeeklyGraphicsWebPageGenerator.py:605
-msgid "Display the average latency of file transfers for every day of the week for each clients."
-msgstr "Afficher la latence moyenne pour tous les fichiers envoyés à tous les clients pour chaque jour de la semaine."
-
-#: WeeklyGraphicsWebPageGenerator.py:609
-msgid "Latency"
-msgstr "Latence"
-
-#: WeeklyGraphicsWebPageGenerator.py:619
-msgid "Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients."
-msgstr "Afficher, pour chaque jour de la semaine, le nombre total de fichiers envoyés à tous les clients pour lesquels la latence fut au delà de 15 secondes."
-
-#: WeeklyGraphicsWebPageGenerator.py:623
-msgid "Files Over Max. Lat."
-msgstr "Latences innacceptables."
-
-#: WeeklyGraphicsWebPageGenerator.py:633
-msgid "Display the total of bytes transfered every day of the week for each clients."
-msgstr "Afficher,pour chaque jour de la semaine, le nombre total de bytes envoyés à tous les clients."
-
-#: WeeklyGraphicsWebPageGenerator.py:647
-msgid "Display the total of files transferred every day of the week for each clients."
-msgstr "Afficher, pour chaque jour de la semaine, le nombre total de fichiers envoyés à tous les clients."
-
-#: WeeklyGraphicsWebPageGenerator.py:661
-msgid "Display the total of errors that occured during file transfers every day of the week for each clients."
-msgstr "Afficher,pour chaque jour de la semaine, le nombre total d'erreurs qui se sont produites durant l'envois de fichiers à tous les clients."
-
-#: WeeklyGraphicsWebPageGenerator.py:699 WeeklyGraphicsWebPageGenerator.py:700
-msgid "/latency/%s.png"
-msgstr "/latence/%s.png"
-
-#: WeeklyGraphicsWebPageGenerator.py:699 WeeklyGraphicsWebPageGenerator.py:718
-#: WeeklyGraphicsWebPageGenerator.py:737 WeeklyGraphicsWebPageGenerator.py:755
-#: WeeklyGraphicsWebPageGenerator.py:773
 msgid "weekly/tx/%s/"
 msgstr "hebdomadaire/tx/%s/"
 
-#: WeeklyGraphicsWebPageGenerator.py:700 WeeklyGraphicsWebPageGenerator.py:719
-#: WeeklyGraphicsWebPageGenerator.py:738 WeeklyGraphicsWebPageGenerator.py:756
-#: WeeklyGraphicsWebPageGenerator.py:774
+msgid "/latency/%s.png"
+msgstr "/latence/%s.png"
+
+msgid "Display the total of bytes transfered every day of the week for each clients."
+msgstr "Afficher,pour chaque jour de la semaine, le nombre total de bytes envoyés à tous les clients."
+
+msgid "Bytecount"
+msgstr "Nombre de bytes"
+
+msgid "Definition of 'byteCount'"
+msgstr "Définition de 'nombre de bytes'."
+
+msgid "*updated hourly"
+msgstr "*M-à-j à chaques heures."
+
+msgid "Display the total of bytes received every day of the week for each sources."
+msgstr "Afficher le nombre total de bytes reçus à tous les jours de la semaine par toutes les sources."
+
+msgid "Display the total of errors that occured during file transfers every day of the week for each clients."
+msgstr "Afficher,pour chaque jour de la semaine, le nombre total d'erreurs qui se sont produites durant l'envois de fichiers à tous les clients."
+
+msgid "/filecount/%s.png"
+msgstr "/nbreDeFichiers/%s.png"
+
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2008-05-14 17:26+GMT\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: ENCODING\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+msgid "weekly/rx/%s/%s/%s.csv"
+msgstr "hebdomadaire/rx/%s/%s/%s.csv"
+
 msgid "archives/weekly/tx/%s/"
 msgstr "archives/hebdomadaire/tx/%s/"
 
-#: WeeklyGraphicsWebPageGenerator.py:718 WeeklyGraphicsWebPageGenerator.py:719
-msgid "/filesOverMaxLatency/%s.png"
-msgstr "/fichiersAvecLatenceInnacceptable/%s.png"
+msgid "Weekly graphics for RX sources from MetPx."
+msgstr "Graphiques hebdomadaires pour toutes les sources(RX) de MetPx."
+
+msgid "/weekly/tx/%s/%s/%s.csv"
+msgstr "/hebdomadaire/tx/%s/%s/%s.csv"
+
+msgid "csvFiles/weekly/rx/%s/%s/%s.csv"
+msgstr "fichiersCsv/hebdomadaire/rx/%s/%s/%s.csv"
+
+msgid "Files Over Max. Lat."
+msgstr "Latences innacceptables."
+
+msgid "Definition of 'filesOverMaxLatency'"
+msgstr "Définition de 'Latences au dessus de 15 secondes'."
+
+msgid "Definition of 'source'"
+msgstr "Définition de 'source'"
 
