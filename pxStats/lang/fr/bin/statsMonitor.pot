@@ -6,8 +6,6 @@ msgstr ""
 "Résultats de l'exercice de surveillance.\n"
 "----------------------------------------------------------------------------------------------------------------------------------\n"
 
-
-#: statsMonitor.py:165
 msgid ""
 "Time of test : %s\n"
 msgstr "Temps où le test a eu lieu : %s\n"
@@ -41,6 +39,9 @@ msgstr "Les avertissements relatifs à l'utilisation des disques suivants ont été
 #: statsMonitor.py:185
 msgid "disk usage errors"
 msgstr "erreur d'utilisation des disques"
+
+msgid "%swebGraphics/columbo/"
+msgstr "%sgraphiquesWeb/columbo/"
 
 #: statsMonitor.py:187
 msgid "The following data gaps were not found in error log file"

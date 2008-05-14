@@ -62,6 +62,9 @@ msgstr "The following"
 msgid "no warnings."
 msgstr "no warnings."
 
+msgid "%swebGraphics/columbo/"
+msgstr "%swebGraphics/columbo/"
+
 msgid "[Stats Library Monitoring] %s with %s."
 msgstr "[Stats Library Monitoring] %s with %s."
 
