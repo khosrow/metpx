@@ -44,7 +44,7 @@ msgid "/filesOverMaxLatency/%s.png"
 msgstr "/fichiersAvecLatenceInnacceptable/%s.png"
 
 msgid "csvFiles/weekly/tx/%s/%s/%s.csv"
-msgstr "csvFiles/hebdomadaire/tx/%s/%s/%s.csv"
+msgstr "fichiersCsv/hebdomadaire/tx/%s/%s/%s.csv"
 
 msgid "archives/weekly/rx/%s/"
 msgstr "archives/hebdomadaire/rx/%s/"
