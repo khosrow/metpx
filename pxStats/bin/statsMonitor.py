@@ -1235,16 +1235,26 @@ def verifyWebPages( parameters, report, paths ):
     
     newReportLines = ""
     outdatedPageFound = False 
-    files = glob.glob( "%s*Graphs*.html" %paths.STATSWEBPAGESHTML )  
-    currentTime = StatsDateLib.getSecondsSinceEpoch( parameters.endTime )
+    
+    generalConfigParameters = StatsConfigParameters()
+    generalConfigParameters.getAllParameters()
     
     
-    for file in files :
-        timeOfUpdate = os.path.getmtime( file )
+    for language in generalConfigParameters.artifactsLanguages:   
         
-        if ( currentTime - timeOfUpdate ) / ( 60*60 ) >1 :
-            outdatedPageFound = True 
-            newReportLines = newReportLines + _("%s was not updated since %s.\n") %( file, StatsDateLib.getIsoFromEpoch( timeOfUpdate )) 
+        paths.setPaths(language)
+        _ = LanguageTools.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, language)
+    
+        files = glob.glob( "%s*Graphs*.html" %paths.STATSWEBPAGESHTML )  
+        currentTime = StatsDateLib.getSecondsSinceEpoch( parameters.endTime )
+        
+        
+        for file in files :
+            timeOfUpdate = os.path.getmtime( file )
+            
+            if ( currentTime - timeOfUpdate ) / ( 60*60 ) >1 :
+                outdatedPageFound = True 
+                newReportLines = newReportLines + _("%s was not updated since %s.\n") %( file, StatsDateLib.getIsoFromEpoch( timeOfUpdate )) 
     
     if outdatedPageFound :
         header = _("\n\nThe following web page warning were found :\n")
@@ -1255,7 +1265,11 @@ def verifyWebPages( parameters, report, paths ):
     header = header + "----------------------------------------------------------------------------------------------------------------------------------\n"
     
     report = report + header + newReportLines + helpLines
-                
+    
+    #revert back to original language
+    paths.setPaths()
+    _ = LanguageTools.getTranslatorForModule(CURRENT_MODULE_ABS_PATH)            
+    
     return report 
         
     
@@ -1275,33 +1289,47 @@ def verifyGraphs( parameters, report, paths ):
         
     """    
     
+    global _ 
+    
     newReportLines = ""
     outdatedGraphsFound = False 
-    folder = ( "%swebGraphics/columbo/" %paths.STATSGRAPHS )  
+      
     currentTime = StatsDateLib.getSecondsSinceEpoch( parameters.endTime )
     
     
     allNames = []
+    
+    generalConfigParameters = StatsConfigParameters()
+    generalConfigParameters.getAllParameters()
+    
+    
     for machine in parameters.machines:
         if "," in machine:
             machine = machine.split(",")[0]
         rxNames, txNames = GeneralStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machine )
         allNames.extend( rxNames )    
         allNames.extend( txNames )
-       
-    for name in allNames :         
+    
+    for language in generalConfigParameters.artifactsLanguages:   
         
-        image = folder + name + ".png"
+        paths.setPaths(language)
+        _ = LanguageTools.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, language)
         
-        if os.path.isfile( image ):          
+        folder = ( _("%swebGraphics/columbo/") %( paths.STATSGRAPHS ) )
+        
+        for name in allNames :         
             
-            if ( currentTime - os.path.getmtime( image ) ) / ( 60*60 ) >1 :
+            image = folder + name + "_" + language + ".png"
+            
+            if os.path.isfile( image ):          
+                
+                if ( currentTime - os.path.getmtime( image ) ) / ( 60*60 ) >1 :
+                    outdatedGraphsFound = True 
+                    newReportLines = newReportLines + _("%s's daily image was not updated since %s\n") %( name, StatsDateLib.getIsoFromEpoch(os.path.getmtime( image ) ) )
+            
+            else:
                 outdatedGraphsFound = True 
-                newReportLines = newReportLines + _("%s's daily image was not updated since %s\n") %( name, StatsDateLib.getIsoFromEpoch(os.path.getmtime( image ) ) )
-        
-        else:
-            outdatedGraphsFound = True 
-            newReportLines = newReportLines + _("%s was not found.") %( image )   
+                newReportLines = newReportLines + _("%s was not found.") %( image )   
         
     if outdatedGraphsFound :
         header = _("\n\nThe following daily graphics warnings were found :\n")
@@ -1312,15 +1340,13 @@ def verifyGraphs( parameters, report, paths ):
     header = header + "----------------------------------------------------------------------------------------------------------------------------------\n"
     
     report = report + header + newReportLines + helpLines
-                
+             
+    paths.setPaths()#revert back to original language
+    _ = LanguageTools.getTranslatorForModule(CURRENT_MODULE_ABS_PATH)#revert back to original language
+    
     return report
     
-
-
-
     
-
-
 def validateParameters( parameters ):
     """
         @summary : Validates parameters. 
@@ -1364,12 +1390,20 @@ def setMonitoringEndTime( parameters, endTime = "" ):
     
         @summary : Sets the end time to either the one specified 
                    during the call
+                   
+        @param parameters :
+
+        @param endTime : endtime to set(optional)
+        
+        return : updated parameters. 
     
     """
+    
     if endTime != "":
-        parameters.endTime = ""
+        parameters.endTime = StatsDateLib.getIsoWithRoundedHours( endTime)
     else:    
         parameters.endTime = StatsDateLib.getIsoWithRoundedHours( StatsDateLib.getIsoFromEpoch( time.time() ) )           
+    
     return parameters 
     
     
@@ -1408,7 +1442,7 @@ def getParameterValue():
         print _( "Please respect this format when specifiying a date." )
         print _( "If no parameter is specified, current time will be used." )
         sys.exit()
-                     
+        
     return parameterValue
   
     
@@ -1459,7 +1493,7 @@ def main():
     parameters.getParametersFromMonitoringConfigurationFile()
     
     if endTime != "":#If a specific end time was specified at the moment of the call.
-        parameters = setMonitoringEndTime( parameters )
+        parameters = setMonitoringEndTime( parameters, endTime )
     
     updateRequiredfiles( generalParameters, paths )
     validateParameters( parameters )
