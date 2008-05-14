@@ -1,51 +1,81 @@
-#: MonthlyGraphicsWebPageGenerator.py:245
-msgid "Definition of 'source'"
-msgstr "Définition de 'source'"
-
-msgid "Definition of 'byteCount'"
-msgstr "Définition de 'nombre de bytes'."
-
-msgid "Definition of 'client'"
-msgstr "Définition de 'client'."
-
-msgid "Definition of 'errors'"
-msgstr "Définition d'erreurs."
-
-msgid "Definition of 'filecount'"
-msgstr "Définition de 'nombre de fichiers'."
-
-msgid "Definition of 'filesOverMaxLatency'"
-msgstr "Définition de 'Latences au dessus de 15 secondes'."
-
-msgid "Definition of 'latency'"
-msgstr "Définition de latence."
-
-msgid "Monthly graphics for RX sources from MetPx."
-msgstr "Graphiques mensuels pour toutes les sources(RX) de MetPx."
-
-msgid "*updated weekly"
-msgstr "*M-à-j hebdomadaire."
-
-msgid "Sources"
-msgstr "Sources"
-
-msgid "Display the total of bytes received every day of the week for each sources."
-msgstr "Afficher le nombre total de bytes reçus à tous les jours de la semaine par toutes les sources."
-
-msgid "Bytecount"
-msgstr "Nombre de bytes"
+msgid "Errors"
+msgstr "Erreurs"
 
 msgid "Display the total of files received every day of the week for each sources."
 msgstr "afficher le total de fichiers reçus à tous les jours de la semaine par toutes les sources."
 
+msgid "csvFiles/monthly/rx/%s/%s/%s.csv"
+msgstr "fichiersCsv/mensuel/rx/%s/%s/%s.csv"
+
+msgid "Definition of 'filecount'"
+msgstr "Définition de 'nombre de fichiers'."
+
+msgid "Latency"
+msgstr "Latence"
+
+msgid "/bytecount/%s.png"
+msgstr "/nbreDeBytes/%s.png"
+
+msgid "Definition of 'client'"
+msgstr "Définition de 'client'."
+
+msgid "monthly/tx/%s/%s/%s.csv"
+msgstr "mensuel/tx/%s/%s/%s.csv"
+
+msgid "Definition of 'errors'"
+msgstr "Définition d'erreurs."
+
+msgid "/errors/%s.png"
+msgstr "/erreurs/%s.png"
+
+msgid "/filesOverMaxLatency/%s.png"
+msgstr "/fichiersAvecLatenceInnacceptable/%s.png"
+
+msgid "monthly/tx/%s/"
+msgstr "mensuel/tx/%s/"
+
 msgid "Filecount"
 msgstr "Nombre de fichiers"
+
+msgid "Clients"
+msgstr "Clients"
+
+msgid "Sources"
+msgstr "Sources"
+
+msgid "CSV files"
+msgstr "Fichier CSV"
 
 msgid "Display the total of errors that occured during the receptions for every day of the week for each sources."
 msgstr "Afficher le total d'erreurs s'étant produite lors de la réception de fichiers à tous les jours de la semaines pour toutes les sources."
 
-msgid "Errors"
-msgstr "Erreurs"
+msgid "/latency/%s.png"
+msgstr "/latence/%s.png"
+
+msgid "monthly/rx/%s/%s/%s.csv"
+msgstr "mensuel/rx/%s/%s/%s.csv"
+
+msgid "Bytecount"
+msgstr "Nombre de bytes"
+
+msgid "Definition of 'byteCount'"
+msgstr "Définition de 'nombre de bytes'."
+
+msgid "*updated weekly"
+msgstr "*M-à-j hebdomadaire."
+
+msgid "Display the total of bytes received every day of the week for each sources."
+msgstr "Afficher le nombre total de bytes reçus à tous les jours de la semaine par toutes les sources."
+
+msgid "monthly/rx/%s/"
+msgstr "mensuel/rx/%s/"
+
+msgid "/filecount/%s.png"
+msgstr "/nbreDeFichiers/%s.png"
+
+
+msgid "Definition of 'latency'"
+msgstr "Définition de latence."
 
 msgid "Months"
 msgstr "Mois"
@@ -53,98 +83,24 @@ msgstr "Mois"
 msgid "Monthly graphics for TX clients from MetPx."
 msgstr "Graphiques mensuels pour tous les clients(TX) de MetPx."
 
-msgid "Clients"
-msgstr "Clients"
-
-msgid "Display the average latency of file transfers for every day of the week for each clients."
-msgstr "Afficher la latence moyenne pour tous les fichiers envoyés à tous les clients pour chaque jour de la semaine."
-
-msgid "Latency"
-msgstr "Latence"
-
-msgid "Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients."
-msgstr "Afficher, pour chaque jour de la semaine, le nombre total de fichiers envoyés à tous les clients pour lesquels la latence fut au delà de 15 secondes."
-
 msgid "Files Over Max. Lat."
 msgstr "Latences innacceptables."
 
-msgid "Display the total of bytes transfered every day of the week for each clients."
-msgstr "Afficher,pour chaque jour de la semaine, le nombre total de bytes envoyés à tous les clients."
+msgid "Monthly graphics for RX sources from MetPx."
+msgstr "Graphiques mensuels pour toutes les sources(RX) de MetPx."
 
-msgid "Display the total of files transferred every day of the week for each clients."
-msgstr "Afficher, pour chaque jour de la semaine, le nombre total de fichiers envoyés à tous les clients."
+msgid "Definition of 'filesOverMaxLatency'"
+msgstr "Définition de 'Latences au dessus de 15 secondes'."
 
-msgid "Display the total of errors that occured during file transfers every day of the week for each clients."
-msgstr "Afficher,pour chaque jour de la semaine, le nombre total d'erreurs qui se sont produites durant l'envois de fichiers à tous les clients."
-
-
-#: MonthlyGraphicsWebPageGenerator.py:496
-#: MonthlyGraphicsWebPageGenerator.py:497
-#: MonthlyGraphicsWebPageGenerator.py:742
-#: MonthlyGraphicsWebPageGenerator.py:743
-msgid "/bytecount/%s.png"
-msgstr "/nbreDeBytes/%s.png"
-
-#: MonthlyGraphicsWebPageGenerator.py:496
-#: MonthlyGraphicsWebPageGenerator.py:515
-#: MonthlyGraphicsWebPageGenerator.py:534
-msgid "monthly/rx/%s/"
-msgstr "mensuel/rx/%s/"
-
-#: MonthlyGraphicsWebPageGenerator.py:497
-#: MonthlyGraphicsWebPageGenerator.py:516
-#: MonthlyGraphicsWebPageGenerator.py:535
 msgid "archives/monthly/rx/%s/"
 msgstr "archives/mensuel/rx/%s/"
 
-#: MonthlyGraphicsWebPageGenerator.py:515
-#: MonthlyGraphicsWebPageGenerator.py:516
-#: MonthlyGraphicsWebPageGenerator.py:761
-#: MonthlyGraphicsWebPageGenerator.py:762
-msgid "/filecount/%s.png"
-msgstr "/nbreDeFichiers/%s.png"
-
-#: MonthlyGraphicsWebPageGenerator.py:534
-#: MonthlyGraphicsWebPageGenerator.py:535
-#: MonthlyGraphicsWebPageGenerator.py:780
-#: MonthlyGraphicsWebPageGenerator.py:781
-msgid "/errors/%s.png"
-msgstr "/erreurs/%s.png"
-
-msgid "monthly/rx/%s/%s/%s.csv"
-msgstr "mensuel/rx/%s/%s/%s.csv"
-
-#: MonthlyGraphicsWebPageGenerator.py:563
-msgid "monthly/tx/%s/%s/%s.csv"
-msgstr "mensuel/tx/%s/%s/%s.csv"
-
-#: MonthlyGraphicsWebPageGenerator.py:564
-msgid "csvFiles/monthly/tx/%s/%s/%s.csv"
-msgstr "fichiersCsv/mensuel/tx/%s/%s/%s.csv"
-
-#: MonthlyGraphicsWebPageGenerator.py:703
-#: MonthlyGraphicsWebPageGenerator.py:704
-msgid "/latency/%s.png"
-msgstr "/latence/%s.png"
-
-#: MonthlyGraphicsWebPageGenerator.py:703
-#: MonthlyGraphicsWebPageGenerator.py:722
-#: MonthlyGraphicsWebPageGenerator.py:742
-#: MonthlyGraphicsWebPageGenerator.py:761
-#: MonthlyGraphicsWebPageGenerator.py:780
-msgid "monthly/tx/%s/"
-msgstr "mensuel/tx/%s/"
-
-#: MonthlyGraphicsWebPageGenerator.py:704
-#: MonthlyGraphicsWebPageGenerator.py:723
-#: MonthlyGraphicsWebPageGenerator.py:743
-#: MonthlyGraphicsWebPageGenerator.py:762
-#: MonthlyGraphicsWebPageGenerator.py:781
 msgid "archives/monthly/tx/%s/"
 msgstr "archives/mensuel/tx/%s/"
 
-#: MonthlyGraphicsWebPageGenerator.py:722
-#: MonthlyGraphicsWebPageGenerator.py:723
-msgid "/filesOverMaxLatency/%s.png"
-msgstr "/fichiersAvecLatenceInnacceptable/%s.png"
+msgid "Definition of 'source'"
+msgstr "Définition de 'source'"
+
+msgid "csvFiles/monthly/tx/%s/%s/%s.csv"
+msgstr "fichiersCsv/mensuel/tx/%s/%s/%s.csv"
 
