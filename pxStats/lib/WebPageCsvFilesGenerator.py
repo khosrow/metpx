@@ -16,7 +16,7 @@
 ##
 ## @author:  Nicholas Lemay  
 ##
-## @since: September 26th 2007 , last updated on March 5th 2007
+## @since: September 26th 2007 , last updated on May 14th 2007
 ##
 ## @note: Updates all the csv using the same frequency
 ##        as those in the getGraphicsForWebPages.py
@@ -89,10 +89,12 @@ class WebPageCsvFilesGenerator( WebPageArtifactsGeneratorInterface ):
         paths = StatsPaths()
         paths.setPaths()
         
-        output = commands.getoutput( paths.STATSBIN + 'csvDataConversion.py --includeGroups -d --machines "%s" --machinesAreClusters --fixedPrevious --date "%s" -f rx --language %s'  %( clusters, self.timeOfRequest, self.outputLanguage ) )
+        typeParameters = {  "daily" : "-d", "weekly" : "-w", "monthly" : "-m", "yearly" : "-y" }
+        
+        output = commands.getoutput( paths.STATSBIN + 'csvDataConversion.py --includeGroups %s --machines "%s" --machinesAreClusters --fixedPrevious --date "%s" -f rx --language %s'  %( typeParameters[type], clusters, self.timeOfRequest, self.outputLanguage ) )
         #print output
            
-        output = commands.getoutput( paths.STATSBIN + 'csvDataConversion.py --includeGroups -d --machines "%s" --machinesAreClusters --fixedPrevious --date "%s" -f tx --language %s'  %( clusters, self.timeOfRequest, self.outputLanguage ) )
+        output = commands.getoutput( paths.STATSBIN + 'csvDataConversion.py --includeGroups %s --machines "%s" --machinesAreClusters --fixedPrevious --date "%s" -f tx --language %s'  %( typeParameters[type], clusters, self.timeOfRequest, self.outputLanguage ) )
         #print output      
         
         fileName = self.__getFileNameFromExecutionOutput(output)
