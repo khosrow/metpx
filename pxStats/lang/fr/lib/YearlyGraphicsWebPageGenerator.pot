@@ -1,133 +1,121 @@
-#: YearlyGraphicsWebPageGenerator.py:198
-msgid "Definition of 'source'"
-msgstr "Définition de 'source'"
-
-msgid "Definition of 'byteCount'"
-msgstr "Définition de 'nombre de bytes'."
-
-msgid "Definition of 'client'"
-msgstr "Définition de 'client'."
-
-msgid "Definition of 'errors'"
-msgstr "Définition d'erreurs."
-
-msgid "Definition of 'filecount'"
-msgstr "Définition de 'nombre de fichiers'."
-
-msgid "Definition of 'filesOverMaxLatency'"
-msgstr "Définition de 'Latences au dessus de 15 secondes'."
-
-msgid "Definition of 'latency'"
-msgstr "Définition de latence."
-
-msgid "Yearly graphics for RX sources from MetPx."
-msgstr "Graphiques annuels pour toutes les sources(RX) de MetPx."
-
-msgid "*updated monthly"
-msgstr "*M-à-j mensuel."
-
-msgid "Sources"
-msgstr "Sources"
-
-msgid "Display the total of bytes received every day of the week for each sources."
-msgstr "Afficher le nombre total de bytes reçus à tous les jours de la semaine par toutes les sources."
-
-msgid "Bytecount"
-msgstr "Nombre de bytes"
-
-msgid "Display the total of files received every day of the week for each sources."
-msgstr "afficher le total de fichiers reçus à tous les jours de la semaine par toutes les sources."
-
-msgid "Filecount"
-msgstr "Nombre de fichiers"
-
-msgid "Display the total of errors that occured during the receptions for every day of the week for each sources."
-msgstr "Afficher le total d'erreurs s'étant produite lors de la réception de fichiers à tous les jours de la semaines pour toutes les sources."
-
-msgid "Errors"
-msgstr "Erreurs"
-
-msgid "Years"
-msgstr "Années"
-
 msgid "Yearly graphics for TX clients from MetPx."
 msgstr "Graphiques annuels pour tous les clients(TX) de MetPx."
 
-msgid "Clients"
-msgstr "Clients"
-
-msgid "Display the average latency of file transfers for every day of the week for each clients."
-msgstr "Afficher la latence moyenne pour tous les fichiers envoyés à tous les clients pour chaque jour de la semaine."
-
-msgid "Latency"
-msgstr "Latence"
-
 msgid "Display the total number of files for wich the latency was over 15 seconds for every day of the week for each clients."
 msgstr "Afficher, pour chaque jour de la semaine, le nombre total de fichiers envoyés à tous les clients pour lesquels la latence fut au delà de 15 secondes."
-
-msgid "Files Over Max. Lat."
-msgstr "Latences innacceptables."
-
-msgid "Display the total of bytes transfered every day of the week for each clients."
-msgstr "Afficher,pour chaque jour de la semaine, le nombre total de bytes envoyés à tous les clients."
-
-msgid "Display the total of files transferred every day of the week for each clients."
-msgstr "Afficher, pour chaque jour de la semaine, le nombre total de fichiers envoyés à tous les clients."
 
 msgid "Display the total of errors that occured during file transfers every day of the week for each clients."
 msgstr "Afficher,pour chaque jour de la semaine, le nombre total d'erreurs qui se sont produites durant l'envois de fichiers à tous les clients."
 
 
-#: YearlyGraphicsWebPageGenerator.py:441 YearlyGraphicsWebPageGenerator.py:442
-#: YearlyGraphicsWebPageGenerator.py:689 YearlyGraphicsWebPageGenerator.py:690
+msgid "*updated monthly"
+msgstr "*M-à-j mensuel."
+
+msgid "Errors"
+msgstr "Erreurs"
+
+msgid "Display the total of files received every day of the week for each sources."
+msgstr "afficher le total de fichiers reçus à tous les jours de la semaine par toutes les sources."
+
 msgid "bytecount/%s.png"
 msgstr "nbreDeBytes/%s.png"
 
-#: YearlyGraphicsWebPageGenerator.py:441 YearlyGraphicsWebPageGenerator.py:461
-#: YearlyGraphicsWebPageGenerator.py:479
-msgid "yearly/rx/%s/"
-msgstr "annuel/rx/%s/"
+msgid "Definition of 'filecount'"
+msgstr "Définition de 'nombre de fichiers'."
 
-#: YearlyGraphicsWebPageGenerator.py:442 YearlyGraphicsWebPageGenerator.py:462
-#: YearlyGraphicsWebPageGenerator.py:480
-msgid "archives/yearly/rx/%s/"
-msgstr "archives/annuel/rx/%s/"
+msgid "Latency"
+msgstr "Latence"
 
-#: YearlyGraphicsWebPageGenerator.py:461 YearlyGraphicsWebPageGenerator.py:462
-#: YearlyGraphicsWebPageGenerator.py:707 YearlyGraphicsWebPageGenerator.py:708
-msgid "filecount/%s.png"
-msgstr "nbreDeFichiers/%s.png"
+msgid "Definition of 'client'"
+msgstr "Définition de 'client'."
 
-#: YearlyGraphicsWebPageGenerator.py:479 YearlyGraphicsWebPageGenerator.py:480
-#: YearlyGraphicsWebPageGenerator.py:725 YearlyGraphicsWebPageGenerator.py:726
+msgid "Display the taverage latency of file transfers for every day of the week for each clients."
+msgstr "Afficher la latence moyenne des fichiers transferes au cours dune journes pour chaques clients."
+
+msgid "Years"
+msgstr "Années"
+
+msgid "Display the total of files transferred every day of the week for each clients."
+msgstr "Afficher, pour chaque jour de la semaine, le nombre total de fichiers envoyés à tous les clients."
+
+msgid "Definition of 'errors'"
+msgstr "Définition d'erreurs."
+
 msgid "errors/%s.png"
 msgstr "erreurs/%s.png"
 
-#: YearlyGraphicsWebPageGenerator.py:513
-msgid "yearly/tx/%s/%s.csv"
-msgstr "annuel/tx/%s/%s.csv"
+msgid "Filecount"
+msgstr "Nombre de fichiers"
 
-#: YearlyGraphicsWebPageGenerator.py:514
+msgid "Yearly graphics for RX sources from MetPx."
+msgstr "Graphiques annuels pour toutes les sources(RX) de MetPx."
+
+msgid "Clients"
+msgstr "Clients"
+
+msgid "Sources"
+msgstr "Sources"
+
+msgid "CSV files"
+msgstr "Fichiers "
+
+msgid "Display the total of errors that occured during the receptions for every day of the week for each sources."
+msgstr "Afficher le total d'erreurs s'étant produite lors de la réception de fichiers à tous les jours de la semaines pour toutes les sources."
+
 msgid "csvFiles/yearly/tx/%s/%s.csv"
 msgstr "fichiersCsv/annuel/tx/%s/%s.csv"
 
-#: YearlyGraphicsWebPageGenerator.py:653 YearlyGraphicsWebPageGenerator.py:654
-msgid "latency/%s.png"
-msgstr "latence/%s.png"
-
-#: YearlyGraphicsWebPageGenerator.py:653 YearlyGraphicsWebPageGenerator.py:671
-#: YearlyGraphicsWebPageGenerator.py:689 YearlyGraphicsWebPageGenerator.py:707
-#: YearlyGraphicsWebPageGenerator.py:725
-msgid "yearly/tx/%s/"
-msgstr "annuel/tx/%s/"
-
-#: YearlyGraphicsWebPageGenerator.py:654 YearlyGraphicsWebPageGenerator.py:672
-#: YearlyGraphicsWebPageGenerator.py:690 YearlyGraphicsWebPageGenerator.py:708
-#: YearlyGraphicsWebPageGenerator.py:726
 msgid "archives/yearly/tx/%s/"
 msgstr "archives/annuel/tx/%s/"
 
-#: YearlyGraphicsWebPageGenerator.py:671 YearlyGraphicsWebPageGenerator.py:672
+msgid "Display the total of bytes transfered every day of the week for each clients."
+msgstr "Afficher,pour chaque jour de la semaine, le nombre total de bytes envoyés à tous les clients."
+
+msgid "Bytecount"
+msgstr "Nombre de bytes"
+
+msgid "csvFiles/yearly/rx/%s/%s.csv"
+msgstr "fichiersCsv/annuel/rx/%s/%s.csv"
+
+msgid "Definition of 'byteCount'"
+msgstr "Définition de 'nombre de bytes'."
+
+msgid "Display the total of bytes received every day of the week for each sources."
+msgstr "Afficher le nombre total de bytes reçus à tous les jours de la semaine par toutes les sources."
+
+msgid "filecount/%s.png"
+msgstr "nbreDeFichiers/%s.png"
+
+msgid "Definition of 'latency'"
+msgstr "Définition de latence."
+
+msgid "archives/yearly/rx/%s/"
+msgstr "archives/annuel/rx/%s/"
+
+msgid "Files Over Max. Lat."
+msgstr "Latences innacceptables."
+
+msgid "yearly/rx/%s/"
+msgstr "annuel/rx/%s/"
+
 msgid "filesOverMaxLatency/%s.png"
 msgstr "fichiersAvecLatenceInnacceptable/%s.png"
+
+msgid "Definition of 'filesOverMaxLatency'"
+msgstr "Définition de 'Latences au dessus de 15 secondes'."
+
+msgid "yearly/tx/%s/%s.csv"
+msgstr "annuel/tx/%s/%s.csv"
+
+msgid "latency/%s.png"
+msgstr "latence/%s.png"
+
+msgid "yearly/tx/%s/"
+msgstr "annuel/tx/%s/"
+
+msgid "Definition of 'source'"
+msgstr "Définition de 'source'"
+
+msgid "yearly/rx/%s/%s.csv"
+msgstr "annuel/rx/%s/%s.csv"
 

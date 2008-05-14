@@ -35,6 +35,9 @@ msgstr "yearly/rx/%s/%s.csv"
 msgid "csvFiles/yearly/rx/%s/%s.csv"
 msgstr "csvFiles/yearly/rx/%s/%s.csv"
 
+msgid "CSV files"
+msgstr "CSV files"
+
 msgid "Sources"
 msgstr "Sources"
 
