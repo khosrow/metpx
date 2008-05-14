@@ -406,7 +406,7 @@ class MonthlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             
             if os.path.isfile( file ):
                 if oneFileFound == False :
-                    fileHandle.write(  "<div class='right'><font size='2' color='black'>CSV files&nbsp;:&nbsp;" )
+                    fileHandle.write(  "<div class='right'><font size='2' color='black'>" + _("CSV files") + "&nbsp;:&nbsp;" )
                     oneFileFound = True
                 fileHandle.write(  """<a  href="%s" style="color:#000000" class="blackLinks">%.3s.csv&nbsp;</a>"""%(  webLink,currentMonth ) ) 
         
@@ -589,7 +589,7 @@ class MonthlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             
             if os.path.isfile( file ):
                 if oneFileFound == False:
-                    fileHandle.write(  "<div class='right'><font size='2' color='black'>CSV files&nbsp;:&nbsp;" )
+                    fileHandle.write(  "<div class='right'><font size='2' color='black'>" + _("CSV files") + "&nbsp;:&nbsp;" )
                     oneFileFound = True 
                 
                 fileHandle.write(  """<a  href="%s" style="color:#000000" class="blackLinks">%.3s.csv&nbsp;</a>"""%(  webLink,currentMonth ) ) 

@@ -26,7 +26,7 @@
     Small function that adds pxlib to the environment path.  
 """
 import  os, time, sys
-sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../../')
+sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) ) + '/../../')
 
 try:
     pxlib = os.path.normpath( os.environ['PXROOT'] ) + '/lib/'
@@ -374,7 +374,7 @@ class WeeklyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             
             if os.path.isfile( file ):
                 if oneFileFound == False:
-                    fileHandle.write(  "<div class='right'><font size='2' color='black'>CSV files&nbsp;:&nbsp; " )
+                    fileHandle.write(  "<div class='right'><font size='2' color='black'>" +_("CSV files") + "&nbsp;:&nbsp; " )
                     oneFileFound = True 
                 
                 fileHandle.write(  """<a  href="%s" class="blackLinks">%.3s.csv&nbsp;</a>"""%(  webLink,currentWeek ) ) 
@@ -561,7 +561,7 @@ class WeeklyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             
             if os.path.isfile( file ):
                 if oneFileFound == False:
-                    fileHandle.write(  "<div class='right'><font size='2' color='black'> CSV files&nbsp;:&nbsp; " )
+                    fileHandle.write(  "<div class='right'><font size='2' color='black'>" + _("CSV files") + "&nbsp;:&nbsp; " )
                     oneFileFound = True 
                 
                 fileHandle.write(  """<a  href="%s" class="blackLinks">%.3s.csv&nbsp;</a>"""%(  webLink,currentWeek ) ) 

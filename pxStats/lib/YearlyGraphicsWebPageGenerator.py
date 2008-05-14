@@ -356,7 +356,7 @@ class YearlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             
             if os.path.isfile( file ):
                 if oneFileFound == False:
-                    fileHandle.write(  "<div class='right'><font size='2' color='black'>CSV files&nbsp;:&nbsp; " )
+                    fileHandle.write(  "<div class='right'><font size='2' color='black'" + _("CSV files") + "&nbsp;:&nbsp; " )
                     oneFileFound = True 
                 
                 fileHandle.write(  """<a  href="%s" class="blackLinks">%.4s.csv&nbsp;</a>"""%(  webLink,currentYear ) ) 
@@ -537,7 +537,7 @@ class YearlyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
             print file
             if os.path.isfile( file ):
                 if oneFileFound == False:
-                    fileHandle.write(  "<div class='right'><font size='2' color='black'> CSV files&nbsp;:&nbsp; " )
+                    fileHandle.write(  "<div class='right'><font size='2' color='black'>" + _("CSV files") + "&nbsp;:&nbsp; " )
                     oneFileFound = True 
                 
                 fileHandle.write(  """<a  href="%s" class="blackLinks">%.4s.csv&nbsp;</a>"""%(  webLink,currentYear ) ) 
