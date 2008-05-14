@@ -12,7 +12,7 @@
 #           named COPYING in the root of the source directory tree.
 #
 #
-# @since: 2008-02-06 , last updated on March 11th 2008
+# @since: 2008-02-06 , last updated on May 14th 2008
 #
 # @summary: This simple script is to be used to copy the corresponding translations of 
 #           a certain .pot file into another .pot file.  
@@ -32,25 +32,75 @@ from pxStats.lib.LanguageTools import LanguageTools
 
 CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 
-def writeLinesToFile( destinationFile, destinationLines ):
+
+
+def writeDictionaryToFile( dictionary, destinationFile ):
     """
         @summary : Writes a list of lines into a file. 
         
+        @param dictionary: dictionary to write 
+        
         @param destinationFile: File in which to write lines.
         
-        @param destinationLines: Array of lines to write to file
-    
         @return : None 
+    
     """
     
     fileHandle = open( destinationFile, "w" )
     
-    for line in destinationLines:
-        fileHandle.write( line ) 
-    
+    for key in dictionary.keys():
+        fileHandle.write(key)        
+        valueLines = dictionary[ key ]
+        fileHandle.write(valueLines)
+        
     fileHandle.close()    
 
 
+
+def turnTranslationfileIntoDictionary( file ):
+    """
+        @summary : Reads a .pot file and returns 
+                   the definition lines  and their 
+                   translations lines in a dictionary  
+                   format.
+                   
+        @param file: .pot file to parse.
+         
+    """
+    
+    dictionary = {}
+    
+    fileHandle = open( file, 'r' )
+    lines = fileHandle.readlines()
+    fileHandle.close()
+    
+    readingKey   = False 
+    readingValue = False 
+    
+    key =[]
+    value =[]
+    
+    for line in lines :
+        
+        if str(line).startswith("#") == False:
+            
+            if str(line).startswith("msgid"):
+                readingKey   = True 
+                readingValue = False 
+                key=""
+            elif str(line).startswith("msgstr"):    
+                readingKey   = False 
+                readingValue = True 
+                value=""
+            
+            if readingKey == True:
+                key = key + line
+            elif readingValue == True :
+                value = value + line   
+                dictionary[key] = value
+                
+    return dictionary
+    
 
 def copyPotFileContent( sourceFile, destinationFile ):
     """
@@ -68,49 +118,17 @@ def copyPotFileContent( sourceFile, destinationFile ):
     
     """
     
-    sourceFileHandle = open( sourceFile, 'r' )
-    sourceLines = sourceFileHandle.readlines()
-    sourceFileHandle.close()
-    
-    destinationFileHandle = open( destinationFile, 'r' )
-    destinationLines = destinationFileHandle.readlines()
-    destinationFileHandle.close()
-    
-    lineBeingRead    = 0 
-    lineBeingWritten = 0 
-    
-    while( lineBeingRead < len( sourceLines ) ):
-        if str(sourceLines[lineBeingRead]).startswith("msgid"):
-            
-            lineBeingWritten = 0 
-            lineFound = False 
-            while( lineBeingWritten < destinationLines.__len__() and lineFound == False ):
-                if( destinationLines[lineBeingWritten] ==  sourceLines[lineBeingRead] ) :
-                    lineFound = True 
-                else:
-                    lineBeingWritten = lineBeingWritten + 1     
-            
-            if lineFound ==True :
-                lineBeingWritten = lineBeingWritten + 1 
-                lineBeingRead    = lineBeingRead + 1 
-                
-                while( lineBeingRead < len(sourceLines) and sourceLines[lineBeingRead].startswith( "#" ) == False  )  :
-                    destinationLines.insert(lineBeingWritten , sourceLines[lineBeingRead] )
-                    
-                    if (lineBeingWritten + 1 < len(destinationLines) ) :
-                        print destinationLines.pop( lineBeingWritten + 1 )
-                    lineBeingRead    = lineBeingRead + 1 
-                    lineBeingWritten = lineBeingWritten + 1 
-                       
-            
-            else:
-                lineBeingRead = lineBeingRead + 1              
-            
-        else:
-            lineBeingRead = lineBeingRead + 1 
+    sourceDictionary      = turnTranslationfileIntoDictionary( sourceFile )
+    destinationDictionary = turnTranslationfileIntoDictionary( destinationFile )
     
     
-    writeLinesToFile( destinationFile, destinationLines )
+    for key in destinationDictionary.keys():
+        try:
+            destinationDictionary[key] = sourceDictionary[key]
+        except :
+            pass
+    
+    writeDictionaryToFile( destinationDictionary, destinationFile )
     
     
     
