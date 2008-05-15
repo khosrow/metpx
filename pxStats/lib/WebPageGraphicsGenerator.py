@@ -90,10 +90,8 @@ class WebPageGraphicsGenerator( WebPageArtifactsGeneratorInterface ):
                     #print  '%sgenerateGnuGraphics.py -g %s -c %s --combineClients --fixedCurrent --copy -d "%s"  -m %s -f %s -p %s  -s 24 --language %s' %( self.paths.STATSBIN, group, groupMembers, self.timeOfRequest, groupMachines, groupFileTypes, groupProducts, self.outputLanguage )
                 
                 else:    
-                    commands.getoutput("%sgenerateRRDGraphics.py %s --copy -f %s --machines '%s'  -c %s --date '%s' --fixedCurrent --outputLanguage %s" %( self.paths.STATSBIN, supportedGraphicTypes[ graphicType], groupFileTypes, groupMachines, group, self.timeOfRequest, self.outputLanguage ) )
-                    # print '%sgenerateRRDGraphics.py -g %s -c %s --combineClients --copy --date "%s"  -m %s -f %s -p %s  %s --language %s'\
-                                        # %( self.paths.STATSBIN, group, groupMembers, self.timeOfRequest, groupMachines, groupFileTypes,\
-                                           # groupProducts, supportedGraphicTypes[ graphicType], self.outputLanguage )
+                    commands.getoutput("%sgenerateRRDGraphics.py %s --copy -f %s --machines '%s'  -c %s --date '%s' --fixedCurrent --language %s" %( self.paths.STATSBIN, supportedGraphicTypes[ graphicType], groupFileTypes, groupMachines, group, self.timeOfRequest, self.outputLanguage ) )
+                    print "%sgenerateRRDGraphics.py %s --copy -f %s --machines '%s'  -c %s --date '%s' --fixedCurrent --language %s" %( self.paths.STATSBIN, supportedGraphicTypes[ graphicType], groupFileTypes, groupMachines, group, self.timeOfRequest, self.outputLanguage )    
          
          
     def __generateAllRRDGraphicsForWebPage( self, graphicType, generateTotalsGraphics = True  ):
