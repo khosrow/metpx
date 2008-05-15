@@ -61,13 +61,13 @@ class COLPATHS :
                 configLines = fileHandle.readlines()
                 for line in configLines:
                     if "PXROOT" in line :
-                        pxroot = str(line).split( "=" )[1]
+                        colroot = str(line).split( "=" )[1]
                         
                         break    
             except:
-                pxroot = os.path.normpath( os.environ['COLROOT'] ) + '/lib/'        
+                colroot = os.path.normpath( os.environ['COLROOT'] ) + '/lib/'        
                     
-            if pxroot == "":      
+            if colroot == "":      
                 raise Exception()
                
         except:
