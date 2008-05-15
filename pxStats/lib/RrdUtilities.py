@@ -20,14 +20,15 @@
 ##############################################################################################
 """
 
-import os, pickle, sys
+import fnmatch, os, pickle, sys
 
 """
     Small function that adds pxStats to the environment path.  
 """
 sys.path.insert(1,  os.path.dirname( os.path.abspath(__file__) ) + '/../../')
-from   pxStats.lib.StatsPaths   import StatsPaths
 
+from   pxStats.lib.StatsPaths   import StatsPaths
+from   pxStats.lib.LanguageTools import LanguageTools
 
 """
     Small function that adds pxlib to the environment path.  
@@ -44,10 +45,11 @@ from   PXManager    import *
 
 LOCAL_MACHINE = os.uname()[1]  
 
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )
 
 
-class RrdUtilities:          
-    
+
+class RrdUtilities:             
     
     
     def buildRRDFileName( dataType = 'errors', clients = None , machines = None,\
@@ -71,6 +73,8 @@ class RrdUtilities:
         
         """
         
+        _ = LanguageTools.getTranslatorForModule( CURRENT_MODULE_ABS_PATH, LanguageTools.getMainApplicationLanguage() )
+        
         clients  = clients or ['client1','client1']
         machines = machines or ['machine1','machine2']
         
@@ -87,17 +91,37 @@ class RrdUtilities:
         if len(clients) ==1:       
             if usage == "regular":
                 fileName = STATSPATHS.STATSCURRENTDB + "%s/%s_%s" %( dataType, combinedClientsName, combinedMachineName )  
+            
             elif usage == "group":
-                 fileName = STATSPATHS.STATSCURRENTDB + "%s/%s_%s" %( dataType, groupName, combinedMachineName )    
+            
+                fileName = STATSPATHS.STATSCURRENTDB + "%s/%s_%s" %( dataType, groupName, combinedMachineName )
+                 
             elif usage == "totalForMachine":
                  fileName = STATSPATHS.STATSCURRENTDB + "%s/%s_%s" %( dataType, fileType, combinedMachineName )            
+        
         else:
+            
             if usage == "regular":
-                fileName = STATSPATHS.STATSCURRENTDB + "%s/combined/%s_%s" %( dataType, combinedClientsName, combinedMachineName )  
+                fileName = STATSPATHS.STATSCURRENTDB + _("%s/combined/%s_%s") %( dataType, combinedClientsName, combinedMachineName )  
+            
             elif usage == "group":
-                 fileName = STATSPATHS.STATSCURRENTDB + "%s/combined/%s_%s" %( dataType, groupName, combinedMachineName )    
+            
+                #fileName = STATSPATHS.STATSCURRENTDB + _("%s/combined/%s_%s") %( dataType, groupName, combinedMachineName )    
+                existingFiles=  os.listdir(STATSPATHS.STATSCURRENTDB + "%s/combined/"%( dataType) )
+                
+                for file in existingFiles:
+                    if fnmatch.fnmatch(file, groupName + "*"):
+                        fileName = file
+                        break
+                    
+                if fileName == "":#no preexisitng file exist for this group
+                    fileName = STATSPATHS.STATSCURRENTDB + "%s/%s_%s" %( dataType, groupName, combinedMachineName )    
+                else:#else
+                    fileName =  STATSPATHS.STATSCURRENTDB + "%s/combined/"%(dataType) + fileName       
+                 
+                 
             elif usage == "totalForMachine":
-                 fileName = STATSPATHS.STATSCURRENTDB + "%s/combined/%s_%s" %( dataType, fileType, combinedMachineName )   
+                 fileName = STATSPATHS.STATSCURRENTDB + _("%s/combined/%s_%s") %( dataType, fileType, combinedMachineName )   
         
         #print "before ", fileName 
         #fileName = fileName.replace("année","year").replace("nbreDeBytes","bytecount").replace("nbreDeFichiers","filecount").replace("erreurs","errors").replace("latence","latency").replace("fichiersAvecLatenceInnacceptable","filesOverMaxLatency").replace("heures","hours").replace("mois","month").replace("jour","day").replace("","")    
@@ -138,7 +162,9 @@ class RrdUtilities:
         try:
             os.chmod( fileName, 0777 )
         except:
-            pass    
+            pass   
+        
+         
     setDatabaseTimeOfUpdate = staticmethod( setDatabaseTimeOfUpdate )
     
     
@@ -172,6 +198,7 @@ class RrdUtilities:
         return lastUpdate 
     
     getDatabaseTimeOfUpdate = staticmethod( getDatabaseTimeOfUpdate )
+    
     
     
     def getMostPopularTimeOfLastUpdate( dataBaseNames, fileType = "tx" ):
