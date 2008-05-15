@@ -156,6 +156,9 @@ def createSymbolicLinks( path, currentlyUsedLanguages ):
         commands.getstatusoutput( "ln -s %s %s/html_%s/archives" %( statsPaths.STATSGRAPHSARCHIVES[:-1], path, language  ) )
         #print "ln -s %s %s/html_%s/archives" %( statsPaths.STATSGRAPHSARCHIVES[:-1], path, language  )
         
+        #.../paths/html_lang/csvFiles
+        commands.getstatusoutput( "ln -s %s %s/html_%s/%s" %( statsPaths.STATSCSVFILES[:-1], path, language, os.path.basename( statsPaths.STATSCSVFILES )  ) )
+        
         # .../path/top_lang.html
         commands.getstatusoutput( "ln -s %s/top_%s.html %s/top_%s.html" %( statsPaths.STATSWEBPAGES, language, path, language )  ) 
         #print "ln -s %s/top_%s.html %s/top_%s.html" %( statsPaths.STATSWEBPAGES, language, path, language )
