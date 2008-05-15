@@ -1685,8 +1685,9 @@ class RRDGraphicProducer( Translatable ):
                         #print databaseName
                         
                         if not os.path.isfile(databaseName):
-                            databaseName = RrdUtilities.buildRRDFileName( dataType = type, groupName=client, machines = [machine], fileType = self.fileType, usage = "group" )
-                        #print databaseName
+                            databaseName = RrdUtilities.buildRRDFileName( dataType = translatedDataType, groupName=client, machines = [machine], fileType = self.fileType, usage = "group" )
+                            #print databaseName
+                            
                         plottedGraphics.append( self.plotRRDGraph( databaseName, type, client, machine )        )
             
             
