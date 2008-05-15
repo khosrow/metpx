@@ -25,24 +25,19 @@ Front Matter
 
 
 Fundamentals
-------------
-
-This Guide's goal is to describe the principles and features of metpx 
-to help users configure metpx for their needs.  It touches on all the facets
+------------ 
+This Guide describes the principles and features of metpx.  It touches on all the facets
 of the package, but with a goal of introducing them, rather than an exhaustive
-exposition.  Reference material is elsewhere.
+exposition.  For detailed reference material, consult the manual pages.
+It begins with a discussion of fundamentals, then a single trivial switching system 
+is used illustrate the basics.  Various aspects of routing and special effects 
+(aka filtering) are gradually unveiled.  Towards the end, an overview of a typical 
+clustering/HA configuration is given.
 
-The document begins with a discussion of fundamentals which are assumed in the 
-rest of the document.   The various aspects of routing and special effects 
-(aka filtering) are gradually unveiled.  After the configuration of a 
-single switching system has been covered, the document will move on to 
-describe some provide an overview of a typical clustering/HA configuration.
-
-There are two components of metpx: sundew, the switching 
-package itself, and columbo, the web-based monitoring GUI. 
-This guide concerns itself with configuration of the sundew
-module.  It will start with simple loopback tests, then
-add methods to accomplish more complicated tasks. 
+There are two components of metpx: sundew, the switching package itself, and columbo, 
+the web-based monitoring GUI.  This guide concerns itself with configuration of the 
+sundew module.  It will start with simple loopback tests, then add methods to 
+accomplish more complicated tasks. 
 
 After presenting the possibilities for clustering configurations, the stage 
 is set for metpx-columbo.  Columbo monitors an entire cluster from a 
@@ -56,9 +51,9 @@ low-latency meteorological message switching application.  Another term in
 wide use for this type of application is a Message Handling System (MHS).
 Regardless of the term, the purpose is to handle message traffic for the 
 `World Meteorological Organization <http://www.wmo.int>`_'s GTS, as described in the 
-`Manual on the Global Telecommunications System <http://www.wmo.ch/web/www/ois/Operational_Information/WMO386/ManOnGTS.html>`_, 
-(there will be many references to *WMO386* in this guide)  or GTS.  The 
-application originated at the Canadian Meteorological Centre (CMC), which 
+Manual on the Global Telecommunications System WMO386, 
+(there will be many references to *WMO386* in this guide) or GTS.  MetPX 
+originated at the Canadian Meteorological Centre (CMC), which 
 in WMO386 Part I terminology is both a Regional Specialized Meteorological 
 Centre for Volcanic Ash advisories as well as environmental emergencies, 
 in addition to being the National Meteorological Centre for Canada. The 
@@ -79,20 +74,6 @@ needs to begin by opening a shell as the px user.  The ways to accomplish
 this are many and varied, and beyond the scope of this manual. however,
 throughout the manual, commands are assumed to be typed from this acocunt.
 
-Another important consideration is that MetPX is released under the 
-General Public License, Version 2.  GPLv2 is, by far, the most commonly 
-used open source license, and its main goal is to encourage collaborative
-development.  In that spirit, other groups may decide to contribute 
-improvements under the same license.  if any one copyright holder elects 
-to change their licensing, because of GPLv2, they will lose access to 
-others' contributions.  As contributions accrete, it becomes less and 
-less attractive to withdraw from the collaborative work.  The risk
-of losing access to others' work is minimized, in comparison to less
-strict open source licenses, and especially when compared to customizations 
-of commercial software.  For organizations considering improving
-a tool for their own purposes, this is the safest license possible,
-as even the originating organization cannot remove access to the 
-existing code base.
 
 .. image:: BigPicture.png
 
@@ -174,9 +155,9 @@ The second category of data which metpx understands is files. A file is a stream
 of bytes, with a name.  Metpx extracts a key from the name of a file and
 perform the same switching function used for bulletins.
 
-Just to confuse users, there is also a hybrid reception type: bulletin-file.
-A bulletin-file though it receives files like a file receiver, it ignores 
-their names. Instead it treats all files as if they were a byte stream 
+as an aside: there is also a third hybrid reception type: bulletin-file.
+A bulletin-file receives files like a file receiver, but ignores their names. 
+Instead, it treats all files as if they were a byte stream 
 received on a socket connection. The bulletin-file receiver looks for 
 the first AHL in a file, routes the contents accordingly.
 
@@ -198,9 +179,22 @@ A philosophical note:
 Installation
 ------------
 
-Assuming Debian packages are available, then dpkg -i metpx-sundew-xx-yy.dpkg; apt-get install -f;
+Assuming Debian packages are available, then 
+
+later:?
+add the following to /etc/apt/sources.list
+
+| deb http://metpx.sf.net/debian/etch
+
+for now: ´obtain a .deb´ from somewhere...
+
+|
+| repository is where...  
+| dpkg -i metpx-sundew-xx-yy.dpkg
+|  apt-get install -f
+
 FIXME
-deprecated: read INSTALL file in sundew root directory.
+
 
 A First Run
 -----------
@@ -487,9 +481,7 @@ Change the sender loop configuration:
 | imask *
 | EOT
 
-If you start this up, it will loop infintely because there is no 
-duplicate suppression in the FTP sender.  So there you have
-a basic FTP sender!
+So there you have a basic FTP sender!
 
 
 
@@ -528,7 +520,7 @@ for some destinations, using
 Filters
 -------
 Hi Michel!
-A Demo with bulletin Collection would be really cool here.
+A Demo with bulletin collection would be really cool here.
 
 
 Recommendations
@@ -619,13 +611,51 @@ there are mappings, and WMO bulletins are encapsulated within AFTN messages.
 I really think Daniel must write this part... 
 
 
+Basic High Availability
+_______________________
+
+The first step in improving availability over running a single system on it´s own
+is to pair servers up, and have some provision for failover between the paired machines.
+If servers A and B are configured in HA mode, then typically it is in an active/passive
+way, where Server A is active, while B is idle.  In the case of failure of the server A, 
+B is ready to take over processing for Server A.  To do that, it needs to assure itself that 
+server A is down, and then take over the disk data from A so that it knows which operations are pending.
+
+The need to take over disk space means that some form of shared storage is needed
+so that both servers can access it.   There are many ways of doing this, from DRBD running over
+ethernet, to myriad cluster file systems, to simple file system failover over fibre channel using heartbeat.
+Regardless of the method of shared storage, the impact on sundew is the same.
+
+One does not typically share /var across an HA cluster, but have separate application file systems
+which transition to the active server.  So configuration of sundew needs to use this shared
+space.
+
+Example... assume /apps is a path where storage is moved between peers in an HA cluster. 
+Assuming sundew is already installed the instructions for moving application data onto 
+shared space would be something like below:
+
+|
+| px stop
+| mv /var/log/px /apps/px/logs
+| ln -s /apps/px/logs /var/log/px
+| mv /var/spool/px /apps/px/spool
+| ln -s /apps/px/spool /var/spool/px
+| mv /etc/px /apps/px/etc
+| ln -s /apps/px/etc /etc/px
+| chown -R px.px /apps/px
+| px start
+|
+
+
 Product eXchange Array
 ----------------------
 
-Sundew is an application which runs on a single computer.  This is an express 
-decision to ensure focus in application development, and to maximally leverage 
-existing technologies.  Sundew is not limited to running on a single system, and
-at the Canadian Meteorological Centre, it is deployed across at least four 
+Beyond running in simple failover pairs which are still limited to the performance of a single
+server, one can scale performance to an arbitrary level 
+by moving to a fully scalable configuration. Normally, Sundew is an application which runs 
+on a single computer.  This is an express decision to ensure focus in application development, 
+and to maximally leverage existing technologies.  Sundew is not limited to running on a single 
+system, and at the Canadian Meteorological Centre, it is deployed across at least four 
 servers, fronted by load balancers, to increase processing capacity, and provide 
 reliability beyond what is possible to do with a single server.  Because the approach 
 is to leverage existing technologies, those technologies are treated as 
@@ -689,10 +719,19 @@ and a web server, as well as the statistics module.  This minimizes the load for
 statistics and monitoring on nodes which need to do processing.
 
 
+Retransmission
+--------------
+
+Maybe Lucie have a first run at this?
+
+
+
 Columbo
 -------
 
-Need to install it on the laptop first...
+Need to install it on the laptop first... get packaging out of the way.
+
+
 
 Miscellany
 ----------
@@ -702,3 +741,6 @@ as well as pxChecker which restarts any channels which may have failed.  Those
 processes generally need no attention.  
 
 bandwidth control using vsftpd ... at least for reception.
+
+
+
