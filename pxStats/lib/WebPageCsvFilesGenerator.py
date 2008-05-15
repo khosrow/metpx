@@ -39,10 +39,12 @@ from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.AutomaticUpdatesManager import AutomaticUpdatesManager
 from pxStats.lib.WebPageArtifactsGeneratorInterface import WebPageArtifactsGeneratorInterface
-
+from pxStats.lib.LanguageTools import LanguageTools
 
 #Modify this totaly random number to suit your needs.
 TOTAL_YEARLY_OPERATIONAL_COSTS = 1000000
+
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" )    
 
 
 class WebPageCsvFilesGenerator( WebPageArtifactsGeneratorInterface ):
@@ -55,14 +57,18 @@ class WebPageCsvFilesGenerator( WebPageArtifactsGeneratorInterface ):
                        the filename that was generated.
         
         """
-            
+        
+        global _
+        
+        _ = LanguageTools.getTranslatorForModule(CURRENT_MODULE_ABS_PATH, self.outputLanguage )
+        
         fileName = ""
         
         lines = str( output ).splitlines()
         
         for line in lines:
-            if "generated filename : " in str(line).lower():
-                fileName = line.split( "generated filename : " )[1].replace(' ','') 
+            if _( "generated filename : " ) in str(line).lower():
+                fileName = line.split( _( "generated filename : " ) )[1].replace(' ','') 
                 break
     
         return fileName
@@ -92,16 +98,16 @@ class WebPageCsvFilesGenerator( WebPageArtifactsGeneratorInterface ):
         typeParameters = {  "daily" : "-d", "weekly" : "-w", "monthly" : "-m", "yearly" : "-y" }
         
         output = commands.getoutput( paths.STATSBIN + 'csvDataConversion.py --includeGroups %s --machines "%s" --machinesAreClusters --fixedPrevious --date "%s" -f rx --language %s'  %( typeParameters[type], clusters, self.timeOfRequest, self.outputLanguage ) )
-        #print output
+        #print paths.STATSBIN + 'csvDataConversion.py --includeGroups %s --machines "%s" --machinesAreClusters --fixedPrevious --date "%s" -f rx --language %s'  %( typeParameters[type], clusters, self.timeOfRequest, self.outputLanguage )
            
         output = commands.getoutput( paths.STATSBIN + 'csvDataConversion.py --includeGroups %s --machines "%s" --machinesAreClusters --fixedPrevious --date "%s" -f tx --language %s'  %( typeParameters[type], clusters, self.timeOfRequest, self.outputLanguage ) )
-        #print output      
+        #print paths.STATSBIN + 'csvDataConversion.py --includeGroups %s --machines "%s" --machinesAreClusters --fixedPrevious --date "%s" -f tx --language %s'  %( typeParameters[type], clusters, self.timeOfRequest, self.outputLanguage )      
         
         fileName = self.__getFileNameFromExecutionOutput(output)
         
         if fileName != "":
             commands.getstatusoutput(paths.STATSWEBPAGESGENERATORS + 'csvDataFiltersForWebPages.py -c %s -f %s ' %(cost, fileName) )
-    
+            #print paths.STATSWEBPAGESGENERATORS + 'csvDataFiltersForWebPages.py -c %s -f %s ' %(cost, fileName)
     
                              
     def __generateAllMissingYearlyCsvFilesSinceLasteUpdate( self, clusters, cost):
