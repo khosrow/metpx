@@ -366,7 +366,7 @@ def writeDataToFileName( infos, sourlients, data, fileName ):
                 fileHandle.write(lineTowrite +  '\n' )
         
         except:
-            print "%s, %s : %s" %( sourlientName, dataType, data[sourlientName] ) 
+            #print "%s, %s : %s" %( sourlientName, dataType, data[sourlientName] ) 
             pass
         
         
@@ -395,7 +395,8 @@ def fetchDataFromRRDDatabase( databaseName, startTime, endTime, interval, graphi
         #print databaseName, 'AVERAGE', '-r', str(resolution), '-s', "%s" %(startTime), '-e', '%s' %(endTime)
     
     except:
-        output = ""
+        pass
+        #----------------------------------------------------------- output = ""
         #------------- print "Error.Could not fetch data from %s." %databaseName
         #------------------------------------------- print "Program terminated."
         #------------------------------------------------------------ sys.exit()
@@ -573,11 +574,17 @@ def getDataFromDatabases( sourlients, dataTypes, infos ):
                 
                 for dataType in dataTypes :
                     
-                    databaseName = RrdUtilities.buildRRDFileName(dataType, [sourlient], [machine], "", infos.fileType)
+                    if infos.outputLanguage != 'en' :
+                        translatedDataType = LanguageTools.translateDataType( dataType, "en", infos.outputLanguage )
+                    else  :
+                        translatedDataType = dataType   
+                    
+                    databaseName = RrdUtilities.buildRRDFileName( dataType = translatedDataType, clients=  [sourlient], machines = [machine], fileType = infos.fileType )
+ 
                     if not os.path.isfile( databaseName ):
                         if infos.includegroups == True:
-                            databaseName = RrdUtilities.buildRRDFileName(dataType = dataType, groupName = sourlient, machines = [machine], fileType = infos.fileType, usage = "group" )
-                            #print databaseName
+                            databaseName = RrdUtilities.buildRRDFileName(dataType = translatedDataType, groupName = sourlient, machines = [machine], fileType = infos.fileType, usage = "group" )
+
                     lastUpdate = RrdUtilities.getDatabaseTimeOfUpdate( databaseName, infos.fileType )        
                                         
                     fetchedInterval = getInterval( int(StatsDateLib.getSecondsSinceEpoch(infos.start)), lastUpdate, dataType, goal = "fetchData"  )  
