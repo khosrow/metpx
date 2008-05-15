@@ -22,7 +22,7 @@
 ##
 ##          Lines starting with the # character will be considered comment lines.
 ##          
-##          List of machines or passwords such as seen in the above example 
+##          List of machines or usernames such as seen in the above example 
 ##          must absolutely be separated by the ',' character. No other characters
 ##          will be accepted.
 ## 
@@ -38,4 +38,5 @@
 tag1                  machine1,machine2           login1,login1
 tag2                  machine3               	  login1
 tag3        		  machine4,machine5       	  login2,login2
-tagx                  machine5                    login2 
+tagx                  machine5                    login2
+
