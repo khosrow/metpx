@@ -23,12 +23,13 @@ import os, sys
 from optparse import OptionParser
 
 sys.path.insert(1, sys.path[0] + '/../../../')
+
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 from pxStats.lib.LanguageTools import LanguageTools
 
 
 TOTAL_YEARLY_OPERATIONAL_COSTS =  10
-CURRENT_MODULE_ABS_PATH = os.path.abspath( sys.path[0] ) + '/' + "csvDataFiletForWebPages.py" 
+CURRENT_MODULE_ABS_PATH =  os.path.abspath(__file__).replace( ".pyc", ".py" ) 
 
 
 class _csvFilterParameters:
@@ -115,9 +116,10 @@ def calculateCosts1( lines, totals, cost  ):
                   for every line received as a parameter. 
     """
     
+    global _
+    
     costs = []
-    
-    
+        
     bytesTotalPosition     = getFieldPosition( _('bytecount total'), lines[0] )
     fileCountTotalPosition = getFieldPosition( _('filecount total'), lines[0] )
     
@@ -195,6 +197,8 @@ def addTotalsAndMeansToLines( lines ):
                   list of lines. 
     """
     
+    global _ 
+    
     #totals section
     lineToAdd = 'Total ( without groups )'
     
@@ -245,6 +249,8 @@ def getNbSourlients( lines, includeGroups = False ):
         @return : Returns the number of sourlients found.
         
     """
+    
+    global _ 
     
     nbSourlients = 0 
     
@@ -351,6 +357,8 @@ def getOptionsFromParser( parser ):
     
     """  
 
+    global _ 
+    
     ( options, args )= parser.parse_args() 
         
     cost =  options.cost
@@ -395,6 +403,8 @@ def addOptions( parser ):
         
     """       
     
+    global _ 
+    
     parser.add_option("-f", "--fileName", action="store", type="string", dest="fileName", default='', help= _( "File on which to apply the filter." )  )
     
     parser.add_option("-c", "--cost", action="store", type="string", dest="cost", default=0, help= _( "Total operational cost of the period covered by the specified file." ) )
@@ -408,6 +418,8 @@ def createAParser( ):
     
         @return : The parser
     """
+    
+    global _
     
     usage = _( """
 
@@ -465,6 +477,8 @@ def main():
         
         
     """
+    
+    global _
     
     setGlobalLanguageParameters()
     
