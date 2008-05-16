@@ -30,7 +30,7 @@
 
 """
 import commands, os, sys
-
+from ConfigParser                        import ConfigParser
 
 """
     - Small function that adds pxStats to sys path.  
@@ -55,6 +55,7 @@ class COLPATHS :
                        Returns the path to columbo's root.
         
         """
+        
         try:
             try:
                 fileHandle = open( "/etc/px/px.conf", 'r' )
@@ -244,24 +245,34 @@ class StatsPaths:
     
         """ 
         
-        realPath = os.path.realpath( __file__ )
-        foundSymlink = ''
-        associatedPath = ''
-        dirname =  os.path.dirname(realPath)
-        while( dirname != '/'):
+        #------------------------------- realPath = os.path.realpath( __file__ )
+        #----------------------------------------------------- foundSymlink = ''
+        #--------------------------------------------------- associatedPath = ''
+        #---------------------------------- dirname =  os.path.dirname(realPath)
+        #----------------------------------------------- while( dirname != '/'):
+#------------------------------------------------------------------------------ 
+            #--------------------- if os.path.islink(os.path.dirname(realPath)):
+                #--------------------- foundSymlink =  os.path.dirname(realPath)
+                # associatedPath = os.path.realpath( os.path.dirname(realPath)  )
+                #--------------------------------------------------------- break
+            #----------------------------- dirname =  os.path.dirname( dirname )
+#------------------------------------------------------------------------------ 
+        #------------------------------------------------- if foundSymlink !='':
+            # STATSROOT = associatedPath + '/'+ realPath.split( foundSymlink )[1]
+        #----------------------------------------------------------------- else:
+            #----------------------------------------------- STATSROOT= realPath
+        #--------------------- while(os.path.basename(STATSROOT) != "pxStats" ):
+            #---------------------------- STATSROOT = os.path.dirname(STATSROOT)
             
-            if os.path.islink(os.path.dirname(realPath)):
-                foundSymlink =  os.path.dirname(realPath)
-                associatedPath = os.path.realpath( os.path.dirname(realPath)  )
-                break
-            dirname =  os.path.dirname( dirname )
-        
-        if foundSymlink !='':
-            STATSROOT = associatedPath + '/'+ realPath.split( foundSymlink )[1]
-        else:
-            STATSROOT= realPath
-        while(os.path.basename(STATSROOT) != "pxStats" ):
-            STATSROOT = os.path.dirname(STATSROOT)
+        configFile = os.path.dirname( os.path.abspath(__file__) ) + "/../etc/config" 
+        config = ConfigParser()
+        file = open( configFile )
+        config.readfp( file ) 
+                  
+
+        STATSROOT = config.get( 'generalConfig', 'statsRoot' ) 
+ 
+            
         
         return STATSROOT
         
@@ -381,7 +392,6 @@ class StatsPaths:
 
         #csvfiles 
         self.STATSCSVFILES         = self.STATSDATA + _("csvFiles/")
-        
         #Databases related paths.
         self.STATSDB               = self.STATSDATA + _( 'databases/' )
         self.STATSCURRENTDB        = self.STATSDB   + _( 'currentDatabases/' )
