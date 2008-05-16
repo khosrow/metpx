@@ -323,7 +323,7 @@ def main():
     
     gp = GnuGraphicProducer( clientNames = infos.clientNames, groupName = infos.groupName , timespan = infos.timespan,\
                                 currentTime = infos.currentTime, productTypes = infos.productTypes, directory = infos.directory ,\
-                                fileType = infos.fileType, machines = infos.machines, language = infos.outputLanguage )  
+                                fileType = infos.fileType, machines = infos.machines, outputLanguage = infos.outputLanguage )  
     
     gp.produceGraphicWithHourlyPickles( types = infos.types, now = infos.collectUpToNow, createCopy = infos.copy,\
                                         combineClients = infos.combineClients )
