@@ -116,10 +116,19 @@ class LanguageTools :
                       , paths.STATSLIB : paths.STATSLANGFRLIB  } 
             
             
-            modulePath = os.path.dirname( moduleAbsPath ) + '/'
+            for key in correspondingPaths.keys():
+                correspondingPaths[ key.split("pxStats")[-1:][0]] = correspondingPaths[ key]
+            
+            modulePath = str(os.path.dirname( moduleAbsPath ) + '/').split("pxStats")[-1:][0]
             moduleBaseName =  str(os.path.basename( moduleAbsPath )).replace( ".py", "" )
             
+            #print "modulePath",modulePath
+            
+            #print "correspondingPaths", correspondingPaths
+                       
             translationfileName = correspondingPaths[ modulePath ] + moduleBaseName
+            
+            #print translationfileName
             
         except Exception, instance:
             print instance
