@@ -107,13 +107,16 @@ class RrdUtilities:
             elif usage == "group":
             
                 #fileName = STATSPATHS.STATSCURRENTDB + _("%s/combined/%s_%s") %( dataType, groupName, combinedMachineName )    
-                existingFiles=  os.listdir(STATSPATHS.STATSCURRENTDB + "%s/combined/"%( dataType) )
+                try:
+                    existingFiles=  os.listdir(STATSPATHS.STATSCURRENTDB + "%s/combined/"%( dataType) )
                 
-                for file in existingFiles:
-                    if fnmatch.fnmatch(file, groupName + "*"):
-                        fileName = file
-                        break
-                    
+                    for file in existingFiles:
+                        if fnmatch.fnmatch(file, groupName + "*"):
+                            fileName = file
+                            break
+                except:
+                    pass
+                
                 if fileName == "":#no preexisitng file exist for this group
                     fileName = STATSPATHS.STATSCURRENTDB + "%s/%s_%s" %( dataType, groupName, combinedMachineName )    
                 else:#else
