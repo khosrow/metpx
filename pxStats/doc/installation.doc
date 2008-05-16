@@ -360,6 +360,12 @@
                 2 - Make sure that for all languages, the .../path/html_language/archives
                     permissions are given so that the user can browse the archives.
 
+        Section 2.6 Giving out execution permission
+        -----------------------------------------------------------------------------
+                1 - Go to .../pxStats/bin/
+                2 - Execute the following command : chmod a+x *.py
+                3 - Execute the following command : chmod a+x */*.py
+
 
 
     Section 3: Installing as a second machine(or more) or as a mirror machine.
