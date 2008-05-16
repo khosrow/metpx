@@ -7,7 +7,7 @@ Guide.rtf:   Guide.latex
 	latex2rtf </dev/null Guide.latex >Guide.rtf
 
 Guide.latex:  Guide.txt
-	rst2latex <- Guide.txt >Guide.latex
+	rst2latex <Guide.txt >Guide.latex
  
 .dia.png:
 	dia -t png $*.dia
