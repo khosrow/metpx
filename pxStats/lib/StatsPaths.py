@@ -244,25 +244,6 @@ class StatsPaths:
             pxStats must be checked-out in a pxStats folder.
     
         """ 
-        
-        #------------------------------- realPath = os.path.realpath( __file__ )
-        #----------------------------------------------------- foundSymlink = ''
-        #--------------------------------------------------- associatedPath = ''
-        #---------------------------------- dirname =  os.path.dirname(realPath)
-        #----------------------------------------------- while( dirname != '/'):
-#------------------------------------------------------------------------------ 
-            #--------------------- if os.path.islink(os.path.dirname(realPath)):
-                #--------------------- foundSymlink =  os.path.dirname(realPath)
-                # associatedPath = os.path.realpath( os.path.dirname(realPath)  )
-                #--------------------------------------------------------- break
-            #----------------------------- dirname =  os.path.dirname( dirname )
-#------------------------------------------------------------------------------ 
-        #------------------------------------------------- if foundSymlink !='':
-            # STATSROOT = associatedPath + '/'+ realPath.split( foundSymlink )[1]
-        #----------------------------------------------------------------- else:
-            #----------------------------------------------- STATSROOT= realPath
-        #--------------------- while(os.path.basename(STATSROOT) != "pxStats" ):
-            #---------------------------- STATSROOT = os.path.dirname(STATSROOT)
             
         configFile = os.path.dirname( os.path.abspath(__file__) ) + "/../etc/config" 
         config = ConfigParser()
@@ -271,8 +252,11 @@ class StatsPaths:
                   
 
         STATSROOT = config.get( 'generalConfig', 'statsRoot' ) 
- 
-            
+        
+        str(STATSROOT).replace('//','/')
+        
+        if  str(STATSROOT).endswith('/') == False :
+            STATSROOT = STATSROOT + '/'
         
         return STATSROOT
         
@@ -296,7 +280,7 @@ class StatsPaths:
         # Protected StatsPaths
         # Paths without _() are protexted paths.  
         # THEY, and the paths under them, MUST NOT BE TRANSLATED !        
-        self.STATSROOT = self.__getPXStatsRoot() + "/"
+        self.STATSROOT = self.__getPXStatsRoot() 
         self.STATSBIN     = self.STATSROOT +  'bin/'  # Protected to ensure imports work !
         self.STATSDEV     = self.STATSROOT +  'dev/'  # Protected to make sure dependencies work.
         self.STATSETC     = self.STATSROOT +  'etc/'  # Protected as to always fin the config files.
