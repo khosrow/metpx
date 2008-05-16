@@ -42,7 +42,7 @@ from pxStats.lib.GeneralStatsLibraryMethods import GeneralStatsLibraryMethods
 
 STATSPATHS = StatsPaths()
 STATSPATHS.setBasicPaths()
-sys.path.append( StatsPaths.PXLIB )
+sys.path.append( STATSPATHS.PXLIB )
 
 """
     Imports which require pxlib 
