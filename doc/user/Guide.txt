@@ -636,10 +636,11 @@ shared space would be something like below:
 
 |
 | px stop
+| mkdir /apps/px
 | mv /var/log/px /apps/px/logs
 | ln -s /apps/px/logs /var/log/px
-| mv /var/spool/px /apps/px/spool
-| ln -s /apps/px/spool /var/spool/px
+| mv /var/spool/px/* /apps/px
+| ln -s /apps/px /var/spool/px
 | mv /etc/px /apps/px/etc
 | ln -s /apps/px/etc /etc/px
 | chown -R px.px /apps/px
