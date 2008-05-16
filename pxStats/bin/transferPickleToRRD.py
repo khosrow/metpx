@@ -659,12 +659,12 @@ def main():
     
     """
     
-    paths = STATSPATHS()
+    paths = StatsPaths()
     paths.setPaths()
     
     language = 'en'
     
-    setGlobalLanguageParameters( language )
+    setGlobalLanguageParameters()
     
     createPaths( paths )
     
