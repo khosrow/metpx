@@ -43,7 +43,7 @@ from   optparse  import OptionParser
 """
     Small function that adds pxlib to the environment path.  
 """
-sys.path.insert(1, os.path.dirname(os.path.abspath(__file__))  + '/../../')
+sys.path.insert(1, os.path.dirname( os.path.abspath(__file__) )  + '/../../')
 print  os.path.abspath(__file__)  + '/../../'
 from pxStats.lib.StatsPaths import StatsPaths
 from pxStats.lib.StatsDateLib import StatsDateLib
