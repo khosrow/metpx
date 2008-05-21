@@ -1,0 +1,406 @@
+##################################################################################################
+<br># Name          : troubleshooting_en.html
+<br># Author        : Nicholas Lemay
+<br># Last Update   : May 21th 2008
+<br>#
+<br>#
+<br># MetPX Copyright (C) 2004-2008  Environment Canada
+<br># MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
+<br># named COPYING in the root of the source directory tree.
+<br>#
+<br>###################################################################################################
+<br>
+<br>
+<br>
+<br>About
+<br>---------------------
+<br>This section was created to help the administrator of the stats library.
+<br>The stats library was designed as to require as little human intervention as 
+<br>possible. Nonetheless it is likely that errors will occur through time.
+<br>A few utilities have been developped as to help the user get things back on track. 
+<br>
+<br>
+<br>
+<br>Section 1 - Data errors on only one machine.
+<br>------------------------------------------------------
+<br>
+<br>
+<br>Preconditions : 
+<br>------------------------------------------------------
+<br>
+<br>- 2 or more machines currently have pxStats installed.
+<br>
+<br>- They BOTH have the same main application language set
+<br>  in their config file.
+<br>
+<br>
+<br>
+<br>Symptoms : (any of these)
+<br>------------------------------------------------------
+<br>
+<br>1 - Different graphics are produced by both machines.
+<br>
+<br>2 - Some graphics are absent on one of the two machines
+<br>    and not on the other.
+<br>
+<br>
+<br>Possible causes :
+<br>------------------------------------------------------
+<br>1 - The two(or more) machines have different versions of
+<br>    the stats library installed on them or different 
+<br>    versions of the crucial files.
+<br>
+<br>2 - Graphic creation has been stopped on one of the two
+<br>    machines.
+<br>
+<br>3 - Disks are full or access to disk is corrupted.
+<br>
+<br>
+<br>
+<br>Recovery procedure:
+<br>-----------------------------------------------------   
+<br>1- Identify the source of the problem within the list 
+<br>   of possible errors.
+<br>
+<br>2- If a machine has the wrong version of the stats 
+<br>   library files installed, install the same version
+<br>   as the working machine on the non-working machine.
+<br>
+<br>3- Stop all stats library related activities by killing
+<br>   currently running process' and by turning off the
+<br>   related crontab entries. To do so, run this commands : 
+<br>   crontab -e  and write the # character in front of the 
+<br>   entries you want to turn off. 
+<br>
+<br>4- Retrieve data from the working machine.
+<br>
+<br>   To do so run this utility :
+<br>
+<br>   .../pxStats/bin/tools/retreiveDataFromMachine.py login machineName  
+<br>
+<br>   Warning : prior to running this script, make sure that the config files in the 
+<br>   .../pxStats/etc folder are properly filled !
+<br>
+<br>5- relaunch graphic production
+<br>
+<br>   To do so remove the # character you have placed in the crontab entries you have modified. 
+<br>
+<br>   Remove any lock found in one of these folders : 
+<br>
+<br>    ...pxStats/tmp/lockFiles/pxStatsStartup.lock
+<br>    or into the 
+<br>    .../pxStats/temp/fichiersDeVerrou/ folder and remove 
+<br>
+<br>   Note: if crontab entry is set at the 15th minute of the hour, and it's hh:25:ss
+<br>         you might want to run launchGraphicCreation manually to see if everything goes well
+<br>         without having to wait untill the next hour.   
+<br>
+<br>Warnings : The preceding script is not bulletproof. If files were being updated 
+<br>           throughout the entire time the transfer was being done, there is no
+<br>           way all the transferred files will be complete and accurate. You
+<br>           should thus make sure that the source machine is not doing any 
+<br>           intensive work of it's own(i.e stop the crons on that machine
+<br>           during transfer). Otherwise, rerun this script numerous time.
+<br>
+<br>
+<br>
+<br>Section 2 Data recuperation
+<br>----------------------------------------------------------------------------------
+<br>
+<br>Preconditions : 
+<br>------------------------------------------------------
+<br>
+<br>- At least one machine has pxStats installed.
+<br>
+<br>- If only one of the machines has problems, the other
+<br>  machines do not have the same installation languages
+<br>  as the problematic one.
+<br>
+<br>- If many machiens have the same installation language
+<br>  they either do not handle the same machines or they
+<br>  are both currently corrupted.
+<br>
+<br>- If any of the preconditions is not met, see the other 
+<br>  section to find the section relative to you problems.
+<br>
+<br>
+<br>Symptoms : (any of these)
+<br>------------------------------------------------------
+<br>
+<br>1 - Graphics are missing.
+<br>
+<br>2 - Graphics appear, but are empty.
+<br>
+<br>3 - Monitoring emails are no longer delivered.
+<br>
+<br>
+<br>Possible causes :
+<br>------------------------------------------------------
+<br>1 - Crontabs have been stopped on all of the machines.
+<br>
+<br>2 - Disks are either full, or disk access has been lost.
+<br>
+<br>3 - Someone stopped crontab during execution and corrupted 
+<br>   data. 
+<br>
+<br>4 - SSH access to remote access is corrupted 
+<br>
+<br>5- Emails transfers is corrupted.
+<br>
+<br>
+<br>Recovery procedure:
+<br>-----------------------------------------------------
+<br>
+<br>1 - Make sure crontabs are currently active
+<br>    - ssh userName@problematicMachine
+<br>    - crontab -e 
+<br>    - Make sure no '#' character is found in front 
+<br>      of the crontab entry dedicated to pxStatsStartup 
+<br>
+<br>2 - Make sure disk space is sufficient and that disk are accessible.
+<br>    -  ssh userName@problematicMachine
+<br>    -  go to the .../pxStats/data or .../pxStats/donnees/ folder.
+<br>    - Browse folders and see if the are ALL accessible.
+<br>    - At the same time, verify every folder for free disk space
+<br>      and make sure they are not full.
+<br>
+<br>4 - SSH connections are lost :
+<br>    This will produce graphics with no data since no log files will be rsync'ed
+<br>    from the source machines to the pickling machines.
+<br>
+<br>   - ssh username@problematicmachine
+<br>   - make sure automatix connection to log producing files
+<br>     is granted without password to the user which is running 
+<br>     the crontabs.
+<br>
+<br>
+<br>
+<br>3 - In case of data courruption :(ssh connection had been lost, 
+<br>    brutal halting of pxStatsStartup execution)
+<br>
+<br>     - ssh userName@problematicMachine
+<br>     - crontab -e : comment the crontab entry of pxStatsStartup.py
+<br>     - go to the .../pxStats/bin/debugTools/ folder
+<br>     - execute the following command : 
+<br>       setTimeOfLastUpdates.py "yyyy-mm-dd HH:MM:SS"
+<br>       the time specified should be the hour prior to data corruption 
+<br>    - go to the .../pxStats/data/databases/databasesBackups and look
+<br>      for the newest backup that is older than the time of courruption.
+<br>
+<br>    - copy that time exemple : 2008-05-04_12:16:00
+<br>
+<br>    - go to the .../pxStats/bin/tools folder and execute the following
+<br>      command restoreRoundRobinDatabases.py "2008-05-04 12:16:00"
+<br>      Note : don't forget to replace the _ character with a space.
+<br>
+<br>    - Go to the .../pxStats/temp/fichiersDeVerrou folder and 
+<br>      remove all lock files found there.
+<br>    
+<br>    - Go to the ...pxStats/tmp/lockFiles/ and remove any lock 
+<br>      files found there.
+<br>    
+<br>     - crontab -e : remove the # you had previously added to the entry.
+<br>        
+<br>
+<br>5 - If everything seems ok but only monitoring emails are missing, 
+<br>    go to the "Section 3  Missing emails " section to fix the email
+<br>    problem
+<br>
+<br>
+<br>
+<br>Section 3  Missing emails 
+<br>---------------------------------------------------------
+<br>
+<br>Symptoms : (any of these)
+<br>------------------------------------------------------
+<br>
+<br>1- Emails are no longer recevied from one or all of the machines
+<br>
+<br>
+<br>Possible causes :
+<br>------------------------------------------------------
+<br>1 - Crontabs are stopped on those machines.
+<br>
+<br>2 - Email server is not distributing hte emails. 
+<br>
+<br>3 - You're client is not receiving emails.
+<br>
+<br>
+<br>Recovery procedure:
+<br>-----------------------------------------------------
+<br>
+<br>1 - Verify if graphics are up to date on the problematic machine
+<br>    If they are not, than a stopped crontab might be the cause.
+<br>    
+<br>    If so follow the following steps :
+<br>
+<br>        - ssh userName@problematicMachine
+<br>        - To verify crontab type crontab - l
+<br>        -  if entry starts with '#' 
+<br>           example : #15 * * * * /apps/px/pxStatsFr/pxStats/bin/pxStatsStartup.py  > /dev/null 2>&1
+<br>           remove the #
+<br>        
+<br>        - If not, verify if process is not allready running. If not,
+<br>          verify if a lock file is blocking the program from running.
+<br>            - Go into the 
+<br>                ...pxStats/tmp/lockFiles/pxStatsStartup.lock
+<br>              or into the 
+<br>                .../pxStats/temp/fichiersDeVerrou/ folder and remove 
+<br>              pxStatsStartup.verrou if it is present( french installation)
+<br>            
+<br>        - Make sure all the .py files found under 
+<br>               .../pxStats/bin/ 
+<br>          and all the folders under it have permissions
+<br>          to be executed.
+<br>    
+<br>
+<br>If graphics are up to date, than the program is running and the emails 
+<br>seem to be the only problem
+<br>
+<br>2 - Verify if your e mail client is currently receiving emails properly. 
+<br>
+<br>3- Verify if the parameters found in the .../pxStats/etc/config 
+<br>   configuration file are up to date. Verify with your email 
+<br>   provider that these parameters can be used on it's server 
+<br>   to send out emails.
+<br>
+<br>
+<br>
+<br>Section 4 Request interface problems
+<br>----------------------------------------------------------
+<br>
+<br>Symptoms( any of these ) :
+<br>----------------------------------------------------------
+<br>
+<br> - Request Page is not displayed at all 
+<br> - Graphics cannot be produced 
+<br> - Some graphics are produced but others are not 
+<br>
+<br>Possible causes :
+<br>------------------------------------------------------
+<br>1 - .py files are not executable
+<br>
+<br>2 - Server does not allow cgi script execution
+<br>
+<br>3 - Permissions is not given to write graphics to the disk.
+<br>
+<br>4 - Cgi message exchange has been corrupted by coding problems.
+<br>
+<br>
+<br>Recovery procedure:
+<br>-----------------------------------------------------
+<br>
+<br>
+<br>Remedy to cause 1 :
+<br>----------------------------
+<br>
+<br>    1 - ssh username@machineHostingWebInterface
+<br>    
+<br>    2 - go into the filder where the web interface has been installed 
+<br>        ex : /web/pxStats/
+<br>    
+<br>    3 - go into the scripts/cgi-bin folder. Make sure all the files 
+<br>        found there are executable.
+<br>
+<br>Remedy to cause 2 :
+<br>-----------------------------
+<br>    1 - ssh username@machineHostingWebInterface
+<br>    2 - go to the  /etc/apache2/sites-available
+<br>    3 - open up the appropriate file
+<br>    4 - make sure a section similar to this one is present : 
+<br>     ScriptAlias /cgi-bin/ /web/pxStats/scripts/cgi-bin/
+<br>     <Directory "/web/pxStats/scripts/cgi-bin/">
+<br>              AllowOverride None
+<br>              Options ExecCGI -MultiViews +SymLinksIfOwnerMatch
+<br>              Order allow,deny
+<br>               Allow from all
+<br>      </Directory>
+<br>
+<br>
+<br>Remedy to cause 3 :
+<br>-----------------------------
+<br>1- ssh username@machineHostingWebInterface
+<br>
+<br>
+<br>2- if an english installation has been made 
+<br>   go to the ...pxStats/data/graphics/others/ folder.
+<br>   Make sure all the folders found under this 
+<br>   path(rrd and gnuplot ) and the ones under these
+<br>   ( they will be sporting the clients and sources names )
+<br>   give away the "write" permission to the web user.
+<br>
+<br>3- if a french install has been made, go to the
+<br>    ...pxStats/donnees/graphiques/autres
+<br>   Make sure all the folders found under this 
+<br>   path(rrd and gnuplot ) and the ones under these
+<br>   ( they will be sporting the clients and sources names )
+<br>   give away the "write" permission to the web user.
+<br>
+<br>Remedy to cause 4:
+<br>-------------------------------
+<br>Note : This problem is usually encountered when new file versions 
+<br>       are introduced into the files being used by the web interface.
+<br>
+<br>       Correcting this bug will require modifying a few lines of code.
+<br>
+<br>1 - ssh username@machineHostingWebInterface
+<br>
+<br>2 - go to the /var/log/apache2 folder
+<br>
+<br>3 - execute this command tail -f pxstats_access_log
+<br>
+<br>4 - go to the web interface and execute a query that is giving you problems.
+<br>
+<br>5 - watch the new lines being outputted by the  tail -f command.
+<br>
+<br>6 - copy the query  line which includes a calls to graphicsrequestbroker
+<br>    which has jsut been added. this is the call you've just made
+<br>
+<br>    example : 
+<br>    /scripts/cgi-bin/graphicsRequestBroker.py?querier=escape(%22graphicsRequestPage.py%22)&endTime=21-05-2008%2014%3A29%3A01&span=&fileType=tx&machines=pxatx&statsTypes=latence%2CnbreDeBytes%2CnbreDeFichiers%2Cerreurs&preDeterminedSpan=annuel&fixedSpan=Derniers%20365%20jours.&sourLients=ncp&combineSourlients=false&products=&lang=fr
+<br>
+<br>7 - go to the place where the web interface is installed
+<br>    example :  /web/pxStats/script/cgi-bin/
+<br>
+<br>
+<br>8 - execute your copied query this way :
+<br>    .graphicsRequestBroker.py "?querier=escape(%22graphicsRequestPage.py%22)&endTime=21-05-2008%2014%3A29%3A01&span=&fileType=tx&machines=pxatx&statsTypes=latence%2CnbreDeBytes%2CnbreDeFichiers%2Cerreurs&preDeterminedSpan=annuel&fixedSpan=Derniers%20365%20jours.&sourLients=ncp&combineSourlients=false&products=&lang=fr"
+<br>    
+<br>    Note do not forget to leave a space between program name and parameters, and to wrap them with double quotes.
+<br>
+<br>9 - look out for any printout which do no start with 
+<br>
+<br>        HTTP/1.0 200 OK
+<br>        Server: NCSA/1.0a6
+<br>        Content-type: text/plain
+<br>
+<br>    for example the exepected reply to you query would be :
+<br>
+<br>        HTTP/1.0 200 OK
+<br>        Server: NCSA/1.0a6
+<br>        Content-type: text/plain
+<br>
+<br>        images=../../pxStats/donnees/graphiques/autres/rrd/ncp/tx_ncp_20080521_14:29:01_latence_1annees_sur_pxatx.png+../../pxStats/donnees/graphiques/autres/rrd/ncp/tx_ncp_20080521_14:29:01_nbreDeBytes_1annees_sur_pxatx.png+../../pxStats/donnees/graphiques/autres/rrd/ncp/tx_ncp_20080521_14:29:01_nbreDeFichiers_1annees_sur_pxatx.png+../../pxStats/donnees/graphiques/autres/rrd/ncp/tx_ncp_20080521_14:29:01_erreurs_1annees_sur_pxatx.png;error=
+<br>
+<br>    If anything else is printed above the header this will corrupt communications between the queried script and the querier.
+<br>    Investigate queried scripts( graphicsRequestBroker.py,  GnuQueryBroker.py, GnuPlotter.py,  RRDGraphicProducer.py,  RRDQueryBroker.py, GraphicsQueryBrokerInterface.py, StatsPaths,StatsDateLib etc  ) and find which onhe is doing debugging priting.
+<br>
+<br>
+<br>Section 5 Web interface problem
+<br>----------------------------------------------------------
+<br>
+<br>Symptoms( any of these ) :
+<br>----------------------------------------------------------
+<br>    - None of the web page are being displayed.
+<br>
+<br>Possible causes :
+<br>------------------------------------------------------
+<br>- Url is wrong or has been changed or dns does not
+<br>  recognise it.
+<br>- Apache server problem 
+<br>
+<br>
+<br>Solutions
+<br>----------------------------------------------------------
+<br>Verify both cause with the apache server administrator.
+<br>
