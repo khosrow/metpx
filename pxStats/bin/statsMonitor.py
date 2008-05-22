@@ -1500,8 +1500,9 @@ def main():
     
     report = buildReportHeader( parameters, paths )
     report = verifyFreeDiskSpace( parameters, report, paths )    
-    report = verifyPicklePresence( parameters, report, paths )    
-    report = verifyPickleContent( parameters, report, paths )        
+    report = verifyPicklePresence( parameters, report, paths ) 
+    if parameters.maximumGaps != {}:
+        report = verifyPickleContent( parameters, report, paths )        
     report = verifyStatsLogs( parameters, report, paths )    
     report = verifyFileVersions( parameters, report, paths  )    
     report = verifyCrontab(  report, paths  )   
