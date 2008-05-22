@@ -177,52 +177,56 @@ class StatsMonitoringConfigParameters:
         rxNames  = []
         txNames  = []
         maximumGaps = {} 
-
-        machineConfig = MachineConfigParameters()
-        machineConfig.getParametersFromMachineConfigurationFile()
-        generalParameters = StatsConfigParameters()
-        generalParameters.getAllParameters()
-                       
-        self.__updateMaxSettingsFile( generalParameters )
-        for tag in generalParameters.sourceMachinesTags:
+        
+        try: 
+            machineConfig = MachineConfigParameters()
+            machineConfig.getParametersFromMachineConfigurationFile()
+            generalParameters = StatsConfigParameters()
+            generalParameters.getAllParameters()
+                           
+            self.__updateMaxSettingsFile( generalParameters )
+            for tag in generalParameters.sourceMachinesTags:
+                
+                try:
+                    #print tag
+                    #print "in getMaximumGaps %s" %generalParameters.detailedParameters.sourceMachinesForTag
+                    machines = generalParameters.detailedParameters.sourceMachinesForTag[tag]    
+                    machine  = machines[0]
+                except:
+                    raise Exception( "Invalid tag found in main configuration file." )
+                        
+                newRxNames, newTxNames = GeneralStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machine )
+                rxNames.extend(newRxNames)
+                txNames.extend(newTxNames)
+                allNames.extend( rxNames )    
+                allNames.extend( txNames )
+    
             
-            try:
-                #print tag
-                #print "in getMaximumGaps %s" %generalParameters.detailedParameters.sourceMachinesForTag
-                machines = generalParameters.detailedParameters.sourceMachinesForTag[tag]    
-                machine  = machines[0]
-            except:
-                raise Exception( "Invalid tag found in main configuration file." )
-                    
-            newRxNames, newTxNames = GeneralStatsLibraryMethods.getRxTxNames( LOCAL_MACHINE, machine )
-            rxNames.extend(newRxNames)
-            txNames.extend(newTxNames)
-            allNames.extend( rxNames )    
-            allNames.extend( txNames )
-
-        
-        circuitsRegex, default_circuit, timersRegex, default_timer, pxGraphsRegex, default_pxGraph =  readMaxFile.readQueueMax( self.maxSettingsFile, "PX" )
-         
-        for key in timersRegex.keys(): #fill all explicitly set maximum gaps.
-            values = timersRegex[key]
-            newKey = key.replace( "^", "" ).replace( "$","").replace(".","")
-            maximumGaps[newKey] = values
-        
-        
-        for name in allNames:#add all clients/sources for wich no value was set
+            circuitsRegex, default_circuit, timersRegex, default_timer, pxGraphsRegex, default_pxGraph =  readMaxFile.readQueueMax( self.maxSettingsFile, "PX" )
+             
+            for key in timersRegex.keys(): #fill all explicitly set maximum gaps.
+                values = timersRegex[key]
+                newKey = key.replace( "^", "" ).replace( "$","").replace(".","")
+                maximumGaps[newKey] = values
             
-            if name not in maximumGaps.keys(): #no value was set                    
-                nameFoundWithWildcard = False     
-                for key in timersRegex.keys(): # in case a wildcard character was used
-                    
-                    cleanKey = key.replace( "^", "" ).replace( "$","").replace(".","")
-                    
-                    if fnmatch.fnmatch( name, cleanKey ):                    
-                        maximumGaps[name] = timersRegex[key]
-                        nameFoundWithWildcard = True 
-                if nameFoundWithWildcard == False :            
-                    maximumGaps[name] = default_timer    
+            
+            for name in allNames:#add all clients/sources for wich no value was set
+                
+                if name not in maximumGaps.keys(): #no value was set                    
+                    nameFoundWithWildcard = False     
+                    for key in timersRegex.keys(): # in case a wildcard character was used
+                        
+                        cleanKey = key.replace( "^", "" ).replace( "$","").replace(".","")
+                        
+                        if fnmatch.fnmatch( name, cleanKey ):                    
+                            maximumGaps[name] = timersRegex[key]
+                            nameFoundWithWildcard = True 
+                    if nameFoundWithWildcard == False :            
+                        maximumGaps[name] = default_timer    
         
+        except:#in case of corrupt or absent file
+            
+            maximumGaps = {} 
                    
         return maximumGaps    
       
