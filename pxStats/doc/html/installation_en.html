@@ -15,7 +15,7 @@
 <br>    #
 <br>    #
 <br>    # Author        : Nicholas Lemay
-<br>    # Last Update   : October 16th 2007
+<br>    # Last Update   : May 13th 2008
 <br>    #
 <br>    ################################################################################
 <br>    
@@ -39,7 +39,8 @@
 <br>        Section 2.1 Required Files    
 <br>        
 <br>        Section 2.2 Configuration files
-<br>            Section 2.2.1 Configuring the library
+<br>            Section 2.2.0 Configuring the machine configuration file.
+<br>            Section 2.2.1 Configuring the main library config files
 <br>            Section 2.2.2 Configuring the cleaner
 <br>            Section 2.2.3 Configuring the statsMonitor
 <br>        
@@ -47,8 +48,9 @@
 <br>        
 <br>        Section 2.4 Setting up Crontabs      
 <br>    
-<br>        Section 2.5 Prior to the first crontab 
-<br>        
+<br>        Section 2.5 Installing the web interface
+<br>
+<br>        Section 2.6 Giving out execution permission
 <br>        
 <br>    Section 3 : Installing as a mirror machine.
 <br>        
@@ -67,83 +69,103 @@
 <br>        
 <br>        Section 1.1.1 Software Requirements
 <br>        ----------------------------------------------------------------------------
-<br>            Python     : version 2.3 or greater.
-<br>            SSH        : Allows to connect and tranfer data /to/from other machines.
-<br>            Rsync      : Allows to synchronise data between machines.
-<br>            RRDTOOL    : Time-series storage and display system.
-<br>            Python-rrd : Python package.
-<br>            Gnuplot.py : Python package.
-<br>        
+<br>            
+<br>            Software requirement for execution.
+<br>
+<br>                Python     : version 2.3 or greater.
+<br>                SSH        : Allows to connect and tranfer data /to/from other machines.
+<br>                Rsync      : Allows to synchronise data between machines.
+<br>                RRDTOOL    : Time-series storage and display system.
+<br>                Python-rrd : Python package.
+<br>                Gnuplot.py : Python package.
+<br>                Sundew     : Python package which is part of the MetPX project.
+<br>
+<br>            If maintenance and or developpement is to be done the following 
+<br>            software will be required :
+<br>
+<br>                pygettext : Allows to get .pot files from .py files.
+<br>                msgfmt    : Transforms .pot files into binary files readable by
+<br>                            pythons gettext module.
+<br>
 <br>            
 <br>        Section 1.1.2 Hardware Requirements
 <br>        ----------------------------------------------------------------------------
 <br>            
-<br>            -> At least 7gb of disk space PER machine for wich you need the 
-<br>            log files. Right now the machine with the most data takes up 6gb
-<br>            but that number could keep on growing in the future.
-<br>            
-<br>            This space will be needed under ...pxstats/data/logFiles/ 
-<br>            if pickling is done on the machine where orgininal logs reside. 
-<br>            
-<br>            Otherwise it will be under ...pxstats/data/logFiles/ if it is 
-<br>            being done on a machine between the graphic producing machine and 
-<br>            the log producing machine or if it is being done directly on the
-<br>            graphic producing machine.
-<br>                
-<br>                
-<br>            -> At least 1gb of disk space for graphics. Current cleaner configuration
-<br>            and number of graphics, combined with the current number of 
-<br>            client/sources keeps the space used under 1gb. That number could grow
-<br>            indefinatly based on cleaner settings and a grwoing number of
-<br>            client/sources.
-<br>            
-<br>            This space will be needed under ...pxstats/data/graphics/
-<br>            
-<br>            
-<br>            -> At least 500 megs of disk space for databases. Right now the different 
-<br>            databases take up 250 megs but a different consolidation configuration
-<br>            or a growing number of client/sources could make this number climb up
-<br>            greatly.
-<br>            
-<br>            This space will be needed under ...pxstats/data/databases/currentDatabases
-<br>            
-<br>                    
-<br>            -> At least 6gb of disk space for database backups. We currently keep 20
-<br>            backups saved at every 12 hours, wich gives us access to the saved 
-<br>            data of the past 10 days. Saving every 12 hours helps us keep a 
-<br>            limited number of backups while keeping the gap between backups small 
-<br>            enough to hopefully keep data recevery times low.
-<br>            
-<br>            This space will be needed under .../pxStats/data/databases/databasesBackups
-<br>            
-<br>                
-<br>            -> At least 10 gb of disk space per machine for wich you want to keep the
-<br>            pickles. Currently we are averaging a 40 gig total for the pickles of 
-<br>            21 days for 3 different machines. Keeping 10 days of pickles just like
-<br>            10 days worth of database backups would be a good idea. 
-<br>            40gigs/(21/10)/3 machines = 6.6 gigs, thus 10 gigs would be a good 
-<br>            preventive minimum.
-<br>            
-<br>            This space will be needed under ../pxStats/data/pickles/
-<br>            
 <br>            
 <br>            -> Some parts of the software were developped with a multi-processor 
-<br>            machine architecture in mind. Perfomances will take a hit if program 
-<br>            is run on a single processor machine.    
+<br>               machine architecture in mind. Perfomances will take a hit if program 
+<br>               is run on a single processor machine.    
+<br>
+<br>            -> On average, under the current clients/sources configuration of metx 
+<br>               each client/source requires on the average 50 megs for it's 
+<br>               log files. Currently, 24 gigs are requried to house the files 
+<br>               of the 482 clients/sources which are spread on different machines.
+<br>            
+<br>               This space will be needed under ...pxstats/data/logFiles/
+<br>              ( or pxStats/donnees/fichiersJournalisation for a french install )
+<br>               if pickling is not done on the machine where orgininal logs reside.
+<br>                 
+<br>                This  machine can be an independant machine between the graphic
+<br>                producing machine and the log producing machine or the graphic
+<br>                producing machine itself.
+<br>                
+<br>                
+<br>            -> At least 6gb of disk space for graphics. Current cleaner configuration
+<br>               and number of graphics, combined with the current number of 
+<br>               client/sources keeps the space used under 1gb. That number could grow
+<br>               indefinatly based on cleaner settings and a growing number of
+<br>               client/sources.
+<br>               
+<br>               NOTE : The cleaner DOES NOT currently clean archives at all, meaning 
+<br>                      archives could be kept forever.
 <br>            
 <br>            
+<br>                This space will be needed under ...pxstats/data/graphics/
+<br>                or ...pxStats/donnees/graphiques/
+<br>
 <br>            
+<br>            
+<br>             -> At least 800 megs of disk space for the current databases( 1.61 megs per client ).
+<br>                Right now the different databases take up 250 megs but a different 
+<br>                consolidation configuration or a growing number of client/sources 
+<br>                could make this number climb up greatly.
+<br>                
+<br>                This space will be needed under ...pxstats/data/databases/currentDatabases
+<br>                or .../pxStats/donnees/basesDeDonnees/basesDeDonneesCourantes 
+<br>                    
+<br>             -> At least 15gb of disk space for database backups. We currently keep 20
+<br>                backups(at ~< 800 megs each) saved at every 12 hours, wich gives us 
+<br>                access to the saved data of the past 10 days. Saving every 12 hours helps 
+<br>                us keep a limited number of backups while keeping the gap between backups
+<br>                small enough to hopefully keep data recevery times low.
+<br>                
+<br>                This space will be needed under .../pxStats/data/databases/databasesBackups
+<br>                or ...pxStats/donnees/basesDeDonnees/basesDeDonneesEmmagasinees
+<br>            
+<br>                
+<br>            -> At least 100 gb of disk space if you want to keep the pickles.
+<br>               Currently we are averaging a 8 megs per client per days of pickles kept.
+<br>               We recommend keeping pickle backups for as long as databsee backups are kept.
+<br>               If not the source data pickles will no longer be available if an error is 
+<br>               introduced within the databases but was not present within the pickles. 
+<br>               
+<br>               This space will be needed under ../pxStats/data/pickles/
+<br>               or .../pxStats/donnees/pickles
+<br>
+<br>               WARNING : KEEPING pickles for too short a period will cause serious problems.
+<br>
+<br>
 <br>    Section 2  : Installing as the first machine.
 <br>    --------------------------------------------------------------------------------
 <br>        This section covers all required steps to install the stats library on a 
-<br>        machine when no other machine are currently running the stats library.     
+<br>        machine when no other machine are currently running the stats library.
 <br>    
 <br>    
 <br>        Section 2.1 Required Files
 <br>        ----------------------------------------------------------------------------    
 <br>            -> All the found under the .../pxStats/ folder 
-<br>            wich can be downloaded here 
-<br>            https://metpx.svn.sourceforge.net/svnroot/metpx/trunk/pxStats
+<br>               wich can be downloaded here 
+<br>               https://metpx.svn.sourceforge.net/svnroot/metpx/trunk/pxStats
 <br>            
 <br>            -> Python-rrd  : a Python package.
 <br>            
@@ -154,63 +176,133 @@
 <br>            -> PXPaths.py  : usually found under /apps/px/lib/
 <br>            
 <br>            -> PXManager   : usually found under /apps/px/lib/
-<br>            
-<br>            -> readMaxFile : usually found under /apps/pds/tools/Columbo/ColumboShow/lib
-<br>            
-<br>            
+<br>
+<br>
 <br>        Section 2.2 Configuration files
 <br>        ----------------------------------------------------------------------------
 <br>        
-<br>            Section 2.2.1 Configuring the library
+<br>            Section 2.2.0 Configuring the machine configuration file.
 <br>            ------------------------------------------------------------------------
 <br>                -> Go to the .../pxstats/etc folder.
 <br>                
 <br>                -> Download the config file template from
-<br>                https://metpx.svn.sourceforge.net/svnroot/metpx/trunk/sundew/stats/etc
+<br>                https://metpx.svn.sourceforge.net/svnroot/metpx/trunk/pxStats/etc/configForMachines.sample
 <br>                
 <br>                -> Follow instructions found within file header.
-<br>            
+<br>
+<br>                -> Remove the .sample extension
+<br>
+<br>            Section 2.2.1 Configuring the main library config files
+<br>            ------------------------------------------------------------------------
+<br>                -> Go to the .../pxstats/etc folder.
+<br>                
+<br>                -> Download the config file template from
+<br>                https://metpx.svn.sourceforge.net/svnroot/metpx/trunk/pxStats/etc/config.sample
+<br>                
+<br>                -> Follow instructions found within file header.
+<br>
+<br>                -> Remove the .sample extension
+<br>
+<br>
+<br>            Section 2.2.1.1 Notes on the update frequencies in this file.
+<br>            ------------------------------------------------------------------------
+<br>
+<br>                2.2.1.1.1 pxStatsFrequency
+<br>                -------------------------------------------------------------------------
+<br>                    Ideally, this should be run hourly. At the very least, it should be at 
+<br>                    as frequently as the artifact that is to be updated the most frequently.
+<br>
+<br>                2.2.1.1.2 monitoringFrequency
+<br>                -------------------------------------------------------------------------
+<br>                    Monitoring should doest not need to be done at every hour. Anyways
+<br>                    this would send out to many emails to the administrator dimishing the 
+<br>                    chances of them being read.
+<br>
+<br>                2.2.1.1.3 dbBackupsFrequency
+<br>                -------------------------------------------------------------------------
+<br>                    Backups should be made quite frequently as to shorten data 
+<br>                    recuperation in case of data curruption. However backing up too 
+<br>                    frequentlywill jack up disk usage if backups are to be kept for any
+<br>                    significant amount of time.
+<br>
+<br>                2.2.1.1.4 pickleCleanerFrequency
+<br>                -------------------------------------------------------------------------
+<br>                    Since the pickles to keep is measured in days, running this daily
+<br>                    is optimal.
+<br>
+<br>                2.2.1.1.5 generalCleanerFrequency
+<br>                -------------------------------------------------------------------------
+<br>                    Update frequnecy found here should be based on what will be found in the 
+<br>                    clean_dir.conf file.
+<br>
+<br>                2.2.1.1.6 xWebPageUpdatesFrequency
+<br>                -------------------------------------------------------------------------
+<br>                    NOTES: The update frequency of web pages listed here will influence 
+<br>                           the update frequency of the artifacts lsited on these web pages.
+<br>
+<br>                        -> dailyWebPageUpdatesFrequency
+<br>                          Since columbo users are expecting graphics to be updated hourly,
+<br>                          this should also be update hourly.
+<br>    
+<br>                        -> weeklyWebPageUpdatesFrequency
+<br>                           This could be updated daily or hourly if visualizing the 
+<br>                           progression of the week is desired. Otherwise it cold be update weekly.
+<br>                           More infrequently than that would make little sens.
+<br>
+<br>                        -> monthlyWebPageUpdatesFrequency
+<br>                           Updating hourly is probably useless and will only add up to machine load.
+<br>                           If weeklies are updated frequently, hgaving these graphics updated once
+<br>                           per week seems optimal.
+<br>
+<br>                        -> yearlyWebPageUpdatesFrequency
+<br>                           Like the monthly graphics, this should not be updated too often.
+<br>                           These are currently update monthly and this seem sufficiant.
+<br>
+<br>                       -> totalWebPageUpdatesFrequency
+<br>                           Since they include all graphic types from daily to yearly,
+<br>                           this should be updated as frequently as the most frequently
+<br>                           updated web page.
+<br>
+<br>
 <br>            Section 2.2.2 Configuring the cleaners
 <br>            ------------------------------------------------------------------------
 <br>                
-<br>                Section 2.2.2.1 Setting up .../pxstats/etc/clean.conf
+<br>                Section 2.2.2.1 Setting up .../pxstats/etc/clean_dir.conf.sample
 <br>                --------------------------------------------------------------------
 <br>                    -> Go to the .../pxstats/etc/ folder.
-<br>                    -> Download the clean.conf file template from
-<br>                    https://metpx.svn.sourceforge.net/svnroot/metpx/trunk/
-<br>                    pxStats/etc/              
-<br>                    -> Follow instructions found within file header.     
 <br>                    
+<br>                    -> Download the clean_dir.conf.sample file template from
+<br>                    https://metpx.svn.sourceforge.net/svnroot/metpx/trunk/pxStats/etc/clean_dir.conf.sample              
+<br>                    
+<br>                    -> Follow instructions found within file header.
+<br>
+<br>                    -> Remove the .sample extension
+<br>
 <br>                    Notes on the times used within the template : 
 <br>                    ---------------------------------------------------------------        
 <br>                    -> The only graphics wich should be cleaned up on a regular basis 
-<br>                    are the ones found under .../pxstats/data/graphics/others.     
-<br>                    
+<br>                       are the ones found under .../pxstats/data/graphics/others or 
+<br>                       .../pxStats/donnees/graphiques/autres
+<br> 
 <br>                    -> Graphics in the other section should be kept since they are 
-<br>                    part of those to be used within columbo's interface or
-<br>                    within the web archives.
-<br>                
-<br>                
-<br>                Section 2.2.2.1 Setting up the pickle Cleaner.
-<br>                --------------------------------------------------------------------        
-<br>                    -> Pickles age must be determined by the date that's included in
-<br>                    their names and not their date of creation. Therefore a 
-<br>                    special utility needs to be used within a crontab 
-<br>                    to clean pickles.
-<br>                    
-<br>                    See section 2.4.x to find out how to set up the picklecleaner. 
-<br>                    
-<br>            
+<br>                       part of those to be used within columbo's interface or
+<br>                       within the web archives.
+<br>
+<br>
 <br>            Section 2.2.3 Configuring the statsMonitor
 <br>            ------------------------------------------------------------------------
 <br>                -> Go to the .../pxstats/etc/ folder.
+<br>
 <br>                -> Download the statsMonitoring.conf file template from
 <br>                https://metpx.svn.sourceforge.net/svnroot/metpx/trunk/
-<br>                pxStats/etc/
+<br>                pxStats/etc/monitoringConf.sample
+<br>
 <br>                -> Follow instructions found within file header.
-<br>                
-<br>                
-<br>        Section 2.3 Setting up ssh
+<br>
+<br>                -> Remove the .sample extension
+<br>
+<br>
+<br>         Section 2.3 Setting up ssh
 <br>        -----------------------------------------------------------------------------
 <br>            When setting up the config file in the .../pxstats/etc/ folder
 <br>            ( section 2.2.1 ) you can set up things so that different machine do 
@@ -240,69 +332,43 @@
 <br>            To edit this list, type crontab -e.
 <br>            
 <br>            Entries starting with the '#' character will be considered comment lines.
-<br>            
-<br>            
+<br>
 <br>            2.4.1 launchGraphCreation.py 
 <br>            -------------------------------------------------------------------------
-<br>            Needs to be run hourly. Choice of minute at wich it starts is arbitrary 
+<br>            Should run hourly. Choice of minute at wich it starts is arbitrary 
 <br>            but it should be run at the top of the hour so that tasks have the time 
-<br>            to end prior to the start of the following hour. 
-<br>            
-<br>            2.4.2 pickleCleaner.py 
+<br>            to end prior to the start of the following hour so that hourly graphics
+<br>            seem up to date to the users. 
+<br>
+<br>
+<br>
+<br>        Section 2.5 Installing the web interface 
+<br>        ------------------------------------------------------------------------------
+<br>            The web interface is usally installed in a different section than the rest 
+<br>            of pxStats.
+<br>
+<br>            To install it, follow the following steps:
+<br>
+<br>            Section 2.5.1 Running the installation script 
 <br>            -------------------------------------------------------------------------
-<br>            The stats monitor expects us to keep at least 7 days worth of pickle 
-<br>            files. In this example we keep 21 days worth of pickles. 
-<br>            
-<br>            This entry should be run once daily as to run the minimal amount of time 
-<br>            that is needed to keep exactly x number of days worth of data.
-<br>            
-<br>            The hour selected is arbitrary, but choosing one when no monitoring is 
-<br>            being run and no database backups are being done would be a wise choice 
-<br>            as to keep machine load as evenly distributed as possible. 
-<br>            
-<br>            For the same reaosn, the minute choosen should not be at the very top 
-<br>            of the hour as to not run at the same time as th graphic creation.   
-<br>            
-<br>            In the example we run it at the 20th minute of the first hour of every 
-<br>            day wich respects both criteria.
-<br>                    
-<br>            
-<br>            2.4.3 backupRRDDatabases.py 
+<br>                1 - go into the ...pxStats/bin/tools/folder
+<br>
+<br>                2 - run the following command ./installPxStatsWebInterface.py  path
+<br>
+<br>            Section 2.5.1 Configuring apache 
 <br>            -------------------------------------------------------------------------
-<br>                This utility allows us to keep backups of rrd databases at different 
-<br>                points in time. This way, if errors start polluting the data present 
-<br>                in the databases, we can recuperate the saved state of the database 
-<br>                prior to the start of the polluting or at least reduce the amount of 
-<br>                time where incorrect data was fed to the databases.
-<br>                
-<br>                Database should NOT be saved every hour since transferring pickles 
-<br>                to rrd databases is quite quick and backuping the databases every hour
-<br>                would be overkill. Never the less, data bases shoudl be backed up at 
-<br>                a frequency that will allow data retrieval to remain quick.
-<br>                
-<br>                In the above example it is saved eveyr 12 hours wich has proven to 
-<br>                be a good compromise between the amount of space taken by the backups,
-<br>                the number of time the backups are done per day and the time taken to
-<br>                retreive data when something goes wrong. 
-<br>                
-<br>                
-<br>                
-<br>            2.4.4 .../pxStats/bin/tools/clean_dir.plx
-<br>            -------------------------------------------------------------------------
-<br>                This is the main cleaner used for cleanign all the artifacts created 
-<br>                by the stats library.
-<br>                
-<br>                It should be run at a frequency wich will allow all the different 
-<br>                entries found in to meet their cleaning frequnecy criteria.
-<br>                
-<br>                In the current configuration, the thing that gets cleaned up after
-<br>                the least amount of time are files that are kept for 7 days. 
-<br>                Therefore we run the utility daily. The choice to run it at the 45th
-<br>                minute of the 18th hours was to meet the same 2 criterias that were 
-<br>                expressed in section (2.4.2)
-<br>                
-<br>            
-<br>            
+<br>                1 - Make sure the ...path/scripts/cgi-bin is allowed to rung cgi scripts.
+<br>                2 - Make sure that for all languages, the .../path/html_language/archives
+<br>                    permissions are given so that the user can browse the archives.
+<br>
+<br>        Section 2.6 Giving out execution permission
+<br>        -----------------------------------------------------------------------------
+<br>                1 - Go to .../pxStats/bin/
+<br>                2 - Execute the following command : chmod a+x *.py
+<br>                3 - Execute the following command : chmod a+x */*.py
+<br>
+<br>
+<br>
 <br>    Section 3: Installing as a second machine(or more) or as a mirror machine.
 <br>    ---------------------------------------------------------------------------------
 <br>        This section covers the different aspects that need to be covered to start up 
@@ -328,7 +394,7 @@
 <br>            -------------------------------------------------------------------------
 <br>                Step 1 -> Open a console session to the allready running machine.
 <br>                Step 2 -> Open a console session to the new machine. 
-<br>                Step 3 -> Follow step 2.2 to 2.4 of this document.
+<br>                Step 3 -> Follow step 2.2 to 2.5 of this document.
 <br>                Step 4 -> Copy all the parameters that seem usefull from the mirrored
 <br>                        machine into the settings you are configuring on the new 
 <br>                        machine.
@@ -340,10 +406,7 @@
 <br>                -> To have the exact same configuration files as a remote machine
 <br>                you need to execute the following commands.
 <br>                
-<br>                scp login@remoteMachine:/apps/px/stats/config /apps/px/stats/config
-<br>                scp login@remoteMachine:/apps/px/etc/cleaner.conf /apps/px/etc/cleaner.conf 
-<br>                scp login@remoteMachine:/apps/px/stats/statsMonitoring/statsMonitoring.conf
-<br>                /apps/px/stats/statsMonitoring/statsMonitoring.conf
+<br>                scp -r login@remoteMachine:.../pxStats/etc/* .../pxStats/etc/
 <br>                
 <br>                -> Some settings cannot be downloaded. The crontab entries 
 <br>                of the remote machine will need to be copied on the local machine.
@@ -363,18 +426,18 @@
 <br>                one machine to another one.
 <br>                
 <br>                To use this utility use the following command : 
-<br>                python /apps/px/lib/stats/retreiveDataFromMachine.py login remoteMachineName
+<br>                python .../pxStats/bin/tools/retreiveDataFromMachine.py login remoteMachineName
 <br>                
 <br>                Please read warning on this utility prior to running it.
-<br>                run this utility PRIOR to running any crontab entries( especially launchGraphCreation.)
+<br>                run this utility PRIOR to running any crontab entries( pxStatsStartup.py )
 <br>                
 <br>                If for any reasons a long delay is to occur between the execution 
 <br>                of this utility, and the first execution of the crontabs, rerun the
 <br>                utility to make sure you have all the latest version of the different
 <br>                files.  
 <br>                
-<br>                Note : /apps/px/stats/config needs to be configured PRIOR to calling 
-<br>                    retreiveDataFromMachine.py. 
+<br>                Note : ...pxStats/etc/config needs to be configured PRIOR to calling 
+<br>                       retreiveDataFromMachine.py. 
 <br>                        
 <br>                    ssh permissions also need to be set as to permit connection
 <br>                    between local machine and mirrored machine without being asked
@@ -399,30 +462,29 @@
 <br>                
 <br>                The command to use is this one :
 <br>                rsync -avzr --delete-before -e ssh login@logProducingMachine:/apps/px/log/ 
-<br>                /apps/px/log/logProducingMachine/ 
+<br>                .../pxStats/data/logFiles/logProducingMachine/ 
 <br>                
 <br>                3.2.1.2 Transferring monitoring artifacts :
 <br>                ---------------------------------------------------------------------
-<br>                This will only prove usefull if the 
 <br>                
 <br>                rsync -avzr  --delete-before -e ssh 
-<br>                login@remoteMachine:/apps/px/stats/statsMonitoring/maxSettings.conf
-<br>                /apps/px/stats/statsMonitoring/maxSettings.conf
+<br>                login@remoteMachine:/.../pxStats/data/monitoring/maxSettings.conf
+<br>                .../pxStats/data/monitoring/maxSettings.conf
 <br>    
 <br>                rsync -avzr  --delete-before -e ssh 
-<br>                login@remoteMachine:/apps/px/stats/statsMonitoring/previousCrontab
-<br>                /apps/px/stats/statsMonitoring/previousCrontab
+<br>                login@remoteMachine:.../pxStats/data/monitoring/maxSettings.confpreviousCrontab
+<br>                .../pxStats/data/monitoring/maxSettings.confpreviousCrontab
 <br>    
 <br>                rsync -avzr  --delete-before -e ssh 
-<br>                login@remoteMachine:/apps/px/stats/statsMonitoring/previousFileChecksums
-<br>                /apps/px/stats/statsMonitoring/previousFileChecksums
+<br>                login@remoteMachine:.../pxStats/data/monitoring/maxSettings.confpreviousFileChecksums
+<br>                .../pxStats/data/monitoring/maxSettings.confpreviousFileChecksums
 <br>    
 <br>                
 <br>                3.2.1.2 Transferring graphics :
 <br>                ---------------------------------------------------------------------
 <br>            
-<br>                rsync -avzr  --delete-before -e ssh login@remoteMachine:/apps/px/stats/graphs/
-<br>                /apps/px/stats/graphs/
+<br>                rsync -avzr  --delete-before -e ssh login@remoteMachine:.../pxStats/data/graphics/
+<br>                .../pxStats/data/graphics/
 <br>                
 <br>                Note : If the current machine does not handle all of the machines that
 <br>                the source machine handles, you will be downloading some useless files.
@@ -431,44 +493,32 @@
 <br>                
 <br>                3.2.1.2 Transferring pickles :
 <br>                ---------------------------------------------------------------------                        
-<br>                rsync -avzr  --delete-before -e ssh login@remoteMachine:/apps/px/stats/pickles/ 
-<br>                /apps/px/stats/pickles/
+<br>                rsync -avzr  --delete-before -e ssh login@remoteMachine:.../pxStats/data/pickles/ 
+<br>                .../pxStats/data/pickles/ 
 <br>                
-<br>                rsync -avzr  --delete-before -e ssh login@remoteMachine:/apps/px/stats/PICKLED-TIMES
-<br>                /apps/px/stats/PICKLED-TIMES
-<br>                
+<br>                rsync -avzr  --delete-before -e ssh login@remoteMachine:.../pxStats/data/picklesTimeOfUpdates/ 
+<br>                .../pxStats/data/picklesTimeOfUpdates/
+<br>
+<br>
 <br>                3.2.1.2 Transferring databases :
 <br>                ---------------------------------------------------------------------                              
 <br>                rsync -avzr  --delete-before -e ssh 
-<br>                login@remoteMachine:/apps/px/stats/databases/ 
-<br>                /apps/px/stats/databases/  
-<br>                    
-<br>                rsync -avzr  --delete-before -e ssh 
-<br>                login@remoteMachine:/apps/px/stats/databases_backups/
-<br>                /apps/px/stats/databases_backups/
-<br>            
-<br>                rsync -avzr  --delete-before -e ssh 
-<br>                login@remoteMachine:/apps/px/stats/DATABASE-UPDATES/ 
-<br>                /apps/px/stats/DATABASE-UPDATES/  
-<br>            
-<br>                rsync -avzr  --delete-before -e ssh 
-<br>                login@remoteMachine:/apps/px/stats/DATABASE-UPDATES_BACKUPS/ 
-<br>                /apps/px/stats/DATABASE-UPDATES_BACKUPS/
-<br>    
-<br>                
+<br>                login@remoteMachine:.../pxStats/data/databases/ 
+<br>                .../pxStats/data/databases/ 
+<br>
 <br>                Transferring a huge amount of file might take a few hours.
 <br>                This means that the first type of filed(ex : pickles ) will be 
 <br>                missing some files by the time you finish to download the last type 
 <br>                of files(ex : databases). This might cause inconstancy.
-<br>                
+<br>
 <br>                To overcome this, run the commands in a specific sequence numerous times.
 <br>                After a few times no new data will be present(except maybe for log files 
 <br>                wich will not be a problem). This can be seen by analysing the output 
 <br>                produced by the different rsync commands you have decided to run.
-<br>                
-<br>                
-<br>                
-<br>                
+<br>
+<br>
+<br>
+<br>
 <br>    Section 4 : Setting up a remote machine for pickling.
 <br>    ---------------------------------------------------------------------------------
 <br>    
@@ -504,7 +554,8 @@
 <br>                
 <br>            If the pickle generating machine is not the one producing the log files
 <br>            it will also need a similar set up between itself and the log producing 
-<br>        machine.
+<br>            machine.
 <br>    
 <br>
-<br></html><br>
+<br></html>
+<br>
