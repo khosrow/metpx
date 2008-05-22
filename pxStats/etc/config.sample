@@ -95,11 +95,11 @@ statsRoot               = /apps/px/pxStats/
 [timeConfig]
 pxStatsFrequency        = 1/hours 
 monitoringFrequency     = 12/hours
-dbBackupsFrequency      = 4/hours 
+dbBackupsFrequency      = 12/hours 
 pickleCleanerFrequency  = 24/hours
 generalCleanerFrequency = 24/hours
-dailyWebPageUpdatesFrequency   = "daily"
-weeklyWebPageUpdatesFrequency  = "daily"
+dailyWebPageUpdatesFrequency   = "hourly"
+weeklyWebPageUpdatesFrequency  = "hourly"
 monthlyWebPageUpdatesFrequency = "weekly"
 yearlyWebPageUpdatesFrequency  = "monthly"
 totalWebPagesUpdatesFrequency  = "daily"
