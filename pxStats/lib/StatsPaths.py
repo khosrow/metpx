@@ -345,7 +345,7 @@ class StatsPaths:
         """
             MetPX related paths
         """
-        PXPaths.normalPaths()
+        PXPaths.normalPaths( str(PXPATHS.getPXLIBPath()).replace("lib/", "") )
         self.PXROOT   = PXPaths.ROOT
         self.PXLIB    = PXPaths.LIB
         self.PXLOG    = PXPaths.LOG
