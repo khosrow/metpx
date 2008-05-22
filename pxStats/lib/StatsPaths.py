@@ -104,7 +104,7 @@ class PXPATHS:
                 configLines = fileHandle.readlines()
                 for line in configLines:
                     if "PXROOT" in line :
-                        pxroot = str(line).split( "=" )[1]
+                        pxroot = str(line).split( "=" )[1].replace(' ','').replace('\n','')
                         break    
             except Exception, instance:
                 pass
@@ -118,7 +118,9 @@ class PXPATHS:
                     pxlib = str(pxroot) +'/lib'
                 else:
                     raise Exception()
-               
+            else:
+                pxlib = str(pxroot) +'/lib'
+                
         except Exception, instance:
            pxlib = '/apps/px/lib/'
     
