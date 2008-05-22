@@ -187,13 +187,14 @@ class TopWebPageGenerator( Translatable ):
             </div>
     
             <div class="right">
-                <a href="html_%s/archives" target="bottom" >Archives</a>
-    
-                 <a href="../scripts/cgi-bin/graphicsRequestPage.py?lang=%s" target="bottom" id='href%s'  onclick="javascript:applyvalue('href%s')">"""%(self.outputLanguage,self.outputLanguage, (i + 1), (i + 1) ) + _("Requests") + """</a>
-    
-                 <a href="html_%s/helpPages/glossary_%s.html" target="bottom" id='href%s'  onclick="javascript:applyvalue('href%s')">""" %( self.outputLanguage, self.outputLanguage, (i + 2), (i + 2) ) + _("Glossary") + """</a>
             
-                 <a href="html_%s/docPages/listOfDocumentationFiles_%s.html" target="bottom" id='href%s'  onclick="javascript:applyvalue('href%s')">""" %( self.outputLanguage, self.outputLanguage, (i + 3), (i + 3)  ) + _("Documentation") +""" </a>  
+                <a href="html_%s/archives" target="bottom"  id='href%s' onclick="javascript:applyvalue('href%s')">Archives</a> """ %( self.outputLanguage, (i + 1), (i + 1) ) + """
+    
+                 <a href="../scripts/cgi-bin/graphicsRequestPage.py?lang=%s" target="bottom" id='href%s'  onclick="javascript:applyvalue('href%s')">"""%(self.outputLanguage, (i + 2), (i + 2) ) + _("Requests") + """</a>
+    
+                 <a href="html_%s/helpPages/glossary_%s.html" target="bottom" id='href%s'  onclick="javascript:applyvalue('href%s')">""" %( self.outputLanguage, self.outputLanguage, (i + 3), (i + 3) ) + _("Glossary") + """</a>
+            
+                 <a href="html_%s/docPages/listOfDocumentationFiles_%s.html" target="bottom" id='href%s'  onclick="javascript:applyvalue('href%s')">""" %( self.outputLanguage, self.outputLanguage, (i + 4), (i + 4)  ) + _("Documentation") +""" </a>  
                  
             </div>
     
