@@ -74,7 +74,7 @@ class TopWebPageGenerator( Translatable ):
             
     
     
-    def __createTheWebPage( self, machineTags ):
+    def __createTheWebPage( self, machineTags, supportedLanguages ):
         """
             @summary :  Generates the top.html web page
                         to be displayed as the top frame
@@ -82,6 +82,8 @@ class TopWebPageGenerator( Translatable ):
             
             @param machineTags  : Tags representing machine groups 
                                   for which we are producing graphics.              
+            
+            @param supportedLanguages : list of languages supported by the application
             
             @precondition: Requires _ translator to have been set prior to calling this function.                           
             
@@ -95,6 +97,13 @@ class TopWebPageGenerator( Translatable ):
         file = "%stop_%s.html" %( paths.STATSWEBPAGES, self.outputLanguage )
         fileHandle = open( file , 'w' )
     
+        languageOptions = """<option value="">%s</option>\n""" %self.outputLanguage
+        
+        for language in supportedLanguages:
+            if language != self.outputLanguage:
+                languageOptions = languageOptions + """<option value="">%s</option>\n"""%language
+            
+        
         fileHandle.write( """
     
         <html>
@@ -103,27 +112,65 @@ class TopWebPageGenerator( Translatable ):
             div.left { float: left; }
             div.right {float: right; }
         </style>
-    
+        
+       <script type="text/javascript">
+           
+            
+            function gup( name ){
+              name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+              var regexS = "[\\?&]"+name+"=([^&#]*)";
+              var regex = new RegExp( regexS );
+              var results = regex.exec( window.location.href );
+              if( results == null )
+                return "";
+              else
+                return results[1];
+            }
+           
+           var lastLinkedClicked = "";
+           
+           
+           lastLinkedClicked= gup('lastLinkedClicked');
+           
+           function applyvalue(value){
+               lastLinkedClicked = value;
+           }
+           
+           function callNewTopWebPage(){
+           
+              parent.top.location.href= 'top_' + document.getElementById('language')[document.getElementById('language').selectedIndex].text + '.html' +'?lastLinkedClicked='+lastLinkedClicked;
+           }
+
+           
+       </script>
+       
         <body text="white" link="white" vlink="white" bgcolor="#3366CC" >
     
             <div class="left">
+                
+                """ + _("Language") + """
+                <select class="dropDownBox" name="language" id="language" OnChange="javascript:callNewTopWebPage();" > 
+                """+languageOptions+                
+                
+                """                
+                </select> &nbsp;&nbsp;
                 """ + _("Individual graphics") + """&nbsp;&nbsp;:&nbsp;&nbsp;
     
-                 <a href="html_%s/dailyGraphs_%s.html" target="bottom">"""%( self.outputLanguage, self.outputLanguage )  + _("Daily") + """</a>
+                 <a href="html_%s/dailyGraphs_%s.html" target="bottom" onclick="javascript:applyvalue('href1')" id="href1" name="href1" class="links" >"""%( self.outputLanguage, self.outputLanguage )  + _("Daily") + """</a>
                 &nbsp;&nbsp;
     
-                 <a href="html_%s/weeklyGraphs_%s.html" target="bottom">"""%( self.outputLanguage, self.outputLanguage ) + _("Weekly")  + """</a>
+                 <a href="html_%s/weeklyGraphs_%s.html" target="bottom"   onclick="javascript:applyvalue('href2')" id='href2'>"""%( self.outputLanguage, self.outputLanguage ) + _("Weekly")  + """</a>
                 &nbsp;&nbsp;
     
-                 <a href="html_%s/monthlyGraphs_%s.html" target="bottom">"""%( self.outputLanguage, self.outputLanguage ) + _("Monthly") + """</a>
+                 <a href="html_%s/monthlyGraphs_%s.html" target="bottom"   onclick="javascript:applyvalue('href3')" id='href3'>"""%( self.outputLanguage, self.outputLanguage ) + _("Monthly") + """</a>
                 &nbsp;&nbsp;
     
-                 <a href="html_%s/yearlyGraphs_%s.html" target="bottom">""" %( self.outputLanguage, self.outputLanguage) +_("Yearly") + """</a>
+                 <a href="html_%s/yearlyGraphs_%s.html" target="bottom"   onclick="javascript:applyvalue('href4')" id='href4'>""" %( self.outputLanguage, self.outputLanguage) +_("Yearly") + """</a>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     
         """   )
     
-    
+        i = 5 
         if machineTags != [] :
             fileHandle.write( """
             """ + _("Clusters") + """&nbsp;&nbsp;:&nbsp;&nbsp;&nbsp;
@@ -131,10 +178,10 @@ class TopWebPageGenerator( Translatable ):
     
             for machineTag in machineTags:
                 fileHandle.write( """
-                <a href="html_%s/%s_%s.html" target="bottom">%s</a>
+                <a href="html_%s/%s_%s.html" target="bottom" id='href%s' onclick="javascript:applyvalue('href%s')">%s</a>
                 &nbsp;&nbsp;&nbsp;
-                 """ %( self.outputLanguage, machineTag.replace( ',','' ),self.outputLanguage , string.upper(machineTag) ) )
-    
+                 """ %( self.outputLanguage, machineTag.replace( ',','' ),self.outputLanguage ,i,i, string.upper(machineTag) ) )
+                i = i + 1 
     
         fileHandle.write( """
             </div>
@@ -142,15 +189,22 @@ class TopWebPageGenerator( Translatable ):
             <div class="right">
                 <a href="html_%s/archives" target="bottom" >Archives</a>
     
-                 <a href="../scripts/cgi-bin/graphicsRequestPage.py?lang=%s" target="bottom">"""%(self.outputLanguage,self.outputLanguage) + _("Requests") + """</a>
+                 <a href="../scripts/cgi-bin/graphicsRequestPage.py?lang=%s" target="bottom" id='href%s'  onclick="javascript:applyvalue('href%s')">"""%(self.outputLanguage,self.outputLanguage, (i + 1), (i + 1) ) + _("Requests") + """</a>
     
-                 <a href="html_%s/helpPages/glossary_%s.html" target="bottom" >""" %( self.outputLanguage, self.outputLanguage ) + _("Glossary") + """</a>
+                 <a href="html_%s/helpPages/glossary_%s.html" target="bottom" id='href%s'  onclick="javascript:applyvalue('href%s')">""" %( self.outputLanguage, self.outputLanguage, (i + 2), (i + 2) ) + _("Glossary") + """</a>
             
-                 <a href="html_%s/docPages/listOfDocumentationFiles_%s.html" target="bottom">""" %( self.outputLanguage, self.outputLanguage ) + _("Documentation") +""" </a>  
+                 <a href="html_%s/docPages/listOfDocumentationFiles_%s.html" target="bottom" id='href%s'  onclick="javascript:applyvalue('href%s')">""" %( self.outputLanguage, self.outputLanguage, (i + 3), (i + 3)  ) + _("Documentation") +""" </a>  
                  
             </div>
     
-    
+            <script type="text/javascript">
+                if( lastLinkedClicked != "" ){
+                  link = document.getElementById(lastLinkedClicked).href;
+                  parent.bottom.location.href = link; 
+               } 
+            
+            
+            </script>
     
         </body>
     
@@ -175,8 +229,8 @@ class TopWebPageGenerator( Translatable ):
         
         machineParameters = MachineConfigParameters()
         machineParameters.getParametersFromMachineConfigurationFile()
-        
-        self.__createTheWebPage(  configParameters.sourceMachinesTags )
+        supportedLanguages = LanguageTools.getSupportedLanguages()
+        self.__createTheWebPage(  configParameters.sourceMachinesTags, supportedLanguages )
        
     
     
