@@ -99,7 +99,7 @@ class LanguageTools :
         """
         
         translationfileName = ""
-        
+        moduleAbsPath = os.path.realpath(moduleAbsPath) #decodes symlinks.
         try : 
             
             paths = StatsPaths()
