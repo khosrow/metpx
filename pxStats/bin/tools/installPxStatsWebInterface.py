@@ -187,7 +187,7 @@ def createSymbolicLinks( path, currentlyUsedLanguages ):
         
         commands.getstatusoutput( "ln -s %s/html/troubleshooting_%s.html %s/html_%s/docPages/links/troubleshooting_%s.html" %(statsPaths.statsdoc,language,path,language,language) )        
         
-        commands.getstatusoutput( "ln -s %s/html/images.html %s/html_%s/docPages/links/images.html" %(statsPaths.statsdoc,path,language )        
+        commands.getstatusoutput( "ln -s %s/html/images.html %s/html_%s/docPages/links/images.html" %(statsPaths.statsdoc,path,language )   )     
         
         
 
