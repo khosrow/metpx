@@ -36,7 +36,7 @@ from pxStats.lib.MachineConfigParameters import  MachineConfigParameters
 from pxStats.lib.RrdUtilities import RrdUtilities
 from pxStats.lib.StatsConfigParameters import StatsConfigParameters
 from pxStats.lib.LanguageTools import LanguageTools
-        
+   
 """
     - Small function that adds pxLib to sys path.
 """    
@@ -504,7 +504,14 @@ class GeneralStatsLibraryMethods:
         pxManager.initNames() # Now you must call this method  
         
         if localMachine != machine :
-            GeneralStatsLibraryMethods.updateConfigurationFiles( machine, "pds" )
+            try:
+                parameters = MachineConfigParameters()
+                parameters.getParametersFromMachineConfigurationFile()                
+                userName = parameters.getUserNameForMachine(machine)
+            except:
+                userName = "pds"
+                
+            GeneralStatsLibraryMethods.updateConfigurationFiles( machine, userName )
         
         txNames = pxManager.getTxNames()               
         rxNames = pxManager.getRxNames()  
