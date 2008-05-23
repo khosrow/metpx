@@ -350,7 +350,7 @@ class DailyGraphicsWebPageGenerator( WebPageGeneratorInterface ):
                 fileHandle.write( """<tr> <td bgcolor="#99FF99"> %s</td> """ %(rxName))
                 fileHandle.write( """<td bgcolor="#66CCFF"> """ + _("Days") + """ :   """ )
             else:
-                machineName = self.getMachineNameFromDescription( self.getMachineNameFromDescription( rxNames[rxName] ) )
+                machineName = self.getMachineNameFromDescription( rxNames[rxName] ) 
                 fileHandle.write( """<tr> <td bgcolor="#99FF99"><div class="left"> %s</div><div class="right"><a href="#" onClick="descriptionWindow.load('inline', '%s', 'Description');descriptionWindow.show(); return false"><font color="black">?</font></a></div><br>(%s)</td> """ %(rxName, rxNames[rxName].replace("'","").replace('"','').replace( ",", ", "), machineName ) )
                 fileHandle.write( """<td bgcolor="#66CCFF"> """ + _("Days") + """ :   """ )
                 
