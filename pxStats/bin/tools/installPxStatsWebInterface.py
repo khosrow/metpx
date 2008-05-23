@@ -171,23 +171,23 @@ def createSymbolicLinks( path, currentlyUsedLanguages ):
         commands.getstatusoutput( "ln -s %s/js  %s/scripts/js_%s " %( statsPaths.STATSWEBPAGES, path, language ) )   
         #print "ln -s %s/js  %s/scripts/js_%s " %( statsPaths.STATSWEBPAGES, path, language )
 
-        commands.getstatusoutput( "ln -s %s/html/howTo_%s.html %s/html_%s/docPages/links/howTo_%s.html" %(statsPaths.statsdoc,language,path,language,language) )
+        commands.getstatusoutput( "ln -s %s/html/howTo_%s.html %s/html_%s/docPages/links/howTo_%s.html" %(statsPaths.STATSDOC,language,path,language,language) )
         
-        commands.getstatusoutput( "ln -s %s/html/installation_%s.html %s/html_%s/docPages/links/installation_%s.html" %(statsPaths.statsdoc,language,path,language,language) )
+        commands.getstatusoutput( "ln -s %s/html/installation_%s.html %s/html_%s/docPages/links/installation_%s.html" %(statsPaths.STATSDOC,language,path,language,language) )
         
-        commands.getstatusoutput( "ln -s %s/html/monitoringDoc_%s.html %s/html_%s/docPages/links/monitoringDoc_%s.html" %(statsPaths.statsdoc,language,path,language,language) )
+        commands.getstatusoutput( "ln -s %s/html/monitoringDoc_%s.html %s/html_%s/docPages/links/monitoringDoc_%s.html" %(statsPaths.STATSDOC,language,path,language,language) )
         
-        commands.getstatusoutput( "ln -s %s/html/translationDoc_%s.html %s/html_%s/docPages/links/translationDoc_%s.html" %(statsPaths.statsdoc,language,path,language,language) )
+        commands.getstatusoutput( "ln -s %s/html/translationDoc_%s.html %s/html_%s/docPages/links/translationDoc_%s.html" %(statsPaths.STATSDOC,language,path,language,language) )
         
-        commands.getstatusoutput( "ln -s %s/html/developersDoc_%s.html %s/html_%s/docPages/links/developersDoc_%s.html" %(statsPaths.statsdoc,language,path,language,language) )
+        commands.getstatusoutput( "ln -s %s/html/developersDoc_%s.html %s/html_%s/docPages/links/developersDoc_%s.html" %(statsPaths.STATSDOC,language,path,language,language) )
         
-        commands.getstatusoutput( "ln -s %s/html/installation_%s.html %s/html_%s/docPages/links/installation_%s.html" %(statsPaths.statsdoc,language,path,language,language) )
+        commands.getstatusoutput( "ln -s %s/html/installation_%s.html %s/html_%s/docPages/links/installation_%s.html" %(statsPaths.STATSDOC,language,path,language,language) )
         
-        commands.getstatusoutput( "ln -s %s/html/rrdToolDoc_%s.html %s/html_%s/docPages/links/rrdToolDoc_%s.html" %(statsPaths.statsdoc,language,path,language,language) )
+        commands.getstatusoutput( "ln -s %s/html/rrdToolDoc_%s.html %s/html_%s/docPages/links/rrdToolDoc_%s.html" %(statsPaths.STATSDOC,language,path,language,language) )
         
-        commands.getstatusoutput( "ln -s %s/html/troubleshooting_%s.html %s/html_%s/docPages/links/troubleshooting_%s.html" %(statsPaths.statsdoc,language,path,language,language) )        
+        commands.getstatusoutput( "ln -s %s/html/troubleshooting_%s.html %s/html_%s/docPages/links/troubleshooting_%s.html" %(statsPaths.STATSDOC,language,path,language,language) )        
         
-        commands.getstatusoutput( "ln -s %s/html/images.html %s/html_%s/docPages/links/images.html" %(statsPaths.statsdoc,path,language )   )     
+        commands.getstatusoutput( "ln -s %s/html/images %s/html_%s/docPages/links/images" %(statsPaths.STATSDOC,path,language )   )     
         
         
 
