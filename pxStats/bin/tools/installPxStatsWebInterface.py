@@ -78,8 +78,12 @@ def giveOutPermissionsToFolders( currentlyUsedLanguages ):
         pathsToOpenUp.append( paths.STATSGRAPHS +_("others/"))
         pathsToOpenUp.append( paths.STATSGRAPHS +_("others/") + "gnuplot/")
         pathsToOpenUp.append( paths.STATSGRAPHS +_("others/") + "rrd/")
-               
+    
+        pathsToOpenUp.append( paths.STATSWEBPAGESHTML + "/popUps/")
+        
         for path in pathsToOpenUp:
+            if not os.path.isdir(path):
+                os.makedirs(path, 0777)
             commands.getstatusoutput( "chmod 0777 %s" %path )
             commands.getstatusoutput( "chmod 0777 %s/*" %path )
     
@@ -167,7 +171,25 @@ def createSymbolicLinks( path, currentlyUsedLanguages ):
         commands.getstatusoutput( "ln -s %s/js  %s/scripts/js_%s " %( statsPaths.STATSWEBPAGES, path, language ) )   
         #print "ln -s %s/js  %s/scripts/js_%s " %( statsPaths.STATSWEBPAGES, path, language )
 
-
+        commands.getstatusoutput( "ln -s %s/html/howTo_%s.html %s/html_%s/docPages/links/howTo_%s.html" %(statsPaths.statsdoc,language,path,language,language) )
+        
+        commands.getstatusoutput( "ln -s %s/html/installation_%s.html %s/html_%s/docPages/links/installation_%s.html" %(statsPaths.statsdoc,language,path,language,language) )
+        
+        commands.getstatusoutput( "ln -s %s/html/monitoringDoc_%s.html %s/html_%s/docPages/links/monitoringDoc_%s.html" %(statsPaths.statsdoc,language,path,language,language) )
+        
+        commands.getstatusoutput( "ln -s %s/html/translationDoc_%s.html %s/html_%s/docPages/links/translationDoc_%s.html" %(statsPaths.statsdoc,language,path,language,language) )
+        
+        commands.getstatusoutput( "ln -s %s/html/developersDoc_%s.html %s/html_%s/docPages/links/developersDoc_%s.html" %(statsPaths.statsdoc,language,path,language,language) )
+        
+        commands.getstatusoutput( "ln -s %s/html/installation_%s.html %s/html_%s/docPages/links/installation_%s.html" %(statsPaths.statsdoc,language,path,language,language) )
+        
+        commands.getstatusoutput( "ln -s %s/html/rrdToolDoc_%s.html %s/html_%s/docPages/links/rrdToolDoc_%s.html" %(statsPaths.statsdoc,language,path,language,language) )
+        
+        commands.getstatusoutput( "ln -s %s/html/troubleshooting_%s.html %s/html_%s/docPages/links/troubleshooting_%s.html" %(statsPaths.statsdoc,language,path,language,language) )        
+        
+        commands.getstatusoutput( "ln -s %s/html/images.html %s/html_%s/docPages/links/images.html" %(statsPaths.statsdoc,path,language )        
+        
+        
 
 def copySourceFiles( currentlyUsedLanguages ):
     """
