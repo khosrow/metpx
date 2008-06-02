@@ -4,7 +4,7 @@
 #Guide.rtf:   Guide.latex
 #	latex2rtf </dev/null Guide.latex >Guide.rtf
 
-MANPAGES= pxSender.1.html pxReceiver.1.html pxFilter.1.html px.1.html pxRouting.conf.5.html pxRouting.7.html
+MANPAGES= pxSender.1.html pxReceiver.1.html pxFilter.1.html px.1.html pxRetransmit.1.html pxRouting.conf.5.html pxRouting.7.html
 TARGETS= Guide.html DevGuide.html $(MANPAGES)
 
 default: $(TARGETS) 
@@ -31,6 +31,9 @@ pxSender.1.html: ../../sundew/man/man1/pxSender.1
 
 pxReceiver.1.html: ../../sundew/man/man1/pxReceiver.1
 	groff -Thtml -man ../../sundew/man/man1/pxReceiver.1 >pxReceiver.1.html
+
+pxRetransmit.1.html: ../../sundew/man/man1/pxRetransmit.1
+	groff -Thtml -man ../../sundew/man/man1/pxRetransmit.1 >pxRetransmit.1.html
 
 px.1.html: ../../sundew/man/man1/px.1
 	groff -Thtml -man ../../sundew/man/man1/px.1 >px.1.html
