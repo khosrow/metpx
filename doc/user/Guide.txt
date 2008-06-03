@@ -586,9 +586,10 @@ Anne-Marie, write up a little configuration...
 
 Feeding LDM
 -----------
-There is no special thing to do to feed ldm using METPX. For example, simply
-send the product files into a directory and periodically run pqinsert for
-each files. Refer to LDM's documentation.
+There is no special thing to do to feed ldm using METPX.
+A simple scenario could be, from METPX, send the product into a directory.
+Periodically run pqinsert on each file... thats it.
+Refer to LDM's documentation for more details.
 
 Receiving from LDM
 ------------------
