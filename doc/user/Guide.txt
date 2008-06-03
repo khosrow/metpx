@@ -649,7 +649,88 @@ unidirectional channels, AFTN requires bi-directional channels.   Instead of usi
 WMO headers, there are AFTN envelopes to remove, and inside are WMO messages., 
 there are mappings, and WMO bulletins are encapsulated within AFTN messages.  
 
-I really think Daniel must write this part... 
+Typical configuration file for a transceiver::
+    
+    # Note: In a real metpx configuration file, comment cannot be added at the end
+    # of the line (only at the beginning)
+
+    type             aftn         # At this time, only possible type for a transceiver
+    subscriber       True         # False if it is a provider (in practice, always subscriber)
+    host             192.168.1.1  # Remote host name (or ip) where to send files
+    portR            12345        # Receiving port
+    portS            12346        # Sending port
+    stationID        TLA          # Three letter ID of this process
+    otherStationID   LTA          # Three letter ID of the other party
+    address          CWAOYYYY     # AFTN address of this process
+    ohterAddress     CWBOZZZZ     # AFTN address of the other party
+    digits           4            # Number of digits used in the Channel Sequence Number (CSN)
+    timeout          10           # Time we wait between each tentative to connect
+
+    # Extension to be added to the ingest name
+    extension aftn:-CCCC:-TT:-CIRCUIT:Direct 
+
+    emask *:aftn:*:*:*:*          # Do not return on AFTN link what was received on AFTN  
+    imask *:*:*:*:*:Direct:*      # Accept everything else with "Direct" well placed 
+
+|
+| Routing table is used at reception of a message and also for transmission of a message.
+| Same routing table directives (*key, clientAlias*) as for receivers are used for transceiver of type aftn.
+
+In addition, two other directives are used:
+
+**subclient <client>  <subclient1, subclient2,...,subclientN>**
+
+    This directive is used to define the subclients to which a given client can refers.  The following clients can be used in *key* and *clientAlias*
+    directives:
+
+    | <client.subclient1>
+    | <client.subclient2>
+    | <client.subclientN>
+
+    | On reception, the bulletin will be linked in the tx queue of <client>.
+    | On transmission, the <client> must know how to use the <subclient?> part
+      to do appropriate delivery.
+
+    At this moment, the subclient directive is only used for a transceiver of type aftn.
+
+    ex: We will use a "client" with the name "toto" that is a transceiver of type aftn
+
+    ::
+
+        subclient toto AAAAAAAA,BBBBBBBB,CCCCCCCC
+        clientAlias ab toto.AAAAAAAA toto.BBBBBBBB
+        clientAlias abc AB,toto.CCCCCCCC
+        key AACN01_ANIK ab,client1,client2
+        key AACN02_ANIK client3,abc
+
+        When a px receiver receive an AACN01_ANIK bulletin, it will be linked 
+        in the tx queue of the transceiver named toto.
+
+        The transceiver named toto will delivers the AACN01_ANIK bulletin to the following address:
+        AAAAAAAA and BBBBBBBB (because the transceiver toto know how to use these subclient (in our
+        example, these are AFTN addresses))
+
+**aftnMap     <address|DEFAULT>     <prefix_header>**
+
+    This directive is **only used on reception** of message by a transceiver of type aftn.
+    If the text part of the message has no WMO Header, one will be created (thanks to the
+    aftnMap entries) for each destination address in the message.
+
+    If a destination address present in the message has no associated aftnMap directive,
+    the prefix_header defined by aftnMap DEFAULT will be used.
+
+    ex::
+
+        aftnMap DEFAULT AACN30
+        aftnMap AAAAAAAA AACN30
+        aftnMap BBBBBBBB UANT30
+
+        A transceiver (type aftn) receive a message with no WMO header and the destinaton addresses are: AAAAAAAA, BBBBBBBBB, CCCCCCCC
+        Bulletins with following header will be created, ingested in the DB and linked to appropriate (following key directives) clients:
+
+        AACN30 AAAA  (AAAA is the last 4 characters of AAAAAAAA)
+        UANT30 BBBB  (BBBB is the last 4 characters of BBBBBBBB)
+        AACN30 CCCC  (CCCC is the last 4 characters of CCCCCCCC)
 
 
 Basic High Availability
