@@ -476,6 +476,27 @@ Change the sender loop configuration:
 So there you have a basic FTP sender!
 
 
+Now if you want to play around with the filename once at its destination,
+there is an option "filename" in the configuration that you can use.
+The option can be uses  ::
+
+
+  NONE        deliver with the complete metpx filename (its the default)
+
+  WHATFN      the first part of the metpx filename (string before first :)
+  HEADFN      HEADER part of the metpx filename (bulletin only)
+  TIME        time stamp appended to filename. Example of use: WHATFN:TIME
+  DESTFN=str  direct filename declaration str
+
+  SENDER       the metpx filename may end with a string SENDER=<string>
+               in this case the <string> will be the remote filename
+               This is borrowed from the PDS application...
+
+  DESTFNSCRIPT=script.py  invoke a script that will process the input filename
+                          and generate the remote filename. The script must be
+                          found in $PXROOT/etc/scripts
+
+
 
 Basic Routing
 -------------
@@ -509,20 +530,30 @@ for some destinations, using
 
 
 
+
+
 Filters
 -------
-Filters are used to modify/convert some files.
-Products routing to the filter works exactly like routing to a client.
-And the converted products are routed from the filter exactly like if
-the filter was a receiver. The script used to filter a product is python
-code under /apps/px/etc/scripts. The expected return values from the filter
-are::
+When you need to modify/convert a product prior to its shipping, the
+user should make use of a pxFilter.  Products routing to the filter works 
+exactly like routing to a client.  And the converted products are routed 
+from the filter exactly like if the filter was a receiver. 
+In the pxFilter configuration file, use option fx_script followed by the name
+the python script file.  The user must provide this python script in
+$PXROOT/etc/scripts. 
+
+The python script receives the input filename and the process'logger object.
+The script is expected to return one of the following values ::
 
     None           : which means the input file was incorrect
     input filepath : which means the input file is already in the proper fashion
     output filepath: which is the path for the newly created product.
 
-Here is an example::
+The following example is a filter that change the origin of a bulletin from
+CWNT to CWAO (absolute nonsense). The output file name (if we succeed) is the
+same as the input file except that it has its field :Direct: replaced by
+:Converted:.  It is a good practice to implement the three return cases 
+explained earlier. ::
 
    import sys,os,time,stat,string
 
@@ -573,6 +604,8 @@ Here is an example::
 
 The very last line is very important. It sets the fx_script with
 the module perform that does the filtering work.
+
+(NOTE  dx_script... should be covered too MG)
 
 
 Recommendations
@@ -897,9 +930,22 @@ statistics and monitoring on nodes which need to do processing.
 Retransmission
 --------------
 
-FIXME: Michel.
+It is possible to retransmit a product, or several products to a client.
+The metpx package provides two utilities for that namely pxRetransmit and
+pxRetrans. pxRetrans is a more complete utility searching for the user 
+through the database for the products and retransmitting to various combination
+of clients. pxRetransmit is a simple shell script with at least 2 arguments.
+The first argument is the client (sender) name, the second is the absolute path
+of the product you want to retransmit. You can put as many products as you want
+Here is an example which retransmit all SXVX45 bulletins to the navcan client:
 
+|
+|  cd $PXROOT/db/20080604/SX/pds6/KWNB
+|  pxRetransmit  navcan  ./SXVX45*
+|
 
+You can list more than one product for the last command line arguments.
+A detailed description of the pxRetrans program is found here (Daniel...!!!)
 
 Columbo
 -------
