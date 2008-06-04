@@ -14,38 +14,38 @@ Front Matter
 :Version: 
      $Rev$
      $Date$
-     PRE-DRAFT, not even ready for revision yet! Missing:
-     * explanation of file naming convention & extension.
-     * explanation of DESTFN stuff in general terms (details for man page.)
-     * several recipes: WMO monitoring feed, LDM reception, choosing among WMO feeds.
-     * AFTN.
+
+PRE-DRAFT, not even ready for revision yet! Missing:
+
+* explanation of file naming convention & extension.
+* explanation of DESTFN stuff in general terms (details for man page.)
+* several recipes: WMO monitoring feed, choosing among WMO feeds.
+* several incomplete sections marked FIXME.
+
 
 :Copyright: MetPX Copyright (C) 2004-2006  Environment Canada
 
 
 
+About This Guide
+---------------- 
+´A Guide to Using MetPX´ describes the principles and features of the MetPX TCP/IP WMO switching
+application.  The Guide introduces many the facets of the package, to get the user started.
+For fully detailed reference material, the manual pages are available on each of the commands used.
+
+This document begins with a trivial switching system to illustrate the basic concepts and activities.
+Various aspects of routing and special effects (aka filtering) are gradually unveiled.  
+Towards the end, an overview of a typical clustering/HA configuration is given.
+
+While Metpx consists of at least three separate modules (sundew, columbo, and stats), 
+this guide currently concerns itself only with the real-time switching component (sundew)
+Columbo is the web monitoring interface for an entire cluster from a 
+single screen.  For now there is not much about columbo in this guide.  As
+the module installation methods mature, information about Columbo will be added.
+
+
 Fundamentals
------------- 
-This Guide describes the principles and features of metpx.  It touches on all the facets
-of the package, but with a goal of introducing them, rather than an exhaustive
-exposition.  For detailed reference material, consult the manual pages.
-It begins with a discussion of fundamentals, then a single trivial switching system 
-is used illustrate the basics.  Various aspects of routing and special effects 
-(aka filtering) are gradually unveiled.  Towards the end, an overview of a typical 
-clustering/HA configuration is given.
-
-There are two components of metpx: sundew, the switching package itself, and columbo, 
-the web-based monitoring GUI.  This guide concerns itself with configuration of the 
-sundew module.  It will start with simple loopback tests, then add methods to 
-accomplish more complicated tasks. 
-
-After presenting the possibilities for clustering configurations, the stage 
-is set for metpx-columbo.  Columbo monitors an entire cluster from a 
-single screen, and allows operators to perform certain interactions such
-as re-sending of data on client request.  For now there is not much about
-columbo in this guide.  When packaging and documentation of Columbo is ready, 
-we will add more information about it to complete this guide.
-
+------------
 `MetPX <http://metpx.sourceforge.net/>`_ is a high speed, high reliability, 
 low-latency meteorological message switching application.  Another term in
 wide use for this type of application is a Message Handling System (MHS).
@@ -92,33 +92,30 @@ can be used to send them data.
 
 One cannot control the wide variety of hardware and software in use
 by other entities, or even when it comes to COTS systems for various 
-functions (WMO monitoring, GOES acquisition, etc...) Metpx strives to 
-apply `Postel's Maxim <http://www.postel.org/postel.html>`_:
-*be liberal in what you accept, and conservative in what you send.* In this
-context, this often means using commodity technologies, such as standard FTP 
-servers, where in the past, some industry specific software would 
-have been required on the client system.
+functions (WMO monitoring, GOES acquisition, etc...) Today, MetPX can receive:
 
-Today, MetPX can receive:
  * Alpha-Manager Protocol sockets (A Canadian proprietary protocol.)
  * WMO GTS socket data.
  * files dropped in a directory on the server (we accept them via scp, ftp, cp, and rcp today.)
  * files dropped in a remote directory accessible via a file transfer protocol (ftp only for now)
 
 MetPX can Send:
+
  * Alpha-Manager Protocol sockets (A Canadian proprietary protocol.)
- * AMIS Protocol sockets (mimics a recently deceased 25 year old Canadian digital satellite broadcast.)
+ * AMIS Protocol sockets (mimics a deceased 25 year old Canadian digital satellite broadcast.)
  * WMO GTS socket data.
  * via FTP 
  * via SFTP
 
 MetPX's switching component (sundew) functions, succinctly, as follows:  
+
  * data is received by pxReceiver processes, 
  * each pxReceiver processes destermins the routing key for the data, and 
- * The receivers then *switch* or *route* the data based on the label, (that is, they 
-   queue the data for the appropriate Filters and Senders. Steps:
-   * look up the key in pxRouting.conf
-   * a table entry gives the list of destinations, as well as a sending priority.
+ * The receivers then *switch* or *route* the data based on the label, (that is, they queue the data for the appropriate Filters and Senders. Steps:
+
+    * look up the key in pxRouting.conf
+    * a table entry gives the list of destinations, as well as a sending priority.
+
  * pxSenders send the data which is waiting in their queues.  
  * pxFilters read data from their queue like a sender, transform data in some 
    fashion, and then switch the data like a receiver.
@@ -155,31 +152,25 @@ The second category of data which metpx understands is files. A file is a stream
 of bytes, with a name.  Metpx extracts a key from the name of a file and
 perform the same switching function used for bulletins.
 
-as an aside: there is also a third hybrid reception type: bulletin-file.
+Regardless of how data is received, as bulletins or files, metpx turns
+it into invidual files, one product per file, with a file name that
+gives enough information to be able to route it. so one may find the words 
+file and bulletin used interchangeably.
+
+
+As an aside: there is also a third hybrid reception type: bulletin-file.
 A bulletin-file receives files like a file receiver, but ignores their names. 
 Instead, it treats all files as if they were a byte stream 
 received on a socket connection. The bulletin-file receiver looks for 
 the first AHL in a file, routes the contents accordingly.
 
-A philosophical note:
-  While some understanding of formats is necessary in order to properly 
-  switch meteorological data, in the interest of simplicity, 
-  MetPX seeks to minimize the knowledge of the stream of bytes beyond 
-  the label of each datum.  This application is intended to switch data, 
-  and not perform any decoding, normalization (beyond what is strictly 
-  needed for routing.) or QA on the data.
-
-  A natural consequence of this approach is that bulletin and file can
-  often be used interchangeably in metpx.  In most WMO switching systems,
-  a file usually contains several bulletins. In metpx, a file usually
-  contains a single bulletin.
 
 
 
 Installation
 ------------
 
-Assuming Debian packages are available, then 
+FIXME: Assuming Debian packages are available, then 
 
 later:?
 add the following to /etc/apt/sources.list
@@ -193,7 +184,6 @@ for now: ´obtain a .deb´ from somewhere...
 | dpkg -i metpx-sundew-xx-yy.dpkg
 |  apt-get install -f
 
-FIXME
 
 
 A First Run
@@ -510,7 +500,7 @@ FIXME: Add a second router, create per bulletin pxRouting file.
 Advanced Routing
 ----------------
 
-Hi Anne-Marie!?
+FIXME: Hi Anne-Marie!?
 use Nws, ukmet & noaaport triple GTS feed routing as example.
 receiving same bulletins from multiple sources, suppressing some sources
 for some destinations, using
@@ -639,7 +629,7 @@ Use key directive (in preference over key_accept) and comments copiously in pxRo
 
 WMO Monitoring 
 --------------
-Anne-Marie, write up a little configuration...
+FIXME: Anne-Marie, write up a little configuration...
  * promote the DWD package, provide a link...
  * Give a sample circuit configuration.
 
@@ -905,7 +895,7 @@ statistics and monitoring on nodes which need to do processing.
 Retransmission
 --------------
 
-Maybe Lucie have a first run at this?
+FIXME: Maybe Lucie have a first run at this?
 
 
 
