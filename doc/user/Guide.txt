@@ -519,8 +519,68 @@ for some destinations, using
 
 Filters
 -------
-Hi Michel!
-A Demo with bulletin collection would be really cool here.
+Filters are used to modify/convert some files.
+Products routing to the filter works exactly like routing to a client.
+And the converted products are routed from the filter exactly like if
+the filter was a receiver. The script used to filter a product is python
+code under /apps/px/etc/scripts. The expected return values from the filter
+are::
+
+    None           : which means the input file was incorrect
+    input filepath : which means the input file is already in the proper fashion
+    output filepath: which is the path for the newly created product.
+
+Here is an example::
+
+   import sys,os,time,stat,string
+
+   class Transformer(object):
+
+      def __init__(self):
+          pass
+
+      def renamer(self,ipath):
+          opath = ipath.replace('Direct','Converted')
+          return opath
+
+      def perform(self, ipath, logger ):
+
+          # file already converted
+
+          parts =  ipath.split(':')
+          if parts[-2] == 'Converted' : return ipath
+
+          # read in the file
+
+          data=''
+          try :     
+                    f = open(ipath, 'r')
+                    data = f.read()
+                    f.close()
+          except :  
+                    # problem with file return None
+                    return None
+
+          # change header
+
+          data = data.replace('CWNT','CWAO')
+
+          # write the file into its proper name
+
+          opath = self.renamer(ipath)
+          f = os.open( opath, os.O_CREAT | os.O_WRONLY )
+          os.write( f , data )
+          os.close( f )
+
+          # log a message
+
+          return opath
+
+   transformer=Transformer()
+   self.fx_script=transformer.perform
+
+The very last line is very important. It sets the fx_script with
+the module perform that does the filtering work.
 
 
 Recommendations
