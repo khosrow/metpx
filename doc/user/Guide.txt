@@ -19,7 +19,8 @@ PRE-DRAFT, not even ready for revision yet! Missing:
 
 * amb - explanation of file naming convention & extension.
 * mg - explanation of DESTFN stuff in general terms (details for man page.)
-* amb - several recipes: WMO monitoring feed, choosing among WMO feeds.
+* lp - WMO monitoring feed, little blather about METDATA thingum...
+* amb - several recipes: choosing among WMO feeds...
 * several incomplete sections marked FIXME.
 * description of required cron jobs.
 
