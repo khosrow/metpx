@@ -8,7 +8,7 @@ A Guide to Using MetPX
 Front Matter
 -------------
 :Authors: 
-    Peter Silva
+    Peter Silva, Michel Grenier, Daniel Lemay,
     and many more to come...:-)
 
 :Version: 
@@ -17,10 +17,11 @@ Front Matter
 
 PRE-DRAFT, not even ready for revision yet! Missing:
 
-* explanation of file naming convention & extension.
-* explanation of DESTFN stuff in general terms (details for man page.)
-* several recipes: WMO monitoring feed, choosing among WMO feeds.
+* amb - explanation of file naming convention & extension.
+* mg - explanation of DESTFN stuff in general terms (details for man page.)
+* amb - several recipes: WMO monitoring feed, choosing among WMO feeds.
 * several incomplete sections marked FIXME.
+* description of required cron jobs.
 
 
 :Copyright: MetPX Copyright (C) 2004-2006  Environment Canada
@@ -709,10 +710,10 @@ Typical configuration file for a transceiver::
     host             192.168.1.1  # Remote host name (or ip) where to send files
     portR            12345        # Receiving port
     portS            12346        # Sending port
-    stationID        TLA          # Three letter ID of this process
+    stationID        TLA          # Three letter ID of this party
     otherStationID   LTA          # Three letter ID of the other party
     address          CWAOYYYY     # AFTN address of this process
-    ohterAddress     CWBOZZZZ     # AFTN address of the other party
+    otherAddress     CWBOZZZZ     # AFTN address of the other party
     digits           4            # Number of digits used in the Channel Sequence Number (CSN)
     timeout          10           # Time we wait between each tentative to connect
 
@@ -784,7 +785,7 @@ In addition, two other directives are used:
 
 
 Basic High Availability
-_______________________
+-----------------------
 
 The first step in improving availability over running a single system on it´s own
 is to pair servers up, and have some provision for failover between the paired machines.
@@ -895,7 +896,7 @@ statistics and monitoring on nodes which need to do processing.
 Retransmission
 --------------
 
-FIXME: Maybe Lucie have a first run at this?
+FIXME: Michel.
 
 
 
