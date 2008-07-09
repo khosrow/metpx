@@ -1,0 +1,7 @@
+usr/share/man
+usr/bin
+usr/lib/px
+etc/px
+etc/cron.d
+var/spool/px
+var/log/px
