@@ -24,7 +24,7 @@ install: build
 
 
 	# install the binary files in /usr/bin
-	for f in `find bin/ \( ! -regex '.*/\..*' \)`; \
+	for f in `find bin/ \( ! -regex '.*/\..*' \)` bin/.localRetrans; \
 	     do if [ -f $$f ]; then \
 	            install -m 755 $$f debian/metpx-sundew/usr/bin; \
 	        fi; \
