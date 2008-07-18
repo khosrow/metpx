@@ -6,6 +6,8 @@ PXETC=/etc/px
 PXLOG=/var/log/px
 PXSPOOL=/var/spool/px
 
+PXHOME=`cat /etc/passwd | grep '^px:' | cut -d: -f6`
+
 if [ -d $PXLOG ]; then
     chown px:px $PXLOG
 fi
