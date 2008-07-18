@@ -2,6 +2,7 @@
 
 set -e
 
+PXETC=/etc/px
 PXLOG=/var/log/px
 PXSPOOL=/var/spool/px
 
@@ -12,6 +13,17 @@ fi
 if [ -d $PXSPOOL ]; then
     chown px:px $PXSPOOL
 fi
+
+if [ -d $PXETC ]; then
+    chown px:px $PXETC
+
+    # Daniel requiered this...
+    if [ ! -d $PXHOME/etc -a ! -L $PXHOME/etc ]; then
+        ln -s $PXETC $PXHOME/etc
+        chown px:px $PXHOME/etc
+    fi
+fi
+
 
 case "$1" in
     configure)
