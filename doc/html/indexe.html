@@ -1,22 +1,23 @@
 <html>
 <head>
-<META http-equiv="Content-Type" content="text/html"; charset="iso8859-1">
+<META http-equiv="Content-Type" content="text/html"; charset="utf-8">
 <title>MetPX welcome</title>
 </head>
 <body>
 <H1>MetPX - Open Source GTS Switching</H1>
 <P>
-Revised: $Date$
+$Date$
 <p>
 [<A HREF="indexf.html">fran&#231;ais</a>]
 <P>
 MetPX is a message switching system for use with <a href="http://www.wmo.int"> Wmo </a> Global Telecommunications System circuits based on TCP/IP. 
-Developed at the Canadian Meteorological Centre of <a href="http://www.ec.gc.ca">Environment Canada</a> for our own use.  
-MetPX is a work in progress, the development process is being externalized in the hopes of fostering a community 
-around a switching system which all can share and improve together.  The system is already production quality for a 
-limited set of features and is in production use at the CMC as the core of our national bulletin switching 
-infrastructure.   The software is under continuous, but low-intensity development.  Features are carefully being 
-layered on top of existing stable functions.
+Developed at the Canadian Meteorological Centre of <a href="http://www.ec.gc.ca">Environment 
+Canada</a> for our own use.  MetPX is a work in progress, the development process is being 
+externalized in the hopes of fostering a community around a switching system which all 
+can share and improve together.  The system is already production quality for a limited 
+set of features and is in production use at the CMC as the core of our national bulletin 
+switching infrastructure.   The software is under continuous, but low-intensity development.  
+Features are carefully being layered on top of existing stable functions.
 <P>
 [<A HREF="#Documentation">Documentation</A>]
 [<A HREF="#Download">Download</A>]
@@ -33,7 +34,8 @@ Protocol support:
 <LI>WMO (see manual 386 for the WMO TCP/IP socket protocol.)
 <LI>FTP (for transport, no support for WMO naming yet (but trivial to add.))
 <LI>SFTP (similar to FTP.)
-<LI>AFTN/IP (NavCanada version of AFTN running on IP networks.) 
+<LI>AFTN/IP bridge (NavCanada version of AFTN running on IP networks.) 
+<LI>coming soon!: AMQP bridge (open standard protocol, comes from the business messaging world.)
 </UL>
 <P>
 features:
@@ -50,16 +52,18 @@ features:
 </UL>
 </UL>
 <P>
-There are two modules in the project right now, and a third under consideration.  Modules of 
+There are three modules in the project right now.  Modules of 
 MetPX are named after species of plant which are endangered in 
 Canada (see <A HREF="http://www.speciesatrisk.gc.ca"> Species at Risk </a> for more details.)
 <UL>
 <LI>sundew: the WMO switching component.
 <LI>columbo: the web based monitoring component, for both sundew, and the older (not released) PDS.
+<LI>stats: collection and display of statistics... (ok so it's not a flower...)
 </UL>
 <P>
 <P>
-Platform: Debian Linux (Sarge).  Any modern Linux should do. (stock 2.6 or 2.4 with many patches.)   Python &gt;2.3
+Platform: we build packages for Debian Derived Linux (Debian Sarge, Etch. any Ubuntu will do).  
+Any modern Linux should do. (stock 2.6 or 2.4 with many patches.)   Python &gt;2.3
 <P>
 Licensing: GPLv2
 
@@ -81,13 +85,14 @@ Licensing: GPLv2
 
 <A NAME="Download"><H3>Download Packages</H3>
 
-There is not yet proper packaging.  We will tag a release when it is ready.  Sundew is 
-rather stable for now, current work is on improving the installation process by 
-implementing Debian packages.  A package for the sundew module should be available 
-shortly (oh... before the end of 2007)  and for Columbo (Spring 2008.)  We are still
-putting finishing touches on a first release version.  
+<A HREF="http://sourceforge.net/project/showfiles.php?group_id=165061">Download</a>
+<P>
+Sundew is rather stable for now, current work is on improving the installation process by 
+implementing Debian packages.  A package for the sundew module is available from
+the sourceforge site, in either source or .deb form.  We hope to produce packages for 
+columbo at some point.  
 
-For now, you can poke around by downloading the source code:
+
 
 <A NAME="Source"><H3>Getting Source Code</H3>
 <P>
@@ -109,7 +114,7 @@ with those explanations, feel free to grab a snapshot can be obtained using subv
     svn co https://metpx.svn.sourceforge.net/svnroot/metpx/trunk
 </UL>
 
-available for anonymous read-only access. 
+Available for anonymous read-only access.  One can also download a stable release by doing an checkout by accessong the currently highest numbered branch.
 
 <P>
 
@@ -124,6 +129,16 @@ Other, somewhat similar software, no endorsements or judgements should be taken 
 <LI><A HREF="http://www.netsys.co.za">http://www.netsys.co.za</a> - commercial WMO switch supplier.
 <LI><A HREF="http://www.iblsoft.com">http://www.iblsoft.com</a> - commercial WMO switch supplier.
 <LI>a variety of file transfer engines: Standard Networks Move IT DMZ, Softlink B-HUB & FEST, Globalscape EFT Server, Axway XFB, Primeur Spazio, Tumbleweed Secure File Transfer, Messageway.
+<LI>New emerging messaging standard: AMQP - Advanced Message Queuing Protocol.  implementation have appeared in 2007, current version is 0-8, next useful version expected to be 1-0.  Standard is still fluid.  
+<P>
+AMQP implementations are not JMS plumbing.  JMS standardizes the API programmers use, but not the on the wire protocol.  So typically, one cannot exchange messages between people using different JMS providers.  AMQP standardizes for interoperability, and functions effectively as an interoperability shim for JMS, without being limited to Java.  AMQP is language neutral, and message neutral.  there are many deployments using python, C++, and ruby.  One could adapt WMO protocols very easily to function over AMQP.  JMS providers are very Java oriented.
+<UL>
+<LI><A HREF="http://www.amqp.org">www.amqp.org</a>  defining AMQP. 
+<LI><A HREF="http://www.openamq.org">www.openamq.org</a> original GPL implementation from JPMorganChase
+<LI><A HREF="http://www.rabbitmq.com">www.rabbitmq.com</a> another free implementation.
+<LI><A HREF="http://cwiki.apache.org/qpid">Apache Qpid</a> yafi.
+<LI><A HREF="http://activemq.apache.org/">Apache ActiveMQ</a> This is really a JMS provider with a bridge for AMQP.  They prefer their own openwire protocol. 
+</UL>
 </UL>
 
 </body>
