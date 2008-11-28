@@ -112,7 +112,7 @@ MetPX can Send:
 MetPX's switching component (sundew) functions, succinctly, as follows:  
 
  * data is received by pxReceiver processes, 
- * each pxReceiver processes destermins the routing key for the data, and 
+ * each pxReceiver destermines the routing key for the data.
  * The receivers then *switch* or *route* the data based on the label, (that is, they queue the data for the appropriate Filters and Senders. Steps:
 
     * look up the key in pxRouting.conf
@@ -120,7 +120,7 @@ MetPX's switching component (sundew) functions, succinctly, as follows:
 
  * pxSenders send the data which is waiting in their queues.  
  * pxFilters read data from their queue like a sender, transform data in some 
-   fashion, and then switch the data like a receiver.
+   fashion, and then name and switch the result like a receiver.
 
 Receivers (also called *Sources*) and Senders (also called *Clients*), as 
 their names imply, are uni-directional data channels.  A receiver will only 
@@ -306,7 +306,7 @@ Now, Let's have a look at the processes:
 
 So the Receivers have started.  Let us given them some data to route.
 
-| cp sample_bulletins/* /var/spool/px/rxq/file/3
+| cp sample_bulletins/* /var/spool/px/rxq/file
 
 That will copy a selection of bulletins into the file receiver's input queue.  What happens next?:
 
@@ -516,7 +516,7 @@ FIXME: Add a second router, create per bulletin pxRouting file.
 
 * client.
 
-  * looks in itÂ´s queue
+  * looks in it´s queue
   * applies imasks, sends as directed.
 
 
