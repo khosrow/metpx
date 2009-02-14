@@ -106,6 +106,7 @@ MetPX can Send:
  * Alpha-Manager Protocol sockets (A Canadian proprietary protocol.)
  * AMIS Protocol sockets (mimics a deceased 25 year old Canadian digital satellite broadcast.)
  * WMO GTS socket data.
+ * via AMQP socket (emerging standard: www.amqp.org)
  * via FTP 
  * via SFTP
 
@@ -172,21 +173,16 @@ the first AHL in a file, routes the contents accordingly.
 Installation
 ------------
 
-FIXME: Assuming Debian packages are available, then 
+Download the .deb package from the download area on metpx.sf.net.
+Then install it using Debian standard methods:
 
-later:?
-add the following to /etc/apt/sources.list
-
-| deb http://metpx.sf.net/debian/etch
-
-for now: ´obtain a .deb´ from somewhere...
-
-|
-| repository is where...  
 | dpkg -i metpx-sundew-xx-yy.dpkg
+
+installs the package itself.
+
 |  apt-get install -f
 
-
+installs the missing dependencies, if any.
 
 A First Run
 -----------
@@ -470,7 +466,7 @@ Change the sender loop configuration:
 | cat >${PXETC}/tx/loop <<EOT
 | type single-file
 | destination ftp://file:ILuvData@localhost
-| imask *
+| accept .*
 | EOT
 
 So there you have a basic FTP sender!
@@ -517,17 +513,17 @@ FIXME: Add a second router, create per bulletin pxRouting file.
 * client.
 
   * looks in it´s queue
-  * applies imasks, sends as directed.
+  * applies reject/accept, sends as directed.
 
 
 Advanced Routing
 ----------------
 
-FIXME: Hi Anne-Marie!?
 use Nws, ukmet & noaaport triple GTS feed routing as example.
 receiving same bulletins from multiple sources, suppressing some sources
-for some destinations, using
+for some destinations, using reject/accept.
 
+FIXME: input from amb
 
 
 
@@ -664,14 +660,16 @@ Use key directive (in preference over key_accept) and comments copiously in pxRo
 
 WMO Monitoring 
 --------------
-FIXME: Anne-Marie, write up a little configuration...
+FIXME: input needed LP, write up a little configuration...
  * promote the DWD package, provide a link...
  * Give a sample circuit configuration.
 
 
 Feeding LDM
 -----------
-There is no special thing to do to feed ldm using METPX.
+
+Unidata's Local Data Manager ( http://www.unidata.ucar.edu/software/ldm/ ) is well known
+in the meteorological community.  There is no special configuration needed to feed ldm using METPX.
 A simple scenario could be, from METPX, send the product into a directory.
 Periodically run pqinsert on each file... thats it.
 Refer to LDM's documentation for more details.
@@ -716,6 +714,46 @@ And here is a possible receiver for these products (from_ldm.conf) ::
   extension LDM:MRF:GRIB:BIN:
 
   accept ^.........._(.*grb:LDM:MRF:GRIB:BIN).*
+
+AMQP
+----
+The Advanced Message Queueing Protocol (AMQP, www.amqp.org) is an emerging standard from
+the financial sector which strives to be interoperable and vendor, language, and transport neutral.
+There is a very close conceptual alignment between traditional WMO messages, and AMQP.  For MetPX in particular, the affinities are very clear.  Terminology mapping:  
+
+========== ==========
+   Concept Mapping
+---------------------
+  AMQP       MetPx
+========== ==========
+Exchange   Receiver
+Binding	   Routing
+Queue      Sender
+Broker     MHS, Switch
+========== ==========
+
+So if you read AMQP literature about an Exchange, it is basically referring to a Receiver in MetPx.
+Current work in MetPX is aimed at bridging to AMQP. a amqp Sender can feed metpx data to an AMQP broker. An AMQP receiver, similarly connects to an amqp broker, and accepts data from it.  There is currently no plan to implement full AMQP broker functionality.
+
+In order to demonstrate AMQP usage, please visit the rabbitmq.com web site, and install that broker.  Debian packages are readily available for installation via apt-get after adding rabbitmq´s repository.  The following examples assume that rabbitmq has been installed on localhost.  No further configuration is assumed.
+
+Feeding AMQP
+------------
+
+Following the simple loopback examples above.  the loop transmitter can be 
+re-cast as an amqp sender. 
+
+| pxSender loop stop
+| cat >${PXETC}/tx/loop.conf <<EOT
+|   type amqp
+|   destination amqp://guest:guest@localhost//data
+|   accept .*
+| EOT
+| pxSender loop start
+
+you can then repeat the 
+
+
 
 
 

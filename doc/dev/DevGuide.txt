@@ -246,7 +246,7 @@ After the changes are committed, one can then update the actual web site.
 From the doc/html directory, update the web site using a sourcforge 
 account access:
 
-  % scp * <user>@shell.sourceforge.net:/home/groups/m/me/metpx/htdocs
+  % scp * <user>@web.sourceforge.net:/home/groups/m/me/metpx/htdocs
 
 Adding Keyword Substitution
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -495,7 +495,6 @@ examples:
 Efficiency Tests
 ----------------
 
-    FIXME: have not looked at system overhead of these calls.
 
 
 Efficiency of date calls. PS
