@@ -1,0 +1,152 @@
+#!/usr/bin/env python
+"""
+MetPX Copyright (C) 2004-2006  Environment Canada
+MetPX comes with ABSOLUTELY NO WARRANTY; For details type see the file 
+named COPYING in the root of the source directory tree.
+
+
+#############################################################################################
+# Name: pxDBCleaner
+#
+# Author: Daniel Lemay
+#
+# Date: 2005-07-19
+#
+# Description: This program is used to clean DB. 
+# 
+# Usage:   This program should be called from a crontab. The entry should look like:
+#  
+#   Added by DL (2005-07-19): Will clean px DB (/apps/px/db). We will keep only the directories for which
+#   the modification time is less than x days ago (set by --days x)
+#
+#   34 18 * * * if test -x /apps/px/bin/pxDBCleaner; then /apps/px/bin/pxDBCleaner --days 3 > /dev/null 2>&1;fi
+#
+#############################################################################################
+"""
+
+import os, time, pwd, sys, re, getopt, commands
+
+# default library path
+
+# old way
+sys.path.insert(1, '/apps/px/lib/importedLibs')
+sys.path.insert(1, '/apps/px/lib')
+
+# debian way
+sys.path.insert(1, '/usr/lib/px/importedLibs')
+sys.path.insert(1, '/usr/lib/px')
+
+# developpement library path option through PXLIB
+
+try:
+    pxlib = os.path.normpath(os.environ['PXLIB'])
+    sys.path.insert(1, pxlib + '/importedLibs')
+    sys.path.insert(1, pxlib )
+except :
+         pass
+
+# developpement library path option through PXROOT
+try:
+    pxroot = os.path.normpath(os.environ['PXROOT'])
+    sys.path.insert(1, pxroot + '/lib/importedLibs')
+    sys.path.insert(1, pxroot + '/lib')
+except :
+    pass
+
+#
+
+import PXPaths
+from Logger import Logger
+from PXManager import PXManager
+
+def usage():
+    print "\nUsage: pxDBCleaner (-d|--days) n, where n is the number of days we want to be left in the database\n"
+    print "Note: if -d is not used, default is to keep 30 days (can be overriden in px.conf with keyword daysToKeepInDB)\n" 
+
+class PXDBCleaner:
+    LOG_LEVEL = "INFO"      # Logging level
+    NB_DAYS_LEFT = None     # Number of days we left
+
+    # We want this program to run under pds user
+    #if not os.getuid() ==  pwd.getpwnam('pds')[2]:
+    #    pdsUID = pwd.getpwnam("pds")[2]
+    #    os.setuid(pdsUID)
+
+    def __init__(self):
+
+        PXPaths.normalPaths()
+        self.manager = PXManager()
+        LOG_NAME = self.manager.LOG + 'pxDBCleaner.log'    # Log's name
+        logger = Logger(LOG_NAME, PXDBCleaner.LOG_LEVEL, "Cleaner")
+
+        self.getOptionsParser()
+        self.logger = logger.getLogger()
+        self.manager.setLogger(self.logger)
+
+    def clean(self):
+        seconds =  PXDBCleaner.NB_DAYS_LEFT * 24 * 3600
+        now = int(time.time())
+        limit = now - seconds
+
+        dates = self.manager.getDBDirs()
+        dates.sort()
+        self.logger.info("************* pxDBCleaner => START (We keep: %s days ) ***************" % PXDBCleaner.NB_DAYS_LEFT)
+        for date in dates:
+            dir = PXPaths.DB + date
+            if  os.stat(dir)[8] < limit:
+                try:
+                    status, output = commands.getstatusoutput('rm -rf %s' % dir) 
+                except:
+                    (type, value, tb) = sys.exc_info()
+                    self.logger.error("Type: %s, Value: %s, Output: %s" % (type, value, output))
+
+                self.logger.info("Dir: %s has been removed" % dir)
+        self.logger.info("************* pxDBCleaner => STOP ***********************************")
+
+    def getOptionsParser(self):
+        nbDaysLeft = False
+
+        try:
+            opts, args = getopt.getopt(sys.argv[1:], 'd:h', ['help', 'days='])
+            #print opts
+            #print args
+        except getopt.GetoptError:
+            # print help information and exit:
+            usage()
+            sys.exit(2)
+
+        for option, value in opts:
+            if option in ('-h', '--help'):
+                usage()
+                sys.exit()
+            if option in ('-d', '--days'):
+                nbDaysLeft = True
+                value = int(value)
+                if value > 0:
+                   PXDBCleaner.NB_DAYS_LEFT = value
+                   #print type(PXDBCleaner.NB_DAYS_LEFT)
+                else:
+                    usage()
+                    sys.exit(2)
+
+        # We must give the number of days we want to leave on the disk
+        if nbDaysLeft  is False:
+            #usage()
+            #sys.exit()
+            PXDBCleaner.NB_DAYS_LEFT = 30  # Safe default (a month)
+
+            pxconf = PXPaths.ETC + 'px.conf' 
+            if os.path.isfile(pxconf):
+                config = open(pxconf, 'r')
+                for line in config.readlines():
+                    words = line.split()
+                    if (len(words) >= 2 and not re.compile('^[ \t]*#').search(line)):
+                        if words[0] == 'daysToKeepInDB':
+                            PXDBCleaner.NB_DAYS_LEFT = int(words[1])
+                            return
+                            
+
+if __name__ == '__main__':
+
+    cleaner =  PXDBCleaner()
+    cleaner.clean()

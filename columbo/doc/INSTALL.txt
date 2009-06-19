@@ -1,0 +1,217 @@
+Introduction 
+------------
+ 
+Columbo  (Class Object Library Used for Merging and Broadcasting Observations) 
+est un programme de monitoring du PXA. Plus particulièrement, les sources et 
+clients PDS et PX sont monitorés par ce programme. 
+ 
+Le programme peut être séparé en trois composantes : 
+ 
+CCS
+   Columbo Crime Scene 
+
+CIR
+   Columbo Investigation Room 
+
+CS 
+  Columbo Show 
+ 
+La composante CCS se retrouve sur chaque machine que l'on veut monitorer. C'est
+elle qui se charge d'obtenir les renseignement pertinents (ce que l'on veut 
+monitorer). Ces renseigments sont ensuite transmis (sous forme de « clues ») 
+à la composante CIR afin que celle-ci regroupe les clues de manière a obtenir 
+un résultat unique pour chaque client. Les résultats sont ensuite transmis 
+(cp, rcp, scp) à la composante CS pour présentation Web. 
+ 
+Installation 
+------------
+ 
+L'installation du logiciel se fait sur deux types de machine : des FRONTENDS 
+et des BACKENDS. 
+ 
+CCS est installé sur le type : FRONTEND et BACKEND 
+CIR  est installé sur le type : FRONTEND 
+CS est installé sur le type : FRONTEND 
+ 
+Afin de s'assurer d'une installation correcte du logiciel, suivre les 
+étapes suivantes : 
+ 
+  2.1 Infrastructure de communication 
+ 
+      Il faut s'assurer que chaque BACKEND puisse faire un ssh vers les 
+      FRONTENDS et inversement, que chaque FRONTEND puisse faire un ssh 
+      vers les BACKENDS. 
+ 
+      La description des étapes nécéssaires à la création de l'infrastructure 
+      de communication peut différer selon l'état initial des systèmes.  Les 
+      étapes mentionnées ci-bas sont celles que j'ai eu à faire étant donné 
+      l'état de mon système. 
+ 
+      Création des clefs ssh sur chacun des FRONTENDS et BACKENDS: ssh-keygen -d
+      Copie des clefs de chaque machine dans le fichier .ssh/authorized_keys2 de
+      l'usager PDS 
+ 
+      Problèmes potentiels avec ssh : -     mauvaises permissions pour les 
+      répertoires et les fichiers. 
+
+      - insertion de caractères indésirables lors du copiage des clefs. 
+      - utilisation de noms courts et de FQDN (fully qualified name). Les 2 
+        versions doivent être résolues (/etc/hosts) et initialisées. 
+      - il faut initialiser le mot de passe du compte linux de l'usager 
+        pour lequel on crée une clé ssh, sinon on obtient un message « User 
+        pds not allowed because account is locked » dans /var/log/messages.  
+       
+      Note : Il faut établir chaque connexion manuellement au moins une fois, car la première fois qu'une connexion est établie, ssh demande une confirmation. Par la suite la confirmation n'est plus demandée. 
+
+  2.2 Commande sudo 
+ 
+      On doit configurer le fichier /etc/sudoers (sur les FRONTENDS seulement) 
+      afin de pouvoir utiliser la commande sudo. Il y a deux raisons pour 
+      lesquelles ont veut utiliser sudo : 
+ 
+      1) Le programme /sbin/ipvsadm (exécutable par root seulement) doit être 
+         appelé par l'utilisateur pds 
+ 
+      2) Des connexions ssh  (usager  = pds) doivent êtres établies par 
+         l'usager qui roule le serveur Web (nobody) 
+ 
+      Voici les lignes à ajouter au fichier /etc/sudoers (utiliser la 
+      commande visudo pour éditer le fichier) : 
+ 
+      | Host_Alias      COLUMBOHOSTS = localhost,  ip_du_host (ex : 142.135.11.168) 
+      | Cmnd_Alias      COLUMBOCMD = /usr/bin/ssh [-A-z0-9\_ ]\*, /usr/bin/ssh lvs[A-z0-9\_ ]\*, /apps/pds/tools/Columbo/ColumboInvestigationRoom/lib/* 
+      | nobody COLUMBOHOSTS = (pds) NOPASSWD: COLUMBOCMD 
+      | pds COLUMBOHOSTS = (root) NOPASSWD: /sbin/ipvsadm 
+      | pds COLUMBOHOSTS = (pds) NOPASSWD: COLUMBOCMD 
+ 
+ 
+2.3 Installer les différentes composantes logicielles 
+ 
+      On commence par installer le logiciel sur chacun des BACKENDS : 
+ 
+      | cd /apps/pds/tools 
+ 
+      | cvs -d :pserver:<USERNAME>@atlas:/sw/cvs login 
+      | cvs -d :pserver:<USERNAME>@atlas:/sw/cvs checkout Columbo
+      | cvs -d :pserver:<USERNAME>@atlas:/sw/cvs logout  
+ 
+ 
+      On exécute ensuite le programme d'installation se trouvant dans /apps/pds/tools/Columbo : 
+ 
+      | ./install.py  -t BACK 
+ 
+      On fait la même chose sur chacun des FRONTENDS, sauf que l'on appelle 
+      le programme d'installation avec l'option FRONT : 
+ 
+      | ./install.py  -t FRONT 
+ 
+      Il faut ensuite s'assurer que les fichiers de configurations se trouvant 
+      sur le FRONTEND (pas utilisé sur les BACKENDS) sont corrects. Des 
+      fichiers .conf.sample sont donnés afin de faciliter la construction des 
+      fichiers de configuration. Les renommer en enlevant le .sample. Voir 
+      également la section Configuration de ce document. 
+ 
+      Note 1 : Je pense qu'il y a un bug avec le chmod de python et à cause de
+      cela, j'ai observé que le programme d'installation ne fixait pas toujours
+      correctement les permissions. En le roulant une deuxième fois, les choses
+      semblent s'arranger. 
+ 
+      Note 2 : Ces répertoires doivent avoir les permissions 777. 
+ 
+      | /apps/pds/tools/Columbo/ColumboShow/log 
+      | /apps/pds/tools/Columbo/ColumboShow/results 
+ 
+      Note 3 : Le module logging n'est pas inclus dans les versions de python 
+      antérieures à 2.2 
+
+  2.4 Serveur Web 
+ 
+      Le « data » du site Web se trouve sous /web/columbo. 
+      L'usager qui roule httpd est nobody.  Le fichier de configuration du 
+      serveur web se trouve sous /opt/apache/cfg/httpd.conf 
+ 
+  2.5 Crontab  
+ 
+      Afin que Columbo soit exécuté à chaque minute, on ajoute l'entrée 
+      suivante dans la crontab de l'utilisateur pds (sur un FRONTEND) : 
+ 
+      | # Pour 'feeder' l'onglet PDS Clients et PDS Sources 
+      | * * * * * /apps/pds/tools/Columbo/ColumboInvestigationRoom/lib/ColumboInvestigationRoom.py PDS > /dev/null 
+ 
+      | # Pour 'feeder' l'onglet PX Circuits 
+      | * * * * * /apps/pds/tools/Columbo/ColumboInvestigationRoom/lib/ColumboInvestigationRoom.py PX > /dev/null 
+ 
+ 
+ 
+ 
+Configuration 
+-------------
+ 
+Le répertoire contenant les fichiers de configurations s'appelle 
+/apps/pds/tools/Columbo/etc/ 
+ 
+Les 2 fichiers utilisés sont : 
+ 
+Columbo.conf  => Principal fichier de configuration de l'application Columbo 
+ 
+maxSettings.conf   =>Définition des queues maximum et des temps individuels (par source/client) maximum sans réception/transmission de données. 
+ 
+
+3.1 Fixation du délai après lequel les « résultats » sont considérés vieux 
+ 
+    Sur le FRONTEND, éditer /apps/pds/tools/Columbo/etc/Columbo.conf 
+ 
+    Dans la section  [CS], on donne un entier comme valeur au paramètre 
+    results_timeout. 
+ 
+    ex : Pour un délai de 8 minutes, on a : 
+    results_timeout = 8 
+ 
+    Note : On parle ici des résultats crées par et pour Columbo. On ne 
+    parle pas de la réception ou transmission d'un cicruit PX.  Pour 
+    cela voir 3.2 
+ 
+3.2 Fixation des queues maximum pour chaque client/circuit 
+ 
+    Sur le FRONTEND,  éditer apps/pds/tools/Columbo/etc/maxSettings.conf
+    dans la section PDS_CLIENTS, PDS_INPUT_DIRECTORIES, et/ou PX_CIRCUITS 
+ 
+
+3.3 Fixation des temps maximum sans réception ou transmission sur un circuit PX 
+ 
+    Sur le FRONTEND, éditer /apps/pds/tools/Columbo/etc/maxSettings.conf 
+    dans la section PX_TIMERS 
+ 
+
+Informations sur les installations opérationnelles 
+--------------------------------------------------
+
+4.1 lvs1-op, lvs2-op 
+ 
+     L'alias pds-op pointe sur la machine active (lvs1-op ou lvs2-op). 
+     L'alias columbo pointe sur pds-op. 
+     Tel que décrit à la section 2.5, un cron s'exécute à chaque minute 
+     sur lvs1-op et lvs2-op : 
+ 
+     Pour voir les details de ce qui est monitoré, il faut consulter 
+     le fichier de configuration se trouvant dans 
+     /apps/pds/tools/Columbo/etc/Columbo.conf 
+ 
+Troubleshooting 
+---------------
+ 
+-Lorsqu'il y a des problèmes avec les retours de CCS (indiqués dans le log de CIR), vérifier les fichiers /apps/pds/info/PDSstartupinfo sur les PDS. S'ils contiennent plusieurs lignes pour un client donné, il faut les effacer. Prendre soin de ne pas effacer la ligne pour laquelle le PID correspond au programme qui tourne réellement pour le client (ps -ef ). 
+ 
+- Lorsque les résultats ne sont pas à jour (indiqué par « outdated » en rouge) : 
+ 
+Si l'on tente de « toggler » un client (prendre le client operator pour faire des tests) et  
+qu'il ne se passe apparemment rien (le client reste toujours vert), cela indique que Columbo n'arrive pas à générer un nouveau fichier de résultats. Les causes peuvent alors être multiples. 
+ 
+    - file system full 
+    - un changement dans ipvsadm qui a pour effet d'introduire une machine 
+      dont les clients PDS sont différents des autres machines 
+    - un changement pour un client PDS qui n'a pas été effectué 
+      sur toutes les machines appropriées. 
+ 
+- Si à chaque exécution de Columbo on voit dans le log /apps/pds/tools/Columbo/ColumboInvestigationRoom/log qu'aucune machine ne fait partie du cluster (on voit ceci gràce à la ligne suivante : Machines List obtained from LVSManager: [] ), alors il est possible que ce soit parce que le fichier /etc/sudoers ait été effacé ou corrompu. La solution est alors de copier un bon fichier (que l'on prend sur lvs1-op ou lvs2-op) /etc/sudoers 
+ 
