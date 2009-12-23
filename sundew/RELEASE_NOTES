@@ -1,0 +1,191 @@
+
+2009-12-21   (MG)  PullFTP.py      added to usage of source.batch 
+                                   Correct a problem with matchPattern
+                                   Local file pulled has remote file time
+                                   Put overload of module for ftp/sftp under a try/except
+                                   Only one trial for sftp connect(instead of a loop)
+
+                   DiskReader.py   add sorting on modified time for ingestors
+
+		   Source.py       added option addStationInFilename (default true)
+
+                   Ingestor.py     use source option addStationInFilename in bulletinManager
+		                   for type bulletin-file and pull-bulletin
+
+                   SenderFTP.py    Correct a problem with BBB in matchPattern
+
+                   bulletinAm.py   Correct token check for digit or year
+
+                   DiskReader.py   Source/Filter file list ingested sorted
+                                   using each file's mtime
+
+                   wmoid.py        added to the package
+                                   read file $PXROOT/etc/wmo_id.conf
+		                   defines wmo bulletins that needs station name 
+				   in filename in a list called wmo_id, it impacted :
+
+		                   bulletin.py         
+		                   bulletinManager.py
+		                   bulletinManagerWmo.py
+		                   bulletinWmo.py
+
+2008-11 20   (MG)  AMQP            senderAMQP.py   added to the package
+                                   receiverAmqp.py added to the package
+                                   pxReceiver      modified to add amqp
+                                   pxSender        modified to add amqp
+                                   Ingestor.py     modified to add amqp receiver type
+                                   urlParser.py    modified to add amqp url type
+                                   gateway.py      modified to add amqp receiver type
+
+2008-11 ??   (MG)  Grib.py/Bufr.py added a try/except around some grib/bufr
+                                   decoding that were causing "traceback"
+                                   messages in the logs without stopping the
+                                   application
+
+---------------- Below are changes made up to version px-0-5-2 --------------------------------------
+
+2008-08 29   (MG)  several changes within the week of the operational implementations
+
+                   hang_check.sh avoid metser client (returned)
+                                  sleeping 10 secs before checking if file is sent is more causious
+                                  update paths used when PXROOT used
+                                  avoid using 'px status'
+                   check_unique   typo for fx path for configs
+                                  screen out ftpd processes
+
+                   Client.py      add sorting when validation is false
+                                  dont take for granted that there are 7 fields in filename
+
+                   Ingestor.py    filenaming standards enforced by truncating filename to 6 fields
+                                  bug fix when empty fields were filled in by its extension counterpart
+
+                   TAFParser.py   importedLibs and more in sys.path for several ways of implementing metpx
+
+                   SenderFTP.py   when there is a problem delivering a file... and we were not done with it
+                                  we try to delete the file on the remote site... this may hang so a timeout
+				  was put there.  Instead of trying to delete both the file and its .tmp for
+                                  example, a partialfile variable was defined and set to the filename 
+                                  currently processed... if something goes wrong... its the one to delete
+
+                   pxSender.1     revised
+
+		   postinst       added theses lines  chown px.px  /usr/lib/px
+		                                      chmod -R 755 /usr/lib/px
+
+
+2008-08-20   (MG)  Client, filename NONE fixed (dont keep SENDER part if provided)
+                           filename NONESENDER like NONE except keep SENDER if provided
+
+2008-07-18   (MG)  debian/postins : when the package is installed, 
+                   if PXHOME/etc doesn't exists a link is done to create
+                   it with /etc/px (requiered by DL)
+
+                   PullFTP  when lsdir goes wrong simply warn instead of error
+                   for both ftp and sftp
+
+                   Documentation revised
+
+                   debian/rules revised to keep file .localRetrans in bin
+
+2008-07-17   (MG)  SenderFTP :  SFTP protocol supports umask...
+                   The trick being the file is opened in w mode,
+                   than a chmod 000 is done on the file... the file
+		   is written, closed  and its permission are reset at the end
+
+2008-07-16   (DL) Add a better comment when pxRetrans is unable to create
+                  to construct DB path from a filename
+
+             (DL) Set appropriate values for some variables in pxRetrans
+                   
+2008-07-15   (MG)  Before we had /apps/px/txq/client/prio/date/file
+                   so prio was fixed at position 5  now with varying
+		   spool directory depth prio is taken from position -3
+		   /var/spool/px/txq/client/prio/date/file
+
+
+2008-07-09   (MG)  Source,PullFTP now support for SFTP pulls.
+                   SenderFTP sleeps 1 sec when a problem occurs on file delivery
+
+2008-06-26   (MG)  SenderFTP Behavior fix... when file delivery goes wrong,
+                   do a preventive delete on the file. (get rid of .tmp, 
+		   permission 000 file... file already there... etc)
+
+             (MG)  Source.py and Ingestor.py   lx_script option added
+                   man/man1/pxFilter.1  contains the explanation for that option
+
+2008-06-25   (MG)  Buf fix SenderFTP throw an exception when ftp mkdir does not work
+
+2008-06-02   (MG)  Bug fix SFTP was working only with an ssh_keyfile.
+                   Now user/passwd without ssh_keyfile works too.
+		   TODO: an option for the keyfile decrypt password too...
+
+2008-05-29   (DL)  Bug fix DBSearcher.py: if filesToParse is None, replaced it by []
+             (DL)  In SAParser.py, FParser.py and TAFParser.py
+                   1) Changed /apps/px/db/ for PXPaths.DB
+                      Changed /apps/px/etc/ for PXPaths.ETC
+
+                   2) In SAParser, take into accout the case where a SA bulletin contains only 1 line
+
+2008-05-30   (MG)  Bug fix CollectionManager.py ... when observation date was incorrect, or undetermined
+                   the usage of the bulletin entry emission was causing the collector to crash. Now the
+                   condition is checked and we log a warning with the filepath.
+
+---------------- Below are changes made in version px-0-5-0------------------------------------------
+
+2008-05-22   (MG) Fixed a bug in SenderFTP.py which generated error messages when sending with file:// option
+
+
+---------------- Below are changes made in version px-0-4-9 -----------------------------------------
+
+2008-05-16   (AMB) Added files destined for /etc/cron.d in directory cronfiles
+
+2008-05-15   (DL)  Removed debug statements in DiskReader.py
+
+2008-05-15   (DL)  Modified StationParser.py to accept comment lines in etc/stations.conf
+
+
+---------------- Below are changes made in version px-0-4-8 ------------------------------------------
+
+2008-05-08   (AMB) Removed French accents in lib/AlarmFTP.py
+
+2008-05-06:  (DL)  Add a line in pxTransceiver to be sure that lib/aftn is accessible
+             (DL)  Bug correction when a receiver is in listen mode and a reload occur
+             (DL)  pxDBCleaner can now read the number of DB to keep in px.conf
+
+2008-05-05:  (DL)  All process are now start via daemon.daemonize() to be sure that standard attributes
+                   of a daemon are implemented (no controlling terminal, cwd to '/', umask 0, etc)
+
+2008-05-05:  (AMB) Modified bin/mr-clean to ensure it calls python instead of python2
+
+2008-05-05:  (AMB) Added etc/trx directory and file aftn.conf.sample in this directory
+
+-----------  Below are changes made in version px-0-4-7 ----------------------------------------------
+
+2008-04-11: Changed default debian BIN location to /usr/bin 
+
+2008-04-07: Purge option added to senders. 
+Add possibility to unlink old files of a given
+priority
+
+2008-03-17: pxRetrans command is now functional.
+This command can be used to retransmit some files already sent
+to a client.
+
+------------- Below are changes made in version px-0-4-6 ---------------------------------------------
+
+1- Receiver, Filter, Transceiver, Sender now take into account options that
+   are generaly set in px.conf (Source.py, Client.py, Sourlient.py)
+
+2- Receiver of type pull, in sleeping state, will do their directory listing anyway...
+   (PullFTP.py, Ingestor.py)
+
+3- Unused PXPaths variables were removed  (PXPath.py)
+
+4- Use /usr/lib/px as a default for metpx python modules path
+   and PXLIB may be used while developping...
+   (paplat,px,pxChecker,pxDBCleaner,pxFilter,pxFlowNames,pxReceiver,
+    pxRetrans,pxSender,pxTransceiver,pxValidator)
+
+5- Same as (4) but for within the lib
+   (DBSearcher.py, DirectRoutingParser.py, RoutingFileCreator.py, Source.py, Sourlient.py, TAFParser.py)
+
