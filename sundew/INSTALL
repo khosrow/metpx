@@ -1,0 +1,41 @@
+
+INSTALL
+
+sundew is the switching component of MetPX. 
+
+We've only installed this internally, fully flexible packaging is
+on the TODO list.  for now, this is the procedure:
+
+requirements:
+	-- kernel 2.6
+	-- works best with ext3 and dir_index option enabled on file system.
+             sample creation command:    mke2fs -j -O dir_index /dev/hda9
+	-- requires python >= 2.3  
+	-- to receive files via FTP, need an ftp server, such as vsftpd
+           set it up to deliver into /apps/px/rx/<channel>
+
+0.   as root in the current directory, run ./tools/pxInit
+     this script does:
+             0.1   create a user & group named px
+             0.2   create a directory with a path /apps/px, chown it to px
+             0.3   copy tree to the right place.
+                   cp -rp=mode bin lib tools /apps/px
+             0.4
+                   mkdir /apps/px/etc /apps/px/etc/tx /apps/px/etc/rx 
+                   mkdir /apps/px/db /apps/px/tx /apps/px/rx /apps/px/log
+                   chgrp px /apps/px/db /apps/px/tx /apps/px/rx /apps/px/log
+                   chown px /apps/px/db /apps/px/tx /apps/px/rx /apps/px/log
+
+1.   Read through the etc.sample directory to create appropriate configuration 
+
+
+2.  start sundew. 
+     /apps/px/bin/px start.
+    
+5.   look at what is going on in /apps/px/log
+
+
+P.S.  If, as a developer, you don't want to run as root, then you can:
+export PXROOT=<root directory of sundew>, then run pxInit... It will 
+bomb on the user creation.  You can comment that out.
+
