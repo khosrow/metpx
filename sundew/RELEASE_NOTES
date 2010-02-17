@@ -1,6 +1,11 @@
 
 ---------------- Below are changes made up to version px-0-5-6 --------------------------------------
 
+2010-02-17   (MG)  CacheManager behavior when full and all entries are not timeout
+                   flush half of the cache... (instead of sorting, and deleting the oldest
+		   entry and adding the new one for each new addition until some timeout
+		   clean some entries... for busy senders that could take a while)
+
 2010-02-15   (MG)  receiver of type bulletin-file and pull-bulletin may now
                    process the received files as they are for an AM feed
 		   option bulletin-type added (None, am  supported)
