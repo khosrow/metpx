@@ -40,7 +40,7 @@ EOF
 
 #      get most recent file in queue
 
-       file=`ls -alrtR ${TXQ}/$sender/[12345]* | grep "^-" | grep -v lock | awk '{print $9}' | tail -1`
+       file=`ls -alrtR ${TXQ}/$sender/[12345]* | grep "^-" | grep -v lock | awk '{print $9}' | tail -n1`
        if [[ -z "$file" ]]; then
            continue;
        fi
