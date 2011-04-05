@@ -129,9 +129,8 @@ means learning together too.  Collaboration is also a means for people
 to collectively improve their skils.   
 
 
-This manual describes 
-ideal working methods we strive for.  Sometimes we do not manage to live 
-up to our ideals.  If you find parts of the code that do not follow the 
+This manual describes ideal working methods we strive for.  Sometimes we do 
+not manage to live up to our ideals.  If you find parts of the code that do not follow the 
 prescriptions here, then it is either an oversight or code which existed 
 before this guide was created, and not a license to deviate.  Please strive 
 to follow the guide's principles.  If you really feel the need to 
@@ -246,7 +245,7 @@ After the changes are committed, one can then update the actual web site.
 From the doc/html directory, update the web site using a sourcforge 
 account access:
 
-  % scp * <user>@web.sourceforge.net:/home/groups/m/me/metpx/htdocs
+  % scp * <user>,metpx@web.sourceforge.net:htdocs
 
 Adding Keyword Substitution
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
