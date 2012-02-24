@@ -885,6 +885,7 @@ shared space would be something like below:
 | mv /var/log/px /apps/px/logs
 | ln -s /apps/px/logs /var/log/px
 | mv /var/spool/px/* /apps/px
+| rmdir /var/spool/px
 | ln -s /apps/px /var/spool/px
 | mv /etc/px /apps/px/etc
 | ln -s /apps/px/etc /etc/px
