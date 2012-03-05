@@ -4,24 +4,24 @@ metpx-sundew (0.6.0-ubuntu1) lucid; urgency=low
   * Add init script 
   * Update doc	 
   * lib/LatMessage.py lib/Latencies.py lib/PDSLatencies.py lib/PXLatencies.py
-    lib/Plotter.py lib/copyFiles.py bin/paplat   change python2 for python
+  * lib/Plotter.py lib/copyFiles.py bin/paplat   change python2 for python
   * rename .localRetrans for localRetrans and modifi pxRetrans accordingly
-    rename hang-check.sh for hang-check
+  * rename hang-check.sh for hang-check
   * move doc from trunk to sundew
-    debian/metpx-sundew.docs
+  * debian/metpx-sundew.docs
   * debian/changelog modified
-    debian/control   modified for architecture and dependencies
-    debian/copyright updated
-    debian/postinst  PXHOME from getent and use dpkg-statoverride for directories
-    debian/rules     modified to install doc (exclude .svn)
-                     create queuedirs and db dir
-                     move  dh_compress for the man
+  * debian/control   modified for architecture and dependencies
+  * debian/copyright updated
+  * debian/postinst PXHOME from getent and use dpkg-statoverride for directories
+  * debian/rules     modified to install doc (exclude .svn)
+  *                  create queuedirs and db dir
+  *                  move  dh_compress for the man
   * /etc/init.d/px written and packaged
 
   [ Michel Grenier ]
   * bulletinLib.py utils.py deleted
-  * short manpages written for  pxValidator, pxRetrans, pxFlowNames, pxDBCleaner,
-    pxChecker, mr-clean, localRetrans, hang-check, check-unique, paplat
+  * manpages written for  pxValidator, pxRetrans, pxFlowNames, pxDBCleaner,
+  * pxChecker, mr-clean, localRetrans, hang-check, check-unique, paplat
 
  -- Michel Grenier <michel.grenier@ec.gc.ca>  Mon, 05 Mar 2012 15:43:50 +0000
 
