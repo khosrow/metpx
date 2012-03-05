@@ -1,0 +1,816 @@
+#!/usr/bin/env python
+"""
+#############################################################################################
+# Name: pxRetrans
+#
+# Author: Daniel Lemay
+#
+# Date: 2007-10-02
+#
+# Description: Used to retransmit files on px clusters
+#
+#############################################################################################
+"""
+import os, os.path, sys, re, time, commands, fnmatch, tempfile, readline, atexit
+
+# default library path
+
+# old way
+sys.path.insert(1, '/apps/px/lib/importedLibs')
+sys.path.insert(1, '/apps/px/lib')
+
+# debian way
+sys.path.insert(1, '/usr/lib/px/importedLibs')
+sys.path.insert(1, '/usr/lib/px')
+
+# developpement library path option through PXLIB
+try:
+    pxlib = os.path.normpath(os.environ['PXLIB'])
+    sys.path.insert(1, pxlib + '/importedLibs')
+    sys.path.insert(1, pxlib )
+except :
+         pass
+
+# developpement library path option through PXROOT
+try:
+    pxroot = os.path.normpath(os.environ['PXROOT'])
+    sys.path.insert(1, pxroot + '/lib/importedLibs')
+    sys.path.insert(1, pxroot + '/lib')
+except :
+    pass
+
+from optparse import OptionParser
+
+import PXPaths, pxRetransLanguage, PXRetransCompleter
+import dateLib, fileLib, dshLib
+
+from RetransConfig import RetransConfig
+from PXManager import PXManager
+from FreqReader import FreqReader
+
+usage = """%%prog [options]
+span %(isInMinutes)s
+offset %(isInMinutes)s
+
+%(example)s 1: %%prog --clients pds_metser --span 30
+%(example)s 2: %%prog --clients pds_metser --span 30 --offset 2*24*60
+%(example)s 3: %%prog --clients pds_metser --span 30 --startDate "2007-10-30 20:06:59"
+%(example)s 4: %%prog --clients pds_metser --span 30 --endDate "2007-10-30 20:07:59"
+%(example)s 5: %%prog --clients pds_metser --startDate "2007-10-30 20:06:59" --endDate "2007-10-30 21:07:59"
+
+%(groupNote)s
+"""
+
+"""
+%(example)s 2: --sources ncp1,ncp2 --span 30 --offset 2*24*60
+%(example)s 3: --sources ncp1,ncp2 --span 30 --startDate "2007-10-30 20:06:59"
+%(example)s 4: --sources ncp1,ncp2 --span 30 --endDate "2007-10-30 20:07:59"
+%(example)s 5: --sources ncp1,ncp2 --startDate "2007-10-30 20:06:59" --endDate "2007-10-30 21:07:59"
+"""
+usageInter = """%(example)s 1: --clients pds_metser --span 30
+%(example)s 2: --clients pds_metser --span 30 --offset 2*24*60
+%(example)s 3: --clients pds_metser --span 30 --startDate "2007-10-30 20:06:59"
+%(example)s 4: --clients pds_metser --span 30 --endDate "2007-10-30 20:07:59"
+%(example)s 5: --clients pds_metser --startDate "2007-10-30 20:06:59" --endDate "2007-10-30 21:07:59"
+
+%(groupNote)s
+"""
+
+#-v, --verbose     %(verboseHelp)s
+#-q, --quiet       %(quietHelp)s
+#-t, --timestamp   %(timestampHelp)s
+#-b, --basename    %(basenameHelp)s
+#--sources         %(sourcesHelp)s
+#--scp             %(scpHelp)s
+
+menu = """
+%(80-)s
+%(HELP)s
+%(80-)s
+h,?               %(printMenu)s
+lo                %(listOptionsMenu)s
+l                 %(listMenu)s
+rtx               %(retransmitMenu)s
+reset             %(resetMenu)s
+
+f                 %(getFlowNames)s
+fs                %(getSourceNames)s
+fc                %(getClientNames)s
+
+cf                %(getClusterFlowNames)s
+cfs               %(getClusterSourceNames)s
+cfc               %(getClusterClientNames)s
+
+findClient        %(getPotentialClients)s
+
+prodSources       %(getProdSources)s
+prodClients       %(getProdClients)s
+prodFreqs         %(getProdFreqs)s
+
+q                 %(quitMenu)s
+
+-s, --span        %(spanHelp)s
+-o, --offset      %(offsetHelp)s
+--startDate       %(startDateHelp)s
+--endDate         %(endDateHelp)s
+-c, --clients     %(clientsHelp)s
+-r, --regex       %(regexHelp)s
+-g, --group       %(groupHelp)s
+-p, --prio        %(prioHelp)s
+"""
+
+histFile = os.path.expanduser("~/.pxRetrans_history")
+def save_history(histFile=histFile):
+    readline.write_history_file(histFile)
+
+if os.path.exists(histFile):
+    readline.read_history_file(histFile)
+atexit.register(save_history)
+
+readline.parse_and_bind("tab: complete")
+
+class PXRetrans(object):
+    def __init__(self):
+        PXPaths.normalPaths()
+        self.debug = 0
+        self.version = "%prog 0.1"
+        self.hostname = os.uname()[1]
+        self.pxm = PXManager()
+
+        self.config = RetransConfig()
+        self.lang = self.config.lang
+        self.masterConfPath = self.config.masterConfPath
+        self.clusters = self.config.clusters
+        self.frontend = os.environ.get(self.config.feEnvVar, None)
+        self.similiFrontend = os.environ.get(self.config.sfeEnvVar, None)
+
+        # Use to execute command (pxRetrans, localRetrans) on the backend
+        # via ssh command run on the frontend
+        if self.config.fePrivKey:
+            self.fePrivKeyArg = '-i %s' % self.config.fePrivKey
+        else:
+            self.fePrivKeyArg = ''
+        self.beUser = self.config.beUser   # Use to ssh from the frontend to the backend
+
+        # Use to scp results from the backend to the frontend
+        if self.config.bePrivKey:
+            self.bePrivKeyArg = '-i %s' % self.config.bePrivKey
+        else:
+            self.bePrivKeyArg = ''
+        self.feUser = self.config.feUser         # On the backend, results (listing) will be sent to this frontend user
+        self.feTempDir = self.config.feTempDir   # On the backend, results (listing) will be sent to this directory
+
+        self.parser = OptionParser(usage=usage % self.lang, version=self.version, description=self.description())
+        self.addOptions(self.parser)
+        (self.options, self.args) = self.parser.parse_args()
+        if self.debug: 
+            print dir(self.options)
+            print self.options.__dict__.items()
+            print self.parser.__dict__
+            print self.parser.defaults
+            print self.parser._short_opt['-c']._short_opts
+            print self.parser._short_opt['-c'].dest
+            print self.parser.values.__dict__
+
+        #print self.parser.values.__dict__
+
+        self.regexes = [        
+            (re.compile("!(?P<command>.*)$"), self.runShellCommand),
+            (re.compile("(?P<command>[^!].*\|.*)$"), self.parsePipe), 
+            (re.compile("(h|\?)$"), self.printMenu),
+            (re.compile("(?P<newOptions>--?.*)$"),  self.parseArgs),
+            (re.compile("rtx *(?P<indexes>[-,0-9]+|all|tous)$"),  self.parseIndexes),
+            (re.compile("l$"), self.list),
+            (re.compile("lo$"), self.listOptions),
+            (re.compile("reset$"), self.resetOptions),
+            (re.compile("f$"), self.getFlowNames),
+            (re.compile("f(?P<type>s)$"), self.getFlowNames),
+            (re.compile("f(?P<type>c)$"), self.getFlowNames),
+            (re.compile("cf$"), self.getClusterFlowNames),
+            (re.compile("cf(?P<type>s)$"), self.getClusterFlowNames),
+            (re.compile("cf(?P<type>c)$"), self.getClusterFlowNames),
+            (re.compile("prod(?P<type>Sources|Clients|Freqs) (?P<prod>.*)$"), self.printProdInfos),
+            (re.compile("findClient (?P<ipOrHost>.*)$"), self.findClient),
+            (re.compile("exit$|ex$|quit$|q$"), self.quit)
+
+        ]
+
+        self._destIndexedByOpt = self._mapOptToDest()                        
+        self._optsIndexedByDest = self._invertDict(self._destIndexedByOpt)
+        self.newValues = True
+        self.matchingFile = ""
+        self.startDate = ""
+        self.endDate = ""
+
+        if self.frontend and not self.options.progCalled:
+            self.clusterFR = {}
+            for cluster in self.clusters:
+                self.clusterFR[cluster] = FreqReader(cluster + '.db', cluster)
+
+        if not self.options.progCalled and not self.options.scp:
+            self.options.scp = self.hostname
+
+        if self.options.inter:
+            self.options.verbose = True
+            if self.options.clients:
+                self.parseArgs(self.options, "-c %s" % self.options.clients)
+            self.start()
+        elif self.options.progCalled:
+            self.search(self.options, self.options.progCalled)
+        else:
+            self.search(self.options)
+
+    def runShellCommand(self, options, command):
+        #print "We are in runShellCommand"
+        if os.environ['HOME'] == '/home/operator':
+            print "%(cannotRunShellCommand)s" % self.lang
+            return
+
+        status, output = commands.getstatusoutput(command)
+        print output
+
+    def parsePipe(self, options, command):
+        #print "We are in parsePipe"
+        #print command
+        one, two = command.strip().split("|", 1)
+        one = one.strip() 
+        two = two.strip()
+
+        #print repr(one)
+        #print two
+
+        save_stdout = sys.stdout
+        file = tempfile.NamedTemporaryFile('r+')
+        sys.stdout = file
+        self.execute(one)
+        sys.stdout = save_stdout
+        file.flush() # The flush must absolutely  be present
+
+        status, output = commands.getstatusoutput("cat %s | %s" % (file.name, two))
+        print output
+
+    def findClient(self, options, ipOrHost=""):
+        if self.debug: print "We are in findClient with ipOrHost=%s" % (ipOrHost)
+        if self.frontend:
+            print "%(searchOnClusters)s" % self.lang % self.clusters
+            print 
+        else:
+            print "%(searchLocally)s" % self.lang % self.hostname
+            print 
+
+        from MasterConfigurator import MasterConfigurator
+        import generalLib
+        ip = host = ""
+
+        if generalLib.isIPAddress(ipOrHost):
+            ip = ipOrHost
+        else:
+            host = ipOrHost
+
+        mc = MasterConfigurator(self.masterConfPath)
+        cliClust = mc.findClient(self.clusters, ip, host)
+
+        if cliClust:
+            print "%(potentialClients)s" % self.lang
+            for cli in cliClust:
+                print cli
+        else:
+            print "%(noResults)s" % self.lang
+
+    def printProdInfos(self, options, type, prod="SACN"):
+        if self.frontend:
+            if self.debug: print "We are in printProdInfos with type=%s and  prod=%s" % (type.lower(), prod)
+            for cluster in self.clusters:
+                self.clusterFR[cluster].printProdInfos(prod, type.lower())
+        else:
+            print "%(onlyAvailableOnFrontend)s" % self.lang
+
+    def getFlowNames(self, options, type=None):
+        from MasterConfigurator import MasterConfigurator
+        
+        mc = MasterConfigurator(self.masterConfPath)
+        mc.setClusters(self.clusters)
+        if mc.getAllFlows():
+            # You go here if self.masterConfPath doesn't exist
+            print "%(youAreOn)s" % self.lang % self.hostname
+
+        if type in [None, 's']:
+            mc.printClusterInfos(mc.sourceCluster)
+            if type == 's' and mc.sourlientCluster: mc.printClusterInfos(mc.sourlientCluster)
+            print 
+
+        if type in [None, 'c']:
+            mc.printClusterInfos(mc.clientCluster)
+            if mc.sourlientCluster: mc.printClusterInfos(mc.sourlientCluster)
+
+    def getClusterFlowNames(self, options, type=None):
+        command = 'pxFlowNames'
+        if options.group and self.frontend:
+            machines = dshLib.getMachines(self.options.group)
+            if self.debug: print "machines: %s" % machines
+            if machines: # Check only on the first machine in the cluster
+                status, flows = commands.getstatusoutput("ssh %s %s@%s %s" % (self.fePrivKeyArg, self.beUser, machines[0], command))
+                clientNames, sourlientNames, sourceNames, aliases = eval(flows)
+            else:
+                print "%(noMachineInThisGroup)s" % self.lang % self.options.group
+                return
+
+        elif self.frontend:
+            print "%(mustSetAGroup)s" % self.lang
+            return
+
+        else:
+            #print "We are on a backend"
+            #status, flows = commands.getstatusoutput(command)
+            #clientNames, sourlientNames, sourceNames, aliases = eval(flows)
+            print "%(commandNotAvailable)s" % self.lang  % ('f' + (type or ""))
+            return
+
+        if type in [None, 's']:
+            typeCluster = "[('source', '%s')]" % self.options.group
+            for source in sourceNames:
+                print "%s: %s" % (source, typeCluster)
+            typeCluster = "[('sourlient', '%s')]" % self.options.group
+            if type == 's' and sourlientNames: 
+                for sourlient in sourlientNames:
+                    print "%s: %s" % (sourlient, typeCluster)
+
+        if type in [None, 'c']:
+            typeCluster = "[('client', '%s')]" % self.options.group
+            for client in clientNames:
+                print "%s: %s" % (client, typeCluster)
+            typeCluster = "[('sourlient', '%s')]" % self.options.group
+            if sourlientNames:
+                for sourlient in sourlientNames:
+                    print "%s: %s" % (sourlient, typeCluster)
+
+    def parseIndexes(self, options, indexes):
+        if not self.matchingFile:
+            print "%(createAListFirst)s" % self.lang
+            return  
+        elif self.newValues:
+            print "%(createANewList)s" % self.lang
+            return  
+        else:
+            numLines = fileLib.getNumLines(self.matchingFile)
+            numFigures = len(str(numLines))
+
+        numbers = []
+
+        if indexes in ['all', 'tous']:
+            numbers = range(1, numLines)
+            
+        else:
+            indexes = indexes.strip(',').split(',')
+            #print indexes
+            for index in indexes:
+                num = index.find('-') 
+                if num != -1:
+                    lowHigh = index.split('-')    
+                    if len(lowHigh) == 2:
+                        if int(lowHigh[0]) > int(lowHigh[1]):
+                            print "%(wrong-)s" % self.lang % (index, lowHigh[0], lowHigh[1])
+                        else:
+                            rangeList = range(int(lowHigh[0]), int(lowHigh[1])+1)
+                            numbers += rangeList
+                            if self.debug: print "%s is equivalent to %s" % (index, rangeList)
+                    else:
+                        print "bad '-' expression (%s)" % index
+                else:
+                    numbers.append(int(index))
+            numbers = PXManager.removeDuplicate(numbers)
+            numbers.sort()
+        
+            tooHigh = []
+            for number in numbers:
+                if number > numLines:
+                    tooHigh.append(number)
+
+            #print numbers
+            #print tooHigh
+        
+            for number in tooHigh:
+                numbers.remove(number)
+
+        self.retrans(numbers)
+
+    def retrans(self, numbers):
+        
+        if len(numbers) >= 10: # FIXME: This number should be configurable (px.conf)
+            question = "%(rtxBigNumberOfFiles)s" %  self.lang % len(numbers)
+            answer = raw_input(question)
+            if answer in ['y', 'Y', 'yes', 'YES', 'o', 'O', 'oui', 'OUI']:
+                pass
+            else:
+                return
+
+        #FIXME: Should check for interactive configution of this variable
+        if len(numbers) >= 200: # FIXME: This number should be configurable (px.conf)
+            waitTimeForLogEntry = 0
+        else:
+            waitTimeForLogEntry = -1
+
+        #print numbers
+        numLines = fileLib.getNumLines(self.matchingFile)
+        numFigures = len(str(numLines))
+        lines = fileLib.getLines(self.matchingFile)
+
+        # Possibility of having no clients (if we only want to see a listing)
+        if self.options.clients == "":
+            clients = []
+        else:
+            clients = self.options.clients.replace(' ', '').strip(',').split(',')
+        clientsCol = ":".join(clients)
+
+        if clients:
+            print "%(retransmittedWithPrio)s\n" % self.lang % (self.options.prio) # (-1 == self.options.prio and "originale" or  self.options.prio)
+        else:
+            for number in numbers:
+                print "%%%is) %%s %%%%(onlyForViewing)s" % numFigures % (number, lines[number-1].strip()) % self.lang  # sources with no clients => viewing only
+      
+        for number in numbers:
+            for client in clients:
+                #print "%%%is) %%s %%%%(forClient)s %%s" % numFigures % (number, lines[number-1].strip(), client) % self.lang
+                date, hour, fullPath, machine = lines[number-1].strip().split()
+                filename = os.path.basename(fullPath)
+                command = "localRetrans %s %s %s %s %s" % (filename, client, self.options.prio, waitTimeForLogEntry, number)
+                output = commands.getoutput("ssh %s %s@%s %s" % (self.fePrivKeyArg, self.beUser, machine, command))
+                print output
+
+    def description(self):
+        return "%(progDesc)s" % self.lang
+
+    def _mapOptToDest(self):
+        dest = {}
+        short_opts =  self.parser._short_opt.keys()
+        for opt in short_opts:
+            dest[opt] = self.parser._short_opt[opt].dest
+
+        long_opts = self.parser._long_opt.keys()
+        for opt in long_opts:
+            dest[opt] = self.parser._long_opt[opt].dest
+
+        return dest
+
+    def _invertDict(self, dict):
+        invDict = {}
+        for key, value in dict.items():
+            keys = invDict.setdefault(value, [])
+            keys.append(key)
+        return invDict
+            
+    def addOptions(self, parser):
+        parser.add_option("-v", "--verbose", action="store_true", dest="verbose", 
+                          help="%(verboseHelp)s" % self.lang)
+
+        parser.add_option("-q", "--quiet", action="store_false", dest="verbose",
+                          help="%(quietHelp)s" % self.lang)
+
+        parser.set_defaults(verbose=True)
+
+        parser.add_option("-s", "--span", action="store", type="string", dest="span", default="240", metavar="SPAN",
+                          help="%(spanHelp)s" % self.lang)
+
+        parser.add_option("-o", "--offset", action="store", type="string", dest="offset", default="0", metavar="OFFSET",
+                          help="%(offsetHelp)s" % self.lang)
+
+        parser.add_option("--startDate", action="store", type="string", dest="startDate", default="", metavar="STARTDATE",
+                          help="%(startDateHelp)s" % self.lang)
+
+        parser.add_option("--endDate", action="store", type="string", dest="endDate", default="", metavar="ENDDATE",
+                          help="%(endDateHelp)s" % self.lang)
+
+        parser.add_option("--sources", action="store", type="string", dest="sources", default="", metavar="SOURCES",
+                          help='%(sourcesHelp)s' % self.lang)
+
+        parser.add_option("-c", "--clients", action="store", type="string", dest="clients", default="", metavar="CLIENTS",
+                          help='%(clientsHelp)s' % self.lang)
+
+        parser.add_option("-r", "--regex", action="store", type="string", dest="regex", default=".*", metavar="REGEX",
+                          help="%(regexHelp)s" % self.lang)
+
+        parser.add_option("-t", "--timestamp", action="store", type="string", dest="timestamp", default="", metavar="TIMESTAMP",
+                          help='%(timestampHelp)s' % self.lang)
+
+        parser.add_option("-g", "--group", action="store", type="string", dest="group", default="", metavar="GROUP",
+                          help='%(groupHelp)s' % self.lang)
+
+        parser.add_option("--scp", action="store", type="string", dest="scp", default="", metavar="SCP",
+                          help="%(scpHelp)s" % self.lang)
+
+        parser.add_option("-b", "--basename", action="store_true", dest="basename", default=False,
+                          help="%(basenameHelp)s" % self.lang)
+
+        parser.add_option("-p", "--prio", type="int", dest="prio", default=0,
+                          help="%(prioHelp)s" % self.lang)
+
+        parser.add_option("-i", "--inter", action="store_true", dest="inter", default=False,
+                          help="%(interHelp)s" % self.lang)
+
+        parser.add_option("--progCalled", action="store_true", dest="progCalled", default=False)
+
+    def printPreRetransInfos(self, matchingFile, startDate, endDate, format="%Y-%m-%d %H:%M:%S"):
+        if self.debug: print "matchingFile: %s" % matchingFile
+
+        if not matchingFile: numLines = "0"
+
+        if self.options.verbose and self.matchingFile:
+            numLines = commands.getoutput("wc -l %s | awk '{print $1}'" % (matchingFile))
+            first = commands.getoutput("head -n1 %s" % (matchingFile)).split()
+            last = commands.getoutput("tail -n1 %s" % (matchingFile)).split()
+
+        if numLines != "0":
+            numFigures = len(numLines) 
+            print "%(listAll)s" % self.lang
+            counter = 1
+            for line in open(matchingFile).readlines():
+                words = line.split()
+                print "%%%ii) %%s %%s %%s %%s" % numFigures % (counter, words[0], words[1], os.path.basename(words[2]), words[3])
+                counter += 1
+            print
+
+        print "%(searchInterval)s" % self.lang % (time.strftime(format, time.gmtime(startDate)), time.strftime(format, time.gmtime(endDate)))
+        print "%(numBullToRetrans)s" % self.lang % (numLines, int(numLines) > 1 and 's' or "")
+        if numLines != "0":
+            print "%(firstBullToRetrans)s" % self.lang % (first[0], first[1], os.path.basename(first[2]))
+            print "%(lastBullToRetrans)s" % self.lang % (last[0], last[1], os.path.basename(last[2]))
+
+    def findFiles(self, path, machines, timestamp):
+        files = []
+        for machine in machines:
+            files += [path + '/' + file for file in fnmatch.filter(os.listdir(path), "toRetransmit*.%s.%s" % (machine, timestamp))]
+        return files 
+
+    def createMergeName(self, flows, timestamp):
+                flows = flows.replace(' ', '').strip(',').split(',')
+                flowsCol = ":".join(flows)
+                return "%s/toRetransmit.%s.%s.%s" % (PXPaths.LOG, flowsCol, self.hostname, timestamp)
+
+    def search(self, options, progCalled=False):
+        #print self.parser.values.__dict__
+        #print 
+        
+        if not (options.sources or options.clients):
+            print "%(optionsMustBePresent)s" % self.lang % ("sources", "clients")
+            return
+
+        if not options.sources and options.clients:
+            clients = options.clients.replace(' ', '').strip(',').split(',')
+            if len(clients) > 1:
+                print "%(noSourceMeanOneClient)s" % self.lang
+                return 
+
+        if progCalled == False: # Search initiation can occurs on a frontend or a backend
+            if not options.group and self.frontend:
+                print "%(optionMustBePresent)s" % self.lang % "group",
+                print "%(youAreOnAFrontend)s" % self.lang
+                return
+
+            if not self.frontend: # We are on a backend, we will only search locally on this machine
+                machines = [self.hostname]
+            else:
+                machines = dshLib.getMachines(options.group)
+
+            print "%(searchOnXMachines)s" % self.lang % (options.group, len(machines), machines)
+            print
+
+            self.startDate, self.endDate = dateLib.getDatesInSeconds(options.startDate, options.endDate, options.span, options.offset)
+            # startDate and endDate validation
+            if self.startDate and self.endDate == None:
+                print "%(startDateOlder)s" % self.lang
+                return
+            elif (self.startDate, self.endDate) == (None, None):
+                print "%(badOptions)s" % self.lang
+                return
+
+            command = 'pxRetrans --progCalled --startDate \\"%s\\" --endDate \\"%s\\"' % (dateLib.getDateInSecondsFormatted(self.startDate), 
+                                                                             dateLib.getDateInSecondsFormatted(self.endDate))
+            for item in self.parser.values.__dict__.items():
+                if item[0] in ['regex'] and item[1]:
+                    command += ' %s%s \\"%s\\"' % ("--", item[0], item[1])
+                elif item[1] and item[1] not in [True, False] and item[0] and item[0] not in ['startDate', 'endDate']: 
+                    command += " %s%s %s" % ("--", item[0], item[1])    
+                elif item[0] in ['timestamp']:
+                    timestamp = item[1] or dateLib.getTimestamp()
+                    command += " %s%s %s" % ("--", item[0], timestamp)
+
+            for machine in machines:
+                if self.debug: print "ssh %s %s@%s %s" % (self.fePrivKeyArg, self.beUser, machine, command)
+                status, output = commands.getstatusoutput("ssh %s %s@%s %s" % (self.fePrivKeyArg, self.beUser, machine, command))
+                #print status
+                if output:
+                    print output
+                if self.debug: print
+            if self.debug: print 
+
+            self.matchingFile = fileLib.mergeFiles(self.findFiles(self.feTempDir, machines, timestamp),
+                                                   self.createMergeName(options.sources or options.clients, timestamp))
+            self.newValues = False
+            #print "self.matchingFile: %s" % self.matchingFile
+
+            self.printPreRetransInfos(self.matchingFile, self.startDate, self.endDate)
+
+        elif progCalled: # When we are on a backend
+            self.startDate, self.endDate = dateLib.getDatesInSeconds(options.startDate, options.endDate, options.span, options.offset)
+
+            if self.startDate and  self.endDate == None:
+                print "%%s: %(startDateOlder)s" % self.lang % self.hostname
+                return 
+            elif (self.startDate, self.endDate) == (None, None):
+                print "%%s: %(badOptions)s" % self.lang % self.hostname
+                return 
+            elif self.startDate and self.endDate:
+                if options.sources:
+                    self.matchingFile = self.pxm.getLastFiles('rx', options.sources, self.startDate, self.endDate, timestamp=options.timestamp, regex=options.regex,
+                    verbose=options.verbose, priority=options.prio, basename=options.basename)
+                else:
+                    self.matchingFile = self.pxm.getLastFiles('tx', options.clients, self.startDate, self.endDate, timestamp=options.timestamp, regex=options.regex,
+                    verbose=options.verbose, priority=options.prio, basename=options.basename)
+                self.newValues = False
+
+            if options.scp and not self.frontend:
+                if os.path.isfile(self.matchingFile):
+                    if options.scp == self.hostname:
+                        if self.debug: print 'scp %s %s %s@%s:%s' % (self.fePrivKeyArg, self.matchingFile, self.beUser, options.scp, self.feTempDir)
+                        output = commands.getoutput('scp %s %s %s@%s:%s' % (self.fePrivKeyArg, self.matchingFile, self.beUser, options.scp, self.feTempDir))
+                    else:
+                        if self.debug: print 'scp %s %s %s@%s:%s' % (self.bePrivKeyArg, self.matchingFile, self.feUser, options.scp, self.feTempDir)
+                        output = commands.getoutput('scp %s %s %s@%s:%s' % (self.bePrivKeyArg, self.matchingFile, self.feUser, options.scp, self.feTempDir))
+                    print output
+            if not options.scp:
+                self.printPreRetransInfos(self.matchingFile, self.startDate, self.endDate)
+
+    def start(self, matchingFile=""):
+        #retransmit(matchingFile, clients, priority, basename)
+        #print sys.argv
+        #print self._optsIndexedByDest
+        #print self._destIndexedByOpt
+        self.printMenu()
+        while True:
+            choice = raw_input("> ")
+            self.execute(choice)
+    
+    def execute(self, choice):
+        #print "In execute with: %s" % choice
+        for regex, action in self.regexes:
+            match = regex.match(choice)
+            if match:
+                if self.debug: print "choice is matched by: %s" % regex.pattern
+                action(self.options, **match.groupdict(''))
+                # return  # if we want to be sure to only match one action
+
+    def printMenu(self, options=""):
+        print menu % self.lang
+        print (usageInter % self.lang).strip()
+        print "%(80-)s" % self.lang
+        print
+
+    def printOptions1(self):
+        print "span: %s" % (self.options.span)
+        print "offset: %s" % (self.options.offset)
+        print "startDate: %s" % (self.options.startDate)
+        print "endDate: %s" % (self.options.endDate)
+        print "timestamp: %s" % (self.options.timestamp)
+        print "sources: %s" % (self.options.sources)
+        print "clients: %s" % (self.options.clients)
+        print "regex: %s" % (self.options.regex)
+        print "prio: %s" % (self.options.prio)
+        print "scp: %s" % (self.options.scp)
+
+    def printOptions(self, options):
+        keys = options.__dict__.keys()
+        keys.sort()
+        #print keys
+        for key in ['span', 'offset', 'startDate', 'endDate']:
+            print "%s:%s " % (key, options.__dict__[key]),
+        print
+
+        if self.debug:
+            keys = ['clients', 'group', 'regex', 'prio', 'scp', 'inter']
+        else:
+            keys = ['clients', 'group', 'regex', 'prio']
+
+        for key in keys:
+            print "%s:%s " % (key, options.__dict__[key]),
+        print
+
+        #for key in ['verbose', 'timestamp', 'basename', 'inter']:
+        #    print "%s:%s " % (key, options.__dict__[key]),
+        #print
+
+    def validateFlow(self, name):
+        """
+        input: flow name
+        output: flow type and cluster name
+        0: means that the flow doesn't exist
+        2,3,4 ... means there is 2,3,4 flows with the same name
+        """
+        from MasterConfigurator import MasterConfigurator
+        mc = MasterConfigurator(self.masterConfPath)    
+        type = mc.getType(name, self.clusters)
+        cluster = mc.getCluster(name)
+        return type, cluster
+        
+    def parseArgs(self, options, newOptions):
+        newOptions = eval(commands.getoutput("%s %s" % (PXPaths.SHELL_PARSER, newOptions)))
+        if self.debug: print newOptions
+
+        parser = OptionParser(usage="")
+        self.addOptions(parser)
+        try:
+            (opts, args) = parser.parse_args(newOptions)
+        except:
+            (err_type, value, tb) = sys.exc_info()
+            #print ("Type: %s, Value: %s" % (err_type, value))
+            print value
+            print
+            return
+
+        #print parser.defaults
+        #print parser.values
+
+        switches = [word for word in newOptions if word[0]== '-' and word[1] not in ['0', '1']]
+        #print switches
+        errors = []
+            
+        for switch in switches:
+            try:
+                if self.debug: print "%s => %s" % (switch, self._destIndexedByOpt[switch])
+                if switch in ['-c', '--clients']: # TODO: sourlients
+                    if not self.options.sources: # Probably a "client resend" 
+                        flow_type, cluster = self.validateFlow(opts.__dict__[self._destIndexedByOpt[switch]]) # Only one (not 2 or more) client will work
+                        if flow_type == 'client' and type(cluster) != int:
+                            self.options.__dict__['group'] = cluster
+                            self.options.__dict__[self._destIndexedByOpt[switch]] = opts.__dict__[self._destIndexedByOpt[switch]]
+                        else:
+                            if self.debug: print "%s: %s" % ("flow_type", str(flow_type))
+                            if self.debug: print "%s: %s" % ("cluster", str(cluster))
+                            print "%(badClientName)s" % self.lang
+                            self.options.__dict__['group'] = ""
+                            self.options.__dict__[self._destIndexedByOpt[switch]] = ""
+
+                elif switch in ['--sources']: # TODO: sourlients
+                    sources = self._destIndexedByOpt[switch].replace(' ', '').strip(',').split(',')
+                    flow_type, cluster = self.validateFlow(sources[0]) # We validate only the first source, we suppose they all came from the same cluster
+                    if flow_type == 'source' and type(cluster) != int:
+                        self.options.__dict__['group'] == cluster
+                        self.options.__dict__[self._destIndexedByOpt[switch]] = opts.__dict__[self._destIndexedByOpt[switch]]
+                    else:
+                        print "Bad source"
+
+                else:
+                    self.options.__dict__[self._destIndexedByOpt[switch]] = opts.__dict__[self._destIndexedByOpt[switch]]
+
+                if switch not in ['-c', '--clients', '-p', '--prio']:
+                    self.newValues = True
+                elif switch in ['-c', '--clients'] and not self.options.sources:
+                    self.newValues = True
+
+            except KeyError:
+                (err_type, value, tb) = sys.exc_info()
+                print ("Type: %s, Value: %s" % (err_type, value))
+                newDict = self.lang.copy()
+                newDict['value']= value
+                errors.append("%(problem)s: %(value)s" % newDict)
+        
+        for error in errors:
+            print error
+        print
+
+        self.printOptions(self.options)
+        print 
+
+    def list(self, options):
+        if self.newValues:
+            self.search(self.options)
+        else:
+            self.printPreRetransInfos(self.matchingFile, self.startDate, self.endDate)
+
+    def listOptions(self, options):
+        self.printOptions(self.options)
+        print
+
+    def resetOptions(self, options):
+        if self.frontend:
+            (self.options, self.args) = self.parser.parse_args(['-i', 'True', '--scp', self.hostname])
+        else:
+            (self.options, self.args) = self.parser.parse_args(['-i', 'True', '--scp', self.hostname])
+            #(self.options, self.args) = self.parser.parse_args(['-i', 'True'])
+            
+        self.newValues = True
+        self.matchingFile = ""
+        self.startDate = ""
+        self.endDate = ""
+        self.printOptions(self.options)
+        print
+
+    def quit(self, options):
+        sys.exit(0)
+
+if __name__ == '__main__':
+    try:
+        pxRetrans = PXRetrans()
+    except KeyboardInterrupt:
+        # FIXME: a cleanup function should probably be called
+        print
+

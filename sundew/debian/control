@@ -1,0 +1,14 @@
+Source: metpx-sundew
+Section: misc 
+Priority: optional
+Maintainer: Michel Grenier <michel.grenier@ec.gc.ca>
+
+Package: metpx-sundew
+Architecture: all 
+Depends: python, python-paramiko, ksh, adduser
+Description:MetPX is a WMO TCP/IP GTS message switching system 
+ WMO - World Meteorological Organization, 
+ GTS - Global Telecommunications System circuits based on TCP/IP. 
+ Developed at the Canadian Meteorological Centre of Environment 
+ Canada for our local use. 
+ web site: http://metpx.sourceforge.net/
