@@ -1,4 +1,11 @@
-metpx-sundew (0.6.0-ubuntu1) lucid; urgency=low
+metpx-sundew (0.6.0-lucid2) lucid; urgency=low
+
+  [ Jun Hu ]
+  * postrm : --force on deluser
+
+ -- Jun Hu <jun.hu@ec.gc.ca>  Thu, 08 Mar 2012 18:14:11 +0000
+
+metpx-sundew (0.6.0-lucid1) lucid; urgency=low
 
   [ Jun Hu ]
   * Add init script 
@@ -25,7 +32,7 @@ metpx-sundew (0.6.0-ubuntu1) lucid; urgency=low
 
  -- Michel Grenier <michel.grenier@ec.gc.ca>  Mon, 05 Mar 2012 15:43:50 +0000
 
-metpx-sundew (0.5.9-ubuntu) unstable; urgency=low
+metpx-sundew (0.5.9-lucid) unstable; urgency=low
 
   [ Michel Grenier ]
   * Ingestor.py Attempt to correct name clash in db by adding a second to the date suffix 
