@@ -1,0 +1,17 @@
+type collector
+extension collecteur:-CCCC:-TT:-CIRCUIT:Collected
+debug   3
+
+# Issue all 7 5
+
+header  SA                #Title for report in the form TT from (TTAAii)
+issue   all 7 5           #the hours collected
+
+header  SI                #Title for report in the form TT from (TTAAii)
+issue   00,06,12,18 12 5  #The hours collected,  The amount of time for on time report, cycle to emit late arrivals.
+
+header  SM                #Title for report in the form TT from (TTAAii)
+issue   00,06,12,18 12 5  #The hours collected,  The amount of time for on time report, cycle to emit late arrivals.
+
+history 24                #The amount of time in hours for which the reports will be kept in the collection db.
+future  40                #Specified in minutes.  If an incoming report is dated in the future by
