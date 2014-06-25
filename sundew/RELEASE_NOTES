@@ -1,0 +1,351 @@
+
+---------------- Below are changes made up to version px-0-6-1 --------------------------------------
+
+2013-09      (MG) clean up trunk to restart at px-0-6-0
+
+             (MG) Client.py
+                  execfile name rearranged
+                  AMQP options revisited
+
+                  Logger.py
+                  addition of class LoggerMonitor
+                  insert module start_timer and delivered 
+                  for logging of latency and speed for senders
+
+                  SenderFTP.py
+                  sftp  rename for .tmp lock uncommented
+                  sftp  supports throttling
+                  execfile name rearranged
+                  use logger.start_timer() and logger.delivered for latency and speed 
+
+                  Source.py
+                  AMQP options revisited
+
+                  receiverAmqp.py
+                  AMQP options revisited
+                  arguments in function calls revisited
+                  Use ingestor instead of bulletin manager 
+                  Use message properties application_headers for filename
+                  Exchange auto-delete set to False
+
+                  senderAMIS.py
+                  use logger.start_timer() and logger.delivered for latency and speed 
+
+                  senderAMQP.py
+                  AMQP options revisited
+                  arguments in function calls revisited
+                  Use message properties application_headers for filename
+                  use logger.start_timer() and logger.delivered for latency and speed 
+                  Exchange auto-delete set to False
+
+                  senderAm.py
+                  use logger.start_timer() and logger.delivered for latency and speed 
+                  execfile name rearranged
+
+                  senderWmo.py
+                  use logger.start_timer() and logger.delivered for latency and speed 
+
+                  DirectRoutingParser.py
+                  option include "filename" now supported
+
+
+---------------- Below are changes made up to version px-0-6-0 --------------------------------------
+
+*** Note  CMO packaging 
+
+2012-03-02   (JH) lib/LatMessage.py lib/Latencies.py lib/PDSLatencies.py lib/PXLatencies.py
+                  lib/Plotter.py lib/copyFiles.py bin/paplat   change python2 for python
+
+             (JH) rename .localRetrans for localRetrans and modifi pxRetrans accordingly
+                  rename hang-check.sh for hang-check
+
+             (JH) move doc from trunk to sundew
+                  debian/metpx-sundew.docs
+
+             (JH) debian/changelog modified
+                  debian/control   modified for architecture and dependencies
+                  debian/copyright updated
+                  debian/postinst  PXHOME from getent and use dpkg-statoverride for directories
+                  debian/rules     modified to install doc (exclude .svn)
+                                   create queuedirs and db dir
+                                   move  dh_compress for the man
+
+             (JH) /etc/init.d/px written and packaged
+
+             (MG) bulletinLib.py utils.py deleted
+                  short manpages written for  pxValidator, pxRetrans, pxFlowNames, pxDBCleaner,
+                  pxChecker, mr-clean, localRetrans, hang-check, check-unique, paplat
+
+
+---------------- Below are changes made up to version px-0-5-9 --------------------------------------
+
+2012-01-17   (MG) Ingestor.py Attempt to correct name clash in db by adding a second
+                  to the date suffix 
+
+2011-12-15   (MG) DirectRoutingParser.py bug fix : return priority  when product match key_accept 
+
+2011-11-18   (MG) SenderScript.py  client object first argument of send_script
+
+2011-10-26   (MG) Ingestor.py Routingtable can be modified for bulletins too.
+
+2011-10-04   (MG) Source.py/CollectionBuilder.py moved aaxx, metar and taf as receiver options
+
+2011-10-04   (MG) StationParser.py trap error and log when a station entry is wrong and continue
+
+2011-08-27   (DL) pxRetrans Option waitTimeForLogEntry : confirms resending within n sec from log
+
+2011-07-27   (MG) PXIgnitor.py   kill sender if stop did not work after .5 sec.
+
+2011-01-20   (MG) Source.py/Ingestor.py add pull-script capability
+
+2010-11-19   (MG) PullFTP.py  added pattern match like JJJ julian day and JJJ-1...
+
+
+---------------- Below are changes made up to version px-0-5-8 --------------------------------------
+
+*** Note  etch to debian  and  32 to 64 bits mods.
+
+
+2010-08-17   (MG) SenderFtp.py   debug log speed for delivery that took more than a sec.
+
+2010-08-16   (MG) socketManagerAm.py change pack/unpack format for 32 and 64bits compliance
+
+2010-08-16   (MG) URLParser.py   python2.6 urlparse different from previous version
+                                 modify code accordingly.
+
+2010-08-10   (MG) CacheManager.py  python2.6 implemented md5 into hashlib 
+                                   and had some syntax/module changed...
+                                   Code this new version and support old one too.
+
+2010-06-23   (MG) Client.py/SenderFtp.py   throttling support ftp/sftp
+
+---------------- Below are changes made up to version px-0-5-7 --------------------------------------
+
+2010-03-31   (MG) DiskReader.py
+                  CacheManager instanciation with a MaxEntries not related to a flow
+
+2010-04-20   (DL) bin/.localRetrans   new release.
+
+2010-04-09   (MG) Client.py
+                  option binary (default=True) for ftp when the file is uploaded
+
+                  SenderFTP.py
+                  option binary (default=True) target one of the 2 sending types
+
+---------------- Below are changes made up to version px-0-5-6 --------------------------------------
+
+2010-02-15   (MG)  receiver of type bulletin-file and pull-bulletin may now
+                   process the received files as they are for an AM feed
+		   option bulletin-type added (None, am  supported)
+		   option addSMHeader supported if bulletin-type is am
+		   The files modified are :
+                   Source.py
+                   Ingestor.py
+
+2010-02-11   (MG)  cache_size option added for all types of flow and used
+                   whenever a CacheManager is instanciated ...
+		   The files modified are :
+		   Client.py  
+                   CollectionManager.py
+                   DiskReader.py
+                   Ingestor.py
+                   Source.py
+                   Sourlient.py
+                   senderAMIS.py
+                   senderAMQP.py
+                   senderAm.py
+                   senderWmo.py
+
+---------------- Below are changes made up to version px-0-5-5 --------------------------------------
+2010-01-??   (MG)  Bufr.py         correct computation of bufr's length
+
+2009-12-21   (MG)  PullFTP.py      added to usage of source.batch 
+                                   Correct a problem with matchPattern
+                                   Local file pulled has remote file time
+                                   Put overload of module for ftp/sftp under a try/except
+                                   Only one trial for sftp connect(instead of a loop)
+
+                   DiskReader.py   add sorting on modified time for ingestors
+
+		   Source.py       added option addStationInFilename (default true)
+
+                   Ingestor.py     use source option addStationInFilename in bulletinManager
+		                   for type bulletin-file and pull-bulletin
+
+                   SenderFTP.py    Correct a problem with BBB in matchPattern
+
+                   bulletinAm.py   Correct token check for digit or year
+
+                   DiskReader.py   Source/Filter file list ingested sorted
+                                   using each file's mtime
+
+                   wmoid.py        added to the package
+                                   read file $PXROOT/etc/wmo_id.conf
+		                   defines wmo bulletins that needs station name 
+				   in filename in a list called wmo_id, it impacted :
+
+		                   bulletin.py         
+		                   bulletinManager.py
+		                   bulletinManagerWmo.py
+		                   bulletinWmo.py
+
+2008-11 20   (MG)  AMQP            senderAMQP.py   added to the package
+                                   receiverAmqp.py added to the package
+                                   pxReceiver      modified to add amqp
+                                   pxSender        modified to add amqp
+                                   Ingestor.py     modified to add amqp receiver type
+                                   urlParser.py    modified to add amqp url type
+                                   gateway.py      modified to add amqp receiver type
+
+2008-11 ??   (MG)  Grib.py/Bufr.py added a try/except around some grib/bufr
+                                   decoding that were causing "traceback"
+                                   messages in the logs without stopping the
+                                   application
+
+---------------- Below are changes made up to version px-0-5-2 --------------------------------------
+
+2008-08 29   (MG)  several changes within the week of the operational implementations
+
+                   hang_check.sh avoid metser client (returned)
+                                  sleeping 10 secs before checking if file is sent is more causious
+                                  update paths used when PXROOT used
+                                  avoid using 'px status'
+                   check_unique   typo for fx path for configs
+                                  screen out ftpd processes
+
+                   Client.py      add sorting when validation is false
+                                  dont take for granted that there are 7 fields in filename
+
+                   Ingestor.py    filenaming standards enforced by truncating filename to 6 fields
+                                  bug fix when empty fields were filled in by its extension counterpart
+
+                   TAFParser.py   importedLibs and more in sys.path for several ways of implementing metpx
+
+                   SenderFTP.py   when there is a problem delivering a file... and we were not done with it
+                                  we try to delete the file on the remote site... this may hang so a timeout
+				  was put there.  Instead of trying to delete both the file and its .tmp for
+                                  example, a partialfile variable was defined and set to the filename 
+                                  currently processed... if something goes wrong... its the one to delete
+
+                   pxSender.1     revised
+
+		   postinst       added theses lines  chown px.px  /usr/lib/px
+		                                      chmod -R 755 /usr/lib/px
+
+
+2008-08-20   (MG)  Client, filename NONE fixed (dont keep SENDER part if provided)
+                           filename NONESENDER like NONE except keep SENDER if provided
+
+2008-07-18   (MG)  debian/postins : when the package is installed, 
+                   if PXHOME/etc doesn't exists a link is done to create
+                   it with /etc/px (requiered by DL)
+
+                   PullFTP  when lsdir goes wrong simply warn instead of error
+                   for both ftp and sftp
+
+                   Documentation revised
+
+                   debian/rules revised to keep file .localRetrans in bin
+
+2008-07-17   (MG)  SenderFTP :  SFTP protocol supports umask...
+                   The trick being the file is opened in w mode,
+                   than a chmod 000 is done on the file... the file
+		   is written, closed  and its permission are reset at the end
+
+2008-07-16   (DL) Add a better comment when pxRetrans is unable to create
+                  to construct DB path from a filename
+
+             (DL) Set appropriate values for some variables in pxRetrans
+                   
+2008-07-15   (MG)  Before we had /apps/px/txq/client/prio/date/file
+                   so prio was fixed at position 5  now with varying
+		   spool directory depth prio is taken from position -3
+		   /var/spool/px/txq/client/prio/date/file
+
+
+2008-07-09   (MG)  Source,PullFTP now support for SFTP pulls.
+                   SenderFTP sleeps 1 sec when a problem occurs on file delivery
+
+2008-06-26   (MG)  SenderFTP Behavior fix... when file delivery goes wrong,
+                   do a preventive delete on the file. (get rid of .tmp, 
+		   permission 000 file... file already there... etc)
+
+             (MG)  Source.py and Ingestor.py   lx_script option added
+                   man/man1/pxFilter.1  contains the explanation for that option
+
+2008-06-25   (MG)  Buf fix SenderFTP throw an exception when ftp mkdir does not work
+
+2008-06-02   (MG)  Bug fix SFTP was working only with an ssh_keyfile.
+                   Now user/passwd without ssh_keyfile works too.
+		   TODO: an option for the keyfile decrypt password too...
+
+2008-05-29   (DL)  Bug fix DBSearcher.py: if filesToParse is None, replaced it by []
+             (DL)  In SAParser.py, FParser.py and TAFParser.py
+                   1) Changed /apps/px/db/ for PXPaths.DB
+                      Changed /apps/px/etc/ for PXPaths.ETC
+
+                   2) In SAParser, take into accout the case where a SA bulletin contains only 1 line
+
+2008-05-30   (MG)  Bug fix CollectionManager.py ... when observation date was incorrect, or undetermined
+                   the usage of the bulletin entry emission was causing the collector to crash. Now the
+                   condition is checked and we log a warning with the filepath.
+
+---------------- Below are changes made in version px-0-5-0------------------------------------------
+
+2008-05-22   (MG) Fixed a bug in SenderFTP.py which generated error messages when sending with file:// option
+
+
+---------------- Below are changes made in version px-0-4-9 -----------------------------------------
+
+2008-05-16   (AMB) Added files destined for /etc/cron.d in directory cronfiles
+
+2008-05-15   (DL)  Removed debug statements in DiskReader.py
+
+2008-05-15   (DL)  Modified StationParser.py to accept comment lines in etc/stations.conf
+
+
+---------------- Below are changes made in version px-0-4-8 ------------------------------------------
+
+2008-05-08   (AMB) Removed French accents in lib/AlarmFTP.py
+
+2008-05-06:  (DL)  Add a line in pxTransceiver to be sure that lib/aftn is accessible
+             (DL)  Bug correction when a receiver is in listen mode and a reload occur
+             (DL)  pxDBCleaner can now read the number of DB to keep in px.conf
+
+2008-05-05:  (DL)  All process are now start via daemon.daemonize() to be sure that standard attributes
+                   of a daemon are implemented (no controlling terminal, cwd to '/', umask 0, etc)
+
+2008-05-05:  (AMB) Modified bin/mr-clean to ensure it calls python instead of python2
+
+2008-05-05:  (AMB) Added etc/trx directory and file aftn.conf.sample in this directory
+
+-----------  Below are changes made in version px-0-4-7 ----------------------------------------------
+
+2008-04-11: Changed default debian BIN location to /usr/bin 
+
+2008-04-07: Purge option added to senders. 
+Add possibility to unlink old files of a given
+priority
+
+2008-03-17: pxRetrans command is now functional.
+This command can be used to retransmit some files already sent
+to a client.
+
+------------- Below are changes made in version px-0-4-6 ---------------------------------------------
+
+1- Receiver, Filter, Transceiver, Sender now take into account options that
+   are generaly set in px.conf (Source.py, Client.py, Sourlient.py)
+
+2- Receiver of type pull, in sleeping state, will do their directory listing anyway...
+   (PullFTP.py, Ingestor.py)
+
+3- Unused PXPaths variables were removed  (PXPath.py)
+
+4- Use /usr/lib/px as a default for metpx python modules path
+   and PXLIB may be used while developping...
+   (paplat,px,pxChecker,pxDBCleaner,pxFilter,pxFlowNames,pxReceiver,
+    pxRetrans,pxSender,pxTransceiver,pxValidator)
+
+5- Same as (4) but for within the lib
+   (DBSearcher.py, DirectRoutingParser.py, RoutingFileCreator.py, Source.py, Sourlient.py, TAFParser.py)
+
