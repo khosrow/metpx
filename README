@@ -13,8 +13,13 @@ MetPX
 
 Modules:
 
-sundew - switching component
-columbo - monitoring component.
+sarracenia - current focus, directory replication engine.
+ 
+sundew - detailed file switching component, for legacy WMO protocols.
+columbo - sundew monitoring component, 
+pxStats - a statistics module ... abandoned?
+unittests - for sundew
+
 
 
 There are INSTALL files describing the installation process in 
