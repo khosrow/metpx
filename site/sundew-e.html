@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>MetPX Sundew</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="./dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="./assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="./dist/css/justified-nav.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="./assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="./assets/js/ie-emulation-modes-warning.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="container">
+
+      <div class="masthead">
+        <h3 class="text-muted">MetPX Sundew</h3>
+        <nav>
+          <ul class="nav nav-justified">
+            <li><a href="index.html">Home</a></li>
+            <li class="active"><a href="#">Sundew</a></li>
+            <li><a href="sarra-e.html">Sarracenia</a></li>
+            <li><a href="#">Downloads</a></li>
+            <li><a href="http://sourceforge.net/projects/metpx/">SourceForge</a></li>
+            <!--<li><a href="#">Contact</a></li>-->
+            <li><a href="sundew-f.html">Français</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="row">
+        <div class="col-md-2">
+          <ul class="nav affix">
+            <li class><a href="#introduction">Introduction</a></li>
+            <li class><a href="#protocol-support">Protocol Support</a></li>
+            <li class><a href="#features">Features</a></li>
+            <li class><a href="#modules">Modules</a></li>
+            <li class><a href="#documentation">Documentation</a></li>
+            <li class><a href="#getting-sundew">Getting Sundew</a></li>
+          </ul>
+        </div>
+        <div class="col-md-10">
+          <div><h1 class="page-header anchored">Introduction</h1> 
+            <p><strong>MetPX-sundew</strong> is a message switching system for use with <a href="http://www.wmo.int">World Meteorological Organization (WMO)</a>
+            <a href="http://www.wmo.ch/pages/prog/www/TEM/XGTS/gts.html">Global Telecommunications System (GTS)</a>
+            circuits based on TCP/IP.  The system is already production quality for a limited set of features and is in production
+            use at the CMC as the core of our national switching infrastructure for bulletins, as well as file data (satellite,
+            RADAR, numerical outputs, charts &amp; imagery...) It is used to ingest from a NOAAPORT feed, as well as two GTS protocol
+            links, feed several hundred clients in both socket and file based feeds, provide Canadian participation
+            in <a href="http://www.unidata.ucar.edu/">Unidata</a> and <a href="http://tigge.ecmwf.int">TIGGE via an LDM bride</a>
+            as well as <a href="http://www.emc.ncep.noaa.gov/gmb/ens/NAEFS.html">NAEFS</a> via direct file transfer.
+            MetPX is unique in its ability to run fine-grained routing with low latency and high performance.
+            Developed at the Canadian Meteorological Centre of <a  href="http://www.ec.gc.ca">Environment Canada</a>
+            for our own use.  Licensed under GPL for collaborative development, MetPX aims to be
+            to meteorological switching what apache is to web serving.</p> 
+          </div>
+          <div>
+            <h1 class="page-header">Protocol Support</h1> 
+            <ul> 
+              <li>AM (Canadian proprietary socket protocol)</li>
+              <li>WMO (see manual 386 for the WMO TCP/IP socket protocol.)</li>
+              <li>FTP (for transport, no support for WMO naming yet (but trivial to add.))</li>
+              <li>SFTP (similar to FTP.)</li>
+              <li>AFTN/IP bridge (NavCanada version of AFTN running on IP networks.)</li>
+              <li>AMQP bridge (open standard protocol, comes from the business messaging world.)</li>
+            </ul>
+          </div>
+        <div> 
+          <h1 class="page-header" >Features</h1>
+          <ul class="simple">
+            <li>detailed routing (in production with 30,000 distinct entries in the routing table.)</li>
+            <li>unified/similar for bulletins and files.</li>
+            <li>sub-second latency (with 28,000 routing entries.)</li>
+            <li>high speed routing and delivery. (was &amp;gt;300 messages per second, but that was a year ago, and many features which might slow it down have been added, a re-test is in order.)</li>
+            <li>no message size limit.</li>
+            <li>message segmentation (for protocols such as AM &amp;amp; WMO which have message length limits.)</li>
+            <li>duplicate suppression (on send.)</li>
+            <li>bulletin collections, NMC function for WMO.</li>
+            <li>generalized filter mechanism.  (collections will be modified to fit this general mechanism.)</li>
+          </ul>
+        </div>
+        <div>
+          <h1 class="page-header">Modules</h1> 
+          <p>There are three modules in the project right now.  Modules of
+          MetPX are named after species of plant which are endangered in
+          Canada (see <a class="reference external" href="http://www.speciesatrisk.gc.ca">Species At Risk</a>  for more details.)</p>
+          <ul class="simple">
+            <li><em>sundew</em>: the WMO switching component.</li>
+            <li><em>columbo</em>: the web based monitoring component, for both sundew, and the older (not released) PDS.</li>
+            <li><em>stats</em>: collection and display of statistics... (ok so it's not a flower...)</li>
+          </ul>
+        </div>
+        <div>
+          <h1 class="page-header">Documentation</h1>
+          <h2>Guides</h2>
+          <ul>
+            <li><a href="Guide.html">User's Guide</a></li>
+            <li><a href="DevGuide.html">Contributor's Guide</a></li>
+          </ul>
+          <h2>Man Pages</h2> 
+          <ul> 
+            <li><a href="px.1.html">px.1</a> (main startup wrapper)</li>
+            <li><a href="pxReceiver.1.html">pxReceiver.1</a></li>
+            <li><a href="pxSender.1.html">pxSender.1</a></li>
+            <li><a href="pxTransceiver.1.html">pxTranceiver.1</a></li>
+            <li><a href="pxFilter.1.html">pxFilter.1</a></li>
+            <li><a href="pxRetransmit.1.html">pxTransmit.1</a></li>
+            <li><a href="pxRouting.conf.5.html">pxRouting.5</a></li>
+            <li><a href="pxRouting.7.html">pxRouting.7</a></li>
+          </ul>
+        </div>
+        <div>
+          <h1 class="page-header">Getting Sundew</h1>
+          <h2>Platform</h2>
+          <p>We build packages for Debian Derived Linux (Debian Sarge, Etch. any Ubuntu will do).
+          Any modern Linux should do. (stock 2.6 or 2.4 with many patches.)   Python &amp;gt;2.3</p>
+          <h2>Download Pacakges</h2>
+          <p>Sundew is rather stable for now, current work is on improving the installation process by
+          implementing Debian packages.  A package for the sundew module is available from
+          the sourceforge site, in either source or .deb form.  We hope to produce packages for
+          columbo at some point.</p>
+          <p><a class="btn btn-lg btn-success" href="http://sourceforge.net/projects/metpx/files/sundew/" role="button">Get Latest Package</a></p>
+          <h2>Getting Source Code</h2> 
+          <p>Currently internal installations are done, one at a time, from source. Development is done on the trunk release. When we install operationally, the process consists of creating a branch, and running the branch on a staging system, and then implementing on operational systems. There are README and INSTALL files that can be used for installation of sundew. One can follow those instructions to get an initial installed system.</p>
+
+          <p>To run sundew, it is critical to install the cron cleanup jobs (mr-clean) since otherwise the server will slow down continuously over time until it slows to a crawl. It is recommended to subscribe to the mailing list and let us know what is stopping you from trying it out, it could inspire us to work on that bit faster to get some collaboration going.</p>
+
+          <p>With those explanations, feel free to grab a snapshot can be obtained using subversion via:</p>
+          <pre>
+          git clone git://git.code.sf.net/p/metpx/git metpx
+          </pre>
+        
+          <p>Available for anonymous read-only access. One can also obtain a stable release by checking out a release branch.</p>
+        </div>
+    
+      </div>
+    </div>
+  </div>
+  <!-- anchorjs -->
+  <script src="./dist/js/anchor.js"></script>
+  <script>anchors.add('h1');</script>
+  </body>
+</html>

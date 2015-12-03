@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>MetPX Sarracenia</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="./dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="./assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="./dist/css/justified-nav.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../.././assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="./assets/js/ie-emulation-modes-warning.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="container">
+      <div class="masthead">
+        <h3 class="text-muted">MetPX Sarracenia</h3>
+        <nav>
+          <ul class="nav nav-justified">
+            <li><a href="index-f.html">Home</a></li>
+            <li><a href="sundew-f.html">Sundew</a></li>
+            <li class="active"><a href="#">Sarracenia</a></li>
+            <li><a href="#">Downloads</a></li>
+            <li><a href="http://sourceforge.net/projects/metpx/">SourceForge</a></li>
+            <!--<li><a href="#">Contact</a></li>-->
+            <li><a href="sarra-e.html">English</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="row">
+        <div class="col-md-2">
+          <ul class="nav affix">
+            <li class><a href="#introduction">Introduction</a></li>
+            <li class><a href="#overview">Overview</a></li>
+            <li class><a href="#pourquoi-ne-pas-utiliser-rsync">Pourquoi ne pas utiliser RSync?</a></li>
+            <li class><a href="#amqp">AMQP</a></li>
+            <li class><a href="#documentation">Documentation</a></li>            
+            <li class><a href="#téléchargement">Téléchargement</a></li>
+          </ul>
+        </div>
+        <div class="col-md-10">
+          <div>
+            <h1 class="page-header anchored">Introduction</h1>
+            <p><strong>MetPX-Sarracenia</strong> est un engin de copie et de distribution de données qui utilise des technologies
+            standards (tel que les services web et le courtier de messages AMQP) afin d'effectuer des transferts de
+            données en temps réel tout en permettant une transparence de bout en bout. Alors que chaque commutateur
+            Sundew est unique en soit, offrant des configurations sur mesure et permutations de données multiples,
+            Sarracenia cherche à maintenir l'intégrité de la structure des données, tel que proposée et organisée
+            par la source, à travers tous les noeuds de la chaîne, jusqu'à destination. Le client peut
+            fournir des accusés de réception qui se propagent en sens inverse jusqu'à la source. Tandis qu'un
+            commutateur traditionnel échange les données de point à point, Sarracenia permet le passage des
+            données d'un bout à l'autre du réseau, tant dans une direction que dans l'autre.</p>
+          </div>
+          <div>
+            <h1 class="page-header">Overview</h1>
+            <p>Sarracenia, à sa plus simple expression, expose une arborescence de dossiers disponibles sur la toile
+            (&quot;Web Accessible Folders&quot;). Le temps de latence est une composante névralgique des applications météo: les minutes, et parfois les secondes, sont comptées. Les technologies standards, telles que ATOM et
+            RSS, sont des technologies qui consomment beaucoup de bande passante et de ressouces lorsqu'elles doivent répondre à ces contraintes. Les standards limitent la fréquence maximale de vérification de serveur à cinq minutes.
+            Le protocol de séquencement de messages avancés (Advanced Message Queuing Protocol, AMQP) est une
+            approche beaucoup plus efficace pour la livraison d'annonces de nouveaux produits.</p>
+            <div class="panel">
+              <div class="panel-body">
+                <img alt="f-ddsr-components.gif" src="f-ddsr-components.gif" class="img-responsive"/>
+              </div>
+            </div>
+            <p>Les sources annoncent la disponibilité des données, les commutateurs en font une copie
+            et la diffusent à leurs clients. Quand les clients téléchargent des données, ils ont l'option
+            d'enregistrer cette transaction. Les enregistrements de transaction sont réacheminés aux sources,
+            en passant par chaque système du chemin inverse. Ceci permet aux sources de voir exactement le
+            chemin qu'ont pris les données pour se rendre aux clients.  Avec les systèmes traditionnels
+            d'échange de données, chaque source peut seulement confirmer que le transfert vers le prochain
+            noeud de la chaîne a été complété. Tout transfert subséquent est « opaque » et tracer le
+            cheminement d'un produit exige l'aide des administrateurs des systèmes intermédiaires. Grâce au
+            concept de Sarracenia, prévoyant l'acheminement des enregistrements de transactions à travers
+            le réseau, la diffusion des données devient transparente aux sources. Les diagnostiques en
+            sont aussi grandement simplifiés.</p>
+            <p>Tandis que Sundew supporte plusieurs protocoles et formats de la météorologie,
+            Sarracenia se retire de cette spécificité et généralise son approche, ce qui lui permet d'être utile pour d'autres domaines scientifiques. Le client prototype, dd_subscribe, est en service depuis
+            2013 et implante une grande partie des fonctions de consommateurs de données. Elle est la seule composante
+            dans les paquets Debian actuels. Le reste des composantes devraient être disponibles durant le printemps de 2016.</p>
+            <p>Sarracenia est plus simple que Sundew, peu importe l'utilisateur: opérateur, dévéloppeur, analyste,
+            source et consommateurs de données. Bien quŽil impose une interface pour l'accès au
+            données, Sarracenia est complètement générique et portable.  Il sera disponible sur nŽimporte
+            quelle plateforme moderne (GNU/Linux, Windows, Apple)</p>
+          </div>
+          <div> 
+            <h1 class="page-header">Pourquoi ne pas utiliser RSync?</h1>
+            <p>Il existe multiples solutions pour la copie de données, pourquoi en inventer une autre? Rsync et la
+            plupart des autres outils sont 1:1, ils comparent source et destination.  Sarracenia, bien quŽil ne sert
+            pas de multi-cast, est orienté vers la livraison à de multiples clients en temps réél. La synchronization
+            RSync se fait via la communication de l'arborescences, en calculant des signatures pour chaque fichier, pour
+            chaque client. Pour les arborescences importantes, comprennant plusieurs clients, ces calculs et transactions deviennent onéreuses, limitant la fréquence de mise à jour et le nombre de clients peuvant être supportés. Sarracenia évite le parcours des arborescences, et les processus qui écrivent les fichiers calculent les checksum une fois seulement, afin d'être utilisé directement par tous les intervenants. Ces deux améliorations rendent Sarracenia beaucoup plus efficace que RSync dans le cas d'arborescences imposantes comprenant l'ajout fréquent de fichiers. LSync est un outil qui utilise INOTIFY sur GNU/Linux pour avoir une notification en temps réel, mais la gestion
+            des checksum et la communication des enregistrements à travers le réseau n'existent pas. De plus,
+            LSync nŽest pas interopérable avec d'autres systèmes d'exploitation.</p>
+            <p>RSync est également une solution point à point. Sarracenia mise sur la &quot;transitivité&quot;, c'est-à-dire sur la capacité d'enchaîner plusieurs commutateurs de produits et de sŽassurer que les accusées de réception se propagent jusquŽà
+            la source. Par contre, l'implantation initiale de sarracenia ne traite pas des deltas (changement de
+            contenu de fichiers existants) et va télécharger le contenu complet a chaque annonce. On étudie présentement
+            le cas des deltas, et l'utilisation de l'algorithm RSync via l'outil zsync est en considération.</p>
+          </div>
+          <div>
+            <h1 class="page-header">AMQP</h1>
+            <p>AMQP est un protocol standard pour l'échange de messages qui origine du domaine de la finance.
+            AMQP est apparu en 2007 et a graduellement gagné en maturité. Il y a aujourd'hui plusieurs
+            implémentations de ce protocole en logiciel libre.  AMQP offre une méthode pour le transport des
+            messages JAVA, mais il n'est pas dédié uniquement à ce langage. Sa neutralité envers les différents
+            langages de programmation facilite l'interopérabilité avec les fournisseurs JMS, sans se limiter
+            à JAVA. Le langage AMQP et ses messages sont neutres. Certaines implémentations utilisent
+            python, C++ et ruby, tandis que les fournisseurs de JMS sont fortement orientés JAVA.</p>
+            <ul>
+            <li><a href="http://www.amqp.org">www.amqp.org</a> Définition d'AMQP.</li>
+            <li><a href="http://www.openamq.org">www.openamq.org</a> prémière Implantation de JPMorganChase</li>
+            <li><a href="http://www.rabbitmq.com">www.rabbitmq.com</a> Une autre implantatation. Celle utilisé par le présent projet.</li>
+            <li><a href="http://cwiki.apache.org/qpid">Apache Qpid</a> Encore une autre implantation.</li>
+            <li><a href="http://activemq.apache.org">Apache ActiveMQ</a> Un &quot;fournisseur JMS&quot; avec la capacité d'utiliser AMQP comme transport.</li>
+            </ul>
+            
+            <p>Sarracenia utilise les concepts de « courtier de messages » et « échanges basés sur le sujet » qui,
+            antérieurement à la version 1.0, étaient standards dans AMQP. A partir de la version 1.0, le comité
+            des standards AMQP a décidé de retirer ces aspects avec l'idée de les réintroduire dans le futur.
+            Dû à cette décision, Sarracenia dépend des versions pré 1.0 de AMQP, tel que « rabbitmq ».</p>
+          </div>
+          <div>
+            <h1 class="page-header">Documentation</h1>
+            <h2>Man Pages</h2>
+            <p>Traditional Unix style manual pages for commands:</p>
+            <ul class="simple">
+              <li><a class="reference external" href="sr_subscribe.1.html">sr_subscribe(1)</a> - the http/https subscription client.</li>
+              <li><a class="reference external" href="sr_post.1.html">sr_post(1)</a> - the tool to post individual files.</li>
+              <li><a class="reference external" href="sr_watch.1.html">sr_watch(1)</a> - the tool to post all changes to a given directory.</li>
+              <li><a class="reference external" href="sr_log.1.html">sr_log(1)</a> - (Does not exist yet!) the tool to read log messages.</li>
+            </ul>
+            <p>administrative daemons:</p>
+            <ul class="first last simple">
+              <li><a class="reference external" href="sr_sarra.8.html">sr_sarra(8)</a> - Subscribe, Acquire And Re-Advertise...  the main pump.</li>
+              <li><a class="reference external" href="sr_log2clusters.8.html">sr_log2clusters(8)</a> - daemon to copy log messages to other clusters.</li>
+              <li><a class="reference external" href="sr_log2source.8.html">sr_log2source(8)</a> - daemon to copy log messages to the originating source.</li>
+            </ul>
+            <p>and formats/protocols:</p>
+            <ul class="simple">
+              <li><a class="reference external" href="sr_post.7.html">sr_post(7)</a> - the format of postings.   Posted by watch and post, consumed by subscribe.</li>
+              <li><a class="reference external" href="sr_log.7.html">sr_log(7)</a> - the format of log messages.  Sent by consumers, for sources to measure reach.</li>
+              <li><a class="reference external" href="log2clusters.7.html">log2clusters(7)</a> - configuration of log routing between clusters.</li>
+            </ul>
+          </div>
+          <div>
+            <h1 class="page-header">Téléchargement</h1>
+            <h2>Accès au code source</h2> 
+            <p>Présentement, les installations sont faites une à la fois, à partir du code source.
+            Le développement se fait dans le branche ŽmainŽ (terminologie de git.) Quand
+            on installe, on crée une branche de maintenance pour lŽinstallation. Il y a des
+            fichiers README et INSTALL qui peuvent donner des indices pour arriver a une
+            installation initiale.</p>
+
+            <p>Sentez-vous libre de prendre une copie de la version à jour du code source via:</p>
+
+            <pre class="literal-block">
+            git clone git://git.code.sf.net/p/metpx/git metpx
+            </pre>
+
+            <p>(disponible anonymement en lecture seulement.) DŽautre versions sont disponibles
+            en téléchargeant une branche spécifique.</p>        
+
+          </div>
+        </div>
+      </div>
+    
+    </div>
+    <!-- anchorjs -->
+    <script src="./dist/js/anchor.js"></script>
+    <script>anchors.add('h1');</script>
+  </body>
+</html>
