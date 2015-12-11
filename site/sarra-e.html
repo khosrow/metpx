@@ -53,7 +53,8 @@
           <ul class="nav affix">
             <li class><a href="#introduction">Introduction</a></li>
             <li class><a href="#overview">Overview</a></li>
-            <li class><a href="#why-not-just-use-rsync">Why not rsync?</a></li>
+            <li class><a href="#why-not-just-use-rsync">Why Not Rsync?</a></li>
+            <li class><a href="#why-no-ftp">Why No FTP?</a></li>
             <li class><a href="#amqp">AMQP</a></li>
             <li class><a href="#documentation">Documentation</a></li>
             <li class><a href="#getting-sarracenia">Getting Sarracenia</a></li>
@@ -121,7 +122,7 @@
             platform (Linux, Windows, Mac)</p>
           </div>
           <div> 
-            <h1 class="page-header" >Why not just use Rsync?</h1>
+            <h1 class="page-header" >Why Not Just Use Rsync?</h1>
             <p>There are a number of tree replication tools that are widely used, why invent another?  Rsync and other tools are
             comparison based (dealing with a single Source and Destination)  Sarracenia, while it does not require or use multi-casting,
             is oriented towards a delivery to multiple receivers.  Where rsync synchronization is typically done by walking a
@@ -144,6 +145,16 @@
             monitoring to be straight-forward, and to integrate other features such as security
             scanning within the flow transparently.</p>
           </div>
+          <div> 
+            <h1 class="page-header" >Why No FTP?</h1>
+            <p>The transport protocols fully supported by sarracenia are http(s) and SFTP (SSH File Transfer Protocol.)  
+            In many cases, when public data is being exchanged, FTP is a lingua franca that is used.  The main advantage
+            being relatively simple programmatic access, but that advantage is obviated by the use of sarracenia itself.
+            Further, these days, with increased security concerns, and with cpu power becoming extremely available, it 
+            no longer makes much sense not to encrypt traffic.   Additionally, to support multi-streaming, sarracenia 
+            makes use of byte-ranges, which are provided by SFTP and HTTP servers, but not FTP.  So we cannot support 
+            file partitioning on FTP.  So while FTP sort-of-works, it is not now and never will be fully supported, 
+            and the partial support that is there is not recommended.
           <div>
             <h1 class="page-header">AMQP</h1>
             <p>AMQP is the Advanced Message Queuing Protocol, which emerged from the financial trading industry and has gradually
