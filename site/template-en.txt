@@ -1,0 +1,38 @@
+%(head_prefix)s
+%(head)s
+%(stylesheet)s
+%(body_prefix)s 
+<div class="container">
+<div class="masthead">
+<h3 class="text-muted">MetPX</h3>
+<nav>
+<ul class="nav nav-justified">
+<li><a href="index.html">Home</a></li>
+<li><a href="sundew-e.html">Sundew</a></li>
+<li><a href="sarra-e.html">Sarracenia</a></li>
+<li><a href="#">Downloads</a></li>
+<li><a href="http://sourceforge.net/projects/metpx/">SourceForge</a></li>
+<li><a href="sarra-f.html">Français</a></li>
+</ul>
+</nav>
+</div> <!-- masthead -->
+</div> <!-- container -->
+<div class="container">
+<div class="row">
+<div class="col-md-3">
+</div> <!-- col-md-3 -->
+<div class="col-md-9">
+%(body_pre_docinfo)s
+%(docinfo)s
+%(body)s
+</div> <!-- col-md-9 -->
+</div> <!-- row -->
+</div> <!-- container -->
+<!-- anchor.js setup -->
+<script src="./dist/js/anchor.js"> </script>
+<script>anchors.add('h1');</script>
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"> </script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="dist/js/bootstrap.min.js"> </script>
+%(body_suffix)s
