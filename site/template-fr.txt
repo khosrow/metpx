@@ -1,0 +1,30 @@
+%(head_prefix)s
+%(head)s
+%(stylesheet)s
+%(body_prefix)s 
+<div class="masthead">
+<div class="container">
+%(body_pre_docinfo)s
+%(docinfo)s
+<nav>
+<ul class="nav nav-justified">
+<li><a href="index.html">Home</a></li>
+<li><a href="sundew-f.html">Sundew</a></li>
+<li><a href="sarra-f.html">Sarracenia</a></li>
+<li><a href="#">Downloads</a></li>
+<li><a href="http://sourceforge.net/projects/metpx/">SourceForge</a></li>
+<li><a href="sarra-f.html">English</a></li>
+</ul>
+</nav>
+</div> <!-- container -->
+</div> <!-- masthead -->
+<div class="container">
+<div class="row">
+<div class="col-md-2">
+</div> <!-- col-md-2 -->
+<div class="col-md-10">
+%(body)s
+</div> <!-- col-md-10 -->
+</div> <!-- row -->
+</div> <!-- container -->
+%(body_suffix)s
