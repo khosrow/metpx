@@ -32,8 +32,6 @@ default: $(TARGETS)
 	sed -i 's/&\#64;Date&\#64;/$(DATE)/' $@
 	sed -i 's/&\#64;Version&\#64;/$(VERSION)/' $@
 
-deploy:
-	rsync -avP -e ssh htdocs/ khosrowe,metpx@web.sourceforge.net:htdocs/
 
 clean: 
 	rm -f $(TARGETS) 
