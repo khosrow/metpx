@@ -1,26 +1,46 @@
 %(head_prefix)s
 %(head)s
 %(stylesheet)s
+<style>
+.affix {
+	top: 50px;
+}
+.sub-nav > li {
+    -webkit-padding-start: 20px;
+    margin-top: 2px;
+}
+</style>
 %(body_prefix)s 
+
+<nav class="navbar navbar-default navbar-static-top">
 <div class="container">
-<div class="masthead">
-<h3 class="text-muted">MetPX</h3>
-<nav>
-<ul class="nav nav-justified">
+<div class="navbar-header">
+<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<a class="navbar-brand" href="#">MetPX</a>
+</div>
+<div id="navbar" class="navbar-collapse collapse">
+<ul class="nav navbar-nav">
 <li><a href="index.html">Home</a></li>
 <li><a href="sundew-e.html">Sundew</a></li>
 <li><a href="sarra-e.html">Sarracenia</a></li>
 <li><a href="#">Downloads</a></li>
 <li><a href="http://sourceforge.net/projects/metpx/">SourceForge</a></li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
 <li><a href="sarra-f.html">Français</a></li>
 </ul>
-</nav>
-</div> <!-- masthead -->
+</div> <!-- #navbar -->
 </div> <!-- container -->
+</nav>
 <div class="container">
 <div class="row">
-<div class="col-md-3">
-</div> <!-- col-md-3 -->
+<nav class="col-md-3" id="sidenav">
+</nav> <!-- col-md-3 -->
 <div class="col-md-9">
 %(body_pre_docinfo)s
 %(docinfo)s
@@ -30,7 +50,7 @@
 </div> <!-- container -->
 <!-- anchor.js setup -->
 <script src="js/anchor.js"> </script>
-<script>anchors.add('h1');</script>
+<script>anchors.add();</script>
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"> </script>
 <!-- Include all compiled plugins (below), or include individual files as needed -->
