@@ -22,7 +22,9 @@ html: $(TARGETS)
 	rst2html --link-stylesheet --stylesheet=./css/bootstrap.min.css,./css/justified-nav.css --template=../template-en.txt $< $@ 
 	sed -i 's/&\#64;Date&\#64;/$(DATE)/' $@
 	sed -i 's/&\#64;Version&\#64;/$(VERSION)/' $@
-	python template.py $@
+	sed -i 's/<a class="toc-backref" .*">\(.*\)<\/a>/\1/' $@
+
+	# python template.py $@
 
 svg:
 	dia -t svg ../../sarracenia/doc/*.dia
