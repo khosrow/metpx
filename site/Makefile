@@ -4,24 +4,26 @@ VERSION = $(shell grep __version__ ../sarracenia/sarra/__init__.py | sed -e 's/"
 DATE = $(shell date "+%B %Y")
 
 SOURCES = $(wildcard ../sarracenia/doc/*.rst)
-TARGETS = $(patsubst ../sarracenia/doc/%.rst,%.html,$(SOURCES))
+TARGETS = $(patsubst ../sarracenia/doc/%.rst,htdocs/%.html,$(SOURCES))
 
 default: $(TARGETS) 
 
 #all: css $(TARGETS)
 all: css bootstrap anchorjs svg jpg $(TARGETS)
 
-html: $(TARGETS)
-	cp index-e.html .
-	cp index-f.html .
-	ln -s htdocs/index-e.html index.html
+html: $(TARGETS) index
+
+index:
+	cp index-e.html htdocs
+	cp index-f.html htdocs
+	ln -s htdocs/index-e.html htdocs/index.html
 
 #.rst.html:
 #    rst2html $*.rst >$*.html
 
 # Build all the html pages from the rst file
 # Also applies special modifications to make the site template work 
-%.html: ../sarracenia/doc/%.rst    
+htdocs/%.html: ../sarracenia/doc/%.rst    
 	rst2html --link-stylesheet --stylesheet=css/bootstrap.min.css,css/metpx-sidebar.css --template=template-en.txt $< $@ 
 	sed -i 's/&\#64;Date&\#64;/$(DATE)/' $@
 	sed -i 's/&\#64;Version&\#64;/$(VERSION)/' $@
@@ -29,10 +31,11 @@ html: $(TARGETS)
 	python template.py $@
 
 svg:
-	dia -t svg ../sarracenia/doc/*.dia
+	cd htdocs && dia -t svg ../../sarracenia/doc/*.dia
 
 jpg:
-	cp *.jpg htdocs
+	cp ../sarracenia/doc/*.jpg htdocs
+	cp ../sarracenia/doc/*.gif htdocs
 
 # Get twitter bootstrap 3.3.6
 bootstrap:
@@ -49,16 +52,19 @@ anchorjs:
 	cd htdocs/js && wget -q https://raw.githubusercontent.com/bryanbraun/anchorjs/2.0.0/anchor.js
 
 css:
+	mkdir -p htdocs/css
 	cp -ap css/* ./htdocs/css
 
 # NOTE: In order to deploy the site to sourceforge, run the following commands:
 # 1. make all
 # 2. make SFUSER=<username> deploy
 deploy:
-	rsync -avP htdocs/ -e ssh $(SFUSER),metpx@web.sourceforge.net:htdocs/ --exclude htdocs/Makefile --exclude htdocs/template.py
+	rsync -avP htdocs/ -e ssh $(SFUSER),metpx@web.sourceforge.net:htdocs/
 
 clean: 
-	rm -f htdocs/$(TARGETS) 	
+	rm -f $(TARGETS) 	
 	rm -rf htdocs/fonts htdocs/js htdocs/css
 	rm -f htodcs/*.svg
 	rm -f htdocs/*.jpg
+	rm -f htdocs/*.gif
+	rm -f htdocs/*.html
