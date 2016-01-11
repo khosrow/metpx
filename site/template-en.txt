@@ -1,58 +1,70 @@
 %(head_prefix)s
 %(head)s
 %(stylesheet)s
-<style>
-.affix {
-	top: 50px;
-}
-.sub-nav > li {
-    -webkit-padding-start: 20px;
-    margin-top: 2px;
-}
-</style>
 %(body_prefix)s 
+	<nav class="navbar navbar-default navbar-static-top">
+		<div class="container">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand" href="index-e.html"><strong>MetPX</strong></a>
+			</div>
+			<div id="navbar" class="navbar-collapse collapse">
+				<ul class="nav navbar-nav">
+					<li><a href="sundew-e.html">Sundew</a></li>
+					<li><a href="sarra-e.html">Sarracenia</a></li>
+					<li class="dropdown">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Documentation <span class="caret"></span></a>
+    					<ul class="dropdown-menu">
+        					<li><a href="sundew-docs-e.html">Sundew</a></li>
+        					<li><a href="sarra-docs-e.html">Sarracenia</a></li>
+						</ul>
+					</li>
+					<li><a href="#">Downloads</a></li>
+				</ul>
+				<ul class="nav navbar-nav navbar-right">
+					<li><a href="sarra-f.html">Français</a></li>
+				</ul>
+			</div> <!-- #navbar -->
+		</div> <!-- container -->
+	</nav>
 
-<nav class="navbar navbar-default navbar-static-top">
-<div class="container">
-<div class="navbar-header">
-<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-<span class="sr-only">Toggle navigation</span>
-<span class="icon-bar"></span>
-<span class="icon-bar"></span>
-<span class="icon-bar"></span>
-</button>
-<a class="navbar-brand" href="#">MetPX</a>
-</div>
-<div id="navbar" class="navbar-collapse collapse">
-<ul class="nav navbar-nav">
-<li><a href="index.html">Home</a></li>
-<li><a href="sundew-e.html">Sundew</a></li>
-<li><a href="sarra-e.html">Sarracenia</a></li>
-<li><a href="#">Downloads</a></li>
-<li><a href="http://sourceforge.net/projects/metpx/">SourceForge</a></li>
-</ul>
-<ul class="nav navbar-nav navbar-right">
-<li><a href="sarra-f.html">Français</a></li>
-</ul>
-</div> <!-- #navbar -->
-</div> <!-- container -->
-</nav>
-<div class="container">
-<div class="row">
-<nav class="col-md-3" id="sidenav">
-</nav> <!-- col-md-3 -->
-<div class="col-md-9">
+	<div class="container">
+		<div class="row">
+			<nav class="col-md-3" id="sidenav">
+			</nav> <!-- col-md-3 -->
+			<div class="col-md-9">
 %(body_pre_docinfo)s
 %(docinfo)s
 %(body)s
-</div> <!-- col-md-9 -->
-</div> <!-- row -->
-</div> <!-- container -->
-<!-- anchor.js setup -->
-<script src="js/anchor.js"> </script>
-<script>anchors.add();</script>
-<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"> </script>
-<!-- Include all compiled plugins (below), or include individual files as needed -->
-<script src="js/bootstrap.min.js"> </script>
+			</div> <!-- col-md-9 -->
+		</div> <!-- row -->
+	</div> <!-- container -->
+	<!-- footer -->
+	<footer class="footer">
+      <div class="container">        
+      <div class="col-sm-6">
+      <p>Code licenced <a href="http://sourceforge.net/p/metpx/git/ci/master/tree/COPYING">GPLv2</a></p>
+      <p class="text-muted">
+        <span class="glyphicon glyphicon-copyright-mark"> </span> 2004-2011  Environment Canada<br/><span class="glyphicon glyphicon-copyright-mark"> </span> 2011-2015  Government of Canada</p>
+      </div>
+      <div class="col-sm-6">
+        <ul class="list-inline">
+          <li><a href="http://sourceforge.net/p/metpx">SourgeForge</a></li>
+          <li><a href="about.html">About</a></li>
+        </ul>
+      </div>
+      </div>
+    </footer>
+	<!-- anchor.js setup -->
+	<script src="js/anchor.js"> </script>
+	<script>anchors.add();</script>
+	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"> </script>
+	<!-- Include all compiled plugins (below), or include individual files as needed -->
+	<script src="js/bootstrap.min.js"> </script>
 %(body_suffix)s
