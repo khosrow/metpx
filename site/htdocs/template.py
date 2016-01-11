@@ -66,9 +66,11 @@ def main():
 		contents_div.parentNode.removeChild(contents_div)
 
 		# Now fix all the sub-nav links
-		for node in ul.childNodes:
-			if node.nodeType not in (node.TEXT_NODE, node.COMMENT_NODE) and node.tagName == "ul":
-				node.setAttribute("class", "nav nav-pills nav-stacked sub-nav")
+		for li in ul.childNodes:
+			if li.nodeType not in (li.TEXT_NODE, li.COMMENT_NODE) and li.tagName == "li":
+				for node in li.childNodes:
+					if node.nodeType not in (node.TEXT_NODE, node.COMMENT_NODE) and node.tagName == "ul":
+						node.setAttribute("class", "nav nav-pills nav-stacked sub-nav")
 
 	for node in doc_div.childNodes:
 		if node.nodeType not in (node.TEXT_NODE, node.COMMENT_NODE) and (node.tagName == "div" or node.tagName == "nav"):
@@ -91,6 +93,7 @@ def main():
 	# 		# p.appendChild(text)
 			
 	scripts = doc.getElementsByTagName("script")
+	footers = doc.getElementsByTagName("footer")
 				
 	body = doc_div.parentNode
 
@@ -103,6 +106,8 @@ def main():
 	if containers:		
 		for c in containers:
 			body.appendChild(c)
+		for f in footers:
+			body.appendChild(f)
 		for s in scripts:
 			body.appendChild(s)
 		body.removeChild(doc_div)
