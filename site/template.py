@@ -12,7 +12,6 @@ def main():
 	nav = None
 	ul = None
 	doc_div = None
-	masthead = None
 	containers = list()
 
 	if len(sys.argv) != 2:
@@ -25,6 +24,28 @@ def main():
 	except (IOError, ExpatError), e:
 		print(e)
 		sys.exit(1)
+
+	# Add bootstrap meta tags to <head>
+	metas = doc.getElementsByTagName("meta")
+	for m in metas:
+		head = m.parentNode
+		head.removeChild(m)
+
+	meta1 = doc.createElement("meta")
+	meta1.setAttribute("charset", "utf-8")
+
+	meta2 = doc.createElement("meta")
+	meta2.setAttribute("content", "IE=edge")
+	meta2.setAttribute("http-equiv", "X-UA-Compatible")
+	
+	meta3 = doc.createElement("meta")
+	meta3.setAttribute("content", "width=device-width, initial-scale=1")
+	meta3.setAttribute("name", "viewport")
+
+	head = doc.getElementsByTagName("head")[0]
+	head.insertBefore(meta3,head.firstChild)
+	head.insertBefore(meta2,meta3)
+	head.insertBefore(meta1,meta2)
 
 	# Add bootstrap class to all <h1>
 	h1_list = doc.getElementsByTagName("h1")
@@ -79,6 +100,27 @@ def main():
 			# if node.hasAttributes and node.getAttribute("class") == "container":	
 			# 	containers.append(node.cloneNode(deep=True))
 
+	# Make all images responsive
+	img_list = doc.getElementsByTagName("img")
+	for img in img_list:
+		img.setAttribute("class", "img-responsive")
+		# clone = i.cloneNode(deep=True)
+
+		# panel = doc.createElement("div")
+		# panel.setAttribute("class", "panel")
+
+		# panelbody = doc.createElement("div")
+		# panelbody.setAttribute("class", "panel-body")
+
+		# # panelbody.appendChild(clone)
+		# panel.appendChild(panelbody)
+
+		# print panel.getAttribute("class")
+		# p = i.parentNode
+		# p.replaceChild(panel,i)
+
+		# print p.getAttribute("class")
+
 	# # Remove up all section header <a> tags
 	# a_tags = doc.getElementsByTagName("a")
 	# for a in a_tags:
@@ -97,10 +139,11 @@ def main():
 				
 	body = doc_div.parentNode
 
-	# some scrollspy and affix attributes
+	# scrollspy and affix attributes
 	body.setAttribute("data-spy", "scroll")
 	body.setAttribute("data-target", "#sidenav")
 	body.setAttribute("data-offset", "15")
+
 	# Remove extra <div class="document">
 	# containers is found earlier in the code
 	if containers:		
@@ -112,27 +155,10 @@ def main():
 			body.appendChild(s)
 		body.removeChild(doc_div)
 
-
-	# Now add some footer stuff
-
-	# Add js libraries
-	# t = doc.createTextNode(" ")
-	
-	# anchor_js = doc.createElement("script")
-	# anchor_js.setAttribute("src","./dist/js/anchor.js")
-	# anchor_js.appendChild(t)
-
-	# text_value = doc.createTextNode("anchors.add('h1');")
-	# anchor_add = doc.createElement("script")
-	# anchor_add.appendChild(text_value)
-
-	# body.appendChild(anchor_js)
-	# body.appendChild(anchor_add)
-
 	# Write file to disk
 	f = open(filename, "wb")
 	f.write(doc.toxml().encode('UTF-8'))
-	# print doc.toxml()
+
 
 if __name__ == "__main__":
 	main()
