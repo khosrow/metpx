@@ -24,7 +24,7 @@
         					<li><a href="sarra-docs-e.html">Sarracenia</a></li>
 						</ul>
 					</li>
-					<li><a href="#">Downloads</a></li>
+					<li><a href="download-e.html">Downloads</a></li>
 				</ul>
 				<ul class="nav navbar-nav navbar-right">
 					<li><a href="index-f.html">Français</a></li>

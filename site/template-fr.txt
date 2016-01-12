@@ -11,7 +11,7 @@
 <li><a href="index.html">Home</a></li>
 <li><a href="sundew-f.html">Sundew</a></li>
 <li><a href="sarra-f.html">Sarracenia</a></li>
-<li><a href="#">Downloads</a></li>
+<li><a href="download-e.html">Downloads</a></li>
 <li><a href="http://sourceforge.net/projects/metpx/">SourceForge</a></li>
 <li><a href="sarra-f.html">English</a></li>
 </ul>
