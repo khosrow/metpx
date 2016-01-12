@@ -9,14 +9,14 @@ TARGETS = $(patsubst ../sarracenia/doc/%.rst,htdocs/%.html,$(SOURCES))
 default: $(TARGETS) 
 
 #all: css $(TARGETS)
-all: css bootstrap anchorjs svg jpg $(TARGETS)
+all: bootstrap anchorjs svg jpg $(TARGETS)
 
 html: $(TARGETS) index
 
 index:
 	cp index-e.html htdocs
 	cp index-f.html htdocs
-	ln -s htdocs/index-e.html htdocs/index.html
+	cd htdocs && ln -s index-e.html index.html
 
 #.rst.html:
 #    rst2html $*.rst >$*.html
@@ -34,8 +34,8 @@ svg:
 	cd htdocs && dia -t svg ../../sarracenia/doc/*.dia
 
 jpg:
-	cp ../sarracenia/doc/*.jpg htdocs
-	cp ../sarracenia/doc/*.gif htdocs
+	cp ../sarracenia/doc/html/*.jpg htdocs
+	# cp ../sarracenia/doc/*.gif htdocs
 
 # Get twitter bootstrap 3.3.6
 bootstrap:
@@ -46,6 +46,7 @@ bootstrap:
 	mv bootstrap-3.3.6-dist/fonts htdocs/fonts
 	rmdir bootstrap-3.3.6-dist
 	rm bootstrap-3.3.6-dist.zip
+	cp -ap css/* htdocs/css
 
 # Get anchor.js 2.0.0
 anchorjs:	
