@@ -1,17 +1,33 @@
 .SUFFIXES: .1.rst .5 .7 .dia .png .pdf .html
 
-VERSION = $(shell grep __version__ ../sarracenia/sarra/__init__.py | sed -e 's/"//g' | cut -c14-)
-DATE = $(shell date "+%B %Y")
+MAKE = make
+# VERSION = $(shell grep __version__ ../sarracenia/sarra/__init__.py | sed -e 's/"//g' | cut -c14-)
+# DATE = $(shell date "+%B %Y")
 
-SOURCES = $(wildcard ../sarracenia/doc/*.rst)
-TARGETS = $(patsubst ../sarracenia/doc/%.rst,htdocs/%.html,$(SOURCES))
+# SOURCES = $(wildcard ../sarracenia/doc/*.rst)
+# TARGETS = $(patsubst ../sarracenia/doc/%.rst,htdocs/%.html,$(SOURCES))
 
-default: $(TARGETS) 
+# default: $(TARGETS) 
 
-#all: css $(TARGETS)
-all: bootstrap anchorjs svg img index $(TARGETS)
+# all: bootstrap anchorjs svg img index $(TARGETS)
+all: bootstrap anchorjs index sarra sundew
 
 html: $(TARGETS)
+
+sarra:
+	$(MAKE) TEMPLATE=--template=../../../site/template-en.txt -C ../sarracenia/doc/html
+	cp ../sarracenia/doc/html/*.html htdocs
+	cp ../sarracenia/doc/html/*.svg htdocs
+	cp ../sarracenia/doc/*.gif htdocs
+	cp ../sarracenia/doc/html/*.jpg htdocs
+
+sundew:
+	$(MAKE) TEMPLATE=--template=../../../site/template-en.txt -C ../sundew/doc/user
+	$(MAKE) TEMPLATE=--template=../../../site/template-en.txt -C ../sundew/doc/dev
+	$(MAKE) -C ../sundew/doc/html
+	cp ../sundew/doc/html/*.html htdocs
+	cp ../sundew/doc/html/*.png htdocs
+	cp ../sundew/doc/html/WMO-386.pdf htdocs
 
 index:
 	cp index-e.html htdocs
@@ -23,19 +39,19 @@ index:
 
 # Build all the html pages from the rst file
 # Also applies special modifications to make the site template work 
-htdocs/%.html: ../sarracenia/doc/%.rst    
-	rst2html --link-stylesheet --stylesheet=css/bootstrap.min.css,css/metpx-sidebar.css --template=template-en.txt $< $@ 
-	sed -i 's/&\#64;Date&\#64;/$(DATE)/' $@
-	sed -i 's/&\#64;Version&\#64;/$(VERSION)/' $@
-	sed -i 's/<a class="toc-backref" .*">\(.*\)<\/a>/\1/' $@
-	python template.py $@
+# htdocs/%.html: ../sarracenia/doc/%.rst    
+# 	rst2html --link-stylesheet --stylesheet=css/bootstrap.min.css,css/metpx-sidebar.css --template=template-en.txt $< $@ 
+# 	sed -i 's/&\#64;Date&\#64;/$(DATE)/' $@
+# 	sed -i 's/&\#64;Version&\#64;/$(VERSION)/' $@
+# 	sed -i 's/<a class="toc-backref" .*">\(.*\)<\/a>/\1/' $@
+# 	python template.py $@
 
-svg:
-	cd htdocs && dia -t svg ../../sarracenia/doc/*.dia
+# svg:
+# 	cd htdocs && dia -t svg ../../sarracenia/doc/*.dia
 
-img:
-	cp ../sarracenia/doc/html/*.jpg htdocs
-	cp ../sarracenia/doc/*.gif htdocs
+# img:
+# 	cp ../sarracenia/doc/html/*.jpg htdocs
+# 	cp ../sarracenia/doc/*.gif htdocs
 
 # Get twitter bootstrap 3.3.6
 bootstrap:
@@ -69,3 +85,7 @@ clean:
 	rm -f htdocs/*.jpg
 	rm -f htdocs/*.gif
 	rm -f htdocs/*.html
+	$(MAKE) -C ../sarracenia/doc/html clean
+	$(MAKE) -C ../sundew/doc/html clean
+	$(MAKE) -C ../sundew/doc/user clean
+	$(MAKE) -C ../sundew/doc/dev clean
