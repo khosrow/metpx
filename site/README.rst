@@ -10,6 +10,7 @@ In order to build the HTML pages, the following software must be available on yo
 
 * `dia <http://dia-installer.de/>`_
 * `docutils <http://docutils.sourceforge.net/>`_
+* `groff <http://www.gnu.org/software/groff/>`_
 
 From a command shell::
 
