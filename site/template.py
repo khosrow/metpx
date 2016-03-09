@@ -82,7 +82,8 @@ def main():
 	if ul is not None and nav is not None:
 		ul.setAttribute("class", "nav nav-underline nav-stacked hidden-xs hidden-sm")
 		ul.setAttribute("data-spy", "affix")
-		ul.setAttribute("data-offset-top", "51")
+		ul.setAttribute("data-offset-top", "20")
+		ul.setAttribute("data-offset-bottom", "200")
 		ul.setAttribute("id", "sidebar")
 		nav.appendChild(ul)
 		contents_div.parentNode.removeChild(contents_div)

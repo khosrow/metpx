@@ -1,6 +1,12 @@
 .affix {
 	top: 50px;
-	width: 232.500px;
+  /*bottom: 200px;*/
+	width: 212.500px;
+}
+
+.affix-bottom {
+  position: absolute;
+  width: 212.500px;
 }
 
 #sidebar.nav .nav {
