@@ -1,9 +1,54 @@
 .affix {
 	top: 50px;
+	width: 232.500px;
 }
+
+#sidebar.nav .nav {
+  display: none;
+  font-size: 12px;
+}
+
+#sidebar.nav > .active > ul {
+  display: block;
+}
+
 .sub-nav > li {
     -webkit-padding-start: 20px;
     margin-top: 2px;
+}
+
+.nav-underline > li {
+  float: none;
+}
+/*.nav-underline > li > a {
+  border-radius: 4px;
+}*/
+.nav-underline > li + li {
+  margin-left: 2px;
+}
+
+.nav-underline > li > a:hover,
+.nav-underline > li > a:focus {
+  text-decoration: underline;
+  background-color: #fff;
+}
+
+.nav-underline > li.active > a,
+.nav-underline > li.active > a:hover,
+.nav-underline > li.active > a:focus {
+  /*color: #fff;
+  background-color: #337ab7;*/
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+.nav-underline > .active > a > .badge {
+  color: #337ab7;
+  background-color: #fff;
+}
+
+.nav-underline > li > a > .badge {
+  margin-left: 3px;
 }
 
 .jumbotron {
@@ -34,11 +79,12 @@ body {
   /* Set the fixed height of the footer here */
   height: 150px;
   background-color: #f5f5f5;
+  /*border-color: #e7e7e7*/
 
   padding-top: 40px;
   padding-bottom: 40px;
   margin-top: 40px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #e7e7e7;
 }
 
 

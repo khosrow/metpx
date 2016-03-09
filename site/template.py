@@ -80,9 +80,10 @@ def main():
 
 	# Insert TOC as a sidebar nav
 	if ul is not None and nav is not None:
-		ul.setAttribute("class", "nav nav-pills nav-stacked hidden-xs hidden-sm")
+		ul.setAttribute("class", "nav nav-underline nav-stacked hidden-xs hidden-sm")
 		ul.setAttribute("data-spy", "affix")
 		ul.setAttribute("data-offset-top", "51")
+		ul.setAttribute("id", "sidebar")
 		nav.appendChild(ul)
 		contents_div.parentNode.removeChild(contents_div)
 
@@ -91,7 +92,7 @@ def main():
 			if li.nodeType not in (li.TEXT_NODE, li.COMMENT_NODE) and li.tagName == "li":
 				for node in li.childNodes:
 					if node.nodeType not in (node.TEXT_NODE, node.COMMENT_NODE) and node.tagName == "ul":
-						node.setAttribute("class", "nav nav-pills nav-stacked sub-nav")
+						node.setAttribute("class", "nav nav-underline sub-nav")
 
 	for node in doc_div.childNodes:
 		if node.nodeType not in (node.TEXT_NODE, node.COMMENT_NODE) and (node.tagName == "div" or node.tagName == "nav"):
