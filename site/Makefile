@@ -32,7 +32,7 @@ sundew:
 index:
 	cp index-e.html htdocs
 	cp index-f.html htdocs
-	cd htdocs && ln -s index-e.html index.html
+	-ln -s index-e.html htdocs/index.html
 
 #.rst.html:
 #    rst2html $*.rst >$*.html
