@@ -57,10 +57,10 @@ index:
 bootstrap:
 	wget -q https://github.com/twbs/bootstrap/releases/download/v3.3.6/bootstrap-3.3.6-dist.zip
 	unzip -q bootstrap-3.3.6-dist.zip
-	mv bootstrap-3.3.6-dist/js htdocs/js
-	mv bootstrap-3.3.6-dist/css htdocs/css
-	mv bootstrap-3.3.6-dist/fonts htdocs/fonts
-	rmdir bootstrap-3.3.6-dist
+	-mv bootstrap-3.3.6-dist/js htdocs/js
+	-mv bootstrap-3.3.6-dist/css htdocs/css
+	-mv bootstrap-3.3.6-dist/fonts htdocs/fonts
+	rm -rf bootstrap-3.3.6-dist
 	rm bootstrap-3.3.6-dist.zip
 	cp -ap css/* htdocs/css
 
