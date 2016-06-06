@@ -87,7 +87,7 @@
       </div>
       <div class="col-sm-6">
         <ul class="list-inline">
-          <li><a href="http://sourceforge.net/p/metpx">SourgeForge</a></li>
+          <li><a href="http://sourceforge.net/p/metpx">SourceForge</a></li>
           <li><a href="about-f.html">Apropos</a></li>
         </ul>
       </div>
