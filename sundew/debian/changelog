@@ -1,3 +1,9 @@
+metpx-sundew (0.6.1) unstable; urgency=low
+
+  * porting to Ubuntu Trusty and Xenial
+
+ -- Khosrow Ebrahimpour <khosrow.ebrahimpour@canada.ca>  Tue, 26 Jul 2016 17:45:27 +0000
+
 metpx-sundew (0.6.1-lucid3) lucid; urgency=low
 
   [ Michel Grenier ]
