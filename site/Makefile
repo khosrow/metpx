@@ -66,7 +66,11 @@ bootstrap:
 
 # Get anchor.js 2.0.0
 anchorjs:	
-	cd htdocs/js && wget -q https://raw.githubusercontent.com/bryanbraun/anchorjs/2.0.0/anchor.js
+	wget -q https://github.com/bryanbraun/anchorjs/archive/3.2.1.tar.gz
+	tar -zxvf 3.2.1.tar.gz anchorjs-3.2.1/anchor.js
+	-mv anchorjs-3.2.1/anchor.js htdocs/js
+	rm -rf anchorjs-3.2.1
+	rm 3.2.1.tar.gz 
 
 css:
 	mkdir -p htdocs/css
